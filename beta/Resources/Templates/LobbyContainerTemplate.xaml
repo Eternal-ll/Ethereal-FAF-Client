@@ -1,0 +1,318 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:beta.Models.Server"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="d"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:ui="http://schemas.modernwpf.com/2019"
+                    xmlns:converters="clr-namespace:beta.Infrastructure.Converters">
+    <Style x:Key="LobbyTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="Padding" Value="24 0 0 0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"/>
+        <Setter Property="Margin" Value="0 6 0 0"/>
+    </Style>
+    <Style x:Key="NewLobbyBorderStyle" TargetType="Border">
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding num_players}" Value="0">
+                <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <converters:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
+    <ItemContainerTemplate x:Key="LobbyContainerDefaultTemplate">
+        <Grid
+            Margin="10"
+            d:DataContext="{d:DesignInstance {x:Type models:GameInfoMessage}}"
+            Width="300">
+            <!--<Grid Background="Black" Margin="0 3 0 0" Opacity=".5">
+                <Grid.Effect>
+                    <DropShadowEffect BlurRadius="6" Direction="-90" ShadowDepth=".1">
+
+                    </DropShadowEffect>
+                </Grid.Effect>
+                <Grid.OpacityMask>
+                    <VisualBrush Visual="{Binding ElementName=Border}"/>
+                </Grid.OpacityMask>
+                <Grid.Resources>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>    
+                            <DataTrigger Binding="{Binding ElementName=Border, Path=IsMouseOver}" Value="true">
+                                <Setter Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="8" Direction="-90" ShadowDepth=".2">
+
+                                        </DropShadowEffect>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+            </Grid>-->
+            
+            <!--<ui:ThemeShadowChrome Name="Background" 
+                                  Depth="10" CornerRadius="10">
+                <ui:ThemeShadowChrome.OpacityMask>
+                    <VisualBrush Visual="{Binding ElementName=Border}"/>
+                </ui:ThemeShadowChrome.OpacityMask>
+                <ui:ThemeShadowChrome.Resources>
+                    <Style TargetType="ui:ThemeShadowChrome">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Depth" Value="25"></Setter>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding ElementName=Border, Path=IsMouseOver}" Value="true">
+                                <Setter Property="Depth" Value="25"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ui:ThemeShadowChrome.Resources>
+            </ui:ThemeShadowChrome>-->
+            <Border
+                Opacity="1"
+                Name="Border"
+                VerticalAlignment="Bottom"
+                Padding="5"
+                Background="{DynamicResource NavigationViewDefaultPaneBackground}"
+                CornerRadius="10"
+                ToolTip="{Binding  launched_at}">
+                <Border.Resources>
+                    <!--<Style TargetType="Border">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Opacity" 
+                                                From=".8"
+                                                To="1"
+                                                Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Opacity" 
+                                                From="1"
+                                                To=".8"
+                                                Duration="0:0:0.2"/>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Opacity" 
+                                                From=".8"
+                                                To=".5"
+                                                BeginTime="0:0:1"
+                                                Duration="0:0:0.9"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>-->
+                </Border.Resources>
+                <StackPanel>
+                    <!--<Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="Uniform">
+                        <Viewbox.LayoutTransform>
+                            <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                        </Viewbox.LayoutTransform>
+                        <Viewbox.Resources>
+                            <Style TargetType="Viewbox">
+                                <Setter Property="Width" Value="500"></Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=Border, Path=IsMouseOver}" Value="True">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleY)" 
+                                                        To="1.2" 
+                                                        Duration="0:0:0.2"/>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleX)" 
+                                                        To="1.2" 
+                                                        Duration="0:0:0.2"  />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleX)" 
+                                                        To="1.3" 
+                                                        Duration="0:0:0.2"  />
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleY)" 
+                                                        To="1.3" 
+                                                        Duration="0:0:0.2"  />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.ExitActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Viewbox.Resources>
+                    </Viewbox>-->
+                    <ui:ListViewHeaderItem Content="{Binding title}"
+                                           Margin="-3 0 -3 4"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
+                                           ToolTip="Title"
+                                           FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Grid Width="90"
+                              Height="90"
+                              Margin="10 0 0 10">
+                            <Border Background="{DynamicResource NavigationViewDefaultPaneBackground}"
+                                    BorderBrush="{DynamicResource NavigationViewDefaultPaneBackground}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    ClipToBounds="True"
+                                    Name="Borderg">
+                            </Border>
+                            <Image Name="MapPreview"
+                                   Visibility="Visible"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center">
+                                <Image.Resources>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Width" Value="90"/>
+                                        <Setter Property="Height" Value="90"/>
+                                        <Setter Property="Source" Value="{x:Null}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
+                                                         Value="Coop">
+                                                <Setter Property="Width" Value="75"/>
+                                                <Setter Property="Source" Value="{StaticResource CoopIcon}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
+                                                         Value="Neroxis">
+                                                <Setter Property="Width" Value="75"/>
+                                                <Setter Property="Source" Value="{StaticResource MapGenIcon}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
+                                                         Value="Normal">
+                                                <Setter Property="Source" Value="{Binding mapname,
+                                                    Converter={StaticResource UriToCachedImageConverter}}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Resources>
+                                <Image.OpacityMask>
+                                    <VisualBrush Visual="{Binding ElementName=Borderg}"/>
+                                </Image.OpacityMask>
+                            </Image>
+                            <ui:ProgressRing SnapsToDevicePixels="True"
+                                             VerticalAlignment="Center"
+                                             HorizontalAlignment="Center"
+                                             Width="15"
+                                             Height="15">
+                                <ui:ProgressRing.Resources>
+                                    <Style TargetType="ui:ProgressRing">
+                                        <Setter Property="IsActive" Value="False"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MapPreview, Path=Source}"
+                                                         Value="{x:Null}">
+                                                <Setter Property="IsActive" Value="True"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ui:ProgressRing.Resources>
+                            </ui:ProgressRing>
+                        </Grid>
+                        <StackPanel Orientation="Vertical"
+                                    Margin="8 0 8 0">
+                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                                       Margin="0"
+                                       ToolTip="Host"
+                                       Text="{Binding host}">
+                                <TextBlock.Background>
+                                    <ImageBrush Stretch="Uniform"  AlignmentX="Left" ImageSource="{DynamicResource HostIcon}">
+                                        <ImageBrush.Transform>
+                                            <TranslateTransform X="5"/>
+                                        </ImageBrush.Transform>
+                                    </ImageBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                                       ToolTip="Players in lobby"
+                                       Text="{Binding num_players}">
+                                <TextBlock.Background>
+                                    <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource PlayersIcon}">
+                                        <ImageBrush.Transform>
+                                            <TransformGroup>
+                                                <TranslateTransform X="1" Y="1"/>
+                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                            </TransformGroup>
+                                        </ImageBrush.Transform>
+                                    </ImageBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                                       ToolTip="Map"
+                                       Text="{Binding MapName}">
+                                <TextBlock.Background>
+                                    <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource MapIcon}">
+                                        <ImageBrush.Transform>
+                                            <TransformGroup>
+                                                <TranslateTransform X="3" Y="1"/>
+                                                <ScaleTransform ScaleX=".95" ScaleY=".95"/>
+                                            </TransformGroup>
+                                        </ImageBrush.Transform>
+                                    </ImageBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                            <TextBlock ToolTip="Secured with password"
+                                       Text="Secured">
+                                <TextBlock.Resources>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource LobbyTextBlockStyle}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding password_protected}"
+                                                         Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <ImageBrush Stretch="Uniform"
+                                                                    AlignmentX="Left"
+                                                                    ImageSource="{DynamicResource SecuredIcon}">
+                                                            <ImageBrush.Transform>
+                                                                <TransformGroup>
+                                                                    <TranslateTransform X="4" Y="2"/>
+                                                                    <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                                                </TransformGroup>
+                                                            </ImageBrush.Transform>
+                                                        </ImageBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Resources>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <!--<Border HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Style="{StaticResource NewLobbyBorderStyle}"
+                    Margin="13 10"
+                    Padding="6 3"
+                    CornerRadius="4">
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".2"/>
+                </Border.Background>
+                <TextBlock Text="New"
+                           FontSize="13"
+                           Margin="0"
+                           FontWeight="SemiBold"
+                           Foreground="RoyalBlue"/>
+            </Border>-->
+        </Grid>
+    </ItemContainerTemplate>
+</ResourceDictionary>

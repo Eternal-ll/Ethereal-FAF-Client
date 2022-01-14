@@ -1,0 +1,218 @@
+﻿<UserControl x:Class="beta.Views.ChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.Background>
+            <SolidColorBrush Color="Black" Opacity=".2"/>
+        </Grid.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TabControl x:Name="Channels"
+                        Background="Transparent">
+                <TabControl.Resources>
+                    <Thickness x:Key="TabViewTopHeaderPadding">0</Thickness>
+                    <Style TargetType="ui:FlyoutPresenter">
+
+                    </Style>
+                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <!--<Setter Property="Can"/>-->
+                        <!--<Setter Property="ItemContainerStyle">
+                            <Setter.Value>
+                                
+                            </Setter.Value>
+                        </Setter>-->
+                        <Setter Property="ItemTemplate">
+                            <Setter.Value>
+                                <ItemContainerTemplate>
+                                    <!--<Grid>-->
+                                        <Glyphs
+                                            FontRenderingEmSize="13"
+                                            Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
+                                            UnicodeString="{Binding }"
+                                        >
+                                            <!--<Glyphs.ContextMenu>
+                                                <ContextMenu>
+
+                                                </ContextMenu>
+                                            </Glyphs.ContextMenu>
+                                            <ui:FlyoutBase.AttachedFlyout>
+                                                <ui:MenuFlyout>
+
+                                                </ui:MenuFlyout>
+                                            </ui:FlyoutBase.AttachedFlyout>-->
+                                        </Glyphs>
+                                        <!--<Grid>
+                                            <ui:FlyoutBase.AttachedFlyout>
+                                                <ui:CommandBarFlyout IsOpen="True">
+                                                    <ui:AppBarButton></ui:AppBarButton>
+                                                </ui:CommandBarFlyout>
+                                            </ui:FlyoutBase.AttachedFlyout>
+                                        </Grid>-->
+                                    <!--</Grid>-->
+                                </ItemContainerTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+                <TabItem Header="Server">
+                    <!--<ScrollViewer>-->
+                        <!--<Grid>-->
+                            <ListBox x:Name="ServerControl"
+                                     VirtualizingPanel.IsVirtualizing="True">
+                                <ListBox.Resources>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Padding" Value="2 2"/>
+                                        <Setter Property="Focusable" Value="False"/>
+                                        <!--<Setter Property="ContextMenu">-->
+                                        <!--<Setter.Value>
+                                            <ContextMenu>
+                                                <MenuItem Click="MenuItem_OnClick"></MenuItem>
+                                            </ContextMenu>
+                                        </Setter.Value>-->
+                                    <!--</Setter>-->
+                                    </Style>
+                                </ListBox.Resources>
+                                <!--<ListBox.Resources>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="ContextMenu">
+                                            <Setter.Value>
+                                                <ContextMenu>
+                                                    <MenuItem Click="MenuItem_OnClick"></MenuItem>
+                                                    <MenuItem Header="{Binding}"/>
+                                                </ContextMenu>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.Resources>-->
+                                <!--<ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="ContextMenu">
+                                            <Setter.Value>
+                                                <ContextMenu>
+                                                    --><!--<MenuItem Click="MenuItem_OnClick"></MenuItem>
+                                                    <MenuItem Header="{Binding}"/>--><!--
+                                                </ContextMenu>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>-->
+                            </ListBox>
+                        <!--</Grid>-->
+                    <!--</ScrollViewer>-->
+                </TabItem>
+                <TabItem Header="Aeolus">
+                    <!--<ScrollViewer>-->
+                        <!--<Grid>-->
+                            <ListBox x:Name="AeolusControl"
+                                     VirtualizingPanel.IsVirtualizing="True">
+                            </ListBox>
+                        <!--</Grid>-->
+                    <!--</ScrollViewer>-->
+                </TabItem>
+                <TabItem Header="Ethereal sanctuary">
+                    
+                </TabItem>
+                <TabItem Header="+">
+                    <Grid>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path
+                                Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
+                                Stretch="Uniform"
+                                Height="60"
+                                Margin="0 0 0 30"
+                                Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
+                                />
+                            <TextBox Margin="0 0 0 90"/>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+            <TextBox Grid.Row="1" Name="TextBox">
+                <TextBox.Resources>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Resources>
+            </TextBox>
+            <Button Grid.Row="1" HorizontalAlignment="Right" Content="Send" Click="ButtonBase_OnClick"/>
+        </Grid>
+        
+        <Grid Grid.Column="1" Width="200">
+                <Grid.Resources>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>    
+                            <DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <ui:AutoSuggestBox Name="SeachPlayerSuggestBox" ToolTip="Search players" ui:ControlHelper.PlaceholderText="Search player" ui:ControlHelper.Description=" Online: 1488"/>
+            <Grid Grid.Row="1">
+                <ItemsControl x:Name="PlayersControl" IsTabStop="False">
+                    <ItemsControl.Items>
+                        <MenuItem Header="Moderators">
+                            <MenuItem.Icon>
+                                <Image Stretch="Uniform">
+                                    <Image.Source>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <GeometryDrawing Brush="{DynamicResource SystemControlForegroundBaseHighBrush}" >
+                                                    <GeometryDrawing.Geometry>
+                                                        <StreamGeometry>
+M 14.980469 1.9902344 A 1.0001 1.0001 0 0 0 14.292969 2.2929688 L 9.2929688 7.2929688 A 1.0001 1.0001 0 1 0 10.707031 8.7070312 L 15.707031 3.7070312 A 1.0001 1.0001 0 0 0 14.980469 1.9902344 z M 17 5 L 12 10 C 12 10 13.268078 11.887981 14.292969 13.167969 C 12.646434 14.60682 4.0618108 22.110064 3.5859375 22.585938 C 2.8049375 23.366937 2.8049375 24.633062 3.5859375 25.414062 C 4.3669375 26.195062 5.6330625 26.195063 6.4140625 25.414062 C 6.8899358 24.938189 14.39318 16.353566 15.832031 14.707031 C 17.112019 15.731922 19 17 19 17 L 24 12 C 24 12 22 9 21 8 C 20 7 17 5 17 5 z M 25.980469 12.990234 A 1.0001 1.0001 0 0 0 25.292969 13.292969 L 20.292969 18.292969 A 1.0001 1.0001 0 1 0 21.707031 19.707031 L 26.707031 14.707031 A 1.0001 1.0001 0 0 0 25.980469 12.990234 z M 15 25 A 1.0001 1.0001 0 1 0 15 27 L 26 27 A 1.0001 1.0001 0 1 0 26 25 L 15 25 z                                                        </StreamGeometry>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Image.Source>
+                                </Image>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <Separator/>
+                        <MenuItem Header="Players">
+                            <MenuItem.Icon>
+                                <Image Stretch="Uniform">
+                                    <Image.Source>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <GeometryDrawing Brush="{DynamicResource SystemControlForegroundBaseHighBrush}" >
+                                                    <GeometryDrawing.Geometry>
+                                                        <StreamGeometry>
+                                                            M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z
+                                                        </StreamGeometry>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Image.Source>
+                                </Image>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ItemsControl.Items>
+                </ItemsControl>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
