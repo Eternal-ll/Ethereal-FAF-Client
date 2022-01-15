@@ -3,9 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
-             xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:converters="clr-namespace:beta.Infrastructure.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
@@ -196,65 +194,65 @@
             </ContentControl.Resources>
             <ContentControl.Template>
                 <ControlTemplate TargetType="{x:Type ContentControl}">
-                    <Grid Name="Frame">
-                        <ContentPresenter  VerticalAlignment="Stretch"
-                                           HorizontalAlignment="Stretch">
-                            <ContentPresenter.Clip>
-                                <PathGeometry>
-                                    <PathFigure StartPoint="15 0">
-                                        <BezierSegment Point1="15 0" Point2="0 0" Point3="0 15" >
-                                        </BezierSegment>
+                    <ContentPresenter  Name="Presenter"
+                                       VerticalAlignment="Stretch"
+                                       HorizontalAlignment="Stretch">
+                        <ContentPresenter.Clip>
+                            <PathGeometry>
+                                <PathFigure StartPoint="15 0">
+                                        <BezierSegment Point1="15 0"
+                                                       Point2="0 0"
+                                                       Point3="0 15"/>
                                         <LineSegment>
                                             <LineSegment.Point>
-                                                <Binding  Converter="{StaticResource PointYConverter}"
-                                                          ElementName="Frame"
-                                                          Path="ActualHeight"
-                                                          ConverterParameter="0"/>
+                                                <Binding Converter="{StaticResource PointYConverter}"
+                                                         ElementName="Presenter"
+                                                         Path="ActualHeight"
+                                                         ConverterParameter="0"/>
                                             </LineSegment.Point>
                                         </LineSegment>
-                                        <!--<BezierSegment>
-                                            <BezierSegment.Point1>
-                                                <Binding  Converter="{StaticResource PointYExtendedConverter}"
-                                                          ElementName="Frame"
-                                                          Path="ActualHeight"
-                                                          ConverterParameter="0 -15"/>
-                                            </BezierSegment.Point1>
-                                            <BezierSegment.Point2>
-                                                <Binding  Converter="{StaticResource PointYConverter}"
-                                                          ElementName="Frame"
-                                                          Path="ActualHeight"
-                                                          ConverterParameter="0"/>
-                                            </BezierSegment.Point2>
-                                            <BezierSegment.Point3>
-                                                <Binding  Converter="{StaticResource PointYConverter}"
-                                                          ElementName="Frame"
-                                                          Path="ActualHeight"
-                                                          ConverterParameter="15"/>
-                                            </BezierSegment.Point3>
-                                        </BezierSegment>-->
+                                    <!--<BezierSegment>
+                                        <BezierSegment.Point1>
+                                            <Binding  Converter="{StaticResource PointYExtendedConverter}"
+                                                        ElementName="Frame"
+                                                        Path="ActualHeight"
+                                                        ConverterParameter="0 -15"/>
+                                        </BezierSegment.Point1>
+                                        <BezierSegment.Point2>
+                                            <Binding  Converter="{StaticResource PointYConverter}"
+                                                        ElementName="Frame"
+                                                        Path="ActualHeight"
+                                                        ConverterParameter="0"/>
+                                        </BezierSegment.Point2>
+                                        <BezierSegment.Point3>
+                                            <Binding  Converter="{StaticResource PointYConverter}"
+                                                        ElementName="Frame"
+                                                        Path="ActualHeight"
+                                                        ConverterParameter="15"/>
+                                        </BezierSegment.Point3>
+                                    </BezierSegment>-->
                                         <LineSegment>
                                             <LineSegment.Point>
                                                 <MultiBinding Converter="{StaticResource PointConverter}">
-                                                    <Binding ElementName="Frame"
+                                                    <Binding ElementName="Presenter"
                                                              Path="ActualWidth"/>
-                                                    <Binding ElementName="Frame"
+                                                    <Binding ElementName="Presenter"
                                                              Path="ActualHeight"/>
                                                 </MultiBinding>
                                             </LineSegment.Point>
                                         </LineSegment>
                                         <LineSegment>
                                             <LineSegment.Point>
-                                                <Binding  Converter="{StaticResource PointXConverter}"
-                                                          ElementName="Frame"
-                                                          Path="ActualWidth"
-                                                          ConverterParameter="0"/>
+                                                <Binding Converter="{StaticResource PointXConverter}"
+                                                         ElementName="Presenter"
+                                                         Path="ActualWidth"
+                                                         ConverterParameter="0"/>
                                             </LineSegment.Point>
-                                        </LineSegment>
-                                    </PathFigure>
-                                </PathGeometry>
-                            </ContentPresenter.Clip>
-                        </ContentPresenter>
-                    </Grid>
+                                    </LineSegment>
+                                </PathFigure>
+                            </PathGeometry>
+                        </ContentPresenter.Clip>
+                    </ContentPresenter>
                 </ControlTemplate>
             </ContentControl.Template>
             <Grid>
