@@ -1,6 +1,5 @@
 ﻿using beta.Views;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
@@ -11,42 +10,8 @@ namespace beta.Models.Server
         New = 1,
         Launched = 2
     }
-
-    public enum PreviewType
-    {
-        Normal = 0,
-        Coop = 1,
-        Neroxis = 2
-    }
     public struct GameInfoMessage: MainView.IServerMessage
     {
-        public static GameInfoMessage New() => new();
-        public static GameInfoMessage New(GameInfoMessage old) => new()
-        {
-            command = old.command,
-            games = old.games,
-            visibility = old.visibility,
-            password_protected = old.password_protected,
-            uid=old.uid,
-            title=old.title,
-            state = old.state,
-            game_type = old.game_type,
-            featured_mod = old.featured_mod,
-            sim_mods = old.sim_mods,
-            mapname = old.mapname,
-            map_file_path = old.map_file_path,
-            host=old.host,
-            num_players = old.num_players,
-            max_players = old.max_players,
-            launched_at = old.launched_at,
-            rating_type = old.rating_type,
-            rating_max = old.rating_max,
-            rating_min = old.rating_min,
-            enforce_rating_range = old.enforce_rating_range,
-            teams = old.teams
-        };
-
-
         #region Custom properties
 
         #region MapName
@@ -84,20 +49,7 @@ namespace beta.Models.Server
 
         public string command { get; set; }
 
-        public PreviewType PreviewType
-        {
-            get
-            {
-                if (game_type == "coop")
-                    return PreviewType.Coop;
-                if (map_file_path.Split('/')[1].Split("_")[0] == "neroxis")
-                    return PreviewType.Neroxis;
-                return PreviewType.Normal;
-            }
-        }
-
-        public int LifyCycle;
-        
+        public int LifyCycle { get; set; }
             
         public GameInfoMessage[] games { get; set; }
 
