@@ -9,6 +9,7 @@
             <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
             <converter:GameModConverter x:Key="GameModConverter"/>
             <converter:MoreThanConverter x:Key="MoreThanConverter"/>
+            <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
             <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemeResources RequestedTheme="Dark">

@@ -499,12 +499,6 @@ namespace beta.Views
             //var t = ((ListBoxItem)Test.SelectedItem).Content.ToString();
             //Clipboard.SetText(t);
         }
-        
-        private void ForceGC(object sender, RoutedEventArgs e)
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-        }
         private void NavigateTo(Type viewtype)
         {
             if (Views.TryGetValue(viewtype, out var view))

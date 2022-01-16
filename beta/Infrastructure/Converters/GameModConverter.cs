@@ -72,4 +72,18 @@ namespace beta.Infrastructure.Converters
             throw new NotImplementedException();
         }
     }
+    public class TextLongerThanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            int num = value.ToString().Length;
+            if (parameter == null)
+                return num > 0;
+            return num > int.Parse(parameter.ToString());
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -4,8 +4,7 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="d"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    xmlns:ui="http://schemas.modernwpf.com/2019"
-                    xmlns:converters="clr-namespace:beta.Infrastructure.Converters">
+                    xmlns:ui="http://schemas.modernwpf.com/2019">
     <Style x:Key="LobbyTextBlockStyle" TargetType="TextBlock">
         <Setter Property="Padding" Value="24 0 0 0"/>
         <Setter Property="FontSize" Value="13"/>
@@ -20,7 +19,33 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-    <converters:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
+
+    <Style x:Key="PreviewImageStyle" TargetType="Image">
+        <Setter Property="Width" Value="90"/>
+        <Setter Property="Height" Value="90"/>
+        <Setter Property="Source" Value="{x:Null}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}" Value="Coop">
+                <Setter Property="Width" Value="60"/>
+                <Setter Property="Source" Value="{StaticResource CoopIcon}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}" Value="Neroxis">
+                <Setter Property="Width" Value="60"/>
+                <Setter Property="Source" Value="{StaticResource MapGenIcon}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}" Value="Normal">
+                <Setter Property="Source" Value="{Binding mapname, Converter={StaticResource UriToCachedImageConverter}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+    <!--<Style x:Key="HeaderStyle" TargetType="ui:ListViewHeaderItem">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding title, Converter={StaticResource TextLongerThanConverter}, ConverterParameter = 10}"
+                     Value="True">
+                <Setter Property="ToolTip" Value="Test"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>-->
     <ItemContainerTemplate x:Key="LobbyContainerDefaultTemplate">
         <Grid
             Margin="10"
@@ -78,42 +103,6 @@
                 Background="{DynamicResource NavigationViewDefaultPaneBackground}"
                 CornerRadius="10"
                 ToolTip="{Binding  launched_at}">
-                <Border.Resources>
-                    <!--<Style TargetType="Border">
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetProperty="Opacity" 
-                                                From=".8"
-                                                To="1"
-                                                Duration="0:0:0.2"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetProperty="Opacity" 
-                                                From="1"
-                                                To=".8"
-                                                Duration="0:0:0.2"/>
-                                            <DoubleAnimation
-                                                Storyboard.TargetProperty="Opacity" 
-                                                From=".8"
-                                                To=".5"
-                                                BeginTime="0:0:1"
-                                                Duration="0:0:0.9"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.ExitActions>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>-->
-                </Border.Resources>
                 <StackPanel>
                     <!--<Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="Uniform">
                         <Viewbox.LayoutTransform>
@@ -162,51 +151,24 @@
                                            FontSize="14"
                                            Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
                                            ToolTip="Title"
-                                           FontWeight="SemiBold"/>
+                                           FontWeight="SemiBold">
+                    </ui:ListViewHeaderItem>
                     <StackPanel Orientation="Horizontal">
                         <Grid Width="90"
                               Height="90"
                               Margin="10 0 0 10">
-                            <Border Background="{DynamicResource NavigationViewDefaultPaneBackground}"
-                                    BorderBrush="{DynamicResource NavigationViewDefaultPaneBackground}"
-                                    BorderThickness="1"
-                                    CornerRadius="10"
-                                    ClipToBounds="True"
-                                    Name="Borderg">
+                            <Border CornerRadius="10"
+                                    Name="Borderg"
+                                    SnapsToDevicePixels="True">
+                                <Border.Background>
+                                    <VisualBrush Stretch="None">
+                                        <VisualBrush.Visual>
+                                            <Image Style="{StaticResource PreviewImageStyle}"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Border.Background>
                             </Border>
-                            <Image Name="MapPreview"
-                                   Visibility="Visible"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Center">
-                                <Image.Resources>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Width" Value="90"/>
-                                        <Setter Property="Height" Value="90"/>
-                                        <Setter Property="Source" Value="{x:Null}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
-                                                         Value="Coop">
-                                                <Setter Property="Width" Value="75"/>
-                                                <Setter Property="Source" Value="{StaticResource CoopIcon}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
-                                                         Value="Neroxis">
-                                                <Setter Property="Width" Value="75"/>
-                                                <Setter Property="Source" Value="{StaticResource MapGenIcon}"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding PreviewType, Mode=OneTime}"
-                                                         Value="Normal">
-                                                <Setter Property="Source" Value="{Binding mapname,
-                                                    Converter={StaticResource UriToCachedImageConverter}}"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Resources>
-                                <Image.OpacityMask>
-                                    <VisualBrush Visual="{Binding ElementName=Borderg}"/>
-                                </Image.OpacityMask>
-                            </Image>
-                            <ui:ProgressRing SnapsToDevicePixels="True"
+                            <!--<ui:ProgressRing SnapsToDevicePixels="True"
                                              VerticalAlignment="Center"
                                              HorizontalAlignment="Center"
                                              Width="15"
@@ -222,7 +184,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </ui:ProgressRing.Resources>
-                            </ui:ProgressRing>
+                            </ui:ProgressRing>-->
                         </Grid>
                         <StackPanel Orientation="Vertical"
                                     Margin="8 0 8 0">
@@ -239,8 +201,10 @@
                                 </TextBlock.Background>
                             </TextBlock>
                             <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
-                                       ToolTip="Players in lobby"
-                                       Text="{Binding num_players}">
+                                       ToolTip="Players in lobby">
+                                <Run Text="{Binding num_players}"/>
+                                <Run Text="/" FontSize="12"/>
+                                <Run Text="{Binding max_players}"/>
                                 <TextBlock.Background>
                                     <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource PlayersIcon}">
                                         <ImageBrush.Transform>

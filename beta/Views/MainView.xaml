@@ -137,7 +137,7 @@
                             </Grid>
                         </Button.Content>
                     </Button>
-                <Button Visibility="Hidden" Click="ForceGC" Background="Transparent" 
+                <!--<Button Visibility="Hidden" Click="ForceGC" Background="Transparent" 
                         ToolTip="Activate garbade collector&#x0a;and clear RAM used by app">
                     <Button.Content>
                         <Grid VerticalAlignment="Center">
@@ -157,7 +157,7 @@
                                        Text="RAM" />
                         </Grid>
                     </Button.Content>
-                </Button>
+                </Button>-->
             </StackPanel>
         </Grid>
             <Button Margin="6 0 6 10" Grid.Row="1" Click="Button_Click">
@@ -196,7 +196,8 @@
                 <ControlTemplate TargetType="{x:Type ContentControl}">
                     <ContentPresenter  Name="Presenter"
                                        VerticalAlignment="Stretch"
-                                       HorizontalAlignment="Stretch">
+                                       HorizontalAlignment="Stretch"
+                                       Focusable="False">
                         <ContentPresenter.Clip>
                             <PathGeometry>
                                 <PathFigure StartPoint="15 0">
