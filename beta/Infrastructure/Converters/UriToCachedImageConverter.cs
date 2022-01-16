@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Converters
 {
-    public sealed class UriToCachedImageConverter : IValueConverter
+    public class UriToCachedImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

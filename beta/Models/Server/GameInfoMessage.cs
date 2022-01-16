@@ -1,5 +1,6 @@
 ﻿using beta.Views;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
@@ -9,6 +10,13 @@ namespace beta.Models.Server
         Warn = 0,
         New = 1,
         Launched = 2
+    }
+
+    public enum PreviewType
+    {
+        Normal = 0,
+        Coop = 1,
+        Neroxis = 2
     }
     public struct GameInfoMessage: MainView.IServerMessage
     {
@@ -49,7 +57,20 @@ namespace beta.Models.Server
 
         public string command { get; set; }
 
-        public int LifyCycle { get; set; }
+        public PreviewType PreviewType
+        {
+            get
+            {
+                if (game_type == "coop")
+                    return PreviewType.Coop;
+                if (map_file_path.Split('/')[1].Split("_")[0] == "neroxis")
+                    return PreviewType.Neroxis;
+                return PreviewType.Normal;
+            }
+        }
+
+        public int LifyCycle;
+        
             
         public GameInfoMessage[] games { get; set; }
 
