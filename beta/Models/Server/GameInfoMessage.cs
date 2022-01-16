@@ -51,7 +51,28 @@ namespace beta.Models.Server
 
         #region MapName
         public string _MapName;
-        public string MapName => _MapName ??= mapname.Split('.')[0];
+        public string MapName
+        {
+            get
+            {
+                if(_MapName is null)
+                {
+                    _MapName += char.ToUpper(mapname[0]);
+                    for (int i = 1; i < mapname.Length; i++)
+                    {
+                        if (mapname[i] == '.') break;
+                        if (mapname[i] == '_')
+                        {
+                            _MapName += " ";
+                            _MapName += mapname[i + 1];
+                            i++;
+                        }
+                        else _MapName += mapname[i];
+                    }
+                }
+                return _MapName;
+            }
+        }
         #endregion
 
         #region MapVersion
