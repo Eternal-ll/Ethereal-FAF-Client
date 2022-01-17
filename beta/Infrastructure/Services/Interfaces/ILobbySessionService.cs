@@ -9,8 +9,8 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface ILobbySessionService
     {
-        public event EventHandler<EventArgs<MainView.PlayerInfoMessage>> NewPlayer;
-        public event EventHandler<EventArgs<MainView.PlayerInfoMessage>> UpdatePlayer;
+        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
+        public event EventHandler<EventArgs<PlayerInfoMessage>> UpdatePlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGameInfo;
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
         public event EventHandler<MainView.IServerMessage> MessageReceived;
@@ -21,7 +21,10 @@ namespace beta.Infrastructure.Services.Interfaces
         public void Authorize();
         public event EventHandler<EventArgs<bool>> Authorization;
         public bool AuthorizationRequested { get; set; }
-        public Dictionary<int, MainView.PlayerInfoMessage> Players { get; }
+
+        public Dictionary<int, PlayerInfoMessage> Players { get; }
+        public Dictionary<string, int> PlayerNameToId { get; }
+
         public List<GameInfoMessage> Games { get; }
     }
 }

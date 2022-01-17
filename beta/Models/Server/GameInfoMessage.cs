@@ -7,9 +7,10 @@ namespace beta.Models.Server
     public enum LobbyState
     {
         Broken = -1,
-        Warn = 0,
+        Init = 0,
         New = 1,
-        Launched = 2
+        Old = 2,
+        Launched = 3
     }
 
     public enum PreviewType
@@ -52,6 +53,17 @@ namespace beta.Models.Server
         public string _MapVersion;
         public string MapVersion => _MapVersion ??= mapname.Split('.')[1];
         #endregion
+
+        private LobbyState _LobbyState;
+        public LobbyState LobbyState
+        {
+            set => _LobbyState = value;
+            get
+            {
+                _LobbyState = num_players == 0 ? LobbyState.New : _LobbyState;
+                return _LobbyState;
+            }
+        }
 
         #endregion
 

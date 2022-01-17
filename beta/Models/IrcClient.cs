@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace TechLifeForum
+namespace beta.Models
 {
     public class IrcClient : IDisposable
     {
@@ -327,7 +327,7 @@ namespace TechLifeForum
             int bytesAvailable = c.Available;
             if (bytesAvailable == 0)
                 return;
-            
+
             while (bytesAvailable > 0 && c.Connected)
             {
                 byte[] nextByte = new byte[1];
@@ -390,6 +390,7 @@ namespace TechLifeForum
             switch (ircCommand)
             {
                 case "001": // server welcome message, after this we can join
+                    Fire_Connected();
                     return;
                     Send("MODE " + _nick + " +B");
                     Fire_Connected();    //TODO: this might not work
@@ -434,7 +435,7 @@ namespace TechLifeForum
                 case "MODE": // MODE was set
                     {
                         var channel = ircData[2];
-                        if (channel != this.Nick)
+                        if (channel != Nick)
                         {
                             string from;
                             if (ircData[0].Contains("!"))
@@ -476,7 +477,7 @@ namespace TechLifeForum
                         var message = JoinArray(ircData, 3);
 
                         // if it's a private message
-                        if (String.Equals(to, _nick, StringComparison.CurrentCultureIgnoreCase))
+                        if (string.Equals(to, _nick, StringComparison.CurrentCultureIgnoreCase))
                             Fire_PrivateMessage(new PrivateMessageEventArgs(from, message));
                         else
                             Fire_ChannelMessage(new ChannelMessageEventArgs(to, from, message));
@@ -529,7 +530,7 @@ namespace TechLifeForum
         /// <returns>String</returns>
         private static string JoinArray(string[] strArray, int startIndex)
         {
-            return StripMessage(String.Join(" ", strArray, startIndex, strArray.Length - startIndex));
+            return StripMessage(string.Join(" ", strArray, startIndex, strArray.Length - startIndex));
         }
         public void Write(byte[] data)
         {
@@ -563,8 +564,8 @@ namespace TechLifeForum
 
         public UpdateUsersEventArgs(string channel, string[] userList)
         {
-            this.Channel = channel;
-            this.UserList = userList;
+            Channel = channel;
+            UserList = userList;
         }
     }
 
@@ -575,8 +576,8 @@ namespace TechLifeForum
 
         public UserJoinedEventArgs(string channel, string user)
         {
-            this.Channel = channel;
-            this.User = user;
+            Channel = channel;
+            User = user;
         }
     }
 
@@ -587,8 +588,8 @@ namespace TechLifeForum
 
         public UserLeftEventArgs(string channel, string user)
         {
-            this.Channel = channel;
-            this.User = user;
+            Channel = channel;
+            User = user;
         }
     }
 
@@ -600,9 +601,9 @@ namespace TechLifeForum
 
         public ChannelMessageEventArgs(string channel, string from, string message)
         {
-            this.Channel = channel;
-            this.From = from;
-            this.Message = message;
+            Channel = channel;
+            From = from;
+            Message = message;
         }
     }
 
@@ -613,8 +614,8 @@ namespace TechLifeForum
 
         public NoticeMessageEventArgs(string from, string message)
         {
-            this.From = from;
-            this.Message = message;
+            From = from;
+            Message = message;
         }
     }
 
@@ -625,8 +626,8 @@ namespace TechLifeForum
 
         public PrivateMessageEventArgs(string from, string message)
         {
-            this.From = from;
-            this.Message = message;
+            From = from;
+            Message = message;
         }
     }
 
@@ -637,8 +638,8 @@ namespace TechLifeForum
 
         public UserNickChangedEventArgs(string oldNick, string newNick)
         {
-            this.Old = oldNick;
-            this.New = newNick;
+            Old = oldNick;
+            New = newNick;
         }
     }
 
@@ -681,10 +682,10 @@ namespace TechLifeForum
 
         public ModeSetEventArgs(string channel, string from, string to, string mode)
         {
-            this.Channel = channel;
-            this.From = from;
-            this.To = to;
-            this.Mode = mode;
+            Channel = channel;
+            From = from;
+            To = to;
+            Mode = mode;
         }
     }
 }

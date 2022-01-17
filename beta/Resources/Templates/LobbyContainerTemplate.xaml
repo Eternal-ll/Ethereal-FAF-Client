@@ -14,8 +14,14 @@
     <Style x:Key="NewLobbyBorderStyle" TargetType="Border">
         <Setter Property="Visibility" Value="Collapsed"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding num_players}" Value="0">
+            <DataTrigger Binding="{Binding LobbyState}" Value="1">
                 <Setter Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding LobbyState}" Value="-1">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Setter Property="TextBlock.Text" Value="Broken"/>
+                <Setter Property="TextBlock.Foreground" Value="Red"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -262,7 +268,7 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <!--<Border HorizontalAlignment="Right"
+            <Border HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Style="{StaticResource NewLobbyBorderStyle}"
                     Margin="13 10"
@@ -273,10 +279,10 @@
                 </Border.Background>
                 <TextBlock Text="New"
                            FontSize="13"
-                           Margin="0"
+                           Margin="0 0 0 2"
                            FontWeight="SemiBold"
                            Foreground="RoyalBlue"/>
-            </Border>-->
+            </Border>
         </Grid>
     </ItemContainerTemplate>
 </ResourceDictionary>

@@ -17,8 +17,8 @@ namespace beta.Infrastructure.Services
     public class LobbySessionService : ILobbySessionService
     {
         public event EventHandler<EventArgs<bool>> Authorization;
-        public event EventHandler<EventArgs<MainView.PlayerInfoMessage>> NewPlayer;
-        public event EventHandler<EventArgs<MainView.PlayerInfoMessage>> UpdatePlayer;
+        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
+        public event EventHandler<EventArgs<PlayerInfoMessage>> UpdatePlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGameInfo;
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
 
@@ -34,7 +34,8 @@ namespace beta.Infrastructure.Services
         }
 
         public bool AuthorizationRequested { get; set; }
-        public Dictionary<int, MainView.PlayerInfoMessage> Players { get; } = new();
+        public Dictionary<int, PlayerInfoMessage> Players { get; } = new();
+        public Dictionary<string, int> PlayerNameToId { get; } = new();
         public List<GameInfoMessage> Games { get; } = new();
 
         public LobbySessionService(IOAuthService oAuthService)
@@ -91,7 +92,7 @@ namespace beta.Infrastructure.Services
                     switch (json[13])
                     {
                         case 'l': // player_info
-                            var playerInfoMessage = JsonSerializer.Deserialize<MainView.PlayerInfoMessage>(json);
+                            var playerInfoMessage = JsonSerializer.Deserialize<PlayerInfoMessage>(json);
                             if (playerInfoMessage.players.Length > 0)
                                 // payload with players
                                 for (int i = 0; i < playerInfoMessage.players.Length; i++)
@@ -206,22 +207,24 @@ namespace beta.Infrastructure.Services
 
         protected virtual void OnAuthorization(EventArgs<bool> e) => Authorization?.Invoke(this, e);
 
-        protected virtual void OnNewPlayer(EventArgs<MainView.PlayerInfoMessage> e)
+        protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e)
         {
             var newPlayer = e.Arg;
             if (Players.ContainsKey(newPlayer.id))
             {
                 Players[newPlayer.id] = newPlayer;
+                PlayerNameToId[newPlayer.login] = newPlayer.id;
                 OnUpdatePlayer(newPlayer);
             }
             else
             {
                 Players.Add(newPlayer.id, newPlayer);
+                PlayerNameToId.Add(newPlayer.login, newPlayer.id);
                 NewPlayer?.Invoke(this, e);
             }
         }
             
-        protected virtual void OnUpdatePlayer(EventArgs<MainView.PlayerInfoMessage> e)
+        protected virtual void OnUpdatePlayer(EventArgs<PlayerInfoMessage> e)
         {
             UpdatePlayer?.Invoke(this, e);
         }

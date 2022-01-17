@@ -4,8 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:local="clr-namespace:beta.Views"
+             xmlns:sModels="clr-namespace:beta.Models.Server"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance local:ChatView}">
     <Grid>
         <Grid.Background>
             <SolidColorBrush Color="Black" Opacity=".2"/>
@@ -16,160 +19,181 @@
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TabControl x:Name="Channels"
-                        Background="Transparent">
-                <TabControl.Resources>
-                    <Thickness x:Key="TabViewTopHeaderPadding">0</Thickness>
-                    <Style TargetType="ui:FlyoutPresenter">
+            <ListBox ItemsSource="{Binding Channels.Keys}"
+                     SelectedItem="{Binding SelectedChannelName}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding SelectedChannelHistory}"/>
+            <TextBox Grid.Row="2" Name="TextBox"/>
 
-                    </Style>
-                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <!--<Setter Property="Can"/>-->
-                        <!--<Setter Property="ItemContainerStyle">
-                            <Setter.Value>
-                                
-                            </Setter.Value>
-                        </Setter>-->
-                        <Setter Property="ItemTemplate">
-                            <Setter.Value>
-                                <ItemContainerTemplate>
-                                    <!--<Grid>-->
-                                        <Glyphs
-                                            FontRenderingEmSize="13"
-                                            Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
-                                            UnicodeString="{Binding }"
-                                        >
-                                            <!--<Glyphs.ContextMenu>
-                                                <ContextMenu>
-
-                                                </ContextMenu>
-                                            </Glyphs.ContextMenu>
-                                            <ui:FlyoutBase.AttachedFlyout>
-                                                <ui:MenuFlyout>
-
-                                                </ui:MenuFlyout>
-                                            </ui:FlyoutBase.AttachedFlyout>-->
-                                        </Glyphs>
-                                        <!--<Grid>
-                                            <ui:FlyoutBase.AttachedFlyout>
-                                                <ui:CommandBarFlyout IsOpen="True">
-                                                    <ui:AppBarButton></ui:AppBarButton>
-                                                </ui:CommandBarFlyout>
-                                            </ui:FlyoutBase.AttachedFlyout>
-                                        </Grid>-->
-                                    <!--</Grid>-->
-                                </ItemContainerTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </TabControl.Resources>
-                <TabItem Header="Server">
-                    <!--<ScrollViewer>-->
-                        <!--<Grid>-->
-                            <ListBox x:Name="ServerControl"
-                                     VirtualizingPanel.IsVirtualizing="True">
-                                <ListBox.Resources>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                        <Setter Property="Padding" Value="2 2"/>
-                                        <Setter Property="Focusable" Value="False"/>
-                                        <!--<Setter Property="ContextMenu">-->
-                                        <!--<Setter.Value>
-                                            <ContextMenu>
-                                                <MenuItem Click="MenuItem_OnClick"></MenuItem>
-                                            </ContextMenu>
-                                        </Setter.Value>-->
-                                    <!--</Setter>-->
-                                    </Style>
-                                </ListBox.Resources>
-                                <!--<ListBox.Resources>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                        <Setter Property="ContextMenu">
-                                            <Setter.Value>
-                                                <ContextMenu>
-                                                    <MenuItem Click="MenuItem_OnClick"></MenuItem>
-                                                    <MenuItem Header="{Binding}"/>
-                                                </ContextMenu>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.Resources>-->
-                                <!--<ListBox.ItemContainerStyle>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                        <Setter Property="ContextMenu">
-                                            <Setter.Value>
-                                                <ContextMenu>
-                                                    --><!--<MenuItem Click="MenuItem_OnClick"></MenuItem>
-                                                    <MenuItem Header="{Binding}"/>--><!--
-                                                </ContextMenu>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ListBox.ItemContainerStyle>-->
-                            </ListBox>
-                        <!--</Grid>-->
-                    <!--</ScrollViewer>-->
-                </TabItem>
-                <TabItem Header="Aeolus">
-                    <!--<ScrollViewer>-->
-                        <!--<Grid>-->
-                            <ListBox x:Name="AeolusControl"
-                                     VirtualizingPanel.IsVirtualizing="True">
-                            </ListBox>
-                        <!--</Grid>-->
-                    <!--</ScrollViewer>-->
-                </TabItem>
-                <TabItem Header="Ethereal sanctuary">
-                    
-                </TabItem>
-                <TabItem Header="+">
-                    <Grid>
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Path
-                                Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
-                                Stretch="Uniform"
-                                Height="60"
-                                Margin="0 0 0 30"
-                                Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
-                                />
-                            <TextBox Margin="0 0 0 90"/>
-                        </StackPanel>
-                    </Grid>
-                </TabItem>
-            </TabControl>
-            <TextBox Grid.Row="1" Name="TextBox">
-                <TextBox.Resources>
-                    <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Resources>
-            </TextBox>
-            <Button Grid.Row="1" HorizontalAlignment="Right" Content="Send" Click="ButtonBase_OnClick"/>
+            <Button Grid.Row="2" HorizontalAlignment="Right" Content="Send" Click="ButtonBase_OnClick"/>
         </Grid>
         
         <Grid Grid.Column="1" Width="200">
                 <Grid.Resources>
                     <Style TargetType="Grid">
                         <Style.Triggers>    
-                            <DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
+                            <!--<DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
                                 <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
+                            </DataTrigger>-->
                         </Style.Triggers>
                     </Style>
                 </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <ui:AutoSuggestBox Name="SeachPlayerSuggestBox" ToolTip="Search players" ui:ControlHelper.PlaceholderText="Search player" ui:ControlHelper.Description=" Online: 1488"/>
-            <Grid Grid.Row="1">
+            <ui:AutoSuggestBox Name="SeachPlayerSuggestBox" ToolTip="Search players" ui:ControlHelper.PlaceholderText="Search player"/>
+            <TextBlock Text="{Binding ElementName=Users, Path=Items.Count}"
+                       Grid.Row="1"/>
+            <ListBox Grid.Row="2"
+                     Background="Transparent"
+                     ItemsSource="{Binding SelectedChannelUsers}"
+                     Name="Users"
+                     VirtualizingPanel.IsVirtualizing="True">
+                <ListBox.Resources>
+                    <!--<SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />-->
+                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushChecked" Color="Transparent" />-->
+                </ListBox.Resources>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="1"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Focusable" Value="False"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <ui:AppBarButton Width="NaN"
+                                         HorizontalAlignment="Stretch">
+                            <ui:AppBarButton.Flyout>
+                                <ui:Flyout Placement="LeftEdgeAlignedTop">
+                                    <StackPanel>
+                                        <ui:AppBarElementContainer>
+                                            <StackPanel DataContext="{Binding Converter={StaticResource GetPlayerInfoConverter}, Mode=OneWay}"
+                                                    d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
+                                                <TextBlock Text="{Binding login}" Margin="0 0 0 10"/>
+                                                <ui:ListViewHeaderItem FontSize="14" FontWeight="DemiBold" Content="Ratings                  " HorizontalAlignment="Stretch"
+                                                                   Padding="0" Margin="0"/>
+                                                <Grid Margin="0 0 0 10">
+                                                    <Button Margin="8 0 0 0" Width="24" Height="24" Content="R" Grid.Column="1" ToolTip="Rating" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <Button Margin="0 0 0 0" Width="24" Height="24" Content="G" Grid.Column="2" ToolTip="Games" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                </Grid>
+                                                <ItemsControl ItemsSource="{Binding ratings, Mode=OneWay}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <ItemContainerTemplate>
+                                                            <Grid Background="Transparent">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="30"/>
+                                                                    <ColumnDefinition Width="1*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock HorizontalAlignment="Center">
+                                                                    <TextBlock.Resources>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="FontWeight" Value="DemiBold"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding Key}" Value="global">
+                                                                                    <Setter Property="Width" Value="30"/>
+                                                                                    <Setter Property="Background">
+                                                                                        <Setter.Value>
+                                                                                            <VisualBrush Stretch="Uniform">
+                                                                                                <VisualBrush.Visual>
+                                                                                                    <Path ToolTip="Global"
+                                                                                                          Fill="White"
+                                                                                                          Data="M39.3,49.1c-2,5.8-3.2,12-3.6,18.5h17.2V49.1H39.3L39.3,49.1z M42.4,41.6h10.5V26.8C48.7,31,45.2,36,42.4,41.6L42.4,41.6z
+                                                                                                          M34.2,41.6c2.2-5.1,5-9.9,8.3-14.2c-8.5,2.7-15.8,7.8-21.1,14.2H34.2L34.2,41.6z M97,49.1l-15.2,0c1.8,5.8,2.9,12,3.2,18.5h17.6
+                                                                                                          C102.1,60.9,100.1,54.7,97,49.1L97,49.1z M77.5,67.6c-0.3-6.5-1.6-12.7-3.6-18.5H60.3v18.5H77.5L77.5,67.6z M70.8,41.6
+                                                                                                          C68.1,36,64.5,31,60.3,26.8v14.8H70.8L70.8,41.6z M79,41.6h12.8c-5.4-6.3-12.7-11.5-21.1-14.2C74,31.7,76.8,36.5,79,41.6L79,41.6z
+                                                                                                          M16.2,93.6l15.2,0c-1.8-5.8-2.9-12-3.2-18.5H10.6C11.2,81.8,13.1,88.1,16.2,93.6L16.2,93.6z M35.7,75.1c0.3,6.5,1.6,12.7,3.6,18.5
+                                                                                                          h13.6V75.1H35.7L35.7,75.1z M42.4,101.1c2.8,5.6,6.4,10.6,10.5,14.8v-14.8H42.4L42.4,101.1z M34.2,101.1H21.3
+                                                                                                          c5.4,6.3,12.7,11.5,21.1,14.2C39.2,111.1,36.4,106.3,34.2,101.1L34.2,101.1z M81.8,93.6l15.2,0c3.1-5.6,5-11.8,5.6-18.5H85
+                                                                                                          C84.7,81.6,83.6,87.8,81.8,93.6L81.8,93.6z M73.9,93.6c2-5.8,3.2-12,3.6-18.5H60.3v18.5H73.9L73.9,93.6z M70.8,101.1H60.3v14.8
+                                                                                                          C64.5,111.8,68.1,106.8,70.8,101.1L70.8,101.1z M79,101.1c-2.2,5.1-5,9.9-8.3,14.2c8.5-2.7,15.8-7.8,21.1-14.2H79L79,101.1z
+                                                                                                          M31.4,49.1l-15.2,0c-3.1,5.6-5,11.9-5.6,18.5h17.6C28.6,61.2,29.7,54.9,31.4,49.1L31.4,49.1z M56.6,125C27,125,3,101,3,71.4
+                                                                                                          c0-29.6,24-53.6,53.6-53.6c29.6,0,53.6,24,53.6,53.6C110.2,101,86.2,125,56.6,125L56.6,125z"/>
+                                                                                                </VisualBrush.Visual>
+                                                                                            </VisualBrush>
+                                                                                        </Setter.Value>
+                                                                                    </Setter>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Key}" Value="ladder_1v1">
+                                                                                    <Setter Property="Text" Value="1vs1"/>
+                                                                                    <Setter Property="ToolTip" Value="Ladder 1 vs 1"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_2v2">
+                                                                                    <Setter Property="Text" Value="2vs2"/>
+                                                                                    <Setter Property="ToolTip" Value="TMM 2 vs 2"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_full_share">
+                                                                                    <Setter Property="Text" Value="4vs4"/>
+                                                                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 full share"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_share_until_death">
+                                                                                    <Setter Property="Text" Value="4vs4"/>
+                                                                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 share until death"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Resources>
+                                                                </TextBlock>
+                                                                <Grid DataContext="{Binding Value}"
+                                                                      Grid.Column="1">
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="50"/>
+                                                                        <ColumnDefinition Width="40"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <!--<TextBlock Text="R:" Margin="10 0 10 0"/>-->
+                                                                    <TextBlock Text="{Binding rating[0], Mode=OneWay}" Grid.Column="0" Margin="10 0 0 0"/>
+                                                                    <!--<TextBlock Text="{Binding rating[1], StringFormat=' +-{0}', Mode=OneWay}" Grid.Column="2"/>-->
+                                                                    <!--<TextBlock Text="G:" Grid.Column="3" Margin="10 0 10 0" HorizontalAlignment="Right"/>-->
+                                                                    <TextBlock Text="{Binding number_of_games, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Right"
+                                                                               Margin="0"/>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </ItemContainerTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </ui:AppBarElementContainer>
+                                    </StackPanel>
+                                </ui:Flyout>
+                            </ui:AppBarButton.Flyout>
+                            <ui:AppBarButton.Template>
+                                <ControlTemplate TargetType="ui:AppBarButton">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="20"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="20"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding}"
+                                                   Grid.Column="2"
+                                                   FontSize="13"
+                                                   Foreground="Aqua"
+                                                   HorizontalAlignment="Left"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ui:AppBarButton.Template>
+                        </ui:AppBarButton>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <!--<Grid Grid.Row="1">
                 <ItemsControl x:Name="PlayersControl" IsTabStop="False">
                     <ItemsControl.Items>
                         <MenuItem Header="Moderators">
@@ -212,7 +236,7 @@ M 14.980469 1.9902344 A 1.0001 1.0001 0 0 0 14.292969 2.2929688 L 9.2929688 7.29
                         </MenuItem>
                     </ItemsControl.Items>
                 </ItemsControl>
-            </Grid>
+            </Grid>-->
         </Grid>
     </Grid>
 </UserControl>

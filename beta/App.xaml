@@ -6,6 +6,9 @@
              StartupUri="Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
+
+            <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
+
             <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
             <converter:GameModConverter x:Key="GameModConverter"/>
             <converter:MoreThanConverter x:Key="MoreThanConverter"/>
