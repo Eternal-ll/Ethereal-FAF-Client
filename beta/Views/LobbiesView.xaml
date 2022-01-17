@@ -243,15 +243,6 @@
                             <StackPanel HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
                                         Orientation="Horizontal">
-                                <!--<TextBlock Text="{Binding LobbiesCountOnView, StringFormat='On view: {0}'}"
-                                           Margin="0">
-                                    <TextBlock.Resources>
-                                        <Style TargetType="ListBox">
-                                            <Style.Triggers>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Resources>
-                                </TextBlock>-->
                                 <TextBlock Text="{Binding View.SourceCollection.Count, StringFormat='Total: {0}'}"
                                            Margin="10 0 0 0"/>
                             </StackPanel>
@@ -259,24 +250,24 @@
                         <StackPanel Orientation="Horizontal"
                                     Margin="11 10 0 0">
                             <ListBox Name="GameModesList"
-                                    HorizontalContentAlignment="Right"
-                                    ItemsSource="{Binding View.Groups,
+                                     HorizontalContentAlignment="Right"
+                                     ItemsSource="{Binding View.Groups,
                                         UpdateSourceTrigger=Explicit, Mode=OneTime}"
-                                    SelectionMode="Multiple"
-                                    SelectionChanged="GameModesList_OnSelectionChanged">
+                                     SelectionMode="Multiple"
+                                     SelectionChanged="GameModesList_OnSelectionChanged">
                                     <ListBox.Resources>
-                                        <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                                            <Setter Property="Foreground" Value="#9a9a9a"/>
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=ToggleGameModeFilter,Path=IsOn}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="6"/>
-                                        </Style>
+                                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                                        <Setter Property="Foreground" Value="#9a9a9a"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=ToggleGameModeFilter,Path=IsOn}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="6"/>
+                                    </Style>
                                     </ListBox.Resources>
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>

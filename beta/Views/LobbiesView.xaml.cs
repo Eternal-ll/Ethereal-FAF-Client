@@ -1,18 +1,17 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Xaml.Behaviors.Core;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Microsoft.Xaml.Behaviors.Core;
 using GameInfoMessage = beta.Models.Server.GameInfoMessage;
 
 namespace beta.Views
@@ -79,22 +78,6 @@ namespace beta.Views
         }
         #endregion
 
-        #region LobbiesCountOnView
-        public int LobbiesCountOnView
-        {
-            get
-            {
-                int sum = 0;
-                //if(LobbiesRepeater.ItemsSourceView!=null)
-                //    for (int i = 0; i < LobbiesRepeater.ItemsSourceView.Count; i++)
-                //    {
-                //        sum += ((CollectionViewGroup)LobbiesRepeater.ItemsSourceView.GetAt(i)).ItemCount;
-                //    }
-                return sum;
-            }
-        }
-        #endregion
-
         #region IsPrivateGamesHidden
 
         private bool _IsPrivateGamesHidden;
@@ -107,7 +90,6 @@ namespace beta.Views
                 _IsPrivateGamesHidden = value;
                 View.Refresh();
                 OnPropertyChanged(nameof(IsPrivateGamesHidden));
-                //OnPropertyChanged(nameof(LobbiesCountOnView));
             }
         }
         #endregion
@@ -122,12 +104,10 @@ namespace beta.Views
                 _IsGameModeFilterEnabled = value;
 
                 OnPropertyChanged(nameof(IsGameModeFilterEnabled));
-                //OnPropertyChanged(nameof(LobbiesCountOnView));
             }
         } 
         #endregion
 
-        //private bool?[] SelectedGameModes = new bool?[15];
         #region SelectedGameModes codes
         //  3 - faf
         //  4 - coop
@@ -142,23 +122,11 @@ namespace beta.Views
         // 14 - claustrophobia 
         #endregion
 
-        private readonly IList<KeyValuePair<long, int>> NewLobbies = new List<KeyValuePair<long, int>>();
-        private readonly IList<GameInfoMessage> RequestedLobbiesToRemove = new List<GameInfoMessage>();
         #region LobbiesViewSourceFilter
         private void LobbiesViewSourceFilter(object sender, FilterEventArgs e)
         {
             string searchText = _SearchText;
             var lobby = (GameInfoMessage)e.Item;
-
-            //if (lobby.num_players == 0)
-            //{
-            //}
-            //if (lobby.launched_at != null)
-            //{
-            //    e.Accepted = false;
-            //    //Lobbies.Remove(lobby);
-            //    return;
-            //}
             
             if (IsPrivateGamesHidden)
             {
@@ -193,45 +161,25 @@ namespace beta.Views
 
                 if (lobby.num_players == 0)
                     return;
-                //if (lobby.map_file_path.Contains("gap") || lobby.map_file_path.Contains("crater"))
-                //    return;
 
-                //bool globalFound = false;
                 for (int i = 0; i < Lobbies.Count; i++)
                 {
-                    //bool found = false;
                     var cLobby = Lobbies[i];
-
-                    //if(cLobby.num_players==0) cLobby.LifyCycle++;
 
                     if (cLobby.uid == lobby.uid)
                     {
-                        //lobby.LifyCycle = cLobby.LifyCycle;
-                        //found = true;
-                        //globalFound = true;
+
+                        if (lobby.launched_at != null)
+                        {
+                            Lobbies.RemoveAt(i);
+                            return;
+                        }
                         Lobbies[i] = lobby;
-
-                        if (lobby.launched_at != null) 
-                            Lobbies.RemoveAt(i); 
                         return;
-                    }
-                    
-                    //if (cLobby.LifyCycle == 50)
-                    //{
-                    //    Lobbies.RemoveAt(i);
-                    //    continue;
-                    //}
-                    
-                    //Lobbies[i] = found ? lobby : cLobby;
+                    }                    
                 }
-
-                //if (!globalFound)
-                //{
                 if (lobby.launched_at == null)
                     Lobbies.Add(lobby);
-                //}
-                
-                //CheckLobby(lobby);
             });
         }
         private void OnNewGameInfo(object sender, Infrastructure.EventArgs<GameInfoMessage> e)
@@ -255,66 +203,8 @@ namespace beta.Views
                 if (lobby.num_players == 0)
                     return;
 
-                //bool found = false;
-                //for (int i = 0; i < Lobbies.Count; i++)
-                //{
-                //    if (Lobbies[i].uid == lobby.uid)
-                //    {
-                //        Lobbies[i] = e.Arg;
-                //        found = true;
-                //        break;
-                //    }
-                //}
-
-
-                //if (!found)
                 Lobbies.Add(lobby);
-                //else
-                //    for (int i = 0; i < NewLobbies.Count; i++)
-                //    {
-                //        var nlobby = NewLobbies[i];
-
-                //        if (lobby.uid == nlobby.Key)
-                //            if (lobby.num_players > 0)
-                //            {
-                //                NewLobbies.RemoveAt(i);
-                //                break;
-                //            }
-                //    }
-
-                //CheckLobby(lobby);
             });
-        }
-
-        private void CheckLobby(GameInfoMessage lobby)
-        {
-            bool found = false;
-            
-            for (int i = 0; i < NewLobbies.Count; i++)
-            {
-                var nlobby = NewLobbies[i];
-
-                if (lobby.uid == nlobby.Key)
-                {
-                    found = true;
-                    if (lobby.num_players > 0)
-                    {
-                        NewLobbies.RemoveAt(i);
-                        break;
-                    }
-                    
-                    if (nlobby.Value < 10)
-                        continue;
-                    Lobbies.Remove(lobby);
-                }
-
-                NewLobbies[i] = new KeyValuePair<long, int>(nlobby.Key, nlobby.Value + 1);
-            }
-
-            if (!found)
-            {
-                NewLobbies.Add(new KeyValuePair<long, int>(lobby.uid, 0));
-            }
         }
         
         //private int GetGameModeIndex(int mode)
@@ -373,7 +263,6 @@ namespace beta.Views
             }
 
             ListTest = selectedGroups;
-            OnPropertyChanged(nameof(LobbiesCountOnView));
         }
 
         private ActionCommand _MoveToSearchBox;
@@ -381,8 +270,6 @@ namespace beta.Views
 
         private void MoveViewToSearchBox()
         {
-            //Frame.ScrollToHorizontalOffset(1000);
-            //Frame.ScrollToVerticalOffset(1060);
             var target = Viewbox.ActualHeight + 90;
             var scrollViewer = Frame;
 
