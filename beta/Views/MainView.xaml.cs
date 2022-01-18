@@ -42,12 +42,6 @@ namespace beta.Views
             Views.Add(typeof(LobbiesView), new LobbiesView());
             Views.Add(typeof(ChatView), new ChatView());
         }
-
-        public class Rating
-        {
-            public double[] rating { get; set; }
-            public int number_of_games { get; set; }
-        }
         public interface IServerMessage
         {
             public string command { get; set; }

@@ -1,4 +1,5 @@
 ﻿using beta.Views;
+using System;
 using System.Collections.Generic;
 
 namespace beta.Models.Server
@@ -9,7 +10,7 @@ namespace beta.Models.Server
         public string login { get; set; }
         public string country { get; set; }
         public string clan { get; set; }
-        public Dictionary<string, MainView.Rating> ratings { get; set; }
+        public Dictionary<string, Rating> ratings { get; set; }
         public double[] global_rating { get; set; }
         public double[] ladder_rating { get; set; }
         public int number_of_games { get; set; }
@@ -17,5 +18,7 @@ namespace beta.Models.Server
 
 
         public PlayerInfoMessage[] players { get; set; }
+
+        public DateTime? Updated { get; set; }
     }
 }

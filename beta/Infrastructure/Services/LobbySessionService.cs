@@ -210,8 +210,26 @@ namespace beta.Infrastructure.Services
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e)
         {
             var newPlayer = e.Arg;
-            if (Players.ContainsKey(newPlayer.id))
+            if (Players.TryGetValue(newPlayer.id, out var originalPlayer))
             {
+                foreach (var rating in originalPlayer.ratings)
+                {
+                    int gamesDifference = 0;
+                    if(newPlayer.ratings.TryGetValue(rating.Key, out var rat))
+                        gamesDifference = rat.number_of_games - rating.Value.number_of_games;
+                    if (gamesDifference == 0)
+                        continue;
+                    
+                    newPlayer.ratings[rating.Key].GamesDifference = gamesDifference;
+
+                    var ratingDifference = new double[2];
+
+                    ratingDifference[0] = newPlayer.ratings[rating.Key].rating[0] - rating.Value.rating[0];
+                    ratingDifference[1] = newPlayer.ratings[rating.Key].rating[1] - rating.Value.rating[1];
+
+                    newPlayer.ratings[rating.Key].RatingDifference = ratingDifference; 
+                }
+                newPlayer.Updated = DateTime.UtcNow;
                 Players[newPlayer.id] = newPlayer;
                 PlayerNameToId[newPlayer.login] = newPlayer.id;
                 OnUpdatePlayer(newPlayer);

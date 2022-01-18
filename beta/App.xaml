@@ -8,6 +8,8 @@
         <ResourceDictionary>
 
             <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
+            <converter:RatingConverter x:Key="RatingConverter"/>
+            <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
 
             <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
             <converter:GameModConverter x:Key="GameModConverter"/>

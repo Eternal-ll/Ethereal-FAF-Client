@@ -21,7 +21,6 @@ namespace beta.Infrastructure.Converters
             }
             var playerName = (string)value;
             if(LobbySessionService.PlayerNameToId.TryGetValue(playerName, out int id)){
-
                 //var playerId = LobbySessionService.PlayerNameToId[playerName];
                 var playerInfo = LobbySessionService.Players[id];
                 return playerInfo;
