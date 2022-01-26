@@ -264,30 +264,5 @@ namespace beta.Views
 
             ListTest = selectedGroups;
         }
-
-        private ActionCommand _MoveToSearchBox;
-        public ICommand MoveToSearchBox => _MoveToSearchBox ??= new ActionCommand(MoveViewToSearchBox);
-
-        private void MoveViewToSearchBox()
-        {
-            var target = Viewbox.ActualHeight + 90;
-            var scrollViewer = Frame;
-
-            var scrollTimer = new DispatcherTimer();
-            var t = scrollViewer.HorizontalOffset;
-            scrollTimer.Start();
-
-            scrollTimer.Interval = TimeSpan.FromMilliseconds(10);
-
-            scrollTimer.Tick += (s, e) =>
-            {          
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + 20);
-
-                if (scrollViewer.VerticalOffset >= target)
-                {
-                    scrollTimer.Stop();
-                }
-            };
-        }
     }
 }
