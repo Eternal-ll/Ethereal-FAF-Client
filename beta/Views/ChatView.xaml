@@ -15,31 +15,59 @@
             <SolidColorBrush Color="Black" Opacity=".2"/>
         </Grid.Background>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <TextBlock Grid.Row="1"
+                       Text="Test title"
+                       Background="#40000000"
+                       Padding="20 2"/>
             <ListBox ItemsSource="{Binding Channels.Keys}"
-                     SelectedItem="{Binding SelectedChannelName}">
+                     SelectedItem="{Binding SelectedChannelName}"
+                     Background="Transparent"
+                     Padding="20 0">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
+                <ListBox.Resources>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="20 4"/>
+                    </Style>
+                </ListBox.Resources>
             </ListBox>
-            <ListBox Grid.Row="1"
-                     ItemsSource="{Binding SelectedChannelHistory}"/>
-            <TextBox Grid.Row="2" Name="TextBox"/>
-
-            <Button Grid.Row="2" HorizontalAlignment="Right" Content="Send" Click="ButtonBase_OnClick"/>
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding HistoryView}"
+                     Background="Transparent"/>
+            <TextBox Name="TextBox"
+                     Grid.Row="3"
+                     BorderThickness="0"
+                     ui:ControlHelper.PlaceholderText="Write message">
+                <TextBox.Resources>
+                    <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
+                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                </TextBox.Resources>
+            </TextBox>
         </Grid>
-        
-        <Grid Grid.Column="1" Width="200">
+        <!--<GridSplitter Grid.Column="1"
+                      Width="2"
+                      ShowsPreview="True"
+                      HorizontalAlignment="Left">
+        </GridSplitter>-->
+        <Grid Grid.Column="2" Width="300"
+              Background="#20000000">
                 <Grid.Resources>
                     <Style TargetType="Grid">
                         <Style.Triggers>    

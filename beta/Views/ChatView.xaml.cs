@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace beta.Views
 {
@@ -24,16 +25,16 @@ namespace beta.Views
         #endregion
 
         private readonly IrcClient IrcClient;
-        private readonly ILobbySessionService LobbySessionService;
+        private readonly ILobbySessionService LobbySessionService; 
 
 
         public ChatView()
         {
             InitializeComponent();
 
-            LobbySessionService = App.Services.GetService<ILobbySessionService>();
-
             DataContext = this;
+
+            LobbySessionService = App.Services.GetService<ILobbySessionService>();
 
             IrcClient = new IrcClient("116.202.155.226", 6697);
             
@@ -49,7 +50,10 @@ namespace beta.Views
             IrcClient.OnConnect += IrcClient_OnConnect;
         }
 
-        //public PlayerInfoMessage GetPlayerInfo => LobbySessionService.Players[LobbySessionService.PlayerNameToId[""]];
+        private readonly CollectionViewSource HistoryViewSource = new();
+        public ICollectionView HistoryView => HistoryViewSource.View;
+
+
 
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
@@ -68,18 +72,30 @@ namespace beta.Views
                 //OnPropertyChanged(nameof(SelectedChannelUsers));
         }
 
-        private readonly Dictionary<string, IList<string>> _Channels = new()
+        private readonly Dictionary<string, BindingList<string>> _Channels = new()
         {
-            { "#server", new List<string>() }
+            { "#server", new BindingList<string>() }
         };
 
         private readonly Dictionary<string, HashSet<string>> _ChannelUsers = new();
 
-        public Dictionary<string, IList<string>> Channels => _Channels;
+        public Dictionary<string, BindingList<string>> Channels => _Channels;
 
         public HashSet<string> SelectedChannelUsers => SelectedChannelName != null ? _ChannelUsers.ContainsKey(SelectedChannelName) ? _ChannelUsers[SelectedChannelName] : null : null;
 
-        public IList<string> SelectedChannelHistory => SelectedChannelName != null ? _Channels[SelectedChannelName] : null;
+        //public IList<string> SelectedChannelHistory => SelectedChannelName != null ? _Channels[SelectedChannelName] : null;
+        private List<string> t = new();
+        public IList<string> SelectedChannelHistory => t;
+        private BindingList<string> _BindingList = new();
+        public BindingList<string> BindingList
+        {
+            get => _BindingList;
+            set
+            {
+                _BindingList = value;
+                OnPropertyChanged();
+            }
+        }
 
         private string _SelectedChannelName;
         public string SelectedChannelName
@@ -95,7 +111,7 @@ namespace beta.Views
         private void IrcClient_OnConnect(object sender, System.EventArgs e)
         {
             IrcClient.JoinChannel("#aeolus");
-            _Channels.Add("#aeolus", new List<string>());
+            _Channels.Add("#aeolus", new BindingList<string>());
             OnPropertyChanged(nameof(Channels));
         }
 
@@ -108,7 +124,7 @@ namespace beta.Views
                 channel.Add(msg);
             else
             {
-                _Channels.Add(e.Channel, new List<string>() { msg });
+                _Channels.Add(e.Channel, new BindingList<string>() { msg });
                 OnPropertyChanged(nameof(Channels));
             }
             if (SelectedChannelName == e.Channel)

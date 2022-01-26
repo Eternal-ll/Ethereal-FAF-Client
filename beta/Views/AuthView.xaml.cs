@@ -30,6 +30,7 @@ namespace beta.Views
             // getting user setting for auto join
             if (Settings.Default.AutoJoin)
             {
+                return;
                 // looping view controls and hide them
                 for (int i = 0; i < Canvas.Children.Count; i++)
                     Canvas.Children[i].Visibility = Visibility.Collapsed;

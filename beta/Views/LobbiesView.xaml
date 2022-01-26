@@ -239,7 +239,19 @@
                                      Margin="0 0 34 0"
                                      ui:ControlHelper.PlaceholderText="Search lobby"
                                      Width="200"
-                                     Name="SearchBox"/>
+                                     BorderThickness="0"
+                                     ui:ControlHelper.CornerRadius="6"
+                                     Name="SearchBox">
+
+                                <TextBox.Resources>
+                                    <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                        <Setter Property="BorderThickness" Value="0"/>
+                                    </Style>
+                                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+                                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
+                                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                                </TextBox.Resources>
+                            </TextBox>
                             <StackPanel HorizontalAlignment="Right"
                                         VerticalAlignment="Center"
                                         Orientation="Horizontal">

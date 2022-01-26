@@ -39,6 +39,7 @@ namespace beta.Views
 
             var lob = new LobbiesView();
             //MainFrame.Content = lob;
+            Views.Add(typeof(NewsView), new NewsView());
             Views.Add(typeof(LobbiesView), new LobbiesView());
             Views.Add(typeof(ChatView), new ChatView());
         }
@@ -496,6 +497,9 @@ namespace beta.Views
             var btn = (Button)sender;
             switch (btn.Name)
             {
+                case "News":
+                    NavigateTo(typeof(NewsView));
+                    break;
                 case "Lobbies":
                     NavigateTo(typeof(LobbiesView));
                     break;

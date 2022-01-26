@@ -15,16 +15,15 @@ namespace beta.Infrastructure.Converters
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null)
-            {
-                return null;
-            }
+            if (value == null) return null;
+            
             var playerName = (string)value;
-            if(LobbySessionService.PlayerNameToId.TryGetValue(playerName, out int id)){
-                //var playerId = LobbySessionService.PlayerNameToId[playerName];
+            if (LobbySessionService.PlayerNameToId.TryGetValue(playerName, out int id))
+            {
                 var playerInfo = LobbySessionService.Players[id];
                 return playerInfo;
             }
+
             return null;
         }
 
