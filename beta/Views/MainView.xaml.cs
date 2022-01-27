@@ -14,11 +14,15 @@ namespace beta.Views
         #region NavigationManager
 
         private INavigationManager NavigationManager;
-        public async Task OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager; 
+        public async Task OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
         #endregion
 
         #region Ctor
-        public MainView() => InitializeComponent();
+        public MainView()
+        {
+            InitializeComponent();
+            Profile.Content = Properties.Settings.Default.PlayerNick;
+        }
 
         #endregion
 

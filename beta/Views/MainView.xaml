@@ -80,7 +80,7 @@
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem Content="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
+                <ui:NavigationViewItem x:Name="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
                 <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
                 <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
             </ui:NavigationView.FooterMenuItems>
