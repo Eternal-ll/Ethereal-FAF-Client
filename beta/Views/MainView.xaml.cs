@@ -34,11 +34,11 @@ namespace beta.Views
 #if DEBUG
             if (selectedItemTag == null || selectedItemTag.Length == 0) return;
 #endif
-            if (selectedItemTag == "Logout")
-            {
-                // Initialize logout process
-                return;
-            }
+            //if (selectedItemTag == "Logout")
+            //{
+            //    // Initialize logout process
+            //    return;
+            //}
 
             string pageName = "beta.Views.Pages." + selectedItemTag + "Page";
             Type pageType = typeof(LobbiesPage).Assembly.GetType(pageName);
