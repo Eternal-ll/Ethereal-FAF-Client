@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:control="clr-namespace:beta.Resources.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="this">
@@ -62,6 +63,25 @@
                 <ui:PathIcon x:Key="ModsPathIcon"
                              Data="M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z"
                              />
+
+                <Style TargetType="control:CrossFadeContentControl">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="control:CrossFadeContentControl">
+                                <Grid>
+                                    <ContentPresenter x:Name="FirstContentPresenter"
+                                                      Content="{x:Null}"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    <ContentPresenter x:Name="SecondContentPresenter"
+                                                      Content="{x:Null}"
+                                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
             </ui:NavigationView.Resources>
 
             <ui:NavigationView.MenuItems>
@@ -85,7 +105,10 @@
                 <!--<ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>-->
             </ui:NavigationView.FooterMenuItems>
 
-            <ContentControl Margin="0 -32 0 0" x:Name="ContentFrame"/>
+            <control:CrossFadeContentControl x:Name="ContentFrame"
+                                             Margin="0 -32 0 0"
+                                             HorizontalContentAlignment="Stretch"
+                                             VerticalContentAlignment="Stretch"/>
         </ui:NavigationView>
 
         <TextBlock FontWeight="SemiBold"
