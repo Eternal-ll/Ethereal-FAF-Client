@@ -1,10 +1,10 @@
-﻿using beta.Views;
+﻿using beta.Models.Server.Base;
 using System;
 using System.Collections.Generic;
 
 namespace beta.Models.Server
 {
-    public class PlayerInfoMessage : MainView.IServerMessage
+    public class PlayerInfoMessage : IServerMessage
     {
         public int id { get; set; }
         public string login { get; set; }

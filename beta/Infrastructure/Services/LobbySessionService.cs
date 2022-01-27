@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
+using beta.Models.Server.Base;
 using beta.Views;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace beta.Infrastructure.Services
         public event EventHandler<EventArgs<GameInfoMessage>> NewGameInfo;
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
 
-        public event EventHandler<MainView.IServerMessage> MessageReceived;
+        public event EventHandler<IServerMessage> MessageReceived;
 
         public string Session => Properties.Settings.Default.session;
         public readonly SimpleTcpClient Client = new();
@@ -75,7 +76,7 @@ namespace beta.Infrastructure.Services
                     {
                         case 't':
                             // matchmaker_info
-                            var queueMessage = JsonSerializer.Deserialize<MainView.QueueMessage>(json);
+                            var queueMessage = JsonSerializer.Deserialize<QueueMessage>(json);
                             if (queueMessage.queues?.Length > 0)
                             {
                                 // payload with queues
@@ -112,12 +113,12 @@ namespace beta.Infrastructure.Services
                         case 'e': // session
                             break;
                         case 'o': // social
-                            var socialMessage = JsonSerializer.Deserialize<MainView.SocialMessage>(json);
+                            var socialMessage = JsonSerializer.Deserialize<SocialMessage>(json);
                             break;
                     }
                     break;
                 case 'w': //welcome
-                    var welcomeMessage = JsonSerializer.Deserialize<MainView.WelcomeMessage>(json);
+                    var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
                     Properties.Settings.Default.PlayerId = welcomeMessage.id;
                     Properties.Settings.Default.PlayerNick = welcomeMessage.login;
                     OnAuthorization(true);

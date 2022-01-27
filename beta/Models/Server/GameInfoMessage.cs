@@ -1,6 +1,5 @@
-﻿using beta.Views;
+﻿using beta.Models.Server.Base;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
@@ -19,7 +18,7 @@ namespace beta.Models.Server
         Coop = 1,
         Neroxis = 2
     }
-    public struct GameInfoMessage: MainView.IServerMessage
+    public struct GameInfoMessage: IServerMessage
     {
         #region Custom properties
 

@@ -11,12 +11,12 @@ using System.Windows.Data;
 using System.Windows.Threading;
 using GameInfoMessage = beta.Models.Server.GameInfoMessage;
 
-namespace beta.Views
+namespace beta.Views.Pages
 {
     /// <summary>
-    /// Interaction logic for LobbiesView.xaml
+    /// Interaction logic for LobbiesPage.xaml
     /// </summary>
-    public partial class LobbiesView : INotifyPropertyChanged
+    public partial class LobbiesPage : Page
     {
         private readonly ILobbySessionService _LobbySessionService;
 
@@ -35,7 +35,7 @@ namespace beta.Views
         #endregion
 
         #region CTOR
-        public LobbiesView()
+        public LobbiesPage()
         {
             InitializeComponent();
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
@@ -102,7 +102,7 @@ namespace beta.Views
 
                 OnPropertyChanged(nameof(IsGameModeFilterEnabled));
             }
-        } 
+        }
         #endregion
 
         #region SelectedGameModes codes
@@ -124,7 +124,7 @@ namespace beta.Views
         {
             string searchText = _SearchText;
             var lobby = (GameInfoMessage)e.Item;
-            
+
             if (IsPrivateGamesHidden)
             {
                 if (lobby.password_protected)
@@ -135,10 +135,10 @@ namespace beta.Views
             }
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                e.Accepted = lobby.title.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)||
+                e.Accepted = lobby.title.Contains(searchText, StringComparison.CurrentCultureIgnoreCase) ||
                              lobby.host.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
             }
-        } 
+        }
         #endregion
 
         private void OnUpdateGameInfo(object sender, Infrastructure.EventArgs<GameInfoMessage> e)
@@ -146,13 +146,13 @@ namespace beta.Views
             Dispatcher.Invoke(() =>
             {
                 var lobby = e.Arg;
-                
+
                 var mapName = lobby.MapName;
                 if (mapName.Contains("gap") || mapName.Contains("crater") || mapName.Contains("astro") ||
                     mapName.Contains("pass"))
                     return;
-                
-                
+
+
                 if (lobby.game_type.Length == 10) //matchmaker
                     return;
 
@@ -173,7 +173,7 @@ namespace beta.Views
                         }
                         Lobbies[i] = lobby;
                         return;
-                    }                    
+                    }
                 }
                 if (lobby.launched_at == null)
                     Lobbies.Add(lobby);
@@ -189,7 +189,7 @@ namespace beta.Views
                 if (mapName.Contains("gap") || mapName.Contains("crater") || mapName.Contains("astro") ||
                     mapName.Contains("pass"))
                     return;
-                
+
 
                 if (lobby.game_type.Length == 10) //matchmaker
                     return;
@@ -203,7 +203,7 @@ namespace beta.Views
                 Lobbies.Add(lobby);
             });
         }
-        
+
         //private int GetGameModeIndex(int mode)
         //{
         //    //    3 => "FAF",
@@ -248,18 +248,18 @@ namespace beta.Views
             }
         }
 
-        public IList GameModeSelectedItems => GameModesList.SelectedItems;
-        private void GameModesList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var selected = GameModesList.SelectedItems;
-            var len = selected.Count;
-            string[] selectedGroups = new string[len];
-            for (int i = 0; i < len; i++)
-            {
-                selectedGroups[i] = ((CollectionViewGroup)selected[i]).Name.ToString();
-            }
+        //public IList GameModeSelectedItems => GameModesList.SelectedItems;
+        //private void GameModesList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    var selected = GameModesList.SelectedItems;
+        //    var len = selected.Count;
+        //    string[] selectedGroups = new string[len];
+        //    for (int i = 0; i < len; i++)
+        //    {
+        //        selectedGroups[i] = ((CollectionViewGroup)selected[i]).Name.ToString();
+        //    }
 
-            ListTest = selectedGroups;
-        }
+        //    ListTest = selectedGroups;
+        //}
     }
 }

@@ -1,5 +1,5 @@
 ﻿using beta.Models.Server;
-using beta.Views;
+using beta.Models.Server.Base;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -13,7 +13,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<PlayerInfoMessage>> UpdatePlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGameInfo;
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
-        public event EventHandler<MainView.IServerMessage> MessageReceived;
+        public event EventHandler<IServerMessage> MessageReceived;
         public string Session { get; }
         public void Connect(IPEndPoint ip);
         public void AskSession();

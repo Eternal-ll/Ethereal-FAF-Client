@@ -4,307 +4,116 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.modernwpf.com/2019"
-             xmlns:converters="clr-namespace:beta.Infrastructure.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="this">
-    <UserControl.Resources>
-            <Storyboard x:Key="HideTitle">
-                <DoubleAnimationUsingKeyFrames
-                    Storyboard.TargetProperty="(TextBlock.Height)"
-                    Duration="0:0:1"
-                    DecelerationRatio="1">
-                    <SplineDoubleKeyFrame KeyTime="100%" Value="0" />
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
-        <ContextMenu x:Key="ContextMenu">
-        </ContextMenu>
-    </UserControl.Resources>
     <Grid>
-        <Grid>
-        <Grid.Resources>
-            <Style TargetType="TextBlock">
-                <Setter Property="Margin" Value="0 6 0 0"/>
-                <Style.Triggers>
-                    <Trigger Property="Height" Value="0">
-                        <Setter Property="Margin" Value="0"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </Grid.Resources>
-        
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
+        <ui:NavigationView x:Name="NavigationView"
+                           IsBackButtonVisible="Collapsed"
+                           PaneDisplayMode="Auto"
+                           SelectionChanged="OnNavigationViewSelectionChanged"
+                           IsSettingsVisible="False"
+                           CompactPaneLength="50"
+                           OpenPaneLength="200"
+                           IsTabStop="False">
+            <ui:NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FF1F1F1F"/>
+                <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="#FF1F1F1F"/>
+                <SolidColorBrush x:Key="FlyoutBorderThemeBrush" Color="#FF1F1F1F"/>
 
-        <Grid>
-            <Grid.Resources>
-                <SolidColorBrush x:Key="ButtonBackground" Color="Transparent"/>
-                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                    <Setter Property="ui:ControlHelper.CornerRadius" Value="4"/>
-                    <Setter Property="Width" Value="60"/>
-                    <Setter Property="Height" Value="60"/>
-                    <Setter Property="Margin" Value="6 0 6 4"/>
+                <ui:PathIcon x:Key="SwordsPathIcon"
+                             Data="M6.2,2.44L18.1,14.34L20.22,12.22L21.63,13.63L19.16,16.1L22.34,19.28C22.73,19.67 22.73,20.3 22.34,20.69L21.63,21.4C21.24,21.79 20.61,21.79 20.22,21.4L17,18.23L14.56,20.7L13.15,19.29L15.27,17.17L3.37,5.27V2.44H6.2M15.89,10L20.63,5.26V2.44H17.8L13.06,7.18L15.89,10M10.94,15L8.11,12.13L5.9,14.34L3.78,12.22L2.37,13.63L4.84,16.1L1.66,19.29C1.27,19.68 1.27,20.31 1.66,20.7L2.37,21.41C2.76,21.8 3.39,21.8 3.78,21.41L7,18.23L9.44,20.7L10.85,19.29L8.73,17.17L10.94,15Z" 
+                             />
+                <ui:PathIcon x:Key="QuestionPathIcon"
+                             Data="M324.45,502.477c0-7.752-1.431-15.096-4.284-22.029c-2.856-6.938-6.938-12.954-12.24-18.057    c-5.304-5.1-11.424-9.18-18.36-12.237c-6.936-3.063-14.279-4.593-22.031-4.593s-15.096,1.53-22.032,4.593    c-6.936,3.06-12.954,7.14-18.054,12.237c-5.1,5.103-9.078,11.118-11.934,18.057c-2.856,6.936-4.284,14.277-4.284,22.029    c0,7.753,1.428,15.099,4.284,22.032c2.856,6.938,6.834,12.954,11.934,18.055c5.1,5.102,11.118,9.182,18.054,12.239    c6.936,3.063,14.28,4.59,22.032,4.59s15.096-1.527,22.031-4.59c6.938-3.06,13.059-7.14,18.36-12.239    c5.304-5.101,9.384-11.116,12.24-18.055C323.021,517.573,324.45,510.229,324.45,502.477z M271.818,420.469h-4.896    c-13.056-1.632-23.766-7.548-32.13-17.748c-8.364-10.197-11.934-21.828-10.71-34.884c2.448-22.438,8.058-44.166,16.83-65.178    c8.772-21.013,20.094-39.679,33.966-55.999c4.488-5.712,9.383-10.914,14.687-15.606c5.307-4.692,10.608-9.282,15.912-13.77    c13.464-11.424,23.769-21.624,30.906-30.6s10.71-19.992,10.71-33.048c0-11.424-2.346-20.808-7.038-28.152    c-4.689-7.344-10.403-13.158-17.136-17.442c-6.733-4.284-13.771-7.344-21.114-9.18c-7.344-1.836-13.872-2.754-19.584-2.754h-1.224    c-11.424,0-20.808,1.53-28.152,4.59s-13.566,7.344-18.666,12.852c-5.1,5.508-9.384,12.138-12.852,19.89    s-7.038,16.116-10.71,25.092c-4.896,12.648-10.812,21.522-17.748,26.622s-13.872,8.058-20.808,8.874    c-7.752,1.632-15.708,1.02-23.868-1.836c-8.16-3.264-14.688-7.956-19.584-14.076c-4.488-5.304-7.956-12.138-10.404-20.502    c-2.448-8.364-1.632-18.666,2.448-30.906c2.448-7.752,6.732-18.87,12.852-33.354s15.402-28.662,27.846-42.534    s28.458-25.908,48.042-36.108s44.064-15.096,73.439-14.688c19.584,0.408,38.862,3.978,57.834,10.71s36.006,16.626,51.102,29.682    c15.099,13.056,27.336,29.07,36.723,48.042c9.384,18.972,14.073,40.698,14.073,65.178c0,17.952-2.445,33.864-7.344,47.736    c-4.896,13.872-11.118,26.316-18.666,37.332s-15.708,20.604-24.479,28.764c-8.772,8.16-16.83,15.504-24.174,22.033    c-4.08,3.672-7.956,7.038-11.631,10.098c-3.672,3.063-6.525,6.021-8.565,8.874c-7.344,8.979-13.566,19.482-18.666,31.521    c-5.103,12.036-8.262,24.582-9.486,37.638c-1.224,12.648-6.426,22.95-15.604,30.906    C294.767,416.491,284.058,420.469,271.818,420.469z"
+                             />
+                <ui:PathIcon x:Key="ProfilePathIcon"
+                             Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11A1.5,1.5 0 0,1 10.5,9.5A1.5,1.5 0 0,1 12,8A1.5,1.5 0 0,1 13.5,9.5A1.5,1.5 0 0,1 12,11Z"
+                             />
+                <ui:PathIcon x:Key="ExitPathIcon"
+                             Data="M19,3H5C3.89,3 3,3.89 3,5V9H5V5H19V19H5V15H3V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M10.08,15.58L11.5,17L16.5,12L11.5,7L10.08,8.41L12.67,11H3V13H12.67L10.08,15.58Z"
+                             />
+                <ui:PathIcon x:Key="ChatPathIcon"
+                             Width="28"
+                             Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z"
+                             />
+                <ui:PathIcon x:Key="PlayPathIcon"
+                             Width="28"
+                             Data="M8.75,15.75C6.75,15.75 6,18 4,19C2,19 0.5,16 4.5,7.5H4.75L5.19,6.67C5.19,6.67 8,5 9.33,6.23H14.67C16,5 18.81,6.67 18.81,6.67L19.25,7.5H19.5C23.5,16 22,19 20,19C18,18 17.25,15.75 15.25,15.75H8.75M12,7A1,1 0 0,0 11,8A1,1 0 0,0 12,9A1,1 0 0,0 13,8A1,1 0 0,0 12,7Z"
+                             />
+                <ui:PathIcon x:Key="EathPathIcon"
+                             Data="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+                             />
+                <ui:PathIcon x:Key="FightPathIcon"
+                             Data="M0 0 4.39 0 11.49 7.1 18.59 0 22.99 0 22.98 4.38 15.88 11.49 19.04 14.65 20.8 12.9 22.55 14.65 19.48 17.72 22.99 21.23 21.23 22.98 17.73 19.47 14.66 22.54 12.91 20.79 14.66 19.03 11.49 15.87 8.33 19.03 10.08 20.79 8.33 22.54 5.26 19.47 1.75 22.98 0 21.23 3.5 17.72 0.44 14.65 2.19 12.9 3.94 14.65 7.11 11.49 0 4.38 0 0"
+                             />
+                <ui:PathIcon x:Key="HomePathIcon"
+                             Data="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"
+                             />
+                <ui:PathIcon x:Key="SettingsPathIcon"
+                             Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"
+                             />
+                <ui:PathIcon x:Key="MapsPathIcon"
+                             Data="M22,16V4A2,2 0 0,0 20,2H8A2,2 0 0,0 6,4V16A2,2 0 0,0 8,18H20A2,2 0 0,0 22,16M11,12L13.03,14.71L16,11L20,16H8M2,6V20A2,2 0 0,0 4,22H18V20H4V6"
+                             />
+                <ui:PathIcon x:Key="WarehousePathIcon"  
+                             Data="M20 20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9H1l10.327-9.388a1 1 0 0 1 1.346 0L23 11h-3v9zM8.592 13.808l-.991.572 1 1.733.993-.573a3.5 3.5 0 0 0 1.405.811v1.145h2.002V16.35a3.5 3.5 0 0 0 1.405-.81l.992.572L16.4 14.38l-.991-.572a3.504 3.504 0 0 0 0-1.62l.991-.573-1-1.733-.993.573A3.5 3.5 0 0 0 13 9.645V8.5h-2.002v1.144a3.5 3.5 0 0 0-1.405.811l-.992-.573L7.6 11.616l.991.572a3.504 3.504 0 0 0 0 1.62zm3.408.69a1.5 1.5 0 1 1-.002-3.001 1.5 1.5 0 0 1 .002 3z"
+                             />
+                <ui:PathIcon x:Key="ModsPathIcon"
+                             Data="M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z"
+                             />
+            </ui:NavigationView.Resources>
+
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Home" Tag="Home" Icon="{StaticResource HomePathIcon}"/>
+                <ui:NavigationViewItem Content="Chat" Tag="Chat" Icon="{StaticResource ChatPathIcon}"/>
+                <ui:NavigationViewItemSeparator/>
+                <ui:NavigationViewItem Content="Global" Tag="Global" Icon="{StaticResource EathPathIcon}"/>
+                <ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>
+                <ui:NavigationViewItemSeparator/>
+                <ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem Content="Maps" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
+                        <ui:NavigationViewItem Content="Mods" Tag="Mods" Icon="{StaticResource ModsPathIcon}"/>
+                    </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+            </ui:NavigationView.MenuItems>
+
+            <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem Content="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
+                <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
+                <ui:NavigationViewItem Content="Exit" Icon="{StaticResource ExitPathIcon}"/>
+            </ui:NavigationView.FooterMenuItems>
+
+            <ui:Frame Margin="0 -32 0 0" x:Name="ContentFrame"/>
+        </ui:NavigationView>
+
+        <TextBlock FontWeight="SemiBold"
+                   Margin="12 6"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Padding="38 0 0 0">
+            <TextBlock.Background>
+                <VisualBrush Stretch="None"
+                             AlignmentX="Left">
+                    <VisualBrush.Visual>
+                        <ui:PathIcon Height="12"
+                                     Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
+                                     />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </TextBlock.Background>
+            <TextBlock.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Text" Value=""/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=NavigationView, Path=IsPaneOpen}"
+                                 Value="True">
+                            <Setter Property="Text" Value="Ethereal FAF client"/>
+                        </DataTrigger>
+                    </Style.Triggers>
                 </Style>
-            </Grid.Resources>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid>
-            <StackPanel x:Name="Navigation">
-                <StackPanel.Resources>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"/>
-                        <Setter Property="FontWeight" Value="DemiBold"/>
-                    </Style>
-                </StackPanel.Resources>
-                <StackPanel>
-                    <StackPanel.Resources>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <EventSetter Handler="Button_Click" Event="Click"/>
-                        </Style>
-                    </StackPanel.Resources>
-                    <Button x:Name="News" Click="SwitchView">
-                        <Button.Content>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                    
-                                <Path
-                                    Height="22"
-                                    Stretch="Uniform"
-                                    StrokeThickness="1" Fill="#9a9a9a"
-                                    Data="M4.8,21.1L5.6,28c0,0.1,0,0.2,0.1,0.3c0.6,1.9,2.4,3.1,4.3,3.1c0.5,0,0.9-0.1,1.4-0.2c2.4-0.8,3.7-3.3,2.9-5.7L13,21.7h0.4   l11.7,5.9c0.2,0.1,0.4,0.2,0.7,0.2c0.3,0,0.5-0.1,0.8-0.2c0.4-0.3,0.7-0.8,0.7-1.3v-6.2c2.6-0.7,4.5-3,4.5-5.8S29.9,9,27.3,8.3V2.1   c0-0.5-0.3-1-0.7-1.3c-0.4-0.3-1-0.3-1.5-0.1L13.4,6.6H7.7c-4.2,0-7.5,3.4-7.5,7.5C0.2,17.3,2.1,19.9,4.8,21.1z M11.4,26.4   c0.3,0.8-0.2,1.6-1,1.9c-0.8,0.2-1.6-0.1-1.9-0.8l-0.7-5.8h1.9L11.4,26.4z M28.8,14.1c0,1.1-0.6,2.1-1.5,2.6v-5.2   C28.2,12.1,28.8,13,28.8,14.1z"
-                                    />
-                                <TextBlock HorizontalAlignment="Center"  FontSize="10" Grid.Row="1" Text="News"/>
-                            </Grid>
-                        </Button.Content>
-                    </Button>
-                    <Button Name="Chat" Click="SwitchView">
-                        <Button.Content>
-                            <Grid VerticalAlignment="Center">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Path
-                                    Height="22"
-                                    Stretch="Uniform"
-                                    StrokeThickness="1" Fill="#9a9a9a"
-                                    Data="M43.5,48.5V47l-4.7-3.5H21.5a6,6,0,0,1-6-6v-15H5.5a4,4,0,0,0-4,4v22a4,4,0,0,0,4,4h8v9l12-9h14A4,4,0,0,0,43.5,48.5Z M63.5,11.5a4,4,0,0,0-4-4h-38a4,4,0,0,0-4,4v26a4,4,0,0,0,4,4h18l12,9v-9h8a4,4,0,0,0,4-4Zm-35,16a3,3,0,1,1,3-3A2.95,2.95,0,0,1,28.5,27.5Zm12,0a3,3,0,1,1,3-3A2.95,2.95,0,0,1,40.5,27.5Zm12,0a3,3,0,1,1,3-3A2.95,2.95,0,0,1,52.5,27.5Z"
-                                    />
-                                <TextBlock  FontSize="10" Grid.Row="1" Text="Chat"/>
-                            </Grid>
-                        </Button.Content>
-                    </Button>
-                    <Button Name="Lobbies"  Click="SwitchView">
-                        <Button.Content>
-                            <Grid VerticalAlignment="Center">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Path
-                                    Height="22"
-                                    Stretch="Uniform"
-                                    StrokeThickness="1" Fill="#9a9a9a"
-                                    Data="M0 0 4.39 0 11.49 7.1 18.59 0 22.99 0 22.98 4.38 15.88 11.49 19.04 14.65 20.8 12.9 22.55 14.65 19.48 17.72 22.99 21.23 21.23 22.98 17.73 19.47 14.66 22.54 12.91 20.79 14.66 19.03 11.49 15.87 8.33 19.03 10.08 20.79 8.33 22.54 5.26 19.47 1.75 22.98 0 21.23 3.5 17.72 0.44 14.65 2.19 12.9 3.94 14.65 7.11 11.49 0 4.38 0 0"
-                                    />
-                                <TextBlock FontSize="10" Grid.Row="1" Text="Lobbies"/>
-                            </Grid>
-                        </Button.Content>
-                    </Button>
-                </StackPanel>
-                    <!--<Button Click="Button_Click_1" Background="Transparent"
-                            ToolTip="Toggle app theme between&#x0a;light and dark">
-                        <Button.Content>
-                            <Grid VerticalAlignment="Center">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Path
-                                    Height="22"
-                                    Stretch="Uniform"
-                                    StrokeThickness="1" Fill="#9a9a9a"
-                                    Data="M7.5,2C5.71,3.15 4.5,5.18 4.5,7.5C4.5,9.82 5.71,11.85 7.53,13C4.46,13 2,10.54 2,7.5A5.5,5.5 0 0,1 7.5,2M19.07,3.5L20.5,4.93L4.93,20.5L3.5,19.07L19.07,3.5M12.89,5.93L11.41,5L9.97,6L10.39,4.3L9,3.24L10.75,3.12L11.33,1.47L12,3.1L13.73,3.13L12.38,4.26L12.89,5.93M9.59,9.54L8.43,8.81L7.31,9.59L7.65,8.27L6.56,7.44L7.92,7.35L8.37,6.06L8.88,7.33L10.24,7.36L9.19,8.23L9.59,9.54M19,13.5A5.5,5.5 0 0,1 13.5,19C12.28,19 11.15,18.6 10.24,17.93L17.93,10.24C18.6,11.15 19,12.28 19,13.5M14.6,20.08L17.37,18.93L17.13,22.28L14.6,20.08M18.93,17.38L20.08,14.61L22.28,17.15L18.93,17.38M20.08,12.42L18.94,9.64L22.28,9.88L20.08,12.42M9.63,18.93L12.4,20.08L9.87,22.27L9.63,18.93Z"
-                                    />
-                                <TextBlock FontSize="10" Grid.Row="1" Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}" Text="Theme"/>
-                            </Grid>
-                        </Button.Content>
-                    </Button>-->
-                <!--<Button Visibility="Hidden" Click="ForceGC" Background="Transparent" 
-                        ToolTip="Activate garbade collector&#x0a;and clear RAM used by app">
-                    <Button.Content>
-                        <Grid VerticalAlignment="Center">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Path
-                                Height="22"
-                                Stretch="Uniform"
-                                StrokeThickness="1" Fill="#9a9a9a"
-                                Data="M3 14h13v1H3z M9.984 1a1 1 0 00-.691.294l-8.5 8.5a1 1 0 000 1.414L2.586 13h6.828l5.793-5.793a1 1 0 000-1.414l-4.5-4.5a1 1 0 00-.723-.292zM6.401 6.9l3.137 3.095s.5.5 0 1L8.56 12H3.398l-1.584-1.5 3.587-3.601c.5-.5 1 0 1 0z"
-                                />
-                            <TextBlock FontSize="10" 
-                                       Grid.Row="1" 
-                                       Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}" 
-                                       Text="RAM" />
-                        </Grid>
-                    </Button.Content>
-                </Button>-->
-            </StackPanel>
-        </Grid>
-            <Button Margin="6 0 6 10" Grid.Row="1" Click="Button_Click">
-                <Button.Content>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <Path
-                            Height="22"
-                            Stretch="Uniform"
-                            StrokeThickness="1" Fill="#9a9a9a"
-                            Data="M2.132 13.63a9.942 9.942 0 0 1 0-3.26c1.102.026 2.092-.502 2.477-1.431.385-.93.058-2.004-.74-2.763a9.942 9.942 0 0 1 2.306-2.307c.76.798 1.834 1.125 2.764.74.93-.385 1.457-1.376 1.43-2.477a9.942 9.942 0 0 1 3.262 0c-.027 1.102.501 2.092 1.43 2.477.93.385 2.004.058 2.763-.74a9.942 9.942 0 0 1 2.307 2.306c-.798.76-1.125 1.834-.74 2.764.385.93 1.376 1.457 2.477 1.43a9.942 9.942 0 0 1 0 3.262c-1.102-.027-2.092.501-2.477 1.43-.385.93-.058 2.004.74 2.763a9.942 9.942 0 0 1-2.306 2.307c-.76-.798-1.834-1.125-2.764-.74-.93.385-1.457 1.376-1.43 2.477a9.942 9.942 0 0 1-3.262 0c.027-1.102-.501-2.092-1.43-2.477-.93-.385-2.004-.058-2.763.74a9.942 9.942 0 0 1-2.307-2.306c.798-.76 1.125-1.834.74-2.764-.385-.93-1.376-1.457-2.477-1.43zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
-                            />
-                        <TextBlock FontSize="10" Grid.Row="1" Text="Settings"/>
-                    </Grid>
-                </Button.Content>
-            </Button>
-        </Grid>
-        
-        <ContentControl Name="MainFrame"
-                        Grid.Column="1"
-                        IsTabStop="False">
-            <ContentControl.Background>
-                <SolidColorBrush Color="Black" Opacity=".2"/>
-            </ContentControl.Background>
-            <ContentControl.Resources>
-                <converters:PointConverter x:Key="PointConverter"/>
-                <converters:PointXConverter x:Key="PointXConverter"/>
-                <converters:PointYConverter x:Key="PointYConverter"/>
-                <!--<converters:PointXExtendedConverter x:Key="PointXExtendedConverter"/>
-                <converters:PointYExtendedConverter x:Key="PointYExtendedConverter"/>-->
-            </ContentControl.Resources>
-            <ContentControl.Template>
-                <ControlTemplate TargetType="{x:Type ContentControl}">
-                    <ContentPresenter  Name="Presenter"
-                                       VerticalAlignment="Stretch"
-                                       HorizontalAlignment="Stretch"
-                                       Focusable="False">
-                        <ContentPresenter.Clip>
-                            <PathGeometry>
-                                <PathFigure StartPoint="15 0">
-                                        <BezierSegment Point1="15 0"
-                                                       Point2="0 0"
-                                                       Point3="0 15"/>
-                                        <LineSegment>
-                                            <LineSegment.Point>
-                                                <Binding Converter="{StaticResource PointYConverter}"
-                                                         ElementName="Presenter"
-                                                         Path="ActualHeight"
-                                                         ConverterParameter="0"/>
-                                            </LineSegment.Point>
-                                        </LineSegment>
-                                    <!--<BezierSegment>
-                                        <BezierSegment.Point1>
-                                            <Binding  Converter="{StaticResource PointYExtendedConverter}"
-                                                        ElementName="Frame"
-                                                        Path="ActualHeight"
-                                                        ConverterParameter="0 -15"/>
-                                        </BezierSegment.Point1>
-                                        <BezierSegment.Point2>
-                                            <Binding  Converter="{StaticResource PointYConverter}"
-                                                        ElementName="Frame"
-                                                        Path="ActualHeight"
-                                                        ConverterParameter="0"/>
-                                        </BezierSegment.Point2>
-                                        <BezierSegment.Point3>
-                                            <Binding  Converter="{StaticResource PointYConverter}"
-                                                        ElementName="Frame"
-                                                        Path="ActualHeight"
-                                                        ConverterParameter="15"/>
-                                        </BezierSegment.Point3>
-                                    </BezierSegment>-->
-                                        <LineSegment>
-                                            <LineSegment.Point>
-                                                <MultiBinding Converter="{StaticResource PointConverter}">
-                                                    <Binding ElementName="Presenter"
-                                                             Path="ActualWidth"/>
-                                                    <Binding ElementName="Presenter"
-                                                             Path="ActualHeight"/>
-                                                </MultiBinding>
-                                            </LineSegment.Point>
-                                        </LineSegment>
-                                        <LineSegment>
-                                            <LineSegment.Point>
-                                                <Binding Converter="{StaticResource PointXConverter}"
-                                                         ElementName="Presenter"
-                                                         Path="ActualWidth"
-                                                         ConverterParameter="0"/>
-                                            </LineSegment.Point>
-                                    </LineSegment>
-                                </PathFigure>
-                            </PathGeometry>
-                        </ContentPresenter.Clip>
-                    </ContentPresenter>
-                </ControlTemplate>
-            </ContentControl.Template>
-            <Grid>
-                <Grid.Background>
-                    <SolidColorBrush Color="Black" Opacity=".2"/>
-                </Grid.Background>
-                <Path
-                    Opacity=".9"
-                    Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
-                    Stretch="Uniform"
-                    Height="100"
-                    Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
-                />
-            </Grid>
-        </ContentControl>
-        <!--<Grid  Grid.Column="1">
-            
-            --><!--<Border  Name="myBorder" CornerRadius="15 0 0 15" Background="White" Margin="1" ClipToBounds="True"/>-->
-        
-            <!--<Rectangle Fill="Bisque">
-                <Rectangle.OpacityMask>
-                <VisualBrush Visual="{Binding ElementName=myBorder}"/>
-            </Rectangle.OpacityMask>
-
-            </Rectangle>--><!--
-    
-            <ContentControl Name="MainFrame">
-                --><!--<ContentControl.Template>
-                    <ControlTemplate>
-                        <Grid>
-                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center">
-                                --><!--<ContentPresenter.OpacityMask>
-                                    <VisualBrush Visual="{Binding ElementName=myBorder}"/>
-                                </ContentPresenter.OpacityMask>--><!--
-                            </ContentPresenter>
-                        </Grid>
-                    </ControlTemplate>
-                </ContentControl.Template>--><!--
-                <ContentControl.Content>
-                    <Grid Background="BlanchedAlmond"></Grid>
-                </ContentControl.Content>
-            </ContentControl>
-            
-            <Image Source="../Resources/Images/Random/1.jpg" Margin="1">
-                --><!--<Image.OpacityMask>
-                <VisualBrush Visual="{Binding ElementName=myBorder}"/>
-            </Image.OpacityMask>--><!--
-            </Image>
-        </Grid>-->
+            </TextBlock.Resources>
+        </TextBlock>
     </Grid>
-    </Grid>
- 
 </UserControl>
