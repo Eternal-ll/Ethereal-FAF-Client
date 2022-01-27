@@ -3,6 +3,7 @@ using beta.Views.Pages;
 using ModernWpf.Controls;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace beta.Views
 {
@@ -22,9 +23,32 @@ namespace beta.Views
         {
             InitializeComponent();
             Profile.Content = Properties.Settings.Default.PlayerNick;
+
+            Pages = new UserControl[]
+            {
+                new ChatPage(),
+                new GlobalPage(),
+                new MatchmakerPage(),
+                new MapsPage(),
+                new ModsPage(),
+                new ProfilePage(),
+                new SettingsPage()
+            };
         }
 
         #endregion
+        private readonly UserControl[] Pages;
+        private UserControl GetPage(Type type)
+        {
+            var enumerator = Pages.GetEnumerator();
+            while (enumerator.MoveNext()) 
+            {
+                var control = (UserControl)enumerator.Current;
+                if (control.GetType() == type)
+                    return control;
+            }
+            return null;
+        }
 
         #region OnNavigationViewSelectionChanged
         private void OnNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -45,7 +69,7 @@ namespace beta.Views
 #if DEBUG
             if (pageType == null) return;
 #endif
-            ContentFrame.Navigate(pageType);
+            ContentFrame.Content = GetPage(pageType);
         } 
         #endregion
     }

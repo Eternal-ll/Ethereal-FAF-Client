@@ -85,7 +85,7 @@
                 <!--<ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>-->
             </ui:NavigationView.FooterMenuItems>
 
-            <ui:Frame Margin="0 -32 0 0" x:Name="ContentFrame"/>
+            <ContentControl Margin="0 -32 0 0" x:Name="ContentFrame"/>
         </ui:NavigationView>
 
         <TextBlock FontWeight="SemiBold"
