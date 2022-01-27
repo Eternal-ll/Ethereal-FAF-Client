@@ -82,7 +82,7 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem Content="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
                 <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
-                <ui:NavigationViewItem Content="Exit" Icon="{StaticResource ExitPathIcon}"/>
+                <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
             </ui:NavigationView.FooterMenuItems>
 
             <ui:Frame Margin="0 -32 0 0" x:Name="ContentFrame"/>
