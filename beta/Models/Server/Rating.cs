@@ -11,7 +11,6 @@ namespace beta.Models.Server
         //public DateTime? Updated;
         #region Custom properties
 
-
         #region On player update
         public double[] RatingDifference;
         public int GamesDifference;
