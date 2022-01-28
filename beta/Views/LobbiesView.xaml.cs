@@ -48,11 +48,11 @@ namespace beta.Views
             _LobbySessionService.NewGameInfo += OnNewGameInfo;
             _LobbySessionService.UpdateGameInfo += OnUpdateGameInfo;
 
-            for (int i = 0; i < _LobbySessionService.Games.Count; i++)
+            for (int i = 0; i < _LobbySessionService.AvailableLobbies.Count; i++)
             {
-                var lobby = _LobbySessionService.Games[i];
+                var lobby = _LobbySessionService.AvailableLobbies[i];
                 if (lobby.num_players == 0 || lobby.launched_at != null) continue;
-                Lobbies.Add(_LobbySessionService.Games[i]);
+                Lobbies.Add(_LobbySessionService.AvailableLobbies[i]);
             }
             CollectionViewSource.Source = Lobbies;
             DataContext = this;

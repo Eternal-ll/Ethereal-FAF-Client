@@ -1,5 +1,4 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Views.Pages;
 using ModernWpf.Controls;
 using System;
 using System.Threading.Tasks;
@@ -26,17 +25,13 @@ namespace beta.Views
 
             Pages = new UserControl[]
             {
-                new ChatPage(),
-                new GlobalPage(),
-                new MatchmakerPage(),
-                new MapsPage(),
-                new ModsPage(),
-                new ProfilePage(),
-                new SettingsPage()
+                new ChatView(),
+                new GlobalView(),
             };
         }
 
         #endregion
+
         private readonly UserControl[] Pages;
         private UserControl GetPage(Type type)
         {
@@ -64,8 +59,8 @@ namespace beta.Views
             //    return;
             //}
 
-            string pageName = "beta.Views.Pages." + selectedItemTag + "Page";
-            Type pageType = typeof(LobbiesPage).Assembly.GetType(pageName);
+            string pageName = "beta.Views." + selectedItemTag + "View";
+            Type pageType = typeof(GlobalView).Assembly.GetType(pageName);
 #if DEBUG
             if (pageType == null) return;
 #endif

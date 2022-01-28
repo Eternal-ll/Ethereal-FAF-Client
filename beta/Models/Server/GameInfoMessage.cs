@@ -1,4 +1,5 @@
 ﻿using beta.Models.Server.Base;
+using beta.ViewModels.Base;
 using System.Collections.Generic;
 
 namespace beta.Models.Server
@@ -8,8 +9,9 @@ namespace beta.Models.Server
         Broken = -1,
         Init = 0,
         New = 1,
-        Old = 2,
-        Launched = 3
+        Unknown = 2,
+        Old = 3,
+        Launched = 4
     }
 
     public enum PreviewType
@@ -18,9 +20,10 @@ namespace beta.Models.Server
         Coop = 1,
         Neroxis = 2
     }
-    public struct GameInfoMessage: IServerMessage
+    public class GameInfoMessage: ViewModel, IServerMessage
     {
         #region Custom properties
+        public int LobbyCycle { get; set; }
 
         #region MapName
         public string _MapName;
@@ -53,21 +56,20 @@ namespace beta.Models.Server
         public string MapVersion => _MapVersion ??= mapname.Split('.')[1];
         #endregion
 
+        #region LobbyState
         private LobbyState _LobbyState;
         public LobbyState LobbyState
         {
-            set => _LobbyState = value;
             get
             {
                 _LobbyState = num_players == 0 ? LobbyState.New : _LobbyState;
                 return _LobbyState;
             }
+            set => Set(ref _LobbyState, value);
         }
-
         #endregion
 
-        public string command { get; set; }
-
+        #region PreviewType
         public PreviewType PreviewType
         {
             get
@@ -78,11 +80,13 @@ namespace beta.Models.Server
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
             }
-        }
+        } 
+        #endregion
 
-        public int LifyCycle;
-        
-            
+        #endregion
+
+        public string command { get; set; }
+
         public GameInfoMessage[] games { get; set; }
 
         public string visibility { get; set; }

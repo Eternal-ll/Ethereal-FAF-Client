@@ -20,8 +20,12 @@
 
             <DataTrigger Binding="{Binding LobbyState}" Value="-1">
                 <Setter Property="Visibility" Value="Visible"/>
-                <Setter Property="TextBlock.Text" Value="Broken"/>
                 <Setter Property="TextBlock.Foreground" Value="Red"/>
+            </DataTrigger>
+            
+            <DataTrigger Binding="{Binding LobbyState}" Value="2">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Setter Property="TextBlock.Foreground" Value="Orange"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -52,11 +56,35 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>-->
+    <Style x:Key="Border" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SystemControlPageBackgroundChromeMediumLowBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <DataTemplate x:Key="PlayerCard" d:DataType="{x:Type models:PlayerInfoMessage}">
+        <Grid DataContext="{Binding Converter={StaticResource GetPlayerInfoConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding login}"/>
+            <Grid DataContext="{Binding ratings[global], Converter={StaticResource RatingDifferenceConverter}, Mode=OneWay}"
+                  Margin="10 0"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right">
+                <TextBlock Text="{Binding DisplayedRating, Mode=OneWay}"/>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+
     <ItemContainerTemplate x:Key="LobbyContainerDefaultTemplate">
         <Grid
-            Margin="10"
+            Margin="0"
             d:DataContext="{d:DesignInstance {x:Type models:GameInfoMessage}}"
-            Width="300">
+            Width="NaN">
             <!--<Grid Background="Black" Margin="0 3 0 0" Opacity=".5">
                 <Grid.Effect>
                     <DropShadowEffect BlurRadius="6" Direction="-90" ShadowDepth=".1">
@@ -105,183 +133,189 @@
                 Opacity="1"
                 Name="Border"
                 VerticalAlignment="Bottom"
-                Padding="5"
-                Background="{DynamicResource NavigationViewDefaultPaneBackground}"
-                CornerRadius="10"
-                ToolTip="{Binding  launched_at}">
-                <StackPanel>
-                    <!--<Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Top" Stretch="Uniform">
-                        <Viewbox.LayoutTransform>
-                            <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
-                        </Viewbox.LayoutTransform>
-                        <Viewbox.Resources>
-                            <Style TargetType="Viewbox">
-                                <Setter Property="Width" Value="500"></Setter>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=Border, Path=IsMouseOver}" Value="True">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleY)" 
-                                                        To="1.2" 
-                                                        Duration="0:0:0.2"/>
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleX)" 
-                                                        To="1.2" 
-                                                        Duration="0:0:0.2"  />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                        <DataTrigger.ExitActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleX)" 
-                                                        To="1.3" 
-                                                        Duration="0:0:0.2"  />
-                                                    <DoubleAnimation
-                                                        Storyboard.TargetProperty="LayoutTransform.(ScaleTransform.ScaleY)" 
-                                                        To="1.3" 
-                                                        Duration="0:0:0.2"  />
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.ExitActions>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Viewbox.Resources>
-                    </Viewbox>-->
-                    <ui:ListViewHeaderItem Content="{Binding title}"
+                Padding="0">
+                <Grid>
+                    <ui:TitleBarButton Width="NaN"
+                                       Height="NaN"
+                                       FontFamily="segoeui"
+                                       Name="Test">
+                        <ui:TitleBarButton.Template>
+                            <ControlTemplate TargetType="ui:TitleBarButton">
+                                <Border CornerRadius="4"
+                                        Style="{StaticResource Border}">
+                                    <ContentPresenter/>
+                                </Border>
+                            </ControlTemplate>
+                        </ui:TitleBarButton.Template>
+
+                        <ui:TitleBarButton.Content>
+                            <Grid TextElement.FontSize="14">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <ui:ListViewHeaderItem Content="{Binding title}"
                                            Margin="-3 0 -3 4"
                                            FontSize="14"
                                            Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
                                            ToolTip="Title"
                                            FontWeight="SemiBold">
-                    </ui:ListViewHeaderItem>
-                    <StackPanel Orientation="Horizontal">
-                        <Grid Width="90"
-                              Height="90"
-                              Margin="10 0 0 10">
-                            <Border CornerRadius="10"
-                                    Name="Borderg"
-                                    SnapsToDevicePixels="True">
-                                <Border.Background>
-                                    <VisualBrush Stretch="None">
-                                        <VisualBrush.Visual>
-                                            <Image Style="{StaticResource PreviewImageStyle}"/>
-                                        </VisualBrush.Visual>
-                                    </VisualBrush>
-                                </Border.Background>
-                            </Border>
-                            <!--<ui:ProgressRing SnapsToDevicePixels="True"
-                                             VerticalAlignment="Center"
-                                             HorizontalAlignment="Center"
-                                             Width="15"
-                                             Height="15">
-                                <ui:ProgressRing.Resources>
-                                    <Style TargetType="ui:ProgressRing">
-                                        <Setter Property="IsActive" Value="False"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=MapPreview, Path=Source}"
-                                                         Value="{x:Null}">
-                                                <Setter Property="IsActive" Value="True"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ui:ProgressRing.Resources>
-                            </ui:ProgressRing>-->
-                        </Grid>
-                        <StackPanel Orientation="Vertical"
+                                </ui:ListViewHeaderItem>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                                    <Grid Width="90" Height="90" Margin="10 0 0 10">
+                                        <Border CornerRadius="4" SnapsToDevicePixels="True">
+                                            <Border.Background>
+                                                <VisualBrush Stretch="None">
+                                                    <VisualBrush.Visual>
+                                                        <Image Style="{DynamicResource PreviewImageStyle}"/>
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Grid>
+                                    <StackPanel Orientation="Vertical"
                                     Margin="8 0 8 0">
-                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                                        <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
                                        Margin="0"
                                        ToolTip="Host"
                                        Text="{Binding host}">
-                                <TextBlock.Background>
-                                    <ImageBrush Stretch="Uniform"  AlignmentX="Left" ImageSource="{DynamicResource HostIcon}">
-                                        <ImageBrush.Transform>
-                                            <TranslateTransform X="5"/>
-                                        </ImageBrush.Transform>
-                                    </ImageBrush>
-                                </TextBlock.Background>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
-                                       ToolTip="Players in lobby">
-                                <Run Text="{Binding num_players}"/>
-                                <Run Text="/" FontSize="12"/>
-                                <Run Text="{Binding max_players}"/>
-                                <TextBlock.Background>
-                                    <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource PlayersIcon}">
-                                        <ImageBrush.Transform>
-                                            <TransformGroup>
-                                                <TranslateTransform X="1" Y="1"/>
-                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
-                                            </TransformGroup>
-                                        </ImageBrush.Transform>
-                                    </ImageBrush>
-                                </TextBlock.Background>
-                            </TextBlock>
-                            <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                                            <TextBlock.Background>
+                                                <ImageBrush Stretch="Uniform"  AlignmentX="Left" ImageSource="{DynamicResource HostIcon}">
+                                                    <ImageBrush.Transform>
+                                                        <TranslateTransform X="5"/>
+                                                    </ImageBrush.Transform>
+                                                </ImageBrush>
+                                            </TextBlock.Background>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource LobbyTextBlockStyle}">
+                                            <Run Text="{Binding num_players}"/>
+                                            <Run Text="/" FontSize="12"/>
+                                            <Run Text="{Binding max_players}"/>
+                                            <TextBlock.Background>
+                                                <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource PlayersIcon}">
+                                                    <ImageBrush.Transform>
+                                                        <TransformGroup>
+                                                            <TranslateTransform X="1" Y="1"/>
+                                                            <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                        </TransformGroup>
+                                                    </ImageBrush.Transform>
+                                                </ImageBrush>
+                                            </TextBlock.Background>
+                                            <TextBlock.ToolTip>
+                                                <StackPanel>
+                                                    <ItemsControl ItemsSource="{Binding teams}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Horizontal"/>
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding Key, Mode=OneWay}" IsHitTestVisible="False"/>
+                                                                    <ItemsControl ItemsSource="{Binding Value}"
+                                                                                  ItemTemplate="{StaticResource PlayerCard}"/>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </TextBlock.ToolTip>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
                                        ToolTip="Map"
                                        Text="{Binding MapName}">
-                                <TextBlock.Background>
-                                    <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource MapIcon}">
-                                        <ImageBrush.Transform>
-                                            <TransformGroup>
-                                                <TranslateTransform X="3" Y="1"/>
-                                                <ScaleTransform ScaleX=".95" ScaleY=".95"/>
-                                            </TransformGroup>
-                                        </ImageBrush.Transform>
-                                    </ImageBrush>
-                                </TextBlock.Background>
-                            </TextBlock>
-                            <TextBlock ToolTip="Secured with password"
-                                       Text="Secured">
-                                <TextBlock.Resources>
-                                    <Style TargetType="TextBlock" BasedOn="{StaticResource LobbyTextBlockStyle}">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding password_protected}"
+                                            <TextBlock.Background>
+                                                <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{DynamicResource MapIcon}">
+                                                    <ImageBrush.Transform>
+                                                        <TransformGroup>
+                                                            <TranslateTransform X="3" Y="1"/>
+                                                            <ScaleTransform ScaleX=".95" ScaleY=".95"/>
+                                                        </TransformGroup>
+                                                    </ImageBrush.Transform>
+                                                </ImageBrush>
+                                            </TextBlock.Background>
+                                        </TextBlock>
+                                        <TextBlock ToolTip="Secured with password" Text="Secured">
+                                            <TextBlock.Resources>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource LobbyTextBlockStyle}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding password_protected}"
                                                          Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <ImageBrush Stretch="Uniform"
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                            <Setter Property="Background">
+                                                                <Setter.Value>
+                                                                    <ImageBrush Stretch="Uniform"
                                                                     AlignmentX="Left"
                                                                     ImageSource="{DynamicResource SecuredIcon}">
-                                                            <ImageBrush.Transform>
-                                                                <TransformGroup>
-                                                                    <TranslateTransform X="4" Y="2"/>
-                                                                    <ScaleTransform ScaleX=".8" ScaleY=".8"/>
-                                                                </TransformGroup>
-                                                            </ImageBrush.Transform>
-                                                        </ImageBrush>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Resources>
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <Border HorizontalAlignment="Right"
-                    VerticalAlignment="Top"
-                    Style="{StaticResource NewLobbyBorderStyle}"
-                    Margin="13 10"
-                    Padding="6 3"
-                    CornerRadius="4">
-                <Border.Background>
-                    <SolidColorBrush Color="Black" Opacity=".2"/>
-                </Border.Background>
-                <TextBlock Text="New"
+                                                                        <ImageBrush.Transform>
+                                                                            <TransformGroup>
+                                                                                <TranslateTransform X="4" Y="2"/>
+                                                                                <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                                                            </TransformGroup>
+                                                                        </ImageBrush.Transform>
+                                                                    </ImageBrush>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Resources>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border HorizontalAlignment="Right"
+                                        VerticalAlignment="Top" Style="{StaticResource NewLobbyBorderStyle}" 
+                                        Margin="13 10"
+                                        Padding="6 3"
+                                        CornerRadius="4">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="Black" Opacity=".2"/>
+                                    </Border.Background>
+                                    <TextBlock Text="{Binding LobbyState, UpdateSourceTrigger=PropertyChanged}"
                            FontSize="13"
                            Margin="0 0 0 2"
                            FontWeight="SemiBold"
                            Foreground="RoyalBlue"/>
+                                </Border>
+                                <Canvas Grid.RowSpan="2">
+                                    <Rectangle Width="{Binding ElementName=Test, Path=ActualWidth}"
+                                               Height="{Binding ElementName=Test, Path=ActualHeight}"/>
+                                </Canvas>
+                            </Grid>
+                        </ui:TitleBarButton.Content>
+                        <ui:ContextFlyoutService.ContextFlyout>
+                            <ui:CommandBarFlyout>
+                                <ui:AppBarButton/>
+                            </ui:CommandBarFlyout>
+                        </ui:ContextFlyoutService.ContextFlyout>
+
+                        <ui:FlyoutService.Flyout>
+                            <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                                <StackPanel Width="290">
+                                    <ui:ItemsRepeater ItemsSource="{Binding teams}">
+                                        <ui:ItemsRepeater.Layout>
+                                            <ui:UniformGridLayout ItemsJustification="SpaceBetween"
+                                                                  MinColumnSpacing="10"
+                                                                  MinRowSpacing="10"/>
+                                        </ui:ItemsRepeater.Layout>
+                                        <ui:ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Key, Mode=OneWay}" IsHitTestVisible="False"/>
+                                                    <ItemsControl ItemsSource="{Binding Value}"
+                                                                  ItemTemplate="{StaticResource PlayerCard}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ui:ItemsRepeater.ItemTemplate>
+                                    </ui:ItemsRepeater>
+                                </StackPanel>
+                            </ui:Flyout>
+                        </ui:FlyoutService.Flyout>
+                    </ui:TitleBarButton>
+                </Grid>
             </Border>
         </Grid>
     </ItemContainerTemplate>

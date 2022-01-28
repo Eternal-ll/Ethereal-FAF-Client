@@ -2,12 +2,14 @@
 using beta.Models.Server.Base;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface ILobbySessionService
+    public interface ILobbySessionService : INotifyPropertyChanged
     {
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<PlayerInfoMessage>> UpdatePlayer;
@@ -25,6 +27,6 @@ namespace beta.Infrastructure.Services.Interfaces
         public Dictionary<int, PlayerInfoMessage> Players { get; }
         public Dictionary<string, int> PlayerNameToId { get; }
 
-        public List<GameInfoMessage> Games { get; }
+        public ObservableCollection<GameInfoMessage> AvailableLobbies { get; }
     }
 }

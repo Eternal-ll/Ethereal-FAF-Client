@@ -2,12 +2,16 @@
 using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Base;
+using beta.Properties;
 using beta.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -15,8 +19,16 @@ using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public class LobbySessionService : ILobbySessionService
+    public class LobbySessionService : ILobbySessionService, INotifyPropertyChanged
     {
+        #region INPC
+        public event PropertyChangedEventHandler PropertyChanged;
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        #endregion
+
+        #region Events
         public event EventHandler<EventArgs<bool>> Authorization;
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<PlayerInfoMessage>> UpdatePlayer;
@@ -24,26 +36,74 @@ namespace beta.Infrastructure.Services
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
 
         public event EventHandler<IServerMessage> MessageReceived;
+        #endregion
 
-        public string Session => Properties.Settings.Default.session;
+        #region Properties
         public readonly SimpleTcpClient Client = new();
-        private readonly IOAuthService OAuthService;
-        private string GeneratedUID { get; set; }
-        public void Connect(IPEndPoint ip)
-        {
-            Client.Connect(ip.Address.ToString(), ip.Port);
-        }
 
+        private readonly bool PreviewNewLobbies;
+        private readonly IOAuthService OAuthService;
+
+        public string Session => Settings.Default.session;
+        private string GeneratedUID { get; set; }
         public bool AuthorizationRequested { get; set; }
+
         public Dictionary<int, PlayerInfoMessage> Players { get; } = new();
         public Dictionary<string, int> PlayerNameToId { get; } = new();
-        public List<GameInfoMessage> Games { get; } = new();
+
+        public ObservableCollection<GameInfoMessage> AvailableLobbies { get; } = new();
+        public ObservableCollection<GameInfoMessage> LaunchedLobbies { get; } = new();
+        #endregion
 
         public LobbySessionService(IOAuthService oAuthService)
         {
             OAuthService = oAuthService;
             OAuthService.Result += OnAuthResult;
             Client.DelimiterDataReceived += OnDataReceived;
+            PreviewNewLobbies = true;
+
+            if (PreviewNewLobbies)
+            {
+                new Thread(() =>
+                {
+                    while (true)
+                    {
+                        for (int i = 0; i < AvailableLobbies.Count; i++)
+                        {
+                            var lobby = AvailableLobbies[i];
+                            //if (lobby.LobbyCycle == 2)
+                            //{
+                            //    if (lobby.num_players == 0)
+                            //    {
+                            //        AvailableLobbies[i].LobbyState = LobbyState.Unknown;
+                            //    }
+                            //}
+                            if (lobby.LobbyCycle == 3)
+                            {
+                                if (lobby.num_players == 0)
+                                {
+                                    AvailableLobbies[i].LobbyState = LobbyState.Broken;
+                                }
+                                else AvailableLobbies[i].LobbyState = LobbyState.Init;
+                            }
+                            if (lobby.LobbyCycle == 4)
+                            {
+                                if (lobby.num_players == 0)
+                                {
+                                    AvailableLobbies.RemoveAt(i);
+                                    continue;
+                                }
+                            }
+                            AvailableLobbies[i].LobbyCycle++;
+                        }
+                        Thread.Sleep(10000);
+                    }
+                }).Start();
+            }
+        }
+        public void Connect(IPEndPoint ip)
+        {
+            Client.Connect(ip.Address.ToString(), ip.Port);
         }
 
         private void OnAuthResult(object sender, EventArgs<OAuthStates> e)
@@ -119,8 +179,8 @@ namespace beta.Infrastructure.Services
                     break;
                 case 'w': //welcome
                     var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
-                    Properties.Settings.Default.PlayerId = welcomeMessage.id;
-                    Properties.Settings.Default.PlayerNick = welcomeMessage.login;
+                    Settings.Default.PlayerId = welcomeMessage.id;
+                    Settings.Default.PlayerNick = welcomeMessage.login;
                     OnAuthorization(true);
                     break;
             }
@@ -247,18 +307,30 @@ namespace beta.Infrastructure.Services
         {
             UpdatePlayer?.Invoke(this, e);
         }
+
         protected virtual void OnNewGameInfo(EventArgs<GameInfoMessage> e)
         {
             var newGame = e.Arg;
+
+            if (!PreviewNewLobbies && newGame.num_players == 0)
+                return;
+
             bool found = false;
-            for (int i = 0; i < Games.Count; i++)
+            var lenght = AvailableLobbies.Count;
+            for (int i = 0; i < lenght; i++)
             {
-                if (Games[i].uid == newGame.uid)
+                if (AvailableLobbies[i].uid == newGame.uid)
                 {
-                    Games[i] = newGame;
+                    found = true;
+                    if (newGame.launched_at != null)
+                    {
+                        AvailableLobbies.RemoveAt(i);
+                        LaunchedLobbies.Add(newGame);
+                        break;
+                    }
+                    AvailableLobbies[i] = newGame;
                     OnUpdateGameInfo(newGame);
 
-                    if (newGame.launched_at != null) Games.RemoveAt(i);
                     found = true;
                     break;
                 }
@@ -266,14 +338,16 @@ namespace beta.Infrastructure.Services
 
             if (!found)
             {
-                if (newGame.launched_at != null) return;
-                Games.Add(newGame);
-                OnNewGameInfo(newGame);
+                if (newGame.launched_at != null)
+                {
+                    LaunchedLobbies.Add(newGame);
+                    return;
+                }
+                AvailableLobbies.Add(newGame);
+
+                NewGameInfo?.Invoke(this, newGame);
             }
         }
-        protected virtual void OnUpdateGameInfo(EventArgs<GameInfoMessage> e)
-        {
-            UpdateGameInfo?.Invoke(this, e);
-        }
+        protected virtual void OnUpdateGameInfo(EventArgs<GameInfoMessage> e) => UpdateGameInfo?.Invoke(this, e);
     }
 }
