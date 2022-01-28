@@ -2,8 +2,6 @@
 using System;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace beta.Infrastructure.Converters
 {
