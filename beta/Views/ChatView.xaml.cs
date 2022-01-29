@@ -31,7 +31,7 @@ namespace beta.Views
         public ChatView()
         {
             InitializeComponent();
-
+            return;
             DataContext = this;
 
             LobbySessionService = App.Services.GetService<ILobbySessionService>();
