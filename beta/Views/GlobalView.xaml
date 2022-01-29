@@ -5,107 +5,203 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
-             xmlns:converters="clr-namespace:beta.Infrastructure.Converters"
              mc:Ignorable="d"
-             x:Name="RootFrame"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:GlobalView}}">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Resources/Templates/LobbyContainerTemplate.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    <ScrollViewer Name="Frame">
-        <ScrollViewer.Resources>
+    <Grid>
+        <Grid.Background>
+            <SolidColorBrush Color="Black" Opacity=".5"/>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
             <SolidColorBrush x:Key="ScrollBarTrackFillPointerOver" Color="Transparent"/>
             <SolidColorBrush x:Key="ScrollBarTrackFillDisabled" Color="Transparent"/>
             <SolidColorBrush x:Key="ScrollBarTrackFill" Color="Transparent"/>
-        </ScrollViewer.Resources>
-        <Grid>
-            <Canvas>
-                <Canvas.Background>
-                    <SolidColorBrush Color="Black" Opacity=".5"/>
-                </Canvas.Background>
-            </Canvas>
-
-            <StackPanel>
-                <StackPanel.Resources>
-                    <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                        <Setter Property="BorderThickness" Value="0"/>
+            <Storyboard x:Key="OpacityAnimationShow">
+                <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" 
+                    To="1" 
+                    Duration="0:0:0.2"/>
+            </Storyboard>
+            <Storyboard x:Key="OpacityAnimationHide">
+                <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" 
+                    To="0"
+                    Duration="0:0:0.2"/>
+            </Storyboard>
+        </Grid.Resources>
+        <TextBox
+            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+            Text="Global FAForever lobbies"
+            FontWeight="DemiBold"
+            IsTabStop="False"
+            IsHitTestVisible="False"
+            HorizontalAlignment="Left"
+            Padding="20 6 20 10"
+            Margin="30 0"
+            BorderThickness="0"
+            ui:ControlHelper.CornerRadius="6"/>
+        <Grid 
+            Grid.Row="1"
+            Panel.ZIndex="2"
+            Margin="30 30 30 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition MinWidth="220"/>
+                <ColumnDefinition Width="154"/>
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <Style TargetType="ui:ToggleSwitch">
+                    <Style.Triggers>
+                        <Trigger Property="IsOn" Value="False">
+                            <Setter Property="BorderBrush" Value="#9a9a9a"/>
+                            <Setter Property="TextElement.Foreground" Value="#9a9a9a"/>
+                            <Setter Property="Foreground" Value="#9a9a9a"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+            <ToggleButton
+                Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                Padding="0">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                        <Setter Property="ui:ControlHelper.CornerRadius" Value="4"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="ui:ControlHelper.CornerRadius" Value="4 4 0 0"/>
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
-                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
-                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
-                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                </StackPanel.Resources>
-                <Border>
-                    <TextBox Style="{StaticResource TextBoxStyle}"
-                             Text="Global FAForever lobbies"
-                             IsHitTestVisible="False"
-                             HorizontalAlignment="Left"
-                             Padding="20 10"
-                             ui:ControlHelper.CornerRadius="6"
-                             Margin="30 0 30 30"/>
-                </Border>
-                <Grid Margin="30 0">
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Resources>
-                            <Style TargetType="ui:ToggleSwitch">
-                                <Style.Triggers>
-                                    <Trigger Property="IsOn" Value="False">
-                                        <Setter Property="BorderBrush" Value="#9a9a9a"/>
-                                        <Setter Property="TextElement.Foreground" Value="#9a9a9a"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                            <!--<Style TargetType="Separator">
-                                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"/>
-                                <Setter Property="Margin" Value="30 0"/>
-                                <Setter Property="Width" Value="40"/>
-                                <Setter Property="LayoutTransform">
-                                    <Setter.Value>
-                                        <RotateTransform Angle="90"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>-->
-                        </StackPanel.Resources>
-                        <ui:ToggleSwitch Header="Hide private games"
-                                         IsOn="{Binding IsPrivateGamesHidden}"
-                                         VerticalAlignment="Top"
-                                         Padding="0"
-                                         Margin="0 0 -40 0"/>
-                    </StackPanel>
-                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                     VerticalAlignment="Center"
-                                     Margin="0 0 34 0"
-                                     ui:ControlHelper.PlaceholderText="Search lobby"
-                                     Width="200"
-                                     BorderThickness="0"
-                                     ui:ControlHelper.CornerRadius="6"
-                                     Name="SearchBox"/>
-
+                </ToggleButton.Style>
+                <Grid>
+                    <TextBlock
+                        Text="Filter"
+                        Padding="24 0 0 0"
+                        Margin="8 6">
+                        <TextBlock.Background>
+                            <VisualBrush Stretch="Uniform" AlignmentX="Left">
+                                <VisualBrush.Visual>
+                                    <Path
+                                        Fill="White"
+                                        Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
+                                        />
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </TextBlock.Background>
+                    </TextBlock>
+                    <Canvas
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom">
+                        <StackPanel
+                            Margin="-1 1 0 0"
+                            Background="{StaticResource NavigationViewDefaultPaneBackground}">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Opacity" Value="0"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="Opacity" Value="0">
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
+                                            Path=IsMouseOver}"
+                                                     Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <StackPanel.Effect>
+                                <DropShadowEffect
+                                    Color="#111111"
+                                    Direction="-90"
+                                    BlurRadius="10"/>
+                            </StackPanel.Effect>
+                            <ui:ToggleSwitch
+                                Margin="10"
+                                Header="Hide private games"
+                                IsOn="{Binding IsPrivateGamesHidden}"
+                                VerticalAlignment="Top"/>
+                        </StackPanel>
+                    </Canvas>
                 </Grid>
-                <ItemsControl Margin="30 0 30 30" ItemsSource="{Binding View.Groups}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <ui:ItemsRepeater ItemsSource="{Binding Items}"
-                                                  ItemTemplate="{StaticResource LobbyContainerDefaultTemplate}"
-                                                  Background="Transparent">
-                                <ui:ItemsRepeater.Layout>
-                                    <ui:UniformGridLayout ItemsStretch="Fill"
-                                                              ItemsJustification="Start"
-                                                              MinItemWidth="300"
-                                                              MinItemHeight="160"
-                                                              MinColumnSpacing="20"
-                                                          MinRowSpacing="8">
-                                    </ui:UniformGridLayout>
-                                </ui:ItemsRepeater.Layout>
-                            </ui:ItemsRepeater>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+            </ToggleButton>
+            <TextBox
+                Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                Width="200"
+                Grid.Column="1"
+                BorderThickness="0"
+                VerticalAlignment="Center"
+                ui:ControlHelper.PlaceholderText="Search lobby"
+                ui:ControlHelper.CornerRadius="6"/>
         </Grid>
-    </ScrollViewer>
+        <Canvas
+            Grid.Row="2"
+            VerticalAlignment="Top"
+            Height="60"
+            Panel.ZIndex="1"
+            SnapsToDevicePixels="True"
+            Background="#111111"
+            IsHitTestVisible="False">
+            <Canvas.OpacityMask>
+                <LinearGradientBrush EndPoint=".5, 0" StartPoint=".5, 1">
+                    <GradientStop Color="#00000000" Offset="0"/>
+                    <GradientStop Color="Black" Offset=".8"/>
+                </LinearGradientBrush>
+            </Canvas.OpacityMask>
+            <Canvas.Style>
+                <Style TargetType="Canvas">
+                    <Setter Property="Opacity" Value="0"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=ScrollViewer, Path=ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                                     Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Canvas.Style>
+        </Canvas>
+        <ScrollViewer
+            x:Name="ScrollViewer"
+            Grid.Row="2"
+            Padding="30 0">
+            <ItemsControl
+                ItemsSource="{Binding View.Groups}"
+                Cursor="Hand">
+                <ItemsControl.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <ui:ItemsRepeater
+                            ItemsSource="{Binding Items}"
+                            ItemTemplate="{StaticResource LobbyContainerDefaultTemplate}">
+                            <ui:ItemsRepeater.Layout>
+                                <ui:UniformGridLayout 
+                                    ItemsStretch="Fill"
+                                    ItemsJustification="Start"
+                                    MinItemWidth="300"
+                                    MinItemHeight="160"
+                                    MinColumnSpacing="20"
+                                    MinRowSpacing="10">
+                                </ui:UniformGridLayout>
+                            </ui:ItemsRepeater.Layout>
+                        </ui:ItemsRepeater>
+                    </ItemContainerTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
