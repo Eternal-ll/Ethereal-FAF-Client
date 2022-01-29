@@ -12,8 +12,6 @@ namespace beta.Infrastructure.Converters
         {
             string mapName = (string)value + ".png";
 
-            var webUri = new Uri("https://content.faforever.com/maps/previews/small/" + mapName, UriKind.Absolute);
-
             var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
 
             if (!Directory.Exists(cacheFolder))
@@ -27,7 +25,7 @@ namespace beta.Infrastructure.Converters
             var image = new BitmapImage();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
-            image.UriSource = webUri;
+            image.UriSource = new Uri("https://content.faforever.com/maps/previews/small/" + mapName, UriKind.Absolute);
             image.EndInit();
 
             SaveImage(image, localFilePath);
