@@ -6,17 +6,19 @@
              StartupUri="Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-
-            <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
-            <converter:RatingConverter x:Key="RatingConverter"/>
-            <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
-
-            <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
-            <converter:GameModConverter x:Key="GameModConverter"/>
-            <converter:MoreThanConverter x:Key="MoreThanConverter"/>
-            <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
-            <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <converter:TestConverter x:Key="TestConverter"/>
+                    <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
+                    <converter:RatingConverter x:Key="RatingConverter"/>
+                    <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
+
+                    <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
+                    <converter:GameModConverter x:Key="GameModConverter"/>
+                    <converter:MoreThanConverter x:Key="MoreThanConverter"/>
+                    <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
+                    <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
+                </ResourceDictionary>
                 <ui:ThemeResources RequestedTheme="Dark">
                     <ui:ThemeResources.ThemeDictionaries>
                         <ResourceDictionary x:Key="Light">
@@ -39,8 +41,8 @@
                 </ui:ThemeResources>
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
-                <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
                 <ResourceDictionary Source="Resources/SVG Icons/PathIcons.xaml"/>
+                <ResourceDictionary Source="../Resources/Templates/LobbyContainerTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
