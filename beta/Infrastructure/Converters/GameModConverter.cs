@@ -62,7 +62,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            int num = (int)value;
+            int num = System.Convert.ToInt32(value);
             if (parameter == null)
                 return num > 0;
             return num > int.Parse(parameter.ToString());
