@@ -8,6 +8,7 @@ namespace beta.Infrastructure.Converters
 {
     public class UriToCachedImageConverter : IValueConverter
     {
+        // CURRENTLY UNUSED !!!!!!
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string mapName = (string)value + ".png";
@@ -22,13 +23,17 @@ namespace beta.Infrastructure.Converters
             if (File.Exists(localFilePath))
                 return BitmapFrame.Create(new Uri(localFilePath, UriKind.Absolute));
 
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.UriSource = new Uri("https://content.faforever.com/maps/previews/small/" + mapName, UriKind.Absolute);
-            image.EndInit();
+            var uri = new Uri("https://content.faforever.com/maps/previews/small/" + mapName, UriKind.Absolute);
+            var image = new BitmapImage(uri, new(System.Net.Cache.RequestCacheLevel.BypassCache));
+            image.DownloadCompleted += (sender, args) =>
+            {
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
 
-            SaveImage(image, localFilePath);
+                using var filestream = new FileStream(localFilePath, FileMode.Create);
+
+                encoder.Save(filestream);
+            };
 
             return image;
         }
@@ -36,19 +41,6 @@ namespace beta.Infrastructure.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
-
-        public void SaveImage(BitmapImage image, string localFilePath)
-        {
-            image.DownloadCompleted += (sender, args) =>
-            {
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create((BitmapImage) sender));
-                
-                using var filestream = new FileStream(localFilePath, FileMode.Create);
-
-                encoder.Save(filestream);
-            };
         }
     }
 }
