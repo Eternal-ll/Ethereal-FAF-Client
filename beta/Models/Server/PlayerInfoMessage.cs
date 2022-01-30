@@ -6,6 +6,16 @@ namespace beta.Models.Server
 {
     public class PlayerInfoMessage : IServerMessage
     {
+        #region Custom properties
+
+        #region Flag
+        private object _Flag;
+        public object Flag => _Flag ??= App.Current.Resources["Flag." + country];
+        #endregion
+
+        public DateTime? Updated { get; set; }
+
+        #endregion
         public int id { get; set; }
         public string login { get; set; }
         public string country { get; set; }
@@ -16,9 +26,6 @@ namespace beta.Models.Server
         public int number_of_games { get; set; }
         public string command { get; set; }
 
-
         public PlayerInfoMessage[] players { get; set; }
-
-        public DateTime? Updated { get; set; }
     }
 }
