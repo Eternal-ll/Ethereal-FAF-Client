@@ -1,5 +1,6 @@
 ﻿using beta.Models.Server.Base;
 using beta.ViewModels.Base;
+using System;
 using System.Collections.Generic;
 
 namespace beta.Models.Server
@@ -98,7 +99,15 @@ namespace beta.Models.Server
         public string game_type { get; set; }
         public string featured_mod { get; set; }
         public Dictionary<string, string> sim_mods { get; set; }
-        
+        private object _MapPreview;
+        public object MapPreview => _MapPreview ??= PreviewType switch
+        {
+            PreviewType.Normal => new Uri("https://content.faforever.com/maps/previews/small/" + mapname + ".png"),
+            PreviewType.Coop => App.Current.Resources["CoopIcon"],
+            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"],
+            _ => App.Current.Resources["QuestionIcon"]
+        };
+
         public string mapname { get; set; }
 
         public string map_file_path { get; set; }

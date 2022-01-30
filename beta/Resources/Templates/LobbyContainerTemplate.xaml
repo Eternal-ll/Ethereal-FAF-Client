@@ -31,19 +31,9 @@
     </Style>
 
     <Style x:Key="PreviewImageStyle" TargetType="Image">
-        <Setter Property="Width" Value="90"/>
-        <Setter Property="Height" Value="90"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding PreviewType}" Value="Coop">
-                <Setter Property="Width" Value="60"/>
-                <Setter Property="Source" Value="{StaticResource CoopIcon}"/>
-            </DataTrigger>
-            <DataTrigger Binding="{Binding PreviewType}" Value="Neroxis">
-                <Setter Property="Width" Value="60"/>
-                <Setter Property="Source" Value="{StaticResource MapGenIcon}"/>
-            </DataTrigger>
-            <DataTrigger Binding="{Binding PreviewType}" Value="Normal">
-                <Setter Property="Source" Value="{Binding mapname, Converter={StaticResource UriToCachedImageConverter}}"/>
+            <DataTrigger Binding="{Binding PreviewType}" Value="0">
+                <Setter Property="Width" Value="90"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -100,7 +90,9 @@
                                 <Border.Background>
                                     <VisualBrush Stretch="None">
                                         <VisualBrush.Visual>
-                                            <Image Style="{DynamicResource PreviewImageStyle}"/>
+                                            <Image
+                                                Source="{Binding MapPreview}"
+                                                Style="{StaticResource PreviewImageStyle}"/>
                                         </VisualBrush.Visual>
                                     </VisualBrush>
                                 </Border.Background>
@@ -145,9 +137,12 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Key, Mode=OneWay}" IsHitTestVisible="False"/>
-                                                        <ItemsControl ItemsSource="{Binding Value}"
-                                                                                ItemTemplate="{StaticResource PlayerCard}"/>
+                                                        <TextBlock
+                                                            Text="{Binding Key, Mode=OneWay}"
+                                                            IsHitTestVisible="False"/>
+                                                        <ItemsControl
+                                                            ItemsSource="{Binding Value}"
+                                                            ItemTemplate="{StaticResource PlayerCard}"/>
                                                     </StackPanel>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
