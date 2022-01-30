@@ -81,24 +81,10 @@ namespace beta.Models.Server
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
             }
-        } 
+        }
         #endregion
 
-        #endregion
-
-        public string command { get; set; }
-
-        public GameInfoMessage[] games { get; set; }
-
-        public string visibility { get; set; }
-        public bool password_protected { get; set; }
-        public long uid { get; set; }
-            
-        public string title { get; set; }
-        public string state { get; set; }
-        public string game_type { get; set; }
-        public string featured_mod { get; set; }
-        public Dictionary<string, string> sim_mods { get; set; }
+        #region MapPreview
         private object _MapPreview;
         public object MapPreview => _MapPreview ??= PreviewType switch
         {
@@ -107,18 +93,29 @@ namespace beta.Models.Server
             PreviewType.Neroxis => App.Current.Resources["MapGenIcon"],
             _ => App.Current.Resources["QuestionIcon"]
         };
+        #endregion
 
+        #endregion
+
+        public string command { get; set; }
+
+        public GameInfoMessage[] games { get; set; }
+        public string visibility { get; set; }
+        public bool password_protected { get; set; }
+        public long uid { get; set; }
+        public string title { get; set; }
+        public string state { get; set; }
+        public string game_type { get; set; }
+        public string featured_mod { get; set; }
+        public Dictionary<string, string> sim_mods { get; set; }
         public string mapname { get; set; }
-
         public string map_file_path { get; set; }
         public string host { get; set; }
         public int num_players { get; set; }
         public int max_players { get; set; }
         public double? launched_at { get; set; }
         public string rating_type { get; set; }
-            
         public double? rating_min { get; set; }
-
         public double? rating_max { get; set; }
         public bool enforce_rating_range { get; set; }
         public Dictionary<int, string[]> teams { get; set; }
