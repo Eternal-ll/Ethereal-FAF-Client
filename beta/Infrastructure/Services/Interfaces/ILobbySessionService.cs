@@ -1,7 +1,6 @@
 ﻿using beta.Models.Server;
 using beta.Models.Server.Base;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net;
@@ -24,8 +23,9 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<bool>> Authorization;
         public bool AuthorizationRequested { get; set; }
 
-        public Dictionary<int, PlayerInfoMessage> Players { get; }
-        public Dictionary<string, int> PlayerNameToId { get; }
+        public ObservableCollection<PlayerInfoMessage> Players { get; }
+        public PlayerInfoMessage GetPlayerInfo(int uid);
+        public PlayerInfoMessage GetPlayerInfo(string login);
 
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; }
     }

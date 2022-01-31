@@ -18,13 +18,8 @@ namespace beta.Infrastructure.Converters
             if (value == null) return null;
             
             var playerName = (string)value;
-            if (LobbySessionService.PlayerNameToId.TryGetValue(playerName, out int id))
-            {
-                var playerInfo = LobbySessionService.Players[id];
-                return playerInfo;
-            }
 
-            return null;
+            return LobbySessionService.GetPlayerInfo(playerName);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

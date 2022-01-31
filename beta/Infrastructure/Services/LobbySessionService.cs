@@ -3,15 +3,14 @@ using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Base;
 using beta.Properties;
+using beta.ViewModels.Base;
 using beta.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -19,15 +18,8 @@ using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public class LobbySessionService : ILobbySessionService, INotifyPropertyChanged
+    public class LobbySessionService : ViewModel, ILobbySessionService
     {
-        #region INPC
-        public event PropertyChangedEventHandler PropertyChanged;
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        #endregion
-
         #region Events
         public event EventHandler<EventArgs<bool>> Authorization;
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
@@ -48,58 +40,37 @@ namespace beta.Infrastructure.Services
         private string GeneratedUID { get; set; }
         public bool AuthorizationRequested { get; set; }
 
-        public Dictionary<int, PlayerInfoMessage> Players { get; } = new();
-        public Dictionary<string, int> PlayerNameToId { get; } = new();
+        public ObservableCollection<PlayerInfoMessage> Players { get; } = new();
+        private readonly Dictionary<int, int> PlayerUIDToId = new();
+        private readonly Dictionary<string, int> PlayerNameToId = new();
 
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; } = new();
         public ObservableCollection<GameInfoMessage> LaunchedLobbies { get; } = new();
         #endregion
-
+        private readonly object _lock = new();
         public LobbySessionService(IOAuthService oAuthService)
         {
             OAuthService = oAuthService;
             OAuthService.Result += OnAuthResult;
             Client.DelimiterDataReceived += OnDataReceived;
             PreviewNewLobbies = true;
+        }
 
-            if (PreviewNewLobbies)
+        public PlayerInfoMessage GetPlayerInfo(string login)
+        {
+            if (PlayerNameToId.TryGetValue(login, out var id))
             {
-                new Thread(() =>
-                {
-                    while (true)
-                    {
-                        for (int i = 0; i < AvailableLobbies.Count; i++)
-                        {
-                            var lobby = AvailableLobbies[i];
-                            //if (lobby.LobbyCycle == 2)
-                            //{
-                            //    if (lobby.num_players == 0)
-                            //    {
-                            //        AvailableLobbies[i].LobbyState = LobbyState.Unknown;
-                            //    }
-                            //}
-                            if (lobby.LobbyCycle == 3)
-                            {
-                                if (lobby.num_players == 0)
-                                {
-                                    AvailableLobbies[i].LobbyState = LobbyState.Broken;
-                                }
-                                else AvailableLobbies[i].LobbyState = LobbyState.Init;
-                            }
-                            if (lobby.LobbyCycle == 4)
-                            {
-                                if (lobby.num_players == 0)
-                                {
-                                    AvailableLobbies.RemoveAt(i);
-                                    continue;
-                                }
-                            }
-                            AvailableLobbies[i].LobbyCycle++;
-                        }
-                        Thread.Sleep(10000);
-                    }
-                }).Start();
+                return Players[id];
             }
+            return null;
+        }
+        public PlayerInfoMessage GetPlayerInfo(int uid)
+        {
+            if (PlayerUIDToId.TryGetValue(uid, out var id))
+            {
+                return Players[id];
+            }
+            return null;
         }
         public void Connect(IPEndPoint ip)
         {
@@ -271,8 +242,9 @@ namespace beta.Infrastructure.Services
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e)
         {
             var newPlayer = e.Arg;
-            if (Players.TryGetValue(newPlayer.id, out var originalPlayer))
+            if (PlayerUIDToId.TryGetValue(newPlayer.id, out var id))
             {
+                var originalPlayer = Players[id];
                 foreach (var rating in originalPlayer.ratings)
                 {
                     int gamesDifference = 0;
@@ -281,24 +253,25 @@ namespace beta.Infrastructure.Services
                     if (gamesDifference == 0)
                         continue;
                     
-                    newPlayer.ratings[rating.Key].GamesDifference = gamesDifference;
+                    newPlayer.ratings[rating.Key].GamesDifference = gamesDifference + originalPlayer.ratings[rating.Key].GamesDifference;
 
                     var ratingDifference = new double[2];
 
-                    ratingDifference[0] = newPlayer.ratings[rating.Key].rating[0] - rating.Value.rating[0];
-                    ratingDifference[1] = newPlayer.ratings[rating.Key].rating[1] - rating.Value.rating[1];
+                    ratingDifference[0] = newPlayer.ratings[rating.Key].rating[0] - rating.Value.rating[0] + originalPlayer.ratings[rating.Key].rating[0];
+                    ratingDifference[1] = newPlayer.ratings[rating.Key].rating[1] - rating.Value.rating[1] + originalPlayer.ratings[rating.Key].rating[1];
 
                     newPlayer.ratings[rating.Key].RatingDifference = ratingDifference; 
                 }
                 newPlayer.Updated = DateTime.UtcNow;
-                Players[newPlayer.id] = newPlayer;
-                PlayerNameToId[newPlayer.login] = newPlayer.id;
+                Players[id] = newPlayer;
                 OnUpdatePlayer(newPlayer);
             }
             else
-            {
-                Players.Add(newPlayer.id, newPlayer);
-                PlayerNameToId.Add(newPlayer.login, newPlayer.id);
+            {                    
+                int count = Players.Count;
+                Players.Add(newPlayer);
+                PlayerNameToId.Add(newPlayer.login, count);
+                PlayerUIDToId.Add(newPlayer.id, count);
                 NewPlayer?.Invoke(this, e);
             }
         }
