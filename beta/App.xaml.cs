@@ -65,6 +65,7 @@ namespace beta
 
                 host.Services.GetRequiredService<ILobbySessionService>().GenerateUID(builder.ToString());
             });
+            start.Name = "UID thread generator";
 
             host.Services.GetRequiredService<IIRCService>();
 

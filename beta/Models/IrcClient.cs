@@ -199,7 +199,11 @@ namespace beta.Models
         /// </summary>
         public void Connect()
         {
-            Thread t = new Thread(DoConnect) { IsBackground = true };
+            Thread t = new Thread(DoConnect)
+            {
+                Name="IRC TCP Client",
+                IsBackground = true
+            };
             t.Start();
         }
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate,

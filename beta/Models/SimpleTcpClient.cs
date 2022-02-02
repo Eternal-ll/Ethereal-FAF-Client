@@ -50,6 +50,7 @@ namespace beta.Models
 
             _rxThread = new Thread(ListenerLoop)
             {
+                Name = "TCP Client",
                 IsBackground = true
             };
             _rxThread.Start();
