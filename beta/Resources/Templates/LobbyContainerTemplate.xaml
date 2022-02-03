@@ -18,7 +18,9 @@
                 <Setter Property="Visibility" Value="Visible"/>
             </DataTrigger>
 
-            <DataTrigger Binding="{Binding LobbyState}" Value="-1">
+            <!--is not used currently-->
+            
+            <!--<DataTrigger Binding="{Binding LobbyState}" Value="-1">
                 <Setter Property="Visibility" Value="Visible"/>
                 <Setter Property="TextBlock.Foreground" Value="Red"/>
             </DataTrigger>
@@ -26,7 +28,7 @@
             <DataTrigger Binding="{Binding LobbyState}" Value="2">
                 <Setter Property="Visibility" Value="Visible"/>
                 <Setter Property="TextBlock.Foreground" Value="Orange"/>
-            </DataTrigger>
+            </DataTrigger>-->
         </Style.Triggers>
     </Style>
 
@@ -42,7 +44,7 @@
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource SystemControlPageBackgroundChromeMediumLowBrush}"/>
-                <Setter Property="Panel.ZIndex" Value="100"/>
+                <Setter Property="Panel.ZIndex" Value="3"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -96,7 +98,7 @@
                                     <VisualBrush Stretch="None">
                                         <VisualBrush.Visual>
                                             <Image
-                                                Source="{Binding MapPreview}"
+                                                Source="{Binding MapNameType,Converter={StaticResource GetMapPreviewConverter}}"
                                                 Style="{StaticResource PreviewImageStyle}"/>
                                         </VisualBrush.Visual>
                                     </VisualBrush>
