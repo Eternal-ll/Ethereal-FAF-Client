@@ -9,6 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/ResourceDictionaries/Flags.xaml"/>
                 <ResourceDictionary>
+                    <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
                     <converter:RatingConverter x:Key="RatingConverter"/>
                     <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>

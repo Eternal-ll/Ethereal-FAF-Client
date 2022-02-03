@@ -84,7 +84,8 @@ namespace beta.Models.Server
         }
         #endregion
 
-        #region MapPreview
+        #region MapPreview // UNUSED
+        // UNUSED
         private object _MapPreview;
         public object MapPreview => _MapPreview ??= PreviewType switch
         {
@@ -93,6 +94,12 @@ namespace beta.Models.Server
             PreviewType.Neroxis => App.Current.Resources["MapGenIcon"],
             _ => App.Current.Resources["QuestionIcon"]
         };
+        #endregion
+
+        #region MapNameType
+        private KeyValuePair<string, PreviewType> _MapNameType;
+        public KeyValuePair<string, PreviewType> MapNameType => _MapNameType.Key == null ?
+            new KeyValuePair<string, PreviewType>(mapname, PreviewType) : _MapNameType;
         #endregion
 
         #endregion
