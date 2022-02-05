@@ -11,7 +11,6 @@ namespace beta.Infrastructure.Converters
     public class GetMapPreviewConverter : IValueConverter
     {
         private readonly IList<KeyValuePair<string, object>> Cache = new List<KeyValuePair<string, object>>();
-        private readonly string cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
 
         private object Test(string mapName)
         {
@@ -20,15 +19,15 @@ namespace beta.Infrastructure.Converters
             {
                 if (Cache[i].Key == mapName) return Cache[i].Value;
             }
-
-            //if (!Directory.Exists(cacheFolder))
-            //    Directory.CreateDirectory(cacheFolder);
+            var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
+            if (!Directory.Exists(cacheFolder))
+                Directory.CreateDirectory(cacheFolder);
 
             var localFilePath = cacheFolder + mapName + ".png";
             BitmapImage image = null;
             if (File.Exists(localFilePath))
             {
-                image = new BitmapImage(new Uri(localFilePath, UriKind.Absolute));
+                image = new BitmapImage(new Uri(localFilePath));
                 image.DecodePixelHeight = 90;
                 image.DecodePixelWidth = 90;
                 image.Freeze();
@@ -67,7 +66,7 @@ namespace beta.Infrastructure.Converters
             };
         }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
