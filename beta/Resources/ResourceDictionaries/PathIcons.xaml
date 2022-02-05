@@ -2,6 +2,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:PresentationOptions=
                     "http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+    <BitmapImage x:Key="PlayerGameStatus.host" UriSource="../Images/PlayerGameStatus/host.png"/>
+    <BitmapImage x:Key="PlayerGameStatus.open" UriSource="../Images/PlayerGameStatus/open.png"/>
+    <BitmapImage x:Key="PlayerGameStatus.playing" UriSource="../Images/PlayerGameStatus/playing.png"/>
+    <BitmapImage x:Key="PlayerGameStatus.playing5" UriSource="../Images/PlayerGameStatus/playing5.png"/>
+    <BitmapImage x:Key="PlayerGameStatus.unknown" UriSource="../Images/PlayerGameStatus/unknown.png"/>
+
+
     <PathGeometry x:Key="MapGenIconPathGeometry"
                   PresentationOptions:Freeze="True"
                   Figures="M27.8,66.8L4.4,55C2,53.7,0,50.5,0,47.8V21c0-2.8,2-4,4.4-2.8l23.5,11.9c2.4,1.2,4.4,4.4,4.4,7.2v26.7
@@ -68,9 +75,16 @@
                   PresentationOptions:Freeze="True"
                   Figures="M12 2C11.5 2 11 2.19 10.59 2.59L2.59 10.59C1.8 11.37 1.8 12.63 2.59 13.41L10.59 21.41C11.37 22.2 12.63 22.2 13.41 21.41L21.41 13.41C22.2 12.63 22.2 11.37 21.41 10.59L13.41 2.59C13 2.19 12.5 2 12 2M12 6.95C14.7 7.06 15.87 9.78 14.28 11.81C13.86 12.31 13.19 12.64 12.85 13.07C12.5 13.5 12.5 14 12.5 14.5H11C11 13.65 11 12.94 11.35 12.44C11.68 11.94 12.35 11.64 12.77 11.31C14 10.18 13.68 8.59 12 8.46C11.18 8.46 10.5 9.13 10.5 9.97H9C9 8.3 10.35 6.95 12 6.95M11 15.5H12.5V17H11V15.5Z"
                   />
+    <DrawingImage x:Key="NoteIcon">
+        <DrawingImage.Drawing>
+            <GeometryDrawing Brush="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
+                             Geometry="M20,12V16C20,17.11 19.11,18 18,18H13.9L10.2,21.71C10,21.89 9.76,22 9.5,22H9A1,1 0 0,1 8,21V18H4A2,2 0 0,1 2,16V6C2,4.89 2.9,4 4,4H9.5C8.95,4.67 8.5,5.42 8.14,6.25L7.85,7L8.14,7.75C9.43,10.94 12.5,13 16,13C17.44,13 18.8,12.63 20,12M16,6C16.56,6 17,6.44 17,7C17,7.56 16.56,8 16,8C15.44,8 15,7.56 15,7C15,6.44 15.44,6 16,6M16,3C18.73,3 21.06,4.66 22,7C21.06,9.34 18.73,11 16,11C13.27,11 10.94,9.34 10,7C10.94,4.66 13.27,3 16,3M16,4.5A2.5,2.5 0 0,0 13.5,7A2.5,2.5 0 0,0 16,9.5A2.5,2.5 0 0,0 18.5,7A2.5,2.5 0 0,0 16,4.5"/>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    
     <DrawingImage x:Key="QuestionIcon">
         <DrawingImage.Drawing>
-            <GeometryDrawing Brush="{StaticResource SystemControlBackgroundBaseMediumHighBrush}"
+            <GeometryDrawing Brush="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
                              Geometry="{StaticResource QuestionPathGeometry}"/>
         </DrawingImage.Drawing>
     </DrawingImage>

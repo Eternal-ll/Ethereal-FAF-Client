@@ -38,41 +38,43 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
             IsDesignMode = false;
+            var t = CurrentDirectory;
+            var g = Directory.GetCurrentDirectory();
             string mapPreviewsCachePath = CurrentDirectory + "\\cache\\previews\\small\\";
             if (Directory.Exists(mapPreviewsCachePath))
                 Directory.CreateDirectory(mapPreviewsCachePath);
 
             var host = Hosting;
 
-            var start = new Thread(() =>
-            {
-                StringBuilder builder = new();
-                Random random = new();
+            //var start = new Thread(() =>
+            //{
+            //    StringBuilder builder = new();
+            //    Random random = new();
 
-                builder
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9))
-                    .Append(random.Next(1, 9));
+            //    builder
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9))
+            //        .Append(random.Next(1, 9));
 
-                Settings.Default.session = builder.ToString();
+            //    Settings.Default.session = builder.ToString();
 
-                host.Services.GetRequiredService<ILobbySessionService>().GenerateUID(builder.ToString());
-            });
-            start.Name = "UID thread generator";
+            //    var service = host.Services.GetRequiredService<ILobbySessionService>().GenerateUID(builder.ToString());
+            //});
+            //start.Name = "UID thread generator";
 
             host.Services.GetRequiredService<IIRCService>();
 
             base.OnStartup(e);
             await host.StartAsync().ConfigureAwait(false);
 
-            start.Start();
+            //start.Start();
         }
         protected override async void OnExit(ExitEventArgs e)
         {

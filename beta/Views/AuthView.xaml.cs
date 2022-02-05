@@ -3,6 +3,7 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,6 +31,7 @@ namespace beta.Views
             // getting user setting for auto join
             if (Settings.Default.AutoJoin)
             {
+                return;
                 // looping view controls and hide them
                 for (int i = 0; i < Canvas.Children.Count; i++)
                     Canvas.Children[i].Visibility = Visibility.Collapsed;
@@ -59,6 +61,8 @@ namespace beta.Views
 
             // load user setting of auto join ot local checkbox
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
+
+            _LobbySessionService.AskSession();
         }
             
         private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>
@@ -73,7 +77,8 @@ namespace beta.Views
                 _LobbySessionService.Authorization -= OnLobbySessionServiceAuthorizationFinish;
                 // call UI thread and invoke our instructions
                 // events coming from different thread and can raise exception
-                return NavigationManager.Navigate(new MainView());
+                NavigationManager.Navigate(new MainView());
+                return;
             });
 
         private void OnCheckBoxClick(object sender, RoutedEventArgs e) => Settings.Default.AutoJoin = ((CheckBox)sender).IsChecked.Value;

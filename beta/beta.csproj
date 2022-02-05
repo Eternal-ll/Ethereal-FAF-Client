@@ -261,10 +261,23 @@
     <None Remove="Resources\Images\flags\za.png" />
     <None Remove="Resources\Images\flags\zm.png" />
     <None Remove="Resources\Images\flags\zw.png" />
+    <None Remove="Resources\Images\PlayerGameStatus\host.png" />
+    <None Remove="Resources\Images\PlayerGameStatus\open.png" />
+    <None Remove="Resources\Images\PlayerGameStatus\playing.png" />
+    <None Remove="Resources\Images\PlayerGameStatus\playing5.png" />
+    <None Remove="Resources\Images\PlayerGameStatus\unknown.png" />
     <None Remove="Resources\Images\Random\1.jpg" />
     <None Remove="Resources\Images\Random\2.jpg" />
     <None Remove="Resources\Images\Random\hilly plateau 6v6.small.png" />
     <None Remove="Resources\Images\Random\Namalsk_1.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
+    <Resource Include="Resources\Images\PlayerGameStatus\open.png" />
+    <Resource Include="Resources\Images\PlayerGameStatus\playing.png" />
+    <Resource Include="Resources\Images\PlayerGameStatus\playing5.png" />
+    <Resource Include="Resources\Images\PlayerGameStatus\unknown.png" />
   </ItemGroup>
 
   <ItemGroup>

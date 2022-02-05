@@ -362,7 +362,9 @@ namespace beta.Infrastructure.Services
             if (Settings.Default.AutoJoin)
             {
                 if (string.IsNullOrEmpty(Settings.Default.access_token))
-                    Result!.Invoke(this, OAuthStates.NO_TOKEN);
+                    if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
+                        await RefreshOAuthToken(Settings.Default.refresh_token).ConfigureAwait(false);
+                    else Result!.Invoke(this, OAuthStates.NO_TOKEN);
                 else if ((Settings.Default.expires_in - DateTime.Now).TotalSeconds < 10)
                     await RefreshOAuthToken(Settings.Default.refresh_token).ConfigureAwait(false);
                 else Result!.Invoke(this, OAuthStates.AUTHORIZED);

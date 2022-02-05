@@ -53,7 +53,7 @@ namespace beta.Infrastructure.Services
             OAuthService = oAuthService;
             OAuthService.Result += OnAuthResult;
             Client.DelimiterDataReceived += OnDataReceived;
-            PreviewNewLobbies = true;
+            PreviewNewLobbies = false;
         }
 
         public PlayerInfoMessage GetPlayerInfo(string login)
@@ -98,9 +98,19 @@ namespace beta.Infrastructure.Services
                             OnNewGameInfo(gameInfoMessage.games[i]);
                     else OnNewGameInfo(gameInfoMessage);
                     break;
-                case 'i': //irc_password
-                    var ircPasswordMessage = JsonSerializer.Deserialize<MainView.IRCPasswordMessage>(json);
-                    Properties.Settings.Default.irc_password = ircPasswordMessage.password;
+                case 'i':
+                    switch (json[13])
+                    {
+                        case 'r':
+                            //irc_password
+                            var ircPasswordMessage = JsonSerializer.Deserialize<MainView.IRCPasswordMessage>(json);
+                            Properties.Settings.Default.irc_password = ircPasswordMessage.password;
+                            return;
+                        case 'n': //invalid
+                            Settings.Default.access_token = null;
+                            OAuthService.Auth();
+                            return;
+                    }
                     break;
                 case 'm':
                     switch (json[14])
@@ -142,6 +152,9 @@ namespace beta.Infrastructure.Services
                     switch (json[13])
                     {
                         case 'e': // session
+                            var session = JsonSerializer.Deserialize<SessionMessage>(json);
+                            Settings.Default.session = session.session.ToString();
+                            new Thread(async () => await GenerateUID(session.session.ToString())).Start();
                             break;
                         case 'o': // social
                             var socialMessage = JsonSerializer.Deserialize<SocialMessage>(json);
@@ -191,12 +204,15 @@ namespace beta.Infrastructure.Services
         {
             if (Client.TcpClient == null)
                 Client.Connect("116.202.155.226", 8002);
-            string accessToken = Properties.Settings.Default.access_token;
-            string uid = GeneratedUID;
-            while (string.IsNullOrEmpty(GeneratedUID))
+            else if (!Client.TcpClient.Connected)
             {
-                Thread.Sleep(50);
+                Client.Connect("116.202.155.226", 8002);
             }
+            string accessToken = Properties.Settings.Default.access_token;
+            //while (string.IsNullOrEmpty(GeneratedUID))
+            //{
+            //    Thread.Sleep(50);
+            //}
             //Dictionary<string, string> auth = new()
             //{
             //    { "command", "auth" },
@@ -206,7 +222,7 @@ namespace beta.Infrastructure.Services
             //};
             StringBuilder builder = new();
             var g = builder.Append("{\"command\":\"auth\",\"token\":\"").Append(accessToken)
-                .Append("\",\"unique_id\":\"").Append(uid)
+                .Append("\",\"unique_id\":\"").Append(GeneratedUID)
                 .Append("\",\"session\":\"").Append(Session).Append("\"}\n").ToString();
             Client.Write(Encoding.UTF8.GetBytes(g));
         }
@@ -215,6 +231,10 @@ namespace beta.Infrastructure.Services
         {
             if (Client.TcpClient == null)
                 Client.Connect("116.202.155.226", 8002);
+            else if (!Client.TcpClient.Connected)
+            {
+                Client.Connect("116.202.155.226", 8002);
+            }
             //var result =
             //    Client.WriteLineAndGetReply("command=ask_session&version=0.20.1+12-g2d1fa7ef.git&user_agent=faf-client",
             //        TimeSpan.Zero);
@@ -288,6 +308,34 @@ namespace beta.Infrastructure.Services
             if (!PreviewNewLobbies && newGame.num_players == 0)
                 return;
 
+            foreach (var key in newGame.teams.Keys)
+            {
+                for (int i = 0; i < newGame.teams[key].Length; i++)
+                {
+                    var nick = newGame.teams[key][i];
+                    if (PlayerNameToId.TryGetValue(nick, out var id)) 
+                    {
+                        var player = Players[id];
+                        if (player.login == newGame.host)
+                        {
+                            player.GameState = newGame.password_protected ? GameState.PrivateHost : GameState.Host;
+                            continue;
+                        }
+
+                        if (newGame.launched_at == null)
+                            player.GameState = newGame.password_protected ? GameState.PrivateOpen : GameState.Open;
+                        else
+                        {
+                            var time = DateTime.UnixEpoch.AddSeconds(newGame.launched_at.Value);
+                            var difference = DateTime.UtcNow - time;
+                            if (difference.TotalSeconds < 300)
+                                player.GameState = newGame.password_protected ? GameState.PrivatePlaying5 : GameState.Playing5;
+                            else player.GameState = newGame.password_protected ? GameState.PrivatePlaying : GameState.Playing;
+                        }
+                    }
+                }
+            }
+
             bool found = false;
             var lenght = AvailableLobbies.Count;
             for (int i = 0; i < lenght; i++)
@@ -302,6 +350,7 @@ namespace beta.Infrastructure.Services
                         break;
                     }
                     AvailableLobbies[i] = newGame;
+                    
                     OnUpdateGameInfo(newGame);
 
                     found = true;
@@ -320,6 +369,11 @@ namespace beta.Infrastructure.Services
 
                 NewGameInfo?.Invoke(this, newGame);
             }
+        }
+        private void AddLaunchedLobby(GameInfoMessage game)
+        {
+            AvailableLobbies.Add(game);
+
         }
         protected virtual void OnUpdateGameInfo(EventArgs<GameInfoMessage> e) => UpdateGameInfo?.Invoke(this, e);
     }

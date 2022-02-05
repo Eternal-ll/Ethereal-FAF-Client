@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Server;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
@@ -25,22 +26,27 @@ namespace beta.Views
         #endregion
 
         private readonly IrcClient IrcClient;
-        private readonly ILobbySessionService LobbySessionService; 
+        private readonly ILobbySessionService LobbySessionService;
 
-
+        private readonly CollectionViewSource ChattersViewSource = new();
+        public ICollectionView ChattersView => ChattersViewSource.View;
+        private readonly object _lock = new();
         public ChatView()
         {
             InitializeComponent();
-            return;
             DataContext = this;
 
             LobbySessionService = App.Services.GetService<ILobbySessionService>();
 
+            BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
+            ChattersViewSource.Source = LobbySessionService.Players;
+            ChattersViewSource.Filter += ChattersViewSource_Filter;
+
             IrcClient = new IrcClient("116.202.155.226", 6697);
             
-            string nick = Properties.Settings.Default.PlayerNick;
-            string id = Properties.Settings.Default.PlayerId.ToString();
-            string password = Properties.Settings.Default.irc_password;
+            string nick = Settings.Default.PlayerNick;
+            string id = Settings.Default.PlayerId.ToString();
+            string password = Settings.Default.irc_password;
             IrcClient.Nick = nick;
             IrcClient.ServerPass = password;
             IrcClient.Connect();
@@ -49,21 +55,37 @@ namespace beta.Views
             IrcClient.UpdateUsers += IrcClient_UpdateUsers;
             IrcClient.OnConnect += IrcClient_OnConnect;
         }
+        private Dictionary<string, List<string>> Test = new();
+        private void ChattersViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            e.Accepted = false;
+            if (SelectedChannelName == null || SelectedChannelName == "#server") return;
+            var enumerator = Test[SelectedChannelName].GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current == ((PlayerInfoMessage)e.Item).login)
+                {
+                    e.Accepted = true;
+                    return;
+                }
+            }
+        }
 
         private readonly CollectionViewSource HistoryViewSource = new();
         public ICollectionView HistoryView => HistoryViewSource.View;
-
-
-
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
         {
             if (_ChannelUsers.TryGetValue(e.Channel, out var channel))
                 for (int i = 0; i < e.UserList.Length; i++)
                     channel.Add(e.UserList[i]);
+            if (Test.TryGetValue(e.Channel, out var channell))
+                for (int i = 0; i < e.UserList.Length; i++)
+                    channell.Add(e.UserList[i]);
             else
             {
                 _ChannelUsers.Add(e.Channel, new HashSet<string>(e.UserList));
+                Test.Add(e.Channel, new List<string>(e.UserList));
                 //for (int i = 0; i < e.UserList.Length; i++)
                 //    _ChannelUsers[e.Channel].Add(e.UserList[i]);
             }
@@ -106,6 +128,7 @@ namespace beta.Views
                 _SelectedChannelName = value;
                 OnPropertyChanged(nameof(SelectedChannelUsers));
                 OnPropertyChanged(nameof(SelectedChannelHistory));
+                ChattersView.Refresh();
             }
         }
         private void IrcClient_OnConnect(object sender, System.EventArgs e)

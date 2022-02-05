@@ -3,11 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
+             xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
              StartupUri="Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/ResourceDictionaries/Flags.xaml"/>
+                <ResourceDictionary>
+                    <cmd:CopyCommand x:Key="CopyCommand"/>
+                </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
@@ -42,7 +46,7 @@
                 </ui:ThemeResources>
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
-                <ResourceDictionary Source="Resources/SVG Icons/PathIcons.xaml"/>
+                <ResourceDictionary Source="Resources/ResourceDictionaries/PathIcons.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
