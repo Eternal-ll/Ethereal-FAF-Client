@@ -6,16 +6,14 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
 using System.Windows;
-using beta.Properties;
 
 namespace beta
 {
     public enum Folder
     {
-        MapsSmallPreviews = 1
+        MapsSmallPreviews = 1,
+        Emoji = 10
     }
     /// <summary>
     /// Interaction logic for App.xaml
@@ -32,6 +30,7 @@ namespace beta
             return folder switch
             {
                 Folder.MapsSmallPreviews => CurrentDirectory + "\\cache\\previews\\small\\",
+                Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)
             };
         }
@@ -46,41 +45,17 @@ namespace beta
 
             var host = Hosting;
 
-            //var start = new Thread(() =>
-            //{
-            //    StringBuilder builder = new();
-            //    Random random = new();
-
-            //    builder
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9))
-            //        .Append(random.Next(1, 9));
-
-            //    Settings.Default.session = builder.ToString();
-
-            //    var service = host.Services.GetRequiredService<ILobbySessionService>().GenerateUID(builder.ToString());
-            //});
-            //start.Name = "UID thread generator";
-
             host.Services.GetRequiredService<IIRCService>();
 
             base.OnStartup(e);
             await host.StartAsync().ConfigureAwait(false);
-
-            //start.Start();
         }
         protected override async void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
 
             var host = Hosting;
+
             await host.StopAsync().ConfigureAwait(false);
             host.Dispose();
             _Hosting = null;

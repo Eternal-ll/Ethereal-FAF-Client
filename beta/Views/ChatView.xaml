@@ -6,6 +6,7 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:local="clr-namespace:beta.Views"
              xmlns:sModels="clr-namespace:beta.Models.Server"
+             xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors" xmlns:controls="clr-namespace:beta.Resources.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:ChatView}">
@@ -124,16 +125,26 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <ListBox
-                        Background="Transparent"
                         ItemsSource="{Binding SelectedChannel.History}"
                         VirtualizingPanel.IsVirtualizing="True"
                         VirtualizingPanel.VirtualizationMode="Recycling"
-                        VirtualizingPanel.IsContainerVirtualizable="True">
+                        VirtualizingPanel.IsContainerVirtualizable="True"
+                        Background="Transparent">
                         <ListBox.Resources>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="Focusable" Value="False"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Margin" Value="2 0"/>
+                                <Setter Property="MaxHeight" Value="18"/>
+                                <Setter Property="Stretch" Value="Uniform"/>
+                            </Style>
+                            <Style TargetType="controls:GifImage">
+                                <Setter Property="Margin" Value="2 0"/>
+                                <Setter Property="MaxHeight" Value="18"/>
+                                <Setter Property="Stretch" Value="Uniform"/>
                             </Style>
                         </ListBox.Resources>
                         <ListBox.ItemTemplate>
@@ -145,16 +156,17 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
-                                    Grid.Column="1"
-                                    Text="{Binding Message}"
-                                    TextWrapping="Wrap"/>
+                                        Grid.Column="1"
+                                        behavior:TextBlockExtensions.BindableInlines="{Binding Message, Converter={StaticResource TextConverter}}"
+                                        TextWrapping="Wrap"/>
                                     <TextBlock 
-                                    Grid.Column="2"
-                                    Text="{Binding Created}"/>
+                                        Grid.Column="2"
+                                        Text="{Binding Created}"/>
                                 </Grid>
                             </ItemContainerTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+
                     <TextBox
                         Grid.Row="1"
                         Name="TextBox"
@@ -240,17 +252,18 @@
                             Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
                             />
                         <Canvas
+                            Margin="0 -8 0 0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top">
                             <Canvas
                                 Canvas.Right="0"
+                                Background="Transparent"
                                 Width="20"
                                 Height="{Binding ElementName=MoreWindow, Path=ActualHeight}"
                                 IsHitTestVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
                                             Path=IsMouseOver}"/>
                             <Border
                                 x:Name="MoreWindow"
-                                Margin="0 -8 0 0"
                                 Padding="10"
                                 CornerRadius="6"
                                 Canvas.Right="13"

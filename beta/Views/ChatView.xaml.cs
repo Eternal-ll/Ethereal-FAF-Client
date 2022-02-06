@@ -5,12 +5,16 @@ using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace beta.Views
 {
@@ -61,7 +65,7 @@ namespace beta.Views
         #endregion
 
         #region FilterText
-        private string _FilterText;
+        private string _FilterText = "";
         public string FilterText
         {
             get => _FilterText;
@@ -78,6 +82,7 @@ namespace beta.Views
         private void OnFilterText(object sender, FilterEventArgs e)
         {
             var filter = _FilterText;
+            if (filter.Length == 0) return;
             var player = (PlayerInfoMessage)e.Item;
             e.Accepted = player.login.Contains(filter, StringComparison.OrdinalIgnoreCase) || (player.clan != null && player.clan.Contains(filter, StringComparison.OrdinalIgnoreCase));
         }
@@ -122,14 +127,40 @@ namespace beta.Views
         #endregion
 
         #endregion
-
+        public string GGG => "gerge :test: tests :gweg : egweg:  : ewgew :eteg:";
+        public IList Inlines => new List<Inline>()
+        {
+            new Run() { Text = "Test" },
+            new Run() { Text = "Test" },
+            new Run() { Text = "Test" },
+            new InlineUIContainer()
+            {
+                Child =  new Image()
+                {
+                    Source = App.Current.Resources["QuestionIcon"] as ImageSource
+                }
+            },
+            new InlineUIContainer()
+            {
+                Child =  new Image(){Source = App.Current.Resources["QuestionIcon"] as ImageSource}
+            },
+            new InlineUIContainer()
+            {
+                Child =  new Image(){Source = App.Current.Resources["QuestionIcon"] as ImageSource}
+            },
+            new Run() { Text = "Test" },
+            new Run() { Text = "Test" },
+            new Run() { Text = "Test" },
+        };
         public ChatView()
         {
             InitializeComponent();
             DataContext = this;
-
             Channels.Add(new() { Name = "#server" });
             SelectedChannel = Channels[0];
+            TextBox.KeyDown += TextBox_KeyDown;
+            return;
+
 
             LobbySessionService = App.Services.GetService<ILobbySessionService>();
 
@@ -147,6 +178,14 @@ namespace beta.Views
             IrcClient.ChannelMessage += IrcClient_ChannelMessage;
             IrcClient.UpdateUsers += IrcClient_UpdateUsers;
             IrcClient.OnConnect += IrcClient_OnConnect;
+        }
+
+        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter) 
+            {
+                SelectedChannel.History.Add(new() { Message = TextBox.Text });
+            }
         }
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
