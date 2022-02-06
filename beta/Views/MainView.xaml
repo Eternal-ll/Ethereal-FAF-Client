@@ -109,6 +109,9 @@
                                              Margin="0 -32 0 0"
                                              HorizontalContentAlignment="Stretch"
                                              VerticalContentAlignment="Stretch"/>
+            <ui:NavigationView.Background>
+                <SolidColorBrush Color="Black" Opacity=".5"/>
+            </ui:NavigationView.Background>
         </ui:NavigationView>
 
         <TextBlock FontWeight="SemiBold"
