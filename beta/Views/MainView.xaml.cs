@@ -25,6 +25,7 @@ namespace beta.Views
 
             Pages = new UserControl[]
             {
+                new HomeView(),
                 new ChatView(),
                 new GlobalView(),
             };
