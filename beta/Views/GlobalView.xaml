@@ -9,11 +9,8 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:GlobalView}}">
     <Grid>
-        <Grid.Background>
-            <SolidColorBrush Color="Black" Opacity=".5"/>
-        </Grid.Background>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="32"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
@@ -80,7 +77,7 @@
                     </Style>
                 </ToggleButton.Style>
                 <Grid>
-                    <TextBlock
+                    <TextBlock  
                         Text="Filter"
                         Padding="24 0 0 0"
                         Margin="8 6">
@@ -98,11 +95,12 @@
                     <Canvas
                         HorizontalAlignment="Left"
                         VerticalAlignment="Bottom">
-                        <StackPanel
+                        <Border
+                            CornerRadius="0 4 4 4"
                             Margin="-1 1 0 0"
                             Background="{StaticResource NavigationViewDefaultPaneBackground}">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
+                            <Border.Style>
+                                <Style TargetType="Border">
                                     <Setter Property="Opacity" Value="0"/>
                                     <Style.Triggers>
                                         <Trigger Property="Opacity" Value="0">
@@ -120,19 +118,21 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </StackPanel.Style>
-                            <StackPanel.Effect>
+                            </Border.Style>
+                            <Border.Effect>
                                 <DropShadowEffect
                                     Color="#111111"
                                     Direction="-90"
                                     BlurRadius="10"/>
-                            </StackPanel.Effect>
-                            <ui:ToggleSwitch
+                            </Border.Effect>
+                            <StackPanel>
+                                <ui:ToggleSwitch
                                 Margin="10"
                                 Header="Hide private games"
                                 IsOn="{Binding IsPrivateGamesHidden}"
                                 VerticalAlignment="Top"/>
-                        </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </Canvas>
                 </Grid>
             </ToggleButton>
@@ -187,7 +187,10 @@
                     <ItemContainerTemplate>
                         <ui:ItemsRepeater
                             ItemsSource="{Binding Items}"
-                            ItemTemplate="{StaticResource LobbyContainerDefaultTemplate}">
+                            ItemTemplate="{StaticResource LobbyContainerDefaultTemplate}"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            VirtualizingPanel.IsContainerVirtualizable="True">
                             <ui:ItemsRepeater.Layout>
                                 <ui:UniformGridLayout 
                                     ItemsStretch="Fill"
