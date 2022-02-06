@@ -10,33 +10,96 @@
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:ChatView}">
     <Grid>
-        <Grid.Background>
-            <SolidColorBrush Color="Black" Opacity=".2"/>
-        </Grid.Background>
+        <Grid.Resources>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+        </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid>
+            <Grid.Resources>
+                <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#111111"/>
+                <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#111111"/>
+                <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+            </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="2"
-                       Text="Test title"
-                       Background="#40000000"
-                       Padding="20 2"/>
-            <ListBox ItemsSource="{Binding Channels.Keys, Mode=OneWay}"
-                     SelectedItem="{Binding SelectedChannelName}"
-                     Background="Transparent"
-                     Padding="20 0"
-                     Grid.Row="1">
+            <TextBox
+                Visibility="Hidden"
+                Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                Text="{Binding SelectedChannel.Name}"
+                FontWeight="DemiBold"
+                IsTabStop="False"
+                IsHitTestVisible="False"
+                HorizontalAlignment="Left"
+                Padding="20 6 20 10"
+                Margin="30 0"
+                BorderThickness="0"
+                ui:ControlHelper.CornerRadius="6"/>
+            <StackPanel Orientation="Horizontal">
+                <ui:TitleBarButton 
+                    Margin="30 0"
+                    HorizontalAlignment="Left"
+                    Width="NaN"
+                    Padding="0"
+                    HorizontalContentAlignment="Left"
+                    HoverBackground="Transparent"
+                    PressedBackground="Transparent">
+                    <StackPanel 
+                        Orientation="Horizontal">
+                        <ComboBox
+                            ItemsSource="{Binding Channels}"
+                            SelectedItem="{Binding SelectedChannel}"
+                            BorderThickness="0"
+                            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                            DisplayMemberPath="FormattedName"
+                            Padding="20 6 20 10"
+                            FontWeight="DemiBold"
+                            ui:ControlHelper.CornerRadius="6"/>
+                        <Button
+                            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                            ToolTip="Join channel"
+                            Margin="10 0 0 0"
+                            Content=" + "
+                            FontWeight="Bold"
+                            ui:ControlHelper.CornerRadius="6">
+                            <ui:FlyoutService.Flyout>
+                                <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Margin="-6">
+                                        <TextBox
+                                        x:Name="JoinChannelInput"
+                                        BorderThickness="0"
+                                        MinWidth="100"
+                                        ui:ControlHelper.PlaceholderText="channel"/>
+                                        <Button
+                                        Content="Join"
+                                        FontSize="13"
+                                        Click="JoinChannel"/>
+                                    </StackPanel>
+                                </ui:Flyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
+                        <TextBlock Text="{Binding SelectedChannel.Title}"/>
+                    </StackPanel>
+                </ui:TitleBarButton>
+            </StackPanel>
+            <ListBox
+                ItemsSource="{Binding Channels, Mode=OneWay}"
+                SelectedItem="{Binding SelectedChannel}"
+                Background="Transparent"
+                Padding="20 0"
+                Visibility="Hidden"
+                Grid.Row="1"
+                ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
+                        <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.Resources>
@@ -44,98 +107,278 @@
                         <Setter Property="Padding" Value="20 4"/>
                     </Style>
                 </ListBox.Resources>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
-            <ListBox Grid.Row="3"
-                     ItemsSource="{Binding HistoryView}"
-                     Background="Transparent"/>
-            <TextBox Name="TextBox"
-                     Grid.Row="4"
-                     BorderThickness="0"
-                     ui:ControlHelper.PlaceholderText="Write message">
-                <TextBox.Resources>
-                    <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                        <Setter Property="BorderThickness" Value="0"/>
-                    </Style>
-                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
-                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
-                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                </TextBox.Resources>
-            </TextBox>
+            <Border
+                Margin="30"
+                Grid.Row="1"
+                CornerRadius="6"
+                Background="{DynamicResource NavigationViewExpandedPaneBackground}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ListBox
+                        Background="Transparent"
+                        ItemsSource="{Binding SelectedChannel.History}"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        VirtualizingPanel.IsContainerVirtualizable="True">
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <ItemContainerTemplate>
+                                <Grid Margin="10 0 24 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width=".05*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding Message}"
+                                    TextWrapping="Wrap"/>
+                                    <TextBlock 
+                                    Grid.Column="2"
+                                    Text="{Binding Created}"/>
+                                </Grid>
+                            </ItemContainerTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBox
+                        Grid.Row="1"
+                        Name="TextBox"
+                        BorderThickness="0"
+                        ui:ControlHelper.PlaceholderText="Write message">
+                        <TextBox.Resources>
+                            <Style x:Key="TextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedChannel.Name}"
+                                                 Value="#server">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
+                        </TextBox.Resources>
+                    </TextBox>
+                </Grid>
+            </Border>
         </Grid>
-        <!--<GridSplitter Grid.Column="1"
-                      Width="2"
-                      ShowsPreview="True"
-                      HorizontalAlignment="Left">
-        </GridSplitter>-->
-        <Grid Grid.Column="2" Width="300"
-              Background="#20000000">
-                <Grid.Resources>
-                    <Style TargetType="Grid">
-                        <Style.Triggers>    
-                            <!--<DataTrigger Binding="{Binding SelectedItem.Header, ElementName=Channels}" Value="+">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>-->
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Resources>
+        <Grid 
+            Grid.Column="2"
+            Margin="2 0 0 0"
+            Panel.ZIndex="2"
+            Background="{DynamicResource NavigationViewExpandedPaneBackground}">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedChannel.Users.Count}"
+                                     Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="32"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <ui:AutoSuggestBox Name="SeachPlayerSuggestBox" ToolTip="Search players" ui:ControlHelper.PlaceholderText="Search player"/>
-            <!--<TextBlock Text="{Binding ChattersView.Count}"
-                       Grid.Row="1"/>-->
-            <ScrollViewer Grid.Row="2" Visibility="Collapsed">
-                <!--<ItemsControl ItemsSource="{Binding ChattersView}">
-                </ItemsControl>-->
-            </ScrollViewer>
+            <Grid.Resources>
+                <Storyboard x:Key="OpacityAnimationShow">
+                    <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" 
+                    To="1" 
+                    Duration="0:0:0.2"/>
+                </Storyboard>
+                <Storyboard x:Key="OpacityAnimationHide">
+                    <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" 
+                    To="0"
+                    Duration="0:0:0.2"/>
+                </Storyboard>
+            </Grid.Resources>
             
-            <ListBox Grid.Row="2"
-                     Visibility="Visible"
-                     Background="Transparent"
-                     ItemsSource="{Binding SelectedChannelUsers}"
-                     Name="Users"
-                     VirtualizingPanel.IsVirtualizing="True">
+            <TextBlock
+                Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                Text="Chat users"
+                FontWeight="DemiBold"
+                Padding="0 6 0  0"
+                Margin="18 0 0 0"/>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button
+                    Margin="8 6 0 0"
+                    Height="30"
+                    Width="30"
+                    Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+                    Padding="0"
+                    ui:ControlHelper.CornerRadius="4"
+                    ToolTip="More"
+                    VerticalAlignment="Top">
+                    <Grid>
+                        <Path
+                            Margin="6"
+                            Stretch="Uniform"
+                            Fill="White"
+                            Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
+                            />
+                        <Canvas
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
+                            <Canvas
+                                Canvas.Right="0"
+                                Width="20"
+                                Height="{Binding ElementName=MoreWindow, Path=ActualHeight}"
+                                IsHitTestVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                            Path=IsMouseOver}"/>
+                            <Border
+                                x:Name="MoreWindow"
+                                Margin="0 -8 0 0"
+                                Padding="10"
+                                CornerRadius="6"
+                                Canvas.Right="13"
+                                Background="{StaticResource NavigationViewDefaultPaneBackground}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Opacity" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="Opacity" Value="0">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                            Path=IsMouseOver}"
+                                                     Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Effect>
+                                    <DropShadowEffect
+                                        Color="#111111"
+                                        Opacity=".4"
+                                        Direction="-90"
+                                        BlurRadius="30"/>
+                                </Border.Effect>
+                                <StackPanel MinWidth="140">
+                                    <TextBlock Text="Filter players" FontWeight="DemiBold" FontSize="14"/>
+                                    <Separator Opacity=".5" Margin="0 6 0 10"/>
+                                    <ComboBox
+                                        FontSize="13"
+                                        SelectedIndex="0"
+                                        ui:ControlHelper.Header="Chat users"
+                                        HorizontalAlignment="Stretch"
+                                        BorderThickness="0">
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="Players only"/>
+                                    </ComboBox>
+
+
+                                    <TextBlock Text="Sort players" FontWeight="DemiBold" FontSize="14" Margin="0 20 0 0"/>
+                                    <Separator Opacity=".5" Margin="0 6 0 10"/>
+                                    <ComboBox
+                                        FontSize="13"
+                                        SelectedIndex="0"
+                                        ui:ControlHelper.Header="By rating"
+                                        HorizontalAlignment="Stretch"
+                                        BorderThickness="0">
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="Ladder"/>
+                                        <ComboBoxItem Content="Global"/>
+                                        <ComboBoxItem Content="2 vs 2"/>
+                                        <ComboBoxItem Content="4 vs 4"/>
+                                    </ComboBox>
+                                    <ui:ToggleSwitch
+                                        HorizontalAlignment="Stretch"
+                                        FontSize="13"
+                                        Margin="0 10 0 0"
+                                        Header="By TMM league"
+                                        ToolTip="Sorting players by their Team Match Making league place"/>
+                                </StackPanel>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                </Button>
+                <TextBox
+                    Grid.Column="1"
+                    BorderThickness="0"
+                    Margin="9 4 10 10"
+                    ui:ControlHelper.CornerRadius="6"
+                    ui:ControlHelper.PlaceholderText="Search players"
+                    Text="{Binding SelectedChannel.FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+            <ListBox 
+                ItemsSource="{Binding SelectedChannel.UsersView}"
+                Grid.Row="2"
+                SelectedItem="{x:Null}"
+                HorizontalContentAlignment="Stretch"
+                Background="Transparent"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                VirtualizingPanel.IsContainerVirtualizable="True">
                 <ListBox.Resources>
-                    <!--<SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />-->
-                    <!--<SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
-                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
-                    <SolidColorBrush x:Key="ButtonBorderBrushChecked" Color="Transparent" />-->
-                </ListBox.Resources>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                        <Setter Property="Padding" Value="1"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                        <Setter Property="Padding" Value="0"/>
                         <Setter Property="Focusable" Value="False"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     </Style>
-                </ListBox.ItemContainerStyle>
+                </ListBox.Resources>
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <ui:AppBarButton Width="NaN"
-                                         HorizontalAlignment="Stretch">
+                    <ItemContainerTemplate>
+                        <ui:AppBarButton 
+                            Width="NaN"
+                            HorizontalAlignment="Stretch"
+                            d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
                             <ui:AppBarButton.Flyout>
-                                <ui:Flyout Placement="LeftEdgeAlignedTop">
+                                <ui:Flyout
+                                    Placement="LeftEdgeAlignedTop">
                                     <StackPanel>
                                         <ui:AppBarElementContainer>
-                                            <StackPanel DataContext="{Binding Converter={StaticResource GetPlayerInfoConverter}, Mode=OneWay}"
-                                                    d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}"
-                                                        x:Name="panel">
-                                                <StackPanel Orientation="Horizontal"
-                                                            Margin="-16 -10 -16 10">
+                                            <StackPanel
+                                                x:Name="panel">
+                                                <StackPanel
+                                                    Orientation="Horizontal"
+                                                    Margin="-16 -10 -16 10">
                                                     <StackPanel.Background>
                                                         <SolidColorBrush Color="Black" Opacity=".2"/>
                                                     </StackPanel.Background>
-                                                    <Image Source="{Binding Flag}" Margin="10 4" ToolTip="{Binding country}"/>
-                                                    <TextBlock Text="{Binding login}" VerticalAlignment="Center" Margin="0 0 14 3"
-                                                               FontWeight="DemiBold">
+                                                    <Image
+                                                        Source="{Binding Flag}"
+                                                        Margin="10 4"
+                                                        ToolTip="{Binding country}"/>
+                                                    <TextBlock 
+                                                        Text="{Binding login}"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0 0 14 3"
+                                                        FontWeight="DemiBold">
                                                         <TextBlock.ContextMenu>
                                                             <ContextMenu>
-                                                                <MenuItem Command="{StaticResource CopyCommand}"
-                                                                      CommandParameter="{Binding login}"
-                                                                      Header="Copy">
+                                                                <MenuItem 
+                                                                    Command="{StaticResource CopyCommand}"
+                                                                    CommandParameter="{Binding login}"
+                                                                    Header="Copy">
                                                                     <MenuItem.Icon>
                                                                         <ui:SymbolIcon Symbol="Copy"/>
                                                                     </MenuItem.Icon>
@@ -322,7 +565,7 @@
                                                                         <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
                                                                         <Run Style="{StaticResource RatingDifferenceRunStyle}"/>
                                                                     </TextBlock>
-                                                                    
+
                                                                     <!--<TextBlock Text="{Binding rating[1], StringFormat=' +-{0}', Mode=OneWay}" Grid.Column="2"/>-->
                                                                     <!--<TextBlock Text="G:" Grid.Column="3" Margin="10 0 10 0" HorizontalAlignment="Right"/>-->
                                                                     <TextBlock Text="{Binding number_of_games, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Right"
@@ -353,18 +596,18 @@
                             </ui:AppBarButton.Flyout>
                             <ui:AppBarButton.Template>
                                 <ControlTemplate TargetType="ui:AppBarButton">
-                                    <Grid>
-                                        <Grid DataContext="{Binding Converter={StaticResource GetPlayerInfoConverter}}"
-                                              d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
+                                    <Grid d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
+                                        <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Image Source="{Binding Flag}"
-                                                   Stretch="None"
-                                                   ToolTip="{Binding country}"
-                                                   Margin="0 0 10 0"/>
+                                            <Image 
+                                                    Source="{Binding Flag}"
+                                                    Stretch="None"
+                                                    ToolTip="{Binding country}"
+                                                    Margin="10 0 10 0"/>
                                             <StackPanel Grid.Column="1"
                                                         Orientation="Horizontal">
                                                 <TextBlock Text="{Binding login}"
@@ -397,9 +640,66 @@
                                 </ControlTemplate>
                             </ui:AppBarButton.Template>
                         </ui:AppBarButton>
-                    </DataTemplate>
+                    </ItemContainerTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <Canvas
+                Grid.Row="2"
+                VerticalAlignment="Top"
+                Height="40"
+                Panel.ZIndex="1"
+                SnapsToDevicePixels="True"
+                Background="#111111"
+                IsHitTestVisible="False">
+                <Canvas.OpacityMask>
+                    <LinearGradientBrush EndPoint=".5, 0" StartPoint=".5, 1">
+                        <GradientStop Color="#00000000" Offset="0"/>
+                        <GradientStop Color="Black" Offset=".9"/>
+                    </LinearGradientBrush>
+                </Canvas.OpacityMask>
+                <Canvas.Style>
+                    <Style TargetType="Canvas">
+                        <Setter Property="Opacity" Value="0"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=ScrollViewer, Path=ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                                     Value="True">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Canvas.Style>
+            </Canvas>
         </Grid>
+        <GridSplitter
+            Grid.Column="1"
+            Width="2"
+            Panel.ZIndex="1"
+            HorizontalAlignment="Left"
+            ToolTip="Splitter">
+            <GridSplitter.Style>
+                <Style TargetType="GridSplitter">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedChannel.Users.Count}"
+                                     Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="BlueViolet"/>
+                            <Setter Property="Panel.ZIndex" Value="2"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter Property="Background" Value="BlueViolet"/>
+                            <Setter Property="Panel.ZIndex" Value="2"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </GridSplitter.Style>
+        </GridSplitter>
     </Grid>
 </UserControl>

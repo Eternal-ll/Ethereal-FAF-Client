@@ -2,8 +2,10 @@
 using beta.Models;
 using beta.Models.Server;
 using beta.Properties;
+using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
+using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -12,6 +14,80 @@ using System.Windows.Data;
 
 namespace beta.Views
 {
+    public struct ChannelMessage
+    {
+        public string From { get; set; }
+        public string Message { get; set; }
+        public DateTime Created => DateTime.Now;
+    }
+    public class Channel : ViewModel
+    {
+        #region Name
+        private string _Name;
+        public string Name
+        {
+            get => _Name;
+            set
+            {
+                if (Set(ref _Name, value))
+                    OnPropertyChanged(nameof(FormattedName));
+            }
+        }
+        public string FormattedName => _Name.Substring(1);
+        #endregion
+
+        #region Title
+        private string _Title;
+        public string Title
+        {
+            get => _Title;
+            set => Set(ref _Title, value);
+        }
+        #endregion
+
+        #region History
+        private readonly ObservableCollection<ChannelMessage> _History = new();
+        public ObservableCollection<ChannelMessage> History => _History;
+        #endregion
+
+        #region Users
+        private readonly ObservableCollection<PlayerInfoMessage> _Users = new();
+        public ObservableCollection<PlayerInfoMessage> Users => _Users;
+        #endregion
+
+        #region UsersView
+        public readonly CollectionViewSource UsersViewSource = new();
+        public ICollectionView UsersView => UsersViewSource.View;
+        #endregion
+
+        #region FilterText
+        private string _FilterText;
+        public string FilterText
+        {
+            get => _FilterText;
+            set
+            {
+                if (Set(ref _FilterText, value))
+                {
+                    UsersView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        private void OnFilterText(object sender, FilterEventArgs e)
+        {
+            var filter = _FilterText;
+            var player = (PlayerInfoMessage)e.Item;
+            e.Accepted = player.login.Contains(filter, StringComparison.OrdinalIgnoreCase) || (player.clan != null && player.clan.Contains(filter, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public Channel()
+        {
+            UsersViewSource.Source = Users;
+            UsersViewSource.Filter += OnFilterText;
+        }
+    }
     /// <summary>
     /// Interaction logic for ChatView.xaml
     /// </summary>
@@ -27,20 +103,37 @@ namespace beta.Views
 
         private readonly IrcClient IrcClient;
         private readonly ILobbySessionService LobbySessionService;
+        //private readonly object _lock = new();
 
-        private readonly CollectionViewSource ChattersViewSource = new();
-        public ICollectionView ChattersView => ChattersViewSource.View;
-        private readonly object _lock = new();
+        #region Properties
+        public ObservableCollection<Channel> Channels { get; } = new();
+
+        #region SelectedChannel
+        private Channel _SelectedChannel;
+        public Channel SelectedChannel
+        {
+            get => _SelectedChannel;
+            set
+            {
+                _SelectedChannel = value;
+                OnPropertyChanged(nameof(SelectedChannel));
+            }
+        }
+        #endregion
+
+        #endregion
+
         public ChatView()
         {
             InitializeComponent();
             DataContext = this;
 
+            Channels.Add(new() { Name = "#server" });
+            SelectedChannel = Channels[0];
+
             LobbySessionService = App.Services.GetService<ILobbySessionService>();
 
-            BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
-            ChattersViewSource.Source = LobbySessionService.Players;
-            ChattersViewSource.Filter += ChattersViewSource_Filter;
+            //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
 
             IrcClient = new IrcClient("116.202.155.226", 6697);
             
@@ -55,133 +148,98 @@ namespace beta.Views
             IrcClient.UpdateUsers += IrcClient_UpdateUsers;
             IrcClient.OnConnect += IrcClient_OnConnect;
         }
-        private Dictionary<string, List<string>> Test = new();
-        private void ChattersViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            e.Accepted = false;
-            if (SelectedChannelName == null || SelectedChannelName == "#server") return;
-            var enumerator = Test[SelectedChannelName].GetEnumerator();
-            while (enumerator.MoveNext())
-            {
-                if (enumerator.Current == ((PlayerInfoMessage)e.Item).login)
-                {
-                    e.Accepted = true;
-                    return;
-                }
-            }
-        }
-
-        private readonly CollectionViewSource HistoryViewSource = new();
-        public ICollectionView HistoryView => HistoryViewSource.View;
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
         {
-            if (_ChannelUsers.TryGetValue(e.Channel, out var channel))
-                for (int i = 0; i < e.UserList.Length; i++)
-                    channel.Add(e.UserList[i]);
-            if (Test.TryGetValue(e.Channel, out var channell))
-                for (int i = 0; i < e.UserList.Length; i++)
-                    channell.Add(e.UserList[i]);
-            else
+            ObservableCollection<PlayerInfoMessage> users = null;
+            for (int i = 0; i < Channels.Count; i++)
             {
-                _ChannelUsers.Add(e.Channel, new HashSet<string>(e.UserList));
-                Test.Add(e.Channel, new List<string>(e.UserList));
-                //for (int i = 0; i < e.UserList.Length; i++)
-                //    _ChannelUsers[e.Channel].Add(e.UserList[i]);
+                var channel = Channels[i];
+                if (channel.Name == e.Channel)
+                {
+                    users = channel.Users;
+                    break;
+                }
             }
-            if (SelectedChannelName == e.Channel)
-                SelectedChannelName = SelectedChannelName;
-                //OnPropertyChanged(nameof(SelectedChannelUsers));
-        }
 
-        private readonly Dictionary<string, BindingList<string>> _Channels = new()
-        {
-            { "#server", new BindingList<string>() }
-        };
-
-        private readonly Dictionary<string, HashSet<string>> _ChannelUsers = new();
-
-        public Dictionary<string, BindingList<string>> Channels => _Channels;
-
-        public HashSet<string> SelectedChannelUsers => SelectedChannelName != null ? _ChannelUsers.ContainsKey(SelectedChannelName) ? _ChannelUsers[SelectedChannelName] : null : null;
-
-        //public IList<string> SelectedChannelHistory => SelectedChannelName != null ? _Channels[SelectedChannelName] : null;
-        private List<string> t = new();
-        public IList<string> SelectedChannelHistory => t;
-        private BindingList<string> _BindingList = new();
-        public BindingList<string> BindingList
-        {
-            get => _BindingList;
-            set
+            for (int i = 0; i < e.UserList.Length; i++)
             {
-                _BindingList = value;
-                OnPropertyChanged();
+                var playerInfo = LobbySessionService.GetPlayerInfo(e.UserList[i]);
+                if (playerInfo != null)
+                    users.Add(playerInfo);
             }
         }
-
-        private string _SelectedChannelName;
-        public string SelectedChannelName
-        {
-            get => _SelectedChannelName;
-            set
-            {
-                _SelectedChannelName = value;
-                OnPropertyChanged(nameof(SelectedChannelUsers));
-                OnPropertyChanged(nameof(SelectedChannelHistory));
-                ChattersView.Refresh();
-            }
-        }
-        private void IrcClient_OnConnect(object sender, System.EventArgs e)
+        private void IrcClient_OnConnect(object sender, EventArgs e)
         {
             IrcClient.JoinChannel("#aeolus");
-            _Channels.Add("#aeolus", new BindingList<string>());
-            OnPropertyChanged(nameof(Channels));
+            Channels.Add(new() { Name = "#aeolus" });
         }
 
         private void IrcClient_ChannelMessage(object sender, ChannelMessageEventArgs e)
         {
             e.Message = e.Message.Replace('\n', ' ');
+            e.Message = e.Message.Replace('\r', ' ');
             e.From = e.From.Replace('\n', ' ');
-            var msg = e.From + ": " + e.Message;
-            if (_Channels.TryGetValue(e.Channel, out var channel)) 
-                channel.Add(msg);
-            else
+            e.From = e.From.Replace('\r', ' ');
+
+            for (int i = 0; i < Channels.Count; i++)
             {
-                _Channels.Add(e.Channel, new BindingList<string>() { msg });
-                OnPropertyChanged(nameof(Channels));
+                var channel = Channels[i];
+                if (channel.Name == e.Channel)
+                {
+                    channel.History.Add(new()
+                    {
+                        From = e.From,
+                        Message = e.Message
+                    });
+                    break;
+                }
             }
-            if (SelectedChannelName == e.Channel)
-                SelectedChannelName = SelectedChannelName;
-                //OnPropertyChanged(nameof(SelectedChannelHistory));
         }
 
         private void IrcClient_ServerMessage(object sender, StringEventArgs e)
         {
             e.Result = e.Result.Replace('\n', ' ');
-            _Channels["#server"].Add(e.Result);
-            if (SelectedChannelName == "#server")
-                SelectedChannelName = SelectedChannelName;
+            e.Result = e.Result.Replace('\r', ' ');
+            Channels[0].History.Add(new() { Message = e.Result });
         }
 
-        private bool s = false;
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(TextBox.Text)) return;
-            
-            string nick = Properties.Settings.Default.PlayerNick;
-            var channel = SelectedChannelName;
+
+            string nick = Settings.Default.PlayerNick;
+            var channel = SelectedChannel.Name;
             var msg = TextBox.Text;
             IrcClient.SendMessage(channel, msg);
 
-            msg = nick + ": " + msg;
-
-            _Channels[channel].Add(msg);
-
-            if (SelectedChannelName == channel)
-                SelectedChannelName = SelectedChannelName;
-                //OnPropertyChanged(nameof(SelectedChannelHistory));
-
+            SelectedChannel.History.Add(new()
+            {
+                From = nick,
+                Message = msg
+            });
             TextBox.Clear();
+        }
+
+        private void JoinChannel(object sender, RoutedEventArgs e)
+        {
+            var channel = JoinChannelInput.Text;
+            if (channel[0] != '#')
+                channel = "#" + channel;
+
+            for (int i = 0; i < Channels.Count; i++)
+            {
+                if (Channels[i].Name == channel)
+                {
+                    // raise something
+                    return;
+                }
+            }
+
+            IrcClient.JoinChannel(channel);
+            Channels.Add(new() { Name = channel });
+
+            JoinChannelInput.Text = string.Empty;
         }
     }
 }
