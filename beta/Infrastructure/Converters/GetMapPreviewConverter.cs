@@ -1,54 +1,71 @@
-﻿using beta.Models.Server;
+﻿using beta.Models;
+using beta.Models.Server;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Net.Cache;
 
 namespace beta.Infrastructure.Converters
 {
     public class GetMapPreviewConverter : IValueConverter
     {
-        private readonly IList<KeyValuePair<string, object>> Cache = new List<KeyValuePair<string, object>>();
+        private readonly IList<BitmapImage> Cache = new List<BitmapImage>();
 
         private object Test(string mapName)
         {
-            var lenght = Cache.Count;
-            for (int i = 0; i < lenght; i++)
+            mapName += ".png";
+            for (int i = 0; i < Cache.Count; i++)
             {
-                if (Cache[i].Key == mapName) return Cache[i].Value;
+                var cache = Cache[i];
+                if (cache.UriSource.Segments[^1] == mapName)
+                    return cache;
             }
+
             var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
+
             if (!Directory.Exists(cacheFolder))
                 Directory.CreateDirectory(cacheFolder);
 
-            var localFilePath = cacheFolder + mapName + ".png";
-            BitmapImage image = null;
+            BitmapImage image = new();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+
+            RequestCachePolicy cachePolicy = new(RequestCacheLevel.NoCacheNoStore);
+
+            var localFilePath = cacheFolder + mapName;
             if (File.Exists(localFilePath))
             {
-                image = new BitmapImage(new Uri(localFilePath));
+                image.UriSource = new Uri(localFilePath, UriKind.Absolute);
+                image.EndInit();
                 image.DecodePixelHeight = 90;
                 image.DecodePixelWidth = 90;
                 image.Freeze();
 
-                Cache.Add(new(mapName, image));
+                Cache.Add(image);
                 return image;
             }
+            image.UriSource = new Uri("https://content.faforever.com/maps/previews/small/" + mapName);
+            image.EndInit();
+            image.DecodePixelHeight = 90;
+            image.DecodePixelWidth = 90;
 
-            var uri = new Uri("https://content.faforever.com/maps/previews/small/" + mapName + ".png", UriKind.Absolute);
-            image = new BitmapImage(uri, new(System.Net.Cache.RequestCacheLevel.BypassCache));
-            image.DownloadCompleted += (sender, arg) =>
+            image.DownloadCompleted += (sender, args) =>
             {
-                BitmapEncoder encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(image));
-                using var fileStream = new FileStream(localFilePath, FileMode.Create);
-                encoder.Save(fileStream);
-                image.DecodePixelWidth = 90;
-                image.DecodePixelWidth = 90;
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
+
+                using var filestream = new FileStream(localFilePath, FileMode.Create);
+
+                encoder.Save(filestream);
+                Cache.Add(image);
+                image.DownloadCompleted -= (sender, args) => { };
                 image.Freeze();
-                Cache.Add(new(mapName, image));
             };
+            
             return image;
 
         }

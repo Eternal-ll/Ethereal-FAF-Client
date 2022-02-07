@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,11 +11,6 @@ using System.Windows;
 
 namespace beta
 {
-    public enum Folder
-    {
-        MapsSmallPreviews = 1,
-        Emoji = 10
-    }
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -31,17 +27,24 @@ namespace beta
             {
                 Folder.MapsSmallPreviews => CurrentDirectory + "\\cache\\previews\\small\\",
                 Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
+                Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)
             };
         }
         protected override async void OnStartup(StartupEventArgs e)
         {
             IsDesignMode = false;
-            var t = CurrentDirectory;
-            var g = Directory.GetCurrentDirectory();
-            string mapPreviewsCachePath = CurrentDirectory + "\\cache\\previews\\small\\";
-            if (Directory.Exists(mapPreviewsCachePath))
-                Directory.CreateDirectory(mapPreviewsCachePath);
+
+            string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);
+            if (Directory.Exists(mapPreviews))
+                Directory.CreateDirectory(mapPreviews);
+
+            string emojisCache = GetPathToFolder(Folder.Emoji);
+            if (Directory.Exists(emojisCache))
+                Directory.CreateDirectory(emojisCache);
+
+            mapPreviews = null;
+            emojisCache = null;
 
             var host = Hosting;
 

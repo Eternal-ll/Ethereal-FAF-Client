@@ -1,6 +1,9 @@
-﻿using System;
+﻿using beta.Models;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Cache;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
@@ -8,23 +11,47 @@ namespace beta.Infrastructure.Converters
 {
     public class UriToCachedImageConverter : IValueConverter
     {
-        // CURRENTLY UNUSED !!!!!!
+        private readonly IList<BitmapImage> Cache = new List<BitmapImage>();
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string mapName = (string)value + ".png";
+            if(parameter == null)
+                throw new ArgumentNullException(nameof(parameter));
 
-            var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
+            Folder folder = (Folder)parameter;
+
+            Uri url = (Uri)value;
+            string fileName = url.Segments[^1];
+
+            for (int i = 0; i < Cache.Count; i++)
+            {
+                var cache = Cache[i];
+                if (cache.UriSource.Segments[^1] == fileName)
+                    return cache;
+            }
+
+            var cacheFolder = App.GetPathToFolder(folder);
 
             if (!Directory.Exists(cacheFolder))
                 Directory.CreateDirectory(cacheFolder);
 
-            var localFilePath = cacheFolder + mapName;
+            BitmapImage image = new();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
 
+            RequestCachePolicy cachePolicy = new(RequestCacheLevel.NoCacheNoStore);
+
+            var localFilePath = cacheFolder + fileName;
             if (File.Exists(localFilePath))
-                return BitmapFrame.Create(new Uri(localFilePath, UriKind.Absolute));
+            {
+                image.UriSource = new Uri(localFilePath, UriKind.Absolute);
+                image.EndInit();
 
-            var uri = new Uri("https://content.faforever.com/maps/previews/small/" + mapName, UriKind.Absolute);
-            var image = new BitmapImage(uri, new(System.Net.Cache.RequestCacheLevel.BypassCache));
+                Cache.Add(image);
+                return image;
+            }
+            image.UriSource = url;
+            image.EndInit();
+
             image.DownloadCompleted += (sender, args) =>
             {
                 var encoder = new PngBitmapEncoder();
@@ -33,6 +60,8 @@ namespace beta.Infrastructure.Converters
                 using var filestream = new FileStream(localFilePath, FileMode.Create);
 
                 encoder.Save(filestream);
+                Cache.Add(image);
+                image.DownloadCompleted -= (sender, args) => { };
             };
 
             return image;
