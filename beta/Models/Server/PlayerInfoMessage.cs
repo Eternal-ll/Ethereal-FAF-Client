@@ -23,6 +23,13 @@ namespace beta.Models.Server
         Playing5 = 9,
         PrivatePlaying5 = 10
     }
+
+    public struct PlayerAvatar
+    {
+        public Uri url { get; set; }
+        public string tooltip { get; set; }
+    }
+
     public class PlayerInfoMessage : ViewModel, IServerMessage
     {
         #region Custom properties
@@ -77,15 +84,17 @@ namespace beta.Models.Server
 
         #endregion
 
+        public string command { get; set; }
+
         public int id { get; set; }
         public string login { get; set; }
         public string country { get; set; }
         public string clan { get; set; }
         public Dictionary<string, Rating> ratings { get; set; }
-        public double[] global_rating { get; set; }
-        public double[] ladder_rating { get; set; }
-        public int number_of_games { get; set; }
-        public string command { get; set; }
+        //public double[] global_rating { get; set; }
+        //public double[] ladder_rating { get; set; }
+        //public int number_of_games { get; set; }
+        public PlayerAvatar? avatar { get; set; }
 
         public PlayerInfoMessage[] players { get; set; }
     }
