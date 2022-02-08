@@ -1,4 +1,7 @@
-﻿using beta.Resources.Controls;
+﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
+using beta.Resources.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -37,10 +40,13 @@ namespace beta.Infrastructure.Converters
                 ImageSource = App.Current.Resources["QuestionIcon"] as ImageSource
             }
         };
-        private Image GetImage(ImageSource imageSource) => new Image
+
+        private readonly ILobbySessionService LobbySessionService;
+        public TextConverter()
         {
-            Source = imageSource
-        };
+            LobbySessionService = App.Services.GetService<ILobbySessionService>();
+        }
+
         private InlineUIContainer GetEmoji(string emoji)
         {
             emoji = emoji.Substring(1, emoji.Length - 2);
@@ -171,46 +177,112 @@ namespace beta.Infrastructure.Converters
             if (value == null) return null;
             var text = value as string;
             IList<Inline> Inlines = new List<Inline>();
-            string textEmoji = string.Empty;
-            StringBuilder emojiBuilder = new();
 
+            StringBuilder emojiBuilder = new();
+            StringBuilder playerBuilder = new();
             StringBuilder textBuilder = new();
 
-            int start;
-            int inlineIndex = 0;
-            for (int i = 0; i < text.Length; i++)
+            StringBuilder sb = new();
+
+            var len = text.Length;
+
+            for (int i = 0; i < len; i++)
             {
-                if (emojiBuilder.Length > 0)
+                var letter = text[i];
+                if (letter == ':')
                 {
-                    if (text[i] == ' ')
+                    sb.Append(letter);
+                    Char innerL = '0';
+                    while (innerL != ':' && i < len - 1)
                     {
-                        emojiBuilder.Clear();
-                        continue;
-                    }
+                        i++;
+                        innerL = text[i];
 
-                    emojiBuilder.Append(text[i]);
-                    if (text[i] == ':')
+                        if (innerL == ' ')
+                        {
+                            textBuilder.Append(sb);
+                            sb.Clear();
+                            break;
+                        }
+                        sb.Append(innerL);
+                    }
+                    if (sb.Length <= 2)
                     {
-                        Inlines.Add(GetEmoji(emojiBuilder.ToString()));
-                        inlineIndex++;
-                        emojiBuilder.Clear();
+                        textBuilder.Append(sb);
+                        sb.Clear();
                     }
-                    continue;
-                }
-
-                if (text[i] == ':' && text[i + 1] != ' ')
-                {
                     Inlines.Add(new Run()
                     {
                         Text = textBuilder.ToString()
                     });
-                    inlineIndex++;
                     textBuilder.Clear();
 
-                    emojiBuilder.Append(text[i]);
+                    if (sb.Length > 2)
+                    {
+                        Inlines.Add(GetEmoji(sb.ToString()));
+                        sb.Clear();
+                    }
                 }
-                else textBuilder.Append(text[i]);
+                else if (letter == '@')
+                {
+                    sb.Append(letter);
+                    Char innerL = '0';
+                    while (innerL != ' ' && i < len - 1)
+                    {
+                        i++;
+                        innerL = text[i];
+                        if (innerL == '@')
+                        {
+                            i--;
+                            break;
+                        }
+                        sb.Append(innerL);
+                    }
+
+                    if (sb.Length <= 2)
+                    {
+                        textBuilder.Append(sb);
+                        sb.Clear();
+                    }
+                    Inlines.Add(new Run()
+                    {
+                        Text = textBuilder.ToString()
+                    });
+                    textBuilder.Clear();
+
+                    if (sb.Length > 2)
+                    {
+                        var t = sb.ToString().Trim().Substring(1);
+                        var player = LobbySessionService.GetPlayerInfo(sb.ToString().Trim().Substring(1));
+                        if (player != null)
+                        {
+                            Inlines.Add(new InlineUIContainer()
+                            {
+                                Child = new Button()
+                                {
+                                    DataContext = player
+                                }
+                            });
+                        }
+                        else
+                        {
+                            Inlines.Add(new Run()
+                            {
+                                Text = sb.ToString()
+                            });
+                        }
+                        sb.Clear();
+                    }
+
+                }
+                else textBuilder.Append(letter);
             }
+
+            Inlines.Add(new Run()
+            {
+                Text = textBuilder.ToString()
+            });
+            textBuilder.Clear();
             return Inlines;
         }
 
