@@ -9,7 +9,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -158,9 +160,11 @@ namespace beta.Views
             DataContext = this;
             Channels.Add(new() { Name = "#server" });
             SelectedChannel = Channels[0];
-            TextBox.KeyDown += TextBox_KeyDown;
-            return;
 
+            App.Current.MainWindow.Closing += MainWindow_Closing;
+
+            MessageInput.TextChanged += OnMessageInputTextChanged;
+            MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
 
             LobbySessionService = App.Services.GetService<ILobbySessionService>();
 
@@ -180,11 +184,212 @@ namespace beta.Views
             IrcClient.OnConnect += IrcClient_OnConnect;
         }
 
-        private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter) 
+            IrcClient.Disconnect();
+        }
+        
+        // for suggestion box above the input box
+        // offset on X from left
+        private Thickness _Thickness;
+        public Thickness Thickness
+        {
+            get => _Thickness;
+            set
             {
-                SelectedChannel.History.Add(new() { Message = TextBox.Text });
+                _Thickness = value;
+                OnPropertyChanged(nameof(Thickness));
+            }
+        }
+        // visibility of suggestionBox
+        private Visibility _Visibility = Visibility.Hidden;
+        public Visibility VisibilityTest
+        {
+            get => _Visibility;
+            set
+            {
+                _Visibility = value;
+                OnPropertyChanged(nameof(VisibilityTest));
+            }
+        }
+        private void OnMessageInputPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            ChangedByKey = true;
+
+            var listbox = SuggestionListBox;
+
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                if (listbox.Visibility != Visibility.Visible)
+                {
+                    SelectedChannel.History.Add(new() { Message = MessageInput.Text });
+                    return;
+                }
+
+                var text = MessageInput.Text;
+                var originalIndex = _foundedIndex;
+                StringBuilder sb = new();
+                var item = (string)listbox.Items[listbox.SelectedIndex];
+                for (int i = 0; i < text.Length; i++)
+                {
+                    var letter = text[i];
+
+                    if (!(i == originalIndex && letter == ' '))
+                        sb.Append(text[i]);
+
+                    if (i == originalIndex)
+                    {
+                        for (int j = keyWordLen; j < item.Length; j++)
+                        {
+                            sb.Append(item[j]);
+                        }
+                        if (i != text.Length - 1)
+                            sb.Append(' ');
+                    }
+                }
+                MessageInput.Text = sb.ToString();
+                MessageInput.Select(originalIndex + item.Length, 0);
+                listbox.ItemsSource = null;
+                VisibilityTest = Visibility.Collapsed;
+                return;
+            }
+
+            if (listbox.ItemsSource == null) return;
+
+            var selectedIndex = listbox.SelectedIndex;
+            var len = listbox.Items.Count;
+
+            if (e.Key == System.Windows.Input.Key.Down)
+            {
+                if (selectedIndex < len)
+                    listbox.SelectedIndex++;
+                else listbox.SelectedIndex = 0;
+            }
+            if (e.Key == System.Windows.Input.Key.Up)
+            {
+                if (selectedIndex > 0)
+                    listbox.SelectedIndex--;
+                else listbox.SelectedIndex = len;
+            }
+        }
+        private bool ChangedByKey = false;
+
+        private int _foundedIndex;
+        private int keyWordLen;
+        private void OnMessageInputTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!ChangedByKey) return;
+            ChangedByKey = false;
+
+            var input = MessageInput;
+
+            var text = input.Text;
+            var len = text.Length;
+
+            if (len == 0)
+            {
+                SuggestionListBox.ItemsSource = null;
+                VisibilityTest = Visibility.Collapsed;
+                return;
+            }
+
+            StringBuilder main = new();
+            StringBuilder sb = new();
+
+            bool foundD = false;
+            int foundIndex = 0;
+            for (int i = 0; i < len; i++)
+            {
+                var letter = text[i];
+
+                if (foundD)
+                {
+                    if (letter != ' ' && i != len - 1)
+                    {
+                        sb.Append(letter);
+                        continue;
+                    }
+                    foundD = false;
+                    foundIndex = i;
+
+                    if (letter != ' ' && i == len - 1)
+                    {
+                        sb.Append(letter);
+                    }
+
+                    var keyWord = sb.ToString();
+
+                    if (keyWord.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (input.CaretIndex > foundIndex + 1)
+                    {
+                        sb.Clear();
+                        foundD = false;
+                        continue;
+                    }
+
+                    var suggestions = LobbySessionService.GetPlayersLogins(keyWord).ToArray();
+
+                    if (suggestions.Length == 1 && suggestions[0] == keyWord)
+                    {
+                        SuggestionListBox.ItemsSource = null;
+                        VisibilityTest = Visibility.Collapsed;
+
+                        sb.Clear();
+                        continue;
+                    }
+
+                    if (suggestions.Length > 0)
+                    {
+
+                        VisibilityTest = Visibility.Visible;
+                        var width = MessageInput.ActualWidth;
+                        var height = MessageInput.ActualHeight;
+                        for (int j = 0; j < width; j++)
+                        {
+                            var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
+                            if (func == foundIndex - keyWord.Length)
+                            {
+                                Thickness = new Thickness(j, 0, 0, 10);
+                                break;
+                            }
+                        }
+
+                        SuggestionListBox.ItemsSource = suggestions;
+                        SuggestionListBox.SelectedIndex = 0;
+
+                        _foundedIndex = foundIndex;
+                        keyWordLen = keyWord.Length;
+                        return;
+                    }
+                    else
+                    {
+                        VisibilityTest = Visibility.Collapsed;
+                        SuggestionListBox.ItemsSource = null;
+                        sb.Clear();
+                        continue;
+                    }
+
+
+                    sb.Clear();
+                    foundD = false;
+                }
+
+                // return if there is nothing interesting
+                if (i == len - 1)
+                {
+                    SuggestionListBox.ItemsSource = null;
+                    VisibilityTest = Visibility.Collapsed;
+                    return;
+                }
+
+                if (letter == '@')
+                {
+                    foundD = true;
+                }
             }
         }
 
@@ -245,11 +450,11 @@ namespace beta.Views
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(TextBox.Text)) return;
+            if (string.IsNullOrWhiteSpace(MessageInput.Text)) return;
 
             string nick = Settings.Default.PlayerNick;
             var channel = SelectedChannel.Name;
-            var msg = TextBox.Text;
+            var msg = MessageInput.Text;
             IrcClient.SendMessage(channel, msg);
 
             SelectedChannel.History.Add(new()
@@ -257,7 +462,7 @@ namespace beta.Views
                 From = nick,
                 Message = msg
             });
-            TextBox.Clear();
+            MessageInput.Clear();
         }
 
         private void JoinChannel(object sender, RoutedEventArgs e)

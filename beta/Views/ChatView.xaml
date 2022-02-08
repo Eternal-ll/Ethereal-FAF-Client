@@ -133,12 +133,14 @@
                         <ListBox.Resources>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                 <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
                                 <Setter Property="Focusable" Value="False"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
                             </Style>
                             <Style TargetType="Image">
-                                <Setter Property="Margin" Value="2 0"/>
-                                <Setter Property="MaxHeight" Value="18"/>
+                                <Setter Property="Margin" Value="2 -4 2 -3"/>
+                                <Setter Property="MaxHeight" Value="24"/>
                                 <Setter Property="Stretch" Value="Uniform"/>
                             </Style>
                             <Style TargetType="controls:GifImage">
@@ -146,30 +148,67 @@
                                 <Setter Property="MaxHeight" Value="18"/>
                                 <Setter Property="Stretch" Value="Uniform"/>
                             </Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                <Setter Property="Content" Value="{Binding login}"/>
+                                <Setter Property="Padding" Value="6 0"/>
+                                <Setter Property="Margin" Value="4 0 4 -5"/>
+                            </Style>
+                            <Style TargetType="TextBlock">
+                                
+                            </Style>
                         </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid Margin="10 0 24 0">
+                                <Grid Margin="0 0 0 0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width=".05*"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
+                                        Margin="10 0 0 0"
+                                        x:Name="MsgTextBlock"
                                         Grid.Column="1"
+                                        Padding="0 2 0 6"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Message, Converter={StaticResource TextConverter}}"
                                         TextWrapping="Wrap"/>
-                                    <TextBlock 
+                                    <Canvas
+                                        Grid.ColumnSpan="3"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                                        <Canvas.Style>
+                                            <Style TargetType="Canvas">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=MsgTextBlock, Converter={StaticResource ChatPlayerHighlightConverter}}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                        <Setter Property="Background">
+                                                            <Setter.Value>
+                                                                <SolidColorBrush Color="Orange" Opacity=".07"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Canvas.Style>
+                                        <Canvas Background="Orange"
+                                                Width="2"
+                                                Height="{Binding ElementName=MsgTextBlock, Path=ActualHeight}"
+                                                Canvas.Left="0"/>
+                                    </Canvas>
+                                    <TextBlock
+                                        Margin="0 4 24 0"
                                         Grid.Column="2"
                                         Text="{Binding Created}"/>
                                 </Grid>
                             </ItemContainerTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-
+                    <!--<TextBlock behavior:TextBlockExtensions.BindableInlines="{Binding Inlines}"/>-->
                     <TextBox
                         Grid.Row="1"
-                        Name="TextBox"
+                        Name="MessageInput"
                         BorderThickness="0"
                         ui:ControlHelper.PlaceholderText="Write message">
                         <TextBox.Resources>
@@ -185,6 +224,25 @@
                             <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#99000000"/>
                         </TextBox.Resources>
                     </TextBox>
+                    <Canvas Grid.Row="1"
+                            Panel.ZIndex="2"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
+                        <ListBox Width="100"
+                                 Focusable="False"
+                                 Name="SuggestionListBox"
+                                 Canvas.Left="0"
+                                 Canvas.Bottom="0"
+                                 MaxHeight="200"
+                                 Margin="{Binding Thickness}"
+                                 Visibility="{Binding VisibilityTest}">
+                            <ListBox.Resources>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                    <Setter Property="Focusable" Value="False"/>
+                                </Style>
+                            </ListBox.Resources>
+                        </ListBox>
+                    </Canvas>
                 </Grid>
             </Border>
         </Grid>

@@ -19,6 +19,7 @@
                     <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
 
 
+                    <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
                     <converter:TextConverter x:Key="TextConverter"/>
 
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
