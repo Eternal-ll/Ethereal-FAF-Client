@@ -251,7 +251,7 @@ namespace beta.Models
             {
                 if (TcpClient.Connected)
                 {
-                    Send("QUIT Client Disconnected: http://tech.reboot.pro");
+                    Send("QUIT");
                 }
                 TcpClient = null;
             }
@@ -307,8 +307,8 @@ namespace beta.Models
         {
             stream.Dispose();
             ssl.Dispose();
-            writer.Dispose();
-            reader.Dispose();
+            //writer.Dispose();
+            //reader.Dispose();
         }
         #endregion
 
