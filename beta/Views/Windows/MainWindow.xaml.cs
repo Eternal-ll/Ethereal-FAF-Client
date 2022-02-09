@@ -11,11 +11,9 @@ namespace beta.Views.Windows
         public MainWindow()
         {
             InitializeComponent();
-            Properties.Settings.Default.PropertyChanged += OnSettingChange;
+            Settings.Default.PropertyChanged += OnSettingChange;
             
             var navManager = new NavigationManager(MainFrame, ModalFrame);
-
-            //new Thread(async () =>await host.Services.GetRequiredService<IOAuthService>().InitialLaunch()).Start();
 
             _ = navManager.Navigate(new AuthView());
             

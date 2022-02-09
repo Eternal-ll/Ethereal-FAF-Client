@@ -4,13 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
-        xmlns:sc="clr-namespace:beta.Infrastructure.Utils"
         ui:WindowHelper.UseModernWindowStyle="True"
         mc:Ignorable="d"
         Title="Ethereal FAF Client" Height="450" Width="800"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:ThemeManager.RequestedTheme="Dark"
         x:Name="Window">
+    <!--<Window.Background>
+        <ImageBrush>
+            <ImageBrush.ImageSource>
+                <BitmapImage UriSource="../../Resources/Images/Random/Namalsk_1.jpg"/>
+            </ImageBrush.ImageSource>
+        </ImageBrush>
+    </Window.Background>-->
     <!--<WindowChrome.WindowChrome>
         <WindowChrome ResizeBorderThickness="5,5,5,5" CaptionHeight="5" />
     </WindowChrome.WindowChrome>-->
