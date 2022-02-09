@@ -69,8 +69,27 @@ namespace beta.Infrastructure.Services
                 while (enumerator.MoveNext())
                 {
                     var player = enumerator.Current.Key;
-                    if (player.Contains(filter))
+                    if (player.StartsWith(filter))
                         yield return player;
+                }
+        }
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter)
+        {
+            var enumerator = PlayerNameToId.GetEnumerator();
+            filter = filter.ToLower();
+
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                var playersEnumrator = Players.GetEnumerator();
+                while (playersEnumrator.MoveNext())
+                    yield return playersEnumrator.Current;                
+            }
+            else
+                while (enumerator.MoveNext())
+                {
+                    var playerL = enumerator.Current;
+                    if (playerL.Key.StartsWith(filter))
+                        yield return Players[playerL.Value];
                 }
         }
 

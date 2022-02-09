@@ -27,7 +27,9 @@ namespace beta.Infrastructure.Services.Interfaces
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage GetPlayerInfo(int uid);
         public PlayerInfoMessage GetPlayerInfo(string login);
+
         public IEnumerable<string> GetPlayersLogins(string filter);
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter);
 
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; }
     }
