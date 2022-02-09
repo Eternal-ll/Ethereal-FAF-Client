@@ -22,14 +22,16 @@ namespace beta.Infrastructure.Services.Interfaces
         public Task<string> GenerateUID(string session);
         public void Authorize();
         public event EventHandler<EventArgs<bool>> Authorization;
+        event EventHandler<EventArgs<SocialMessage>> SocialInfo;
+
         public bool AuthorizationRequested { get; set; }
 
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage GetPlayerInfo(int uid);
         public PlayerInfoMessage GetPlayerInfo(string login);
 
-        public IEnumerable<string> GetPlayersLogins(string filter);
-        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter);
+        public IEnumerable<string> GetPlayersLogins(string filter = null);
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null);
 
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; }
     }

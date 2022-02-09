@@ -27,6 +27,8 @@ namespace beta.Infrastructure.Services
         public event EventHandler<EventArgs<GameInfoMessage>> NewGameInfo;
         public event EventHandler<EventArgs<GameInfoMessage>> UpdateGameInfo;
 
+        public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
+
         public event EventHandler<IServerMessage> MessageReceived;
         #endregion
 
@@ -47,7 +49,7 @@ namespace beta.Infrastructure.Services
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; } = new();
         public ObservableCollection<GameInfoMessage> LaunchedLobbies { get; } = new();
         #endregion
-        private readonly object _lock = new();
+
         public LobbySessionService(IOAuthService oAuthService)
         {
             OAuthService = oAuthService;
@@ -55,7 +57,7 @@ namespace beta.Infrastructure.Services
             Client.DelimiterDataReceived += OnDataReceived;
             PreviewNewLobbies = false;
         }
-        public IEnumerable<string> GetPlayersLogins(string filter)
+        public IEnumerable<string> GetPlayersLogins(string filter = null)
         {
             var enumerator = PlayerNameToId.GetEnumerator();
             filter = filter.ToLower();
@@ -73,7 +75,7 @@ namespace beta.Infrastructure.Services
                         yield return player;
                 }
         }
-        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter)
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null)
         {
             var enumerator = PlayerNameToId.GetEnumerator();
             filter = filter.ToLower();
@@ -201,11 +203,12 @@ namespace beta.Infrastructure.Services
                         case 'e': // session
                             var session = JsonSerializer.Deserialize<SessionMessage>(json);
                             Settings.Default.session = session.session.ToString();
-                            new Thread(async () => await GenerateUID(session.session.ToString())).Start();
+                            new Thread(() => _ = GenerateUID(session.session.ToString())).Start();
                             break;
                         case 'o': // social
-                            var socialMessage = JsonSerializer.Deserialize<SocialMessage>(json);
-                            break;
+                            // Do i really need to invoke Event? 
+                            OnSocialInfo(JsonSerializer.Deserialize<SocialMessage>(json));
+                            return;
                     }
                     break;
                 case 'w': //welcome
@@ -342,7 +345,6 @@ namespace beta.Infrastructure.Services
                 NewPlayer?.Invoke(this, e);
             }
         }
-            
         protected virtual void OnUpdatePlayer(EventArgs<PlayerInfoMessage> e)
         {
             UpdatePlayer?.Invoke(this, e);
@@ -417,11 +419,8 @@ namespace beta.Infrastructure.Services
                 NewGameInfo?.Invoke(this, newGame);
             }
         }
-        private void AddLaunchedLobby(GameInfoMessage game)
-        {
-            AvailableLobbies.Add(game);
-
-        }
         protected virtual void OnUpdateGameInfo(EventArgs<GameInfoMessage> e) => UpdateGameInfo?.Invoke(this, e);
+
+        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);
     }
 }
