@@ -7,6 +7,11 @@ namespace beta.Infrastructure.Commands
     {
         public override bool CanExecute(object parameter) => true;
 
-        public override void Execute(object parameter) => Clipboard.SetText(parameter.ToString());
+        public override void Execute(object parameter)
+        {
+            if (parameter == null) return;
+
+            Clipboard.SetText(parameter.ToString());
+        }
     }
 }
