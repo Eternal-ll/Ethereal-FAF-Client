@@ -94,7 +94,7 @@ namespace beta.Models.Server
         //public double[] global_rating { get; set; }
         //public double[] ladder_rating { get; set; }
         //public int number_of_games { get; set; }
-        public PlayerAvatar? avatar { get; set; }
+        public PlayerAvatar avatar { get; set; }
 
         public PlayerInfoMessage[] players { get; set; }
     }
