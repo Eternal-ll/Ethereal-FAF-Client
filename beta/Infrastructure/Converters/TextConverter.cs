@@ -57,23 +57,31 @@ namespace beta.Infrastructure.Converters
                 var cache = Cache[i];
                 if (cache.Name.Equals(emoji, StringComparison.OrdinalIgnoreCase))
                 {
+                    Image image;
                     if (cache is GIFEmojiCache gifCache)
                     {
-                        ui.Child = new GifImage()
+                        image = new GifImage()
                         {
                             GifBitmapDecoder = gifCache.GifBitmapDecoder,
-                            ToolTip = emoji,
-                            AutoStart = true
+                            AutoStart = true,
                         };
                     }
-                    else if (cache is BitmapEmojiCache emojiCache)
+                    else
                     {
-                        ui.Child = new Image()
+                        var emojiCache = (BitmapEmojiCache)cache;
+                        image = new Image()
                         {
-                            Source = emojiCache.ImageSource,
-                            ToolTip = emoji
+                            Source = emojiCache.ImageSource
                         };
                     }
+
+                    image.DataContext = image;
+                    image.ToolTip = emoji;
+                    image.Stretch = Stretch.Uniform;
+                    image.MaxHeight = 24;
+                    image.Margin = new(2, 0, 2, 0);
+
+                    ui.Child = image;
                     return ui;
                 }
             }
@@ -122,7 +130,7 @@ namespace beta.Infrastructure.Converters
                     {
 
                         IEmojiCache cache;
-
+                        Image image;
                         if (extension.ToString() == "gif")
                         {
                             GIFEmojiCache emojiCache = new()
@@ -131,35 +139,39 @@ namespace beta.Infrastructure.Converters
                                 GifBitmapDecoder = new GifBitmapDecoder(
                                     new Uri(file, UriKind.Absolute),
                                 BitmapCreateOptions.PreservePixelFormat,
-                                BitmapCacheOption.Default)
+                                BitmapCacheOption.Default),
                             };
-                            ui.Child = new GifImage
+                            image = new GifImage
                             {
                                 GifBitmapDecoder = emojiCache.GifBitmapDecoder,
-                                ToolTip = emoji,
-                                AutoStart = true
+                                AutoStart = true,
                             };
                             cache = emojiCache;
                         }
                         else
                         {
-                            var source = new BitmapImage(new Uri(file))
-                            {
-                                DecodePixelHeight = 16,
-                            };
+                            var source = new BitmapImage(new Uri(file));
+                            source.DecodePixelHeight = 34;
                             source.Freeze();
                             BitmapEmojiCache emojiCache = new()
                             {
                                 Name = emoji,
                                 ImageSource = source,
                             };
-                            ui.Child = new Image
+
+                            image = new Image()
                             {
-                                Source = emojiCache.ImageSource,
-                                ToolTip = emoji
+                                Source = emojiCache.ImageSource
                             };
                             cache = emojiCache;
                         }
+                        image.DataContext = image;
+                        image.ToolTip = emoji;
+                        image.Stretch = Stretch.Uniform;
+                        image.MaxHeight = 24;
+                        image.Margin = new(2, 0, 2, 0);
+
+                        ui.Child = image;
                         Cache.Add(cache);
                         return ui;
                     }
@@ -178,13 +190,13 @@ namespace beta.Infrastructure.Converters
             var text = value as string;
             IList<Inline> Inlines = new List<Inline>();
 
-            StringBuilder emojiBuilder = new();
-            StringBuilder playerBuilder = new();
             StringBuilder textBuilder = new();
 
             StringBuilder sb = new();
 
             var len = text.Length;
+
+            bool anyText = false;
 
             for (int i = 0; i < len; i++)
             {
@@ -211,11 +223,15 @@ namespace beta.Infrastructure.Converters
                         textBuilder.Append(sb);
                         sb.Clear();
                     }
-                    Inlines.Add(new Run()
+                    if (textBuilder.Length > 0)
                     {
-                        Text = textBuilder.ToString()
-                    });
-                    textBuilder.Clear();
+                        Inlines.Add(new Run()
+                        {
+                            Text = textBuilder.ToString()
+                        });
+                        textBuilder.Clear();
+                        anyText = true;
+                    }
 
                     if (sb.Length > 2)
                     {
@@ -244,16 +260,21 @@ namespace beta.Infrastructure.Converters
                         textBuilder.Append(sb);
                         sb.Clear();
                     }
-                    Inlines.Add(new Run()
+
+                    if (textBuilder.Length > 0)
                     {
-                        Text = textBuilder.ToString()
-                    });
-                    textBuilder.Clear();
+                        Inlines.Add(new Run()
+                        {
+                            Text = textBuilder.ToString()
+                        });
+                        textBuilder.Clear();
+                        anyText = true;
+                    }
 
                     if (sb.Length > 2)
                     {
-                        var t = sb.ToString().Trim().Substring(1);
-                        var player = LobbySessionService.GetPlayerInfo(sb.ToString().Trim().Substring(1));
+                        var login = sb.ToString().Substring(1).Replace(" ", "");
+                        var player = LobbySessionService.GetPlayerInfo(login);
                         if (player != null)
                         {
                             Inlines.Add(new InlineUIContainer()
@@ -263,6 +284,7 @@ namespace beta.Infrastructure.Converters
                                     DataContext = player
                                 }
                             });
+                            anyText = true;
                         }
                         else
                         {
@@ -270,19 +292,31 @@ namespace beta.Infrastructure.Converters
                             {
                                 Text = sb.ToString()
                             });
+                            anyText = true;
                         }
                         sb.Clear();
                     }
-
                 }
                 else textBuilder.Append(letter);
             }
 
-            Inlines.Add(new Run()
+            if (textBuilder.Length > 0)
             {
-                Text = textBuilder.ToString()
-            });
-            textBuilder.Clear();
+                Inlines.Add(new Run()
+                {
+                    Text = textBuilder.ToString()
+                });
+                textBuilder.Clear();
+                anyText = true;
+            }
+            if (!anyText)
+                for (int i = 0; i < Inlines.Count; i++)
+                {
+                    var inline = (InlineUIContainer)Inlines[i];
+                    var image = (Image)inline.Child;
+                    image.MaxHeight = 34;
+                    image.Margin = new(2, 4, 2, -4);
+                }
             return Inlines;
         }
 

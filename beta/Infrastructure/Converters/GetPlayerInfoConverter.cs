@@ -1,4 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
+using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Globalization;
@@ -15,9 +17,20 @@ namespace beta.Infrastructure.Converters
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return null;
-            
-            var playerName = (string)value;
+            //if (value == null) return null;
+
+            var playerName = string.Empty;
+
+            if (value is PlayerInfoMessage)
+                return value;
+
+            if (value is ChannelMessage channelMessage)
+                if (channelMessage.From != null)
+                    playerName = channelMessage.From;
+                else return null;
+
+            if (value is string player)
+                playerName = player;
 
             return LobbySessionService.GetPlayerInfo(playerName);
         }

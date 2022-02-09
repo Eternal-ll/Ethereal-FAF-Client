@@ -6,13 +6,299 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:local="clr-namespace:beta.Views"
              xmlns:sModels="clr-namespace:beta.Models.Server"
-             xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors" xmlns:controls="clr-namespace:beta.Resources.Controls"
+             xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
+             xmlns:controls="clr-namespace:beta.Resources.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:ChatView}">
     <Grid>
         <Grid.Resources>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+
+            <Style TargetType="TextBlock" x:Key="TextBlockStyle">
+                <Setter Property="FontWeight" Value="DemiBold"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Key}" Value="global">
+                        <Setter Property="Width" Value="30"/>
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <VisualBrush Stretch="Uniform">
+                                    <VisualBrush.Visual>
+                                        <Path ToolTip="Global"
+                                              Fill="White"
+                                              Data="M39.3,49.1c-2,5.8-3.2,12-3.6,18.5h17.2V49.1H39.3L39.3,49.1z M42.4,41.6h10.5V26.8C48.7,31,45.2,36,42.4,41.6L42.4,41.6z
+                                              M34.2,41.6c2.2-5.1,5-9.9,8.3-14.2c-8.5,2.7-15.8,7.8-21.1,14.2H34.2L34.2,41.6z M97,49.1l-15.2,0c1.8,5.8,2.9,12,3.2,18.5h17.6
+                                              C102.1,60.9,100.1,54.7,97,49.1L97,49.1z M77.5,67.6c-0.3-6.5-1.6-12.7-3.6-18.5H60.3v18.5H77.5L77.5,67.6z M70.8,41.6
+                                              C68.1,36,64.5,31,60.3,26.8v14.8H70.8L70.8,41.6z M79,41.6h12.8c-5.4-6.3-12.7-11.5-21.1-14.2C74,31.7,76.8,36.5,79,41.6L79,41.6z
+                                              M16.2,93.6l15.2,0c-1.8-5.8-2.9-12-3.2-18.5H10.6C11.2,81.8,13.1,88.1,16.2,93.6L16.2,93.6z M35.7,75.1c0.3,6.5,1.6,12.7,3.6,18.5
+                                              h13.6V75.1H35.7L35.7,75.1z M42.4,101.1c2.8,5.6,6.4,10.6,10.5,14.8v-14.8H42.4L42.4,101.1z M34.2,101.1H21.3
+                                              c5.4,6.3,12.7,11.5,21.1,14.2C39.2,111.1,36.4,106.3,34.2,101.1L34.2,101.1z M81.8,93.6l15.2,0c3.1-5.6,5-11.8,5.6-18.5H85
+                                              C84.7,81.6,83.6,87.8,81.8,93.6L81.8,93.6z M73.9,93.6c2-5.8,3.2-12,3.6-18.5H60.3v18.5H73.9L73.9,93.6z M70.8,101.1H60.3v14.8
+                                              C64.5,111.8,68.1,106.8,70.8,101.1L70.8,101.1z M79,101.1c-2.2,5.1-5,9.9-8.3,14.2c8.5-2.7,15.8-7.8,21.1-14.2H79L79,101.1z
+                                              M31.4,49.1l-15.2,0c-3.1,5.6-5,11.9-5.6,18.5h17.6C28.6,61.2,29.7,54.9,31.4,49.1L31.4,49.1z M56.6,125C27,125,3,101,3,71.4
+                                              c0-29.6,24-53.6,53.6-53.6c29.6,0,53.6,24,53.6,53.6C110.2,101,86.2,125,56.6,125L56.6,125z"/>
+                                    </VisualBrush.Visual>
+                                </VisualBrush>
+                            </Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Key}" Value="ladder_1v1">
+                        <Setter Property="Text" Value="1 vs 1"/>
+                        <Setter Property="ToolTip" Value="Ladder 1 vs 1"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Key}" Value="tmm_2v2">
+                        <Setter Property="Text" Value="2 vs 2"/>
+                        <Setter Property="ToolTip" Value="TMM 2 vs 2"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_full_share">
+                        <Setter Property="Text" Value="4 vs 4"/>
+                        <Setter Property="ToolTip" Value="TMM 4 vs 4 full share"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_share_until_death">
+                        <Setter Property="Text" Value="4 vs 4"/>
+                        <Setter Property="ToolTip" Value="TMM 4 vs 4 share until death"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="Run" x:Key="RatingDifferenceRunStyle">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference,
+                        Mode=OneWay, Converter={StaticResource MoreThanConverter}}"
+                        Value="True">
+                        <Setter Property="Text" Value="↑"/>
+                        <Setter Property="Foreground" Value="Lime"/>
+                        <Setter Property="ToolTip"
+                                Value="{Binding DisplayedRatingDifference,StringFormat='TEST', Mode=OneWay}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference,
+                        Mode=OneWay, Converter={StaticResource MoreThanConverter},ConverterParameter = '-1'}"
+                        Value="False">
+                        <Setter Property="Text" Value="↓"/>
+                        <Setter Property="Foreground" Value="Red"/>
+                        <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, Mode=OneWay}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="DataContext" Value="{Binding Converter={StaticResource GetPlayerInfoConverter}}"/>
+                        </Style>
+                    </StackPanel.Style>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Margin="-16 -10 -16 10">
+                        <StackPanel.Background>
+                            <SolidColorBrush Color="Black" Opacity=".2"/>
+                        </StackPanel.Background>
+                        <Image
+                            Source="{Binding Flag}"
+                            Height="40"
+                            Stretch="UniformToFill"
+                            Margin="0 -10 0 -10"
+                            ToolTip="{Binding country}"/>
+                        <Image
+                            Margin="0 4 10 4"
+                            ToolTip="{Binding avatar.tooltip}"
+                            Source="{Binding avatar.url}">
+                            <Image.Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    <!--<Setter Property="Source" Value="{Binding avatar.url, Converter={StaticResource UriToCachedImageConverter}}"/>-->
+
+                                    <!--<Style.Triggers>
+                                        <DataTrigger Binding="{Binding avatar.url.AbsoluteUri.Length}"
+                                                     Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>-->
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                        <TextBlock
+                            Text="{Binding login}"
+                            VerticalAlignment="Center"
+                            Margin="0 0 14 3"
+                            FontWeight="DemiBold">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Command="{StaticResource CopyCommand}"
+                                        CommandParameter="{Binding login}"
+                                        Header="Copy">
+                                        <MenuItem.Icon>
+                                            <ui:SymbolIcon Symbol="Copy"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <TextBlock FontSize="14" FontWeight="DemiBold"
+                               Margin="0 6  ">
+                        <Run Text="Clan -" />
+                        <Run Text="{Binding clan}" FontWeight="Normal"/>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding clan}"
+                                                     Value="{x:Null}">
+                                        <Setter Property="Text" Value="{x:Null}"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="Game status" FontWeight="DemiBold" FontSize="14">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                        Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Padding="24 0 0 0"
+                               Margin="0 6">
+                        <TextBlock.Background>
+                            <VisualBrush Stretch="None" AlignmentX="Left">
+                                <VisualBrush.Visual>
+                                    <Image Source="{Binding GameStatusImage}">
+                                    </Image>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </TextBlock.Background>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                            Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                            Value="1">
+                                        <Setter Property="Text" Value="In lobby"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                            Value="2">
+                                        <Setter Property="Text" Value="Playing live"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                            Value="4">
+                                        <Setter Property="Text" Value="Hosting"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GameState}"
+                                                                            Value="9">
+                                        <Setter Property="Text" Value="Playing"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Text="Note" FontWeight="DemiBold" FontSize="14"/>
+                    <TextBox ui:ControlHelper.PlaceholderText="Click to add a note"
+                                                        ToolTip="Click to add a note"
+                                                        TextWrapping="Wrap"
+                                                        Padding="6 6"
+                                                        Margin="-6 0"
+                                                        FontSize="13"
+                                                        Text="{Binding Note}"
+                                                        Width="120">
+                        <TextBox.Resources>
+                            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent"/>
+                            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+                        </TextBox.Resources>
+                        <TextBox.Style>
+                            <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="Green"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                    <TextBlock Text="Ratings" FontWeight="DemiBold" FontSize="14"/>
+                    <Grid Margin="0 10" Visibility="Collapsed">
+                        <Button Margin="8 0 0 0" Width="24" Height="24" Content="R" Grid.Column="1" ToolTip="Rating" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Button Margin="0 0 0 0" Width="24" Height="24" Content="G" Grid.Column="2" ToolTip="Games" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ItemsControl Visibility="Visible" ItemsSource="{Binding ratings, Mode=OneWay}"
+                                                            Margin="0 10">
+                        <ItemsControl.ItemTemplate>
+                            <ItemContainerTemplate>
+                                <Grid Background="Transparent"
+                                                                ShowGridLines="False">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="40"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock HorizontalAlignment="Center"
+                                                                        Style="{StaticResource TextBlockStyle}"/>
+
+                                    <Grid DataContext="{Binding Value}"
+                                                                    Grid.Column="1"
+                                                                    ShowGridLines="False"
+                                                                    >
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0"
+                                                                            Margin="10 0 0 0"
+                                                                            DataContext="{Binding Mode=OneWay,
+                                                                    Converter={StaticResource RatingDifferenceConverter}}">
+                                                                    <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
+                                                                    <Run Style="{StaticResource RatingDifferenceRunStyle}"/>
+                                        </TextBlock>
+
+                                        <!--<TextBlock Text="{Binding rating[1], StringFormat=' +-{0}', Mode=OneWay}" Grid.Column="2"/>-->
+                                        <!--<TextBlock Text="G:" Grid.Column="3" Margin="10 0 10 0" HorizontalAlignment="Right"/>-->
+                                        <TextBlock Text="{Binding number_of_games, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Right"
+                                                                            Margin="0"/>
+                                    </Grid>
+                                </Grid>
+                            </ItemContainerTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding id, StringFormat='id: {0}'}"
+                                                           Opacity=".3">
+                        <TextBlock.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{StaticResource CopyCommand}"
+                                                                      CommandParameter="{Binding id}"
+                                                                      Header="Copy">
+                                    <MenuItem.Icon>
+                                        <ui:SymbolIcon Symbol="Copy"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TextBlock.ContextMenu>
+                    </TextBlock>
+                </StackPanel>
+            </DataTemplate>
+
+            <ui:Flyout x:Key="ChatterPlayerCardFlyout" Placement="RightEdgeAlignedTop">
+                <ContentControl Content="{Binding}"/>
+            </ui:Flyout>
+
+            <ui:Flyout x:Key="MessagePlayerCardFlyout" Placement="RightEdgeAlignedTop">
+                <ContentControl Content="{Binding Converter={StaticResource GetPlayerInfoConverter}}"/>
+            </ui:Flyout>
+            
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -71,17 +357,20 @@
                             <ui:FlyoutService.Flyout>
                                 <ui:Flyout Placement="BottomEdgeAlignedLeft">
                                     <StackPanel
-                                        Orientation="Horizontal"
+                                        Orientation="Vertical"
                                         Margin="-6">
                                         <TextBox
-                                        x:Name="JoinChannelInput"
-                                        BorderThickness="0"
-                                        MinWidth="100"
-                                        ui:ControlHelper.PlaceholderText="channel"/>
-                                        <Button
-                                        Content="Join"
-                                        FontSize="13"
-                                        Click="JoinChannel"/>
+                                            x:Name="JoinChannelInput"
+                                            BorderThickness="0"
+                                            MinWidth="100"
+                                            ui:ControlHelper.CornerRadius="4"
+                                            ui:ControlHelper.PlaceholderText="Channel"
+                                            KeyDown="JoinChannelInput_KeyDown"/>
+                                        <TextBlock
+                                            Margin="4 4 4 0"
+                                            Opacity=".5"
+                                            Text='Press Enter to join'
+                                            FontSize="12"/>
                                     </StackPanel>
                                 </ui:Flyout>
                             </ui:FlyoutService.Flyout>
@@ -115,10 +404,9 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <Border
-                Margin="30"
+                Margin="0 30"
                 Grid.Row="1"
-                CornerRadius="6"
-                Background="{DynamicResource NavigationViewExpandedPaneBackground}">
+                CornerRadius="6">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition/>
@@ -131,6 +419,39 @@
                         VirtualizingPanel.IsContainerVirtualizable="True"
                         Background="Transparent">
                         <ListBox.Resources>
+                            <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="DimGray" Opacity=".05"/>
+                            <ui:Flyout x:Key="EmojiFlyout">
+                                <StackPanel Margin="-10 -10 -10 -4">
+                                    <Image
+                                        Source="{Binding Source}"
+                                        Width="100"
+                                        MaxHeight="100"
+                                        Margin="0"
+                                        Stretch="Uniform">
+                                        <Image.Style>
+                                            <Style>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                    <TextBox
+                                        Margin="0 8 0 0"
+                                        Opacity=".5"    
+                                        BorderThickness="0"
+                                        Background="Transparent"
+                                        IsReadOnly="True"
+                                        Text="{Binding ToolTip, StringFormat=':{0}:'}"/>
+                                    <Button
+                                        Style="{StaticResource DefaultButtonStyle}"
+                                        Content="Copy"
+                                        Command="{StaticResource CopyCommand}"
+                                        CommandParameter="{Binding ToolTip, Converter={StaticResource EmojiFormatConverter}}"
+                                        HorizontalAlignment="Center"
+                                        Padding="10 2 10 4"
+                                        Opacity=".7"
+                                        Margin="0"
+                                        Background="Transparent"/>
+                                </StackPanel>
+                            </ui:Flyout>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="Margin" Value="0"/>
@@ -139,48 +460,91 @@
                                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                             </Style>
                             <Style TargetType="Image">
-                                <Setter Property="Margin" Value="2 -4 2 -3"/>
                                 <Setter Property="MaxHeight" Value="24"/>
-                                <Setter Property="Stretch" Value="Uniform"/>
+                                <!--<Style.Triggers>
+                                    <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
+                                                 Value="{x:Type Image}">
+                                        <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>-->
                             </Style>
                             <Style TargetType="controls:GifImage">
-                                <Setter Property="Margin" Value="2 0"/>
-                                <Setter Property="MaxHeight" Value="18"/>
-                                <Setter Property="Stretch" Value="Uniform"/>
+                                <!--<Style.Triggers>
+                                    <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
+                                                 Value="{x:Type controls:GifImage}">
+                                        <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>-->
                             </Style>
                             <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                                 <Setter Property="Content" Value="{Binding login}"/>
-                                <Setter Property="Padding" Value="6 0"/>
-                                <Setter Property="Margin" Value="4 0 4 -5"/>
-                            </Style>
-                            <Style TargetType="TextBlock">
-                                
+                                <Setter Property="Padding" Value="6 0 6 2"/>
+                                <Setter Property="Margin" Value="4 0 4 0"/>
+                                <Setter Property="ui:FlyoutService.Flyout" Value="{StaticResource MessagePlayerCardFlyout}"/>
                             </Style>
                         </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid Margin="0 0 0 0">
+                                <Grid Margin="0 0 0 4">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width=".05*"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width=".25*" MinWidth="100"/>
+                                        <ColumnDefinition Width="2*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
-                                        Margin="10 0 0 0"
-                                        x:Name="MsgTextBlock"
+                                        TextWrapping="Wrap"
+                                        HorizontalAlignment="Right">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding From}"
+                                                                 Value="{x:Null}">
+                                                        <Setter Property="Margin" Value="10 0 14 -4"/>
+                                                        <Setter Property="VerticalAlignment" Value="Stretch"/>
+                                                        <Setter Property="Text" Value=""/>
+                                                        <Setter Property="Opacity" Value=".09"/>
+                                                        <Setter Property="Width" Value="2"/>
+                                                        <Setter Property="Background" Value="Gray"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <Button
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Background="Transparent">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                <Setter Property="Content" Value="{Binding From}"/>
+                                                <Setter Property="Padding" Value="6 0 6 2"/>
+                                                <Setter Property="Margin" Value="0 0 10 0"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding From}"
+                                                                 Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <TextBlock
+                                        Background="Transparent"
+                                        VerticalAlignment="Center"
                                         Grid.Column="1"
-                                        Padding="0 2 0 6"
+                                        Opacity=".8"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Message, Converter={StaticResource TextConverter}}"
-                                        TextWrapping="Wrap"/>
+                                        TextWrapping="Wrap">
+                                    </TextBlock>
                                     <Canvas
+                                        IsHitTestVisible="False"
                                         Grid.ColumnSpan="3"
-                                        HorizontalAlignment="Stretch"
-                                        VerticalAlignment="Stretch">
+                                        Margin="0">
                                         <Canvas.Style>
                                             <Style TargetType="Canvas">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ElementName=MsgTextBlock, Converter={StaticResource ChatPlayerHighlightConverter}}"
+                                                    <DataTrigger Binding="{Binding HasMention}"
                                                                  Value="True">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                         <Setter Property="Background">
@@ -192,20 +556,20 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Canvas.Style>
-                                        <Canvas Background="Orange"
-                                                Width="2"
-                                                Height="{Binding ElementName=MsgTextBlock, Path=ActualHeight}"
-                                                Canvas.Left="0"/>
+                                        <Canvas
+                                            Background="Orange"
+                                            Width="2"
+                                            Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas}}, Path=ActualHeight}"/>
                                     </Canvas>
                                     <TextBlock
                                         Margin="0 4 24 0"
+                                        Opacity=".09"
                                         Grid.Column="2"
-                                        Text="{Binding Created}"/>
+                                        Text="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
                                 </Grid>
                             </ItemContainerTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <!--<TextBlock behavior:TextBlockExtensions.BindableInlines="{Binding Inlines}"/>-->
                     <TextBox
                         Grid.Row="1"
                         Name="MessageInput"
@@ -418,255 +782,13 @@
                 </ListBox.Resources>
                 <ListBox.ItemTemplate>
                     <ItemContainerTemplate>
-                        <ui:AppBarButton 
+                        <Button 
                             Width="NaN"
                             HorizontalAlignment="Stretch"
-                            d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
-                            <ui:AppBarButton.Flyout>
-                                <ui:Flyout
-                                    Placement="LeftEdgeAlignedTop">
-                                    <StackPanel>
-                                        <ui:AppBarElementContainer>
-                                            <StackPanel
-                                                x:Name="panel">
-                                                <StackPanel
-                                                    Orientation="Horizontal"
-                                                    Margin="-16 -10 -16 10">
-                                                    <StackPanel.Background>
-                                                        <SolidColorBrush Color="Black" Opacity=".2"/>
-                                                    </StackPanel.Background>
-                                                    <Image
-                                                        Source="{Binding Flag}"
-                                                        Margin="10 4"
-                                                        ToolTip="{Binding country}"/>
-                                                    <TextBlock 
-                                                        Text="{Binding login}"
-                                                        VerticalAlignment="Center"
-                                                        Margin="0 0 14 3"
-                                                        FontWeight="DemiBold">
-                                                        <TextBlock.ContextMenu>
-                                                            <ContextMenu>
-                                                                <MenuItem 
-                                                                    Command="{StaticResource CopyCommand}"
-                                                                    CommandParameter="{Binding login}"
-                                                                    Header="Copy">
-                                                                    <MenuItem.Icon>
-                                                                        <ui:SymbolIcon Symbol="Copy"/>
-                                                                    </MenuItem.Icon>
-                                                                </MenuItem>
-                                                            </ContextMenu>
-                                                        </TextBlock.ContextMenu>
-                                                    </TextBlock>
-                                                </StackPanel>
-
-                                                <TextBlock Text="Game status" FontWeight="DemiBold" FontSize="14">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                            Value="0">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock Padding="24 0 0 0"
-                                                           Margin="0 6">
-                                                    <TextBlock.Background>
-                                                        <VisualBrush Stretch="None" AlignmentX="Left">
-                                                            <VisualBrush.Visual>
-                                                                <Image Source="{Binding GameStatusImage}">
-                                                                </Image>
-                                                            </VisualBrush.Visual>
-                                                        </VisualBrush>
-                                                    </TextBlock.Background>
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                             Value="0">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                             Value="1">
-                                                                    <Setter Property="Text" Value="In lobby"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                             Value="2">
-                                                                    <Setter Property="Text" Value="Playing live"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                             Value="4">
-                                                                    <Setter Property="Text" Value="Hosting"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding GameState}"
-                                                                             Value="9">
-                                                                    <Setter Property="Text" Value="Playing"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-
-                                                <TextBlock Text="Note" FontWeight="DemiBold" FontSize="14"/>
-                                                <TextBox ui:ControlHelper.PlaceholderText="Click to add a note"
-                                                         ToolTip="Click to add a note"
-                                                         TextWrapping="Wrap"
-                                                         Padding="6 6"
-                                                         Margin="-6 0"
-                                                         FontSize="13"
-                                                         Text="{Binding Note}"
-                                                         Width="120">
-                                                    <TextBox.Resources>
-                                                        <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent"/>
-                                                        <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                                                    </TextBox.Resources>
-                                                    <TextBox.Style>
-                                                        <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
-                                                            <Setter Property="BorderThickness" Value="0"/>
-                                                            <Setter Property="Background" Value="Transparent"/>
-                                                            <Setter Property="Foreground" Value="Green"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="Text" Value="">
-                                                                    <Setter Property="Foreground" Value="White"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBox.Style>
-                                                </TextBox>
-                                                <TextBlock Text="Ratings" FontWeight="DemiBold" FontSize="14"/>
-                                                <Grid Margin="0 10" Visibility="Collapsed">
-                                                    <Button Margin="8 0 0 0" Width="24" Height="24" Content="R" Grid.Column="1" ToolTip="Rating" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    <Button Margin="0 0 0 0" Width="24" Height="24" Content="G" Grid.Column="2" ToolTip="Games" Background="Gray" Padding="0" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                </Grid>
-                                                <ItemsControl Visibility="Visible" ItemsSource="{Binding ratings, Mode=OneWay}"
-                                                              Margin="0 10">
-                                                    <ItemsControl.Resources>
-                                                        <Style TargetType="Run"
-                                                               x:Key="RatingDifferenceRunStyle">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding DisplayedRatingDifference, Mode=OneWay, Converter={StaticResource MoreThanConverter}}"
-                                                                             Value="True">
-                                                                    <Setter Property="Text" Value="↑"/>
-                                                                    <Setter Property="Foreground" Value="Lime"/>
-                                                                    <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, StringFormat='TEST', Mode=OneWay}"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding DisplayedRatingDifference, Mode=OneWay, Converter={StaticResource MoreThanConverter},
-                                                                    ConverterParameter = '-1'}"
-                                                                             Value="False">
-                                                                    <Setter Property="Text" Value="↓"/>
-                                                                    <Setter Property="Foreground" Value="Red"/>
-                                                                    <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, Mode=OneWay}"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-
-                                                        <Style TargetType="TextBlock"
-                                                               x:Key="TextBlockStyle">
-                                                            <Setter Property="FontWeight" Value="DemiBold"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Key}" Value="global">
-                                                                    <Setter Property="Width" Value="30"/>
-                                                                    <Setter Property="Background">
-                                                                        <Setter.Value>
-                                                                            <VisualBrush Stretch="Uniform">
-                                                                                <VisualBrush.Visual>
-                                                                                    <Path ToolTip="Global"
-                                                                                                          Fill="White"
-                                                                                                          Data="M39.3,49.1c-2,5.8-3.2,12-3.6,18.5h17.2V49.1H39.3L39.3,49.1z M42.4,41.6h10.5V26.8C48.7,31,45.2,36,42.4,41.6L42.4,41.6z
-                                                                                                          M34.2,41.6c2.2-5.1,5-9.9,8.3-14.2c-8.5,2.7-15.8,7.8-21.1,14.2H34.2L34.2,41.6z M97,49.1l-15.2,0c1.8,5.8,2.9,12,3.2,18.5h17.6
-                                                                                                          C102.1,60.9,100.1,54.7,97,49.1L97,49.1z M77.5,67.6c-0.3-6.5-1.6-12.7-3.6-18.5H60.3v18.5H77.5L77.5,67.6z M70.8,41.6
-                                                                                                          C68.1,36,64.5,31,60.3,26.8v14.8H70.8L70.8,41.6z M79,41.6h12.8c-5.4-6.3-12.7-11.5-21.1-14.2C74,31.7,76.8,36.5,79,41.6L79,41.6z
-                                                                                                          M16.2,93.6l15.2,0c-1.8-5.8-2.9-12-3.2-18.5H10.6C11.2,81.8,13.1,88.1,16.2,93.6L16.2,93.6z M35.7,75.1c0.3,6.5,1.6,12.7,3.6,18.5
-                                                                                                          h13.6V75.1H35.7L35.7,75.1z M42.4,101.1c2.8,5.6,6.4,10.6,10.5,14.8v-14.8H42.4L42.4,101.1z M34.2,101.1H21.3
-                                                                                                          c5.4,6.3,12.7,11.5,21.1,14.2C39.2,111.1,36.4,106.3,34.2,101.1L34.2,101.1z M81.8,93.6l15.2,0c3.1-5.6,5-11.8,5.6-18.5H85
-                                                                                                          C84.7,81.6,83.6,87.8,81.8,93.6L81.8,93.6z M73.9,93.6c2-5.8,3.2-12,3.6-18.5H60.3v18.5H73.9L73.9,93.6z M70.8,101.1H60.3v14.8
-                                                                                                          C64.5,111.8,68.1,106.8,70.8,101.1L70.8,101.1z M79,101.1c-2.2,5.1-5,9.9-8.3,14.2c8.5-2.7,15.8-7.8,21.1-14.2H79L79,101.1z
-                                                                                                          M31.4,49.1l-15.2,0c-3.1,5.6-5,11.9-5.6,18.5h17.6C28.6,61.2,29.7,54.9,31.4,49.1L31.4,49.1z M56.6,125C27,125,3,101,3,71.4
-                                                                                                          c0-29.6,24-53.6,53.6-53.6c29.6,0,53.6,24,53.6,53.6C110.2,101,86.2,125,56.6,125L56.6,125z"/>
-                                                                                </VisualBrush.Visual>
-                                                                            </VisualBrush>
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Key}" Value="ladder_1v1">
-                                                                    <Setter Property="Text" Value="1 vs 1"/>
-                                                                    <Setter Property="ToolTip" Value="Ladder 1 vs 1"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_2v2">
-                                                                    <Setter Property="Text" Value="2 vs 2"/>
-                                                                    <Setter Property="ToolTip" Value="TMM 2 vs 2"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_full_share">
-                                                                    <Setter Property="Text" Value="4 vs 4"/>
-                                                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 full share"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Key}" Value="tmm_4v4_share_until_death">
-                                                                    <Setter Property="Text" Value="4 vs 4"/>
-                                                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 share until death"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </ItemsControl.Resources>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <ItemContainerTemplate>
-                                                            <Grid Background="Transparent"
-                                                                  ShowGridLines="False">
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition Width="40"/>
-                                                                    <ColumnDefinition Width="*"/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <TextBlock HorizontalAlignment="Center"
-                                                                           Style="{StaticResource TextBlockStyle}"/>
-
-                                                                <Grid DataContext="{Binding Value}"
-                                                                      Grid.Column="1"
-                                                                      ShowGridLines="False"
-                                                                      >
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                        <ColumnDefinition Width="*"/>
-                                                                    </Grid.ColumnDefinitions>
-
-                                                                    <TextBlock Grid.Column="0"
-                                                                               Margin="10 0 0 0"
-                                                                               DataContext="{Binding Mode=OneWay,
-                                                                        Converter={StaticResource RatingDifferenceConverter}}">
-                                                                        <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
-                                                                        <Run Style="{StaticResource RatingDifferenceRunStyle}"/>
-                                                                    </TextBlock>
-
-                                                                    <!--<TextBlock Text="{Binding rating[1], StringFormat=' +-{0}', Mode=OneWay}" Grid.Column="2"/>-->
-                                                                    <!--<TextBlock Text="G:" Grid.Column="3" Margin="10 0 10 0" HorizontalAlignment="Right"/>-->
-                                                                    <TextBlock Text="{Binding number_of_games, Mode=OneWay}" Grid.Column="1" HorizontalAlignment="Right"
-                                                                               Margin="0"/>
-                                                                </Grid>
-                                                            </Grid>
-                                                        </ItemContainerTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                                <TextBlock Text="{Binding id, StringFormat='id: {0}'}"
-                                                           Opacity=".3">
-                                                    <TextBlock.ContextMenu>
-                                                        <ContextMenu>
-                                                            <MenuItem Command="{StaticResource CopyCommand}"
-                                                                      CommandParameter="{Binding id}"
-                                                                      Header="Copy">
-                                                                <MenuItem.Icon>
-                                                                    <ui:SymbolIcon Symbol="Copy"/>
-                                                                </MenuItem.Icon>
-                                                            </MenuItem>
-                                                        </ContextMenu>
-                                                    </TextBlock.ContextMenu>
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </ui:AppBarElementContainer>
-                                    </StackPanel>
-                                </ui:Flyout>
-                            </ui:AppBarButton.Flyout>
-                            <ui:AppBarButton.Template>
-                                <ControlTemplate TargetType="ui:AppBarButton">
+                            d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}"
+                            ui:FlyoutService.Flyout="{StaticResource ChatterPlayerCardFlyout}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
                                     <Grid d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -709,8 +831,8 @@
                                         </Grid>
                                     </Grid>
                                 </ControlTemplate>
-                            </ui:AppBarButton.Template>
-                        </ui:AppBarButton>
+                            </Button.Template>
+                        </Button>
                     </ItemContainerTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
