@@ -55,12 +55,38 @@ namespace beta.Infrastructure.Services
             Client.DelimiterDataReceived += OnDataReceived;
             PreviewNewLobbies = false;
         }
+        public IEnumerable<string> GetPlayersLogins(string filter)
+        {
+            var enumerator = PlayerNameToId.GetEnumerator();
+            filter = filter.ToLower();
+
+            if (string.IsNullOrWhiteSpace(filter))
+                while (enumerator.MoveNext())
+                {
+                    yield return enumerator.Current.Key;
+                }
+            else
+                while (enumerator.MoveNext())
+                {
+                    var player = enumerator.Current.Key;
+                    if (player.Contains(filter))
+                        yield return player;
+                }
+        }
 
         public PlayerInfoMessage GetPlayerInfo(string login)
         {
+            login = login.ToLower();
             if (PlayerNameToId.TryGetValue(login, out var id))
             {
                 return Players[id];
+            }
+            foreach (var item in PlayerNameToId.Keys)
+            {
+                if (item.StartsWith(login, StringComparison.OrdinalIgnoreCase))
+                {
+
+                }
             }
             return null;
         }
@@ -138,7 +164,9 @@ namespace beta.Infrastructure.Services
                             if (playerInfoMessage.players.Length > 0)
                                 // payload with players
                                 for (int i = 0; i < playerInfoMessage.players.Length; i++)
+                                {
                                     OnNewPlayer(playerInfoMessage.players[i]);
+                                }
                             else OnNewPlayer(playerInfoMessage);
 
                             break;
@@ -290,7 +318,7 @@ namespace beta.Infrastructure.Services
             {                    
                 int count = Players.Count;
                 Players.Add(newPlayer);
-                PlayerNameToId.Add(newPlayer.login, count);
+                PlayerNameToId.Add(newPlayer.login.ToLower(), count);
                 PlayerUIDToId.Add(newPlayer.id, count);
                 NewPlayer?.Invoke(this, e);
             }

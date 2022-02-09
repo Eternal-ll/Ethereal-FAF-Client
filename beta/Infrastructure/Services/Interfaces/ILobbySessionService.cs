@@ -1,6 +1,7 @@
 ﻿using beta.Models.Server;
 using beta.Models.Server.Base;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net;
@@ -26,6 +27,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage GetPlayerInfo(int uid);
         public PlayerInfoMessage GetPlayerInfo(string login);
+        public IEnumerable<string> GetPlayersLogins(string filter);
 
         public ObservableCollection<GameInfoMessage> AvailableLobbies { get; }
     }
