@@ -193,7 +193,7 @@ namespace beta.Views
 
             if (e.Key == System.Windows.Input.Key.Enter)
             {
-                if (listbox.Visibility != Visibility.Visible)
+                if (VisibilityTest != Visibility.Visible)
                 {
                     string nick = Settings.Default.PlayerNick;
                     var mention = input.Text.Contains(nick, StringComparison.OrdinalIgnoreCase);
