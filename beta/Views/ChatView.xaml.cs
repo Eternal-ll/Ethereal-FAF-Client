@@ -260,8 +260,17 @@ namespace beta.Views
                 if (previousItem != null)
                 {
                     var t = _foundedIndex + previousItem.Length - keyWordLen;
-                    if (t < input.Text.Length)
-                        input.Text += text.Substring(t);
+
+                    // TODO FIX ME
+                    try
+                    {
+                        if (t < input.Text.Length)
+                            input.Text += text.Substring(t);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.ToString());
+                    }
                 }
                 else input.Text += text.Substring(_foundedIndex);
                 input.CaretIndex = start.Length + item.Length;
@@ -370,8 +379,31 @@ namespace beta.Views
 
                         if (suggestions.Length > 0)
                         {
+                            if (suggestions.Length == 1)
+                            {
+                                if (suggestions[0].Equals(word, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    SuggestionListBox.ItemsSource = null;
+                                    VisibilityTest = Visibility.Collapsed;
+                                    return;
+                                }
+                            }
+
                             SuggestionListBox.ItemsSource = suggestions;
+                            SuggestionListBox.SelectedIndex = 0;
                             VisibilityTest = Visibility.Visible;
+
+                            var width = MessageInput.ActualWidth;
+                            var height = MessageInput.ActualHeight;
+                            for (int j = 0; j < width; j++)
+                            {
+                                var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
+                                if (func == i - word.Length)
+                                {
+                                    Thickness = new Thickness(j, 0, 0, 10);
+                                    break;
+                                }
+                            }
 
                             var player = suggestions[0];
                             player = player.Substring(word.Length);
@@ -391,101 +423,101 @@ namespace beta.Views
                 }
             }
             _previousText = input.Text;
-            return;
+            //return;
 
-            bool foundD = false;
-            for (int i = 0; i < len; i++)
-            {
-                var letter = text[i];
+            //bool foundD = false;
+            //for (int i = 0; i < len; i++)
+            //{
+            //    var letter = text[i];
 
-                if (foundD)
-                {
-                    if (letter != ' ' && i != len - 1)
-                    {
-                        sb.Append(letter);
-                        continue;
-                    }
-                    foundD = false;
+            //    if (foundD)
+            //    {
+            //        if (letter != ' ' && i != len - 1)
+            //        {
+            //            sb.Append(letter);
+            //            continue;
+            //        }
+            //        foundD = false;
 
-                    if (letter != ' ' && i == len - 1)
-                    {
-                        sb.Append(letter);
-                    }
+            //        if (letter != ' ' && i == len - 1)
+            //        {
+            //            sb.Append(letter);
+            //        }
 
-                    var keyWord = sb.ToString();
+            //        var keyWord = sb.ToString();
 
-                    if (keyWord.Length == 0)
-                    {
-                        continue;
-                    }
+            //        if (keyWord.Length == 0)
+            //        {
+            //            continue;
+            //        }
 
-                    if (input.CaretIndex > i + 1)
-                    {
-                        sb.Clear();
-                        foundD = false;
-                        continue;
-                    }
+            //        if (input.CaretIndex > i + 1)
+            //        {
+            //            sb.Clear();
+            //            foundD = false;
+            //            continue;
+            //        }
 
-                    var suggestions = Test.Where(x => x.StartsWith(keyWord, StringComparison.OrdinalIgnoreCase)).ToArray();
+            //        var suggestions = Test.Where(x => x.StartsWith(keyWord, StringComparison.OrdinalIgnoreCase)).ToArray();
 
-                    if (suggestions.Length == 1 && suggestions[0] == keyWord)
-                    {
-                        SuggestionListBox.ItemsSource = null;
-                        VisibilityTest = Visibility.Collapsed;
+            //        if (suggestions.Length == 1 && suggestions[0] == keyWord)
+            //        {
+            //            SuggestionListBox.ItemsSource = null;
+            //            VisibilityTest = Visibility.Collapsed;
 
-                        sb.Clear();
-                        continue;
-                    }
+            //            sb.Clear();
+            //            continue;
+            //        }
 
-                    if (suggestions.Length > 0)
-                    {
+            //        if (suggestions.Length > 0)
+            //        {
 
-                        VisibilityTest = Visibility.Visible;
-                        var width = MessageInput.ActualWidth;
-                        var height = MessageInput.ActualHeight;
-                        for (int j = 0; j < width; j++)
-                        {
-                            var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
-                            if (func == i - keyWord.Length)
-                            {
-                                Thickness = new Thickness(j, 0, 0, 10);
-                                break;
-                            }
-                        }
+            //            VisibilityTest = Visibility.Visible;
+            //            var width = MessageInput.ActualWidth;
+            //            var height = MessageInput.ActualHeight;
+            //            for (int j = 0; j < width; j++)
+            //            {
+            //                var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
+            //                if (func == i - keyWord.Length)
+            //                {
+            //                    Thickness = new Thickness(j, 0, 0, 10);
+            //                    break;
+            //                }
+            //            }
 
-                        SuggestionListBox.ItemsSource = suggestions;
-                        SuggestionListBox.SelectedIndex = 0;
+            //            SuggestionListBox.ItemsSource = suggestions;
+            //            SuggestionListBox.SelectedIndex = 0;
 
-                        _foundedIndex = i;
-                        _keyWordLen = keyWord.Length;
-                        return;
-                    }
-                    else
-                    {
-                        VisibilityTest = Visibility.Collapsed;
-                        SuggestionListBox.ItemsSource = null;
-                        sb.Clear();
-                        continue;
-                    }
+            //            _foundedIndex = i;
+            //            _keyWordLen = keyWord.Length;
+            //            return;
+            //        }
+            //        else
+            //        {
+            //            VisibilityTest = Visibility.Collapsed;
+            //            SuggestionListBox.ItemsSource = null;
+            //            sb.Clear();
+            //            continue;
+            //        }
 
 
-                    sb.Clear();
-                    foundD = false;
-                }
+            //        sb.Clear();
+            //        foundD = false;
+            //    }
 
-                // return if there is nothing interesting
-                if (i == len - 1)
-                {
-                    SuggestionListBox.ItemsSource = null;
-                    VisibilityTest = Visibility.Collapsed;
-                    return;
-                }
+            //    // return if there is nothing interesting
+            //    if (i == len - 1)
+            //    {
+            //        SuggestionListBox.ItemsSource = null;
+            //        VisibilityTest = Visibility.Collapsed;
+            //        return;
+            //    }
 
-                if (letter == '@')
-                {
-                    foundD = true;
-                }
-            }
+            //    if (letter == '@')
+            //    {
+            //        foundD = true;
+            //    }
+            //}
         }
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
