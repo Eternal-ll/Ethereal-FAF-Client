@@ -19,7 +19,17 @@
                     <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
 
 
+                    <converter:IsNullConverter x:Key="IsNullConverter"/>
+                    <converter:TestConverter x:Key="TestConverter"/>
+                    <converter:ObjectToTypeConverter x:Key="ObjectToTypeConverter"/>
+                    
+                    
+                    <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
+
                     <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
+                    <converter:CheckIfEmojiOnlyConverter x:Key="CheckIfEmojiOnlyConverter"/>
+
+
                     <converter:TextConverter x:Key="TextConverter"/>
 
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
