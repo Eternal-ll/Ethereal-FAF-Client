@@ -14,7 +14,7 @@ namespace beta.Views
     /// </summary>
     public partial class GlobalView : INotifyPropertyChanged
     {
-        private readonly ILobbySessionService _LobbySessionService;
+        private readonly IGamesServices GamesServices;
 
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;
@@ -30,15 +30,16 @@ namespace beta.Views
         {
             InitializeComponent();
 
+            GamesServices = App.Services.GetRequiredService<IGamesServices>();
+
             var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
             CollectionViewSource.GroupDescriptions.Add(grouping);
 
-            _LobbySessionService = App.Services.GetRequiredService<ILobbySessionService>();
+            BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
 
-            BindingOperations.EnableCollectionSynchronization(_LobbySessionService.AvailableLobbies, _lock);
+            CollectionViewSource.Source = GamesServices.IdleGames;
 
-            CollectionViewSource.Source = _LobbySessionService.AvailableLobbies;
             DataContext = this;
         }
         #endregion

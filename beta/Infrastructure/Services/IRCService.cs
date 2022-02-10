@@ -9,13 +9,13 @@ namespace beta.Infrastructure.Services
     public class IRCService : IIRCService
     {
         public event EventHandler<EventArgs<string>> Message;
-        private readonly ILobbySessionService LobbySession;
+        private readonly ISessionService SessionService;
         public readonly SSLClient Client = new();
         public SSLClient SslClient => Client;
-        public IRCService(ILobbySessionService lobbySession)
+        public IRCService(ISessionService lobbySession)
         {
-            LobbySession = lobbySession;
-            LobbySession.Authorization += OnLobbyAuthorization;
+            SessionService = lobbySession;
+            SessionService.Authorization += OnLobbyAuthorization;
             Client.DelimiterDataReceived += OnIRCServerResponse;
         }
 

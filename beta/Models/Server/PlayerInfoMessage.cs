@@ -30,11 +30,27 @@ namespace beta.Models.Server
         public string tooltip { get; set; }
     }
 
+    public struct PlayerAlias
+    {
+        public string name { get; set; }
+        public DateTime changeTime;
+    }
+
+    public enum PlayerState
+    {
+        IDLE = 1,
+        PLAYING = 2,
+        HOSTING = 3,
+        JOINING = 4,
+        SEARCHING_LADDER = 5,
+        STARTING_AUTOMATCH = 6,
+    }
+
     public class PlayerInfoMessage : ViewModel, IServerMessage
     {
         #region Custom properties
 
-        #region Flag
+        #region Flag    
         private object _Flag;
         public object Flag => _Flag ??= App.Current.Resources["Flag." + country];
         #endregion
@@ -91,10 +107,8 @@ namespace beta.Models.Server
         public string country { get; set; }
         public string clan { get; set; }
         public Dictionary<string, Rating> ratings { get; set; }
-        //public double[] global_rating { get; set; }
-        //public double[] ladder_rating { get; set; }
-        //public int number_of_games { get; set; }
         public PlayerAvatar avatar { get; set; }
+        public PlayerAlias[] names { get; set; }
 
         public PlayerInfoMessage[] players { get; set; }
     }

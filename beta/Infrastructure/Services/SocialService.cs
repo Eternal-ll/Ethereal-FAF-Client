@@ -24,7 +24,9 @@ namespace beta.Infrastructure.Services
         */
 
         #region Properties
-        private readonly ILobbySessionService LobbySessionService;
+        private readonly IPlayersService PlayersService;
+        private readonly ISessionService SessionService;
+
         public SocialMessage SocialMessage { get; set; }
 
         public int[] FriendsIds { get; set;}
@@ -34,10 +36,14 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region Ctor
-        public SocialService(ILobbySessionService lobbySessionService)
+        public SocialService(
+            IPlayersService playersService,
+            ISessionService sessionService)
         {
-            LobbySessionService = lobbySessionService;
-            lobbySessionService.SocialInfo += OnNewSocialInfo;
+            PlayersService = playersService;
+            SessionService = sessionService;
+
+            sessionService.SocialInfo += OnNewSocialInfo;
         }
         #endregion
 
@@ -73,7 +79,7 @@ namespace beta.Infrastructure.Services
                     {
                         if (friends[i] == id)
                         {
-                            return LobbySessionService.GetPlayerInfo(id);
+                            return PlayersService.GetPlayer(id);
                         }
                     }
                 }
@@ -89,7 +95,7 @@ namespace beta.Infrastructure.Services
                 {
                     if (foes[i] == id)
                     {
-                        return LobbySessionService.GetPlayerInfo(id);
+                        return PlayersService.GetPlayer(id);
                     }
                 }
             }
@@ -118,7 +124,7 @@ namespace beta.Infrastructure.Services
              *  if (... == ...) return ...
              */
 
-            var players = LobbySessionService.GetPlayers();
+            var players = PlayersService.GetPlayers();
             var enumerator = players.GetEnumerator();
 
             if (relation == PlayerRelation.FRIEND)

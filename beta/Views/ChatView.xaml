@@ -311,7 +311,7 @@
                         <Button
                             Content="R"
                             ToolTip="Rating"
-                            Margin="22 0 0 0"/>
+                            Margin="14 0 0 0"/>
                         <Button
                             Content="G"
                             ToolTip="Games"
@@ -319,7 +319,7 @@
                     </StackPanel>
 
                     <ItemsControl
-                        Margin="10"
+                        Margin="10 10 0 0"
                         HorizontalAlignment="Stretch"
                         ItemsSource="{Binding ratings, Mode=OneWay}">
                         <ItemsControl.Style>
@@ -338,10 +338,10 @@
                         </ItemsControl.Style>
                         <ItemsControl.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid>
+                                <Grid Background="Transparent">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="60"/>
-                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="90"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Margin="0 0 0 0"
@@ -354,10 +354,9 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-
                                         <TextBlock
                                             Grid.Column="0"
-                                            Margin="0"
+                                            Margin="0 0 6 0"
                                             HorizontalAlignment="Right"
                                             DataContext="{Binding Mode=OneWay,
                                             Converter={StaticResource RatingDifferenceConverter}}">
@@ -991,7 +990,7 @@
                     <Style TargetType="Canvas">
                         <Setter Property="Opacity" Value="0"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ScrollViewer, Path=ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                            <DataTrigger Binding="{Binding ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
                                      Value="True">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>

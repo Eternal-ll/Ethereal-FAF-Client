@@ -3,7 +3,6 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,9 +15,8 @@ namespace beta.Views
     public partial class AuthView : INavigationAware
     {
         private readonly IOAuthService OAuthService;
-        private readonly ILobbySessionService _LobbySessionService;
+        private readonly ISessionService SessionService;
         private INavigationManager NavigationManager;
-
         /// <summary>
         /// Raising event on navigating, give us a NavigationManager to move to next view
         /// </summary>
@@ -49,7 +47,7 @@ namespace beta.Views
 
             // loading required services
             OAuthService = App.Services.GetRequiredService<IOAuthService>();
-            _LobbySessionService = App.Services.GetRequiredService<ILobbySessionService>();
+            SessionService = App.Services.GetRequiredService<ISessionService>();
 
             // starting listening events
 
@@ -57,12 +55,15 @@ namespace beta.Views
             OAuthService.Result += OnOAuthAuthorizationFinish;
             
             // raising up after finishing lobby session authorization
-            _LobbySessionService.Authorization += OnLobbySessionServiceAuthorizationFinish;
+            SessionService.Authorization += OnLobbySessionServiceAuthorizationFinish;
 
             // load user setting of auto join ot local checkbox
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
 
-            _LobbySessionService.AskSession();
+            SessionService.AskSession();
+
+            LoginInput.Text = "eternal-";
+            PasswordInput.Password = "cjxB2010123";
         }
             
         private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>
@@ -74,7 +75,7 @@ namespace beta.Views
 
                 // remove listeners of events
                 OAuthService.Result -= OnOAuthAuthorizationFinish;
-                _LobbySessionService.Authorization -= OnLobbySessionServiceAuthorizationFinish;
+                SessionService.Authorization -= OnLobbySessionServiceAuthorizationFinish;
                 // call UI thread and invoke our instructions
                 // events coming from different thread and can raise exception
                 NavigationManager.Navigate(new MainView());

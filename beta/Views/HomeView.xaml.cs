@@ -1,10 +1,6 @@
-﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
-using beta.Properties;
-using Microsoft.Extensions.DependencyInjection;
+﻿using beta.Properties;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Data;
 
 namespace beta.Views
 {
@@ -19,7 +15,7 @@ namespace beta.Views
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         #endregion
-        private readonly ILobbySessionService LobbySessionService;
+
         public HomeView()
         {
             InitializeComponent();

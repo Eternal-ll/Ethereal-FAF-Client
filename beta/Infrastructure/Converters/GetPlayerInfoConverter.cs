@@ -10,14 +10,14 @@ namespace beta.Infrastructure.Converters
 {
     public class GetPlayerInfoConverter : IValueConverter
     {
-        private readonly ILobbySessionService LobbySessionService;
+        private readonly IPlayersService PlayersService;
         public GetPlayerInfoConverter()
         {
-            LobbySessionService = App.Services.GetService<ILobbySessionService>();
+            PlayersService = App.Services.GetService<IPlayersService>();
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            //if (value == null) return null;
+            if (value == null) return null;
 
             var playerName = string.Empty;
 
@@ -32,7 +32,7 @@ namespace beta.Infrastructure.Converters
             if (value is string player)
                 playerName = player;
 
-            return LobbySessionService.GetPlayerInfo(playerName);
+            return PlayersService.GetPlayer(playerName);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

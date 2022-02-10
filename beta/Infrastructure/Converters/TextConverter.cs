@@ -41,10 +41,10 @@ namespace beta.Infrastructure.Converters
             }
         };
 
-        private readonly ILobbySessionService LobbySessionService;
+        private readonly IPlayersService PlayersService;
         public TextConverter()
         {
-            LobbySessionService = App.Services.GetService<ILobbySessionService>();
+            PlayersService = App.Services.GetService<IPlayersService>();
         }
 
         private InlineUIContainer GetEmoji(string emoji)
@@ -274,7 +274,7 @@ namespace beta.Infrastructure.Converters
                     if (sb.Length > 2)
                     {
                         var login = sb.ToString().Substring(1).Replace(" ", "");
-                        var player = LobbySessionService.GetPlayerInfo(login);
+                        var player = PlayersService.GetPlayer(login);
                         if (player != null)
                         {
                             Inlines.Add(new InlineUIContainer()

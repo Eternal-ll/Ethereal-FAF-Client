@@ -91,6 +91,8 @@ namespace beta.Views
     /// </summary>
     public partial class ChatView : UserControl, INotifyPropertyChanged
     {
+        #region Properties
+
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -100,10 +102,10 @@ namespace beta.Views
         #endregion
 
         private readonly IrcClient IrcClient;
-        private readonly ILobbySessionService LobbySessionService;
-
-        #region Properties
-        public ObservableCollection<Channel> Channels { get; } = new();
+        private readonly IPlayersService PlayersService;
+        
+        private readonly ObservableCollection<Channel> _Channels = new();
+        public ObservableCollection<Channel> Channels => _Channels;
 
         #region SelectedChannel
         private Channel _SelectedChannel;
@@ -148,10 +150,15 @@ namespace beta.Views
         #endregion
 
         #endregion
+
         public ChatView()
         {
             InitializeComponent();
+
+            PlayersService = App.Services.GetService<IPlayersService>();
+
             DataContext = this;
+
             Channels.Add(new() { Name = "#server" });
             SelectedChannel = Channels[0];
 
@@ -160,7 +167,6 @@ namespace beta.Views
             MessageInput.TextChanged += OnMessageInputTextChanged;
             MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
 
-            LobbySessionService = App.Services.GetService<ILobbySessionService>();
             return;
 
             //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
@@ -375,13 +381,13 @@ namespace beta.Views
                     if (test)
                     {
                         var word = sb.ToString().Trim().Substring(1);
-                        var suggestions = LobbySessionService.GetPlayersLogins(word).ToArray();
+                        var suggestions = PlayersService.GetPlayers(word).ToArray();
 
                         if (suggestions.Length > 0)
                         {
                             if (suggestions.Length == 1)
                             {
-                                if (suggestions[0].Equals(word, StringComparison.OrdinalIgnoreCase))
+                                if (suggestions[0].login.Equals(word, StringComparison.OrdinalIgnoreCase))
                                 {
                                     SuggestionListBox.ItemsSource = null;
                                     VisibilityTest = Visibility.Collapsed;
@@ -406,7 +412,6 @@ namespace beta.Views
                             }
 
                             var player = suggestions[0];
-                            player = player.Substring(word.Length);
                             //input.Text = text + player;
                             _previousText = text + player;
                             if (gg) currentIndex--;
@@ -535,7 +540,7 @@ namespace beta.Views
 
             for (int i = 0; i < e.UserList.Length; i++)
             {
-                var playerInfo = LobbySessionService.GetPlayerInfo(e.UserList[i]);
+                var playerInfo = PlayersService.GetPlayer(e.UserList[i]);
                 if (playerInfo != null)
                     users.Add(playerInfo);
             }

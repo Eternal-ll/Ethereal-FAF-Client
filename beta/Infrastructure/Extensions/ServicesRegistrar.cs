@@ -8,7 +8,10 @@ namespace beta.Infrastructure.Extensions
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services) => services
             .AddSingleton<IOAuthService, OAuthService>()
-            .AddSingleton<ILobbySessionService, LobbySessionService>()
-            .AddSingleton<IIRCService, IRCService>();
+            .AddSingleton<ISessionService, SessionService>()
+            .AddSingleton<IPlayersService, PlayersService>()
+            .AddSingleton<IGamesServices, GamesServices>()
+            .AddSingleton<IIRCService, IRCService>()
+            ;
     }
 }
