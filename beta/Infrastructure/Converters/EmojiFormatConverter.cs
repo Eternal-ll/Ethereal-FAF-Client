@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
 
-namespace beta.Infrastructure.Utils
+namespace beta.Infrastructure.Converters
 {
-    public class PixelsToGridLengthConverter : IValueConverter
+    /// <summary>
+    /// Formatting emoji name to :name:
+    /// </summary>
+    internal class EmojiFormatConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return new GridLength((double)value);
+            if (value == null) return string.Empty;
+            return ":" + value.ToString() + ":";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

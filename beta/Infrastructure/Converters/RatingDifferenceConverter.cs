@@ -15,13 +15,13 @@ namespace beta.Infrastructure.Converters
 
             double calculated = rating.rating[0] - 3 * rating.rating[1];
 
-            rating.DisplayedRating = System.Convert.ToInt32(calculated);
+            //rating.DisplayedRating = System.Convert.ToInt32(calculated);
 
-            if (rating.GamesDifference > 0)
-            {
-                double difference = rating.RatingDifference[0] - 3 * rating.RatingDifference[1];
-                rating.DisplayedRatingDifference = System.Convert.ToInt32(difference);
-            }
+            //if (rating.GamesDifference > 0)
+            //{
+            //    double difference = rating.RatingDifference[0] - 3 * rating.RatingDifference[1];
+            //    rating.DisplayedRatingDifference = System.Convert.ToInt32(difference);
+            //}
             return rating;
         }
 

@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
-using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -43,12 +42,7 @@ namespace beta
             if (Directory.Exists(emojisCache))
                 Directory.CreateDirectory(emojisCache);
 
-            mapPreviews = null;
-            emojisCache = null;
-
             var host = Hosting;
-
-            host.Services.GetRequiredService<IIRCService>();
 
             base.OnStartup(e);
             await host.StartAsync().ConfigureAwait(false);
@@ -65,12 +59,11 @@ namespace beta
         }
 
         public static void ConfigureServices(HostBuilderContext host, IServiceCollection services) => services
-            .RegisterServices()
-            .AddViewModels();
+            .RegisterServices();
 
         // TODO: maybe will be useful for future
         public static string CurrentDirectory => IsDesignMode 
-            ? Path.GetDirectoryName(GetSourceCodePath()) 
+            ? Path.GetDirectoryName(GetSourceCodePath())
             : Environment.CurrentDirectory;
 
         private static string GetSourceCodePath([CallerFilePath] string Path = null) => Path;

@@ -60,7 +60,7 @@
                 Text="{Binding login}"
                 Grid.Column="1"/>
             <Grid 
-                DataContext="{Binding ratings[global], Converter={StaticResource RatingDifferenceConverter}, Mode=OneWay}"
+                DataContext="{Binding ratings[global], Mode=OneWay}"
                 Margin="10 0"
                 Grid.Column="2"
                 HorizontalAlignment="Right">

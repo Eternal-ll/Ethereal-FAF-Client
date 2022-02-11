@@ -4,7 +4,9 @@ using beta.Models.Server;
 using beta.Properties;
 using beta.ViewModels.Base;
 using beta.Views;
+#if DEBUG
 using Microsoft.Extensions.Logging;
+#endif
 using System;
 using System.Diagnostics;
 using System.IO;

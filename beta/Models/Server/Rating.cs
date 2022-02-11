@@ -17,8 +17,14 @@ namespace beta.Models.Server
         #endregion
 
         #region Filling from converter
-        public int DisplayedRating { get; set; }
-        public int DisplayedRatingDifference { get; set; }
+
+        #region DisplayedRating
+        private int? _DisplayedRating;
+        public int DisplayedRating => _DisplayedRating ??= Convert.ToInt32(rating[0] - 3 * rating[1]);
+        #endregion
+
+        public int DisplayedRatingDifference => GamesDifference == 0 ? 0 : Convert.ToInt32(RatingDifference[0] - 3 * RatingDifference[1]);
+        
         #endregion
 
         #endregion

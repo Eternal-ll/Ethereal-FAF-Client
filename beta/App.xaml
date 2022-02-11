@@ -16,19 +16,18 @@
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
                     <converter:RatingConverter x:Key="RatingConverter"/>
-                    <converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>
-
+                    
+                    <!--Depreciated, calculations moved to Rating class-->
+                    <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
 
                     <converter:IsNullConverter x:Key="IsNullConverter"/>
-                    <converter:TestConverter x:Key="TestConverter"/>
                     <converter:ObjectToTypeConverter x:Key="ObjectToTypeConverter"/>
                     
-                    
+                    <!--Chat converters-->
                     <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
-
+                    
                     <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
                     <converter:CheckIfEmojiOnlyConverter x:Key="CheckIfEmojiOnlyConverter"/>
-
 
                     <converter:TextConverter x:Key="TextConverter"/>
 

@@ -62,21 +62,20 @@
             </Style>
 
             <Style TargetType="Run" x:Key="RatingDifferenceRunStyle">
+                <Setter Property="Text" Value="↓"/>
+                <Setter Property="Foreground" Value="Red"/>
+                <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference}"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding DisplayedRatingDifference,
-                        Mode=OneWay, Converter={StaticResource MoreThanConverter}}"
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference}"
+                                 Value="0">
+                        <Setter Property="Text" Value="{x:Null}"/>
+                        <Setter Property="ToolTip" Value="{x:Null}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference, Converter={StaticResource MoreThanConverter}}"
                         Value="True">
                         <Setter Property="Text" Value="↑"/>
                         <Setter Property="Foreground" Value="Lime"/>
-                        <Setter Property="ToolTip"
-                                Value="{Binding DisplayedRatingDifference,StringFormat='TEST', Mode=OneWay}"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding DisplayedRatingDifference,
-                        Mode=OneWay, Converter={StaticResource MoreThanConverter},ConverterParameter = '-1'}"
-                        Value="False">
-                        <Setter Property="Text" Value="↓"/>
-                        <Setter Property="Foreground" Value="Red"/>
-                        <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, Mode=OneWay}"/>
+                        <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, StringFormat='+{0}'}"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -357,10 +356,8 @@
                                         <TextBlock
                                             Grid.Column="0"
                                             Margin="0 0 6 0"
-                                            HorizontalAlignment="Right"
-                                            DataContext="{Binding Mode=OneWay,
-                                            Converter={StaticResource RatingDifferenceConverter}}">
-                                            <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
+                                            HorizontalAlignment="Right">
+                                            <Run Text="{Binding DisplayedRating}"/>
                                             <Run Style="{StaticResource RatingDifferenceRunStyle}"/>
                                         </TextBlock>
 
