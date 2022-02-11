@@ -29,9 +29,9 @@ namespace beta.Infrastructure.Converters
         public string Name { get; set; }
         public ImageSource ImageSource;
     }
+    // TODO: Move to Service!!! This logic should be in some ChatService
     internal class TextConverter : IValueConverter
     {
-
         private readonly IList<IEmojiCache> Cache = new List<IEmojiCache>()
         {
             new BitmapEmojiCache()

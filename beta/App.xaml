@@ -14,7 +14,7 @@
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
-                    <converter:GetPlayerInfoConverter x:Key="GetPlayerInfoConverter"/>
+                    <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
                     <converter:RatingConverter x:Key="RatingConverter"/>
                     
                     <!--Depreciated, calculations moved to Rating class-->

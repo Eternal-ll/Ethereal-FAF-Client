@@ -49,7 +49,7 @@
         </Style.Triggers>
     </Style>
     <DataTemplate x:Key="PlayerCard" d:DataType="{x:Type models:PlayerInfoMessage}">
-        <Grid DataContext="{Binding Converter={StaticResource GetPlayerInfoConverter}}">
+        <Grid DataContext="{Binding Converter={StaticResource GetPlayerConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="16"/>
                 <ColumnDefinition/>

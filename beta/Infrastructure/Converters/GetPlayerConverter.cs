@@ -8,13 +8,21 @@ using System.Windows.Data;
 
 namespace beta.Infrastructure.Converters
 {
-    public class GetPlayerInfoConverter : IValueConverter
+    /// <summary>
+    /// Get player from PlayersService by login, id
+    /// </summary>
+    public class GetPlayerConverter : IValueConverter
     {
         private readonly IPlayersService PlayersService;
-        public GetPlayerInfoConverter()
+        public GetPlayerConverter()
         {
             PlayersService = App.Services.GetService<IPlayersService>();
         }
+        /// <summary>
+        /// Get player from PlayersService by login, id. Returns Player instance or Null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null) return null;

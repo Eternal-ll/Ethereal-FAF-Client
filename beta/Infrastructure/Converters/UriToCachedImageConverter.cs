@@ -11,6 +11,7 @@ namespace beta.Infrastructure.Converters
 {
     public class UriToCachedImageConverter : IValueConverter
     {
+        // TODO: Move to service !!!
         private readonly IList<BitmapImage> Cache = new List<BitmapImage>();
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

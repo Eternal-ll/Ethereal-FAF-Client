@@ -85,7 +85,7 @@
                             Margin="0 0 0 10">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
-                            <Setter Property="DataContext" Value="{Binding Converter={StaticResource GetPlayerInfoConverter}}"/>
+                            <Setter Property="DataContext" Value="{Binding Converter={StaticResource GetPlayerConverter}}"/>
                         </Style>
                     </StackPanel.Style>
                     <Grid>
@@ -396,7 +396,7 @@
             </ui:Flyout>
 
             <ui:Flyout x:Key="MessagePlayerCardFlyout" Placement="RightEdgeAlignedTop">
-                <ContentControl Content="{Binding Converter={StaticResource GetPlayerInfoConverter}}"/>
+                <ContentControl Content="{Binding Converter={StaticResource GetPlayerConverter}}"/>
             </ui:Flyout>
             
         </Grid.Resources>
