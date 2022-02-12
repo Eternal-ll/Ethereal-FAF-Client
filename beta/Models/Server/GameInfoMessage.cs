@@ -21,18 +21,32 @@ namespace beta.Models.Server
         Coop = 1,
         Neroxis = 2
     }
+
+    public struct InGameTeam
+    {
+        public string Name => Number > 1 ? "Team " + (Number - 1) : "Team? " + Number;
+        
+        public int Number { get; }
+        public IPlayer[] Players { get; }
+
+        public InGameTeam(int number, IPlayer[] players) : this()
+        {
+            Number = number;
+            Players = players;
+        }
+    }
+
     public class GameInfoMessage: ViewModel, IServerMessage
     {
         #region Custom properties
-        public int LobbyCycle { get; set; }
 
         #region MapName
-        public string _MapName;
+        private string _MapName;
         public string MapName
         {
             get
             {
-                if(_MapName is null)
+                if (_MapName is null)
                 {
                     _MapName += char.ToUpper(mapname[0]);
                     for (int i = 1; i < mapname.Length; i++)
@@ -53,21 +67,21 @@ namespace beta.Models.Server
         #endregion
 
         #region MapVersion
-        public string _MapVersion;
-        public string MapVersion => _MapVersion ??= mapname.Split('.')[1];
+        private string _MapVersion;
+        public string MapVersion => _MapVersion ??= mapname.Split('.').Length > 1? mapname.Split('.')[1] : string.Empty;
         #endregion
 
         #region LobbyState
-        private LobbyState _LobbyState;
-        public LobbyState LobbyState
-        {
-            get
-            {
-                _LobbyState = num_players == 0 ? LobbyState.New : _LobbyState;
-                return _LobbyState;
-            }
-            set => Set(ref _LobbyState, value);
-        }
+        //private LobbyState _LobbyState;
+        //public LobbyState LobbyState
+        //{
+        //    get
+        //    {
+        //        _LobbyState = num_players == 0 ? LobbyState.New : _LobbyState;
+        //        return _LobbyState;
+        //    }
+        //    set => Set(ref _LobbyState, value);
+        //}
         #endregion
 
         #region PreviewType
@@ -101,6 +115,17 @@ namespace beta.Models.Server
         public KeyValuePair<string, PreviewType> MapNameType => _MapNameType.Key == null ?
             new KeyValuePair<string, PreviewType>(mapname, PreviewType) : _MapNameType;
         #endregion
+
+        #region Teams
+        private InGameTeam[] _Teams;
+        public InGameTeam[] Teams
+        {
+            get => _Teams;
+            set => Set(ref _Teams, value);
+        }
+        #endregion
+
+        public PlayerInfoMessage Host { get; set; }
 
         #endregion
 

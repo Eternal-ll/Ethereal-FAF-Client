@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
-using System;
 using System.Collections.ObjectModel;
 
 namespace beta.Infrastructure.Services
@@ -13,7 +12,7 @@ namespace beta.Infrastructure.Services
         #region Services
 
         private readonly ISessionService SessionService;
-        private readonly IPlayersService PlayerService;
+        private readonly IPlayersService PlayersService;
 
         #endregion
 
@@ -34,7 +33,7 @@ namespace beta.Infrastructure.Services
             IPlayersService playerService)
         {
             SessionService = sessionService;
-            PlayerService = playerService;
+            PlayersService = playerService;
 
             sessionService.NewGame += OnNewGame;
         }
@@ -43,75 +42,97 @@ namespace beta.Infrastructure.Services
         {
             var game = e.Arg;
             var games = _IdleGames;
-
             // Update in-game players status
 
-            foreach (var key in game.teams.Keys)
-            {
-                for (int i = 0; i < game.teams[key].Length; i++)
-                {
-                    var nick = game.teams[key][i];
+            game.Teams = GetInGameTeams(game);
 
-                    var player = PlayerService.GetPlayer(nick);
-
-                    if (player != null)
-                    {
-                        // TODO FIX ME: rewrite
-
-                        if (game.launched_at == null)
-                        {
-                            if (player.login == game.host)
-                            {
-                                player.GameState = game.password_protected ? GameState.PrivateHost : GameState.Host;
-                                continue;
-                            }
-                            player.GameState = game.password_protected ? GameState.PrivateOpen : GameState.Open;
-                        }
-                        else
-                        {
-                            var time = DateTime.UnixEpoch.AddSeconds(game.launched_at.Value);
-                            var difference = DateTime.UtcNow - time;
-                            if (difference.TotalSeconds < 300)
-                                player.GameState = game.password_protected ? GameState.PrivatePlaying5 : GameState.Playing5;
-                            else player.GameState = game.password_protected ? GameState.PrivatePlaying : GameState.Playing;
-                        }
-                    }
-                }
-            }
-
+            if (game.Host == null)
+                game.Host = PlayersService.GetPlayer(game.host);
+            
             for (int i = 0; i < games.Count; i++)
             {
-                var idleGame = games[i];
-                if (game.uid == idleGame.uid)
-                {
-                    // TODO: Update stats manually
-                    games[i] = game;
-                }
-            }
-
-            //
-            for (int i = 0; i < games.Count; i++)
-            {
-                if (games[i].uid == game.uid)
+                if (games[i].host == game.host)
                 {
                     if (game.launched_at != null)
                     {
-                        _IdleGames.RemoveAt(i);
+                        games.RemoveAt(i);
                         _LiveGames.Add(game);
                         return;
                     }
-                    games[i] = game;
+
+                    if (game.num_players == 0)
+                    {
+                        games.RemoveAt(i);
+                    }
+                    else games[i] = game;
                     return;
                 }
             }
 
             if (game.launched_at != null)
             {
-                _LiveGames.Add(game);
+                var liveGames = _LiveGames;
+                liveGames.Add(game);
+                for (int i = 0; i < liveGames.Count; i++)
+                {
+                    if (liveGames[i].host == game.host)
+                    {
+                        if (game.num_players == 0)
+                        {
+                            liveGames.RemoveAt(i);
+                        }
+                        else liveGames[i] = game;
+                        return;
+                    }
+                }
                 return;
             }
+            if (game.num_players > 0)
+                games.Add(game);
+        }
 
-            _IdleGames.Add(game);
+        public InGameTeam[] GetInGameTeams(GameInfoMessage game)
+        {
+            InGameTeam[] teams = new InGameTeam[game.teams.Count];
+
+            int j = 0;
+
+            // TODO: FIX ME Need to rework player game status
+
+            //var playerStatus = GameState.Open;
+            //if (game.launched_at != null)
+            //{
+            //    var timeDifference = DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(game.launched_at.Value);
+            //    playerStatus = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
+            //}
+
+            foreach (var valuePair in game.teams)
+            {
+                var players = new IPlayer[valuePair.Value.Length];
+
+                for (int i = 0; i < valuePair.Value.Length; i++)
+                {
+                    var player = PlayersService.GetPlayer(valuePair.Value[i]);
+                    if (player == null)
+                    {
+                        players[i] = new UnknownPlayer()
+                        {
+                            login = valuePair.Value[i]
+                        };
+                        continue;
+                    }
+
+                    //player.GameState = playerStatus;
+                
+                    player.Game = game;
+
+                    players[i] = player;
+                }
+
+                teams[j] = new(valuePair.Key, players);
+                j++;
+            }
+            return teams;
         }
     }
 }

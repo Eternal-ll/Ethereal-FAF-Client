@@ -7,5 +7,7 @@ namespace beta.Infrastructure.Services.Interfaces
     {
         public ObservableCollection<GameInfoMessage> IdleGames { get; }
         public ObservableCollection<GameInfoMessage> LiveGames { get; }
+
+        public InGameTeam[] GetInGameTeams(GameInfoMessage game);
     }
 }
