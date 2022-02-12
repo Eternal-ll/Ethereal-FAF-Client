@@ -67,12 +67,14 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public PlayerInfoMessage GetPlayer(string login)
         {
+            login = login.ToLower();
             if (login.Length <= 0 || login.Trim().Length <= 0) return null;
 
             if (PlayerLoginToId.TryGetValue(login, out var id))
             {
                 return Players[id];
             }
+
 
             return null;
         }
@@ -103,13 +105,10 @@ namespace beta.Infrastructure.Services.Interfaces
                 {
                     var player = enumerator.Current;
                     if (method == ComparisonMethod.STARTS_WITH)
-                    {
-                        if (player.login.StartsWith(filter))
+                        if (player.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
                             yield return player;
-                        break;
-                    }
-
-                    if (player.login.Contains(filter))
+                    
+                    else if (player.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
                         yield return player;
                 }
         }
