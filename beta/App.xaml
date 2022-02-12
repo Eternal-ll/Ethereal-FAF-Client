@@ -16,13 +16,15 @@
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
                     <converter:RatingConverter x:Key="RatingConverter"/>
+                    <converter:GetInGameTeamsConverter x:Key="GetInGameTeamsConverter"/>
                     
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
 
                     <converter:IsNullConverter x:Key="IsNullConverter"/>
                     <converter:ObjectToTypeConverter x:Key="ObjectToTypeConverter"/>
-                    
+                    <converter:WidthToRowsConverter x:Key="WidthToRowsConverter"/>
+
                     <!--Chat converters-->
                     <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
                     

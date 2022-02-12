@@ -41,8 +41,8 @@ namespace beta.Infrastructure.Converters
             {
                 image.UriSource = new Uri(localFilePath, UriKind.Absolute);
                 image.EndInit();
-                image.DecodePixelHeight = 90;
-                image.DecodePixelWidth = 90;
+                image.DecodePixelHeight = 100;
+                image.DecodePixelWidth = 100;
                 image.Freeze();
 
                 Cache.Add(image);
@@ -50,8 +50,8 @@ namespace beta.Infrastructure.Converters
             }
             image.UriSource = new Uri("https://content.faforever.com/maps/previews/small/" + mapName);
             image.EndInit();
-            image.DecodePixelHeight = 90;
-            image.DecodePixelWidth = 90;
+            image.DecodePixelHeight = 100;
+            image.DecodePixelWidth = 100;
 
             image.DownloadCompleted += (sender, args) =>
             {

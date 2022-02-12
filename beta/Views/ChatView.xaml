@@ -64,18 +64,18 @@
             <Style TargetType="Run" x:Key="RatingDifferenceRunStyle">
                 <Setter Property="Text" Value="↓"/>
                 <Setter Property="Foreground" Value="Red"/>
-                <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference}"/>
+                <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, Mode=OneWay}"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding DisplayedRatingDifference}"
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference, Mode=OneWay}"
                                  Value="0">
                         <Setter Property="Text" Value="{x:Null}"/>
                         <Setter Property="ToolTip" Value="{x:Null}"/>
                     </DataTrigger>
-                    <DataTrigger Binding="{Binding DisplayedRatingDifference, Converter={StaticResource MoreThanConverter}}"
+                    <DataTrigger Binding="{Binding DisplayedRatingDifference, Mode=OneWay, Converter={StaticResource MoreThanConverter}}"
                         Value="True">
                         <Setter Property="Text" Value="↑"/>
                         <Setter Property="Foreground" Value="Lime"/>
-                        <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, StringFormat='+{0}'}"/>
+                        <Setter Property="ToolTip" Value="{Binding DisplayedRatingDifference, Mode=OneWay, StringFormat='+{0}'}"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -357,7 +357,7 @@
                                             Grid.Column="0"
                                             Margin="0 0 6 0"
                                             HorizontalAlignment="Right">
-                                            <Run Text="{Binding DisplayedRating}"/>
+                                            <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
                                             <Run Style="{StaticResource RatingDifferenceRunStyle}"/>
                                         </TextBlock>
 
@@ -577,7 +577,20 @@
                             </Style>
                             <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                                 <Setter Property="IsTabStop" Value="False"/>
-                                <Setter Property="Content" Value="{Binding login}"/>
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <TextBlock
+                                            Text="{Binding login}"
+                                            Padding="26 0 0 0">
+                                            <TextBlock.Background>
+                                                <ImageBrush ImageSource="{Binding Flag}"
+                                                            Stretch="None"
+                                                            AlignmentX="Left"
+                                                            AlignmentY="Top"/>
+                                            </TextBlock.Background>
+                                        </TextBlock>
+                                    </Setter.Value>
+                                </Setter>
                                 <Setter Property="Padding" Value="6 0 6 2"/>
                                 <Setter Property="Margin" Value="4 0 4 0"/>
                                 <Setter Property="ui:FlyoutService.Flyout" Value="{DynamicResource MessagePlayerCardFlyout}"/>

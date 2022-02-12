@@ -251,21 +251,21 @@ namespace beta.Views
 
             if (e.Key == System.Windows.Input.Key.Down)
             {
-                string previousItem = (string)SuggestionListBox.SelectedItem;
+                var previousItem = (PlayerInfoMessage)SuggestionListBox.SelectedItem;
 
                 if (selectedIndex < len)
                     listbox.SelectedIndex++;
                 else listbox.SelectedIndex = 0;
 
-                var item = (string)listbox.Items[listbox.SelectedIndex];
-                item = item.Substring(keyWordLen);
+                var itemg = (PlayerInfoMessage)listbox.Items[listbox.SelectedIndex];
+                var item = itemg.login.Substring(keyWordLen);
 
                 var start = text.Substring(0, _foundedIndex);
 
                 input.Text = start + item;
                 if (previousItem != null)
                 {
-                    var t = _foundedIndex + previousItem.Length - keyWordLen;
+                    var t = _foundedIndex + previousItem.login.Length - keyWordLen;
 
                     // TODO FIX ME
                     try

@@ -45,8 +45,16 @@ namespace beta.Models.Server
         SEARCHING_LADDER = 5,
         STARTING_AUTOMATCH = 6,
     }
+    public interface IPlayer
+    {
+        public string login { get; set; }
+    }
+    public class UnknownPlayer : IPlayer
+    {
+        public string login { get; set; }
+    }
 
-    public class PlayerInfoMessage : ViewModel, IServerMessage
+    public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer
     {
         #region Custom properties
 
@@ -93,6 +101,15 @@ namespace beta.Models.Server
         {
             get => _Note;
             set => Set(ref _Note, value);
+        }
+        #endregion
+
+        #region Game
+        private GameInfoMessage _Game;
+        public GameInfoMessage Game
+        {
+            get => _Game;
+            set => Set(ref _Game, value);
         }
         #endregion
 

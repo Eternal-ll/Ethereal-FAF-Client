@@ -46,7 +46,7 @@
         <Grid 
             Grid.Row="1"
             Panel.ZIndex="2"
-            Margin="30 30 30 0">
+            Margin="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition MinWidth="220"/>
@@ -163,7 +163,7 @@
                 <Style TargetType="Canvas">
                     <Setter Property="Opacity" Value="0"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=ScrollViewer, Path=ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                        <DataTrigger Binding="{Binding IdleGamesScrollViewer.ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
                                      Value="True">
                             <DataTrigger.EnterActions>
                                 <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
@@ -176,35 +176,65 @@
                 </Style>
             </Canvas.Style>
         </Canvas>
-        <ScrollViewer
-            x:Name="ScrollViewer"
-            Grid.Row="2"
-            Padding="30 0">
-            <ItemsControl
-                ItemsSource="{Binding View.Groups}"
-                Cursor="Hand">
-                <ItemsControl.ItemTemplate>
-                    <ItemContainerTemplate>
-                        <ui:ItemsRepeater
-                            ItemsSource="{Binding Items}"
-                            ItemTemplate="{StaticResource LobbyContainerDefaultTemplate}"
-                            VirtualizingPanel.IsVirtualizing="True"
-                            VirtualizingPanel.VirtualizationMode="Recycling"
-                            VirtualizingPanel.IsContainerVirtualizable="True">
-                            <ui:ItemsRepeater.Layout>
-                                <ui:UniformGridLayout 
-                                    ItemsStretch="Fill"
-                                    ItemsJustification="Start"
-                                    MinItemWidth="300"
-                                    MinItemHeight="160"
-                                    MinColumnSpacing="20"
-                                    MinRowSpacing="10">
-                                </ui:UniformGridLayout>
-                            </ui:ItemsRepeater.Layout>
-                        </ui:ItemsRepeater>
-                    </ItemContainerTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+        <Grid
+            Margin="28 0 30 0"
+            Grid.Row="2">
+            <ListBox
+                x:Name="IdleGames"
+                Grid.Row="2"
+                Margin="0"
+                IsTabStop="False"
+                Padding="0"
+                Background="{x:Null}"
+                SizeChanged="IdleGames_SizeChanged"
+                ItemsSource="{Binding View}"
+                ItemTemplate="{DynamicResource LobbyContainerDefaultTemplate}"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                VirtualizingPanel.IsContainerVirtualizable="True"
+                VirtualizingPanel.VirtualizationMode="Recycling">
+                <ListBox.Resources>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                        <!--<Setter Property="MinWidth" Value="300"/>-->
+                        <Setter Property="Margin" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Focusable" Value="False"/>
+                        <Setter Property="IsTabStop" Value="False"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                        <Setter Property="BorderBrush" Value="Gray"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                        <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
+                        <Style.Resources>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                            <!--<Style TargetType="Border">
+                            <Setter Property="Padding" Value="0"/>  
+                            <Setter Property="OverridesDefaultStyle" Value="True"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="10"/>
+                            -->
+                            <!--<Setter Property="CornerRadius" Value="10"/>-->
+                            <!--
+                        </Style>-->
+                        </Style.Resources>
+                    </Style>
+                </ListBox.Resources>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid
+                        VerticalAlignment="Top"
+                        Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualWidth}"
+                        Columns="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                        VirtualizingPanel.IsContainerVirtualizable="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+        </Grid>
     </Grid>
 </UserControl>

@@ -1,9 +1,11 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Infrastructure.Utils;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 using System.Windows.Data;
 using GameInfoMessage = beta.Models.Server.GameInfoMessage;
 
@@ -14,34 +16,13 @@ namespace beta.Views
     /// </summary>
     public partial class GlobalView : INotifyPropertyChanged
     {
-        private readonly IGamesServices GamesServices;
+        #region Properties
 
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        #endregion
-
-        private object _lock = new ();
-
-        #region CTOR
-        public GlobalView()
-        {
-            InitializeComponent();
-
-            GamesServices = App.Services.GetRequiredService<IGamesServices>();
-
-            var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
-            CollectionViewSource.Filter += LobbiesViewSourceFilter;
-            CollectionViewSource.GroupDescriptions.Add(grouping);
-
-            BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
-
-            CollectionViewSource.Source = GamesServices.IdleGames;
-
-            DataContext = this;
-        }
         #endregion
 
         #region SearchText
@@ -119,5 +100,59 @@ namespace beta.Views
             e.Accepted = true;
         }
         #endregion
+
+        #region IdleGames (ListBox) / IdleGamesColumns / ScrollViewer
+
+        #region IdleGamesColumns
+        private int _IdleGamesColumns = 1;
+        public int IdleGamesColumns
+        {
+            get => _IdleGamesColumns;
+            set
+            {
+                if (value != _IdleGamesColumns)
+                {
+                    _IdleGamesColumns = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IdleGamesColumns)));
+                }
+            }
+        }
+        #endregion
+
+
+        public ScrollViewer IdleGamesScrollViewer { get; }
+        #endregion
+
+        private readonly IGamesServices GamesServices;
+        private readonly object _lock = new();
+
+        #endregion
+
+        #region CTOR
+        public GlobalView()
+        {
+            InitializeComponent();
+
+            IdleGamesScrollViewer = Tools.FindChild<ScrollViewer>(IdleGames);
+
+            GamesServices = App.Services.GetRequiredService<IGamesServices>();
+
+            var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
+            CollectionViewSource.Filter += LobbiesViewSourceFilter;
+            CollectionViewSource.GroupDescriptions.Add(grouping);
+
+            BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
+
+            CollectionViewSource.Source = GamesServices.IdleGames;
+
+            DataContext = this;
+        }
+        #endregion
+
+        private void IdleGames_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width < 600) IdleGamesColumns = 1;
+            else IdleGamesColumns = Convert.ToInt32((e.NewSize.Width - 60) / (330));
+        }
     }
 }
