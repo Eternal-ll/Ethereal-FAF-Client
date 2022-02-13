@@ -2,6 +2,7 @@
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace beta.Models.Server
 {
@@ -24,7 +25,7 @@ namespace beta.Models.Server
 
     public struct InGameTeam
     {
-        public string Name => Number > 1 ? "Team " + (Number - 1) : "Team? " + Number;
+        public string Name => Number != -1 ? "Team " + (Number - 1) : "Observers";
         
         public int Number { get; }
         public IPlayer[] Players { get; }
@@ -43,10 +44,44 @@ namespace beta.Models.Server
             orig.title = newInfo.title;
 
             orig.num_players = newInfo.num_players;
+
+            // We have to change status of players that left or join
+            // TODO FIX ME Rewrite this shit
+            #region Updating status of left players
+            IPlayer[] origPlayers = new IPlayer[16];
+            int k = 0;
+            for (int i = 0; i < orig.Teams.Length; i++)
+            {
+                var players = orig.Teams[i].Players;
+                for (int j = 0; j < players.Length; j++)
+                {
+                    origPlayers[k] = players[j];
+                    k++;
+                }
+            }
+
+            IPlayer[] newPlayers = new IPlayer[16];
+            k = 0;
+            for (int i = 0; i < newInfo.Teams.Length; i++)
+            {
+                var players = newInfo.Teams[i].Players;
+                for (int j = 0; j < players.Length; j++)
+                {
+                    newPlayers[k] = players[j];
+                    k++;
+                }
+            }
+
+            var enumerator = origPlayers.Except(newPlayers).GetEnumerator();
+            while (enumerator.MoveNext())
+                if(enumerator.Current is PlayerInfoMessage player)
+                    player.Game = null;
             
+            #endregion
+
             orig.Teams = newInfo.Teams;
             orig.teams = newInfo.teams;
-
+                
             orig.sim_mods = newInfo.sim_mods;
             return orig;
         }
