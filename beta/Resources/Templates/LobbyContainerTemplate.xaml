@@ -44,9 +44,9 @@
         </Style.Triggers>
     </Style>
     <Style x:Key="LobbyContainerBtnStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-        <Setter Property="Margin" Value="6 0"/>
+        <Setter Property="Margin" Value="6 0 0 0"/>
         <Setter Property="Padding" Value="6 0 6 1"/>
-        <Setter Property="Opacity" Value=".6"/>
+        <!--<Setter Property="Opacity" Value=".6"/>-->
     </Style>
     <Style x:Key="Border" TargetType="Border">
         <!--<Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>-->
@@ -131,6 +131,67 @@
                         VerticalAlignment="Center"
                         Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>-->
                     <Image
+                        Source="{Binding Host.Flag}"
+                        Stretch="Uniform"
+                        Margin="6 3 4 0"
+                        VerticalAlignment="Center"
+                        Height="18"
+                        ToolTip="{Binding Host.country}"/>
+                    <TextBlock
+                        Style="{StaticResource LobbyTextBlockStyle}"
+                        Margin="0 4"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Text="{Binding host}"/>
+
+                    <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Red"/>
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip Foreground="Red">
+                                            <ToolTip.Content>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} after {1} g">
+                                                            <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
+                                                            <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </ToolTip.Content>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="↑">
+                                        <Setter Property="Foreground" Value="Lime"/>
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip Foreground="Lime">
+                                                    <ToolTip.Content>
+                                                        <TextBlock>
+                                                            <TextBlock.Text>
+                                                                <MultiBinding StringFormat="{}+{0} after {1} g">
+                                                                    <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
+                                                                    <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                                </MultiBinding>
+                                                            </TextBlock.Text>
+                                                        </TextBlock>
+                                                    </ToolTip.Content>
+                                                </ToolTip>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Image
                         Margin="6 0 0 0"
                         Stretch="Uniform"
                         MaxHeight="18"
@@ -148,90 +209,211 @@
                                     <DataTrigger Binding="{Binding Host.avatar.url, Converter={StaticResource IsNullConverter}}"
                                                  Value="False">
                                         <Setter Property="ToolTip" Value="{Binding Host.avatar.tooltip}"/>
-                                        <Setter Property="Source" Value="{Binding Host.avatar.url}"/>
+                                        <Setter Property="Source" Value="{Binding Host.avatar.Image}"/>
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Image.Style>
                     </Image>
-                    <Image
-                        Source="{Binding Host.Flag}"
-                        Stretch="Uniform"
-                        Margin="6 3 4 0"
-                        VerticalAlignment="Center"
-                        Height="18"
-                        ToolTip="{Binding Host.country}"/>
-
-                    <TextBlock
-                        Style="{StaticResource LobbyTextBlockStyle}"
-                        Margin="0 4"
-                        Padding="0"
-                        VerticalAlignment="Center"
-                        Text="{Binding host}"/>
                 </StackPanel>
 
-                <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
                            Margin="7 4 0 0"
                            Padding="26 0 0 0">
                     <Run Text="{Binding num_players}"/>
                     <Run Text="/" FontSize="12"/>
                     <Run Text="{Binding max_players}"/>
-                    <TextBlock.Background>
-                        <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{StaticResource PlayersIcon}">
-                            <ImageBrush.Transform>
-                                <TransformGroup>
-                                    <TranslateTransform X="0" Y="1"/>
-                                    <ScaleTransform ScaleX=".8" ScaleY=".8"/>
-                                </TransformGroup>
-                            </ImageBrush.Transform>
-                        </ImageBrush>
-                    </TextBlock.Background>
-                    <TextBlock.ToolTip>
-                        <ToolTip FontSize="14" Placement="Bottom">
-                            <ItemsControl
-                                ItemsSource="{Binding Teams}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}"/>
-                                            <ItemsControl ItemsSource="{Binding Players}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid
-                                                            d:DataContext="{d:DesignInstance {x:Type models:PlayerInfoMessage}}"
-                                                            ShowGridLines="False">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="20"/>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                                <ColumnDefinition MinWidth="40"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <Image Source="{Binding Flag}"/>
-                                                            <TextBlock
-                                                                Margin="4 0 0 0"
-                                                                Grid.Column="1"
-                                                                Text="{Binding login}"/>
-                                                            <TextBlock
-                                                                Margin="20 0 0 0"
-                                                                Grid.Column="2"
-                                                                HorizontalAlignment="Right"
-                                                                Text="{Binding ratings[global].DisplayedRating}"/>
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                            <!--<TextBlock
+                        <TextBlock.Background>
+                            <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{StaticResource PlayersIcon}">
+                                <ImageBrush.Transform>
+                                    <TransformGroup>
+                                        <TranslateTransform X="0" Y="1"/>
+                                        <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                    </TransformGroup>
+                                </ImageBrush.Transform>
+                            </ImageBrush>
+                        </TextBlock.Background>
+                        <TextBlock.ToolTip>
+                            <ToolTip FontSize="14" Placement="Bottom">
+                                <ItemsControl ItemsSource="{Binding Teams}">
+                                    <ItemsControl.Resources>
+                                        <DataTemplate DataType="{x:Type models:PlayerInfoMessage}">
+                                            <Grid
+                                                d:DataContext="{d:DesignInstance {x:Type models:PlayerInfoMessage}}"
+                                                ShowGridLines="False">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition MinWidth="40"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Source="{Binding Flag}"/>
+                                                <TextBlock
+                                                    Margin="4 0 0 0"
+                                                    Grid.Column="1"
+                                                    Text="{Binding login}"/>
+                                                <TextBlock Grid.Column="1" HorizontalAlignment="Right"
+                                                           Margin="0 -4 -8 0"
+                                                           Text="{Binding ratings[global].DisplayedDifferenceArrow}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="Red"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="Text" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </Trigger>
+                                                                <Trigger Property="Text" Value="↑">
+                                                                    <Setter Property="Foreground" Value="Lime"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>    
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <Image
+                                                    Visibility="Visible"
+                                                    Margin="8 0 0 0"
+                                                    Stretch="Uniform"
+                                                    MaxHeight="18"
+                                                    HorizontalAlignment="Left"
+                                                    Grid.Column="2">
+                                                    <Image.Style>
+                                                        <Style TargetType="Image">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <!-- TODO: FIX ME / Binding error
+                                                                Cannot convert '<null>' from type '<null>' to type 'System.Windows.Media.ImageSource'
+                                                                for 'en-US' culture with default conversions; consider using Converter property of Binding.
+                                                                NotSupportedException:'System.NotSupportedException: ImageSourceConverter cannot convert from (null).			
+                                                                -->
+                                                                <DataTrigger Binding="{Binding avatar.url, Converter={StaticResource IsNullConverter}}"
+                                                                             Value="False">
+                                                                    <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
+                                                                    <Setter Property="Source" Value="{Binding avatar.Image}"/>
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Image.Style>
+                                                </Image>
+                                                <TextBlock
+                                                    Margin="10 0 0 0"
+                                                    Grid.Column="3"
+                                                    HorizontalAlignment="Right"
+                                                    Text="{Binding ratings[global].DisplayedRating}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                                            <Grid
+                                                d:DataContext="{d:DesignInstance {x:Type models:UnknownPlayer}}"
+                                                ShowGridLines="False">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="20"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition MinWidth="40"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="?"/>
+                                                
+                                                <TextBlock
+                                                    Margin="4 0 0 0"
+                                                    Grid.Column="1"
+                                                    Text="{Binding login}"/>
+                                                <TextBlock Text="?" Grid.Column="2"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.Resources>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="-8 0 -8 10">
+                                                    <StackPanel.Background>
+                                                        <SolidColorBrush Color="Black" Opacity=".2"/>
+                                                    </StackPanel.Background>
+                                                    <TextBlock
+                                                        Margin="8 4 0 4"
+                                                        Text="{Binding Name}"/>
+                                                    <TextBlock Text="{Binding Players.Length}" Margin="3 0 0 0" Opacity=".5" FontSize="12"/>
+                                                    <TextBlock
+                                                        Margin="10 0 8 1"
+                                                        Padding="18 0 0 0"
+                                                        FontSize="12"
+                                                        VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text">
+                                                                    <Setter.Value>
+                                                                        <MultiBinding StringFormat="{}{0} / {1} avg.">
+                                                                            <Binding Path="SumRating"/>
+                                                                            <Binding Path="AverageRating"/>
+                                                                        </MultiBinding>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Players.Length, Converter={StaticResource MoreThanConverter}, ConverterParameter=1}"
+                                                                                 Value="False">
+                                                                        <Setter Property="Text" Value="{Binding SumRating}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                        <TextBlock.Background>
+                                                            <DrawingBrush Stretch="Uniform" AlignmentX="Left">
+                                                                <DrawingBrush.Drawing>
+                                                                    <GeometryDrawing Brush="White" Geometry="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z"/>
+                                                                </DrawingBrush.Drawing>
+                                                                <DrawingBrush.RelativeTransform>
+                                                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                                </DrawingBrush.RelativeTransform>
+                                                            </DrawingBrush>
+                                                        </TextBlock.Background>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <ItemsControl ItemsSource="{Binding Players}" Margin="0 0 0 10">
+                                                </ItemsControl>
+                                                <!--<TextBlock
                                                 Text="{Binding Key, Mode=OneWay}"
                                                 IsHitTestVisible="False"/>
                                             <ItemsControl
                                                 ItemsSource="{Binding Value}"/>-->
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ToolTip>
-                    </TextBlock.ToolTip>
-                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ToolTip>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                    <TextBlock
+                        Margin="10 0 0 0"
+                        Padding="18 0 0 0"
+                        FontSize="12"
+                        VerticalAlignment="Bottom">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{Binding AverageRating, StringFormat='{}{0} avg.'}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding num_players}"
+                                                 Value="1">
+                                        <Setter Property="Text" Value="{Binding AverageRating}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <TextBlock.Background>
+                            <DrawingBrush Stretch="Uniform" AlignmentX="Left">
+                                <DrawingBrush.Drawing>
+                                    <GeometryDrawing
+                                        Brush="White"
+                                        Geometry="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z"/>
+                                </DrawingBrush.Drawing>
+                                <DrawingBrush.RelativeTransform>
+                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                </DrawingBrush.RelativeTransform>
+                            </DrawingBrush>
+                        </TextBlock.Background>
+                    </TextBlock>
+                </StackPanel>
+
 
                 <TextBlock
                     ToolTip="Secured with password"
@@ -263,25 +445,11 @@
                         </Style>
                     </TextBlock.Resources>
                 </TextBlock>
-
-                <TextBlock
-                    Visibility="Collapsed"
-                    Style="{StaticResource LobbyTextBlockStyle}"
-                    Margin="0"
-                    ToolTip="Host"
-                    Text="{Binding host}">
-                    <TextBlock.Background>
-                        <ImageBrush Stretch="Uniform"  AlignmentX="Left" ImageSource="{DynamicResource HostIcon}">
-                            <ImageBrush.Transform>
-                                <TranslateTransform X="5"/>
-                            </ImageBrush.Transform>
-                        </ImageBrush>
-                    </TextBlock.Background>
-                </TextBlock>
             </StackPanel>
             <Grid
                 Grid.Column="1"
                 Grid.Row="1"
+                HorizontalAlignment="Right"
                 VerticalAlignment="Bottom"
                 Margin="0 10 10 10">
                 <Grid.Style>
@@ -301,11 +469,34 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Button
+                    VerticalAlignment="Stretch"
+                    Background="Transparent"
+                    Opacity="1"
+                    Grid.Column="2"
                     Style="{StaticResource LobbyContainerBtnStyle}"
-                    Content="Details"/>
+                    ToolTip="Details">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
+                    </Button.Resources>
+                    <Path
+                        Fill="White"
+                        Stretch="Uniform"
+                        Height="16">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Data" Value="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True">
+                                        <Setter Property="Data" Value="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
                 <Button
                     Style="{StaticResource LobbyContainerBtnStyle}"
-                    Grid.Column="1"
                     HorizontalAlignment="Left"
                     Content="Join"/>
             </Grid>

@@ -25,10 +25,28 @@ namespace beta.Models.Server
 
     public struct InGameTeam
     {
-        public string Name => Number != -1 ? "Team " + (Number - 1) : "Observers";
-        
+        public string Name => Number switch
+        {
+            > 0 => Number - 1 == 0 ? "No team" : "Team " + (Number - 1),
+            -1 => "Observers",
+            _ => "Unknown",
+        };//Number != -1 ? "Team " + (Number - 1) : "Observers";
+
         public int Number { get; }
         public IPlayer[] Players { get; }
+        public int SumRating
+        {
+            get
+            {
+                if (Players == null || Players.Length == 0) return 0;
+                int sum = 0;
+                for (int i = 0; i < Players.Length; i++)
+                    if (Players[i] is PlayerInfoMessage player)
+                        sum += player.ratings["global"].DisplayedRating;
+                return sum;
+            }
+        }
+        public int AverageRating => SumRating / Players.Length;
 
         public InGameTeam(int number, IPlayer[] players) : this()
         {
@@ -48,7 +66,7 @@ namespace beta.Models.Server
             // We have to change status of players that left or join
             // TODO FIX ME Rewrite this shit
             #region Updating status of left players
-            IPlayer[] origPlayers = new IPlayer[16];
+            IPlayer[] origPlayers = new IPlayer[30];
             int k = 0;
             for (int i = 0; i < orig.Teams.Length; i++)
             {
@@ -60,7 +78,7 @@ namespace beta.Models.Server
                 }
             }
 
-            IPlayer[] newPlayers = new IPlayer[16];
+            IPlayer[] newPlayers = new IPlayer[30];
             k = 0;
             for (int i = 0; i < newInfo.Teams.Length; i++)
             {
@@ -83,6 +101,21 @@ namespace beta.Models.Server
             orig.teams = newInfo.teams;
                 
             orig.sim_mods = newInfo.sim_mods;
+
+
+            //Map update
+            if (orig.mapname != newInfo.mapname)
+            {
+                orig.map_file_path = newInfo.map_file_path;
+                orig.max_players = newInfo.max_players;
+
+                // should be changed last because
+                // it calls Update event of multiple properties
+                orig.mapname = newInfo.mapname;
+            }
+
+            orig.password_protected = newInfo.password_protected;
+
             return orig;
         }
     }
@@ -163,8 +196,16 @@ namespace beta.Models.Server
 
         #region MapNameType
         private KeyValuePair<string, PreviewType> _MapNameType;
-        public KeyValuePair<string, PreviewType> MapNameType => _MapNameType.Key == null ?
-            new KeyValuePair<string, PreviewType>(mapname, PreviewType) : _MapNameType;
+        public KeyValuePair<string, PreviewType> MapNameType
+        {
+            get
+            {
+                if (_MapNameType.Key == null)
+                    _MapNameType = new(mapname, PreviewType);
+
+                return _MapNameType;
+            }
+        }
         #endregion
 
         #region Teams
@@ -172,8 +213,29 @@ namespace beta.Models.Server
         public InGameTeam[] Teams
         {
             get => _Teams;
-            set => Set(ref _Teams, value);
+            set
+            {
+                if (Set(ref _Teams, value))
+                {
+                    OnPropertyChanged(nameof(AverageRating));
+                }
+            }
         }
+        #endregion
+
+        #region AverageRating
+        public int AverageRating
+        {
+            get
+            {
+                if (Teams == null || Teams.Length == 0) return 0;
+                int sum = 0;
+                for (int i = 0; i < Teams.Length; i++)
+                    sum += Teams[i].AverageRating;
+                return sum / Teams.Length;
+            }
+        }
+
         #endregion
 
         public PlayerInfoMessage Host { get; set; }
@@ -191,7 +253,36 @@ namespace beta.Models.Server
         public string game_type { get; set; }
         public string featured_mod { get; set; }
         public Dictionary<string, string> sim_mods { get; set; }
-        public string mapname { get; set; }
+        private string _mapname;
+        public string mapname
+        {
+            get => _mapname;
+            set
+            {
+                // TODO FIX ME
+
+                //if (!_mapname.Equals(value, StringComparison.OrdinalIgnoreCase))
+
+                if (_mapname == null)
+                {
+                    Set(ref _mapname, value);
+                    return;
+                }
+
+                if (!_mapname.Equals(value, StringComparison.OrdinalIgnoreCase))
+                    if (Set(ref _mapname, value))
+                    {
+                        _MapNameType = new(null, PreviewType.Normal);
+                        _MapVersion = null;
+                        _MapName = null;
+
+                        OnPropertyChanged(nameof(MapNameType));
+                        OnPropertyChanged(nameof(PreviewType));
+                        OnPropertyChanged(nameof(MapVersion));
+                        OnPropertyChanged(nameof(MapName));
+                    }
+            }
+        }
         public string map_file_path { get; set; }
         public string host { get; set; }
 

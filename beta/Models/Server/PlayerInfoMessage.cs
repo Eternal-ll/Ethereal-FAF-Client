@@ -3,6 +3,7 @@ using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
@@ -28,6 +29,10 @@ namespace beta.Models.Server
     public struct PlayerAvatar
     {
         public Uri url { get; set; }
+
+        private ImageSource _Image;
+        public ImageSource Image => _Image ??= url != null ? new BitmapImage(url) : null;
+        
         public string tooltip { get; set; }
     }
 
@@ -53,6 +58,17 @@ namespace beta.Models.Server
     public class UnknownPlayer : IPlayer
     {
         public string login { get; set; }
+    }
+    
+    public static class PlayerInfoExtensions
+    {
+        public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
+        {
+            orig.login = newP.login;
+
+            orig.ratings = newP.ratings;
+            return orig;
+        }
     }
 
     public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer
@@ -139,10 +155,54 @@ namespace beta.Models.Server
         public string command { get; set; }
 
         public int id { get; set; }
-        public string login { get; set; }
+
+        #region login
+        private string _login;
+        public string login
+        {
+            get => _login;
+            set => Set(ref _login, value);
+        } 
+        #endregion
+
         public string country { get; set; }
         public string clan { get; set; }
-        public Dictionary<string, Rating> ratings { get; set; }
+
+        #region ratings
+        private Dictionary<string, Rating> _ratings;
+        public Dictionary<string, Rating> ratings
+        {
+            get => _ratings;
+            set
+            {
+                if (value != _ratings)
+                {
+                    if (_ratings != null)
+                        foreach (var item in value)
+                        {
+                            if (_ratings.TryGetValue(item.Key, out Rating rating))
+                            {
+                                if (rating == null) continue;
+                                rating.RatingDifference[0] += item.Value.rating[0] - rating.rating[0];
+                                rating.RatingDifference[1] += item.Value.rating[1] - rating.rating[1];
+                                rating.GamesDifference++;
+                            }
+                            else
+                            {
+                                _ratings.Add(item.Key, item.Value);
+
+                                _ratings[item.Key].RatingDifference[0] += item.Value.rating[0];
+                                _ratings[item.Key].RatingDifference[1] += item.Value.rating[1];
+                                _ratings[item.Key].GamesDifference++;
+                            };
+                        }
+                    else _ratings = value;
+                    OnPropertyChanged(nameof(ratings));
+                }
+            }
+        } 
+        #endregion
+
         public PlayerAvatar avatar { get; set; }
         public PlayerAlias[] names { get; set; }
 

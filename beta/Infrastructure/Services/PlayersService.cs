@@ -49,12 +49,14 @@ namespace beta.Infrastructure.Services.Interfaces
             var player = e.Arg;
             if (PlayerUIDToId.TryGetValue(player.id, out var id))
             {
-                var cachedPlayer = Players[id];
+                Players[id].Update(player);
+                Players[id].Updated = DateTime.Now;
+                //var cachedPlayer = Players[id];
 
                 // TODO: update stats manually
 
-                player.Updated = DateTime.UtcNow;
-                _Players[id] = player;
+                //player.Updated = DateTime.UtcNow;
+                //_Players[id] = player;
             }
             else
             {
@@ -93,24 +95,18 @@ namespace beta.Infrastructure.Services.Interfaces
         public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH)
         {
             var enumerator = _Players.GetEnumerator();
-            filter = filter.ToLower();
 
             if (string.IsNullOrWhiteSpace(filter))
-            {
                 while (enumerator.MoveNext())
                     yield return enumerator.Current;
-            }
             else
                 while (enumerator.MoveNext())
-                {
-                    var player = enumerator.Current;
                     if (method == ComparisonMethod.STARTS_WITH)
-                        if (player.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-                            yield return player;
-                    
-                    else if (player.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                        yield return player;
-                }
+                        if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+                            yield return enumerator.Current;
+                    else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                        yield return enumerator.Current;
+                
         }
     }
 }
