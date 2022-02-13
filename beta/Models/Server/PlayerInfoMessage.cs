@@ -2,6 +2,7 @@
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace beta.Models.Server
 {
@@ -58,9 +59,9 @@ namespace beta.Models.Server
     {
         #region Custom properties
 
-        #region Flag    
-        private object _Flag;
-        public object Flag => _Flag ??= App.Current.Resources["Flag." + country];
+        #region Flag
+        private ImageSource _Flag;
+        public ImageSource Flag => _Flag ??= App.Current.Resources["Flag." + country] as ImageSource;
         #endregion
 
         #region GameState
@@ -109,7 +110,25 @@ namespace beta.Models.Server
         public GameInfoMessage Game
         {
             get => _Game;
-            set => Set(ref _Game, value);
+            set
+            {
+                if (Set(ref _Game, value))
+                {
+                    if (value == null)
+                    {
+                        GameState = GameState.None;
+                        return;
+                    }
+                    if (value.launched_at != null)
+                    {
+                        var timeDifference = DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(value.launched_at.Value);
+                        GameState = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
+                        return;
+                    }
+
+                    GameState = value.host.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
+                }
+            }
         }
         #endregion
 
