@@ -36,6 +36,22 @@ namespace beta.Models.Server
         }
     }
 
+    public static class GameInfoExtensions
+    {
+        public static GameInfoMessage Update(this GameInfoMessage orig, GameInfoMessage newInfo)
+        {
+            orig.title = newInfo.title;
+
+            orig.num_players = newInfo.num_players;
+            
+            orig.Teams = newInfo.Teams;
+            orig.teams = newInfo.teams;
+
+            orig.sim_mods = newInfo.sim_mods;
+            return orig;
+        }
+    }
+
     public class GameInfoMessage: ViewModel, IServerMessage
     {
         #region Custom properties
@@ -143,7 +159,16 @@ namespace beta.Models.Server
         public string mapname { get; set; }
         public string map_file_path { get; set; }
         public string host { get; set; }
-        public int num_players { get; set; }
+
+        #region num_players
+        private int _num_players;
+        public int num_players
+        {
+            get => _num_players;
+            set => Set(ref _num_players, value);
+        } 
+        #endregion
+
         public int max_players { get; set; }
         public double? launched_at { get; set; }
         public string rating_type { get; set; }

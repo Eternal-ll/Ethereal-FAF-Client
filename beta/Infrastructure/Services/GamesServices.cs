@@ -64,7 +64,7 @@ namespace beta.Infrastructure.Services
                     {
                         games.RemoveAt(i);
                     }
-                    else games[i] = game;
+                    else games[i].Update(game);
                     return;
                 }
             }
@@ -78,9 +78,7 @@ namespace beta.Infrastructure.Services
                     if (liveGames[i].host == game.host)
                     {
                         if (game.num_players == 0)
-                        {
                             liveGames.RemoveAt(i);
-                        }
                         else liveGames[i] = game;
                         return;
                     }
