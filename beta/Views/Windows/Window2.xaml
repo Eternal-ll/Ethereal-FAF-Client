@@ -1,0 +1,433 @@
+﻿<Window x:Class="beta.Views.Windows.Window2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:beta.Views.Windows"
+        xmlns:model="clr-namespace:beta.Models" xmlns:ui="http://schemas.modernwpf.com/2019" xmlns:commands="clr-namespace:beta.Infrastructure.Commands"
+        mc:Ignorable="d"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        d:DataContext="{d:DesignInstance {x:Type local:Window2}}"
+        Title="Window2" Height="450" Width="800"
+        x:Name="Root">
+    <ui:NavigationView IsBackButtonVisible="Collapsed">
+        <ui:NavigationView.Resources>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FF1F1F1F"/>
+        </ui:NavigationView.Resources>
+        <Grid Background="#FF1F1F1F" Margin="0 -32   0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid Opacity=".7">
+                <Image Source="https://cdn.discordapp.com/attachments/926400628803113020/942645373929918464/unknown.png"
+                    Stretch="UniformToFill"/>
+
+                <Grid.OpacityMask>
+                    <LinearGradientBrush StartPoint="0 0" EndPoint="0 1">
+                        <GradientStop Color="White" Offset="0.5"/>
+                        <GradientStop Color="Transparent" Offset="1"/>
+                    </LinearGradientBrush>
+                </Grid.OpacityMask>
+            </Grid>
+            <Border HorizontalAlignment="Left" Margin="30 0 0 150" VerticalAlignment="Bottom" Background="{StaticResource NavigationViewDefaultPaneBackground}"
+                    CornerRadius="10">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black"
+                                      ShadowDepth="6"
+                                      BlurRadius="20"
+                                      Direction="-90"
+                                      Opacity=".5"/>
+                </Border.Effect>
+                <StackPanel DataContext="{Binding ElementName=ListBox, Path=SelectedItem}" Margin="20 0 20 20" Width="300" Height="500">
+                    <Border Margin="-20 0 -20 0" Padding="0 20 0 20" CornerRadius="10 10 0 0">
+                        <Border.Background>
+                            <SolidColorBrush Color="Black" Opacity=".5"/>
+                        </Border.Background>
+                        <TextBlock Text="{Binding Title}" FontSize="16" HorizontalAlignment="Center"
+                                   Margin="20 0" TextWrapping="Wrap" FontWeight="DemiBold"/>
+                    </Border>
+                    <Grid Width="300">
+                        <Border Margin="0 20 0 20" Background="White" HorizontalAlignment="Stretch" Width="300" Height="200" CornerRadius="10">
+                            <!--<Border.Background>
+                            <ImageBrush Stretch="UniformToFill" ImageSource="{Binding MediaUri}"/>
+                        </Border.Background>-->
+                        </Border>
+                        <Image Source="{Binding MediaUri}">
+                            <Image.OpacityMask>
+                                <VisualBrush Visual="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, Path=Children[0]}"/>
+                            </Image.OpacityMask>
+                        </Image>
+                    </Grid>
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="300"/>
+                    <!--<ui:HyperlinkButton NavigateUri="{Binding DestinationUri}" Content="Visit"
+                                        HorizontalAlignment="Stretch" Margin="0 20 0 0" HorizontalContentAlignment="Left"/>-->
+                </StackPanel>
+            </Border>
+
+            <ListBox x:Name="ListBox" VerticalAlignment="Bottom"
+                     Margin="20 0 0 -40"
+                     Background="Transparent"
+                     ItemsSource="{Binding News}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                <ListBox.Resources>
+                    <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                    <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                    <Style BasedOn="{StaticResource DefaultListBoxItemStyle}"
+                           TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Margin" Value="10 10 10 30"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Style>
+
+                    <DataTemplate DataType="{x:Type model:NewsItem}">
+                        <Border Width="250" Height="120" CornerRadius="10" Margin="10 0 10 0">
+                            <Border.Resources>
+                                <Style TargetType="Rectangle">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                                    To=".25"
+                                                                    From="-1"
+                                                                    Duration="0:0:0.3"/>
+                                                        <!--<DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                    To="1"
+                                                                    From="0"
+                                                                    Duration="0:0:0.5"/>-->
+                                                        <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                    From="0" To="1" Duration="0:0:0.3"/>-->
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                                    To="-1"
+                                                                    From=".25"
+                                                                    BeginTime="0:0:0.2"
+                                                                    Duration="0:0:0.5"/>
+                                                        <!--<DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                    To="0"
+                                                                    From="1"
+                                                                    Duration="0:0:0.3"/>-->
+                                                        <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                    From="1" To="0" Duration="0:0:0.2"/>-->
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+
+                                <Style TargetType="Image">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="Width"
+                                            BeginTime="0:0:0.10"
+                                            From="250" To="220" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="Width"
+                                            From="220" To="250" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Opacity" Value="0"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ThicknessAnimation
+                                                                    Storyboard.TargetProperty="Margin"
+                                                                    Duration="0:0:0.3"
+                                                                    FillBehavior="HoldEnd"
+                                                                    From="8 0 0 0"
+                                                                    To="14 0 0 0" />
+                                                        <DoubleAnimation
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="1"
+                                                                    From="0"
+                                                                    Duration="0:0:0.5"
+                                                                    BeginTime="0:0:0.1"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ThicknessAnimation
+                                                                    Storyboard.TargetProperty="Margin"
+                                                                    Duration="0:0:0.3"
+                                                                    FillBehavior="HoldEnd"
+                                                                    From="14 0 0 0"
+                                                                    To="8 0 0 0" />
+                                                        <DoubleAnimation
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="0"
+                                                                    From="1"
+                                                                    Duration="0:0:0.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Resources>
+                            <Border.Clip>
+                                <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
+                                    <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
+                                    <Binding Path="CornerRadius" RelativeSource="{RelativeSource Self}"/>
+                                </MultiBinding>
+                            </Border.Clip>
+                            <Canvas>
+                                <Image Source="{Binding MediaUri}"
+                                        Canvas.Right="0"
+                                        Canvas.Top="0"
+                                        Width="250"
+                                        HorizontalAlignment="Right"/>
+                                <Rectangle
+                                    Canvas.Left="0"
+                                    Canvas.Top="0"
+                                    Width="250"
+                                    Height="120">
+                                    <Rectangle.Fill>
+                                        <LinearGradientBrush StartPoint="0 .5" EndPoint="1 .5">
+                                            <GradientStop Color="black" Offset="-1"/>
+                                            <GradientStop Color="#00000000"
+                                                    Offset=".8"/>
+                                        </LinearGradientBrush>
+                                    </Rectangle.Fill>
+                                </Rectangle>
+                                <TextBlock
+                                    Text="{Binding Title}"
+                                    FontSize="16"
+                                    FontWeight="DemiBold"
+                                    TextWrapping="Wrap"
+                                    HorizontalAlignment="Left"
+                                    Width="150"
+                                    Canvas.Top="30">
+                                </TextBlock>
+                            </Canvas>
+                        </Border>
+                    </DataTemplate>
+
+                </ListBox.Resources>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+
+            <ScrollViewer
+                Visibility="Collapsed"
+                VerticalAlignment="Bottom"
+                Margin="20 0 0 -40"
+                HorizontalScrollBarVisibility="Auto"
+                CanContentScroll="True"
+                IsTabStop="False">
+                <ScrollViewer.Resources>
+                </ScrollViewer.Resources>
+                <ItemsControl ItemsSource="{Binding News}" IsTabStop="False" Margin="0 0 0 30">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type model:NewsItem}">
+                            <Border Width="250" Height="120" CornerRadius="10" Margin="10 0 10 0">
+                                <Border.Resources>
+                                    <Style TargetType="Rectangle">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                                                        Path=IsMouseOver}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                                        Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                                        To=".25"
+                                                                        From="-1"
+                                                                        Duration="0:0:0.3"/>
+                                                            <!--<DoubleAnimation
+                                                                        Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                        To="1"
+                                                                        From="0"
+                                                                        Duration="0:0:0.5"/>-->
+                                                            <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                     From="0" To="1" Duration="0:0:0.3"/>-->
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                                        Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                                        To="-1"
+                                                                        From=".25"
+                                                                        BeginTime="0:0:0.2"
+                                                                        Duration="0:0:0.5"/>
+                                                            <!--<DoubleAnimation
+                                                                        Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                        To="0"
+                                                                        From="1"
+                                                                        Duration="0:0:0.3"/>-->
+                                                            <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                     From="1" To="0" Duration="0:0:0.2"/>-->
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas}},
+                                Path=IsMouseOver}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Width"
+                                                BeginTime="0:0:0.10"
+                                                From="250" To="220" Duration="0:0:0.3"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Width"
+                                                From="220" To="250" Duration="0:0:0.3"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                                                        Path=IsMouseOver}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <ThicknessAnimation
+                                                                        Storyboard.TargetProperty="Margin"
+                                                                        Duration="0:0:0.3"
+                                                                        FillBehavior="HoldEnd"
+                                                                        From="8 0 0 0"
+                                                                        To="14 0 0 0" />
+                                                            <DoubleAnimation
+                                                                        Storyboard.TargetProperty="Opacity"
+                                                                        To="1"
+                                                                        From="0"
+                                                                        Duration="0:0:0.5"
+                                                                        BeginTime="0:0:0.1"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <ThicknessAnimation
+                                                                        Storyboard.TargetProperty="Margin"
+                                                                        Duration="0:0:0.3"
+                                                                        FillBehavior="HoldEnd"
+                                                                        From="14 0 0 0"
+                                                                        To="8 0 0 0" />
+                                                            <DoubleAnimation
+                                                                        Storyboard.TargetProperty="Opacity"
+                                                                        To="0"
+                                                                        From="1"
+                                                                        Duration="0:0:0.2"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Resources>
+                                <Border.Clip>
+                                    <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
+                                        <Binding Path="CornerRadius" RelativeSource="{RelativeSource Self}"/>
+                                    </MultiBinding>
+                                </Border.Clip>
+                                <Canvas>
+                                    <Image Source="{Binding MediaUri}"
+                                           Canvas.Right="0"
+                                           Canvas.Top="0"
+                                           Width="250"
+                                           HorizontalAlignment="Right"/>
+                                    <Rectangle
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"
+                                        Width="250"
+                                        Height="120">
+                                        <Rectangle.Fill>
+                                            <LinearGradientBrush StartPoint="0 .5" EndPoint="1 .5">
+                                                <GradientStop Color="black" Offset="-1"/>
+                                                <GradientStop Color="#00000000"
+                                                      Offset=".8"/>
+                                            </LinearGradientBrush>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <TextBlock
+                                        Text="{Binding Title}"
+                                        FontSize="16"
+                                        FontWeight="DemiBold"
+                                        TextWrapping="Wrap"
+                                        HorizontalAlignment="Left"
+                                        Width="150"
+                                        Opacity="0"
+                                        Canvas.Top="30">
+                                    </TextBlock>
+                                </Canvas>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.Resources>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </ui:NavigationView>
+</Window>
