@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public class SessionService : ViewModel, ISessionService
+    public class SessionService : ISessionService
     {
         #region Events
         public event EventHandler<EventArgs<bool>> Authorization;

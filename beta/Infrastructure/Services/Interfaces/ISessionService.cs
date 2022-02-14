@@ -1,12 +1,11 @@
 ﻿using beta.Models.Server;
 using System;
-using System.ComponentModel;
 using System.Net;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface ISessionService : INotifyPropertyChanged
+    public interface ISessionService
     {
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
