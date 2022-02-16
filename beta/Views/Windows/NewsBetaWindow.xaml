@@ -1,0 +1,575 @@
+﻿<Window x:Class="beta.Views.Windows.NewsBetaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:beta.Views.Windows"
+        xmlns:model="clr-namespace:beta.Models" xmlns:ui="http://schemas.modernwpf.com/2019" xmlns:commands="clr-namespace:beta.Infrastructure.Commands"
+        mc:Ignorable="d"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        d:DataContext="{d:DesignInstance {x:Type local:NewsBetaWindow}}"
+        Title="Window2" Height="450" Width="800"
+        x:Name="Root">
+    <ui:NavigationView IsBackButtonVisible="Collapsed">
+        <ui:NavigationView.Resources>
+            <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FF1F1F1F"/>
+            <Style x:Key="ClippedBorder" TargetType="Border">
+                <Setter Property="Clip">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
+                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
+                            <Binding Path="CornerRadius" RelativeSource="{RelativeSource Self}"/>
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+        </ui:NavigationView.Resources>
+        <ScrollViewer Margin="0 -32 0 0">
+            <Grid Background="#FF1F1F1F" Height="5000" ShowGridLines="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="500"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <!--#region Row 1 -->
+                <Grid Opacity=".7">
+                    <Image Source="https://cdn.discordapp.com/attachments/926400628803113020/942645373929918464/unknown.png"
+                    Stretch="UniformToFill"/>
+
+                    <Grid.OpacityMask>
+                        <LinearGradientBrush StartPoint="0 0" EndPoint="0 1">
+                            <GradientStop Color="White" Offset="0.5"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.OpacityMask>
+                </Grid>
+
+                <Border HorizontalAlignment="Left" Margin="30 30 0 150"
+                        VerticalAlignment="Stretch"
+                        Background="{StaticResource NavigationViewDefaultPaneBackground}"
+                        CornerRadius="10">
+                    <Border.Effect>
+                        <DropShadowEffect
+                            Color="Black"
+                            ShadowDepth="4"
+                            BlurRadius="14"
+                            Opacity=".7"
+                            Direction="-90"/>
+                    </Border.Effect>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=ListBox, Path=SelectedItem}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid DataContext="{Binding ElementName=ListBox, Path=SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                          ShowGridLines="False">
+                        <Grid.Clip>
+                            <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                                <Binding Path="ActualHeight" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                                <Binding Path="CornerRadius" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                            </MultiBinding>
+                        </Grid.Clip>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding Title}"
+                                   Margin="0 0 -20 20"
+                                   Padding="20 20 20 20"
+                                   FontSize="16"
+                                   Grid.ColumnSpan="2"
+                                   TextWrapping="Wrap" FontWeight="DemiBold">
+                            <TextBlock.Background>
+                                <SolidColorBrush Color="Black" Opacity=".5"/>
+                            </TextBlock.Background>
+                        </TextBlock>
+                        <ToggleButton Grid.Column="1" Content="Hide" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                Margin="0 20 10 0"
+                                Padding="10 0 10 1"
+                                      x:Name="HideSelectedToggle"
+                                Background="Transparent">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                                    <Setter Property="Opacity" Value=".4"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value=".8"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding ElementName=ListBox, Path=SelectedItem}" Value="{x:Null}">
+                                            <Setter Property="IsChecked" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+                        <Border VerticalAlignment="Top"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="10"
+                                Style="{StaticResource ClippedBorder}"
+                                Grid.Row="1"
+                                Margin="20 0 0 20">
+                            <Image Source="{Binding BitmapImage}"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"/>
+                        </Border>
+                        <Grid
+                            Margin="20 0 20 20"
+                            Grid.Column="1"
+                            Grid.Row="1"
+                            MaxWidth="200"
+                            HorizontalAlignment="Stretch">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock
+                                Text="{Binding Description}"
+                                TextWrapping="Wrap"/>
+                            <Button Content="Visit" VerticalAlignment="Bottom" Margin="0 20 0 0" Padding="10 0 10 1"
+                                    CommandParameter="{Binding DestinationUri}"
+                                    Command="{StaticResource NavigateUriCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding DestinationUri}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <ListBox x:Name="ListBox" VerticalAlignment="Bottom"
+                     Margin="20 0 0 -40"
+                     Background="Transparent"
+                     ItemsSource="{Binding News}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Visible">
+                    <ListBox.Style>
+                        <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=HideSelectedToggle, Path=IsChecked}" Value="True">
+                                    <Setter Property="SelectedItem" Value="{x:Null}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Style>
+                    <ListBox.Resources>
+                        <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                        <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                        <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                        <Style BasedOn="{StaticResource DefaultListBoxItemStyle}"
+                           TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Margin" Value="10 10 10 30"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+
+                        <Style x:Key="AnimatedRectangleShadow" TargetType="Rectangle">
+                            <Style.Triggers>
+                               
+                                <!--<DataTrigger Binding="{Binding BitmapImage.IsDownloading}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>-->
+
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                    To=".01"
+                                                    From="-1"
+                                                    Duration="0:0:0.2"/>
+                                                <!--<DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                    To="1"
+                                                                    From="0"
+                                                                    Duration="0:0:0.5"/>-->
+                                                <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                    From="0" To="1" Duration="0:0:0.3"/>-->
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                    To="-1"
+                                                    From=".01"
+                                                    BeginTime="0:0:0.2"
+                                                    Duration="0:0:0.4"/>
+                                                <!--<DoubleAnimation
+                                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
+                                                                    To="0"
+                                                                    From="1"
+                                                                    Duration="0:0:0.3"/>-->
+                                                <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                    From="1" To="0" Duration="0:0:0.2"/>-->
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style x:Key="AnimatedImage" TargetType="Image">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <!--<DoubleAnimation
+                                                    Storyboard.TargetProperty="Width"
+                                                    From="250" To="220"
+                                                    Duration="0:0:0.3"/>-->
+                                                <!--<DoubleAnimation
+                                                    Storyboard.TargetProperty="OpacityMask.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                    To=".8"
+                                                    From="1"
+                                                    Duration="0:0:0.3"/>-->
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <!--<DoubleAnimation
+                                                    Storyboard.TargetProperty="Width"
+                                                    From="220" To="250" Duration="0:0:0.3"/>-->
+                                                <!--<DoubleAnimation
+                                                    Storyboard.TargetProperty="OpacityMask.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                    To="1"
+                                                    From=".8"
+                                                    Duration="0:0:0.3"/>-->
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <Style x:Key="AnimatedTextBlock" TargetType="TextBlock">
+                            <Setter Property="Opacity" Value="0"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                    Path=IsSelected}" Value="True">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ThicknessAnimation
+                                                                    Storyboard.TargetProperty="Padding"
+                                                                    Duration="0:0:0.3"
+                                                                    FillBehavior="HoldEnd"
+                                                                    To="14 0 0 0" />
+                                                <DoubleAnimation FillBehavior="HoldEnd"
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="1"
+                                                                    From="0"
+                                                                    Duration="0:0:0.5"
+                                                                    BeginTime="0:0:0.1"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ThicknessAnimation
+                                                                    Storyboard.TargetProperty="Padding"
+                                                                    Duration="0:0:0.3"
+                                                                    FillBehavior="HoldEnd"
+                                                                    To="8 0 0 0" />
+                                                <DoubleAnimation FillBehavior="HoldEnd"
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="0"
+                                                                    From="1"
+                                                                    Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+
+                        <DataTemplate DataType="{x:Type model:NewsItem}">
+                            <Border
+                                Height="120"
+                                CornerRadius="10"
+                                Margin="10 0 10 0"
+                                Style="{StaticResource ClippedBorder}">
+                                <Grid>
+                                    <Image
+                                        Source="{Binding BitmapImage}"
+                                        x:Name="NewsImage"
+                                        Canvas.Right="0"
+                                        Canvas.Top="0"
+                                        HorizontalAlignment="Right">
+                                        <!--<Image.OpacityMask>
+                                            <LinearGradientBrush StartPoint="1 .5" EndPoint="0 .5">
+                                                <GradientStop Color="White" Offset=".8"/>
+                                                <GradientStop Color="#00000000" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Image.OpacityMask>-->
+                                    </Image>
+                                    <ui:ProgressRing HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center" Height="50" Width="50"
+                                                     IsActive="True"
+                                                     Visibility="{Binding ImageVisibility}">
+                                        <!--<ui:ProgressRing.Style>
+                                            <Style TargetType="ui:ProgressRing">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDownloading}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:ProgressRing.Style>-->
+                                    </ui:ProgressRing>
+                                    <Rectangle
+                                        Style="{StaticResource AnimatedRectangleShadow}"
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"
+                                        Height="120">
+                                        <Rectangle.Fill>
+                                            <LinearGradientBrush StartPoint="0 .5" EndPoint="1 .5">
+                                                <GradientStop Color="#000000" Offset="-1"/>
+                                                <GradientStop Color="#00000000"
+                                                    Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Rectangle.Fill>
+                                    </Rectangle>
+                                    <TextBlock
+                                        Style="{StaticResource AnimatedTextBlock}"
+                                        Text="{Binding Title}"
+                                        FontSize="16"
+                                        FontWeight="DemiBold"
+                                        TextWrapping="Wrap"
+                                        VerticalAlignment="Center"
+                                        Padding="8 0 0 0"
+                                        MaxWidth="{Binding ElementName=NewsImage, Path=ActualWidth}"
+                                        Canvas.Top="30">
+                                    </TextBlock>
+                                    <!--<Canvas DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
+                                            Visibility="Collapsed"
+                                            x:Name="Test"/>-->
+                                    <!--<TextBlock Text="{Binding ElementName=Test, Path=DataContext}" Visibility="Collapsed">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsSelected}" Value="True"/>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsMouseOver}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Background" Value="Red"/>
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
+
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsSelected}" Value="False"/>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsMouseOver}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Background" Value="Blue"/>
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
+
+
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsSelected}" Value="True"/>
+                                                            <Condition Binding="{Binding ElementName=Test, Path=DataContext.IsMouseOver}" Value="False"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <MultiDataTrigger.Setters>
+                                                            <Setter Property="Background" Value="Purple"/>
+                                                        </MultiDataTrigger.Setters>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>-->
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.Resources>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                </ListBox>
+                <!--#endregion-->
+
+                <StackPanel VerticalAlignment="Top"
+                            Grid.Row="1"
+                            Margin="30 60 30 0">
+                    <StackPanel.Resources>
+                        <Style BasedOn="{StaticResource DefaultButtonStyle}"
+                                   TargetType="Button">
+                            <Setter Property="Margin" Value="10 10 0 0"/>
+                            <Setter Property="VerticalAlignment" Value="Stretch"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Fill" Value="White"/>
+                            <Setter Property="Stretch" Value="Uniform"/>
+                            <Setter Property="LayoutTransform">
+                                <Setter.Value>
+                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </StackPanel.Resources>
+                    <WrapPanel>
+                        <WrapPanel.Resources>
+                            <Style BasedOn="{StaticResource {x:Type Button}}"
+                                   TargetType="Button">
+                                <Setter Property="Command" Value="{StaticResource NavigateUriCommand}"/>
+                            </Style>
+                        </WrapPanel.Resources>
+                        <Button Content="Request a News Post!"
+                                FontWeight="DemiBold"
+                                Foreground="Black"
+                                Background="#ffae00"
+                                CommandParameter="https://forms.gle/yCTimUxqRbmYhvKc9">
+                            <!--<Path Fill="Black"
+                                  Stretch="Uniform"
+                                  Data="M17,14H19V17H22V19H19V22H17V19H14V17H17V14M20,11V8H4V11H20M13,13V14.68C12.37,15.63 12,16.77 12,18C12,19.09 12.29,20.12 12.8,21H4A2,2 0 0,1 2,19V3L3.67,4.67L5.33,3L7,4.67L8.67,3L10.33,4.67L12,3L13.67,4.67L15.33,3L17,4.67L18.67,3L20.33,4.67L22,3V13.5C20.93,12.58 19.53,12 18,12C16.77,12 15.63,12.37 14.68,13H13M11,19V13H4V19H11Z" />-->
+                        
+                        </Button>
+                        <Button Content="Job Board" CommandParameter="https://forum.faforever.com/category/21/job-openings-unpaid"/>
+                        <Button Content="FAQ" CommandParameter="https://forum.faforever.com/category/18/frequently-asked-questions">
+                            <!--<Path Data="M18,15H6L2,19V3A1,1 0 0,1 3,2H18A1,1 0 0,1 19,3V14A1,1 0 0,1 18,15M23,9V23L19,19H8A1,1 0 0,1 7,18V17H21V8H22A1,1 0 0,1 23,9M8.19,4C7.32,4 6.62,4.2 6.08,4.59C5.56,5 5.3,5.57 5.31,6.36L5.32,6.39H7.25C7.26,6.09 7.35,5.86 7.53,5.7C7.71,5.55 7.93,5.47 8.19,5.47C8.5,5.47 8.76,5.57 8.94,5.75C9.12,5.94 9.2,6.2 9.2,6.5C9.2,6.82 9.13,7.09 8.97,7.32C8.83,7.55 8.62,7.75 8.36,7.91C7.85,8.25 7.5,8.55 7.31,8.82C7.11,9.08 7,9.5 7,10H9C9,9.69 9.04,9.44 9.13,9.26C9.22,9.08 9.39,8.9 9.64,8.74C10.09,8.5 10.46,8.21 10.75,7.81C11.04,7.41 11.19,7 11.19,6.5C11.19,5.74 10.92,5.13 10.38,4.68C9.85,4.23 9.12,4 8.19,4M7,11V13H9V11H7M13,13H15V11H13V13M13,4V10H15V4H13Z" />-->
+                        </Button>
+                        <Button Content="Projects" CommandParameter="https://wiki.faforever.com/en/Projects"/>
+                        <Button Content="Matchmaker" CommandParameter="https://wiki.faforever.com/en/tmm"/>
+                        <Button Content="Development" CommandParameter="https://wiki.faforever.com/en/FAF-Development"/>
+                        <Button Content="Contribute" CommandParameter="https://faforever.com/contribution"/>
+                        <Button Content="Promotions" CommandParameter="https://discord.gg/3h6yQEwEVb"/>
+                        <Button Content="Code of Conduct" CommandParameter="https://wiki.faforever.com/en/FAF-Code-of-Conduct"/>
+                        <Button Content="Player Statistic Tool" CommandParameter="https://kazbek.github.io/FAF-Analytics"/>
+                        <Button Content="Vault Rules" CommandParameter="https://wiki.faforever.com/en/Vault-Rules"/>
+                        <Button Content="FAF Cast Playlist" CommandParameter="https://www.youtube.com/playlist?list=PL0nxuIUIjpFs2mil4oqCJkvRLdmp_VLGw"/>
+                        <Button Content="Streamers&amp;Casters" CommandParameter="https://wiki.faforever.com/en/Casts&amp;Livestreams"/>
+                        <Button Content="News Archive" CommandParameter="https://forum.faforever.com/topic/3201/2022-weekly-news-archive/52"/>
+                    </WrapPanel>
+
+                    <WrapPanel Margin="0 20 0 0">
+                        <WrapPanel.Resources>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                                <Setter Property="Margin" Value="10 10 0 0"/>
+                            </Style>
+                        </WrapPanel.Resources>
+                        <Button Content="{StaticResource SettingsPathIcon}">
+                            <ui:FlyoutService.Flyout>
+                                <ui:Flyout>
+                                    
+                                </ui:Flyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
+                        <ToggleButton
+                            VerticalAlignment="Stretch"
+                            Background="Transparent"
+                            ui:ControlHelper.CornerRadius="4">
+                            <ToggleButton.Resources>
+                                <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#222222"/>
+                                <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="#222222"/>
+                                <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+                                <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#222222"/>
+                            </ToggleButton.Resources>
+                            <Path>
+                                <Path.Style>
+                                    <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                        <Setter Property="Margin" Value="0 0 4 0"/>
+                                        <Setter Property="Fill" Value="White"/>
+                                        <Setter Property="Data" Value="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
+                                                 Value="True">
+                                                <Setter Property="Margin" Value="0"/>
+                                                <Setter Property="Fill" Value="LightGreen"/>
+                                                <Setter Property="Data" Value="M12 12V19.88C12.04 20.18 11.94 20.5 11.71 20.71C11.32 21.1 10.69 21.1 10.3 20.71L8.29 18.7C8.06 18.47 7.96 18.16 8 17.87V12H7.97L2.21 4.62C1.87 4.19 1.95 3.56 2.38 3.22C2.57 3.08 2.78 3 3 3H17C17.22 3 17.43 3.08 17.62 3.22C18.05 3.56 18.13 4.19 17.79 4.62L12.03 12H12M17.75 21L15 18L16.16 16.84L17.75 18.43L21.34 14.84L22.5 16.25L17.75 21"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                        </ToggleButton>
+                        <ToggleButton>
+                            <TextBlock Text="Open games" Padding="26 0 0 0">
+                                <TextBlock.Background>
+                                    <VisualBrush Stretch="Uniform" AlignmentX="Left">
+                                        <VisualBrush.Visual>
+                                            <Path Data="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </ToggleButton>
+                        <ToggleButton>
+                            <TextBlock Text="Live games" Padding="26 0 0 0">
+                                <TextBlock.Background>
+                                    <VisualBrush Stretch="Uniform" AlignmentX="Left">
+                                        <VisualBrush.Visual>
+                                            <Path Data="M17.9,17.39C17.64,16.59 16.89,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </ToggleButton>
+                        <ToggleButton>
+                            <TextBlock Text="Maps" Padding="26 0 0 0">
+                                <TextBlock.Background>
+                                    <VisualBrush Stretch="Uniform" AlignmentX="Left">
+                                        <VisualBrush.Visual>
+                                            <Path Data="M22,16V4A2,2 0 0,0 20,2H8A2,2 0 0,0 6,4V16A2,2 0 0,0 8,18H20A2,2 0 0,0 22,16M11,12L13.03,14.71L16,11L20,16H8M2,6V20A2,2 0 0,0 4,22H18V20H4V6"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </ToggleButton>
+                        <ToggleButton>
+                            <TextBlock Text="Mods" Padding="26 0 0 0">
+                                <TextBlock.Background>
+                                    <VisualBrush Stretch="Uniform" AlignmentX="Left">
+                                        <VisualBrush.Visual>
+                                            <Path Data="M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </ToggleButton>
+                    </WrapPanel>
+                    
+                    
+                </StackPanel>
+
+
+            </Grid>
+        </ScrollViewer>
+    </ui:NavigationView>
+</Window>

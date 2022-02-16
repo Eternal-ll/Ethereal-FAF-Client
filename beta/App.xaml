@@ -4,13 +4,14 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
-             StartupUri="Views/Windows/Window2.xaml">
+             StartupUri="Views/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/ResourceDictionaries/Flags.xaml"/>
                 <ResourceDictionary>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
+                    <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>

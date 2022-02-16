@@ -1,5 +1,8 @@
 ﻿using beta.ViewModels.Base;
 using System;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models
 {
@@ -10,19 +13,21 @@ namespace beta.Models
         public Uri DestinationUri { get; set; }
         public string Author { get; set; }
         public Uri MediaUri { get; set; }
-
-        private bool _IsMouseOver;
-        public bool IsMouseOver
+        private BitmapImage _BitmapImage;
+        public BitmapImage BitmapImage
         {
-            get=> _IsMouseOver;
-            set => Set(ref _IsMouseOver, value);
+            get
+            {
+                if (_BitmapImage == null)
+                {
+                    _BitmapImage = new BitmapImage(MediaUri, new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore));
+                    _BitmapImage.DownloadCompleted += (s, e) => OnPropertyChanged(nameof(ImageVisibility));
+                    _BitmapImage.DownloadCompleted -= (s, e) => OnPropertyChanged();
+                }
+                return _BitmapImage;
+            }
         }
-
-        private bool _IsSelected;
-        public bool IsSelected
-        {
-            get => _IsSelected;
-            set => Set(ref _IsSelected, value);
-        }
+        public bool IsDownloading => BitmapImage.IsDownloading;
+        public Visibility ImageVisibility => BitmapImage.IsDownloading ? Visibility.Visible : Visibility.Collapsed;
     }
 }
