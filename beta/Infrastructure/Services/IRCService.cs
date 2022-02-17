@@ -15,7 +15,7 @@ namespace beta.Infrastructure.Services
         public IRCService(ISessionService lobbySession)
         {
             SessionService = lobbySession;
-            SessionService.Authorization += OnLobbyAuthorization;
+            SessionService.Authorized += OnLobbyAuthorization;
             //Client.DelimiterDataReceived += OnIRCServerResponse;
         }
 

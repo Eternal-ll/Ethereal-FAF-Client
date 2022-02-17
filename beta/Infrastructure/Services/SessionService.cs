@@ -21,7 +21,7 @@ namespace beta.Infrastructure.Services
     public class SessionService : ISessionService
     {
         #region Events
-        public event EventHandler<EventArgs<bool>> Authorization;
+        public event EventHandler<EventArgs<bool>> Authorized;
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
         public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
@@ -259,7 +259,7 @@ namespace beta.Infrastructure.Services
             //return session;
         }
 
-        protected virtual void OnAuthorization(EventArgs<bool> e) => Authorization?.Invoke(this, e);
+        protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayer?.Invoke(this, e);
         protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGame?.Invoke(this, e);
         protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);

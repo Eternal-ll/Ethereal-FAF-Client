@@ -1,10 +1,11 @@
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace beta.Infrastructure.Services.Interfaces
+namespace beta.Infrastructure.Services
 {
     public enum ComparisonMethod
     {
@@ -13,9 +14,9 @@ namespace beta.Infrastructure.Services.Interfaces
     }
     public class PlayersService : ViewModel, IPlayersService
     {
-        
+
         #region Properties
-        
+
         #region Services
 
         private readonly ISessionService SessionService;
@@ -61,7 +62,7 @@ namespace beta.Infrastructure.Services.Interfaces
                     {
                         if (player.avatar.url.Segments[^1] != matchedPlayer.avatar.url.Segments[^1])
                             // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                            App.Current.Dispatcher.Invoke(() => matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
+                            System.Windows.Application.Current.Dispatcher.Invoke(() => matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
                             System.Windows.Threading.DispatcherPriority.Background);
                     }
                     else player.Avatar = null;
@@ -77,7 +78,7 @@ namespace beta.Infrastructure.Services.Interfaces
                 if (player.avatar != null)
                 {
                     // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                    App.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),
                     System.Windows.Threading.DispatcherPriority.Background);
                 }
 
@@ -123,9 +124,9 @@ namespace beta.Infrastructure.Services.Interfaces
                     if (method == ComparisonMethod.STARTS_WITH)
                         if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
                             yield return enumerator.Current;
-                    else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                        yield return enumerator.Current;
-                
+                        else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                            yield return enumerator.Current;
+
         }
     }
 }

@@ -14,7 +14,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public void AskSession();
         public Task<string> GenerateUID(string session);
         public void Authorize();
-        public event EventHandler<EventArgs<bool>> Authorization;
+        public event EventHandler<EventArgs<bool>> Authorized;
         event EventHandler<EventArgs<SocialMessage>> SocialInfo;
     }
 }

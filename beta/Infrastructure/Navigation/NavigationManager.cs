@@ -1,7 +1,6 @@
-﻿using beta.Infrastructure.Services.Interfaces;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
-namespace beta.Infrastructure.Services
+namespace beta.Infrastructure.Navigation
 {
     public class NavigationManager : INavigationManager
     {

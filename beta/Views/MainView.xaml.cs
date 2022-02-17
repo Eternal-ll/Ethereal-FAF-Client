@@ -1,4 +1,4 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Navigation;
 using ModernWpf.Controls;
 using System;
 using System.Windows.Controls;

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace beta.Infrastructure.Services.Interfaces
+namespace beta.Infrastructure.Navigation
 {
     public interface INavigationManager
     {

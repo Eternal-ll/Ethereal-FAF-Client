@@ -1,4 +1,5 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Navigation;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
@@ -56,7 +57,7 @@ namespace beta.Views
             OAuthService.Result += OnOAuthAuthorizationFinish;
             
             // raising up after finishing lobby session authorization
-            SessionService.Authorization += OnLobbySessionServiceAuthorizationFinish;
+            SessionService.Authorized += OnLobbySessionServiceAuthorizationFinish;
 
             // load user setting of auto join ot local checkbox
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
@@ -76,7 +77,7 @@ namespace beta.Views
 
                 // remove listeners of events
                 OAuthService.Result -= OnOAuthAuthorizationFinish;
-                SessionService.Authorization -= OnLobbySessionServiceAuthorizationFinish;
+                SessionService.Authorized -= OnLobbySessionServiceAuthorizationFinish;
                 // call UI thread and invoke our instructions
                 // events coming from different thread and can raise exception
                 NavigationManager.Navigate(new MainView());
