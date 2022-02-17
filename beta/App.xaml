@@ -42,6 +42,9 @@
                     <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
                     <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
                 </ResourceDictionary>
+
+                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
+                
                 <ui:ThemeResources RequestedTheme="Dark">
                     <ui:ThemeResources.ThemeDictionaries>
                         <ResourceDictionary x:Key="Light">

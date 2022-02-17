@@ -10,13 +10,13 @@ namespace beta.Infrastructure.Services
     {
         public event EventHandler<EventArgs<string>> Message;
         private readonly ISessionService SessionService;
-        public readonly SSLClient Client = new();
-        public SSLClient SslClient => Client;
+        //public readonly SSLClient Client = new();
+        //public SSLClient SslClient => Client;
         public IRCService(ISessionService lobbySession)
         {
             SessionService = lobbySession;
             SessionService.Authorization += OnLobbyAuthorization;
-            Client.DelimiterDataReceived += OnIRCServerResponse;
+            //Client.DelimiterDataReceived += OnIRCServerResponse;
         }
 
         public string CreateMD5(string input)

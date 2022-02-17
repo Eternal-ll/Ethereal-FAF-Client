@@ -15,7 +15,15 @@ namespace beta.Views.Windows
             
             var navManager = new NavigationManager(MainFrame, ModalFrame);
 
-            _ = navManager.Navigate(new AuthView());
+            navManager.Navigate(new AuthView());
+            //var t = new ContentDialog();
+            //t.PreviewKeyDown += (s, e) =>
+            //{
+            //    if (e.Key == System.Windows.Input.Key.Escape)
+            //    {
+            //        e.Handled = true;
+            //    }
+            //};
             
         }
         

@@ -26,12 +26,9 @@ namespace beta.Models.Server
         PrivatePlaying5 = 10
     }
 
-    public struct PlayerAvatar
+    public class PlayerAvatar
     {
         public Uri url { get; set; }
-
-        private ImageSource _Image;
-        public ImageSource Image => _Image ??= url != null ? new BitmapImage(url) : null;
         
         public string tooltip { get; set; }
     }
@@ -145,6 +142,15 @@ namespace beta.Models.Server
                     GameState = value.host.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
                 }
             }
+        }
+        #endregion
+
+        #region Avatar
+        private BitmapImage _Avatar;
+        public BitmapImage Avatar
+        {
+            get => _Avatar;
+            set => Set(ref _Avatar, value);
         }
         #endregion
 

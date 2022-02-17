@@ -186,6 +186,7 @@ namespace beta.Views
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
+            if (IrcClient != null)
             if (IrcClient.Connected)
             IrcClient.Disconnect();
         }
@@ -569,14 +570,14 @@ namespace beta.Views
 
                     if (len >= 0)
                     {
-                        var previousNick = channel.History[len].From;
-                        while (previousNick == null && len > 0)
+                        var previousMsg = channel.History[len];
+                        while (previousMsg.From == null && len > 0)
                         {
                             len--;
-                            previousNick = channel.History[len].From;
+                            previousMsg = channel.History[len];
                         }
 
-                        if (previousNick == e.From)
+                        if (previousMsg.From == e.From)
                             e.From = null;
                     }
                     channel.History.Add(new()

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
+                    xmlns:models="clr-namespace:beta.Models.Server"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:GlobalView}}">
@@ -46,11 +47,10 @@
         <Grid 
             Grid.Row="1"
             Panel.ZIndex="2"
-            Margin="30">
+            Margin="30" ShowGridLines="False">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition MinWidth="220"/>
-                <ColumnDefinition Width="154"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.Resources>
                 <Style TargetType="ui:ToggleSwitch">
@@ -63,87 +63,129 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Resources>
-            <ToggleButton
-                Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                Padding="0">
-                <ToggleButton.Style>
-                    <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
-                        <Setter Property="ui:ControlHelper.CornerRadius" Value="4"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="ui:ControlHelper.CornerRadius" Value="4 4 0 0"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ToggleButton.Style>
-                <Grid>
-                    <TextBlock  
-                        Text="Filter"
-                        Padding="24 0 0 0"
-                        Margin="8 6">
-                        <TextBlock.Background>
-                            <VisualBrush Stretch="Uniform" AlignmentX="Left">
-                                <VisualBrush.Visual>
-                                    <Path
-                                        Fill="White"
-                                        Data="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"
-                                        />
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </TextBlock.Background>
-                    </TextBlock>
-                    <Canvas
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Bottom">
-                        <Border
-                            CornerRadius="0 4 4 4"
-                            Margin="-1 1 0 0"
-                            Background="{StaticResource NavigationViewDefaultPaneBackground}">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Opacity" Value="0"/>
-                                    <Style.Triggers>
-                                        <Trigger Property="Opacity" Value="0">
-                                            <Setter Property="IsHitTestVisible" Value="False"/>
-                                        </Trigger>
-                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
-                                            Path=IsMouseOver}"
-                                                     Value="True">
-                                            <DataTrigger.EnterActions>
-                                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
-                                            </DataTrigger.EnterActions>
-                                            <DataTrigger.ExitActions>
-                                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
-                                            </DataTrigger.ExitActions>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <Border.Effect>
-                                <DropShadowEffect
-                                    Color="#111111"
-                                    Direction="-90"
-                                    BlurRadius="10"/>
-                            </Border.Effect>
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Padding="8 0"
+                    VerticalAlignment="Stretch"
+                    Background="Transparent"
+                    Content="{StaticResource SettingsPathIcon}">
+                    <ui:FlyoutService.Flyout>
+                        <ui:Flyout Placement="BottomEdgeAlignedLeft">
                             <StackPanel>
                                 <ui:ToggleSwitch
-                                Margin="10"
-                                Header="Hide private games"
-                                IsOn="{Binding IsPrivateGamesHidden}"
-                                VerticalAlignment="Top"/>
+                                    Margin="0 4"
+                                    FontSize="14"
+                                    Header="Hide private games"
+                                    IsOn="{Binding IsPrivateGamesHidden}"
+                                    VerticalAlignment="Top"/>
+                                <ui:ToggleSwitch
+                                    Margin="0 4"
+                                    FontSize="14"
+                                    Header="Hide FOE`s games"
+                                    VerticalAlignment="Top"/>
                             </StackPanel>
-                        </Border>
-                    </Canvas>
-                </Grid>
-            </ToggleButton>
+                        </ui:Flyout>
+                    </ui:FlyoutService.Flyout>
+                </Button>
+                <ToggleButton
+                    VerticalAlignment="Stretch"
+                    Background="Transparent"
+                    Padding="8 0 4 0"
+                    ui:ControlHelper.CornerRadius="4"
+                    IsChecked="{Binding IsSortEnabled}">
+                    <ToggleButton.Resources>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#222222"/>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="#222222"/>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#222222"/>
+                    </ToggleButton.Resources>
+                    <Path Stretch="Uniform">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Margin" Value="0 0 5 0"/>
+                                <Setter Property="Fill" Value="White"/>
+                                <Setter Property="Data" Value="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
+                                                 Value="True">
+                                        <Setter Property="Margin" Value="0"/>
+                                        <Setter Property="Fill" Value="LightGreen"/>
+                                        <Setter Property="Data" Value="M12 12V19.88C12.04 20.18 11.94 20.5 11.71 20.71C11.32 21.1 10.69 21.1 10.3 20.71L8.29 18.7C8.06 18.47 7.96 18.16 8 17.87V12H7.97L2.21 4.62C1.87 4.19 1.95 3.56 2.38 3.22C2.57 3.08 2.78 3 3 3H17C17.22 3 17.43 3.08 17.62 3.22C18.05 3.56 18.13 4.19 17.79 4.62L12.03 12H12M17.75 21L15 18L16.16 16.84L17.75 18.43L21.34 14.84L22.5 16.25L17.75 21"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </ToggleButton>
+                <ComboBox
+                    BorderThickness="0"
+                    ItemsSource="{Binding SortDescriptions}"
+                    SelectedItem="{Binding SelectedSort}"
+                    DisplayMemberPath="PropertyName">
+                    <ComboBox.Style>
+                        <Style BasedOn="{StaticResource DefaultComboBoxStyle}"
+                               TargetType="ComboBox">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSortEnabled}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Style>
+                </ComboBox>
+                <Button
+                    Background="Transparent"
+                    Padding="6 0"
+                    VerticalAlignment="Stretch"
+                    Command="{Binding ChangeSortDirectionCommmand}">
+                    <Path Fill="White">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Data" Value="M19 17H22L18 21L14 17H17V3H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SortDirection}" Value="1">
+                                        <Setter Property="Data" Value="M19 7H22L18 3L14 7H17V21H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource DefaultButtonStyle}"
+                               TargetType="Button">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSortEnabled}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
             <TextBox
                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                 Width="200"
                 Grid.Column="1"
+                HorizontalAlignment="Left"
+                Margin="20 0 0 0"
                 BorderThickness="0"
-                VerticalAlignment="Center"
                 ui:ControlHelper.PlaceholderText="Search lobby"
-                ui:ControlHelper.CornerRadius="6"/>
+                ui:ControlHelper.CornerRadius="4"/>
+
+
+            <StackPanel Orientation="Horizontal"
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        Margin="0 0 10 0">
+                <TextBlock Foreground="LimeGreen" Text="{Binding View.Count, StringFormat='On view: {0}'}"/>
+
+                <TextBlock Margin="10 0" Foreground="LightGray"
+                           Text="{Binding View.SourceCollection.Count, StringFormat='Idle: {0}'}"
+                           ToolTip="Part of them unacessible due to technical errors"/>
+
+                <TextBlock Foreground="Red" Text="{Binding LiveGames.Count, StringFormat='Live: {0}'}">
+                </TextBlock>
+            </StackPanel>
         </Grid>
         <Canvas
             Grid.Row="2"
@@ -188,7 +230,6 @@
                 Background="{x:Null}"
                 SizeChanged="IdleGames_SizeChanged"
                 ItemsSource="{Binding View}"
-                ItemTemplate="{DynamicResource LobbyContainerDefaultTemplate}"
                 VirtualizingPanel.IsVirtualizing="True"
                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                 VirtualizingPanel.IsContainerVirtualizable="True"
@@ -222,6 +263,33 @@
                         </Style.Resources>
                     </Style>
                 </ListBox.Resources>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl>
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Button
+                                                Content="Create game"
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                Background="Transparent">
+
+                                            </Button>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
+                                                     Value="{x:Type models:GameInfoMessage}">
+                                            <Setter Property="Content" Value="{Binding}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid
@@ -236,5 +304,10 @@
                 </ListBox.ItemsPanel>
             </ListBox>
         </Grid>
+        <DataGrid
+            ItemsSource="{Binding View}"
+            Visibility="Collapsed">
+            
+        </DataGrid>
     </Grid>
 </UserControl>

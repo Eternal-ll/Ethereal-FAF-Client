@@ -196,7 +196,7 @@
                                         <BeginStoryboard>
                                             <Storyboard>
                                                 <DoubleAnimation
-                                                    Storyboard.TargetProperty="Fill.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
+                                                    Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
                                                     To=".01"
                                                     From="-1"
                                                     Duration="0:0:0.2"/>

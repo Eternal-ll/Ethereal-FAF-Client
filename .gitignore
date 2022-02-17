@@ -12,6 +12,7 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+.Документация/
 
 # Build results
 [Dd]ebug/
@@ -333,3 +334,4 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+/Документация

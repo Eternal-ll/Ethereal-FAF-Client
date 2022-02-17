@@ -3,7 +3,7 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -17,12 +17,13 @@ namespace beta.Views
         private readonly IOAuthService OAuthService;
         private readonly ISessionService SessionService;
         private INavigationManager NavigationManager;
+
         /// <summary>
         /// Raising event on navigating, give us a NavigationManager to move to next view
         /// </summary>
         /// <param name="navigationManager"></param>
         /// <returns></returns>
-        async Task INavigationAware.OnViewChanged(INavigationManager navigationManager)
+        void INavigationAware.OnViewChanged(INavigationManager navigationManager)
         {
             NavigationManager = navigationManager;
 
@@ -37,7 +38,7 @@ namespace beta.Views
                 ProgressRing.Visibility = Visibility.Visible;
 
                 // launch OAuth2 authorization in service
-                await OAuthService.Auth();
+                OAuthService.Auth();
             }
         }
 
@@ -84,20 +85,17 @@ namespace beta.Views
 
         private void OnCheckBoxClick(object sender, RoutedEventArgs e) => Settings.Default.AutoJoin = ((CheckBox)sender).IsChecked.Value;
 
-        private void OnAuthorization(object sender, RoutedEventArgs e)
+        private void OnAuthorizationButtonClick(object sender, RoutedEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                string loginrOrEmail = LoginInput.Text;
-                string password = PasswordInput.Password;
+            var login = LoginInput.Text;
+            var password = PasswordInput.Password;
 
-                for (int i = 0; i < Canvas.Children.Count; i++)
-                    Canvas.Children[i].Visibility = Visibility.Collapsed;
+            for (int i = 0; i < Canvas.Children.Count; i++)
+                Canvas.Children[i].Visibility = Visibility.Collapsed;
 
-                ProgressRing.Visibility = Visibility.Visible;
+            ProgressRing.Visibility = Visibility.Visible;
 
-                OAuthService.Auth(loginrOrEmail, password);
-            });
+            new Thread(()=> OAuthService.Auth(login, password)).Start();
         }
 
         private readonly ContentDialog WarnDialog = new()
@@ -108,38 +106,41 @@ namespace beta.Views
 
         private void OnOAuthAuthorizationFinish(object sender, Infrastructure.EventArgs<OAuthStates> e)
         {
-            switch (e.Arg)
+            Dispatcher.Invoke(() =>
             {
-                case OAuthStates.AUTHORIZED:
-                    for (int i = 0; i < Canvas.Children.Count; i++)
-                        Canvas.Children[i].Visibility = Visibility.Collapsed;
-                    ProgressRing.Visibility = Visibility.Visible;
-                    return;
-                case OAuthStates.INVALID:
-                    WarnDialog.Content = "Invalid authorization parameters";
-                    break;
-                case OAuthStates.NO_CONNECTION:
-                    WarnDialog.Content = "No connection.\nPlease check your internet connection";
-                    break;
-                case OAuthStates.NO_TOKEN:
-                    WarnDialog.Content = "Something went wrong on auto-join.\nPlease use authorization form again";
-                    break;
-                case OAuthStates.TIMED_OUT:
-                    WarnDialog.Content = "Server is not responses";
-                    break;
-                case OAuthStates.EMPTY_FIELDS:
-                    WarnDialog.Content = "Empty fields";
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                switch (e.Arg)
+                {
+                    case OAuthStates.AUTHORIZED:
+                        for (int i = 0; i < Canvas.Children.Count; i++)
+                            Canvas.Children[i].Visibility = Visibility.Collapsed;
+                        ProgressRing.Visibility = Visibility.Visible;
+                        return;
+                    case OAuthStates.INVALID:
+                        WarnDialog.Content = "Invalid authorization parameters";
+                        break;
+                    case OAuthStates.NO_CONNECTION:
+                        WarnDialog.Content = "No connection.\nPlease check your internet connection";
+                        break;
+                    case OAuthStates.NO_TOKEN:
+                        WarnDialog.Content = "Something went wrong on auto-join.\nPlease use authorization form again";
+                        break;
+                    case OAuthStates.TIMED_OUT:
+                        WarnDialog.Content = "Server is not responses";
+                        break;
+                    case OAuthStates.EMPTY_FIELDS:
+                        WarnDialog.Content = "Empty fields";
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-            for (int i = 0; i < Canvas.Children.Count; i++)
-                Canvas.Children[i].Visibility = Visibility.Visible;
+                for (int i = 0; i < Canvas.Children.Count; i++)
+                    Canvas.Children[i].Visibility = Visibility.Visible;
 
-            ProgressRing.Visibility = Visibility.Collapsed;
+                ProgressRing.Visibility = Visibility.Collapsed;
 
-            WarnDialog.ShowAsync();
+                WarnDialog.ShowAsync();
+            });
         }
     }
 }

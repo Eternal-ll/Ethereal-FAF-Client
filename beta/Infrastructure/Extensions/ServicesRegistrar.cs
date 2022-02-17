@@ -12,6 +12,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IPlayersService, PlayersService>()
             .AddSingleton<IGamesServices, GamesServices>()
             .AddSingleton<IIRCService, IRCService>()
+            .AddSingleton<IAvatarService, AvatarService>()
             ;
     }
 }

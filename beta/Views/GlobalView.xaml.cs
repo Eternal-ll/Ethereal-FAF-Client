@@ -1,12 +1,15 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using GameInfoMessage = beta.Models.Server.GameInfoMessage;
 
 namespace beta.Views
@@ -51,10 +54,13 @@ namespace beta.Views
             get => _IsPrivateGamesHidden;
             set
             {
-                _IsPrivateGamesHidden = value;
+                if (_IsPrivateGamesHidden != value)
+                {
+                    _IsPrivateGamesHidden = value;
 
-                View.Refresh();
-                OnPropertyChanged(nameof(IsPrivateGamesHidden));
+                    View.Refresh();
+                    OnPropertyChanged(nameof(IsPrivateGamesHidden));
+                }
             }
         }
         #endregion
@@ -73,21 +79,20 @@ namespace beta.Views
             var lobby = (GameInfoMessage)e.Item;
             e.Accepted = false;
 
+            if (lobby.game_type != "custom" || lobby.featured_mod != "faf" || lobby.sim_mods.Count > 0)
+                return;
+
             //var mapName = lobby.MapName;
             //if (mapName.Contains("gap") || mapName.Contains("crater") || mapName.Contains("astro") ||
             //    mapName.Contains("pass"))
             //    return;
 
-            if (lobby.game_type != "custom" || lobby.featured_mod != "faf")
-                return;
-
             //if (lobby.num_players == 0)
             //    return;
 
 
-            if (_IsPrivateGamesHidden)
+            if (_IsPrivateGamesHidden && lobby.password_protected)
             {
-                e.Accepted = !lobby.password_protected;
                 return;
             }
 
@@ -123,6 +128,92 @@ namespace beta.Views
         public ScrollViewer IdleGamesScrollViewer { get; }
         #endregion
 
+        #region IsSortEnabled
+        private bool _IsSortEnabled;
+        public bool IsSortEnabled
+        {
+            get => _IsSortEnabled;
+            set
+            {
+                if (_IsSortEnabled != value)
+                {
+                    _IsSortEnabled = value;
+
+                    //View.Refresh();
+                    OnPropertyChanged(nameof(IsSortEnabled));
+
+                    if (!value)
+                    {
+                        View.SortDescriptions.Clear();
+                    }
+                    if (value && View.SortDescriptions.Count == 0)
+                    {
+                        SelectedSort = SortDescriptions[0];
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Sort properties
+
+        public SortDescription[] SortDescriptions => new SortDescription[]
+        {
+            new SortDescription(nameof(GameInfoMessage.title), ListSortDirection.Ascending),
+            // Requires IComaprable TODO
+            //new SortDescription(nameof(GameInfoMessage.Host), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.MapName), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.max_players), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.rating_max), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.rating_min), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.AverageRating), ListSortDirection.Ascending)
+        };
+
+        #region SelectedSort
+        private SortDescription _SelectedSort;
+        public SortDescription SelectedSort
+        {
+            get => _SelectedSort;
+            set
+            {
+                if (value != _SelectedSort)
+                {
+                    _SelectedSort = value;
+                    PropertyChanged?.Invoke(this, new(nameof(SelectedSort)));
+                    PropertyChanged?.Invoke(this, new(nameof(SortDirection)));
+                    //SortDirection = ListSortDirection.Ascending;
+                    View.SortDescriptions.Clear();
+                    View.SortDescriptions.Add(value);
+                }
+            }
+        }
+        #endregion
+
+        #region SortDirection
+        public ListSortDirection SortDirection
+        {
+            get => SelectedSort.Direction;
+            set
+            {
+                if (SelectedSort.Direction == ListSortDirection.Ascending)
+                {
+                    SelectedSort = new(SelectedSort.PropertyName, ListSortDirection.Descending);
+                }
+                else SelectedSort = new(SelectedSort.PropertyName, ListSortDirection.Ascending);
+            }
+        }
+        #endregion
+
+        #region ChangeSortDirectionCommmand
+        private ICommand _ChangeSortDirectionCommmand;
+        public ICommand ChangeSortDirectionCommmand => _ChangeSortDirectionCommmand ??= new LambdaCommand(OnChangeSortDirectionCommmand);
+        public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
+        #endregion
+
+        #endregion
+
+        public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
+
         private readonly IGamesServices GamesServices;
         private readonly object _lock = new();
 
@@ -142,6 +233,7 @@ namespace beta.Views
             CollectionViewSource.GroupDescriptions.Add(grouping);
 
             BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
+            BindingOperations.EnableCollectionSynchronization(GamesServices.LiveGames, _lock);
 
             CollectionViewSource.Source = GamesServices.IdleGames;
 

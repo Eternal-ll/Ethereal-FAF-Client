@@ -213,35 +213,35 @@ namespace beta.Models
         }
         private void DoConnect()
         {
-            //try
-            //{
-            TcpClient = new TcpClient("irc.faforever.com", _port);
-
-            stream = TcpClient.GetStream();
-            ssl = new SslStream(stream, false, ValidateServerCertificate, null);
-            //SslStream.AuthenticateAsClient("irc.faforever.com");
-            //ssl = new SslStream(stream, false);
-            ssl.AuthenticateAsClient("irc.faforever.com");
-            //reader = new StreamReader(ssl);
-            //writer = new StreamWriter(ssl);
-
-            if (!string.IsNullOrEmpty(_ServerPass))
-                Send("PASS " + _ServerPass);
-
-            Send("NICK " + _nick);
-            Send("USER " + _nick + " 0 * :" + _nick);
-
-            while (TcpClient.Connected)
+            try
             {
-                Listen();
-                Thread.Sleep(10);
+                TcpClient = new TcpClient("irc.faforever.com", _port);
+
+                stream = TcpClient.GetStream();
+                ssl = new SslStream(stream, false, ValidateServerCertificate, null);
+                //SslStream.AuthenticateAsClient("irc.faforever.com");
+                //ssl = new SslStream(stream, false);
+                ssl.AuthenticateAsClient("irc.faforever.com");
+                //reader = new StreamReader(ssl);
+                //writer = new StreamWriter(ssl);
+
+                if (!string.IsNullOrEmpty(_ServerPass))
+                    Send("PASS " + _ServerPass);
+
+                Send("NICK " + _nick);
+                Send("USER " + _nick + " 0 * :" + _nick);
+
+                while (TcpClient.Connected)
+                {
+                    Listen();
+                    Thread.Sleep(10);
+                }
             }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Fire_ExceptionThrown(ex);
-            //}
-        }
+            catch (Exception ex)
+            {
+
+            }
+}
         /// <summary>
         /// Disconnect from the IRC server
         /// </summary>

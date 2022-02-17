@@ -19,6 +19,7 @@ namespace beta.Infrastructure.Services.Interfaces
         #region Services
 
         private readonly ISessionService SessionService;
+        private readonly IAvatarService AvatarService;
 
         #endregion
 
@@ -36,12 +37,14 @@ namespace beta.Infrastructure.Services.Interfaces
 
         #region Ctor
 
-        public PlayersService(ISessionService sessionService)
+        public PlayersService(ISessionService sessionService, IAvatarService avatarService)
         {
             SessionService = sessionService;
+            AvatarService = avatarService;
+
             sessionService.NewPlayer += OnNewPlayer;
         }
-        
+
         #endregion
 
         private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
@@ -61,6 +64,15 @@ namespace beta.Infrastructure.Services.Interfaces
             else
             {
                 int count = _Players.Count;
+
+                // Check for avatar
+                if (player.avatar != null)
+                {
+                    // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
+                    App.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),
+                    System.Windows.Threading.DispatcherPriority.Background);
+                }
+
                 _Players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);
                 PlayerUIDToId.Add(player.id, count);

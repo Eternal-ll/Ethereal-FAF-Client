@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using beta.Infrastructure.Services.Interfaces;
 using System.Windows.Controls;
-using beta.Infrastructure.Services.Interfaces;
 
 namespace beta.Infrastructure.Services
 {
@@ -10,19 +8,20 @@ namespace beta.Infrastructure.Services
         private readonly ContentControl MainFrame;
         private readonly ContentControl ModalFrame;
 
+        public NavigationManager(ContentControl mainFrame) => MainFrame = mainFrame;
         public NavigationManager(ContentControl mainFrame, ContentControl modalFrame)
         {
             MainFrame = mainFrame;
             ModalFrame = modalFrame;
         }
 
-        public async Task Navigate(UserControl userControl)
+        public void Navigate(UserControl userControl)
         {
             MainFrame.Content = userControl;
             if (userControl is not INavigationAware navigationAware)
                 return;
 
-            await navigationAware.OnViewChanged(this);
+            navigationAware.OnViewChanged(this);
         }
     };
 }

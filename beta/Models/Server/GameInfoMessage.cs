@@ -30,7 +30,7 @@ namespace beta.Models.Server
             > 0 => Number - 1 == 0 ? "No team" : "Team " + (Number - 1),
             -1 => "Observers",
             _ => "Unknown",
-        };//Number != -1 ? "Team " + (Number - 1) : "Observers";
+        };
 
         public int Number { get; }
         public IPlayer[] Players { get; }
@@ -57,8 +57,17 @@ namespace beta.Models.Server
 
     public static class GameInfoExtensions
     {
-        public static GameInfoMessage Update(this GameInfoMessage orig, GameInfoMessage newInfo)
+        public static bool Update(this GameInfoMessage orig, GameInfoMessage newInfo)
         {
+            if (orig.num_players > newInfo.num_players && newInfo.num_players == 0)
+                return false;
+
+            if (orig.num_players < newInfo.num_players)
+                orig.PlayersCountChanged = 1;
+            else if (orig.num_players > newInfo.num_players)
+                orig.PlayersCountChanged = -1;
+            else orig.PlayersCountChanged = null;
+
             orig.title = newInfo.title;
 
             orig.num_players = newInfo.num_players;
@@ -116,7 +125,7 @@ namespace beta.Models.Server
 
             orig.password_protected = newInfo.password_protected;
 
-            return orig;
+            return true;
         }
     }
 
@@ -124,6 +133,7 @@ namespace beta.Models.Server
     {
         #region Custom properties
 
+        // FIX
         #region MapName
         private string _MapName;
         public string MapName
@@ -150,6 +160,7 @@ namespace beta.Models.Server
         }
         #endregion
 
+        // FIX
         #region MapVersion
         private string _MapVersion;
         public string MapVersion => _MapVersion ??= mapname.Split('.').Length > 1? mapname.Split('.')[1] : string.Empty;
@@ -238,6 +249,27 @@ namespace beta.Models.Server
 
         #endregion
 
+        #region PlayersCountChanged
+        private int? _PlayersCountChanged;
+        public int? PlayersCountChanged
+        {
+            get => _PlayersCountChanged;
+            set => Set(ref _PlayersCountChanged, value);
+        }
+        #endregion
+
+        #region Size
+        private string _Size;
+        public string Size
+        {
+            get => _Size;
+            set => Set(ref _Size, value);
+        }
+
+        #endregion
+
+        public DateTime? CreatedTime { get; set; }
+
         public PlayerInfoMessage Host { get; set; }
 
         #endregion
@@ -253,6 +285,8 @@ namespace beta.Models.Server
         public string game_type { get; set; }
         public string featured_mod { get; set; }
         public Dictionary<string, string> sim_mods { get; set; }
+
+        #region mapname
         private string _mapname;
         public string mapname
         {
@@ -276,13 +310,15 @@ namespace beta.Models.Server
                         _MapVersion = null;
                         _MapName = null;
 
-                        OnPropertyChanged(nameof(MapNameType));
                         OnPropertyChanged(nameof(PreviewType));
+                        OnPropertyChanged(nameof(MapNameType));
                         OnPropertyChanged(nameof(MapVersion));
                         OnPropertyChanged(nameof(MapName));
                     }
             }
-        }
+        } 
+        #endregion
+
         public string map_file_path { get; set; }
         public string host { get; set; }
 

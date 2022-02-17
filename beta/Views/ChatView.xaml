@@ -119,25 +119,8 @@
                             Stretch="Uniform"
                             MaxWidth="40"
                             MaxHeight="40"
-                            HorizontalAlignment="Center">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <!-- TODO: FIX ME / Binding error
-                                        Cannot convert '<null>' from type '<null>' to type 'System.Windows.Media.ImageSource'
-                                        for 'en-US' culture with default conversions; consider using Converter property of Binding.
-                                        NotSupportedException:'System.NotSupportedException: ImageSourceConverter cannot convert from (null).			
-                                        -->
-                                        <DataTrigger Binding="{Binding avatar.url, Converter={StaticResource IsNullConverter}}"
-                                                     Value="False">
-                                            <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
-                                            <Setter Property="Source" Value="{Binding avatar.url}"/>
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
+                            HorizontalAlignment="Center"
+                            Style="{StaticResource AvatarImageStyle}">
                         </Image>
                         <TextBlock
                             Grid.Column="1"

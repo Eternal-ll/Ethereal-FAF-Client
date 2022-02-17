@@ -78,7 +78,13 @@
         </Grid>
     </DataTemplate>
 
-    <ItemContainerTemplate x:Key="LobbyContainerDefaultTemplate">
+    <ui:Flyout x:Key="LobbyDetailedFlyout" Placement="Full">
+        <Grid>
+
+        </Grid>
+    </ui:Flyout>
+
+    <DataTemplate DataType="{x:Type models:GameInfoMessage}">
         <Grid
             Focusable="False"
             ShowGridLines="False"
@@ -86,20 +92,20 @@
             HorizontalAlignment="Stretch"
             d:DataContext="{d:DesignInstance {x:Type models:GameInfoMessage}}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="10"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="110"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ui:ListViewHeaderItem
+            <!--<ui:ListViewHeaderItem
                 Grid.ColumnSpan="2"
                 Margin="0"
                 IsTabStop="False"
                 Focusable="False"
                 Content="{Binding title}"
-                FontSize="14"/>
+                FontSize="14"/>-->
             <Border
                 Grid.Row="1"
                 CornerRadius="4"
@@ -114,7 +120,6 @@
             <StackPanel
                 Grid.Column="1"
                 Grid.Row="1"
-                Margin="0 0 0 30"
                 Background="Transparent">
                 <StackPanel Orientation="Horizontal" ToolTip="Host"
                             Margin="10 0 0 0">
@@ -196,33 +201,101 @@
                         Stretch="Uniform"
                         MaxHeight="18"
                         HorizontalAlignment="Center"
-                        Grid.Column="1">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <!-- TODO: FIX ME / Binding error
-                                    Cannot convert '<null>' from type '<null>' to type 'System.Windows.Media.ImageSource'
-                                    for 'en-US' culture with default conversions; consider using Converter property of Binding.
-                                    NotSupportedException:'System.NotSupportedException: ImageSourceConverter cannot convert from (null).			
-                                    -->
-                                    <DataTrigger Binding="{Binding Host.avatar.url, Converter={StaticResource IsNullConverter}}"
-                                                 Value="False">
-                                        <Setter Property="ToolTip" Value="{Binding Host.avatar.tooltip}"/>
-                                        <Setter Property="Source" Value="{Binding Host.avatar.Image}"/>
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
+                        Grid.Column="1"
+                        DataContext="{Binding Host}"
+                        Style="{StaticResource AvatarImageStyle}">
                     </Image>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="-8 0">
+                        <TextBlock.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                <TranslateTransform X="50" Y="-8"/>
+                            </TransformGroup>
+                        </TextBlock.RenderTransform>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                 Value="1">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        Duration="0:0:0.3"
+                                                        From="0" To="1"
+                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Foreground" Value="Lime"/>
+                                            <Setter Property="Text" Value="+"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                 Value="-1">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        Duration="0:0:0.3"
+                                                        From="0" To="1"
+                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                        <DataTrigger.Setters>
+                                            <Setter Property="Foreground" Value="Red"/>
+                                            <Setter Property="Text" Value="-"/>
+                                        </DataTrigger.Setters>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
                            Margin="7 4 0 0"
                            Padding="26 0 0 0">
-                    <Run Text="{Binding num_players}"/>
+                    <Run Text="{Binding num_players}">
+                        <Run.Style>
+                            <Style TargetType="Run">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                Value="1">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation
+                                                        Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                        From="White" To="Lime" Duration="0:0:0.3"
+                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                Value="-1">
+                                        <DataTrigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation
+                                                        Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                        From="White" To="Red" Duration="0:0:0.3"
+                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </DataTrigger.EnterActions>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Run.Style>
+                    </Run>
                     <Run Text="/" FontSize="12"/>
                     <Run Text="{Binding max_players}"/>
                         <TextBlock.Background>
@@ -277,25 +350,8 @@
                                                     Stretch="Uniform"
                                                     MaxHeight="18"
                                                     HorizontalAlignment="Left"
-                                                    Grid.Column="2">
-                                                    <Image.Style>
-                                                        <Style TargetType="Image">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <!-- TODO: FIX ME / Binding error
-                                                                Cannot convert '<null>' from type '<null>' to type 'System.Windows.Media.ImageSource'
-                                                                for 'en-US' culture with default conversions; consider using Converter property of Binding.
-                                                                NotSupportedException:'System.NotSupportedException: ImageSourceConverter cannot convert from (null).			
-                                                                -->
-                                                                <DataTrigger Binding="{Binding avatar.url, Converter={StaticResource IsNullConverter}}"
-                                                                             Value="False">
-                                                                    <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
-                                                                    <Setter Property="Source" Value="{Binding avatar.Image}"/>
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Image.Style>
+                                                    Grid.Column="2"
+                                                    Style="{StaticResource AvatarImageStyle}">
                                                 </Image>
                                                 <TextBlock
                                                     Margin="10 0 0 0"
@@ -414,7 +470,6 @@
                     </TextBlock>
                 </StackPanel>
 
-
                 <TextBlock
                     ToolTip="Secured with password"
                     Text="Secured"
@@ -445,6 +500,24 @@
                         </Style>
                     </TextBlock.Resources>
                 </TextBlock>
+
+                <TextBlock Text="{Binding MapName}"
+                           Margin="8 6 0 0"
+                           Padding="24 0 0 0">
+                    <TextBlock.Background>
+                        <ImageBrush
+                            ImageSource="{StaticResource MapIcon}"
+                            Stretch="Uniform"
+                            AlignmentX="Left">
+                            <ImageBrush.Transform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                    <TranslateTransform X="3"/>
+                                </TransformGroup>
+                            </ImageBrush.Transform>
+                        </ImageBrush>
+                    </TextBlock.Background>
+                </TextBlock>
             </StackPanel>
             <Grid
                 Grid.Column="1"
@@ -474,7 +547,8 @@
                     Opacity="1"
                     Grid.Column="2"
                     Style="{StaticResource LobbyContainerBtnStyle}"
-                    ToolTip="Details">
+                    ToolTip="Details"
+                    ui:FlyoutService.Flyout="{StaticResource LobbyDetailedFlyout}">
                     <Button.Resources>
                         <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
                         <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
@@ -500,6 +574,36 @@
                     HorizontalAlignment="Left"
                     Content="Join"/>
             </Grid>
+            <Border Grid.Row="1" Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0 0 10 0"
+                    BorderThickness="1"
+                    BorderBrush="LightSkyBlue"
+                    CornerRadius="4"
+                    Padding="10 2">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Opacity" Value="0"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding num_players}" Value="0">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation
+                                                Storyboard.TargetProperty="Opacity"
+                                                From="0" To="1" AutoReverse="True"
+                                                Duration="0:0:.4"
+                                                RepeatBehavior="0:0:4"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="New"/>
+            </Border>
         </Grid>
-    </ItemContainerTemplate>
+    </DataTemplate>
 </ResourceDictionary>

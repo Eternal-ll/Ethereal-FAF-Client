@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IOAuthService
     {
         public event EventHandler<EventArgs<OAuthStates>> Result;
-        public Task<string> GetOAuthCode(string usernameOrEmail, string password);
-        public Task<string> FetchOAuthToken(string code);
-        public Task<string> RefreshOAuthToken(string refresh_token);
-        public Task Auth();
-        public Task Auth(string access_token);
-        public Task Auth(string usernameOrEmail, string password);
-        //public Task<string> GenerateUID(string session);
-        public Task InitialLaunch();
+        public void FetchOAuthToken(string code);
+        public void RefreshOAuthToken(string refresh_token);
+        public void Auth();
+        public void Auth(string access_token);
+        public void Auth(string usernameOrEmail, string password);
     }
 
     public enum OAuthStates

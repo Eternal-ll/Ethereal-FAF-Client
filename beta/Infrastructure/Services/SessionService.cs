@@ -32,7 +32,7 @@ namespace beta.Infrastructure.Services
 
         #region Properties
 
-        public readonly SimpleTcpClient Client = new();
+        public readonly ManagedTcpClient Client = new();
 
         private readonly IOAuthService OAuthService;
 
@@ -55,7 +55,7 @@ namespace beta.Infrastructure.Services
 #endif
 
             OAuthService.Result += OnAuthResult;
-            Client.DelimiterDataReceived += OnDataReceived;
+            Client.DataReceived += OnDataReceived;
         }
 
         public void Connect(IPEndPoint ip)
@@ -92,7 +92,7 @@ namespace beta.Infrastructure.Services
                         case 'r':
                             //irc_password
                             var ircPasswordMessage = JsonSerializer.Deserialize<MainView.IRCPasswordMessage>(json);
-                            Properties.Settings.Default.irc_password = ircPasswordMessage.password;
+                            Settings.Default.irc_password = ircPasswordMessage.password;
                             return;
                         case 'n': //invalid
                             Settings.Default.access_token = null;

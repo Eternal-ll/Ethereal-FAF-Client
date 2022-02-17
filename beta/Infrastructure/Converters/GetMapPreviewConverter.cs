@@ -5,15 +5,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Net.Cache;
 
 namespace beta.Infrastructure.Converters
 {
     public class GetMapPreviewConverter : IValueConverter
     {
-        private readonly IList<BitmapImage> Cache = new List<BitmapImage>();
+        private readonly List<BitmapImage> Cache = new();
 
         private object Test(string mapName)
         {
@@ -33,8 +31,6 @@ namespace beta.Infrastructure.Converters
             BitmapImage image = new();
             image.BeginInit();
             image.CacheOption = BitmapCacheOption.OnLoad;
-
-            RequestCachePolicy cachePolicy = new(RequestCacheLevel.NoCacheNoStore);
 
             var localFilePath = cacheFolder + mapName;
             if (File.Exists(localFilePath))
@@ -56,7 +52,7 @@ namespace beta.Infrastructure.Converters
             image.DownloadCompleted += (sender, args) =>
             {
                 var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create((BitmapImage)sender));
+                encoder.Frames.Add(BitmapFrame.Create(image));
 
                 using var filestream = new FileStream(localFilePath, FileMode.Create);
 
@@ -72,7 +68,7 @@ namespace beta.Infrastructure.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if(value ==null)return null;
+            if (value == null) return null;
             var MapNameType = (KeyValuePair<string, PreviewType>)value;
             return MapNameType.Value switch
             {

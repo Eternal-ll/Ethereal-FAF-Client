@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using ModernWpf.Controls;
 using System;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace beta.Views
@@ -14,7 +13,7 @@ namespace beta.Views
         #region NavigationManager
 
         private INavigationManager NavigationManager;
-        public async Task OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
+        public void OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
         #endregion
 
         #region Ctor

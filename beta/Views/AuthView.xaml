@@ -55,7 +55,7 @@
         <!--#region Log in Button -->
         <Button Name="AuthButton"
                 Width="100"
-                Click="OnAuthorization"
+                Click="OnAuthorizationButtonClick"
                 
                 Canvas.Top="76"
                 Canvas.Left="-50">
