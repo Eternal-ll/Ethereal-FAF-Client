@@ -161,14 +161,10 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-                    
-                    <TextBlock
-                        Text="Game status"
-                        FontWeight="DemiBold"
-                        FontSize="14"
-                        Margin="10 10 10 4">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
+
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding GameState}"
                                                                         Value="0">
@@ -176,45 +172,64 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <TextBlock Padding="24 0 0 0"
+                        </StackPanel.Style>
+                        <TextBlock
+                        Text="Game status"
+                        FontWeight="DemiBold"
+                        FontSize="14"
+                        Margin="10 10 10 4">
+                        </TextBlock>
+                        <TextBlock Padding="24 0 0 0"
                                Margin="10 0">
-                        <TextBlock.Background>
-                            <VisualBrush Stretch="None" AlignmentX="Left">
-                                <VisualBrush.Visual>
-                                    <Image Source="{Binding GameStatusImage}">
-                                    </Image>
-                                </VisualBrush.Visual>
-                            </VisualBrush>
-                        </TextBlock.Background>
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding GameState}"
-                                                                            Value="0">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding GameState}"
+                            <TextBlock.Background>
+                                <VisualBrush Stretch="None" AlignmentX="Left">
+                                    <VisualBrush.Visual>
+                                        <Image Source="{Binding GameStatusImage}"/>
+                                    </VisualBrush.Visual>
+                                    <VisualBrush.Transform>
+                                        <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                    </VisualBrush.Transform>
+                                </VisualBrush>
+                            </TextBlock.Background>
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding GameState}"
                                                                             Value="1">
-                                        <Setter Property="Text" Value="In lobby"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding GameState}"
+                                            <Setter Property="Text" Value="In lobby"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding GameState}"
                                                                             Value="2">
-                                        <Setter Property="Text" Value="Playing live"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding GameState}"
+                                            <Setter Property="Text" Value="Playing live"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding GameState}"
                                                                             Value="4">
-                                        <Setter Property="Text" Value="Hosting"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding GameState}"
+                                            <Setter Property="Text" Value="Hosting"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding GameState}"
                                                                             Value="9">
-                                        <Setter Property="Text" Value="Playing"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
+                                            <Setter Property="Text" Value="Playing"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{Binding Game.num_players}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="24" Height="24" Stretch="Uniform" Source="{Binding Game.MapPreview}">
+                                <!--<Image.Style>
+                                    <Style TargetType="Image">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}"
+                                                         Value="False">
+                                                <Setter Property="Source" Value="{Binding Game.MapPreview, Mode=OneWay}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>-->
+                            </Image>
+                        </StackPanel>
+                    </StackPanel>
 
                     <TextBlock x:Name="NoteTitle"
                                Text="Note"
@@ -311,7 +326,7 @@
                                     <!--
                                     TODO FIX ME / Sometimes getting Binding error because children[0] is not a ToggleButton
                                     -->
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self},Path=Parent.Children[6].Children[0].IsChecked}"
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self},Path=Parent.Children[5].Children[0].IsChecked}"
                                                  Value="True">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
@@ -713,12 +728,18 @@
                                     Opacity=".5"
                                     Margin="0 0 0 10"/>
                                 <ListBox
-                                    Width="100"
+                                    Width="140"
                                     Focusable="False"
                                     Name="SuggestionListBox"
                                     MaxHeight="200"
                                     Background="Transparent">
                                     <ListBox.Resources>
+                                        <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding Flag}"/>
+                                                <TextBlock Text="{Binding login}" Margin="4 0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
                                         <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Gray" Opacity=".2"/>
                                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                             <Setter Property="Focusable" Value="False"/>

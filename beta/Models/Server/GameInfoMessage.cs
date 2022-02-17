@@ -3,6 +3,7 @@ using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Media;
 
 namespace beta.Models.Server
 {
@@ -46,7 +47,7 @@ namespace beta.Models.Server
                 return sum;
             }
         }
-        public int AverageRating => SumRating / Players.Length;
+        public int AverageRating => Players.Length != 0 ? SumRating / Players.Length : 0;
 
         public InGameTeam(int number, IPlayer[] players) : this()
         {
@@ -117,9 +118,6 @@ namespace beta.Models.Server
             {
                 orig.map_file_path = newInfo.map_file_path;
                 orig.max_players = newInfo.max_players;
-
-                // should be changed last because
-                // it calls Update event of multiple properties
                 orig.mapname = newInfo.mapname;
             }
 
@@ -132,39 +130,6 @@ namespace beta.Models.Server
     public class GameInfoMessage: ViewModel, IServerMessage
     {
         #region Custom properties
-
-        // FIX
-        #region MapName
-        private string _MapName;
-        public string MapName
-        {
-            get
-            {
-                if (_MapName is null)
-                {
-                    _MapName += char.ToUpper(mapname[0]);
-                    for (int i = 1; i < mapname.Length; i++)
-                    {
-                        if (mapname[i] == '.') break;
-                        if (mapname[i] == '_')
-                        {
-                            _MapName += " ";
-                            _MapName += mapname[i + 1];
-                            i++;
-                        }
-                        else _MapName += mapname[i];
-                    }
-                }
-                return _MapName;
-            }
-        }
-        #endregion
-
-        // FIX
-        #region MapVersion
-        private string _MapVersion;
-        public string MapVersion => _MapVersion ??= mapname.Split('.').Length > 1? mapname.Split('.')[1] : string.Empty;
-        #endregion
 
         #region LobbyState
         //private LobbyState _LobbyState;
@@ -193,30 +158,15 @@ namespace beta.Models.Server
         }
         #endregion
 
-        #region MapPreview // UNUSED
-        // UNUSED
-        private object _MapPreview;
-        public object MapPreview => _MapPreview ??= PreviewType switch
+        #region MapPreview
+        public ImageSource MapPreviewSource;
+        public ImageSource MapPreview => PreviewType switch
         {
-            PreviewType.Normal => new Uri("https://content.faforever.com/maps/previews/small/" + mapname + ".png"),
-            PreviewType.Coop => App.Current.Resources["CoopIcon"],
-            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"],
-            _ => App.Current.Resources["QuestionIcon"]
+            PreviewType.Normal => MapPreviewSource,
+            PreviewType.Coop => App.Current.Resources["CoopIcon"] as ImageSource,
+            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"] as ImageSource,
+            _ => App.Current.Resources["QuestionIcon"] as ImageSource
         };
-        #endregion
-
-        #region MapNameType
-        private KeyValuePair<string, PreviewType> _MapNameType;
-        public KeyValuePair<string, PreviewType> MapNameType
-        {
-            get
-            {
-                if (_MapNameType.Key == null)
-                    _MapNameType = new(mapname, PreviewType);
-
-                return _MapNameType;
-            }
-        }
         #endregion
 
         #region Teams
@@ -226,9 +176,11 @@ namespace beta.Models.Server
             get => _Teams;
             set
             {
+                var old = AverageRating;
                 if (Set(ref _Teams, value))
                 {
-                    OnPropertyChanged(nameof(AverageRating));
+                    if (old != AverageRating)
+                        OnPropertyChanged(nameof(AverageRating));
                 }
             }
         }
@@ -291,32 +243,8 @@ namespace beta.Models.Server
         public string mapname
         {
             get => _mapname;
-            set
-            {
-                // TODO FIX ME
-
-                //if (!_mapname.Equals(value, StringComparison.OrdinalIgnoreCase))
-
-                if (_mapname == null)
-                {
-                    Set(ref _mapname, value);
-                    return;
-                }
-
-                if (!_mapname.Equals(value, StringComparison.OrdinalIgnoreCase))
-                    if (Set(ref _mapname, value))
-                    {
-                        _MapNameType = new(null, PreviewType.Normal);
-                        _MapVersion = null;
-                        _MapName = null;
-
-                        OnPropertyChanged(nameof(PreviewType));
-                        OnPropertyChanged(nameof(MapNameType));
-                        OnPropertyChanged(nameof(MapVersion));
-                        OnPropertyChanged(nameof(MapName));
-                    }
-            }
-        } 
+            set => Set(ref _mapname, value);
+        }
         #endregion
 
         public string map_file_path { get; set; }

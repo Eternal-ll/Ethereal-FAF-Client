@@ -20,7 +20,7 @@ namespace beta.Models.Server
 
         #region DisplayedRating
         private int? _DisplayedRating; // TODO
-        public int DisplayedRating => Convert.ToInt32(rating[0] - 3 * rating[1]);
+        public int DisplayedRating => _DisplayedRating ??= Convert.ToInt32(rating[0] - 3 * rating[1]);
         #endregion
 
         public int DisplayedRatingDifference => GamesDifference == 0 ? 0 : Convert.ToInt32(RatingDifference[0] - 3 * RatingDifference[1]);

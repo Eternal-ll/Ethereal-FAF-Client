@@ -52,14 +52,22 @@ namespace beta.Infrastructure.Services.Interfaces
             var player = e.Arg;
             if (PlayerUIDToId.TryGetValue(player.id, out var id))
             {
-                Players[id].Update(player);
-                Players[id].Updated = DateTime.Now;
-                //var cachedPlayer = Players[id];
+                var matchedPlayer = Players[id];
 
-                // TODO: update stats manually
+                // If avatar is changed
+                if (matchedPlayer.avatar != null)
+                {
+                    if (player.avatar != null)
+                    {
+                        if (player.avatar.url.Segments[^1] != matchedPlayer.avatar.url.Segments[^1])
+                            // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
+                            App.Current.Dispatcher.Invoke(() => matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
+                            System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                    else player.Avatar = null;
+                }
 
-                //player.Updated = DateTime.UtcNow;
-                //_Players[id] = player;
+                matchedPlayer.Update(player);
             }
             else
             {
@@ -88,7 +96,6 @@ namespace beta.Infrastructure.Services.Interfaces
             {
                 return Players[id];
             }
-
 
             return null;
         }

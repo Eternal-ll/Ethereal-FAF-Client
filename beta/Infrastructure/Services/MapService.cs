@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Server;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,17 +8,23 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
 {
-    public class AvatarService : IAvatarService
+    public class MapService : IMapService
     {
-        private readonly ISessionService SessionService;
+        public event EventHandler<EventArgs<bool>> MapIsDownloaded;
+
         private readonly List<BitmapImage> Cache = new();
 
-        public AvatarService(ISessionService sessionService)
+        public void AddDetailedInfo(GameInfoMessage game)
         {
-            SessionService = sessionService;
+            throw new NotImplementedException();
         }
 
-        public BitmapImage GetAvatar(Uri uri)
+        public void Download(Uri url)
+        {
+            throw new NotImplementedException();
+        }
+
+        public BitmapImage GetMap(Uri uri)
         {
             var cache = Cache;
 
@@ -25,7 +32,7 @@ namespace beta.Infrastructure.Services
                 if (cache[i].UriSource.Segments[^1] == uri.Segments[^1])
                     return cache[i];
 
-            var cacheFolder = App.GetPathToFolder(Folder.PlayerAvatars);
+            var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
 
             if (!Directory.Exists(cacheFolder))
                 Directory.CreateDirectory(cacheFolder);
@@ -61,11 +68,6 @@ namespace beta.Infrastructure.Services
             };
 
             return image;
-        }
-
-        public void SetAvatar()
-        {
-            throw new NotImplementedException();
         }
     }
 }

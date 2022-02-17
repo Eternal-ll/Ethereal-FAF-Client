@@ -109,11 +109,11 @@
             <Border
                 Grid.Row="1"
                 CornerRadius="4"
-                ToolTip="{Binding MapName}"
+                ToolTip="{Binding mapname}"
                 Style="{StaticResource PreviewImageStyle}">
                 <Border.Background>
                     <ImageBrush Stretch="Uniform"
-                                ImageSource="{Binding MapNameType,Converter={StaticResource GetMapPreviewConverter}, Mode=OneWay}">
+                                ImageSource="{Binding MapPreview, Mode=OneWay}">
                     </ImageBrush>
                 </Border.Background>
             </Border>
@@ -149,7 +149,7 @@
                         VerticalAlignment="Center"
                         Text="{Binding host}"/>
 
-                    <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow}">
+                    <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="Red"/>
@@ -192,6 +192,19 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Trigger>
+                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                        <EventTrigger.Actions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="0" From="1"
+                                                        Duration="0:0:0.2"
+                                                        AutoReverse="True"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger.Actions>
+                                    </EventTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
@@ -258,9 +271,10 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock Style="{StaticResource LobbyTextBlockStyle}"
-                           Margin="7 4 0 0"
-                           Padding="26 0 0 0">
+                    <TextBlock
+                        Style="{StaticResource LobbyTextBlockStyle}"
+                        Margin="7 4 0 0"
+                        Padding="26 0 0 0">
                     <Run Text="{Binding num_players}">
                         <Run.Style>
                             <Style TargetType="Run">
@@ -329,7 +343,7 @@
                                                     Text="{Binding login}"/>
                                                 <TextBlock Grid.Column="1" HorizontalAlignment="Right"
                                                            Margin="0 -4 -8 0"
-                                                           Text="{Binding ratings[global].DisplayedDifferenceArrow}">
+                                                           Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="Red"/>
@@ -340,6 +354,19 @@
                                                                 <Trigger Property="Text" Value="↑">
                                                                     <Setter Property="Foreground" Value="Lime"/>
                                                                 </Trigger>
+                                                                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                                    <EventTrigger.Actions>
+                                                                        <BeginStoryboard>
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation
+                                                                                    Storyboard.TargetProperty="Opacity"
+                                                                                    To="0" From="1"
+                                                                                    Duration="0:0:0.2"
+                                                                                    AutoReverse="True"/>
+                                                                            </Storyboard>
+                                                                        </BeginStoryboard>
+                                                                    </EventTrigger.Actions>
+                                                                </EventTrigger>
                                                             </Style.Triggers>
                                                         </Style>    
                                                     </TextBlock.Style>
@@ -439,34 +466,46 @@
                             </ToolTip>
                         </TextBlock.ToolTip>
                     </TextBlock>
-                    <TextBlock
+                    <Path
                         Margin="10 0 0 0"
-                        Padding="18 0 0 0"
+                        Stretch="Uniform"
+                        Fill="White"
+                        VerticalAlignment="Bottom"
+                        Data="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <TranslateTransform Y="4"/>
+                                <ScaleTransform ScaleX=".7" ScaleY=".7"/>
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                        <TextBlock
                         FontSize="12"
                         VerticalAlignment="Bottom">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="{Binding AverageRating, StringFormat='{}{0} avg.'}"/>
+                                <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True, StringFormat='{}{0} avg.'}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding num_players}"
                                                  Value="1">
-                                        <Setter Property="Text" Value="{Binding AverageRating}"/>
+                                        <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True}"/>
                                     </DataTrigger>
+                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                        <EventTrigger.Actions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="0" From="1"
+                                                        Duration="0:0:0.2"
+                                                        AutoReverse="True"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger.Actions>
+                                    </EventTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
-                        <TextBlock.Background>
-                            <DrawingBrush Stretch="Uniform" AlignmentX="Left">
-                                <DrawingBrush.Drawing>
-                                    <GeometryDrawing
-                                        Brush="White"
-                                        Geometry="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z"/>
-                                </DrawingBrush.Drawing>
-                                <DrawingBrush.RelativeTransform>
-                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
-                                </DrawingBrush.RelativeTransform>
-                            </DrawingBrush>
-                        </TextBlock.Background>
                     </TextBlock>
                 </StackPanel>
 
@@ -501,7 +540,7 @@
                     </TextBlock.Resources>
                 </TextBlock>
 
-                <TextBlock Text="{Binding MapName}"
+                <TextBlock Text="{Binding mapname}"
                            Margin="8 6 0 0"
                            Padding="24 0 0 0">
                     <TextBlock.Background>
@@ -594,7 +633,7 @@
                                                 Storyboard.TargetProperty="Opacity"
                                                 From="0" To="1" AutoReverse="True"
                                                 Duration="0:0:.4"
-                                                RepeatBehavior="0:0:4"/>
+                                                RepeatBehavior="0:0:12"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>

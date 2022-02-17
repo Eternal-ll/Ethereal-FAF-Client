@@ -16,6 +16,8 @@ namespace beta.Views.Windows
             var navManager = new NavigationManager(MainFrame, ModalFrame);
 
             navManager.Navigate(new AuthView());
+
+            Closing += OnMainWindowClosing;
             //var t = new ContentDialog();
             //t.PreviewKeyDown += (s, e) =>
             //{
@@ -24,9 +26,24 @@ namespace beta.Views.Windows
             //        e.Handled = true;
             //    }
             //};
-            
+
+            Left = Settings.Default.Left;
+            Top = Settings.Default.Top;
+
+            Width = Settings.Default.Width;
+            Height = Settings.Default.Height;
         }
-        
+
+        private void OnMainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Settings.Default.Left = Left;
+            Settings.Default.Top = Top;
+
+            Settings.Default.Width = Width;
+            Settings.Default.Height = Height;
+
+            Closing -= OnMainWindowClosing;
+        }
 
         private void ToggleAppThemeHandler(object sender, RoutedEventArgs e)
         {

@@ -14,6 +14,7 @@ namespace beta.Infrastructure.Services
 
         private readonly ISessionService SessionService;
         private readonly IPlayersService PlayersService;
+        private readonly IMapService MapService;
 
         #endregion
 
@@ -36,10 +37,12 @@ namespace beta.Infrastructure.Services
 
         public GamesServices(
             ISessionService sessionService,
-            IPlayersService playerService)
+            IPlayersService playerService,
+            IMapService mapService)
         {
             SessionService = sessionService;
             PlayersService = playerService;
+            MapService = mapService;
 
             sessionService.NewGame += OnNewGame;
         }
@@ -70,6 +73,7 @@ namespace beta.Infrastructure.Services
                 if (difference.TotalSeconds > 120)
                 {
                     games.Remove(suspiciousGames[i]);
+                    suspiciousGames.RemoveAt(i);
                 }
             }
             #endregion
@@ -112,7 +116,7 @@ namespace beta.Infrastructure.Services
                         if (!liveGames[i].Update(game))
                         {
                             // returns false if num_players == 0, game is died
-                            games.RemoveAt(i);
+                            liveGames.RemoveAt(i);
                         }
                         return;
                     }
@@ -139,6 +143,13 @@ namespace beta.Infrastructure.Services
                 game.CreatedTime = System.DateTime.UtcNow;
                 SuspiciousGames.Add(game);
             }
+
+            // add small map preview for normal games
+            if (game.PreviewType == PreviewType.Normal)
+                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() => MapService.GetMap(
+                    new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png")),
+                    System.Windows.Threading.DispatcherPriority.Background);
+
             // finally if nothing matched we adding it to IdleGames
             games.Add(game);
         }

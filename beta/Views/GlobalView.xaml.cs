@@ -162,8 +162,9 @@ namespace beta.Views
             new SortDescription(nameof(GameInfoMessage.title), ListSortDirection.Ascending),
             // Requires IComaprable TODO
             //new SortDescription(nameof(GameInfoMessage.Host), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.MapName), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.mapname), ListSortDirection.Ascending),
             new SortDescription(nameof(GameInfoMessage.max_players), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameInfoMessage.num_players), ListSortDirection.Ascending),
             new SortDescription(nameof(GameInfoMessage.rating_max), ListSortDirection.Ascending),
             new SortDescription(nameof(GameInfoMessage.rating_min), ListSortDirection.Ascending),
             new SortDescription(nameof(GameInfoMessage.AverageRating), ListSortDirection.Ascending)

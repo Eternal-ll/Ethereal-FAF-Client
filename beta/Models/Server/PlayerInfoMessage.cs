@@ -62,8 +62,10 @@ namespace beta.Models.Server
         public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
         {
             orig.login = newP.login;
+            orig.avatar = newP.avatar;
 
             orig.ratings = newP.ratings;
+            orig.Updated = DateTime.Now;
             return orig;
         }
     }

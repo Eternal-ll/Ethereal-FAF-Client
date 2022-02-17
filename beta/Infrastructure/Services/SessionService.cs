@@ -22,11 +22,8 @@ namespace beta.Infrastructure.Services
     {
         #region Events
         public event EventHandler<EventArgs<bool>> Authorization;
-
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
-
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
-
         public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
         #endregion
 

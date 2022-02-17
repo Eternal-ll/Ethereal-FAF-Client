@@ -306,8 +306,14 @@
         </Grid>
         <DataGrid
             ItemsSource="{Binding View}"
-            Visibility="Collapsed">
-            
-        </DataGrid>
+            Visibility="Collapsed"/>
+
+        <!--<TextBlock Grid.RowSpan="2" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Run Text="2" Foreground="LimeGreen"/>
+            <Run Text="|" Foreground="Gray"/>
+            <Run Text="5" Foreground="Red"/>
+            <Run Text="|" Foreground="Gray"/>
+            <Run Text="2" Foreground="Orange"/>
+        </TextBlock>-->
     </Grid>
 </UserControl>
