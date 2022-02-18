@@ -3,12 +3,6 @@ using beta.Models.Server;
 
 namespace beta.Infrastructure.Services
 {
-    public enum PlayerRelation
-    {
-        FOE = -1,
-        NONE = 0,
-        FRIEND = 1
-    }
     public class SocialService : ISocialService
     {
         /*
@@ -60,9 +54,9 @@ namespace beta.Infrastructure.Services
         /// <returns>
         /// Player with associated relation
         /// </returns>
-        public PlayerInfoMessage GetPlayer(int id, PlayerRelation relation = PlayerRelation.FRIEND)
+        public PlayerInfoMessage GetPlayer(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
         {
-            if (relation == PlayerRelation.NONE) return null;
+            if (relation == PlayerRelationShip.None) return null;
 
             /*
              * TODO: Loop cache list? Maybe offline JSON cache with all Friends / Foes, and notify if they are offline
@@ -70,7 +64,7 @@ namespace beta.Infrastructure.Services
              *  if (... == ...) return ...
              */
 
-            if (relation == PlayerRelation.FRIEND)
+            if (relation == PlayerRelationShip.Friend)
             {
                 var friends = FriendsIds;
                 if (friends != null & friends.Length > 0)
@@ -114,9 +108,9 @@ namespace beta.Infrastructure.Services
         /// <returns>
         /// Player with associated relation
         /// </returns>
-        public PlayerInfoMessage GetPlayer(string login, PlayerRelation relation = PlayerRelation.FRIEND)
+        public PlayerInfoMessage GetPlayer(string login, PlayerRelationShip relation = PlayerRelationShip.Friend)
         {
-            if (relation == PlayerRelation.NONE) return null;
+            if (relation == PlayerRelationShip.None) return null;
 
             /*
              * TODO: Loop cache list? Maybe offline JSON cache with all Friends / Foes, and notify if they are offline
@@ -127,7 +121,7 @@ namespace beta.Infrastructure.Services
             var players = PlayersService.GetPlayers();
             var enumerator = players.GetEnumerator();
 
-            if (relation == PlayerRelation.FRIEND)
+            if (relation == PlayerRelationShip.Friend)
             {
                 var friends = FriendsIds;
                 if (friends != null & friends.Length > 0)
@@ -164,7 +158,17 @@ namespace beta.Infrastructure.Services
             return null;
         }
         #endregion
-        
+
+        public void AddPlayer(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RemovePlayer(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
+        {
+            throw new System.NotImplementedException();
+        }
+
         #endregion
 
         #region LobbySessionService.SocialInfo event listener
@@ -173,7 +177,7 @@ namespace beta.Infrastructure.Services
             SocialMessage = e.Arg;
             FriendsIds = e.Arg.friends;
             FoesIds = e.Arg.foes;
-        } 
+        }
         #endregion
     }
 }
