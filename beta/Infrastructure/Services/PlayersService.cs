@@ -20,6 +20,7 @@ namespace beta.Infrastructure.Services
         #region Services
 
         private readonly ISessionService SessionService;
+        private readonly ISocialService SocialService;
         private readonly IAvatarService AvatarService;
 
         #endregion
@@ -34,14 +35,24 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
+        private int[] _FriendsIds;
+        private int[] FriendsIds => _FriendsIds ??= SocialService.FriendsIds;
+
+        private int[] _FoessIds;
+        private int[] FoesIds => _FoessIds ??= SocialService.FoesIds;
+
         #endregion
 
         #region Ctor
 
-        public PlayersService(ISessionService sessionService, IAvatarService avatarService)
+        public PlayersService(
+            ISessionService sessionService,
+            IAvatarService avatarService,
+            ISocialService socialService)
         {
             SessionService = sessionService;
             AvatarService = avatarService;
+            SocialService = socialService;
 
             sessionService.NewPlayer += OnNewPlayer;
         }
@@ -51,6 +62,30 @@ namespace beta.Infrastructure.Services
         private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
+
+            #region Matching friends & foes
+
+            var friendsIds = FriendsIds;
+            var foesIds = FoesIds;
+
+            if (friendsIds != null & friendsIds.Length > 0)
+                for (int i = 0; i < friendsIds.Length; i++)
+                    if (friendsIds[i] == player.id)
+                    {
+                        player.RelationShip = PlayerRelationShip.Friend;
+                        break;
+                    }
+
+            if (foesIds != null & foesIds.Length > 0)
+                for (int i = 0; i < foesIds.Length; i++)
+                    if (foesIds[i] == player.id)
+                    {
+                        player.RelationShip = PlayerRelationShip.Foe;
+                        break;
+                    }
+
+            #endregion
+
             if (PlayerUIDToId.TryGetValue(player.id, out var id))
             {
                 var matchedPlayer = Players[id];

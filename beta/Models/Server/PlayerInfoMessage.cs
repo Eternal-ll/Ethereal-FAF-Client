@@ -64,10 +64,25 @@ namespace beta.Models.Server
             orig.login = newP.login;
             orig.avatar = newP.avatar;
 
+            orig.RelationShip = newP.RelationShip;
+
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
             return orig;
         }
+    }
+
+    public enum PlayerRelationShip
+    {
+        Foe = -1,
+        None = 0,
+        Friend = 1
+    }
+
+    public class PlayerNote
+    {
+        public Color Color { get; set; }
+        public string Text { get; set; }
     }
 
     public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer
@@ -153,6 +168,26 @@ namespace beta.Models.Server
         {
             get => _Avatar;
             set => Set(ref _Avatar, value);
+        }
+        #endregion
+
+        // SOCIAL
+        #region RelationShip
+        private PlayerRelationShip _RelationShip;
+        public PlayerRelationShip RelationShip
+        {
+            get => _RelationShip;
+            set => Set(ref _RelationShip, value);
+        }
+        #endregion
+
+        // SOCIAL
+        #region Note
+        private PlayerNote _PlayerNote;
+        public PlayerNote PlayerNote
+        {
+            get => _PlayerNote;
+            set=>Set(ref _PlayerNote, value);
         }
         #endregion
 
