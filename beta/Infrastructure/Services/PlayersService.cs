@@ -62,6 +62,7 @@ namespace beta.Infrastructure.Services
         private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
+            var players = _Players;
 
             #region Matching friends & foes
 
@@ -88,7 +89,7 @@ namespace beta.Infrastructure.Services
 
             if (PlayerUIDToId.TryGetValue(player.id, out var id))
             {
-                var matchedPlayer = Players[id];
+                var matchedPlayer = players[id];
 
                 // If avatar is changed
                 if (matchedPlayer.avatar != null)
@@ -107,7 +108,7 @@ namespace beta.Infrastructure.Services
             }
             else
             {
-                int count = _Players.Count;
+                int count = players.Count;
 
                 // Check for avatar
                 if (player.avatar != null)
@@ -117,7 +118,7 @@ namespace beta.Infrastructure.Services
                     System.Windows.Threading.DispatcherPriority.Background);
                 }
 
-                _Players.Add(player);
+                players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);
                 PlayerUIDToId.Add(player.id, count);
             }
