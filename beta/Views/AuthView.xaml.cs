@@ -63,9 +63,6 @@ namespace beta.Views
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
 
             SessionService.AskSession();
-
-            LoginInput.Text = "eternal-";
-            PasswordInput.Password = "cjxB2010123";
         }
             
         private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>
