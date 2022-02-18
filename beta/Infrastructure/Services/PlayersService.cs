@@ -124,8 +124,9 @@ namespace beta.Infrastructure.Services
                     if (method == ComparisonMethod.STARTS_WITH)
                         if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
                             yield return enumerator.Current;
-                        else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                            yield return enumerator.Current;
+                        else { }
+                    else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                        yield return enumerator.Current;
 
         }
     }
