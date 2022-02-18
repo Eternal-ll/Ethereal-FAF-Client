@@ -81,6 +81,11 @@
                                 <ui:ToggleSwitch
                                     Margin="0 4"
                                     FontSize="14"
+                                    Header="Hide games with rating restriction"
+                                    VerticalAlignment="Top"/>
+                                <ui:ToggleSwitch
+                                    Margin="0 4"
+                                    FontSize="14"
                                     Header="Hide FOE`s games"
                                     VerticalAlignment="Top"/>
                             </StackPanel>
@@ -122,6 +127,33 @@
                     ItemsSource="{Binding SortDescriptions}"
                     SelectedItem="{Binding SelectedSort}"
                     DisplayMemberPath="PropertyName">
+                    <ComboBox.Resources>
+                        <Style TargetType="ComboBoxItem">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="title">
+                                    <Setter Property="Content" Value="by title"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="mapname">
+                                    <Setter Property="Content" Value="by map name"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="max_players">
+                                    <Setter Property="Content" Value="by map slots"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="num_players">
+                                    <Setter Property="Content" Value="by players in game"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="rating_max">
+                                    <Setter Property="Content" Value="by restriction of max rating"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="rating_min">
+                                    <Setter Property="Content" Value="by restriction of min rating"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="AverageRating">
+                                    <Setter Property="Content" Value="by average rating in game"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Resources>
                     <ComboBox.Style>
                         <Style BasedOn="{StaticResource DefaultComboBoxStyle}"
                                TargetType="ComboBox">
