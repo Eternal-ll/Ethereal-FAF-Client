@@ -18,7 +18,7 @@ namespace beta.Infrastructure.Services
         */
 
         #region Properties
-        private readonly IPlayersService PlayersService;
+        //private readonly IPlayersService PlayersService;
         private readonly ISessionService SessionService;
 
         public SocialMessage SocialMessage { get; set; }
@@ -31,10 +31,10 @@ namespace beta.Infrastructure.Services
 
         #region Ctor
         public SocialService(
-            IPlayersService playersService,
+            //IPlayersService playersService,
             ISessionService sessionService)
         {
-            PlayersService = playersService;
+            //PlayersService = playersService;
             SessionService = sessionService;
 
             sessionService.SocialInfo += OnNewSocialInfo;
@@ -73,7 +73,7 @@ namespace beta.Infrastructure.Services
                     {
                         if (friends[i] == id)
                         {
-                            return PlayersService.GetPlayer(id);
+                            //return PlayersService.GetPlayer(id);
                         }
                     }
                 }
@@ -89,7 +89,7 @@ namespace beta.Infrastructure.Services
                 {
                     if (foes[i] == id)
                     {
-                        return PlayersService.GetPlayer(id);
+                        //return PlayersService.GetPlayer(id);
                     }
                 }
             }
@@ -118,27 +118,27 @@ namespace beta.Infrastructure.Services
              *  if (... == ...) return ...
              */
 
-            var players = PlayersService.GetPlayers();
-            var enumerator = players.GetEnumerator();
+            //var players = PlayersService.GetPlayers();
+            //var enumerator = players.GetEnumerator();
 
-            if (relation == PlayerRelationShip.Friend)
-            {
-                var friends = FriendsIds;
-                if (friends != null & friends.Length > 0)
-                {
-                    while (enumerator.MoveNext())
-                    {
-                        for (int i = 0; i < friends.Length; i++)
-                        {
-                            if (friends[i] == enumerator.Current.id)
-                            {
-                                return enumerator.Current;
-                            }
-                        }
-                    }
-                }                    
-                return null;
-            }
+            //if (relation == PlayerRelationShip.Friend)
+            //{
+            //    var friends = FriendsIds;
+            //    if (friends != null & friends.Length > 0)
+            //    {
+            //        while (enumerator.MoveNext())
+            //        {
+            //            for (int i = 0; i < friends.Length; i++)
+            //            {
+            //                if (friends[i] == enumerator.Current.id)
+            //                {
+            //                    return enumerator.Current;
+            //                }
+            //            }
+            //        }
+            //    }                    
+            //    return null;
+            //}
 
             // FOE
             var foes = FoesIds;
