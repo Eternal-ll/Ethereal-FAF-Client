@@ -141,20 +141,20 @@ namespace beta.Infrastructure.Services
             //}
 
             // FOE
-            var foes = FoesIds;
-            if (foes != null & foes.Length > 0)
-            {
-                while (enumerator.MoveNext())
-                {
-                    for (int i = 0; i < foes.Length; i++)
-                    {
-                        if (foes[i] == enumerator.Current.id)
-                        {
-                            return enumerator.Current;
-                        }
-                    }
-                }
-            }
+            //var foes = FoesIds;
+            //if (foes != null & foes.Length > 0)
+            //{
+            //    while (enumerator.MoveNext())
+            //    {
+            //        for (int i = 0; i < foes.Length; i++)
+            //        {
+            //            if (foes[i] == enumerator.Current.id)
+            //            {
+            //                return enumerator.Current;
+            //            }
+            //        }
+            //    }
+            //}
             return null;
         }
         #endregion
