@@ -86,5 +86,12 @@
             </CheckBox.Content>
         </CheckBox>
         <!--#endregion-->
+
+        <Button Command="{StaticResource NavigateUriCommand}"
+                CommandParameter="https://faforever.com/account/register"
+                Background="Transparent"
+                Content="Create an account"
+                Canvas.Top="180"
+                Canvas.Left="-60"/>
     </Canvas>
 </UserControl>
