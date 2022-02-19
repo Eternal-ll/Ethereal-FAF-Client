@@ -20,7 +20,6 @@ namespace beta.Infrastructure.Services
         #region Services
 
         private readonly ISessionService SessionService;
-        private readonly ISocialService SocialService;
         private readonly IAvatarService AvatarService;
 
         #endregion
@@ -35,11 +34,8 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        private int[] _FriendsIds;
-        private int[] FriendsIds => _FriendsIds ??= SocialService.FriendsIds;
-
-        private int[] _FoessIds;
-        private int[] FoesIds => _FoessIds ??= SocialService.FoesIds;
+        private int[] FriendsIds { get; set; }
+        private int[] FoesIds { get; set; }
 
         #endregion
 
@@ -47,18 +43,23 @@ namespace beta.Infrastructure.Services
 
         public PlayersService(
             ISessionService sessionService,
-            IAvatarService avatarService,
-            ISocialService socialService)
+            IAvatarService avatarService)
         {
             SessionService = sessionService;
             AvatarService = avatarService;
-            SocialService = socialService;
 
             sessionService.NewPlayer += OnNewPlayer;
+            sessionService.SocialInfo += OnNewSocialInfo;
         }
 
         #endregion
 
+        #region Event listeners
+        private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
+        {
+            FriendsIds = e.Arg.friends;
+            FoesIds = e.Arg.foes;
+        }
         private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
@@ -124,6 +125,9 @@ namespace beta.Infrastructure.Services
             }
         }
 
+        #endregion
+
+
         public PlayerInfoMessage GetPlayer(string login)
         {
             login = login.ToLower();
@@ -148,22 +152,34 @@ namespace beta.Infrastructure.Services
         }
 
 
-        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH)
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH,
+            PlayerRelationShip? relationShip = null)
         {
             var enumerator = _Players.GetEnumerator();
 
             if (string.IsNullOrWhiteSpace(filter))
                 while (enumerator.MoveNext())
-                    yield return enumerator.Current;
+                    if (relationShip.HasValue)
+                        if (relationShip.Value == enumerator.Current.RelationShip)
+                            yield return enumerator.Current;
+                        else { }
+                    else yield return enumerator.Current;
             else
                 while (enumerator.MoveNext())
                     if (method == ComparisonMethod.STARTS_WITH)
                         if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-                            yield return enumerator.Current;
+                            if (relationShip.HasValue)
+                                if (relationShip.Value == enumerator.Current.RelationShip)
+                                    yield return enumerator.Current;
+                                else { }
+                            else yield return enumerator.Current;
                         else { }
                     else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                        yield return enumerator.Current;
-
+                        if (relationShip.HasValue)
+                            if (relationShip.Value == enumerator.Current.RelationShip)
+                                yield return enumerator.Current;
+                            else { }
+                        else yield return enumerator.Current;
         }
     }
 }

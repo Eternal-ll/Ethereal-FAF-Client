@@ -18,8 +18,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public PlayerInfoMessage GetPlayer(string login);
         public PlayerInfoMessage GetPlayer(int id);
 
-        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH);
-
+        public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH,
+            PlayerRelationShip? relationShip = null);
         #endregion
     }
 }
