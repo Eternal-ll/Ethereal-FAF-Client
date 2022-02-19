@@ -113,6 +113,18 @@ namespace beta.Infrastructure.Services
                 {
                     if (liveGames[i].host == game.host)
                     {
+                        if (liveGames[i].mapname != game.mapname)
+                        {
+                            // add small map preview for normal games
+                            if (game.PreviewType == PreviewType.Normal)
+                                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() =>
+                                {
+                                    var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
+                                    // some maps cant be found on faf server.
+                                    return preview.Width == 1 ? App.Current.Resources["QuestionIcon"] as ImageSource : preview;
+                                },
+                                    System.Windows.Threading.DispatcherPriority.Background);
+                        }
                         // Updating idle game states
                         if (!liveGames[i].Update(game))
                         {
