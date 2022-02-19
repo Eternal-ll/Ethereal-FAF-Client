@@ -189,7 +189,7 @@ namespace beta.Infrastructure.Services
         {
 #if DEBUG
             Logger.LogInformation($"SessionService starting authorization process to lobby.faforever.com on {nameof(Authorize)} function.");
-            Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
+            //Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
 #endif
             if (Client.TcpClient == null)
                 Client.Connect("116.202.155.226", 8002);
@@ -210,7 +210,7 @@ namespace beta.Infrastructure.Services
 
 
             StringBuilder builder = new();
-
+            // $"{\"command\": \"social_add\", \"friend|foe\": \"player_id\"}\n"
             var command = builder.Append("{\"command\":\"auth\",\"token\":\"").Append(accessToken)
                 .Append("\",\"unique_id\":\"").Append(generatedUID)
                 .Append("\",\"session\":\"").Append(session).Append("\"}\n").ToString();

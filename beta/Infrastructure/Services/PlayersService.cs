@@ -59,18 +59,48 @@ namespace beta.Infrastructure.Services
         {
             FriendsIds = e.Arg.friends;
             FoesIds = e.Arg.foes;
+
+            var friendsIds = e.Arg.friends;
+            var foesIds = e.Arg.foes;
+
+            // TODO REWRITE?
+            if (friendsIds != null && friendsIds.Length > 0)
+                for (int i = 0; i < friendsIds.Length; i++)
+                    if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
+                    {
+                        var player = Players[id];
+                        if (friendsIds[i] == player.id)
+                        {
+                            player.RelationShip = PlayerRelationShip.Friend;
+                            break;
+                        }
+                    }
+
+            if (foesIds != null && foesIds.Length > 0)
+                for (int i = 0; i < foesIds.Length; i++)
+                    if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
+                    {
+                        var player = Players[id];
+                        if (foesIds[i] == player.id)
+                        {
+                            player.RelationShip = PlayerRelationShip.Foe;
+                            break;
+                        }
+                    }
         }
         private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
             var players = _Players;
 
+            // TODO REWRITE?
             #region Matching friends & foes
 
             var friendsIds = FriendsIds;
             var foesIds = FoesIds;
 
-            if (friendsIds != null & friendsIds.Length > 0)
+            // TODO REWRITE?
+            if (friendsIds != null && friendsIds.Length > 0)
                 for (int i = 0; i < friendsIds.Length; i++)
                     if (friendsIds[i] == player.id)
                     {
@@ -78,7 +108,7 @@ namespace beta.Infrastructure.Services
                         break;
                     }
 
-            if (foesIds != null & foesIds.Length > 0)
+            if (foesIds != null && foesIds.Length > 0)
                 for (int i = 0; i < foesIds.Length; i++)
                     if (foesIds[i] == player.id)
                     {

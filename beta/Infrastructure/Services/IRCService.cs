@@ -1,22 +1,81 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Server;
+using beta.ViewModels.Base;
 using System;
+using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
+using System.Windows.Data;
 
 namespace beta.Infrastructure.Services
 {
-    public class IRCService : IIRCService
+    public class IrcService : ViewModel, IIrcService
     {
-        public event EventHandler<EventArgs<string>> Message;
+        #region Events
+        public event EventHandler<EventArgs<ChannelMessage>> Message;
+        #endregion
+
+        #region Properties
+
+        #region Services
+
         private readonly ISessionService SessionService;
-        //public readonly SSLClient Client = new();
-        //public SSLClient SslClient => Client;
-        public IRCService(ISessionService lobbySession)
+        private readonly IPlayersService PlayersService;
+
+        #endregion
+
+        #region FilterText
+
+        private string _FilterText = string.Empty;
+
+        public string FilterText
         {
-            SessionService = lobbySession;
-            SessionService.Authorized += OnLobbyAuthorization;
-            //Client.DelimiterDataReceived += OnIRCServerResponse;
+            get => _FilterText;
+            set
+            {
+                if (Set(ref _FilterText, value))
+                    ChannelUsersView.Refresh();
+            }
+        }
+        #endregion
+
+        #region ChannelUsers
+
+        private readonly CollectionViewSource ChannelUsersViewSource = new();
+        public ICollectionView ChannelUsersView => ChannelUsersViewSource.View;
+
+        #endregion
+
+        private object _lock;
+        
+        #endregion
+
+        public IrcService(
+            ISessionService sessionService,
+            IPlayersService playersService)
+        {
+            SessionService = sessionService;
+            PlayersService = playersService;
+
+
+            ChannelUsersViewSource.GroupDescriptions.Add(new PropertyGroupDescription(nameof(PlayerInfoMessage.IsChatModerator)));
+            ChannelUsersViewSource.SortDescriptions.Add(new(nameof(PlayerInfoMessage.IsChatModerator), ListSortDirection.Descending));
+            ChannelUsersViewSource.SortDescriptions.Add(new(nameof(PlayerInfoMessage.RelationShip), ListSortDirection.Descending));
+
+            ChannelUsersViewSource.Filter += ChannelUsersViewSourceFilter;
+
+            App.Current.Dispatcher.Invoke(() => _lock = new());
+
+            BindingOperations.EnableCollectionSynchronization(playersService.Players, _lock);
+            
+            ChannelUsersViewSource.Source = PlayersService.Players;
+        }
+
+        private void ChannelUsersViewSourceFilter(object sender, FilterEventArgs e)
+        {
+            var player = (PlayerInfoMessage)sender;
+            e.Accepted = true;
         }
 
         public string CreateMD5(string input)
@@ -31,134 +90,6 @@ namespace beta.Infrastructure.Services
                 sb.AppendFormat("{0:x2}", hashBytes[i]);
             }
             return sb.ToString();
-        }
-
-        public void OnIRCServerResponse(object sender, string e)
-        {
-            return;
-            Message.Invoke(this, e);
-            StringBuilder builder = new();
-            string nick = Properties.Settings.Default.PlayerNick;
-            string id = Properties.Settings.Default.PlayerId.ToString();
-            string password = Properties.Settings.Default.irc_password;
-            //if (e.Contains("PING"))
-            //{
-            //    //PING :357DADF4\r
-            //    //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    //    .Append("PONG :")
-            //    //    .Append(e.Split(":")[1].Replace("\r", "\r"))
-            //    //    .ToString()));
-                
-                
-            //    // PRIVMSG NickServ :identify Eternal- 19050b478205e39b0a92cecb5c248737
-            //    Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //        .Append("PASS ")
-            //        .Append(password)
-            //        .Append("\r\n").ToString()));
-            
-            //    var t = builder.ToString();
-            //    Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //        .Append("NICK ")
-            //        .Append(nick)
-            //        .Append("\r\n").ToString()));
-            
-            //    var g = builder.ToString();
-            //    Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //        .Append("USER  ")
-            //        .Append(id)
-            //        .Append(" 0 * :")
-            //        .Append(nick)
-            //        .Append("\r\n").ToString()));
-            //    var gv = CreateMD5(password);
-            //    Client.Write(Encoding.UTF8.GetBytes("PRIVMSG NickServ :identify Eternal- " + gv +"\r\n"));
-            //    Client.Write(Encoding.UTF8.GetBytes("WHOIS Eternal- \r\n"));
-            //    Client.Write(Encoding.UTF8.GetBytes($"identify Eternal- {password} \r\n"));
-            //}
-            //if (e.Contains("QUIT"))
-            //{
-            //    auth();
-            //}
-        }
-
-        private void auth()
-        {
-            string nick = Properties.Settings.Default.PlayerNick;
-            string id = Properties.Settings.Default.PlayerId.ToString();
-            string password = Properties.Settings.Default.irc_password;
-            StringBuilder builder = new();
-            //Client.Write(Encoding.UTF8.GetBytes(builder
-            //    .Append("{\"command\":\"auth\",\"token\":\"").Append(accessToken)
-            //    .Append("\",\"unique_id\":\"").Append(uid)
-            //    .Append("\",\"session\":\"").Append(Session)
-            //    .Append("\"}\n").ToString()));
-
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("PASS ")
-            //    .Append(password)
-            //    .Append("\r\n").ToString()));
-
-            //var t = builder.ToString();
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("NICK ")
-            //    .Append(nick)
-            //    .Append("\r\n").ToString()));
-
-            //var g = builder.ToString();
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("USER  ")
-            //    .Append(id)
-            //    .Append(" 0 * :")
-            //    .Append(nick)
-            //    .Append("\r\n").ToString()));
-
-            var b = builder.ToString();
-        }
-
-        private void OnLobbyAuthorization(object sender, EventArgs<bool> e)
-        {
-            //Client.Connect("116.202.155.226", 6697);
-            //auth();
-            //string nick = Properties.Settings.Default.PlayerNick;
-            //string id = Properties.Settings.Default.PlayerId.ToString();
-            //string password = Properties.Settings.Default.irc_password;
-            //StringBuilder builder = new();
-            ////Client.Write(Encoding.UTF8.GetBytes(builder
-            ////    .Append("{\"command\":\"auth\",\"token\":\"").Append(accessToken)
-            ////    .Append("\",\"unique_id\":\"").Append(uid)
-            ////    .Append("\",\"session\":\"").Append(Session)
-            ////    .Append("\"}\n").ToString()));
-
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("PASS ")
-            //    .Append(password)
-            //    .Append("\r \n  ").ToString()));
-
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("NICK ")
-            //    .Append(nick)
-            //    .Append("\r \n").ToString()));
-
-
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("USER  ")
-            //    .Append(id)
-            //    .Append(" 0 * :")
-            //    .Append(nick)
-            //    .Append("\r \n").ToString()));
-            //Client.Write(Encoding.UTF8.GetBytes(builder.Clear()
-            //    .Append("JOIn #aeolus\r \n").ToString()));
-
-            // PASS a5960a4440a3045b4cf025983f0d3f5c
-
-            // PASS a5960a4440a3045b4cf025983f0d3f5c b'\r\n'
-
-            // NICK Eternal-
-
-            // QUIT Connection reset by peer
-
-            // USER {id} 0 * :{playerNick}
-
-            // JOIN #aeolus
         }
     }
 }

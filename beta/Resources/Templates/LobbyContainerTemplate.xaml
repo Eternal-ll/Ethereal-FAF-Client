@@ -84,6 +84,44 @@
         </Grid>
     </ui:Flyout>
 
+
+    <ui:Flyout x:Key="MapDetailedFlyout">
+        <Grid>
+            <ui:ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                 Height="100" Width="100">
+                <ui:ProgressRing.Style>
+                    <Style TargetType="ui:ProgressRing">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                    Path=Children[1].Source.IsDownloading}"
+                                                             Value="True">
+                                <Setter Property="IsActive" Value="True"/>
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ui:ProgressRing.Style>
+            </ui:ProgressRing>
+            <Image
+                Source="{Binding mapname, Converter={StaticResource GetMapPreviewConverter}}"
+                Stretch="UniformToFill"
+                Height="400"
+                Width="400"/>
+            <Border MaxWidth="300"
+                    CornerRadius="4"
+                    Margin="0 10 0 0"
+                    Padding="10 6"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top">
+                <TextBlock Text="{Binding mapname}" TextWrapping="Wrap"/>
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".5"/>
+                </Border.Background>
+            </Border>
+        </Grid>
+    </ui:Flyout>
+
     <DataTemplate DataType="{x:Type models:GameInfoMessage}">
         <Grid
             Focusable="False"
@@ -106,6 +144,7 @@
                 Focusable="False"
                 Content="{Binding title}"
                 FontSize="14"/>-->
+
             <Border
                 Grid.Row="1"
                 CornerRadius="4"
@@ -117,12 +156,196 @@
                     </ImageBrush>
                 </Border.Background>
             </Border>
+
+            <ui:ProgressRing
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False"
+                Height="50" Width="50"
+                Grid.Row="1">
+                <!--TODO FIX ME-->
+                <!--<ui:ProgressRing.Style>
+                <Style TargetType="ui:ProgressRing">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                    Path=Children[0].Background.ImageSource.IsDownloading}"
+                                                             Value="True">
+                            <Setter Property="IsActive" Value="True"/>
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+                </ui:ProgressRing.Style>-->
+            </ui:ProgressRing>
+
+            <Border
+                Grid.Row="1"
+                CornerRadius="4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0 4 4 14"
+                ToolTip="Map version"
+                Padding="4">
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".5"/>
+                </Border.Background>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[0].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[3].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[4].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </Trigger>
+
+                            <DataTrigger Binding="{Binding MapVersion.Length}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding MapVersion, StringFormat='v.{0}'}" FontSize="13"/>
+            </Border>
+
+            <Border
+                Grid.Row="1"
+                CornerRadius="4"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="14 4 0 0"
+                ToolTip="Secured with password"
+                Padding="6">
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".5"/>
+                </Border.Background>
+                <Path
+                    Fill="White"
+                    Height="14"
+                    Stretch="Uniform"
+                    Data="{StaticResource SecuredIconPathGeometry}"/>
+
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <!--<Setter Property="Visibility" Value="Collapsed"/>-->
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding password_protected}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+
+            <Border
+                Grid.Row="1"
+                CornerRadius="4"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0 0 4 14"
+                ToolTip="Version">
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".5"/>
+                </Border.Background>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[0].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[2].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                Path=Children[3].IsMouseOver}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </Trigger>
+
+                            <DataTrigger Binding="{Binding PreviewType}" Value="1">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding PreviewType}" Value="2">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Button
+                    Background="Transparent"
+                    Padding="4"
+                    Margin="0"
+                    ToolTip="Open scaled version">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PreviewType}"
+                                             Value="0">
+                                    <Setter Property="ui:FlyoutService.Flyout" Value="{StaticResource MapDetailedFlyout}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
+                    </Button.Resources>
+                    <Path
+                        Fill="White"
+                        Stretch="Uniform"
+                        Height="16">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Data" Value="M18 16H17.42L16.61 15.19C17.5 14 18 12.5 18 11C18 7.13 14.87 4 11 4C9.5 4 8 4.5 6.79 5.4C3.7 7.72 3.07 12.11 5.39 15.2C7.71 18.29 12.1 18.92 15.19 16.6L16 17.41V18L21 23L23 21L18 16M11 16C8.24 16 6 13.76 6 11S8.24 6 11 6 16 8.24 16 11 13.76 16 11 16M3 6L1 8V1H8L6 3H3V6M21 1V8L19 6V3H16L14 1H21M6 19L8 21H1V14L3 16V19H6Z"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True">
+                                        <Setter Property="Data" Value="M18 16H17.42L16.61 15.19C17.5 14 18 12.5 18 11C18 7.13 14.87 4 11 4C9.5 4 8 4.5 6.79 5.4C3.7 7.72 3.07 12.11 5.39 15.2C7.71 18.29 12.1 18.92 15.19 16.6L16 17.41V18L21 23L23 21L18 16M11 16C8.24 16 6 13.76 6 11S8.24 6 11 6 16 8.24 16 11 13.76 16 11 16M3 6L1 8V1H8L6 3H3V6M21 1V8L19 6V3H16L14 1H21M6 19L8 21H1V14L3 16V19H6Z"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
+            </Border>
+
             <StackPanel
                 Grid.Column="1"
                 Grid.Row="1"
                 Background="Transparent">
                 <StackPanel Orientation="Horizontal" ToolTip="Host"
                             Margin="10 0 0 0">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Host.RelationShip}"
+                                                                             Value="1">
+                                    <Setter Property="TextElement.Foreground" Value="LimeGreen"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Host.RelationShip}"
+                                                                             Value="-1">
+                                    <Setter Property="TextElement.Foreground" Value="Red"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                     <Image
                         Source="{StaticResource HostIcon}"
                         Height="14"
@@ -147,7 +370,9 @@
                         Margin="0 4"
                         Padding="0"
                         VerticalAlignment="Center"
-                        Text="{Binding host}"/>
+                        Text="{Binding host}">
+                        
+                    </TextBlock>
 
                     <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
@@ -205,6 +430,10 @@
                                             </BeginStoryboard>
                                         </EventTrigger.Actions>
                                     </EventTrigger>
+                                    <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
+                                                 Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
@@ -340,7 +569,22 @@
                                                 <TextBlock
                                                     Margin="4 0 0 0"
                                                     Grid.Column="1"
-                                                    Text="{Binding login}"/>
+                                                    Text="{Binding login}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding RelationShip}"
+                                                                             Value="1">
+                                                                    <Setter Property="Foreground" Value="LimeGreen"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding RelationShip}"
+                                                                             Value="-1">
+                                                                    <Setter Property="Foreground" Value="Red"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                                 <TextBlock Grid.Column="1" HorizontalAlignment="Right"
                                                            Margin="0 -4 -8 0"
                                                            Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
@@ -512,6 +756,7 @@
                 <TextBlock
                     ToolTip="Secured with password"
                     Text="Secured"
+                    Visibility="Collapsed"
                     Margin="8 6 0 0">
                     <TextBlock.Resources>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource LobbyTextBlockStyle}">
@@ -540,22 +785,37 @@
                     </TextBlock.Resources>
                 </TextBlock>
 
-                <TextBlock Text="{Binding mapname}"
-                           Margin="8 6 0 0"
-                           Padding="24 0 0 0">
-                    <TextBlock.Background>
-                        <ImageBrush
-                            ImageSource="{StaticResource MapIcon}"
-                            Stretch="Uniform"
-                            AlignmentX="Left">
-                            <ImageBrush.Transform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
-                                    <TranslateTransform X="3"/>
-                                </TransformGroup>
-                            </ImageBrush.Transform>
-                        </ImageBrush>
-                    </TextBlock.Background>
+                <TextBlock
+                    Margin="8 6 0 0"
+                    Padding="24 0 0 0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding MapName}"/>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <ImageBrush
+                                        ImageSource="{StaticResource MapIcon}"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left">
+                                        <ImageBrush.Transform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                <TranslateTransform X="3"/>
+                                            </TransformGroup>
+                                        </ImageBrush.Transform>
+                                    </ImageBrush>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PreviewType}"
+                                             Value="Neroxis">
+                                    <Setter Property="Text" Value="{x:Null}"/>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
                 </TextBlock>
             </StackPanel>
             <Grid
@@ -581,9 +841,11 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Button
-                    VerticalAlignment="Stretch"
+                    Style="{StaticResource LobbyContainerBtnStyle}"
+                    HorizontalAlignment="Left"
+                    Content="Join"/>
+                <Button
                     Background="Transparent"
-                    Opacity="1"
                     Grid.Column="2"
                     Style="{StaticResource LobbyContainerBtnStyle}"
                     ToolTip="Details"
@@ -608,10 +870,6 @@
                         </Path.Style>
                     </Path>
                 </Button>
-                <Button
-                    Style="{StaticResource LobbyContainerBtnStyle}"
-                    HorizontalAlignment="Left"
-                    Content="Join"/>
             </Grid>
             <Border Grid.Row="1" Grid.Column="1"
                     HorizontalAlignment="Right"

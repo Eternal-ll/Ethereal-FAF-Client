@@ -1,11 +1,9 @@
-﻿using System;
-using beta.Models;
+﻿using System.ComponentModel;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface IIRCService
+    public interface IIrcService
     {
-        public event EventHandler<EventArgs<string>> Message;
-        //public SSLClient SslClient { get; }
+        public ICollectionView ChannelUsersView { get; }
     }
 }

@@ -24,15 +24,16 @@ namespace beta.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public BitmapImage GetMap(Uri uri)
+        public BitmapImage GetMap(Uri uri, Folder folder = Folder.MapsSmallPreviews)
         {
             var cache = Cache;
 
-            for (int i = 0; i < cache.Count; i++)
-                if (cache[i].UriSource.Segments[^1] == uri.Segments[^1])
-                    return cache[i];
+            if (folder == Folder.MapsSmallPreviews)
+                for (int i = 0; i < cache.Count; i++)
+                    if (cache[i].UriSource.Segments[^1] == uri.Segments[^1])
+                        return cache[i];
 
-            var cacheFolder = App.GetPathToFolder(Folder.MapsSmallPreviews);
+            var cacheFolder = App.GetPathToFolder(folder);
 
             if (!Directory.Exists(cacheFolder))
                 Directory.CreateDirectory(cacheFolder);
@@ -44,7 +45,8 @@ namespace beta.Infrastructure.Services
                 var img = new BitmapImage(new(localFilePath, UriKind.Absolute), new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore));
                 img.Freeze();
 
-                cache.Add(img);
+                if (folder == Folder.MapsSmallPreviews)
+                    cache.Add(img);
                 return img;
             }
 
@@ -64,7 +66,8 @@ namespace beta.Infrastructure.Services
 
                 encoder.Save(filestream);
                 image.Freeze();
-                cache.Add(image);
+                if (folder == Folder.MapsSmallPreviews)
+                    cache.Add(image);
             };
 
             return image;

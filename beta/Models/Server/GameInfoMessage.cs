@@ -47,7 +47,22 @@ namespace beta.Models.Server
                 return sum;
             }
         }
-        public int AverageRating => Players.Length != 0 ? SumRating / Players.Length : 0;
+        public int AverageRating
+        {
+            get
+            {
+                if (Players.Length == 0) return 0;
+
+                var avg = SumRating / Players.Length;
+                if (avg > 1000)
+                    return (int)Math.Round(avg * .01) * 100;
+
+                if (avg > 100)
+                    return (int)Math.Round(avg * .01) * 100;
+
+                return SumRating / Players.Length;
+            }
+        }
 
         public InGameTeam(int number, IPlayer[] players) : this()
         {
@@ -131,20 +146,7 @@ namespace beta.Models.Server
     {
         #region Custom properties
 
-        #region LobbyState
-        //private LobbyState _LobbyState;
-        //public LobbyState LobbyState
-        //{
-        //    get
-        //    {
-        //        _LobbyState = num_players == 0 ? LobbyState.New : _LobbyState;
-        //        return _LobbyState;
-        //    }
-        //    set => Set(ref _LobbyState, value);
-        //}
-        #endregion
-
-        #region PreviewType
+        #region PreviewType // On fly
         public PreviewType PreviewType
         {
             get
@@ -186,16 +188,16 @@ namespace beta.Models.Server
         }
         #endregion
 
-        #region AverageRating
+        #region AverageRating // On fly
         public int AverageRating
         {
             get
             {
-                if (Teams == null || Teams.Length == 0) return 0;
+                if (_Teams == null || _Teams.Length == 0) return 0;
                 int sum = 0;
-                for (int i = 0; i < Teams.Length; i++)
-                    sum += Teams[i].AverageRating;
-                return sum / Teams.Length;
+                for (int i = 0; i < _Teams.Length; i++)
+                    sum += _Teams[i].AverageRating;
+                return (int)Math.Round((sum / _Teams.Length) * .01) * 100;
             }
         }
 
@@ -218,6 +220,55 @@ namespace beta.Models.Server
             set => Set(ref _Size, value);
         }
 
+        #endregion
+
+        #region MapName // On fly
+
+        public string MapName
+        {
+            get
+            {
+                string formattedMapName = string.Empty;
+                for (int i = 0; i < _mapname.Length; i++)
+                {
+                    if (_mapname[i] == '_')
+                    {
+                        formattedMapName += ' ';
+                        formattedMapName += char.ToUpper(_mapname[i + 1]);
+                        i++;
+                    }
+                    else if (_mapname[i] == '.')
+                        break;
+                    else if (i == 0) formattedMapName += char.ToUpper(_mapname[i]);
+                    else formattedMapName += _mapname[i];
+                }
+                return formattedMapName;
+            }
+        }
+
+        #endregion
+
+        #region MapVersion // On fly
+        public string MapVersion
+        {
+            get
+            {
+                string mapVersion = string.Empty;
+
+                for (int i = 0; i < _mapname.Length; i++)
+                {
+                    if (_mapname[i] == '.')
+                    {
+                        var version = _mapname.Substring(i + 2);
+                        if (version.Length <= 4)
+                            mapVersion = Convert.ToInt32(version).ToString();
+                        break;
+                    }
+                }
+
+                return mapVersion.Length > 4 ? string.Empty : mapVersion;
+            }
+        }
         #endregion
 
         public DateTime? CreatedTime { get; set; }
@@ -243,7 +294,16 @@ namespace beta.Models.Server
         public string mapname
         {
             get => _mapname;
-            set => Set(ref _mapname, value);
+            set
+            {
+                if (Set(ref _mapname, value))
+                {
+                    OnPropertyChanged(nameof(MapVersion));
+                    OnPropertyChanged(nameof(MapName));
+                    OnPropertyChanged(nameof(MapPreview));
+                    OnPropertyChanged(nameof(max_players));
+                }
+            }
         }
         #endregion
 

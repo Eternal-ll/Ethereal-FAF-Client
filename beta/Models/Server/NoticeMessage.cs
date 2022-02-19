@@ -7,6 +7,5 @@ namespace beta.Models.Server
         public string command { get; set; }
         public string style { get; set; }
         public string text { get; set; }
-
     }
 }

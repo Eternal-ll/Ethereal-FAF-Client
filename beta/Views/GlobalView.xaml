@@ -212,8 +212,10 @@
                 <TextBlock Foreground="LimeGreen" Text="{Binding View.Count, StringFormat='On view: {0}'}"/>
 
                 <TextBlock Margin="10 0" Foreground="LightGray"
-                           Text="{Binding View.SourceCollection.Count, StringFormat='Idle: {0}'}"
-                           ToolTip="Part of them unacessible due to technical errors"/>
+                           Text="{Binding View.SourceCollection.Count, StringFormat='Idle: {0} (?)'}"
+                           ToolTip="Part of them unacessible due to technical restrictions
+                           &#10;1. Any SIM mod
+                           &#10;2. Not a FAF mod (Coop / Nomads / etc)"/>
 
                 <TextBlock Foreground="Red" Text="{Binding LiveGames.Count, StringFormat='Live: {0}'}">
                 </TextBlock>

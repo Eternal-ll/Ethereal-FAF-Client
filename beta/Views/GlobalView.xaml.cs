@@ -124,7 +124,6 @@ namespace beta.Views
         }
         #endregion
 
-
         public ScrollViewer IdleGamesScrollViewer { get; }
         #endregion
 
@@ -229,9 +228,9 @@ namespace beta.Views
 
             GamesServices = App.Services.GetRequiredService<IGamesServices>();
 
-            var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
+            //var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
-            CollectionViewSource.GroupDescriptions.Add(grouping);
+            //CollectionViewSource.GroupDescriptions.Add(grouping);
 
             BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
             BindingOperations.EnableCollectionSynchronization(GamesServices.LiveGames, _lock);

@@ -1,4 +1,5 @@
-﻿using beta.Models.Server;
+﻿using beta.Models;
+using beta.Models.Server;
 using System;
 using System.Windows.Media.Imaging;
 
@@ -8,7 +9,7 @@ namespace beta.Infrastructure.Services.Interfaces
     {
         public event EventHandler<EventArgs<bool>> MapIsDownloaded;
 
-        public BitmapImage GetMap(Uri uri);
+        public BitmapImage GetMap(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AddDetailedInfo(GameInfoMessage game);
         public void Download(Uri url);
     }

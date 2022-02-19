@@ -48,8 +48,8 @@ namespace beta.Views
         #endregion
 
         #region Users
-        private readonly ObservableCollection<PlayerInfoMessage> _Users = new();
-        public ObservableCollection<PlayerInfoMessage> Users => _Users;
+        private readonly ObservableCollection<IPlayer> _Users = new();
+        public ObservableCollection<IPlayer> Users => _Users;
         #endregion
 
         #region UsersView
@@ -537,13 +537,16 @@ namespace beta.Views
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
         {
-            ObservableCollection<PlayerInfoMessage> users = null;
+            ObservableCollection<IPlayer> users = null;
             for (int i = 0; i < Channels.Count; i++)
             {
                 var channel = Channels[i];
                 if (channel.Name == e.Channel)
                 {
-                    users = channel.Users;
+                    for (int j = 0; j < channel.Users.Count; j++)
+                    {
+                        users.Add(channel.Users[j]);
+                    }
                     break;
                 }
             }
@@ -553,6 +556,10 @@ namespace beta.Views
                 var playerInfo = PlayersService.GetPlayer(e.UserList[i]);
                 if (playerInfo != null)
                     users.Add(playerInfo);
+                else users.Add(new UnknownPlayer()
+                {
+                    login = e.UserList[i]
+                });
             }
         }
         private void IrcClient_OnConnect(object sender, EventArgs e)

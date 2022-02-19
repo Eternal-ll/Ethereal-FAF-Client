@@ -1,4 +1,5 @@
-﻿using System;
+﻿using beta.Models.Server;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
@@ -16,6 +17,8 @@ namespace beta.Views.Windows
     public class Test : IComparable
     {
         public int id { get; set; }
+        public bool IsChatModerator { get; set; }
+        public PlayerRelationShip RelantionShip { get; set; }
         public string login { get; set; }
         public string name { get; set; }
 
@@ -75,6 +78,7 @@ namespace beta.Views.Windows
 
             return foundChild as T;
         }
+
         public string WordFinder2(int requestedLength)
         {
             Random rnd = new Random();
@@ -138,8 +142,12 @@ namespace beta.Views.Windows
                     PropertyChanged?.Invoke(this, new(nameof(SelectedSort)));
                     PropertyChanged?.Invoke(this, new(nameof(SortDirection)));
                     //SortDirection = ListSortDirection.Ascending;
-                    Source.SortDescriptions.Clear();
-                    Source.SortDescriptions.Add(value);
+                    if (Source.SortDescriptions.Count > 2)
+                    {
+                        Source.SortDescriptions.Remove(Source.SortDescriptions[^1]);
+                        Source.SortDescriptions.Add(value);
+                    }
+                    else Source.SortDescriptions.Add(value);
                 }
             }
         }
@@ -177,7 +185,10 @@ namespace beta.Views.Windows
         {
             InitializeComponent();
             Scroll = FindChild<ScrollViewer>(ListBox);
-            //Source.GroupDescriptions.Add(new PropertyGroupDescription(nameof(Test.id)));
+
+            Source.GroupDescriptions.Add(new PropertyGroupDescription(nameof(Test.IsChatModerator)));
+            Source.SortDescriptions.Add(new(nameof(Test.IsChatModerator), ListSortDirection.Descending));
+            Source.SortDescriptions.Add(new(nameof(Test.RelantionShip), ListSortDirection.Descending));
 
             DataContext = this;
             Source.Source = Titles;
@@ -192,7 +203,14 @@ namespace beta.Views.Windows
                     {
                         id = new Random().Next(0, 10),
                         login = WordFinder2(10),
-                        name = "test " + new Random().Next(-100, 1000)
+                        name = "test " + new Random().Next(-100, 1000),
+                        IsChatModerator = new Random().Next(-10, 10) == 1,
+                        RelantionShip = new Random().Next(-10, 10) switch
+                        {
+                            -1 => PlayerRelationShip.Foe,
+                            1 => PlayerRelationShip.Friend,
+                            _ => PlayerRelationShip.None
+                        }
                     }));
                     Thread.Sleep(250);
                 }

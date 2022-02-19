@@ -3,6 +3,7 @@ using beta.Models.Server;
 using beta.ViewModels.Base;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace beta.Infrastructure.Services
 {
@@ -146,8 +147,12 @@ namespace beta.Infrastructure.Services
 
             // add small map preview for normal games
             if (game.PreviewType == PreviewType.Normal)
-                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() => MapService.GetMap(
-                    new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png")),
+                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() =>
+                {
+                    var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
+                    // some maps cant be found on faf server.
+                    return preview.Width == 1 ? App.Current.Resources["QuestionIcon"] as ImageSource : preview;
+                },
                     System.Windows.Threading.DispatcherPriority.Background);
 
             // finally if nothing matched we adding it to IdleGames

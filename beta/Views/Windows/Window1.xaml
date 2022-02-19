@@ -23,7 +23,6 @@
         </StackPanel>
         <ListBox
             Grid.Row="1"
-            Visibility="Collapsed"
             x:Name="ListBox"
             ItemsSource="{Binding View}"
                      SizeChanged="ListBox_SizeChanged"
@@ -34,7 +33,18 @@
                 <GroupStyle>
                     <GroupStyle.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Users"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Name}" Value="True">
+                                                <Setter Property="Text" Value="Moderators"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </DataTemplate>
                     </GroupStyle.HeaderTemplate>
                 </GroupStyle>
@@ -45,15 +55,43 @@
                         <TextBlock Text="{Binding id}" Margin="4 0"/>
                         <TextBlock Text="{Binding login}" Margin="4 0"/>
                         <TextBlock Text="{Binding name}" Margin="4 0"/>
+                        <TextBlock Margin="4 0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelantionShip}" Value="Friend">
+                                            <Setter Property="Text" Value="Friend"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding RelantionShip}" Value="Foe">
+                                            <Setter Property="Text" Value="Foe"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelantionShip}" Value="-1">
+                                        <Setter Property="TextElement.Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RelantionShip}" Value="1">
+                                        <Setter Property="TextElement.Foreground" Value="LimeGreen"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                     <Setter Property="MinWidth" Value="400"/>
+                    <Setter Property="IsSelected" Value="False"/>
+                    <Setter Property="Focusable" Value="False"/>
                 </Style>
             </ListBox.Resources>
-            <ListBox.ItemsPanel>
+            <!--<ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid
                         Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualWidth}"
@@ -63,7 +101,7 @@
                      VirtualizingPanel.IsContainerVirtualizable="True"
                      VirtualizingPanel.VirtualizationMode="Recycling"/>
                 </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
+            </ListBox.ItemsPanel>-->
         </ListBox>
         <TextBlock Text="{Binding Columns}"
                    VerticalAlignment="Top" HorizontalAlignment="Center" Background="White"
@@ -74,7 +112,7 @@
                    FontSize="20"
                    Padding="20"/>
 
-        <TextBlock Text="TEST" Padding="50" Grid.ColumnSpan="2" Grid.RowSpan="2">
+        <TextBlock Text="TEST" Padding="50" Grid.ColumnSpan="2" Grid.RowSpan="2" Visibility="Collapsed">
             <TextBlock.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleX="1" ScaleY="1"/>

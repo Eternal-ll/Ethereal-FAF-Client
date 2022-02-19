@@ -172,22 +172,33 @@ namespace beta.Models.Server
         #endregion
 
         // SOCIAL
-        #region RelationShip
-        private PlayerRelationShip _RelationShip;
-        public PlayerRelationShip RelationShip
-        {
-            get => _RelationShip;
-            set => Set(ref _RelationShip, value);
-        }
-        #endregion
-
-        // SOCIAL
         #region Note
         private PlayerNote _PlayerNote;
         public PlayerNote PlayerNote
         {
             get => _PlayerNote;
             set=>Set(ref _PlayerNote, value);
+        }
+        #endregion
+
+        // CHAT PROPERTIES FOR SORTING
+        #region IsChatModerator
+        private bool _IsChatModerator;
+        public bool IsChatModerator
+        {
+            get => _IsChatModerator;
+            set => Set(ref _IsChatModerator, value);
+        }
+        #endregion
+
+        // SOCIAL
+        // CHAT PROPERTIES FOR SORTING
+        #region RelationShip
+        private PlayerRelationShip _RelationShip;
+        public PlayerRelationShip RelationShip
+        {
+            get => _RelationShip;
+            set => Set(ref _RelationShip, value);
         }
         #endregion
 
