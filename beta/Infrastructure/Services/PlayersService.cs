@@ -72,7 +72,7 @@ namespace beta.Infrastructure.Services
                         if (friendsIds[i] == player.id)
                         {
                             player.RelationShip = PlayerRelationShip.Friend;
-                            break;
+                            return;
                         }
                     }
 
@@ -84,7 +84,7 @@ namespace beta.Infrastructure.Services
                         if (foesIds[i] == player.id)
                         {
                             player.RelationShip = PlayerRelationShip.Foe;
-                            break;
+                            return;
                         }
                     }
         }

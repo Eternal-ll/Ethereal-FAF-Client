@@ -7,14 +7,20 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface ISessionService
     {
+        public event EventHandler<EventArgs<bool>> Authorized;
+
+        public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
 
         public void Connect(IPEndPoint ip);
         public void AskSession();
-        public Task<string> GenerateUID(string session);
         public void Authorize();
-        public event EventHandler<EventArgs<bool>> Authorized;
-        event EventHandler<EventArgs<SocialMessage>> SocialInfo;
+        public Task<string> GenerateUID(string session);
+
+        /// <summary>
+        /// JSON Format
+        /// </summary>
+        public void Send(string command);
     }
 }

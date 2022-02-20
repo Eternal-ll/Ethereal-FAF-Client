@@ -12,6 +12,14 @@
                 <ResourceDictionary>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
                     <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
+
+                        
+                    <cmd:AddFriendCommand x:Key="AddFriendCommand"/>
+                    <cmd:AddFoeCommand x:Key="AddFoeCommand"/>
+                    
+                    <cmd:RemoveFriendCommand x:Key="RemoveFriendCommand"/>
+                    <cmd:RemoveFoeCommand x:Key="RemoveFoeCommand"/>
+                
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>

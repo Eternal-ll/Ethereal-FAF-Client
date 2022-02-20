@@ -3,7 +3,6 @@ using beta.Models.Server;
 using beta.ViewModels.Base;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows.Media;
 
 namespace beta.Infrastructure.Services
 {
@@ -46,6 +45,22 @@ namespace beta.Infrastructure.Services
             MapService = mapService;
 
             sessionService.NewGame += OnNewGame;
+            //Random rndm = new();
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    IdleGames.Add(new GameInfoMessage()
+            //    {
+            //        title = "Neroxis_test_test_1.2.4_",
+            //        mapname = "Neroxis_test_test_1.2.4_",
+            //        MapPreviewSource = App.Current.Resources["MapGenIcon"] as ImageSource,
+            //        max_players = rndm.Next(2, 16),
+            //        featured_mod = "faf",
+            //        game_type = "custom",
+            //        sim_mods = new(),
+            //        num_players = rndm.Next(2, 16),
+            //        host = rndm.Next(1000, 10000).ToString()
+            //    });
+            //}
         }
 
         private void OnNewGame(object sender, EventArgs<GameInfoMessage> e)
@@ -121,7 +136,7 @@ namespace beta.Infrastructure.Services
                                 {
                                     var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
                                     // some maps cant be found on faf server.
-                                    return preview.Width == 1 ? App.Current.Resources["QuestionIcon"] as ImageSource : preview;
+                                    return preview;
                                 },
                                     System.Windows.Threading.DispatcherPriority.Background);
                         }
@@ -163,7 +178,7 @@ namespace beta.Infrastructure.Services
                 {
                     var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
                     // some maps cant be found on faf server.
-                    return preview.Width == 1 ? App.Current.Resources["QuestionIcon"] as ImageSource : preview;
+                    return preview;
                 },
                     System.Windows.Threading.DispatcherPriority.Background);
 

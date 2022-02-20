@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace beta.Models.Server
 {
+    public class ServerCommandMessage : IServerMessage
+    {
+        public string command { get; set; }
+    }
     public class ServerMessage : IServerMessage
     {
         public string command { get; set; }

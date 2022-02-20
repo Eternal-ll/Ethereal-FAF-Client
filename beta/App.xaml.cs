@@ -1,6 +1,6 @@
 ﻿using beta.Infrastructure.Extensions;
-using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -24,14 +24,26 @@ namespace beta
         {
             return folder switch
             {
+                // CACHE
                 Folder.MapsSmallPreviews => CurrentDirectory + "\\cache\\previews\\small\\",
+                Folder.MapsLargePreviews => CurrentDirectory + "\\cache\\previews\\large\\",
                 Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
+
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)
             };
         }
+
+#if DEBUG
+        public readonly static ServerDebugWindow DebugWindow = new();
+#endif
+
         protected override async void OnStartup(StartupEventArgs e)
         {
+#if DEBUG
+            DebugWindow.Show();
+#endif
+
             IsDesignMode = false;
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);

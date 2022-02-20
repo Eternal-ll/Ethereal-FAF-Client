@@ -64,8 +64,6 @@ namespace beta.Models.Server
             orig.login = newP.login;
             orig.avatar = newP.avatar;
 
-            orig.RelationShip = newP.RelationShip;
-
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
             return orig;

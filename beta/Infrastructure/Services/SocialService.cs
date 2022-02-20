@@ -20,37 +20,47 @@ namespace beta.Infrastructure.Services
         #region Properties
 
         private readonly ISessionService SessionService;
+        private readonly IPlayersService PlayersService;
 
         public SocialMessage SocialMessage { get; set; }
 
         #endregion
 
         #region Ctor
-        public SocialService(ISessionService sessionService)
+        public SocialService(
+            ISessionService sessionService,
+            IPlayersService playersService)
         {
             SessionService = sessionService;
-
-            //sessionService.SocialInfo += OnNewSocialInfo;
+            PlayersService = playersService;
         }
         #endregion
 
         #region Methods
+        public void AddFriend(int id) => AddRelationShip(id);
+        public void AddFoe(int id) => AddRelationShip(id, PlayerRelationShip.Foe);
 
-        public void AddRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
+        public void RemoveFriend(int id) => RemoveRelationShip(id);
+        public void RemoveFoe(int id) => RemoveRelationShip(id, PlayerRelationShip.Foe);
+
+        public void AddRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend) => SendCommand("social_add", id, relation);
+        public void RemoveRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend) => SendCommand("social_remove", id, relation);
+
+        private void SendCommand(string command, int id, PlayerRelationShip relation)
         {
-            throw new System.NotImplementedException();
+            string json = $"{{ \"command\":\"{command}\", \"{relation.ToString().ToLower()}\": {id} }}";
+
+            var player = PlayersService.GetPlayer(id);
+            if (player != null)
+            {
+                if (command == "social_remove")
+                    relation = PlayerRelationShip.None;
+                
+                player.RelationShip = relation;
+            }
+
+            SessionService.Send(json);
         }
-
-        public void RemoveRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
-        {
-
-        }
-
         #endregion
     }
 }

@@ -153,7 +153,7 @@ namespace beta.Models.Server
             {
                 if (game_type == "coop")
                     return PreviewType.Coop;
-                if (map_file_path.Split('/')[1].Split("_")[0] == "neroxis")
+                if (mapname.Substring(0, 7) == "neroxis")
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
             }
@@ -254,6 +254,9 @@ namespace beta.Models.Server
             get
             {
                 string mapVersion = string.Empty;
+
+                if (_mapname.StartsWith("neroxis", StringComparison.OrdinalIgnoreCase))
+                    return string.Empty;
 
                 for (int i = 0; i < _mapname.Length; i++)
                 {

@@ -204,21 +204,128 @@
                 ui:ControlHelper.PlaceholderText="Search lobby"
                 ui:ControlHelper.CornerRadius="4"/>
 
-
             <StackPanel Orientation="Horizontal"
                         Grid.Column="1"
                         HorizontalAlignment="Right"
-                        Margin="0 0 10 0">
-                <TextBlock Foreground="LimeGreen" Text="{Binding View.Count, StringFormat='On view: {0}'}"/>
+                        Margin="0 0 0 0">
+                <StackPanel.Resources>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedDisabled" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminate" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminatePointerOver" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminatePressed" Color="Transparent"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundIndeterminateDisabled" Color="Transparent"/>
+                </StackPanel.Resources>
+                <TextBlock VerticalAlignment="Center" Foreground="LimeGreen" Text="{Binding View.Count, StringFormat='On view: {0}'}"/>
 
-                <TextBlock Margin="10 0" Foreground="LightGray"
+                <TextBlock VerticalAlignment="Center"
+                           Margin="10 0" Foreground="LightGray"
                            Text="{Binding View.SourceCollection.Count, StringFormat='Idle: {0} (?)'}"
                            ToolTip="Part of them unacessible due to technical restrictions
                            &#10;1. Any SIM mod
                            &#10;2. Not a FAF mod (Coop / Nomads / etc)"/>
 
-                <TextBlock Foreground="Red" Text="{Binding LiveGames.Count, StringFormat='Live: {0}'}">
-                </TextBlock>
+                <TextBlock VerticalAlignment="Center"  Foreground="Red" Text="{Binding LiveGames.Count, StringFormat='Live: {0}'}"/>
+
+                <Separator Width="30"
+                           Margin="10 -4 10 0">
+                    <Separator.LayoutTransform>
+                        <RotateTransform Angle="90"/>
+                    </Separator.LayoutTransform>
+                </Separator>
+                <ToggleButton
+                    x:Name="GridViewToggleButton"
+                    Padding="4"
+                    Background="Transparent"
+                    VerticalAlignment="Top"
+                    Margin="0 0 6 0"
+                    IsChecked="{Binding IsGridView}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Stretch="Uniform" Data="M3 11H11V3H3M5 5H9V9H5M13 21H21V13H13M15 15H19V19H15M3 21H11V13H3M5 15H9V19H5M13 3V11H21V3M19 9H15V5H19Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Stretch="Uniform" Data="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <ToggleButton
+                    x:Name="ListViewToggleButton"
+                    Padding="4"
+                    Background="Transparent"
+                    VerticalAlignment="Top"
+                    IsChecked="{Binding IsListView}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Stretch="Uniform" Data="M21 13H3A1 1 0 0 0 2 14V20A1 1 0 0 0 3 21H21A1 1 0 0 0 22 20V14A1 1 0 0 0 21 13M20 19H4V15H20M21 3H3A1 1 0 0 0 2 4V10A1 1 0 0 0 3 11H21A1 1 0 0 0 22 10V4A1 1 0 0 0 21 3M20 9H4V5H20Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Stretch="Uniform" Data="M21 3H3C2.4 3 2 3.4 2 4V10C2 10.6 2.4 11 3 11H21C21.6 11 22 10.6 22 10V4C22 3.4 21.6 3 21 3M21 13H3C2.4 13 2 13.4 2 14V20C2 20.6 2.4 21 3 21H21C21.6 21 22 20.6 22 20V14C22 13.4 21.6 13 21 13Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Separator Width="30"
+                           Margin="10 -4 10 0">
+                    <Separator.LayoutTransform>
+                        <RotateTransform Angle="90"/>
+                    </Separator.LayoutTransform>
+                </Separator>
+                <ToggleButton
+                    IsChecked="{Binding IsExtendedViewEnabled}"
+                    Padding="14 14 14 12"
+                    Background="Transparent"
+                    VerticalAlignment="Top"
+                    Margin="0 0 6 0">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="Gray" Stretch="Fill" Margin="-10"  Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="LimeGreen" Stretch="Fill" Margin="-10"  Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
             </StackPanel>
         </Grid>
         <Canvas
@@ -255,13 +362,17 @@
         <Grid
             Margin="28 0 30 0"
             Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             <ListBox
                 x:Name="IdleGames"
                 Grid.Row="2"
                 Margin="0"
                 IsTabStop="False"
                 Padding="0"
-                Background="{x:Null}"
+                Background="Transparent"
                 SizeChanged="IdleGames_SizeChanged"
                 ItemsSource="{Binding View}"
                 VirtualizingPanel.IsVirtualizing="True"
@@ -273,13 +384,20 @@
                         <!--<Setter Property="MinWidth" Value="300"/>-->
                         <Setter Property="Margin" Value="0"/>
                         <Setter Property="Padding" Value="0"/>
-                        <Setter Property="Focusable" Value="False"/>
                         <Setter Property="IsTabStop" Value="False"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                         <Setter Property="BorderBrush" Value="Gray"/>
                         <Setter Property="BorderThickness" Value="2"/>
                         <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
+
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
+                                Path=DataContext.IsExtendedViewEnabled}" Value="False">
+                                <Setter Property="Focusable" Value="False"/>
+                                <Setter Property="IsSelected" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
                         <Style.Resources>
                             <Style TargetType="ContentPresenter">
                                 <Setter Property="Margin" Value="0"/>
@@ -309,7 +427,16 @@
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
                                                 Background="Transparent">
-
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
+                                Path=DataContext.IsExtendedViewEnabled}" Value="True">
+                                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
                                             </Button>
                                         </Setter.Value>
                                     </Setter>
@@ -329,19 +456,588 @@
                         <UniformGrid
                         VerticalAlignment="Top"
                         Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualWidth}"
-                        Columns="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"
                         VirtualizingPanel.IsVirtualizing="True"
                         VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                         VirtualizingPanel.IsContainerVirtualizable="True"
-                        VirtualizingPanel.VirtualizationMode="Recycling"/>
+                        VirtualizingPanel.VirtualizationMode="Recycling">
+                            <UniformGrid.Style>
+                                <Style TargetType="UniformGrid">
+                                    <Setter Property="Columns" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsListView}" Value="True">
+                                            <Setter Property="Columns" Value="1"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </UniformGrid.Style>
+                        </UniformGrid>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
             </ListBox>
+            <ContentControl Grid.Column="1" Width="340">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type models:GameInfoMessage}">
+                        <ScrollViewer Margin="20 0 -30 30">
+                            <StackPanel Margin="0 0 40 0">
+                                <ui:ListViewHeaderItem Content="{Binding title}"/>
+                                <Image Margin="0 20 0 0" Source="{Binding MapPreview}"/>
+
+                                <TextBlock Margin="0 10 0 0"
+                                           Padding="24 0 0 0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding MapName}"/>
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <ImageBrush
+                                                        ImageSource="{StaticResource MapIcon}"
+                                                        Stretch="Uniform"
+                                                        AlignmentX="Left">
+                                                        <ImageBrush.Transform>
+                                                            <TransformGroup>
+                                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                                <TranslateTransform X="3"/>
+                                                            </TransformGroup>
+                                                        </ImageBrush.Transform>
+                                                    </ImageBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding PreviewType}"
+                                            Value="Neroxis">
+                                                    <Setter Property="Text" Value="{x:Null}"/>
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Setter Property="Background" Value="{x:Null}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <StackPanel Orientation="Horizontal" ToolTip="Host"
+                                            Margin="0 10 0 0">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Host.RelationShip}"
+                                                                             Value="1">
+                                                        <Setter Property="TextElement.Foreground" Value="LimeGreen"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Host.RelationShip}"
+                                                                             Value="-1">
+                                                        <Setter Property="TextElement.Foreground" Value="Red"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <Image
+                        Source="{StaticResource HostIcon}"
+                        Height="14"
+                        Margin="0 0 0 1"
+                        Stretch="Uniform"
+                        VerticalAlignment="Center"/>
+                                        <!--<Path
+                        Height="14"
+                        Margin="0 0 0 1"
+                        Stretch="Uniform"
+                        VerticalAlignment="Center"
+                        Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>-->
+                                        <Image
+                        Source="{Binding Host.Flag}"
+                        Stretch="Uniform"
+                        Margin="6 3 4 0"
+                        VerticalAlignment="Center"
+                        Height="18"
+                        ToolTip="{Binding Host.country}"/>
+                                        <TextBlock
+                        Style="{StaticResource LobbyTextBlockStyle}"
+                        Margin="0 4"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        Text="{Binding host}">
+
+                                        </TextBlock>
+
+                                        <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="ToolTip">
+                                                        <Setter.Value>
+                                                            <ToolTip Foreground="Red">
+                                                                <ToolTip.Content>
+                                                                    <TextBlock>
+                                                                        <TextBlock.Text>
+                                                                            <MultiBinding StringFormat="{}{0} after {1} g">
+                                                                                <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
+                                                                                <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                                            </MultiBinding>
+                                                                        </TextBlock.Text>
+                                                                    </TextBlock>
+                                                                </ToolTip.Content>
+                                                            </ToolTip>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </Trigger>
+                                                        <Trigger Property="Text" Value="↑">
+                                                            <Setter Property="Foreground" Value="Lime"/>
+                                                            <Setter Property="ToolTip">
+                                                                <Setter.Value>
+                                                                    <ToolTip Foreground="Lime">
+                                                                        <ToolTip.Content>
+                                                                            <TextBlock>
+                                                                                <TextBlock.Text>
+                                                                                    <MultiBinding StringFormat="{}+{0} after {1} g">
+                                                                                        <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
+                                                                                        <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                                                    </MultiBinding>
+                                                                                </TextBlock.Text>
+                                                                            </TextBlock>
+                                                                        </ToolTip.Content>
+                                                                    </ToolTip>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Trigger>
+                                                        <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                            <EventTrigger.Actions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="0" From="1"
+                                                        Duration="0:0:0.2"
+                                                        AutoReverse="True"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </EventTrigger.Actions>
+                                                        </EventTrigger>
+                                                        <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
+                                                 Value="0">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                    </TextBlock>
+                                        <Image
+                        Margin="6 0 0 0"
+                        Stretch="Uniform"
+                        MaxHeight="18"
+                        HorizontalAlignment="Center"
+                        Grid.Column="1"
+                        DataContext="{Binding Host}"
+                        Style="{StaticResource AvatarImageStyle}">
+                                        </Image>
+                                    </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Margin="-8 0">
+                                        <TextBlock.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                <TranslateTransform X="50" Y="-8"/>
+                                            </TransformGroup>
+                                        </TextBlock.RenderTransform>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                Value="1">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    Duration="0:0:0.3"
+                                                    From="0" To="1"
+                                                    AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.Setters>
+                                                            <Setter Property="Foreground" Value="Lime"/>
+                                                            <Setter Property="Text" Value="+"/>
+                                                        </DataTrigger.Setters>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                Value="-1">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    Duration="0:0:0.3"
+                                                    From="0" To="1"
+                                                    AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.Setters>
+                                                            <Setter Property="Foreground" Value="Red"/>
+                                                            <Setter Property="Text" Value="-"/>
+                                                        </DataTrigger.Setters>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock
+                                        Style="{StaticResource LobbyTextBlockStyle}"
+                                        Margin="0 10 0 0"
+                                        Padding="26 0 0 0">
+                                        <Run Text="{Binding num_players}">
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Setter Property="Foreground" Value="White"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                                    Value="1">
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                                            From="White" To="Lime" Duration="0:0:0.3"
+                                                                            AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                                    Value="-1">
+                                                            <DataTrigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                                            From="White" To="Red" Duration="0:0:0.3"
+                                                                            AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </DataTrigger.EnterActions>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                        <Run Text="/" FontSize="12"/>
+                                        <Run Text="{Binding max_players}"/>
+                                        <TextBlock.Background>
+                                            <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{StaticResource PlayersIcon}">
+                                                <ImageBrush.Transform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform X="0" Y="1"/>
+                                                        <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                                    </TransformGroup>
+                                                </ImageBrush.Transform>
+                                            </ImageBrush>
+                                        </TextBlock.Background>
+                                    </TextBlock>
+                                    <Path
+                                        Margin="10 0 0 0"
+                                        Stretch="Uniform"
+                                        Fill="White"
+                                        VerticalAlignment="Bottom"
+                                        Data="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z">
+                                        <Path.RenderTransform>
+                                            <TransformGroup>
+                                                <TranslateTransform Y="4"/>
+                                                <ScaleTransform ScaleX=".7" ScaleY=".7"/>
+                                            </TransformGroup>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                    <TextBlock
+                                        FontSize="12"
+                                        VerticalAlignment="Bottom">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True, StringFormat='{}{0} avg.'}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding num_players}"
+                                                Value="1">
+                                                        <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True}"/>
+                                                    </DataTrigger>
+                                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                        <EventTrigger.Actions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                    Storyboard.TargetProperty="Opacity"
+                                                    To="0" From="1"
+                                                    Duration="0:0:0.2"
+                                                    AutoReverse="True"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </EventTrigger.Actions>
+                                                    </EventTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                                <ScrollViewer Margin="0 20 0 0">
+                                    <ItemsControl ItemsSource="{Binding Teams}">
+                                        <ItemsControl.Resources>
+                                            <DataTemplate DataType="{x:Type models:PlayerInfoMessage}">
+                                                <Grid
+                                            d:DataContext="{d:DesignInstance {x:Type models:PlayerInfoMessage}}"
+                                            ShowGridLines="False">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition MinWidth="40"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Image Source="{Binding Flag}"/>
+                                                    <TextBlock
+                                                Margin="4 0 0 0"
+                                                Grid.Column="1"
+                                                Text="{Binding login}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding RelationShip}"
+                                                                            Value="1">
+                                                                        <Setter Property="Foreground" Value="LimeGreen"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding RelationShip}"
+                                                                            Value="-1">
+                                                                        <Setter Property="Foreground" Value="Red"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Grid.Column="1" HorizontalAlignment="Right"
+                                                        Margin="0 -4 -8 0"
+                                                        Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="Text" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                    <Trigger Property="Text" Value="↑">
+                                                                        <Setter Property="Foreground" Value="Lime"/>
+                                                                    </Trigger>
+                                                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                                        <EventTrigger.Actions>
+                                                                            <BeginStoryboard>
+                                                                                <Storyboard>
+                                                                                    <DoubleAnimation
+                                                                                Storyboard.TargetProperty="Opacity"
+                                                                                To="0" From="1"
+                                                                                Duration="0:0:0.2"
+                                                                                AutoReverse="True"/>
+                                                                                </Storyboard>
+                                                                            </BeginStoryboard>
+                                                                        </EventTrigger.Actions>
+                                                                    </EventTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <Image
+                                                Visibility="Visible"
+                                                Margin="8 0 0 0"
+                                                Stretch="Uniform"
+                                                MaxHeight="18"
+                                                HorizontalAlignment="Left"
+                                                Grid.Column="2"
+                                                Style="{StaticResource AvatarImageStyle}">
+                                                    </Image>
+                                                    <TextBlock
+                                                Margin="10 0 0 0"
+                                                Grid.Column="3"
+                                                HorizontalAlignment="Right"
+                                                Text="{Binding ratings[global].DisplayedRating}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                                                <Grid
+                                            d:DataContext="{d:DesignInstance {x:Type models:UnknownPlayer}}"
+                                            ShowGridLines="False">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="20"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition MinWidth="40"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="?"/>
+
+                                                    <TextBlock
+                                                Margin="4 0 0 0"
+                                                Grid.Column="1"
+                                                Text="{Binding login}"/>
+                                                    <TextBlock Text="?" Grid.Column="2"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.Resources>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="-8 0 -8 10">
+                                                        <StackPanel.Background>
+                                                            <SolidColorBrush Color="Black" Opacity=".2"/>
+                                                        </StackPanel.Background>
+                                                        <TextBlock
+                                                    Margin="8 4 0 4"
+                                                    Text="{Binding Name}"/>
+                                                        <TextBlock Text="{Binding Players.Length}" Margin="3 0 0 0" Opacity=".5" FontSize="12"/>
+                                                        <TextBlock
+                                                    Margin="10 0 8 1"
+                                                    Padding="18 0 0 0"
+                                                    FontSize="12"
+                                                    VerticalAlignment="Center">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Text">
+                                                                        <Setter.Value>
+                                                                            <MultiBinding StringFormat="{}{0} / {1} avg.">
+                                                                                <Binding Path="SumRating"/>
+                                                                                <Binding Path="AverageRating"/>
+                                                                            </MultiBinding>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Players.Length, Converter={StaticResource MoreThanConverter}, ConverterParameter=1}"
+                                                                                Value="False">
+                                                                            <Setter Property="Text" Value="{Binding SumRating}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                            <TextBlock.Background>
+                                                                <DrawingBrush Stretch="Uniform" AlignmentX="Left">
+                                                                    <DrawingBrush.Drawing>
+                                                                        <GeometryDrawing Brush="White" Geometry="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z"/>
+                                                                    </DrawingBrush.Drawing>
+                                                                    <DrawingBrush.RelativeTransform>
+                                                                        <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                                    </DrawingBrush.RelativeTransform>
+                                                                </DrawingBrush>
+                                                            </TextBlock.Background>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                    <ItemsControl ItemsSource="{Binding Players}" Margin="0 0 0 10">
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </ContentControl.Resources>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <ScrollViewer Margin="20 0 -30 30">
+                                    <StackPanel Margin="0 0 20 0">
+                                        <StackPanel.Resources>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                                                <Setter Property="BorderThickness" Value="0"/>
+                                            </Style>
+                                        </StackPanel.Resources>
+                                        <TextBlock Text="Create game" FontSize="16" FontWeight="DemiBold"/>
+                                        <TextBox Margin="0 20 0 0"
+                                             ui:ControlHelper.PlaceholderText="Title"/>
+                                        <Grid Margin="0 20 0 0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox ui:ControlHelper.PlaceholderText="Password"/>
+                                            <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
+                                        </Grid>
+                                        <Border Margin="0 20 0 0">
+                                            <Border.Background>
+                                                <SolidColorBrush Color="Black" Opacity=".4"/>
+                                            </Border.Background>
+                                            <Image Height="200"/>
+                                        </Border>
+                                        <Button Content="Select map" Margin="0 20 0 0">
+                                            <ui:FlyoutService.Flyout>
+                                                <ui:Flyout Placement="LeftEdgeAlignedTop">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition/>
+                                                        </Grid.RowDefinitions>
+
+                                                        <Border Grid.RowSpan="2" Margin="0 0 20 0">
+                                                            <Border.Background>
+                                                                <SolidColorBrush Color="Black" Opacity=".4"/>
+                                                            </Border.Background>
+                                                            <Image Height="200" Width="200"/>
+                                                        </Border>
+                                                        <TextBox Grid.Column="1" MinWidth="200"
+                                                                 ui:ControlHelper.PlaceholderText="Search"/>
+                                                        <ListBox Grid.Column="1" Grid.Row="1" Margin="0 20 0 0"/>
+                                                    </Grid>
+                                                </ui:Flyout>
+                                            </ui:FlyoutService.Flyout>
+                                        </Button>
+
+                                        <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
+                                        <ListBox SelectedIndex="0"
+                                             HorizontalAlignment="Left">
+                                            <ListBox.Resources>
+                                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                                    <Setter Property="Padding" Value="20 6"/>
+                                                </Style>
+                                            </ListBox.Resources>
+                                            <ListBox.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ListBox.ItemsPanel>
+                                            <ListBoxItem Content="FAF"/>
+                                            <ListBoxItem Content="FAF Beta"/>
+                                            <ListBoxItem Content="FAF Develop"/>
+                                        </ListBox>
+                                        <TextBlock Text="Rating restriction" FontSize="16" Margin="0 20 0 10"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox ui:ControlHelper.PlaceholderText="Min"/>
+                                            <TextBox ui:ControlHelper.PlaceholderText="Max" Margin="10 0"/>
+                                            <CheckBox Margin="10 0 0 0" Content="Enforce rating" IsChecked="True"/>
+                                        </StackPanel>
+                                        <Button Content="Host game" Margin="0 20 0 0"/>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
+                                Path=DataContext.IsExtendedViewEnabled}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Content" Value="{x:Null}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=IdleGames, Path=SelectedItem, Converter={StaticResource ObjectToTypeConverter}}"
+                                         Value="{x:Type models:GameInfoMessage}">
+                                <Setter Property="Content" Value="{Binding ElementName=IdleGames, Path=SelectedItem}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ElementName=IdleGames, Path=SelectedIndex}"
+                                         Value="-1">
+                                <Setter Property="Content" Value="{x:Null}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
         </Grid>
         <DataGrid
             ItemsSource="{Binding View}"
             Visibility="Collapsed"/>
-
         <!--<TextBlock Grid.RowSpan="2" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Run Text="2" Foreground="LimeGreen"/>
             <Run Text="|" Foreground="Gray"/>

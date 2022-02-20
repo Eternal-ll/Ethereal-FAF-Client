@@ -162,7 +162,7 @@
                             </TextBlock.Style>
                         </TextBlock>
                     </Grid>
-
+                    
                     <StackPanel Margin="10 0">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">

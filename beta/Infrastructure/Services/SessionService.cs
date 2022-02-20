@@ -2,7 +2,6 @@
 using beta.Models;
 using beta.Models.Server;
 using beta.Properties;
-using beta.ViewModels.Base;
 using beta.Views;
 #if DEBUG
 using Microsoft.Extensions.Logging;
@@ -72,6 +71,59 @@ namespace beta.Infrastructure.Services
         {
 #if DEBUG
             Logger.LogInformation("New JSON data from Server", json);
+
+            var t = JsonSerializer.Deserialize<ServerCommandMessage>(json);
+
+            //if (t.command != "matchmaker_info" &&
+            //    t.command != "game_info" && t.command == "social")
+            if (true)
+            {
+                int depth = 0;
+                StringBuilder depthB = new();
+                StringBuilder sb = new();
+                for (int i = 0; i < json.Length; i++)
+                {
+                    var letter = json[i];
+
+                    if (letter == '}')
+                    {
+                        depth--;
+                        depthB.Clear();
+                        for (int j = 0; j < (depth * 4); j++)
+                        {
+                            depthB.Append(' ');
+                        }
+                        sb.Append('\n');
+                        sb.Append(depthB);
+                    }
+
+                    sb.Append(letter);
+
+
+                    if (letter == '{')
+                    {
+                        depth++;
+                        depthB.Clear();
+                        for (int j = 0; j < (depth * 4); j++)
+                        {
+                            depthB.Append(' ');
+                        }
+
+                        sb.Append('\n');
+                        sb.Append(depthB);
+                    }
+
+                    if (letter == ',')
+                    {
+                        sb.Append('\n');
+                        sb.Append(depthB);
+                    }
+
+
+                }
+
+                App.DebugWindow.LOG(sb.ToString());
+            }
 #endif
             switch (json[12])
             {
@@ -258,10 +310,12 @@ namespace beta.Infrastructure.Services
             //string session = string.Empty;
             //return session;
         }
+        public void Send(string command) => Client.WriteLine(command);
 
         protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayer?.Invoke(this, e);
         protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGame?.Invoke(this, e);
         protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);
+
     }
 }

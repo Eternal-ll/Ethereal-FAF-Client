@@ -26,6 +26,13 @@ namespace beta.Views
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
+        {
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(PropertyName);
+            return true;
+        }
         #endregion
 
         #region SearchText
@@ -208,6 +215,49 @@ namespace beta.Views
         private ICommand _ChangeSortDirectionCommmand;
         public ICommand ChangeSortDirectionCommmand => _ChangeSortDirectionCommmand ??= new LambdaCommand(OnChangeSortDirectionCommmand);
         public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
+        #endregion
+
+        #endregion
+
+        #region View toggles
+
+        #region IsGridView
+        private bool _IsGridView = true;
+        public bool IsGridView
+        {
+            get => _IsGridView;
+            set
+            {
+                if (Set(ref _IsGridView, value))
+                {
+                    IsListView = !value;
+                }
+            }
+        }
+        #endregion
+
+        #region IsListView
+        private bool _IsListView;
+        public bool IsListView
+        {
+            get => _IsListView;
+            set
+            {
+                if (Set(ref _IsListView, value))
+                {
+                    IsGridView = !value;
+                }
+            }
+        }
+        #endregion
+
+        #region IsExtendedViewEnabled
+        private bool _IsExtendedViewEnabled;
+        public bool IsExtendedViewEnabled
+        {
+            get => _IsExtendedViewEnabled;
+            set => Set(ref _IsExtendedViewEnabled, value);
+        }
         #endregion
 
         #endregion
