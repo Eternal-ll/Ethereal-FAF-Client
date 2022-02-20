@@ -72,22 +72,10 @@
                     <ui:FlyoutService.Flyout>
                         <ui:Flyout Placement="BottomEdgeAlignedLeft">
                             <StackPanel>
-                                <ui:ToggleSwitch
-                                    Margin="0 4"
-                                    FontSize="14"
-                                    Header="Hide private games"
-                                    IsOn="{Binding IsPrivateGamesHidden}"
-                                    VerticalAlignment="Top"/>
-                                <ui:ToggleSwitch
-                                    Margin="0 4"
-                                    FontSize="14"
-                                    Header="Hide games with rating restriction"
-                                    VerticalAlignment="Top"/>
-                                <ui:ToggleSwitch
-                                    Margin="0 4"
-                                    FontSize="14"
-                                    Header="Hide FOE`s games"
-                                    VerticalAlignment="Top"/>
+                                <TextBlock Text="Global settings" Margin="0 0 0 4"/>
+                                <CheckBox Content="Hide private games" IsChecked="{Binding IsPrivateGamesHidden}"/>
+                                <CheckBox Content="Hide games with &#10;enforced rating restriction" IsChecked="False"/>
+                                <CheckBox Content="Hide foes games" IsChecked="{Binding IsFoesGamesHidden}"/>
                             </StackPanel>
                         </ui:Flyout>
                     </ui:FlyoutService.Flyout>
@@ -128,7 +116,7 @@
                     SelectedItem="{Binding SelectedSort}"
                     DisplayMemberPath="PropertyName">
                     <ComboBox.Resources>
-                        <Style TargetType="ComboBoxItem">
+                        <Style TargetType="ComboBoxItem" BasedOn="{StaticResource DefaultComboBoxItemStyle}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding}" Value="title">
                                     <Setter Property="Content" Value="by title"/>

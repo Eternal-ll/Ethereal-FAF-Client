@@ -97,11 +97,12 @@ namespace beta.Views
             //if (lobby.num_players == 0)
             //    return;
 
+            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == Models.Server.PlayerRelationShip.Foe)
+                return;
 
             if (_IsPrivateGamesHidden && lobby.password_protected)
-            {
                 return;
-            }
+            
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
@@ -260,6 +261,21 @@ namespace beta.Views
         }
         #endregion
 
+        #endregion
+
+        #region IsFoesGamesHidden
+        private bool _IsFoesGamesHidden;
+        public bool IsFoesGamesHidden
+        {
+            get => _IsFoesGamesHidden;
+            set
+            {
+                if (Set(ref _IsFoesGamesHidden, value))
+                {
+                    View.Refresh();
+                }
+            }
+        }
         #endregion
 
         public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
