@@ -15,6 +15,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IAvatarService, AvatarService>()
             .AddSingleton<IMapService, MapService>()
             .AddSingleton<ISocialService, SocialService>()
+            .AddSingleton<ICacheService, CacheService>()
             ;
     }
 }
