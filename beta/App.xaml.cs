@@ -29,6 +29,8 @@ namespace beta
                 Folder.MapsLargePreviews => CurrentDirectory + "\\cache\\previews\\large\\",
                 Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
+                
+                Folder.Common => CurrentDirectory + "\\cache\\common\\",
 
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)
             };
@@ -41,7 +43,7 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
 #if DEBUG
-            DebugWindow.Show();
+            //DebugWindow.Show();
 #endif
 
             IsDesignMode = false;
