@@ -2,7 +2,6 @@
 using beta.Models;
 using beta.Models.Server;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media.Imaging;
 
@@ -11,8 +10,6 @@ namespace beta.Infrastructure.Services
     public class MapService : IMapService
     {
         public event EventHandler<EventArgs<bool>> MapIsDownloaded;
-
-        private readonly List<BitmapImage> Cache = new();
 
         public void AddDetailedInfo(GameInfoMessage game)
         {
@@ -26,13 +23,6 @@ namespace beta.Infrastructure.Services
 
         public BitmapImage GetMap(Uri uri, Folder folder = Folder.MapsSmallPreviews)
         {
-            var cache = Cache;
-
-            if (folder == Folder.MapsSmallPreviews)
-                for (int i = 0; i < cache.Count; i++)
-                    if (cache[i].UriSource.Segments[^1] == uri.Segments[^1])
-                        return cache[i];
-
             var cacheFolder = App.GetPathToFolder(folder);
 
             if (!Directory.Exists(cacheFolder))
@@ -40,34 +30,41 @@ namespace beta.Infrastructure.Services
 
             var localFilePath = cacheFolder + uri.Segments[^1];
 
-            if (File.Exists(localFilePath))
-            {
-                var img = new BitmapImage(new(localFilePath, UriKind.Absolute), new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore));
-                img.Freeze();
+            BitmapImage image = new();
+            image.CacheOption = BitmapCacheOption.OnDemand;
 
-                if (folder == Folder.MapsSmallPreviews)
-                    cache.Add(img);
-                return img;
+            if (folder == Folder.MapsLargePreviews)
+            {
+                image.DecodePixelHeight = 512;
+                image.DecodePixelWidth = 512;
+            }
+            else
+            {
+                image.DecodePixelHeight = 100;
+                image.DecodePixelWidth = 100;
             }
 
-            BitmapImage image = null;
-
-            image = new();
             image.BeginInit();
-            image.CacheOption = BitmapCacheOption.OnDemand;
+
+            if (File.Exists(localFilePath))
+            {
+                image.UriSource = new(localFilePath, UriKind.Absolute);
+                image.EndInit();
+                image.Freeze();
+
+                return image;
+            }
             image.UriSource = uri;
             image.EndInit();
             image.DownloadCompleted += (s, e) =>
             {
-                var encoder = new PngBitmapEncoder();
+                PngBitmapEncoder encoder = new();
                 encoder.Frames.Add(BitmapFrame.Create(image));
 
-                using var filestream = new FileStream(localFilePath, FileMode.Create);
+                using FileStream filestream = new (localFilePath, FileMode.Create);
 
                 encoder.Save(filestream);
                 image.Freeze();
-                if (folder == Folder.MapsSmallPreviews)
-                    cache.Add(image);
             };
 
             return image;
