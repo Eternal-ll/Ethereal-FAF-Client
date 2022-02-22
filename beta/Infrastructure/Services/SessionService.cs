@@ -14,7 +14,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 
 namespace beta.Infrastructure.Services
 {
@@ -179,9 +178,6 @@ namespace beta.Infrastructure.Services
                 101, 114, 95, 97, 103, 101, 110, 116, 34, 58, 34, 102, 97, 102, 45, 99, 108, 105, 101, 110, 116, 34,
                 125, 10
             });
-            //string session = string.Empty;
-            //return session;
-
         }
         public void Send(string command) => Client.WriteLine(command);
         private void OnAuthResult(object sender, EventArgs<OAuthStates> e)

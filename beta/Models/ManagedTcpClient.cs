@@ -1,5 +1,8 @@
-﻿using System;
+﻿using beta.Infrastructure.Extensions;
+using beta.Models.Server.Base;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -179,22 +182,28 @@ namespace beta.Models
             else Write(data);
         }
 
-        //public Message WriteLineAndGetReply(string data, TimeSpan timeout)
-        //{
-        //    Message mReply = null;
-        //    //DataReceived += (s, e) => { mReply = e; };
-        //    WriteLine(data);
+        public string WriteLineAndGetReply(string data, ServerCommand command, TimeSpan timeout)
+        {
+            string reply = string.Empty;
 
-        //    Stopwatch sw = new Stopwatch();
-        //    sw.Start();
+            DataReceived += (s, e) =>
+            {
+                if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
+                    if (repylCommand == command)
+                        reply = e;
+                
+            };
+            
+            WriteLine(data);
 
-        //    while (mReply == null && sw.Elapsed < timeout)
-        //    {
-        //        Thread.Sleep(10);
-        //    }
+            Stopwatch sw = new();
+            sw.Start();
 
-        //    return mReply;
-        //}
+            while (reply.Length == 0 && sw.Elapsed < timeout)
+                Thread.Sleep(10);
+            
+            return reply;
+        }
 
         private void OnStateChanged(TcpClientState state) => StateChanged?.Invoke(this, state);
         private void OnDataReceived(List<byte> msg) => DataReceived?.Invoke(this, StringEncoder.GetString(msg.ToArray()));

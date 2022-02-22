@@ -1215,7 +1215,8 @@
                     <Style TargetType="Canvas">
                         <Setter Property="Opacity" Value="0"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                            <!--TODO FIX ME SOLUTION in GlobalView-->
+                            <!--<DataTrigger Binding="{Binding ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
                                      Value="True">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
@@ -1223,7 +1224,7 @@
                                 <DataTrigger.ExitActions>
                                     <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
                                 </DataTrigger.ExitActions>
-                            </DataTrigger>
+                            </DataTrigger>-->
                         </Style.Triggers>
                     </Style>
                 </Canvas.Style>

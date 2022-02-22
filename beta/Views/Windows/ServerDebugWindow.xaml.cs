@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace beta.Views.Windows
 {
@@ -19,6 +20,11 @@ namespace beta.Views.Windows
                 //ScrollViewer.ScrollToBottom();
             });
 
+        }
+
+        internal void LOG(object p)
+        {
+            throw new NotImplementedException();
         }
     }
 }
