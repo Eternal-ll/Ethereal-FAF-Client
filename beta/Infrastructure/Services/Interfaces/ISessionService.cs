@@ -1,7 +1,7 @@
-﻿using beta.Models.Server;
+﻿using beta.Models;
+using beta.Models.Server;
 using System;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
@@ -13,10 +13,12 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
 
+        public ManagedTcpClient TcpClient { get; }
+
         public void Connect(IPEndPoint ip);
         public void AskSession();
         public void Authorize();
-        public Task<string> GenerateUID(string session);
+        public string GenerateUID(string session);
 
         /// <summary>
         /// JSON Format

@@ -1,8 +1,10 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 
 namespace beta.Infrastructure.Services
 {

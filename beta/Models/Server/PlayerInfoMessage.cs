@@ -85,6 +85,8 @@ namespace beta.Models.Server
 
     public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer
     {
+        public ServerCommand Command { get; set; }
+
         #region Custom properties
 
         #region Flag

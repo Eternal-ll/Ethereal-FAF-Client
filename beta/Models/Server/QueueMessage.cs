@@ -4,7 +4,8 @@ namespace beta.Models.Server
 {
     public class QueueMessage : IServerMessage
     {
-        public string command { get; set; }
+        public ServerCommand Command { get; set; }
+
         public QueueMessage[] queues { get; set; }
 
         public string queue_name { get; set; }

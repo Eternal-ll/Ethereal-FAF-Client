@@ -417,7 +417,7 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Trigger>
-                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    <!--<EventTrigger RoutedEvent="Binding.TargetUpdated">
                                         <EventTrigger.Actions>
                                             <BeginStoryboard>
                                                 <Storyboard>
@@ -429,7 +429,7 @@
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger.Actions>
-                                    </EventTrigger>
+                                    </EventTrigger>-->
                                     <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
                                                  Value="0">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -504,48 +504,48 @@
                         Style="{StaticResource LobbyTextBlockStyle}"
                         Margin="7 4 0 0"
                         Padding="26 0 0 0">
-                    <Run Text="{Binding num_players}">
-                        <Run.Style>
-                            <Style TargetType="Run">
-                                <Setter Property="Foreground" Value="White"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
-                                                Value="1">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                        Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
-                                                        From="White" To="Lime" Duration="0:0:0.3"
-                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding PlayersCountChanged}"
-                                                Value="-1">
-                                        <DataTrigger.EnterActions>
-                                            <BeginStoryboard>
-                                                <Storyboard>
-                                                    <ColorAnimation
-                                                        Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
-                                                        From="White" To="Red" Duration="0:0:0.3"
-                                                        AutoReverse="True" RepeatBehavior="0:0:2.4"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </DataTrigger.EnterActions>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Run.Style>
-                    </Run>
-                    <Run Text="/" FontSize="12"/>
-                    <Run Text="{Binding max_players}"/>
+                        <Run Text="{Binding num_players}">
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                    Value="1">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation
+                                                            Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                            From="White" To="Lime" Duration="0:0:0.3"
+                                                            AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding PlayersCountChanged}"
+                                                    Value="-1">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <ColorAnimation
+                                                            Storyboard.TargetProperty="Foreground.(SolidColorBrush.Color)"
+                                                            From="White" To="Red" Duration="0:0:0.3"
+                                                            AutoReverse="True" RepeatBehavior="0:0:2.4"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                        <Run Text="/" FontSize="12"/>
+                        <Run Text="{Binding max_players}"/>
                         <TextBlock.Background>
                             <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{StaticResource PlayersIcon}">
                                 <ImageBrush.Transform>
                                     <TransformGroup>
-                                        <TranslateTransform X="0" Y="1"/>
+                                        <TranslateTransform X="2" Y="1"/>
                                         <ScaleTransform ScaleX=".8" ScaleY=".8"/>
                                     </TransformGroup>
                                 </ImageBrush.Transform>
@@ -598,7 +598,7 @@
                                                                 <Trigger Property="Text" Value="↑">
                                                                     <Setter Property="Foreground" Value="Lime"/>
                                                                 </Trigger>
-                                                                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                                <!--<EventTrigger RoutedEvent="Binding.TargetUpdated">
                                                                     <EventTrigger.Actions>
                                                                         <BeginStoryboard>
                                                                             <Storyboard>
@@ -610,7 +610,7 @@
                                                                             </Storyboard>
                                                                         </BeginStoryboard>
                                                                     </EventTrigger.Actions>
-                                                                </EventTrigger>
+                                                                </EventTrigger>-->
                                                             </Style.Triggers>
                                                         </Style>    
                                                     </TextBlock.Style>

@@ -1,10 +1,12 @@
 ﻿using beta.Models.Server.Base;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
-    public struct SocialMessage : IServerMessage
+    public class SocialMessage : IServerMessage
     {
-        //[JsonPropertyName("autojoin")]
+        public ServerCommand Command { get; set; }
+        [JsonPropertyName("autojoin")]
         public string[] autojoin { get; set; }
         public string[] channels { get; set; }
         public int[] friends { get; set; }

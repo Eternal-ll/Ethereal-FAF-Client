@@ -32,7 +32,166 @@
                     To="0"
                     Duration="0:0:0.2"/>
             </Storyboard>
+
+            <ScrollViewer x:Key="Test" Margin="20 0 -30 30">
+                <StackPanel Margin="0 0 20 0">
+                    <StackPanel.Resources>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Style>
+                    </StackPanel.Resources>
+                    <TextBlock Text="Create game" FontSize="16" FontWeight="DemiBold"/>
+                    <TextBox Margin="0 20 0 0"
+                                             ui:ControlHelper.PlaceholderText="Title"/>
+                    <Grid Margin="0 20 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox ui:ControlHelper.PlaceholderText="Password"/>
+                        <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
+                    </Grid>
+                    <Border Margin="0 20 0 0">
+                        <Border.Background>
+                            <SolidColorBrush Color="Black" Opacity=".4"/>
+                        </Border.Background>
+                        <Image Height="200"/>
+                    </Border>
+                    <Button Content="Select map" Margin="0 20 0 0">
+                        <ui:FlyoutService.Flyout>
+                            <ui:Flyout Placement="LeftEdgeAlignedTop">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+
+                                    <Border Grid.RowSpan="2" Margin="0 0 20 0">
+                                        <Border.Background>
+                                            <SolidColorBrush Color="Black" Opacity=".4"/>
+                                        </Border.Background>
+                                        <Image Height="200" Width="200"/>
+                                    </Border>
+                                    <TextBox Grid.Column="1" MinWidth="200"
+                                                                 ui:ControlHelper.PlaceholderText="Search"/>
+                                    <ListBox Grid.Column="1" Grid.Row="1" Margin="0 20 0 0"/>
+                                </Grid>
+                            </ui:Flyout>
+                        </ui:FlyoutService.Flyout>
+                    </Button>
+
+                    <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
+                    <ListBox SelectedIndex="0"
+                                             HorizontalAlignment="Left">
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                <Setter Property="Padding" Value="20 6"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBoxItem Content="FAF"/>
+                        <ListBoxItem Content="FAF Beta"/>
+                        <ListBoxItem Content="FAF Develop"/>
+                    </ListBox>
+                    <TextBlock Text="Rating restriction" FontSize="16" Margin="0 20 0 10"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox ui:ControlHelper.PlaceholderText="Min"/>
+                        <TextBox ui:ControlHelper.PlaceholderText="Max" Margin="10 0"/>
+                        <CheckBox Margin="10 0 0 0" Content="Enforce rating" IsChecked="True"/>
+                    </StackPanel>
+                    <Button Content="Host game" Margin="0 20 0 0"/>
+                </StackPanel>
+            </ScrollViewer>
         </Grid.Resources>
+
+        <ui:ContentDialog x:Name="TestDialog" Grid.ColumnSpan="2" Grid.RowSpan="3"
+                          Background="#111111"
+                          BorderThickness="0">
+            <StackPanel>
+                <StackPanel.Resources>
+                    <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                        <Setter Property="BorderThickness" Value="0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <TextBlock Text="Create game" FontSize="16" FontWeight="DemiBold"/>
+                <TextBox Margin="0 20 0 0"
+                                             ui:ControlHelper.PlaceholderText="Title"/>
+                <Grid Margin="0 20 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox ui:ControlHelper.PlaceholderText="Password"/>
+                    <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
+                </Grid>
+                <Border Margin="0 20 0 0">
+                    <Border.Background>
+                        <SolidColorBrush Color="Black" Opacity=".4"/>
+                    </Border.Background>
+                    <Image Height="200"/>
+                </Border>
+                <Button Content="Select map" Margin="0 20 0 0">
+                    <ui:FlyoutService.Flyout>
+                        <ui:Flyout Placement="LeftEdgeAlignedTop">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.RowSpan="2" Margin="0 0 20 0">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="Black" Opacity=".4"/>
+                                    </Border.Background>
+                                    <Image Height="200" Width="200"/>
+                                </Border>
+                                <TextBox Grid.Column="1" MinWidth="200"
+                                                                 ui:ControlHelper.PlaceholderText="Search"/>
+                                <ListBox Grid.Column="1" Grid.Row="1" Margin="0 20 0 0"/>
+                            </Grid>
+                        </ui:Flyout>
+                    </ui:FlyoutService.Flyout>
+                </Button>
+
+                <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
+                <ListBox SelectedIndex="0"
+                                             HorizontalAlignment="Left">
+                    <ListBox.Resources>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                            <Setter Property="Padding" Value="20 6"/>
+                        </Style>
+                    </ListBox.Resources>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBoxItem Content="FAF"/>
+                    <ListBoxItem Content="FAF Beta"/>
+                    <ListBoxItem Content="FAF Develop"/>
+                </ListBox>
+                <TextBlock Text="Rating restriction" FontSize="16" Margin="0 20 0 10"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox ui:ControlHelper.PlaceholderText="Min" Width="80" MaxLength="4"/>
+                    <TextBox ui:ControlHelper.PlaceholderText="Max" Width="80" MaxLength="4" Margin="10 0"/>
+                    <CheckBox Margin="10 0 0 0" Content="Enforce rating" IsChecked="True"/>
+                </StackPanel>
+                <Button Content="Host game" Margin="0 20 0 0"/>
+            </StackPanel>
+        </ui:ContentDialog>
+        
         <TextBox
             Background="{DynamicResource NavigationViewExpandedPaneBackground}"
             Text="Global FAForever lobbies"
@@ -66,8 +225,8 @@
             <StackPanel Orientation="Horizontal">
                 <Button
                     Padding="8 0"
+                    Margin="0 0 10 0"
                     VerticalAlignment="Stretch"
-                    Background="Transparent"
                     Content="{StaticResource SettingsPathIcon}">
                     <ui:FlyoutService.Flyout>
                         <ui:Flyout Placement="BottomEdgeAlignedLeft">
@@ -76,20 +235,78 @@
                                 <CheckBox Content="Hide private games" IsChecked="{Binding IsPrivateGamesHidden}"/>
                                 <CheckBox Content="Hide games with &#10;enforced rating restriction" IsChecked="False"/>
                                 <CheckBox Content="Hide foes games" IsChecked="{Binding IsFoesGamesHidden}"/>
+                                <CheckBox Content="Enable maps blacklist" IsChecked="{Binding IsMapsBlacklistEnabled}"/>
+                            </StackPanel>
+                        </ui:Flyout>
+                    </ui:FlyoutService.Flyout>
+                </Button>
+                <Button
+                    ToolTip="Maps blacklist"
+                    VerticalAlignment="Stretch"
+                    Margin="0 0 10 0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMapsBlacklistEnabled}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Path Fill="White" Stretch="Uniform" Data="M21 7H3V3H21V7M9.5 11H14.5C14.78 11 15 11.22 15 11.5V12.06C15.87 10.83 17.35 10 19 10C19.34 10 19.68 10.04 20 10.11V8H4V21H13.03C13 20.9 13 20.8 13 20.7V17.2C13 16.24 13.5 15.34 14.2 14.74V14.5C14.2 14 14.32 13.47 14.5 13H9V11.5C9 11.22 9.22 11 9.5 11M23 17.3V20.8C23 21.4 22.4 22 21.7 22H16.2C15.6 22 15 21.4 15 20.7V17.2C15 16.6 15.6 16 16.2 16V14.5C16.2 13.1 17.6 12 19 12S21.8 13.1 21.8 14.5V16C22.4 16 23 16.6 23 17.3M20.5 14.5C20.5 13.7 19.8 13.2 19 13.2S17.5 13.7 17.5 14.5V16H20.5V14.5Z" />
+                    <ui:FlyoutService.Flyout>
+                        <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                            <StackPanel>
+                                <TextBlock Text="Maps blacklist" FontWeight="DemiBold"/>
+                                <TextBlock Text="Hide games with maps&#10;that contains listed keywords"
+                                           TextWrapping="Wrap" FontSize="14" Margin="0 4 0 10"
+                                           Opacity=".6"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBox ui:ControlHelper.PlaceholderText="Key word"
+                                             BorderThickness="0"
+                                             MinWidth="160"
+                                             Text="{Binding InputKeyWord, UpdateSourceTrigger=PropertyChanged}">
+                                    </TextBox>
+                                    <Button Content=" + " Command="{Binding AddKeyWordCommand}"/>
+                                </StackPanel>
+                                <ListBox Height="200" Margin="0 20 0 0"
+                                         ItemsSource="{Binding MapsBlackList}">
+                                    <ListBox.Resources>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Padding" Value="10 4 0 4"/>
+                                            <Setter Property="Focusable" Value="False"/>
+                                        </Style>
+                                    </ListBox.Resources>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <TextBlock Text="{Binding}" HorizontalAlignment="Left"/>
+                                                <Button Content=" - "
+                                                        Padding="4 0"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Right"
+                                                        CommandParameter="{Binding}"
+                                                        Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
+                                                    Path=DataContext.RemoveKeyWordCommand}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </StackPanel>
                         </ui:Flyout>
                     </ui:FlyoutService.Flyout>
                 </Button>
                 <ToggleButton
                     VerticalAlignment="Stretch"
-                    Background="Transparent"
                     Padding="8 0 4 0"
+                    Margin="0 0 10 0"
                     ui:ControlHelper.CornerRadius="4"
                     IsChecked="{Binding IsSortEnabled}">
                     <ToggleButton.Resources>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#222222"/>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="#222222"/>
-                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#444444"/>
                         <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#222222"/>
                     </ToggleButton.Resources>
                     <Path Stretch="Uniform">
@@ -111,6 +328,7 @@
                     </Path>
                 </ToggleButton>
                 <ComboBox
+                    MinWidth="140"  
                     BorderThickness="0"
                     ItemsSource="{Binding SortDescriptions}"
                     SelectedItem="{Binding SelectedSort}"
@@ -187,7 +405,7 @@
                 Width="200"
                 Grid.Column="1"
                 HorizontalAlignment="Left"
-                Margin="20 0 0 0"
+                Margin="10 0 0 0"
                 BorderThickness="0"
                 ui:ControlHelper.PlaceholderText="Search lobby"
                 ui:ControlHelper.CornerRadius="4"/>
@@ -404,13 +622,14 @@
                     </Style>
                 </ListBox.Resources>
                 <ListBox.ItemTemplate>
-                    <DataTemplate>
+                    <ItemContainerTemplate>
                         <ContentControl>
                             <ContentControl.Style>
                                 <Style TargetType="ContentControl">
-                                    <Setter Property="Content">
+                                    <!--<Setter Property="Content">
                                         <Setter.Value>
-                                            <Button
+                                            <TextBlock Text="{Binding}"/>
+                                            --><!--<Button
                                                 Content="Create game"
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
@@ -419,16 +638,35 @@
                                                     <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
-                                Path=DataContext.IsExtendedViewEnabled}" Value="True">
+                                                                Path=DataContext.IsExtendedViewEnabled}" Value="True">
                                                                 <Setter Property="IsHitTestVisible" Value="False"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Button.Style>
-                                            </Button>
+                                            </Button>--><!--
                                         </Setter.Value>
-                                    </Setter>
+                                    </Setter>-->
                                     <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}"
+                                                     Value="{x:Static local:GlobalView.NewItemPlaceholder}">
+                                            <Setter Property="Content">
+                                                <Setter.Value>
+                                                    <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}-->
+                                                        <!--,Path=DataContext.IsExtendedViewEnabled}"/>-->
+                                                    <Button
+                                                        Content="Create game"
+                                                        HorizontalAlignment="Stretch"
+                                                        VerticalAlignment="Stretch"
+                                                        Background="Transparent"
+                                                        Command="{DynamicResource OnOpenGameCreationWindowCommand}">
+                                                        <Button.Resources>
+                                                            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+                                                        </Button.Resources>
+                                                    </Button>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
                                                      Value="{x:Type models:GameInfoMessage}">
                                             <Setter Property="Content" Value="{Binding}"/>
@@ -437,7 +675,7 @@
                                 </Style>
                             </ContentControl.Style>
                         </ContentControl>
-                    </DataTemplate>
+                    </ItemContainerTemplate>
                 </ListBox.ItemTemplate>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -923,86 +1161,7 @@
                 </ContentControl.Resources>
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
-                        <Setter Property="Content">
-                            <Setter.Value>
-                                <ScrollViewer Margin="20 0 -30 30">
-                                    <StackPanel Margin="0 0 20 0">
-                                        <StackPanel.Resources>
-                                            <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
-                                                <Setter Property="BorderThickness" Value="0"/>
-                                            </Style>
-                                        </StackPanel.Resources>
-                                        <TextBlock Text="Create game" FontSize="16" FontWeight="DemiBold"/>
-                                        <TextBox Margin="0 20 0 0"
-                                             ui:ControlHelper.PlaceholderText="Title"/>
-                                        <Grid Margin="0 20 0 0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBox ui:ControlHelper.PlaceholderText="Password"/>
-                                            <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
-                                        </Grid>
-                                        <Border Margin="0 20 0 0">
-                                            <Border.Background>
-                                                <SolidColorBrush Color="Black" Opacity=".4"/>
-                                            </Border.Background>
-                                            <Image Height="200"/>
-                                        </Border>
-                                        <Button Content="Select map" Margin="0 20 0 0">
-                                            <ui:FlyoutService.Flyout>
-                                                <ui:Flyout Placement="LeftEdgeAlignedTop">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition/>
-                                                            <ColumnDefinition/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"/>
-                                                            <RowDefinition/>
-                                                        </Grid.RowDefinitions>
-
-                                                        <Border Grid.RowSpan="2" Margin="0 0 20 0">
-                                                            <Border.Background>
-                                                                <SolidColorBrush Color="Black" Opacity=".4"/>
-                                                            </Border.Background>
-                                                            <Image Height="200" Width="200"/>
-                                                        </Border>
-                                                        <TextBox Grid.Column="1" MinWidth="200"
-                                                                 ui:ControlHelper.PlaceholderText="Search"/>
-                                                        <ListBox Grid.Column="1" Grid.Row="1" Margin="0 20 0 0"/>
-                                                    </Grid>
-                                                </ui:Flyout>
-                                            </ui:FlyoutService.Flyout>
-                                        </Button>
-
-                                        <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
-                                        <ListBox SelectedIndex="0"
-                                             HorizontalAlignment="Left">
-                                            <ListBox.Resources>
-                                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                                    <Setter Property="Padding" Value="20 6"/>
-                                                </Style>
-                                            </ListBox.Resources>
-                                            <ListBox.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel/>
-                                                </ItemsPanelTemplate>
-                                            </ListBox.ItemsPanel>
-                                            <ListBoxItem Content="FAF"/>
-                                            <ListBoxItem Content="FAF Beta"/>
-                                            <ListBoxItem Content="FAF Develop"/>
-                                        </ListBox>
-                                        <TextBlock Text="Rating restriction" FontSize="16" Margin="0 20 0 10"/>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBox ui:ControlHelper.PlaceholderText="Min"/>
-                                            <TextBox ui:ControlHelper.PlaceholderText="Max" Margin="10 0"/>
-                                            <CheckBox Margin="10 0 0 0" Content="Enforce rating" IsChecked="True"/>
-                                        </StackPanel>
-                                        <Button Content="Host game" Margin="0 20 0 0"/>
-                                    </StackPanel>
-                                </ScrollViewer>
-                            </Setter.Value>
+                        <Setter Property="Content" Value="{StaticResource Test}">
                         </Setter>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
@@ -1017,6 +1176,7 @@
                             <DataTrigger Binding="{Binding ElementName=IdleGames, Path=SelectedIndex}"
                                          Value="-1">
                                 <Setter Property="Content" Value="{x:Null}"/>
+                                <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

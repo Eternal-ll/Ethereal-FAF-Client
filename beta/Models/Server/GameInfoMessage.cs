@@ -144,6 +144,8 @@ namespace beta.Models.Server
 
     public class GameInfoMessage: ViewModel, IServerMessage
     {
+        public ServerCommand Command { get; set; }
+
         #region Custom properties
 
         #region PreviewType // On fly
@@ -280,7 +282,7 @@ namespace beta.Models.Server
 
         #endregion
 
-        public string command { get; set; }
+        //public string command { get; set; }
 
         public GameInfoMessage[] games { get; set; }
         public string visibility { get; set; }

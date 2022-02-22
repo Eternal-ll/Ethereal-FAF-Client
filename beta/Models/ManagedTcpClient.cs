@@ -8,7 +8,9 @@ namespace beta.Models
 {
     public enum TcpClientState
     {
-        
+        TimedOut = -2,
+        Disconnected = -1,
+        Connected = 1
     }
 
     public class ManagedTcpClient : IDisposable
@@ -52,8 +54,13 @@ namespace beta.Models
             ReadLoopIntervalMs = 10;
             Delimiter = 10;
         }
-
-        public ManagedTcpClient Connect(string hostNameOrIpAddress, int port)
+        /// <summary>
+        /// Connects to lobby server. Default IP: 116.202.155.226 PORT: 8002
+        /// </summary>
+        /// <param name="hostNameOrIpAddress"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public ManagedTcpClient Connect(string hostNameOrIpAddress = "lobby.faforever.com", int port = 8002)
         {
             TcpClient = new TcpClient(AddressFamily.InterNetwork);
 
@@ -63,11 +70,15 @@ namespace beta.Models
             }
             catch (Exception e)
             {
-                throw new Exception(nameof(ManagedTcpClient), e);
+                TcpClient.Dispose();
+                TcpClient = null;
+                OnStateChanged(TcpClientState.TimedOut);
+                //throw new Exception(nameof(ManagedTcpClient), e);
             }
             finally
             {
                 StartListenThread();
+                OnStateChanged(TcpClientState.Connected);
             }
             return this;
         }
@@ -104,11 +115,13 @@ namespace beta.Models
             //}
             //catch (Exception e)
             //{
-            //    throw new Exception(ThreadName, e);
+            //    TcpClient.Dispose();
+            //    TcpClient = null;
+            //    OnStateChanged(TcpClientState.TimedOut);
             //}
             //finally
             //{
-                ListenThread = null;
+            //    ListenThread = null;
             //}
         }
         private void RunLoopStep()
@@ -124,7 +137,7 @@ namespace beta.Models
                 Thread.Sleep(10);
                 return;
             }
-            while (bytesAvailable > 0 && c.Connected)
+            while (bytesAvailable > 0)
             {
                 byte[] nextByte = new byte[1];
                 c.Client.Receive(nextByte, 0, 1, SocketFlags.None);
@@ -132,18 +145,21 @@ namespace beta.Models
                 //              == \n
                 if (nextByte[0] == Delimiter)
                 {
-                    NotifyDelimiterMessageRx(c, QueueCache);
+                    OnDataReceived(QueueCache);
                     QueueCache.Clear();
                 }
                 else QueueCache.Add(nextByte[0]);
             }
         }
 
-        private void NotifyDelimiterMessageRx(TcpClient client, List<byte> msg) => DataReceived.Invoke(this, StringEncoder.GetString(msg.ToArray()));
-        
+
+        #region Write
         public void Write(byte[] data)
         {
-            //if (_client == null) { throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)"); }
+            if (TcpClient == null)
+            {
+                throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+            }
             TcpClient.GetStream().Write(data, 0, data.Length);
         }
 
@@ -151,7 +167,8 @@ namespace beta.Models
         {
             if (data == null) { return; }
             Write(StringEncoder.GetBytes(data));
-        }
+        } 
+        #endregion
 
         public void WriteLine(string data)
         {
@@ -178,6 +195,9 @@ namespace beta.Models
 
         //    return mReply;
         //}
+
+        private void OnStateChanged(TcpClientState state) => StateChanged?.Invoke(this, state);
+        private void OnDataReceived(List<byte> msg) => DataReceived?.Invoke(this, StringEncoder.GetString(msg.ToArray()));
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

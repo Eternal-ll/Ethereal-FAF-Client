@@ -1,19 +1,20 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Extensions;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
+using beta.Models.Server.Base;
 using beta.Properties;
-using beta.Views;
 #if DEBUG
 using Microsoft.Extensions.Logging;
 #endif
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -28,17 +29,20 @@ namespace beta.Infrastructure.Services
 
         #region Properties
 
-        public readonly ManagedTcpClient Client = new();
+        private readonly ManagedTcpClient Client = new();
+        public ManagedTcpClient TcpClient => Client;
 
         private readonly IOAuthService OAuthService;
+
+        private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
 
 #if DEBUG
         private readonly ILogger Logger;
 #endif
-        private string GeneratedUID;
 
         #endregion
 
+        #region CTOR
         public SessionService(IOAuthService oAuthService
 #if DEBUG
             , ILogger<SessionService> logger
@@ -49,165 +53,35 @@ namespace beta.Infrastructure.Services
 #if DEBUG
             Logger = logger;
 #endif
-
             OAuthService.Result += OnAuthResult;
             Client.DataReceived += OnDataReceived;
+
+            #region Response actions for server
+            //Operations.Add(ServerCommand.notice, OnNoticeData);
+            Operations.Add(ServerCommand.session, OnSessionData);
+
+            Operations.Add(ServerCommand.irc_password, OnIrcPassowrdData);
+            Operations.Add(ServerCommand.welcome, OnWelcomeData);
+            Operations.Add(ServerCommand.social, OnSocialData);
+
+            Operations.Add(ServerCommand.player_info, OnPlayerData);
+            Operations.Add(ServerCommand.game_info, OnGameData);
+            //Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
+
+            //Operations.Add(ServerCommand.ping, OnPing);
+            //Operations.Add(ServerCommand.pong, OnPong);
+
+            Operations.Add(ServerCommand.invalid, OnInvalidData); 
+            #endregion
         }
+        #endregion
+
 
         public void Connect(IPEndPoint ip)
         {
             Client.Connect(ip.Address.ToString(), ip.Port);
         }
-
-        private void OnAuthResult(object sender, EventArgs<OAuthStates> e)
-        {
-            if (e.Arg == OAuthStates.AUTHORIZED)
-            {
-                Authorize();
-            }
-        }
-
-        private void OnDataReceived(object sender, string json)
-        {
-#if DEBUG
-            Logger.LogInformation("New JSON data from Server", json);
-
-            var t = JsonSerializer.Deserialize<ServerCommandMessage>(json);
-
-            //if (t.command != "matchmaker_info" &&
-            //    t.command != "game_info" && t.command == "social")
-            if (true)
-            {
-                int depth = 0;
-                StringBuilder depthB = new();
-                StringBuilder sb = new();
-                for (int i = 0; i < json.Length; i++)
-                {
-                    var letter = json[i];
-
-                    if (letter == '}')
-                    {
-                        depth--;
-                        depthB.Clear();
-                        for (int j = 0; j < (depth * 4); j++)
-                        {
-                            depthB.Append(' ');
-                        }
-                        sb.Append('\n');
-                        sb.Append(depthB);
-                    }
-
-                    sb.Append(letter);
-
-
-                    if (letter == '{')
-                    {
-                        depth++;
-                        depthB.Clear();
-                        for (int j = 0; j < (depth * 4); j++)
-                        {
-                            depthB.Append(' ');
-                        }
-
-                        sb.Append('\n');
-                        sb.Append(depthB);
-                    }
-
-                    if (letter == ',')
-                    {
-                        sb.Append('\n');
-                        sb.Append(depthB);
-                    }
-
-
-                }
-
-                App.DebugWindow.LOG(sb.ToString());
-            }
-#endif
-            switch (json[12])
-            {
-                case 'g': //game_info
-                    var gameInfoMessage = JsonSerializer.Deserialize<GameInfoMessage>(json);
-                    if (gameInfoMessage.games?.Length > 0)
-                        // payload with lobbies
-                        for (int i = 0; i < gameInfoMessage.games.Length; i++)
-                            OnNewGame(gameInfoMessage.games[i]);
-                    else OnNewGame(gameInfoMessage);
-                    break;
-                case 'i':
-                    switch (json[13])
-                    {
-                        case 'r':
-                            //irc_password
-                            var ircPasswordMessage = JsonSerializer.Deserialize<MainView.IRCPasswordMessage>(json);
-                            Settings.Default.irc_password = ircPasswordMessage.password;
-                            return;
-                        case 'n': //invalid
-                            Settings.Default.access_token = null;
-                            OAuthService.Auth();
-                            return;
-                    }
-                    break;
-                case 'm':
-                    switch (json[14])
-                    {
-                        case 't':
-                            // matchmaker_info
-                            var queueMessage = JsonSerializer.Deserialize<QueueMessage>(json);
-                            if (queueMessage.queues?.Length > 0)
-                            {
-                                // payload with queues
-                            }
-                            break;
-                        case 'p':
-                            // mapVault_info
-                            break;
-                    }
-                    break;
-                case 'n': // notice
-                    break;
-                case 'p':
-                    switch (json[13])
-                    {
-                        case 'l': // player_info
-                            var playerInfoMessage = JsonSerializer.Deserialize<PlayerInfoMessage>(json);
-                            if (playerInfoMessage.players.Length > 0)
-                                // payload with players
-                                for (int i = 0; i < playerInfoMessage.players.Length; i++)
-                                    OnNewPlayer(playerInfoMessage.players[i]);
-                            else OnNewPlayer(playerInfoMessage);
-                            break;
-                        case 'i': // ping
-                            break;
-                        case 'o': // pong
-                            break;
-                    }
-                    break;
-                case 's':
-                    switch (json[13])
-                    {
-                        case 'e': // session
-                            var session = JsonSerializer.Deserialize<SessionMessage>(json);
-                            Settings.Default.session = session.session.ToString();
-                            new Thread(() => _ = GenerateUID(session.session.ToString())).Start();
-                            break;
-                        case 'o': // social
-                            // Do i really need to invoke Event? 
-                            OnSocialInfo(JsonSerializer.Deserialize<SocialMessage>(json));
-                            return;
-                    }
-                    break;
-                case 'w': //welcome
-                    var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
-                    Settings.Default.PlayerId = welcomeMessage.id;
-                    Settings.Default.PlayerNick = welcomeMessage.login;
-                    OnAuthorization(true);
-                    break;
-            }
-        }
-
-        public async Task<string> GenerateUID(string session)
+        public string GenerateUID(string session)
         {
             if (string.IsNullOrWhiteSpace(session))
                 return null;
@@ -229,35 +103,34 @@ namespace beta.Infrastructure.Services
             {
 
                 // TODO: i didnt get it, why it doesnt work on async. Looks like main dispatcher being busy and stucks
-                result += await process.StandardOutput.ReadLineAsync();
+                result += process.StandardOutput.ReadLine();
             }
             process.Close();
 
-            GeneratedUID = result;
             return result;
         }
-
         public void Authorize()
         {
 #if DEBUG
-            Logger.LogInformation($"SessionService starting authorization process to lobby.faforever.com on {nameof(Authorize)} function.");
+            Logger.LogInformation($"Starting authorization process to lobby server");
             //Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
 #endif
+
             if (Client.TcpClient == null)
-                Client.Connect("116.202.155.226", 8002);
+                Client.Connect();
             else if (!Client.TcpClient.Connected)
             {
-                Client.Connect("116.202.155.226", 8002);
+                Client.Connect();
             }
 
-            string accessToken = Settings.Default.access_token;
             string session = Settings.Default.session;
-            string generatedUID = GeneratedUID;
+            string accessToken = Settings.Default.access_token;
+            string generatedUID = GenerateUID(session);
 
 #if DEBUG
-            Logger.LogInformation($"{nameof(accessToken)}", accessToken);
-            Logger.LogInformation($"{nameof(session)}", session);
-            Logger.LogInformation($"{nameof(generatedUID)}", generatedUID);
+            Logger.LogInformation($"{nameof(accessToken)}");
+            Logger.LogInformation($"{nameof(session)}");
+            Logger.LogInformation($"{nameof(generatedUID)}");
 #endif
 
 
@@ -268,7 +141,7 @@ namespace beta.Infrastructure.Services
                 .Append("\",\"session\":\"").Append(session).Append("\"}\n").ToString();
 
 #if DEBUG
-            Logger.LogInformation($"Sending message to Server", JsonSerializer.Serialize(command, typeof(string)));
+            Logger.LogInformation($"Sending data for authorization on server: {@command}");
 #endif
 
             Client.Write(Encoding.UTF8.GetBytes(command));
@@ -280,14 +153,13 @@ namespace beta.Infrastructure.Services
             //    { "session", session }
             //};
         }
-
         public void AskSession()
         {
             if (Client.TcpClient == null)
-                Client.Connect("116.202.155.226", 8002);
+                Client.Connect();
             else if (!Client.TcpClient.Connected)
             {
-                Client.Connect("116.202.155.226", 8002);
+                Client.Connect();
             }
             //var result =
             //    Client.WriteLineAndGetReply("command=ask_session&version=0.20.1+12-g2d1fa7ef.git&user_agent=faf-client",
@@ -309,13 +181,121 @@ namespace beta.Infrastructure.Services
             });
             //string session = string.Empty;
             //return session;
+
         }
         public void Send(string command) => Client.WriteLine(command);
+        private void OnAuthResult(object sender, EventArgs<OAuthStates> e)
+        {
+            if (e.Arg == OAuthStates.AUTHORIZED)
+                Authorize();
+        }
+        
+        private void OnDataReceived(object sender, string json)
+        {
+            if (Enum.TryParse<ServerCommand>(json.GetRequiredJsonRowValue(), out var command))
+            {
+                if (Operations.TryGetValue(command, out var response))
+                    response.Invoke(json);
+#if DEBUG
+                else App.DebugWindow.LOG("--------------WARNING! UNKNOWN COMMAND----------------\n" + json.ToJsonFormat());
 
+                if (true)
+                    App.DebugWindow.LOG(json.ToJsonFormat());
+#endif
+            }
+        }
+
+        #region Events invokers
         protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayer?.Invoke(this, e);
         protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGame?.Invoke(this, e);
-        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);
+        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e); 
+        #endregion
 
+        #region Server response actions
+        private void OnNoticeData(string json)
+        {
+            // TODO
+        }
+        private void OnWelcomeData(string json)
+        {
+            var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
+            Settings.Default.PlayerId = welcomeMessage.id;
+            Settings.Default.PlayerNick = welcomeMessage.login;
+            OnAuthorization(true);
+        }
+        private void OnSessionData(string json)
+        {
+            Settings.Default.session = json.GetRequiredJsonRowValue(2);
+        }
+
+        private void OnIrcPassowrdData(string json)
+        {
+            string password = json.GetRequiredJsonRowValue(2);
+            Settings.Default.irc_password = password;
+        }
+        private void OnSocialData(string json)
+        {
+            // Do i really need to invoke Event? 
+            OnSocialInfo(JsonSerializer.Deserialize<SocialMessage>(json));
+        }
+        private void OnInvalidData(string json = null)
+        {
+            // TODO FIX ME???? ERROR UP?
+            Settings.Default.access_token = null;
+            OAuthService.Auth();
+        }
+
+        private void OnPlayerData(string json)
+        {
+            var playerInfoMessage = JsonSerializer.Deserialize<PlayerInfoMessage>(json);
+            if (playerInfoMessage.players.Length > 0)
+                // payload with players
+                for (int i = 0; i < playerInfoMessage.players.Length; i++)
+                    OnNewPlayer(playerInfoMessage.players[i]);
+            else OnNewPlayer(playerInfoMessage);
+        }
+
+        private void OnGameData(string json)
+        {
+            var gameInfoMessage = JsonSerializer.Deserialize<GameInfoMessage>(json);
+            if (gameInfoMessage.games?.Length > 0)
+                // payload with lobbies
+                for (int i = 0; i < gameInfoMessage.games.Length; i++)
+                    OnNewGame(gameInfoMessage.games[i]);
+            else OnNewGame(gameInfoMessage);
+        }
+        private void OnMatchmakerData(string json)
+        {
+            var matchmakerMessage = JsonSerializer.Deserialize<QueueMessage>(json);
+            if (matchmakerMessage.queues?.Length > 0)
+            {
+                // payload with queues
+            }
+        }
+
+        // VAULTS
+        private void OnMapVaultData(string json)
+        {
+
+        }
+
+        private void OnPing(string json = null)
+        {
+#if DEBUG
+            //Logger.LogInformation($"Received ping, starting timer...");
+            //Client.Write("{\"command\":\"pong\"}");
+            //Stopwatch.Start();
+#endif
+        }
+
+        private void OnPong(string json = null)
+        {
+#if DEBUG
+            //Logger.LogInformation($"Received PONG, time elapsed: {Stopwatch.Elapsed.ToString("c")}");
+            //Stopwatch.Stop();
+#endif
+        } 
+        #endregion
     }
 }

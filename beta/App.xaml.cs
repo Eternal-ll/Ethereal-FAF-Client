@@ -43,7 +43,7 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
 #if DEBUG
-            //DebugWindow.Show();
+            DebugWindow.Show();
 #endif
 
             IsDesignMode = false;

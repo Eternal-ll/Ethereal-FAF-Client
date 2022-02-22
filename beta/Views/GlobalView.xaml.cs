@@ -96,6 +96,13 @@ namespace beta.Views
 
             //if (lobby.num_players == 0)
             //    return;
+            if (_IsMapsBlacklistEnabled && MapsBlackList.Count > 0)
+            {
+                var items = MapsBlackList;
+                for (int i = 0; i < items.Count; i++)
+                    if (lobby.mapname.Contains(items[i], StringComparison.OrdinalIgnoreCase))
+                        return;
+            }
 
             if (_IsFoesGamesHidden && lobby.Host?.RelationShip == Models.Server.PlayerRelationShip.Foe)
                 return;
@@ -278,6 +285,67 @@ namespace beta.Views
         }
         #endregion
 
+        #region MapsBlackList
+
+        public ObservableCollection<string> MapsBlackList { get; set; } = new();
+
+        #region IsMapsBlacklistEnabled
+        private bool _IsMapsBlacklistEnabled;
+        public bool IsMapsBlacklistEnabled
+        {
+            get => _IsMapsBlacklistEnabled;
+            set
+            {
+                if (Set(ref _IsMapsBlacklistEnabled, value))
+                {
+                    if (MapsBlackList.Count > 0)
+                        View.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        #region InputKeyWord
+        private string _InputKeyWord = string.Empty;
+        public string InputKeyWord
+        {
+            get => _InputKeyWord;
+            set => Set(ref _InputKeyWord, value);
+        }
+        #endregion
+
+        #region AddKeyWordCommand
+        private ICommand _AddKeyWordCommand;
+        public ICommand AddKeyWordCommand => _AddKeyWordCommand;
+        private bool CanAddKeyWordCommand(object parameter) => !string.IsNullOrWhiteSpace(_InputKeyWord);
+        public void OnAddKeyWordCommand(object parameter)
+        {
+            if (MapsBlackList.Contains(_InputKeyWord.Trim())) return;
+            MapsBlackList.Add(_InputKeyWord.Trim());
+            InputKeyWord = string.Empty;
+
+            if (_IsMapsBlacklistEnabled)
+                View.Refresh();
+        }
+        #endregion
+
+
+        #region RemoveKeyWordCommand
+        private ICommand _RemoveKeyWordCommand;
+        public ICommand RemoveKeyWordCommand => _RemoveKeyWordCommand;
+        public void OnRemoveKeyWordCommand(object parameter)
+        {
+            if (parameter == null) return;
+            MapsBlackList.Remove(parameter.ToString());
+
+            if (_IsMapsBlacklistEnabled)
+                View.Refresh();
+        }
+        #endregion
+
+        #endregion
+
+        public static object NewItemPlaceholder => CollectionView.NewItemPlaceholder;
         public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
 
         private readonly IGamesServices GamesServices;
@@ -289,6 +357,13 @@ namespace beta.Views
         public GlobalView()
         {
             InitializeComponent();
+
+            _AddKeyWordCommand = new LambdaCommand(OnAddKeyWordCommand, CanAddKeyWordCommand);
+            _RemoveKeyWordCommand = new LambdaCommand(OnRemoveKeyWordCommand);
+            _OpenGameCreationWindowCommand = new LambdaCommand(OnOpenGameCreationWindowCommand, CanOpenGameCreationWindowCommand);
+            
+            if (!App.Current.Resources.Contains("OnOpenGameCreationWindowCommand"))
+                App.Current.Resources.MergedDictionaries[2].Add("OnOpenGameCreationWindowCommand", _OpenGameCreationWindowCommand);
 
             IdleGamesScrollViewer = Tools.FindChild<ScrollViewer>(IdleGames);
 
@@ -312,5 +387,15 @@ namespace beta.Views
             if (e.NewSize.Width < 600) IdleGamesColumns = 1;
             else IdleGamesColumns = Convert.ToInt32((e.NewSize.Width - 60) / (330));
         }
+
+        #region OpenGameCreationWindowCommand
+        private ICommand _OpenGameCreationWindowCommand;
+        public ICommand OpenGameCreationWindowCommand => _OpenGameCreationWindowCommand;
+        private bool CanOpenGameCreationWindowCommand(object parameter) => !_IsExtendedViewEnabled;
+        private void OnOpenGameCreationWindowCommand(object parameter)
+        {
+            TestDialog.ShowAsync();
+        }
+        #endregion
     }
 }

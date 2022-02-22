@@ -1,15 +1,14 @@
-﻿namespace beta.Models.Server.Base
+﻿using System.Runtime.Serialization;
+
+namespace beta.Models.Server.Base
 {
-    public enum ServerCommand
+    public enum ServerCommand : byte
     {
-        unknown = -10,
-
-        ping = -1,
-        pong = 2,
-
         #region Receive
         // READ
+
         notice = 0,
+
         session = 1,
         irc_password = 2,
         welcome = 3,
@@ -17,7 +16,10 @@
         player_info = 5,
         game_info = 6,
         matchmaker_info = 7,
-        mapvault_info = 8, 
+        mapvault_info = 8,
+
+        ping = 9,
+        pong = 10,
         #endregion
 
         // WRITE
@@ -29,8 +31,10 @@
         game_join = 24,
 
         invite_to_party = 25,
-
-
-
+        
+        // on lobby server authorization
+        invalid = 99,
+        
+        unknown = 100
     }
 }

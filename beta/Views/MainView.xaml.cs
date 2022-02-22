@@ -27,6 +27,7 @@ namespace beta.Views
                 new HomeView(),
                 new ChatView(),
                 new GlobalView(),
+                new AnalyticsView(),
             };
         }
 
