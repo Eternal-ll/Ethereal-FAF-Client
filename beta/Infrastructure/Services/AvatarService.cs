@@ -2,7 +2,6 @@
 using beta.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
@@ -25,6 +24,35 @@ namespace beta.Infrastructure.Services
 
         public void SetAvatar()
         {
+            /*
+            "command": "avatar",
+            "action": "select",
+            "avatar": "https://content.faforever.com/faf/avatars/qai2.png"
+            */
+
+            throw new NotImplementedException();
+        }
+
+        public void UpdateAvaiableAvatars()
+        {
+            /*
+            "command": "avatar",
+            "action": "list_avatar"
+            */
+
+            throw new NotImplementedException();
+        }
+
+        public BitmapImage[] GetAvailableAvatars()
+        {
+            /*
+            "command": "avatar",
+            "avatarlist": [
+            { "url": "https://content.faforever.com/faf/avatars/qai2.png","tooltip": "QAI"},
+            { "url": "https://content.faforever.com/faf/avatars/UEF.png", "tooltip": "UEF"}
+            ]
+            */
+
             throw new NotImplementedException();
         }
     }
