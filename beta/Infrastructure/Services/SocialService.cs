@@ -48,6 +48,22 @@ namespace beta.Infrastructure.Services
 
         private void SendCommand(string command, int id, PlayerRelationShip relation)
         {
+            /*
+            
+            "command": "social_add",
+            "friend": 2
+
+            "command": "social_remove",
+            "friend": 1
+
+            "command": "social_add",
+            "foe": 2
+
+            "command": "social_remove",
+            "foe": 1
+
+            */
+
             string json = $"{{ \"command\":\"{command}\", \"{relation.ToString().ToLower()}\": {id} }}";
 
             var player = PlayersService.GetPlayer(id);
