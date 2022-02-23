@@ -22,7 +22,7 @@ namespace beta.Infrastructure.Services
     }
     public class OAuthService : IOAuthService
     {
-        public event EventHandler<EventArgs<OAuthStates>> Result;
+        public event EventHandler<EventArgs<OAuthState>> Result;
 
         private readonly HttpClient HttpClient = new(new HttpClientHandler { UseProxy = false });
 
@@ -100,8 +100,9 @@ namespace beta.Infrastructure.Services
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException) OnResult(OAuthStates.NO_CONNECTION);
-                else OnResult(OAuthStates.INVALID);
+                if (e is HttpRequestException) OnResult(OAuthState.NO_CONNECTION);
+                else if (e is AggregateException) OnResult(OAuthState.NO_CONNECTION);
+                else OnResult(OAuthState.INVALID);
             }
 
             return null;
@@ -114,7 +115,7 @@ namespace beta.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrWhiteSpace(password))
             {
                 Logger.LogWarning("Given usernameOrEmail or password is empty or null");
-                Result?.Invoke(this, OAuthStates.EMPTY_FIELDS);
+                Result?.Invoke(this, OAuthState.EMPTY_FIELDS);
                 return null;
             }
 
@@ -188,7 +189,7 @@ namespace beta.Infrastructure.Services
 
             if (consent_challenge.Length == 0)
             {
-                Result?.Invoke(this, OAuthStates.INVALID);
+                Result?.Invoke(this, OAuthState.INVALID);
                 return null;
             }
             #endregion
@@ -210,8 +211,8 @@ namespace beta.Infrastructure.Services
             catch (Exception e)
             {
                 Logger.LogWarning("Something went wrong on POST request");
-                if (e is HttpRequestException) OnResult(OAuthStates.NO_CONNECTION);
-                else OnResult(OAuthStates.INVALID);
+                if (e is HttpRequestException) OnResult(OAuthState.NO_CONNECTION);
+                else OnResult(OAuthState.INVALID);
 
             }
             
@@ -234,13 +235,13 @@ namespace beta.Infrastructure.Services
         {
             Logger.LogInformation("Starting fetching OAuth token by code");
 
-            OAuthStates result = OAuthStates.INVALID;
+            OAuthState result = OAuthState.INVALID;
 
             Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
 
             if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
                 OAuthExtension.GetQueryByteArrayContent($"grant_type=authorization_code&code={code}&client_id=faf-python-client&redirect_uri=http://localhost"))))
-                result = OAuthStates.AUTHORIZED;
+                result = OAuthState.AUTHORIZED;
             else Logger.LogWarning("Something went wrong in the JSON data parsing part");
             
             Logger.LogInformation(result.ToString());
@@ -256,13 +257,13 @@ namespace beta.Infrastructure.Services
                 throw new ArgumentNullException(nameof(refresh_token));
             }
 
-            OAuthStates result = OAuthStates.INVALID;
+            OAuthState result = OAuthState.INVALID;
 
             Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
 
             if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
                 OAuthExtension.GetQueryByteArrayContent($"grant_type=refresh_token&refresh_token={refresh_token}&client_id=faf-python-client"))))
-                result = OAuthStates.AUTHORIZED;
+                result = OAuthState.AUTHORIZED;
             else Logger.LogWarning("Something went wrong in the JSON data parsing part");
 
             Logger.LogInformation(result.ToString());
@@ -279,10 +280,10 @@ namespace beta.Infrastructure.Services
                 if (string.IsNullOrEmpty(Settings.Default.access_token))
                     if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
                         RefreshOAuthToken(Settings.Default.refresh_token);
-                    else Result!.Invoke(this, OAuthStates.NO_TOKEN);
+                    else Result!.Invoke(this, OAuthState.NO_TOKEN);
                 else if ((Settings.Default.expires_in - DateTime.Now).TotalSeconds < 10)
                     RefreshOAuthToken(Settings.Default.refresh_token);
-                else Result!.Invoke(this, OAuthStates.AUTHORIZED);
+                else Result!.Invoke(this, OAuthState.AUTHORIZED);
             }
         }
 
@@ -305,7 +306,7 @@ namespace beta.Infrastructure.Services
             FetchOAuthToken(code);
         }
 
-        protected virtual void OnResult(EventArgs<OAuthStates> e) => Result?.Invoke(this, e);
+        protected virtual void OnResult(EventArgs<OAuthState> e) => Result?.Invoke(this, e);
 
         private string GetHiddenValue(string line)
         {

@@ -100,30 +100,30 @@ namespace beta.Views
             CloseButtonText = "Ok"
         };
 
-        private void OnOAuthAuthorizationFinish(object sender, Infrastructure.EventArgs<OAuthStates> e)
+        private void OnOAuthAuthorizationFinish(object sender, Infrastructure.EventArgs<OAuthState> e)
         {
             Dispatcher.Invoke(() =>
             {
                 switch (e.Arg)
                 {
-                    case OAuthStates.AUTHORIZED:
+                    case OAuthState.AUTHORIZED:
                         for (int i = 0; i < Canvas.Children.Count; i++)
                             Canvas.Children[i].Visibility = Visibility.Collapsed;
                         ProgressRing.Visibility = Visibility.Visible;
                         return;
-                    case OAuthStates.INVALID:
+                    case OAuthState.INVALID:
                         WarnDialog.Content = "Invalid authorization parameters";
                         break;
-                    case OAuthStates.NO_CONNECTION:
+                    case OAuthState.NO_CONNECTION:
                         WarnDialog.Content = "No connection.\nPlease check your internet connection";
                         break;
-                    case OAuthStates.NO_TOKEN:
+                    case OAuthState.NO_TOKEN:
                         WarnDialog.Content = "Something went wrong on auto-join.\nPlease use authorization form again";
                         break;
-                    case OAuthStates.TIMED_OUT:
+                    case OAuthState.TIMED_OUT:
                         WarnDialog.Content = "Server is not responses";
                         break;
-                    case OAuthStates.EMPTY_FIELDS:
+                    case OAuthState.EMPTY_FIELDS:
                         WarnDialog.Content = "Empty fields";
                         break;
                     default:

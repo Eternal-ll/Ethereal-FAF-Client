@@ -56,9 +56,9 @@ namespace beta.ViewModels
             }
         }
 
-        private void OnOAuthService_Result(object sender, Infrastructure.EventArgs<OAuthStates> e)
+        private void OnOAuthService_Result(object sender, Infrastructure.EventArgs<OAuthState> e)
         {
-            if (e.Arg == OAuthStates.AUTHORIZED)
+            if (e.Arg == OAuthState.AUTHORIZED)
             {
                 ReloadTokenTimer();
             }

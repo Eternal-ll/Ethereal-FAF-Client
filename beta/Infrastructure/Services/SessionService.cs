@@ -185,9 +185,9 @@ namespace beta.Infrastructure.Services
             Client.WriteLine("{\"command\":\"ping\"}");
         }
 
-        private void OnAuthResult(object sender, EventArgs<OAuthStates> e)
+        private void OnAuthResult(object sender, EventArgs<OAuthState> e)
         {
-            if (e.Arg == OAuthStates.AUTHORIZED)
+            if (e.Arg == OAuthState.AUTHORIZED)
                 Authorize();
         }
 
