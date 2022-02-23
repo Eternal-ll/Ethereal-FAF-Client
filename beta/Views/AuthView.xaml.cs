@@ -61,8 +61,6 @@ namespace beta.Views
 
             // load user setting of auto join ot local checkbox
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
-
-            SessionService.AskSession();
         }
             
         private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>

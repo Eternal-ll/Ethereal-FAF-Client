@@ -4,6 +4,7 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf;
 using ModernWpf.Controls;
+using System;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -67,6 +68,7 @@ namespace beta.Views.Windows
             Settings.Default.Height = Height;
 
             Closing -= OnMainWindowClosing;
+            Application.Current.Shutdown();
         }
 
         private void ToggleAppThemeHandler(object sender, RoutedEventArgs e)

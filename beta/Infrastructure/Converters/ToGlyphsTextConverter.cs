@@ -10,7 +10,7 @@ namespace beta.Infrastructure.Converters
         {
             if (value == null) return "!Null";
             var text = value.ToString();
-            return text.Length == 0 ? "!Empty" : text;
+            return text.Length == 0 ? ' ' : text;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -16,8 +16,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public ManagedTcpClient TcpClient { get; }
 
         public void Connect(IPEndPoint ip);
-        public void AskSession();
         public void Authorize();
+        public void Ping();
         public string GenerateUID(string session);
 
         /// <summary>

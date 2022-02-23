@@ -24,9 +24,7 @@
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
-                    <converter:RatingConverter x:Key="RatingConverter"/>
-                    <converter:GetInGameTeamsConverter x:Key="GetInGameTeamsConverter"/>
-                    
+
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
 
@@ -47,8 +45,6 @@
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
                     <converter:GameModConverter x:Key="GameModConverter"/>
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
-                    <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
-                    <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
                 </ResourceDictionary>
 
                 <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>

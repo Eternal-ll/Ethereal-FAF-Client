@@ -256,7 +256,8 @@ namespace beta.Models.Server
             }
         } 
         #endregion
-
+        
+        // TODO RENAME to PlayerAvatarData?
         public PlayerAvatar avatar { get; set; }
         public PlayerAlias[] names { get; set; }
 

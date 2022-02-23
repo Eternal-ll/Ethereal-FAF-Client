@@ -34,6 +34,8 @@ namespace beta.Infrastructure.Services
         private readonly IOAuthService OAuthService;
 
         private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
+        private bool WaitingPong = false;
+        private Stopwatch Stopwatch = new();
 
 #if DEBUG
         private readonly ILogger Logger;
@@ -57,8 +59,7 @@ namespace beta.Infrastructure.Services
 
             #region Response actions for server
             //Operations.Add(ServerCommand.notice, OnNoticeData);
-            Operations.Add(ServerCommand.session, OnSessionData);
-
+            
             Operations.Add(ServerCommand.irc_password, OnIrcPassowrdData);
             Operations.Add(ServerCommand.welcome, OnWelcomeData);
             Operations.Add(ServerCommand.social, OnSocialData);
@@ -68,7 +69,7 @@ namespace beta.Infrastructure.Services
             //Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
 
             //Operations.Add(ServerCommand.ping, OnPing);
-            //Operations.Add(ServerCommand.pong, OnPong);
+            Operations.Add(ServerCommand.pong, OnPong);
 
             Operations.Add(ServerCommand.invalid, OnInvalidData); 
             #endregion
@@ -122,7 +123,7 @@ namespace beta.Infrastructure.Services
                 Client.Connect();
             }
 
-            string session = Settings.Default.session;
+            string session = GetSession();
             string accessToken = Settings.Default.access_token;
             string generatedUID = GenerateUID(session);
 
@@ -134,71 +135,87 @@ namespace beta.Infrastructure.Services
 
 
             StringBuilder builder = new();
-            // $"{\"command\": \"social_add\", \"friend|foe\": \"player_id\"}\n"
-            var command = builder.Append("{\"command\":\"auth\",\"token\":\"").Append(accessToken)
+
+            /*
+            {
+                "command": "auth",
+                "token": "......",
+                "unique_id": "faf-uid.exe".
+                "session": "...."
+
+            */
+
+            var command = builder
+                .Append("{\"command\":\"auth\",\"token\":\"")
+                .Append(accessToken)
                 .Append("\",\"unique_id\":\"").Append(generatedUID)
-                .Append("\",\"session\":\"").Append(session).Append("\"}\n").ToString();
+                .Append("\",\"session\":\"").Append(session)
+                .Append("\"}\n")
+                .ToString();
 
 #if DEBUG
             Logger.LogInformation($"Sending data for authorization on server: {@command}");
 #endif
 
             Client.Write(Encoding.UTF8.GetBytes(command));
-            //Dictionary<string, string> auth = new()
-            //{
-            //    { "command", "auth" },
-            //    { "token", Properties.Settings.Default.access_token },
-            //    { "unique_id", uid },
-            //    { "session", session }
-            //};
         }
-        public void AskSession()
+        public string GetSession()
         {
-            if (Client.TcpClient == null)
-                Client.Connect();
-            else if (!Client.TcpClient.Connected)
+            /*WRITE
             {
-                Client.Connect();
-            }
-            //var result =
-            //    Client.WriteLineAndGetReply("command=ask_session&version=0.20.1+12-g2d1fa7ef.git&user_agent=faf-client",
-            //        TimeSpan.Zero);
-            Client.Write(new byte[]
-            {
-                /* WRITE
-                {
-                    "command": "ask_session",
-                    "version": "0.20.1+12-g2d1fa7ef.git",
-                    "user_agent": "faf-client"
-                }*/
+                "command": "ask_session",
+                "version": "0.20.1+12-g2d1fa7ef.git",
+                "user_agent": "faf-client"
+            }*/
 
-                123, 34, 99, 111, 109, 109, 97, 110, 100, 34, 58, 34, 97, 115, 107, 95, 115, 101, 115, 115, 105, 111,
+            var response = Client.WriteLineAndGetReply(new byte[] {123, 34, 99, 111, 109, 109, 97, 110, 100, 34, 58, 34, 97, 115, 107, 95, 115, 101, 115, 115, 105, 111,
                 110, 34, 44, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 34, 48, 46, 50, 48, 46, 49, 92, 117, 48, 48,
                 50, 66, 49, 50, 45, 103, 50, 100, 49, 102, 97, 55, 101, 102, 46, 103, 105, 116, 34, 44, 34, 117, 115,
                 101, 114, 95, 97, 103, 101, 110, 116, 34, 58, 34, 102, 97, 102, 45, 99, 108, 105, 101, 110, 116, 34,
-                125, 10
-            });
+                125, 10}, ServerCommand.session, new(0, 0, 10));
+
+            return response.GetRequiredJsonRowValue(2);
         }
         public void Send(string command) => Client.WriteLine(command);
+
+        public void Ping()
+        {
+            WaitingPong = true;
+            Stopwatch.Start();
+            Client.WriteLine("{\"command\":\"ping\"}");
+        }
+
         private void OnAuthResult(object sender, EventArgs<OAuthStates> e)
         {
             if (e.Arg == OAuthStates.AUTHORIZED)
                 Authorize();
         }
-        
+
+#if DEBUG
+        private readonly List<ServerCommand> AllowedToDebugCommands = new()
+        {
+            //ServerCommand.notice,
+            //ServerCommand.session,
+        };
+#endif
+
         private void OnDataReceived(object sender, string json)
         {
-            if (Enum.TryParse<ServerCommand>(json.GetRequiredJsonRowValue(), out var command))
+            var commandText = json.GetRequiredJsonRowValue();
+            if (Enum.TryParse<ServerCommand>(commandText, out var command))
             {
                 if (Operations.TryGetValue(command, out var response))
+                {
                     response.Invoke(json);
 #if DEBUG
-                else App.DebugWindow.LOG("--------------WARNING! UNKNOWN COMMAND----------------\n" + json.ToJsonFormat());
-
-                if (true)
                     App.DebugWindow.LOG(json.ToJsonFormat());
+                }
+                else App.DebugWindow.LOG($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
 #endif
             }
+#if DEBUG
+            else App.DebugWindow.LOG($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
+#endif
         }
 
         #region Events invokers
@@ -219,10 +236,6 @@ namespace beta.Infrastructure.Services
             Settings.Default.PlayerId = welcomeMessage.id;
             Settings.Default.PlayerNick = welcomeMessage.login;
             OnAuthorization(true);
-        }
-        private void OnSessionData(string json)
-        {
-            Settings.Default.session = json.GetRequiredJsonRowValue(2);
         }
 
         private void OnIrcPassowrdData(string json)
@@ -287,10 +300,13 @@ namespace beta.Infrastructure.Services
 
         private void OnPong(string json = null)
         {
+            WaitingPong = true;
 #if DEBUG
             //Logger.LogInformation($"Received PONG, time elapsed: {Stopwatch.Elapsed.ToString("c")}");
             //Stopwatch.Stop();
+            App.DebugWindow.LOG($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
 #endif
+            Stopwatch.Reset();
         } 
         #endregion
     }

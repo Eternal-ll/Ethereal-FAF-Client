@@ -11,7 +11,9 @@ namespace beta.Models
 {
     public enum TcpClientState
     {
-        TimedOut = -2,
+        TimedOut = -4,
+        CantConnect = -3,
+        NotConnected = -2,
         Disconnected = -1,
         Connected = 1
     }
@@ -161,7 +163,7 @@ namespace beta.Models
         {
             if (TcpClient == null)
             {
-                throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+                //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
             }
             TcpClient.GetStream().Write(data, 0, data.Length);
         }
@@ -188,10 +190,12 @@ namespace beta.Models
 
             DataReceived += (s, e) =>
             {
+                // parsing first row
+                // "command": "....",
                 if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
                     if (repylCommand == command)
                         reply = e;
-                
+                DataReceived -= (s, e) => { };
             };
             
             WriteLine(data);
@@ -202,6 +206,30 @@ namespace beta.Models
             while (reply.Length == 0 && sw.Elapsed < timeout)
                 Thread.Sleep(10);
             
+            return reply;
+        }
+        public string WriteLineAndGetReply(byte[] data, ServerCommand command, TimeSpan timeout)
+        {
+            string reply = string.Empty;
+
+            DataReceived += (s, e) =>
+            {
+                // parsing first row
+                // "command": "....",
+                if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
+                    if (repylCommand == command)
+                        reply = e;
+                DataReceived -= (s, e) => { };
+            };
+
+            Write(data);
+
+            Stopwatch sw = new();
+            sw.Start();
+
+            while (reply.Length == 0 && sw.Elapsed < timeout)
+                Thread.Sleep(10);
+
             return reply;
         }
 
