@@ -712,28 +712,27 @@
                                            Padding="24 0 0 0">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding MapName}"/>
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <ImageBrush
-                                                        ImageSource="{StaticResource MapIcon}"
-                                                        Stretch="Uniform"
-                                                        AlignmentX="Left">
-                                                        <ImageBrush.Transform>
-                                                            <TransformGroup>
-                                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
-                                                                <TranslateTransform X="3"/>
-                                                            </TransformGroup>
-                                                        </ImageBrush.Transform>
-                                                    </ImageBrush>
-                                                </Setter.Value>
-                                            </Setter>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding PreviewType}"
-                                            Value="Neroxis">
-                                                    <Setter Property="Text" Value="{x:Null}"/>
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Setter Property="Background" Value="{x:Null}"/>
+                                                             Value="0">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <Setter Property="Text" Value="{Binding MapName}"/>
+                                                    <Setter Property="Background">
+                                                        <Setter.Value>
+                                                            <ImageBrush
+                                                                ImageSource="{StaticResource MapIcon}"
+                                                                Stretch="Uniform"
+                                                                AlignmentX="Left">
+                                                                <ImageBrush.Transform>
+                                                                    <TransformGroup>
+                                                                        <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                                        <TranslateTransform X="3"/>
+                                                                    </TransformGroup>
+                                                                </ImageBrush.Transform>
+                                                            </ImageBrush>
+                                                        </Setter.Value>
+                                                    </Setter>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

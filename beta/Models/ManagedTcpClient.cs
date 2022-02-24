@@ -77,7 +77,7 @@ namespace beta.Models
             {
                 TcpClient.Dispose();
                 TcpClient = null;
-                OnStateChanged(TcpClientState.TimedOut);
+                OnStateChanged(TcpClientState.CantConnect);
                 //throw new Exception(nameof(ManagedTcpClient), e);
             }
             finally

@@ -1,4 +1,5 @@
-﻿using beta.Models.Server.Base;
+﻿using beta.Infrastructure.Services;
+using beta.Models.Server.Base;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -148,6 +149,15 @@ namespace beta.Models.Server
 
         #region Custom properties
 
+        #region Map
+        private Map _Map;
+        public Map Map
+        {
+            get => _Map;
+            set => Set(ref _Map, value);
+        }
+        #endregion
+
         #region PreviewType // On fly
         public PreviewType PreviewType
         {
@@ -160,17 +170,6 @@ namespace beta.Models.Server
                 return PreviewType.Normal;
             }
         }
-        #endregion
-
-        #region MapPreview
-        public ImageSource MapPreviewSource;
-        public ImageSource MapPreview => PreviewType switch
-        {
-            PreviewType.Normal => MapPreviewSource,
-            PreviewType.Coop => App.Current.Resources["CoopIcon"] as ImageSource,
-            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"] as ImageSource,
-            _ => App.Current.Resources["QuestionIcon"] as ImageSource
-        };
         #endregion
 
         #region Teams
@@ -230,10 +229,14 @@ namespace beta.Models.Server
         {
             get
             {
+                if (Map.Scenario != null)
+                    if (Map.Scenario.TryGetValue("name", out var name))
+                        return name;
+
                 string formattedMapName = string.Empty;
                 for (int i = 0; i < _mapname.Length; i++)
                 {
-                    if (_mapname[i] == '_')
+                    if (_mapname[i] == '_' || _mapname[i] == '-')
                     {
                         formattedMapName += ' ';
                         formattedMapName += char.ToUpper(_mapname[i + 1]);
@@ -305,7 +308,6 @@ namespace beta.Models.Server
                 {
                     OnPropertyChanged(nameof(MapVersion));
                     OnPropertyChanged(nameof(MapName));
-                    OnPropertyChanged(nameof(MapPreview));
                     OnPropertyChanged(nameof(max_players));
                 }
             }

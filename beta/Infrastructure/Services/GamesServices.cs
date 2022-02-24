@@ -1,10 +1,8 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Windows.Media;
 
 namespace beta.Infrastructure.Services
 {
@@ -132,15 +130,8 @@ namespace beta.Infrastructure.Services
                     {
                         if (liveGames[i].mapname != game.mapname)
                         {
-                            // add small map preview for normal games
-                            if (game.PreviewType == PreviewType.Normal)
-                                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() =>
-                                {
-                                    var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
-                                    // some maps cant be found on faf server.
-                                    return preview;
-                                },
-                                    System.Windows.Threading.DispatcherPriority.Background);
+                            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+                                attachScenario: true);
                         }
                         // Updating idle game states
                         if (!liveGames[i].Update(game))
@@ -174,15 +165,8 @@ namespace beta.Infrastructure.Services
                 SuspiciousGames.Add(game);
             }
 
-            // add small map preview for normal games
-            if (game.PreviewType == PreviewType.Normal)
-                game.MapPreviewSource = App.Current.Dispatcher.Invoke(() =>
-                {
-                    var preview = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"));
-                    // some maps cant be found on faf server.
-                    return preview;
-                },
-                    System.Windows.Threading.DispatcherPriority.Background);
+            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+                attachScenario: true);
 
             // finally if nothing matched we adding it to IdleGames
             games.Add(game);
