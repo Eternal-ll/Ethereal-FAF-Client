@@ -43,8 +43,7 @@ namespace beta.Views
         #endregion
 
         #region History
-        private readonly ObservableCollection<ChannelMessage> _History = new();
-        public ObservableCollection<ChannelMessage> History => _History;
+        public ObservableCollection<ChannelMessage> History { get; set; } = new();
         #endregion
 
         #region Users
@@ -164,9 +163,9 @@ namespace beta.Views
 
             App.Current.MainWindow.Closing += MainWindow_Closing;
 
+
             MessageInput.TextChanged += OnMessageInputTextChanged;
             MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
-
             return;
 
             //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
@@ -188,7 +187,7 @@ namespace beta.Views
         {
             if (IrcClient != null)
             if (IrcClient.Connected)
-            IrcClient.Disconnect();
+            IrcClient.Dispose();
         }
 
         private void OnMessageInputPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -269,6 +268,7 @@ namespace beta.Views
                     var t = _foundedIndex + previousItem.login.Length - keyWordLen;
 
                     // TODO FIX ME
+                    // !!!!!!!!!!!!!!!!!!!!!!
                     try
                     {
                         if (t < input.Text.Length)
@@ -276,7 +276,7 @@ namespace beta.Views
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString());
+                        //MessageBox.Show(ex.ToString());
                     }
                 }
                 else input.Text += text.Substring(_foundedIndex);
@@ -438,106 +438,11 @@ namespace beta.Views
                 }
             }
             _previousText = input.Text;
-            //return;
-
-            //bool foundD = false;
-            //for (int i = 0; i < len; i++)
-            //{
-            //    var letter = text[i];
-
-            //    if (foundD)
-            //    {
-            //        if (letter != ' ' && i != len - 1)
-            //        {
-            //            sb.Append(letter);
-            //            continue;
-            //        }
-            //        foundD = false;
-
-            //        if (letter != ' ' && i == len - 1)
-            //        {
-            //            sb.Append(letter);
-            //        }
-
-            //        var keyWord = sb.ToString();
-
-            //        if (keyWord.Length == 0)
-            //        {
-            //            continue;
-            //        }
-
-            //        if (input.CaretIndex > i + 1)
-            //        {
-            //            sb.Clear();
-            //            foundD = false;
-            //            continue;
-            //        }
-
-            //        var suggestions = Test.Where(x => x.StartsWith(keyWord, StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            //        if (suggestions.Length == 1 && suggestions[0] == keyWord)
-            //        {
-            //            SuggestionListBox.ItemsSource = null;
-            //            VisibilityTest = Visibility.Collapsed;
-
-            //            sb.Clear();
-            //            continue;
-            //        }
-
-            //        if (suggestions.Length > 0)
-            //        {
-
-            //            VisibilityTest = Visibility.Visible;
-            //            var width = MessageInput.ActualWidth;
-            //            var height = MessageInput.ActualHeight;
-            //            for (int j = 0; j < width; j++)
-            //            {
-            //                var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
-            //                if (func == i - keyWord.Length)
-            //                {
-            //                    Thickness = new Thickness(j, 0, 0, 10);
-            //                    break;
-            //                }
-            //            }
-
-            //            SuggestionListBox.ItemsSource = suggestions;
-            //            SuggestionListBox.SelectedIndex = 0;
-
-            //            _foundedIndex = i;
-            //            _keyWordLen = keyWord.Length;
-            //            return;
-            //        }
-            //        else
-            //        {
-            //            VisibilityTest = Visibility.Collapsed;
-            //            SuggestionListBox.ItemsSource = null;
-            //            sb.Clear();
-            //            continue;
-            //        }
-
-
-            //        sb.Clear();
-            //        foundD = false;
-            //    }
-
-            //    // return if there is nothing interesting
-            //    if (i == len - 1)
-            //    {
-            //        SuggestionListBox.ItemsSource = null;
-            //        VisibilityTest = Visibility.Collapsed;
-            //        return;
-            //    }
-
-            //    if (letter == '@')
-            //    {
-            //        foundD = true;
-            //    }
-            //}
         }
 
         private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
         {
-            ObservableCollection<IPlayer> users = null;
+            ObservableCollection<IPlayer> users = new();
             for (int i = 0; i < Channels.Count; i++)
             {
                 var channel = Channels[i];

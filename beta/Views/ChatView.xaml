@@ -972,7 +972,7 @@
             </Border>
         </Grid>
         <Grid 
-            Grid.Column="2"
+            Grid.Column="1"
             Margin="2 0 0 0"
             Panel.ZIndex="2"
             Background="{DynamicResource NavigationViewExpandedPaneBackground}">

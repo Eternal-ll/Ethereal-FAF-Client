@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace beta.Models
+namespace IRC
 {
     public class IrcClient : IDisposable
     {
@@ -162,7 +162,7 @@ namespace beta.Models
         {
             Thread t = new Thread(DoConnect)
             {
-                Name="IRC TCP Client",
+                Name = "IRC TCP Client",
                 IsBackground = true
             };
             t.Start();
@@ -199,7 +199,7 @@ namespace beta.Models
             {
 
             }
-}
+        }
         /// <summary>
         /// Disconnect from the IRC server
         /// </summary>
@@ -312,9 +312,6 @@ namespace beta.Models
         /// <param name="data">message from the server</param>
         private void ParseData(string data)
         {
-#if DEBUG
-            App.DebugWindow.LOGIRC(data);
-#endif
             // split the data into parts
             string[] ircData = data.Split(' ');
 

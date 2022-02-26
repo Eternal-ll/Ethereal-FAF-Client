@@ -2,7 +2,9 @@
 using beta.Models;
 using beta.Models.Server;
 using beta.ViewModels.Base;
+using beta.Views;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +12,7 @@ using System.Windows.Data;
 
 namespace beta.Infrastructure.Services
 {
+    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
     public class IrcService : ViewModel, IIrcService
     {
         #region Events
@@ -39,6 +42,15 @@ namespace beta.Infrastructure.Services
             }
         }
         #endregion
+
+        public ObservableCollection<Channel> Channels { get; } = new();
+
+        private Channel _SelectedChannel;
+        public Channel SelectedChannel
+        {
+            get => _SelectedChannel;
+            set => Set(ref _SelectedChannel, value);
+        }
 
         #region ChannelUsers
 

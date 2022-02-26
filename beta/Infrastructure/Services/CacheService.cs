@@ -23,16 +23,16 @@ namespace beta.Infrastructure.Services
             BitmapImage image = new();
             image.CacheOption = BitmapCacheOption.OnDemand;
 
-            if (folder == Folder.MapsLargePreviews)
-            {
-                image.DecodePixelHeight = 512;
-                image.DecodePixelWidth = 512;
-            }
-            else
-            {
-                image.DecodePixelHeight = 100;
-                image.DecodePixelWidth = 100;
-            }
+            //if (folder == Folder.MapsLargePreviews)
+            //{
+            //    image.DecodePixelHeight = 512;
+            //    image.DecodePixelWidth = 512;
+            //}
+            //else
+            //{
+            //    image.DecodePixelHeight = 100;
+            //    image.DecodePixelWidth = 100;
+            //}
 
             image.BeginInit();
 

@@ -47,11 +47,12 @@ namespace beta.Views.Windows
 
         private void SessionService_StateChanged(object sender, Models.TcpClientState e)
         {
-            if (e == Models.TcpClientState.Disconnected || e == Models.TcpClientState.TimedOut)
+            if (e == Models.TcpClientState.Disconnected)
             {
                 Dialog.ShowAsync();
                 SessionService.Authorize();
             }
+
             if (e == Models.TcpClientState.Connected)
             {
                 if (Dialog != null)

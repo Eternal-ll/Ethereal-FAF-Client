@@ -12,12 +12,19 @@ namespace beta.Views.Windows
         {
             InitializeComponent();
         }
-        public void LOG(string data)
+        public void LOGLobby(string data)
         {
             Dispatcher.Invoke(() =>
             {
                 ItemsControl.Items.Add(data);
-                //ScrollViewer.ScrollToBottom();
+            });
+
+        }
+        public void LOGIRC(string data)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                IRCItemsControl.Items.Add(data);
             });
 
         }

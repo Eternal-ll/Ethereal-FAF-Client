@@ -109,25 +109,25 @@ namespace beta.Models
         }
         private void ListenerLoop(object state)
         {
-            //try
-            //{
+            try
+            {
                 while (!IsListening)
                 {
                     RunLoopStep();
 
                     Thread.Sleep(ReadLoopIntervalMs);
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    TcpClient.Dispose();
-            //    TcpClient = null;
-            //    OnStateChanged(TcpClientState.TimedOut);
-            //}
-            //finally
-            //{
-            //    ListenThread = null;
-            //}
+            }
+            catch (Exception e)
+            {
+                TcpClient.Dispose();
+                TcpClient = null;
+                OnStateChanged(TcpClientState.Disconnected);
+            }
+            finally
+            {
+                ListenThread = null;
+            }
         }
         private void RunLoopStep()
         {

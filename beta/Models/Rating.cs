@@ -1,7 +1,10 @@
 ﻿using System;
 
-namespace beta.Models.Server
+namespace beta.Models
 {
+    /// <summary>
+    /// Used by PlayerInfoMessage. 
+    /// </summary>
     public class Rating
     {
         public double[] rating { get; set; }

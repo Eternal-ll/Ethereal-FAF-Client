@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <StartupObject>beta.Program</StartupObject>
 	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	<PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>

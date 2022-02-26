@@ -4,10 +4,8 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface IMapService
+    public interface IMapsService
     {
-        public event EventHandler<EventArgs<bool>> MapIsDownloaded;
-
         public Map GetMap(Uri uri, bool attachScenario = true);
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AttachMapScenario(ref Map map);

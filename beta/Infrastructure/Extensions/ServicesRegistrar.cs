@@ -11,9 +11,9 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<IPlayersService, PlayersService>()
             .AddSingleton<IGamesServices, GamesServices>()
-            .AddSingleton<IIrcService, IrcService>()
+            //.AddSingleton<IIrcService, IrcService>()
             .AddSingleton<IAvatarService, AvatarService>()
-            .AddSingleton<IMapService, MapService>()
+            .AddSingleton<IMapsService, MapsService>()
             .AddSingleton<ISocialService, SocialService>()
             .AddSingleton<ICacheService, CacheService>()
             ;

@@ -14,6 +14,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 
 namespace beta.Infrastructure.Services
 {
@@ -36,6 +37,7 @@ namespace beta.Infrastructure.Services
         private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
         private bool WaitingPong = false;
         private Stopwatch Stopwatch = new();
+        private Stopwatch TimeOutWatcher = new();
 
 #if DEBUG
         private readonly ILogger Logger;
@@ -71,8 +73,19 @@ namespace beta.Infrastructure.Services
             //Operations.Add(ServerCommand.ping, OnPing);
             Operations.Add(ServerCommand.pong, OnPong);
 
-            Operations.Add(ServerCommand.invalid, OnInvalidData); 
+            Operations.Add(ServerCommand.invalid, OnInvalidData);
             #endregion
+
+            //new Thread(() =>
+            //{
+            //    Stopwatch.Start();
+            //    while (true)
+            //    {
+            //        if (TimeOutWatcher.Elapsed.TotalSeconds > 180)
+            //            Ping();
+            //        Thread.Sleep(6000);
+            //    }
+            //}).Start();
         }
         #endregion
 
@@ -201,6 +214,7 @@ namespace beta.Infrastructure.Services
 
         private void OnDataReceived(object sender, string json)
         {
+            //TimeOutWatcher.Restart();
             var commandText = json.GetRequiredJsonRowValue();
             if (Enum.TryParse<ServerCommand>(commandText, out var command))
             {
@@ -208,13 +222,13 @@ namespace beta.Infrastructure.Services
                 {
                     response.Invoke(json);
 #if DEBUG
-                    App.DebugWindow.LOG(json.ToJsonFormat());
+                    App.DebugWindow.LOGLobby(json.ToJsonFormat());
                 }
-                else App.DebugWindow.LOG($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
+                else App.DebugWindow.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
 #endif
             }
 #if DEBUG
-            else App.DebugWindow.LOG($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
+            else App.DebugWindow.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
 #endif
         }
 
@@ -304,7 +318,7 @@ namespace beta.Infrastructure.Services
 #if DEBUG
             //Logger.LogInformation($"Received PONG, time elapsed: {Stopwatch.Elapsed.ToString("c")}");
             //Stopwatch.Stop();
-            App.DebugWindow.LOG($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
+            App.DebugWindow.LOGLobby($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
 #endif
             Stopwatch.Reset();
         } 

@@ -14,7 +14,7 @@ namespace beta.Infrastructure.Services
 
         private readonly ISessionService SessionService;
         private readonly IPlayersService PlayersService;
-        private readonly IMapService MapService;
+        private readonly IMapsService MapService;
 
         #endregion
 
@@ -38,7 +38,7 @@ namespace beta.Infrastructure.Services
         public GamesServices(
             ISessionService sessionService,
             IPlayersService playerService,
-            IMapService mapService)
+            IMapsService mapService)
         {
             SessionService = sessionService;
             PlayersService = playerService;

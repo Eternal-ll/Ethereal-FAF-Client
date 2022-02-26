@@ -26,10 +26,8 @@ namespace beta.Infrastructure.Services
             }
         }
     }
-    public class MapService : IMapService
+    public class MapsService : IMapsService
     {
-        public event EventHandler<EventArgs<bool>> MapIsDownloaded;
-
         private readonly ICacheService CacheService;
 
         private readonly List<string> LocalMaps = new();
@@ -37,7 +35,7 @@ namespace beta.Infrastructure.Services
 
         private string path = @"C:\Users\Eternal\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\";
         public string[] LocalPaths;
-        public MapService(ICacheService cacheService)
+        public MapsService(ICacheService cacheService)
         {
             CacheService = cacheService;
 

@@ -1,0 +1,30 @@
+﻿<Window x:Class="beta.Views.Windows.RichTextBoxWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:beta.Views.Windows"
+        mc:Ignorable="d"
+        Title="RichTextBoxWindow" Height="450" Width="800">
+    <RichTextBox Background="White" Foreground="Black">
+        <FlowDocument>
+            <Paragraph Background="WhiteSmoke">
+                <Run Text="Test"/>
+                <Bold>
+                    TEST
+                </Bold>
+                <InlineUIContainer>
+                    <Image Source="{StaticResource Flag.AD}" Height="20"/>
+                </InlineUIContainer>
+            </Paragraph>
+            <Section>
+                <List>
+                    <ListItem>
+                        
+                    </ListItem>
+                    <ListItem/>
+                </List>
+            </Section>
+        </FlowDocument>
+    </RichTextBox>
+</Window>

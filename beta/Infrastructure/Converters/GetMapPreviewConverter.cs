@@ -9,11 +9,11 @@ namespace beta.Infrastructure.Converters
 {
     public class GetMapPreviewConverter : IValueConverter
     {
-        private readonly IMapService MapService;
+        private readonly IMapsService MapService;
 
         public GetMapPreviewConverter()
         {
-            MapService = App.Services.GetService<IMapService>();
+            MapService = App.Services.GetService<IMapsService>();
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
