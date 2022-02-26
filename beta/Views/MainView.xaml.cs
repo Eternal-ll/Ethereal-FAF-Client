@@ -1,6 +1,8 @@
 ﻿using beta.Infrastructure.Navigation;
+using beta.Views.Modals;
 using ModernWpf.Controls;
 using System;
+using System.IO;
 using System.Windows.Controls;
 
 namespace beta.Views
@@ -16,6 +18,8 @@ namespace beta.Views
         public void OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
         #endregion
 
+        private ContentDialog Dialog;
+
         #region Ctor
         public MainView()
         {
@@ -28,7 +32,34 @@ namespace beta.Views
                 new ChatView(),
                 new GlobalView(),
                 new AnalyticsView(),
+                new SettingsView(),
             };
+
+            // TODO rewrite
+            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.PathToGame))
+            {
+                var defaultPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance\bin\SupremeCommander.exe";
+
+                if (!File.Exists(defaultPath))
+                {
+                    Dialog = new ContentDialog();
+
+                    Dialog.PreviewKeyDown += (s, e) =>
+                    {
+                        if (e.Key == System.Windows.Input.Key.Escape)
+                        {
+                            e.Handled = true;
+                        }
+                    };
+                    Dialog.Content = new SelectPathToGameView(Dialog);
+                    Dialog.ShowAsync();
+                }
+                else
+                {
+                    // TODO INVOKE SOMETHING AND SHOW TO USER
+                    Properties.Settings.Default.PathToGame = defaultPath;
+                }   
+            }
         }
 
         #endregion

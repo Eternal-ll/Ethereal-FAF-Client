@@ -41,5 +41,8 @@
     <Setting Name="Height" Type="System.Double" Scope="User">
       <Value Profile="(Default)">600</Value>
     </Setting>
+    <Setting Name="PathToGame" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

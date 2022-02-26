@@ -177,5 +177,17 @@ namespace beta.Properties {
                 this["Height"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PathToGame {
+            get {
+                return ((string)(this["PathToGame"]));
+            }
+            set {
+                this["PathToGame"] = value;
+            }
+        }
     }
 }

@@ -22,8 +22,6 @@
                 <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="#FF1F1F1F"/>
                 <SolidColorBrush x:Key="FlyoutBorderThemeBrush" Color="#FF1F1F1F"/>
 
-                
-
                 <Style TargetType="control:CrossFadeContentControl">
                     <Setter Property="Template">
                         <Setter.Value>
@@ -69,7 +67,7 @@
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem x:Name="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
                 <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
-                <!--<ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>-->
+                <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
             </ui:NavigationView.FooterMenuItems>
 
             <control:CrossFadeContentControl x:Name="ContentFrame"

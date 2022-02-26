@@ -4,12 +4,12 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf;
 using ModernWpf.Controls;
-using System;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace beta.Views.Windows
 {
+
     public partial class MainWindow : Window
     {
         private readonly ISessionService SessionService;
@@ -22,10 +22,10 @@ namespace beta.Views.Windows
             SessionService = App.Services.GetService<ISessionService>();
 
             NavigationManager navManager = new(MainFrame, ModalFrame);
-            navManager.Navigate(new AuthView());
-
+            navManager.Navigate(new MainView());
 
             Dialog = new ContentDialog();
+
             Dialog.PreviewKeyDown += (s, e) =>
             {
                 if (e.Key == System.Windows.Input.Key.Escape)
