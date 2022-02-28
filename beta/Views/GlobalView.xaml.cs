@@ -87,16 +87,9 @@ namespace beta.Views
             var lobby = (GameInfoMessage)e.Item;
             e.Accepted = false;
 
-            if (lobby.game_type != "custom" || lobby.featured_mod != "faf" || lobby.sim_mods.Count > 0)
+            if (lobby.game_type != "custom" || lobby.FeaturedMod != FeaturedMod.FAF || lobby.sim_mods.Count > 0)
                 return;
 
-            //var mapName = lobby.MapName;
-            //if (mapName.Contains("gap") || mapName.Contains("crater") || mapName.Contains("astro") ||
-            //    mapName.Contains("pass"))
-            //    return;
-
-            //if (lobby.num_players == 0)
-            //    return;
             if (_IsMapsBlacklistEnabled && MapsBlackList.Count > 0)
             {
                 var items = MapsBlackList;
