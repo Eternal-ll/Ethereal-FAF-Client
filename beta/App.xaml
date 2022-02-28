@@ -43,7 +43,6 @@
                     <converter:TextConverter x:Key="TextConverter"/>
 
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
-                    <converter:GameModConverter x:Key="GameModConverter"/>
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
                 </ResourceDictionary>
 
