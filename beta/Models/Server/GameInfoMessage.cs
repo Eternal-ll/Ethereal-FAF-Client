@@ -5,6 +5,7 @@ using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
@@ -290,7 +291,11 @@ namespace beta.Models.Server
         public string title { get; set; }
         public string state { get; set; }
         public string game_type { get; set; }
-        public string featured_mod { get; set; }
+
+        [JsonPropertyName("featured_mod")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public FeaturedMod FeaturedMod { get; set; }
+
         public Dictionary<string, string> sim_mods { get; set; }
 
         #region mapname
