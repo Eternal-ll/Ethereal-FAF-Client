@@ -88,7 +88,8 @@ namespace beta.Infrastructure.Services
 
                 if (difference.TotalSeconds > 120)
                 {
-                    games.Remove(suspiciousGames[i]);
+                    if (suspiciousGames[i].num_players == 0)
+                        games.Remove(suspiciousGames[i]);
                     suspiciousGames.RemoveAt(i);
                 }
             }

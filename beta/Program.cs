@@ -16,12 +16,10 @@ namespace beta
 
         public static IHostBuilder CreateHostBuilder(string[] Args) =>
             Host.CreateDefaultBuilder(Args)
-#if DEBUG
             .ConfigureLogging(logging =>
             {
 
             })
-#endif
             .UseContentRoot(App.CurrentDirectory)
             .ConfigureAppConfiguration((host, cfg) => cfg
             .SetBasePath(App.CurrentDirectory)

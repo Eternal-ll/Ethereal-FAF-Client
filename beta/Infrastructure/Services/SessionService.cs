@@ -2,7 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
-using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using beta.Properties;
 #if DEBUG
 using Microsoft.Extensions.Logging;

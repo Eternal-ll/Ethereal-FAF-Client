@@ -1,4 +1,4 @@
-﻿using beta.Models.Server;
+﻿using beta.Models.Server.Enums;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

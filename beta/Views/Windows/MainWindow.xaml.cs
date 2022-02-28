@@ -22,7 +22,7 @@ namespace beta.Views.Windows
             SessionService = App.Services.GetService<ISessionService>();
 
             NavigationManager navManager = new(MainFrame, ModalFrame);
-            navManager.Navigate(new MainView());
+            navManager.Navigate(new AuthView());
 
             Dialog = new ContentDialog();
 

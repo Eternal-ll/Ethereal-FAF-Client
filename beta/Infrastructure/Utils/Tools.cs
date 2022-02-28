@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Windows;
 using System.Windows.Media;
 
 namespace beta.Infrastructure.Utils
@@ -53,6 +56,15 @@ namespace beta.Infrastructure.Utils
             }
 
             return foundChild as T;
+        }
+
+
+        public static string CalculateMD5(string filename)
+        {
+            using var md5 = MD5.Create();
+            using var stream = File.OpenRead(filename);
+            var hash = md5.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
     }
 }

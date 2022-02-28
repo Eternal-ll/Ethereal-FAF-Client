@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
+using beta.Models.Server.Enums;
 
 namespace beta.Infrastructure.Services
 {

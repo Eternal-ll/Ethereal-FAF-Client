@@ -1,4 +1,5 @@
 ﻿using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.Server

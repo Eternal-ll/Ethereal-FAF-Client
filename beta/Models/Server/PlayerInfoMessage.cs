@@ -1,4 +1,5 @@
 ﻿using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -7,23 +8,16 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
-    public enum GameState
+    public enum GameState : byte
     {
         None = 0,
 
         Open = 1,
         Playing = 2,
-        Closed = 3,
 
         Host = 4,
-        PrivateHost = 5,
 
-        PrivateOpen = 6,
-        PrivateClosed = 7,
-        PrivatePlaying = 8,
-
-        Playing5 = 9,
-        PrivatePlaying5 = 10
+        Playing5 = 9
     }
 
     public class PlayerAvatar
@@ -70,13 +64,6 @@ namespace beta.Models.Server
         }
     }
 
-    public enum PlayerRelationShip
-    {
-        Foe = -1,
-        None = 0,
-        Friend = 1
-    }
-
     public class PlayerNote
     {
         public Color Color { get; set; }
@@ -108,21 +95,12 @@ namespace beta.Models.Server
         #endregion
 
         #region GameStatusImage
-        private object _GameStatusImage;
         public object GameStatusImage => GameState switch
         {
-            GameState.None => null,
             GameState.Open => App.Current.Resources["PlayerGameStatus.open"],
             GameState.Playing => App.Current.Resources["PlayerGameStatus.playing"],
-            GameState.Closed => null,
             GameState.Host => App.Current.Resources["PlayerGameStatus.host"],
-            GameState.PrivateHost => null,
-            GameState.PrivateOpen => null,
-            GameState.PrivateClosed => null,
-            GameState.PrivatePlaying => null,
-            GameState.Playing5 => App.Current.Resources["PlayerGameStatus.playing5"],
-            GameState.PrivatePlaying5 => null,
-            _ => null
+            GameState.Playing5 => App.Current.Resources["PlayerGameStatus.playing5"]
         };
         #endregion
 
@@ -259,7 +237,6 @@ namespace beta.Models.Server
         
         // TODO RENAME to PlayerAvatarData?
         public PlayerAvatar avatar { get; set; }
-        public PlayerAlias[] names { get; set; }
 
         public PlayerInfoMessage[] players { get; set; }
     }

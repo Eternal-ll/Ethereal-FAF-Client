@@ -421,7 +421,7 @@
                                     <Setter Property="TextElement.Foreground" Value="LimeGreen"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Host.RelationShip}"
-                                                                             Value="-1">
+                                                                             Value="2">
                                     <Setter Property="TextElement.Foreground" Value="Red"/>
                                 </DataTrigger>
                             </Style.Triggers>
@@ -659,7 +659,7 @@
                                                                     <Setter Property="Foreground" Value="LimeGreen"/>
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding RelationShip}"
-                                                                             Value="-1">
+                                                                             Value="2">
                                                                     <Setter Property="Foreground" Value="Red"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>

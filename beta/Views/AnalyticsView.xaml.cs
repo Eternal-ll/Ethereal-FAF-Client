@@ -96,7 +96,11 @@ namespace beta.Views
                     break;
                     //Thread.Sleep(500);
                 }
-            }).Start();
+            })
+            {
+                Name = "Analytics load thread",
+                IsBackground = true
+            }.Start();
         }
     }
 }

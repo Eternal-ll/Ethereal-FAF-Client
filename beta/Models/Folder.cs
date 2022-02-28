@@ -10,6 +10,7 @@
         Mods = 4,
         Maps = 5,
 
+        ProgramData = 6,
 
         PlayerAvatars = 4,
         Emoji = 10

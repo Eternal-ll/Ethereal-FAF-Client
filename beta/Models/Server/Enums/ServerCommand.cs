@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace beta.Models.Server.Base
+﻿namespace beta.Models.Server.Enums
 {
     public enum ServerCommand : byte
     {
@@ -31,10 +29,10 @@ namespace beta.Models.Server.Base
         game_join = 24,
 
         invite_to_party = 25,
-        
+
         // on lobby server authorization
         invalid = 99,
-        
+
         unknown = 100
     }
 }

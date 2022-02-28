@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
+using beta.Models.Server.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -104,7 +105,7 @@ namespace beta.Views
                         return;
             }
 
-            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == Models.Server.PlayerRelationShip.Foe)
+            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == PlayerRelationShip.Foe)
                 return;
 
             if (_IsPrivateGamesHidden && lobby.password_protected)
@@ -158,6 +159,7 @@ namespace beta.Views
 
                     if (!value)
                     {
+                        CollectionViewSource.LiveSortingProperties.Clear();
                         View.SortDescriptions.Clear();
                     }
                     if (value && View.SortDescriptions.Count == 0)
@@ -196,6 +198,9 @@ namespace beta.Views
                     _SelectedSort = value;
                     PropertyChanged?.Invoke(this, new(nameof(SelectedSort)));
                     PropertyChanged?.Invoke(this, new(nameof(SortDirection)));
+
+                    CollectionViewSource.LiveSortingProperties.Clear();
+                    CollectionViewSource.LiveSortingProperties.Add(value.PropertyName);
                     //SortDirection = ListSortDirection.Ascending;
                     View.SortDescriptions.Clear();
                     View.SortDescriptions.Add(value);
@@ -372,6 +377,7 @@ namespace beta.Views
             //var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
             //CollectionViewSource.GroupDescriptions.Add(grouping);
+            CollectionViewSource.IsLiveSortingRequested = true;
 
             BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
             BindingOperations.EnableCollectionSynchronization(GamesServices.LiveGames, _lock);

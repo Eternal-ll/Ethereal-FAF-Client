@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "beta", "beta\beta.csproj", "{1CC6DEA6-1F9C-4246-8A15-D082BBD9D47D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRC", "IRC\IRC.csproj", "{D8FC7D11-88D7-41E5-AA1E-FA42439D04CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRC", "IRC\IRC.csproj", "{D8FC7D11-88D7-41E5-AA1E-FA42439D04CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

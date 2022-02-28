@@ -30,6 +30,8 @@ namespace beta
                 Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
                 
+                Folder.ProgramData => "C:\\ProgramData\\FAForever\\",
+
                 Folder.Common => CurrentDirectory + "\\cache\\common\\",
 
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)

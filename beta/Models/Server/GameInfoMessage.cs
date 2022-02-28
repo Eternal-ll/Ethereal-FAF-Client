@@ -1,24 +1,14 @@
 ﻿using beta.Infrastructure.Services;
 using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Media;
 
 namespace beta.Models.Server
 {
-    public enum LobbyState
-    {
-        Broken = -1,
-        Init = 0,
-        New = 1,
-        Unknown = 2,
-        Old = 3,
-        Launched = 4
-    }
-
-    public enum PreviewType
+    public enum PreviewType : byte
     {
         Normal = 0,
         Coop = 1,
@@ -154,7 +144,13 @@ namespace beta.Models.Server
         public Map Map
         {
             get => _Map;
-            set => Set(ref _Map, value);
+            set
+            {
+                if (Set(ref _Map, value))
+                {
+                    OnPropertyChanged(nameof(Map.MapPreviewSource));
+                }
+            }
         }
         #endregion
 

@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Commands.Base;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Server.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace beta.Infrastructure.Commands
@@ -35,7 +36,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.AddRelationShip(id, Models.Server.PlayerRelationShip.Foe);
+                SocialService.AddRelationShip(id, PlayerRelationShip.Foe);
         }
     }
     internal class RemoveFoeCommand : Command
@@ -46,7 +47,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.RemoveRelationShip(id, Models.Server.PlayerRelationShip.Foe);
+                SocialService.RemoveRelationShip(id, PlayerRelationShip.Foe);
         }
     }
 }

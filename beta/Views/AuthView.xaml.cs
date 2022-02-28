@@ -91,7 +91,11 @@ namespace beta.Views
 
             ProgressRing.Visibility = Visibility.Visible;
 
-            new Thread(()=> OAuthService.Auth(login, password)).Start();
+            new Thread(()=> OAuthService.Auth(login, password))
+            {
+                Name = "OAuthorization thread",
+                IsBackground=true
+            }.Start();
         }
 
         private readonly ContentDialog WarnDialog = new()
