@@ -1,6 +1,6 @@
 ﻿using beta.Infrastructure.Commands.Base;
 using beta.Infrastructure.Services.Interfaces;
-using beta.ViewModels;
+using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
 
@@ -14,7 +14,7 @@ namespace beta.Infrastructure.Commands
 
         public override void Execute(object parameter)
         {
-            if (parameter is GameVM game)
+            if (parameter is GameInfoMessage game)
                 new Thread(() => GameLauncherService.JoinGame(game))
                 {
                     Name = "Game launcher thread"

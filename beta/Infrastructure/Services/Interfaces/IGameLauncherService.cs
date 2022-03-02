@@ -1,5 +1,7 @@
-﻿using beta.ViewModels;
+﻿using beta.Models.Server;
+using beta.ViewModels;
 using System;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
@@ -8,6 +10,6 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<TestDownloaderModel>> PatchUpdateRequired;
 
         public void JoinGame();
-        public void JoinGame(GameVM game);
+        public void JoinGame(GameInfoMessage game);
     }
 }

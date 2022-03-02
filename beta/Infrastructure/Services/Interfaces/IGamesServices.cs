@@ -1,12 +1,13 @@
 ﻿using beta.Models.Server;
-using beta.ViewModels;
 using System.Collections.ObjectModel;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IGamesServices
     {
-        public ObservableCollection<GameVM> IdleGames { get; }
-        public ObservableCollection<GameVM> LiveGames { get; }
+        public ObservableCollection<GameInfoMessage> IdleGames { get; }
+        public ObservableCollection<GameInfoMessage> LiveGames { get; }
+
+        public InGameTeam[] GetInGameTeams(GameInfoMessage game);
     }
 }

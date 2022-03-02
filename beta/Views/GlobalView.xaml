@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
                     xmlns:models="clr-namespace:beta.Models.Server"
-             xmlns:viewModels="clr-namespace:beta.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:GlobalView}}">
@@ -671,7 +670,7 @@
                                             </Setter>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
-                                                     Value="{x:Type viewModels:GameVM}">
+                                                     Value="{x:Type models:GameInfoMessage}">
                                             <Setter Property="Content" Value="{Binding}"/>
                                         </DataTrigger>
                                     </Style.Triggers>

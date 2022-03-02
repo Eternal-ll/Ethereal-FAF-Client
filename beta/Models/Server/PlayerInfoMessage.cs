@@ -1,6 +1,5 @@
 ﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
-using beta.ViewModels;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -115,8 +114,8 @@ namespace beta.Models.Server
         #endregion
 
         #region Game
-        private GameVM _Game;
-        public GameVM Game
+        private GameInfoMessage _Game;
+        public GameInfoMessage Game
         {
             get => _Game;
             set
@@ -135,7 +134,7 @@ namespace beta.Models.Server
                         return;
                     }
 
-                    GameState = value.Host.login.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
+                    GameState = value.host.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
                 }
             }
         }

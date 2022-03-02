@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:models="clr-namespace:beta.Models.Server"
-                    xmlns:viewModels="clr-namespace:beta.ViewModels"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="d"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -95,7 +94,7 @@
                         <Setter Property="Visibility" Value="Collapsed"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                                    Path=Children[1].Source.IsDownloading, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}"
+                                    Path=Children[1].Source.IsDownloading}"
                                                              Value="True">
                                 <Setter Property="IsActive" Value="True"/>
                                 <Setter Property="Visibility" Value="Visible"/>
@@ -105,7 +104,7 @@
                 </ui:ProgressRing.Style>
             </ui:ProgressRing>
             <Image
-                Source="{Binding mapname, Converter={StaticResource GetMapPreviewConverter}, UpdateSourceTrigger=PropertyChanged}"
+                Source="{Binding mapname, Converter={StaticResource GetMapPreviewConverter}}"
                 Stretch="UniformToFill"
                 Height="400"
                 Width="400"/>
@@ -188,13 +187,13 @@
         </Grid>
     </ui:Flyout>
 
-    <DataTemplate DataType="{x:Type viewModels:GameVM}">
+    <DataTemplate DataType="{x:Type models:GameInfoMessage}">
         <Grid
             Focusable="False"
             ShowGridLines="False"
             Background="Transparent"
             HorizontalAlignment="Stretch"
-            d:DataContext="{d:DesignInstance {x:Type viewModels:GameVM}}">
+            d:DataContext="{d:DesignInstance {x:Type models:GameInfoMessage}}">
             <Grid.Resources>
                 <SolidColorBrush x:Key="Bg" Color="Black" Opacity=".5"/>
             </Grid.Resources>
@@ -217,7 +216,7 @@
             <Border
                 Grid.Row="1"
                 CornerRadius="4"
-                ToolTip="{Binding MapName}"
+                ToolTip="{Binding mapname}"
                 Style="{StaticResource PreviewImageStyle}">
                 <Border.Background>
                     <ImageBrush Stretch="Uniform"
@@ -253,7 +252,7 @@
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPasswordProtected}" Value="False">
+                                    <DataTrigger Binding="{Binding password_protected}" Value="False">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -452,13 +451,10 @@
                         Margin="0 4"
                         Padding="0"
                         VerticalAlignment="Center"
-                        Text="{Binding Host.login}">
+                        Text="{Binding host}">
                         
                     </TextBlock>
 
-                    <!--
-                        TODO: IPlayer -> UnknownPlayer(login) or PlayerInfoMessage(data...)
-                    -->
                     <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -589,7 +585,7 @@
                         Style="{StaticResource LobbyTextBlockStyle}"
                         Margin="7 4 0 0"
                         Padding="26 0 0 0">
-                        <Run Text="{Binding PlayersCount}">
+                        <Run Text="{Binding num_players}">
                             <Run.Style>
                                 <Style TargetType="Run">
                                     <Setter Property="Foreground" Value="White"/>
@@ -625,7 +621,7 @@
                             </Run.Style>
                         </Run>
                         <Run Text="/" FontSize="12"/>
-                        <Run Text="{Binding MaxPlayersCount}"/>
+                        <Run Text="{Binding max_players}"/>
                         <TextBlock.Background>
                             <ImageBrush Stretch="Uniform" AlignmentX="Left" ImageSource="{StaticResource PlayersIcon}">
                                 <ImageBrush.Transform>
@@ -815,7 +811,7 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True, StringFormat='{}{0} avg.'}"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PlayersCount}"
+                                    <DataTrigger Binding="{Binding num_players}"
                                                  Value="1">
                                         <Setter Property="Text" Value="{Binding AverageRating, NotifyOnTargetUpdated=True}"/>
                                     </DataTrigger>

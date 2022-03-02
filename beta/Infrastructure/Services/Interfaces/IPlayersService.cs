@@ -16,7 +16,7 @@ namespace beta.Infrastructure.Services.Interfaces
 
         #region Functions
 
-        public IPlayer GetPlayer(string login);
+        public PlayerInfoMessage GetPlayer(string login);
         public PlayerInfoMessage GetPlayer(int id);
 
         public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH,

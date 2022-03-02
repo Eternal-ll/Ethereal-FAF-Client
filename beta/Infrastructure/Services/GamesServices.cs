@@ -1,9 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
-using beta.Models.Server.Enums;
-using beta.ViewModels;
 using beta.ViewModels.Base;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -22,19 +19,19 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region IdleGames
-        private readonly ObservableCollection<GameVM> _IdleGames = new();
-        public ObservableCollection<GameVM> IdleGames => _IdleGames;
+        private readonly ObservableCollection<GameInfoMessage> _IdleGames = new();
+        public ObservableCollection<GameInfoMessage> IdleGames => _IdleGames;
         #endregion
 
         #region LiveGames
-        private readonly ObservableCollection<GameVM> _LiveGames = new();
-        public ObservableCollection<GameVM> LiveGames => _LiveGames;
+        private readonly ObservableCollection<GameInfoMessage> _LiveGames = new();
+        public ObservableCollection<GameInfoMessage> LiveGames => _LiveGames;
         #endregion
 
         /// <summary>
         /// Idle games without players. Bugged or just created
         /// </summary>
-        private readonly List<GameVM> SuspiciousGames = new();
+        private readonly List<GameInfoMessage> SuspiciousGames = new();
 
         #endregion
 
@@ -70,17 +67,17 @@ namespace beta.Infrastructure.Services
         {
             var game = e.Arg;
 
-            var idleGames = _IdleGames;
-            var liveGames = _LiveGames;
+            var games = _IdleGames;
             var suspiciousGames = SuspiciousGames;
+            // Update in-game players status
 
-            var newTeams = GetInGameTeams(game.teams);
+            game.Teams = GetInGameTeams(game);
 
             #region Checking suspicious games with NO PLAYERS
 
             for (int i = 0; i < suspiciousGames.Count; i++)
             {
-                if (suspiciousGames[i].Host.login.Equals(game.host, System.StringComparison.OrdinalIgnoreCase))
+                if (suspiciousGames[i].host == game.host)
                 {
                     if (game.num_players == 0) continue;
                     suspiciousGames.RemoveAt(i);
@@ -92,42 +89,31 @@ namespace beta.Infrastructure.Services
 
                 if (difference.TotalSeconds > 120)
                 {
-                    if (suspiciousGames[i].PlayersCount == 0)
-                        idleGames.Remove(suspiciousGames[i]);
+                    if (suspiciousGames[i].num_players == 0)
+                        games.Remove(suspiciousGames[i]);
                     suspiciousGames.RemoveAt(i);
                 }
             }
             #endregion
 
             #region Searching matches in list of idle games
-            for (int i = 0; i < idleGames.Count; i++)
+            for (int i = 0; i < games.Count; i++)
             {
-                var idleGame = idleGames[i];
-                if (idleGame.Host.login.Equals(game.host, System.StringComparison.OrdinalIgnoreCase))
+                if (games[i].host == game.host)
                 {
                     if (game.launched_at != null)
                     {
                         // game is launched, removing from IdleGames and moving to LiveGames
-                        idleGames.RemoveAt(i);
-                        liveGames.Add(idleGame);
+                        games.RemoveAt(i);
+                        _LiveGames.Add(game);
                         return;
                     }
 
-                    if (idleGame.MapName != game.mapname)
-                    {
-                        idleGame.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                            attachScenario: true);
-                    }
-
-                    // TODO rework process of updating players in game
-                    idleGame.UpdateTeams(newTeams);
-
-                    // Updating idle game stats
-                    if (!idleGame.Update(game))
+                    // Updating idle game states
+                    if (!games[i].Update(game))
                     {
                         // returns false if num_players == 0, game is died
-                        // 2 -> 1 -> 0 -> died, end
-                        idleGames.RemoveAt(i);
+                        games.RemoveAt(i);
                     }
                     return;
                 }
@@ -138,93 +124,59 @@ namespace beta.Infrastructure.Services
             // if game is live
             if (game.launched_at != null)
             {
+                var liveGames = _LiveGames;
+
                 for (int i = 0; i < liveGames.Count; i++)
                 {
-                    var liveGame = liveGames[i];
-                    if (liveGame.Host.login.Equals(game.host, System.StringComparison.OrdinalIgnoreCase))
+                    if (liveGames[i].host == game.host)
                     {
-                        // TODO rework process of updating players in game
-                        liveGame.UpdateTeams(newTeams);
-
+                        if (liveGames[i].mapname != game.mapname)
+                        {
+                            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+                                attachScenario: true);
+                        }
                         // Updating idle game states
-                        if (!liveGame.Update(game))
+                        if (!liveGames[i].Update(game))
                         {
                             // returns false if num_players == 0, game is died
-                            // 2 -> 1 -> 0 -> died, end
                             liveGames.RemoveAt(i);
                         }
                         return;
                     }
                 }
-            }
+
+                // if we passed this way, that we didnt found matches in LiveGames
+
+                // filling host by player instance
+                if (game.Host == null)
+                    game.Host = PlayersService.GetPlayer(game.host);
+
+                liveGames.Add(game);
+                return;
+            } 
             #endregion
 
-            // if we passed this way, that we didnt found matches in LiveGames
-
-            GameVM newGame = CreateNewGame(game);
-            // TODO REWORK????
-            // loading teams
-            // TODO rework process of updating players in game
-            newGame.UpdateTeams(newTeams);
-
-            // if started, adding to live games and the end
-            if (game.launched_at != null)
-            {
-                liveGames.Add(newGame);
-                return;
-            }
+            // filling host by player instance
+            if (game.Host == null)
+                game.Host = PlayersService.GetPlayer(game.host);
 
             if (game.num_players == 0)
             {
                 // if game is empty, we adding it to suspicious list and monitoring it during next updates
-                newGame.CreatedTime = System.DateTime.UtcNow;
-                SuspiciousGames.Add(newGame);
+                game.CreatedTime = System.DateTime.UtcNow;
+                SuspiciousGames.Add(game);
             }
+
+            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+                attachScenario: true);
 
             // finally if nothing matched we adding it to IdleGames
-            idleGames.Add(newGame);
+            games.Add(game);
         }
 
-        private GameVM CreateNewGame(GameInfoMessage game)
+        public InGameTeam[] GetInGameTeams(GameInfoMessage game)
         {
-            GameVM newGame = new()
-            {
-                UID = game.uid,
-                Title = game.title,
-                Host = PlayersService.GetPlayer(game.host),
-                Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                // detailed info: size / mexs / hydros / name / description
-                attachScenario: true),
-                // TODO Move to Map.cs?
-                MapName = game.mapname,
-                IsPasswordProtected = game.password_protected,
-                // -----------
-                // TODO Move to separate struct?
-                MinPlayerRatingToJoin = game.rating_min,
-                MaxPlayerRatingToJoin = game.rating_max,
-                enforce_rating_range = game.enforce_rating_range,
-                // -----------
-                State = game.state,
-                game_type = game.game_type,
-                PlayersCount = game.num_players,
-                // TODO Move to Map.cs?
-                MaxPlayersCount = game.max_players,
-                rating_type = game.rating_type,
-                sim_mods = game.sim_mods,
-                launched_at = game.launched_at,
-                Visibility = game.visibility,
-                FeaturedMod = Enum.Parse<FeaturedMod>(game.featured_mod, true)
-            };
-            if (newGame.Host == null)
-            {
-
-            }
-            return newGame;
-        }
-
-        public InGameTeam[] GetInGameTeams(Dictionary<int, string[]> gameTeams)
-        {
-            InGameTeam[] teams = new InGameTeam[gameTeams.Count];
+            InGameTeam[] teams = new InGameTeam[game.teams.Count];
 
             int j = 0;
 
@@ -237,7 +189,7 @@ namespace beta.Infrastructure.Services
             //    playerStatus = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
             //}
 
-            foreach (var valuePair in gameTeams)
+            foreach (var valuePair in game.teams)
             {
                 var players = new IPlayer[valuePair.Value.Length];
 
@@ -252,6 +204,11 @@ namespace beta.Infrastructure.Services
                         };
                         continue;
                     }
+
+                    //player.GameState = playerStatus;
+                
+                    player.Game = game;
+
                     players[i] = player;
                 }
 
