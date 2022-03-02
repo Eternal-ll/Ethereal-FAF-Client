@@ -189,5 +189,53 @@ namespace beta.Properties {
                 this["PathToGame"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsMapsBlacklistEnabled {
+            get {
+                return ((bool)(this["IsMapsBlacklistEnabled"]));
+            }
+            set {
+                this["IsMapsBlacklistEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsFoesGamesHidden {
+            get {
+                return ((bool)(this["IsFoesGamesHidden"]));
+            }
+            set {
+                this["IsFoesGamesHidden"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsGamesSortEnabled {
+            get {
+                return ((bool)(this["IsGamesSortEnabled"]));
+            }
+            set {
+                this["IsGamesSortEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsPrivateGamesHidden {
+            get {
+                return ((bool)(this["IsPrivateGamesHidden"]));
+            }
+            set {
+                this["IsPrivateGamesHidden"] = value;
+            }
+        }
     }
 }

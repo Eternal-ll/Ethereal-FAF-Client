@@ -53,26 +53,6 @@ namespace beta.Views
         }
         #endregion
 
-        #region IsPrivateGamesHidden
-
-        private bool _IsPrivateGamesHidden;
-
-        public bool IsPrivateGamesHidden
-        {
-            get => _IsPrivateGamesHidden;
-            set
-            {
-                if (_IsPrivateGamesHidden != value)
-                {
-                    _IsPrivateGamesHidden = value;
-
-                    View.Refresh();
-                    OnPropertyChanged(nameof(IsPrivateGamesHidden));
-                }
-            }
-        }
-        #endregion
-
         #region CollectionViewSource / View
         private readonly CollectionViewSource CollectionViewSource = new();
         public ICollectionView View => CollectionViewSource.View;
@@ -134,34 +114,6 @@ namespace beta.Views
         #endregion
 
         public ScrollViewer IdleGamesScrollViewer { get; }
-        #endregion
-
-        #region IsSortEnabled
-        private bool _IsSortEnabled;
-        public bool IsSortEnabled
-        {
-            get => _IsSortEnabled;
-            set
-            {
-                if (_IsSortEnabled != value)
-                {
-                    _IsSortEnabled = value;
-
-                    //View.Refresh();
-                    OnPropertyChanged(nameof(IsSortEnabled));
-
-                    if (!value)
-                    {
-                        CollectionViewSource.LiveSortingProperties.Clear();
-                        View.SortDescriptions.Clear();
-                    }
-                    if (value && View.SortDescriptions.Count == 0)
-                    {
-                        SelectedSort = SortDescriptions[0];
-                    }
-                }
-            }
-        }
         #endregion
 
         #region Sort properties
@@ -268,8 +220,56 @@ namespace beta.Views
 
         #endregion
 
+        #region IsPrivateGamesHidden
+
+        private bool _IsPrivateGamesHidden = Settings.Default.IsPrivateGamesHidden;
+
+        public bool IsPrivateGamesHidden
+        {
+            get => _IsPrivateGamesHidden;
+            set
+            {
+                if (_IsPrivateGamesHidden != value)
+                {
+                    _IsPrivateGamesHidden = value;
+
+                    View.Refresh();
+                    OnPropertyChanged(nameof(IsPrivateGamesHidden));
+                }
+            }
+        }
+        #endregion
+
+        #region IsSortEnabled
+        private bool _IsSortEnabled = Settings.Default.IsGamesSortEnabled;
+        public bool IsSortEnabled
+        {
+            get => _IsSortEnabled;
+            set
+            {
+                if (_IsSortEnabled != value)
+                {
+                    _IsSortEnabled = value;
+
+                    //View.Refresh();
+                    OnPropertyChanged(nameof(IsSortEnabled));
+
+                    if (!value)
+                    {
+                        CollectionViewSource.LiveSortingProperties.Clear();
+                        View.SortDescriptions.Clear();
+                    }
+                    if (value && View.SortDescriptions.Count == 0)
+                    {
+                        SelectedSort = SortDescriptions[0];
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region IsFoesGamesHidden
-        private bool _IsFoesGamesHidden;
+        private bool _IsFoesGamesHidden = Settings.Default.IsFoesGamesHidden;
         public bool IsFoesGamesHidden
         {
             get => _IsFoesGamesHidden;
@@ -283,12 +283,8 @@ namespace beta.Views
         }
         #endregion
 
-        #region MapsBlackList
-
-        public ObservableCollection<string> MapsBlackList { get; set; } = new();
-
         #region IsMapsBlacklistEnabled
-        private bool _IsMapsBlacklistEnabled;
+        private bool _IsMapsBlacklistEnabled = Settings.Default.IsMapsBlacklistEnabled;
         public bool IsMapsBlacklistEnabled
         {
             get => _IsMapsBlacklistEnabled;
@@ -302,6 +298,10 @@ namespace beta.Views
             }
         }
         #endregion
+
+        #region MapsBlackList
+
+        public ObservableCollection<string> MapsBlackList { get; set; } = new();
 
         #region InputKeyWord
         private string _InputKeyWord = string.Empty;
@@ -326,7 +326,6 @@ namespace beta.Views
                 View.Refresh();
         }
         #endregion
-
 
         #region RemoveKeyWordCommand
         private ICommand _RemoveKeyWordCommand;
