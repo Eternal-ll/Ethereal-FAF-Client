@@ -220,14 +220,15 @@ namespace beta.Infrastructure.Services
                 if (Operations.TryGetValue(command, out var response))
                 {
                     response.Invoke(json);
-#if DEBUG
-                    App.DebugWindow.LOGLobby(json.ToJsonFormat());
+
+                    //App.DebugWindow.LOGLobby(json.ToJsonFormat());
                 }
+#if DEBUG
                 else App.DebugWindow.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
 #endif
-            }
+        }
 #if DEBUG
-            else App.DebugWindow.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
+            //else App.DebugWindow.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
 #endif
         }
 
