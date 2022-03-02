@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Models.API;
-using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels;
 using System;
@@ -28,7 +27,7 @@ namespace beta.Infrastructure.Services
 
         public GameLauncherState State { get; set; }
         public bool GameIsRunning { get; set; } = false;
-        private GameInfoMessage LastGame;
+        private GameVM LastGame;
 
         public GameLauncherService(IApiService apiService)
         {
@@ -42,7 +41,7 @@ namespace beta.Infrastructure.Services
 
             }
         }
-        public void JoinGame(GameInfoMessage game)
+        public void JoinGame(GameVM game)
         {
             /* SEND
             "command": "game_join",
@@ -69,7 +68,7 @@ namespace beta.Infrastructure.Services
 
             }
         }
-        public void JoinGame(GameInfoMessage game, string password)
+        public void JoinGame(GameVM game, string password)
         {
             /* SEND
             "command": "game_join",

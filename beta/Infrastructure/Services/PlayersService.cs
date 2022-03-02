@@ -159,7 +159,7 @@ namespace beta.Infrastructure.Services
         #endregion
 
 
-        public PlayerInfoMessage GetPlayer(string login)
+        public IPlayer GetPlayer(string login)
         {
             login = login.ToLower();
             if (login.Length <= 0 || login.Trim().Length <= 0) return null;
@@ -169,7 +169,10 @@ namespace beta.Infrastructure.Services
                 return Players[id];
             }
 
-            return null;
+            return new UnknownPlayer()
+            {
+                login = login
+            };
         }
 
         public PlayerInfoMessage GetPlayer(int uid)

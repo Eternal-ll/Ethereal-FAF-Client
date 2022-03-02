@@ -1,8 +1,10 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
+using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.Properties;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
@@ -11,7 +13,6 @@ using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using GameInfoMessage = beta.Models.Server.GameInfoMessage;
 
 namespace beta.Views
 {
@@ -64,7 +65,7 @@ namespace beta.Views
         {
             string searchText = _SearchText;
 
-            var lobby = (GameInfoMessage)e.Item;
+            var lobby = (GameVM)e.Item;
             e.Accepted = false;
 
             if (lobby.game_type != "custom" || lobby.FeaturedMod != FeaturedMod.FAF || lobby.sim_mods.Count > 0)
@@ -74,21 +75,24 @@ namespace beta.Views
             {
                 var items = MapsBlackList;
                 for (int i = 0; i < items.Count; i++)
-                    if (lobby.mapname.Contains(items[i], StringComparison.OrdinalIgnoreCase))
+                    if (lobby.MapName.Contains(items[i], StringComparison.OrdinalIgnoreCase))
                         return;
             }
 
-            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == PlayerRelationShip.Foe)
-                return;
+            if (_IsFoesGamesHidden)
+            {
+                if (lobby.Host is PlayerInfoMessage player && player.RelationShip == PlayerRelationShip.Foe)
+                    return;
+            }
 
-            if (_IsPrivateGamesHidden && lobby.password_protected)
+            if (_IsPrivateGamesHidden && lobby.IsPasswordProtected)
                 return;
             
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                e.Accepted = lobby.title.Contains(searchText, StringComparison.CurrentCultureIgnoreCase) ||
-                             lobby.host.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
+                e.Accepted = lobby.Title.Contains(searchText, StringComparison.CurrentCultureIgnoreCase) ||
+                             lobby.Host.login.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
                 return;
             }
             e.Accepted = true;
@@ -120,15 +124,15 @@ namespace beta.Views
 
         public SortDescription[] SortDescriptions => new SortDescription[]
         {
-            new SortDescription(nameof(GameInfoMessage.title), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.Teams), ListSortDirection.Ascending),
             // Requires IComaprable TODO
-            //new SortDescription(nameof(GameInfoMessage.Host), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.mapname), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.max_players), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.num_players), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.rating_max), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.rating_min), ListSortDirection.Ascending),
-            new SortDescription(nameof(GameInfoMessage.AverageRating), ListSortDirection.Ascending)
+            //new SortDescription(nameof(GameVM.Host), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.MapName), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.MaxPlayersCount), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.PlayersCount), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.MaxPlayerRatingToJoin), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.MinPlayerRatingToJoin), ListSortDirection.Ascending),
+            new SortDescription(nameof(GameVM.AverageRating), ListSortDirection.Ascending)
         };
 
         #region SelectedSort
@@ -343,7 +347,7 @@ namespace beta.Views
         #endregion
 
         public static object NewItemPlaceholder => CollectionView.NewItemPlaceholder;
-        public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
+        public ObservableCollection<GameVM> LiveGames => GamesServices.LiveGames;
 
         private readonly IGamesServices GamesServices;
         private readonly object _lock = new();
@@ -366,7 +370,7 @@ namespace beta.Views
 
             GamesServices = App.Services.GetRequiredService<IGamesServices>();
 
-            //var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
+            //var grouping = new PropertyGroupDescription(nameof(GameVM.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
             //CollectionViewSource.GroupDescriptions.Add(grouping);
             CollectionViewSource.IsLiveSortingRequested = true;
