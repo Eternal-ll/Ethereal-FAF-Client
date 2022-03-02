@@ -13,7 +13,10 @@
                     <cmd:CopyCommand x:Key="CopyCommand"/>
                     <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
 
-                        
+
+                    <cmd:JoinGameCommand x:Key="JoinGameCommand"/>
+
+
                     <cmd:AddFriendCommand x:Key="AddFriendCommand"/>
                     <cmd:AddFoeCommand x:Key="AddFoeCommand"/>
                     

@@ -66,6 +66,7 @@ namespace beta.Infrastructure.Services
         private void OnNewGame(object sender, EventArgs<GameInfoMessage> e)
         {
             var game = e.Arg;
+
             var games = _IdleGames;
             var suspiciousGames = SuspiciousGames;
             // Update in-game players status

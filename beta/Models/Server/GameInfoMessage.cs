@@ -266,7 +266,8 @@ namespace beta.Models.Server
                     {
                         var version = _mapname.Substring(i + 2);
                         if (version.Length <= 4)
-                            mapVersion = Convert.ToInt32(version).ToString();
+                            if (int.TryParse(version, out var res))
+                                mapVersion = res.ToString();
                         break;
                     }
                 }

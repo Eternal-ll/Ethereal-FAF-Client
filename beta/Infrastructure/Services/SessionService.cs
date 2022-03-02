@@ -89,7 +89,6 @@ namespace beta.Infrastructure.Services
         }
         #endregion
 
-
         public void Connect(IPEndPoint ip)
         {
             Client.Connect(ip.Address.ToString(), ip.Port);
@@ -222,7 +221,7 @@ namespace beta.Infrastructure.Services
                 {
                     response.Invoke(json);
 #if DEBUG
-                    //App.DebugWindow.LOGLobby(json.ToJsonFormat());
+                    App.DebugWindow.LOGLobby(json.ToJsonFormat());
                 }
                 else App.DebugWindow.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
 #endif

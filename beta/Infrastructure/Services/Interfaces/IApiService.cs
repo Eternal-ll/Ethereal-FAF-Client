@@ -2,6 +2,6 @@
 {
     public interface IApiService
     {
-
+        public string GET(string path);
     }
 }

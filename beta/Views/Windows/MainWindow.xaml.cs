@@ -1,9 +1,11 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
+using beta.Views.Modals;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf;
 using ModernWpf.Controls;
+using System;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -13,6 +15,7 @@ namespace beta.Views.Windows
     public partial class MainWindow : Window
     {
         private readonly ISessionService SessionService;
+        private readonly IGameLauncherService GameLauncherService;
 
         private ContentDialog Dialog;
         public MainWindow()
@@ -20,6 +23,8 @@ namespace beta.Views.Windows
             InitializeComponent();
 
             SessionService = App.Services.GetService<ISessionService>();
+            GameLauncherService = App.Services.GetService<IGameLauncherService>();
+
 
             NavigationManager navManager = new(MainFrame, ModalFrame);
             navManager.Navigate(new AuthView());
@@ -42,7 +47,28 @@ namespace beta.Views.Windows
 
             Closing += OnMainWindowClosing;
             Settings.Default.PropertyChanged += OnSettingChange;
+
+
             SessionService.TcpClient.StateChanged += SessionService_StateChanged;
+            GameLauncherService.PatchUpdateRequired += OnPatchUpdateRequired;
+        }
+
+        private void OnPatchUpdateRequired(object sender, Infrastructure.EventArgs<ViewModels.TestDownloaderModel> e)
+        {
+            //{
+            Dialog.Dispatcher.Invoke(() =>
+            {
+                var view = new PatchUpdateView(e);
+                Dialog.Content = view;
+                Dialog.ShowAsync();
+                view.Model.DownloadFinished += (s, e) =>
+                {
+                    view = null;
+                    Dialog.Content = null;
+                    Dialog.Hide();
+                    GameLauncherService.JoinGame();
+                };
+            });
         }
 
         private void SessionService_StateChanged(object sender, Models.TcpClientState e)

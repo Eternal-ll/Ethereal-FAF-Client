@@ -270,21 +270,18 @@ namespace beta.Infrastructure.Services
 
             Result?.Invoke(this, result);
         }
-
-        
+      
         public void Auth()
         {
             // TODO: move or we are fine? xD
-            if (Settings.Default.AutoJoin)
-            {
-                if (string.IsNullOrEmpty(Settings.Default.access_token))
-                    if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
-                        RefreshOAuthToken(Settings.Default.refresh_token);
-                    else Result!.Invoke(this, OAuthState.NO_TOKEN);
-                else if ((Settings.Default.expires_in - DateTime.Now).TotalSeconds < 10)
+            if (string.IsNullOrEmpty(Settings.Default.access_token))
+                if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
                     RefreshOAuthToken(Settings.Default.refresh_token);
-                else Result!.Invoke(this, OAuthState.AUTHORIZED);
-            }
+                else Result!.Invoke(this, OAuthState.NO_TOKEN);
+            else if ((Settings.Default.expires_in - DateTime.UtcNow).TotalSeconds < 10)
+                // TODO FIX ME Not working
+                RefreshOAuthToken(Settings.Default.refresh_token);
+            else Result!.Invoke(this, OAuthState.AUTHORIZED);
         }
 
         public void Auth(string access_token)

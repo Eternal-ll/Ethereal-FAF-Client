@@ -31,7 +31,6 @@ namespace beta.Views
             // getting user setting for auto join
             if (Settings.Default.AutoJoin)
             {
-                return;
                 // looping view controls and hide them
                 for (int i = 0; i < Canvas.Children.Count; i++)
                     Canvas.Children[i].Visibility = Visibility.Collapsed;
@@ -39,7 +38,11 @@ namespace beta.Views
                 ProgressRing.Visibility = Visibility.Visible;
 
                 // launch OAuth2 authorization in service
-                OAuthService.Auth();
+                new Thread(() => OAuthService.Auth())
+                {
+                    Name = "OAuthorization thread",
+                    IsBackground = true
+                }.Start();
             }
         }
 

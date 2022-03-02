@@ -160,12 +160,11 @@ namespace beta.Models
         /// </summary>
         public void Connect()
         {
-            Thread t = new Thread(DoConnect)
+            new Thread(DoConnect)
             {
-                Name="IRC TCP Client",
+                Name = "IRC TCP Client",
                 IsBackground = true
-            };
-            t.Start();
+            }.Start();
         }
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate,
             X509Chain chain, SslPolicyErrors sslPolicyErrors)
