@@ -67,11 +67,14 @@ namespace beta.Infrastructure.Services
         {
             var game = e.Arg;
 
-            var games = _IdleGames;
+            var idleGames = _IdleGames;
+            var liveGames = _LiveGames;
             var suspiciousGames = SuspiciousGames;
             // Update in-game players status
 
             game.Teams = GetInGameTeams(game);
+            game.teams = null;
+            game.sim_mods = game.sim_mods.Count == 0 ? null : game.sim_mods;
 
             #region Checking suspicious games with NO PLAYERS
 
@@ -79,9 +82,11 @@ namespace beta.Infrastructure.Services
             {
                 if (suspiciousGames[i].host == game.host)
                 {
-                    if (game.num_players == 0) continue;
-                    suspiciousGames.RemoveAt(i);
-                    i++;
+                    if (game.num_players != 0)
+                    {
+                        suspiciousGames.RemoveAt(i);
+                        i++;
+                    }
                     continue;
                 }
 
@@ -90,30 +95,30 @@ namespace beta.Infrastructure.Services
                 if (difference.TotalSeconds > 120)
                 {
                     if (suspiciousGames[i].num_players == 0)
-                        games.Remove(suspiciousGames[i]);
+                        idleGames.Remove(suspiciousGames[i]);
                     suspiciousGames.RemoveAt(i);
                 }
             }
             #endregion
 
             #region Searching matches in list of idle games
-            for (int i = 0; i < games.Count; i++)
+            for (int i = 0; i < idleGames.Count; i++)
             {
-                if (games[i].host == game.host)
+                if (idleGames[i].host == game.host)
                 {
                     if (game.launched_at != null)
                     {
                         // game is launched, removing from IdleGames and moving to LiveGames
-                        games.RemoveAt(i);
-                        _LiveGames.Add(game);
+                        idleGames.RemoveAt(i);
+                        liveGames.Add(game);
                         return;
                     }
 
                     // Updating idle game states
-                    if (!games[i].Update(game))
+                    if (!idleGames[i].Update(game))
                     {
                         // returns false if num_players == 0, game is died
-                        games.RemoveAt(i);
+                        idleGames.RemoveAt(i);
                     }
                     return;
                 }
@@ -124,19 +129,18 @@ namespace beta.Infrastructure.Services
             // if game is live
             if (game.launched_at != null)
             {
-                var liveGames = _LiveGames;
-
                 for (int i = 0; i < liveGames.Count; i++)
                 {
-                    if (liveGames[i].host == game.host)
+                    var liveGame = liveGames[i];
+                    if (liveGame.host == game.host)
                     {
-                        if (liveGames[i].mapname != game.mapname)
+                        if (liveGame.mapname != game.mapname)
                         {
                             game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
                                 attachScenario: true);
                         }
                         // Updating idle game states
-                        if (!liveGames[i].Update(game))
+                        if (!liveGame.Update(game))
                         {
                             // returns false if num_players == 0, game is died
                             liveGames.RemoveAt(i);
@@ -144,21 +148,14 @@ namespace beta.Infrastructure.Services
                         return;
                     }
                 }
-
-                // if we passed this way, that we didnt found matches in LiveGames
-
-                // filling host by player instance
-                if (game.Host == null)
-                    game.Host = PlayersService.GetPlayer(game.host);
-
-                liveGames.Add(game);
-                return;
-            } 
+            }
             #endregion
 
+            // if we passed this way, that we didnt found matches in LiveGames
+
             // filling host by player instance
-            if (game.Host == null)
-                game.Host = PlayersService.GetPlayer(game.host);
+            //if (game.Host == null)
+            game.Host = PlayersService.GetPlayer(game.host);
 
             if (game.num_players == 0)
             {
@@ -167,11 +164,17 @@ namespace beta.Infrastructure.Services
                 SuspiciousGames.Add(game);
             }
 
+            if (game.launched_at != null)
+            {
+                liveGames.Add(game);
+                return;
+            }
+
             game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                attachScenario: true);
+            attachScenario: true);
 
             // finally if nothing matched we adding it to IdleGames
-            games.Add(game);
+            idleGames.Add(game);
         }
 
         public InGameTeam[] GetInGameTeams(GameInfoMessage game)
@@ -206,8 +209,10 @@ namespace beta.Infrastructure.Services
                     }
 
                     //player.GameState = playerStatus;
-                
-                    player.Game = game;
+                    if (player.Game == null)
+                        player.Game = game;
+                    else if (player.Game.uid != game.uid)
+                        player.Game = game;
 
                     players[i] = player;
                 }

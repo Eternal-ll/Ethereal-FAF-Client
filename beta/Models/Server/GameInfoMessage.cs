@@ -290,7 +290,11 @@ namespace beta.Models.Server
         public bool password_protected { get; set; }
         public long uid { get; set; }
         public string title { get; set; }
-        public string state { get; set; }
+
+        [JsonPropertyName("state")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        /// Open / Playing
+        public GameState State { get; set; }
         public string game_type { get; set; }
 
         [JsonPropertyName("featured_mod")]
