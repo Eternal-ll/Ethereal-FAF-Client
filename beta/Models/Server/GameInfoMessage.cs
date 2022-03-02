@@ -160,9 +160,9 @@ namespace beta.Models.Server
         {
             get
             {
-                if (game_type == "coop")
-                    return PreviewType.Coop;
-                if (mapname.Substring(0, 7) == "neroxis")
+                //if (game_type == "coop")
+                //    return PreviewType.Coop;
+                if (mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase))
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
             }

@@ -24,7 +24,6 @@ namespace beta.Infrastructure.Services
         public event EventHandler<EventArgs<TestDownloaderModel>> PatchUpdateRequired;
         #endregion
 
-
         private readonly IApiService ApiService;
 
         public GameLauncherState State { get; set; }
