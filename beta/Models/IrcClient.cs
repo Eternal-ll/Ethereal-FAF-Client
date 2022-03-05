@@ -175,12 +175,12 @@ namespace beta.Models
         {
             try
             {
-                TcpClient = new TcpClient("irc.faforever.com", _port);
+                TcpClient = new TcpClient("lobby.faforever.com", _port);
 
                 stream = TcpClient.GetStream();
-                ssl = new SslStream(stream, false, ValidateServerCertificate, null);
+                //ssl = new SslStream(stream, false, ValidateServerCertificate, null);
 
-                ssl.AuthenticateAsClient("irc.faforever.com");
+                //ssl.AuthenticateAsClient("lobby.faforever.com");
 
                 if (!string.IsNullOrEmpty(_ServerPass))
                     Send("PASS " + _ServerPass);
@@ -290,7 +290,7 @@ namespace beta.Models
             while (bytesAvailable > 0 && c.Connected)
             {
                 byte[] nextByte = new byte[1];
-                ssl.Read(nextByte, 0, 1);
+                stream.Read(nextByte, 0, 1);
 
                 //              == \n
                 if (nextByte[0] == 10)
@@ -327,7 +327,6 @@ namespace beta.Models
                     Send("PONG " + ircData[1].Replace(":", string.Empty));
                     return;
                 }
-
             }
 
             // re-act according to the IRC Commands
@@ -339,13 +338,63 @@ namespace beta.Models
                     Send("MODE " + _nick + " +B");
                     Fire_Connected();    //TODO: this might not work
                     break;
+                case "333": // Channel owner?
+
+                    break;
+                case "332": // Topic?
+
+                    break;
                 case "353": // member list
                     {
-                        var channel = ircData[4];
-                        var userList = JoinArray(ircData, 5).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        StringBuilder sb = new();
+                        bool isChannel = false;
+                        string channel = string.Empty;
+                        for (int i = 1; i < data.Length; i++)
+                        {
+                            var letter = data[i];
 
-                        Fire_UpdateUsers(new UpdateUsersEventArgs(channel, userList));
+                            if (sb.Length > 0)
+                            {
+                                if (isChannel && letter == ' ')
+                                {
+                                    channel = sb.ToString();
+                                    sb.Clear();
+                                    isChannel = false;
+                                    continue;
+                                }
+
+                                if (letter == '\r')
+                                {
+                                    // remove ':' and " \r"
+                                    sb.Remove(0, 1).Remove(sb.Length - 1, 1);
+                                    break;
+                                }
+
+                                sb.Append(letter);
+                                continue;
+                            }
+
+                            if (letter == ':' || letter == '#')
+                            {
+                                sb.Append(letter);
+                                if (letter == '#')
+                                {
+                                    isChannel = true;
+                                }
+                            }
+                        }
+
+                        var users = sb.ToString().Split();
+                        sb.Clear();
+                        Fire_UpdateUsers(new UpdateUsersEventArgs(channel, users));
                     }
+                    break;
+
+                case "432": //Nickname is unavailable: Being held for registered user
+                    var rnd = new Random();
+                    var rndomNick = Nick + rnd.Next(0, 9) + rnd.Next(0, 9) + rnd.Next(0, 9);
+                    Send("NICK " + rndomNick);
+                    _nick = rndomNick;
                     break;
                 case "433":
                     var takenNick = ircData[3];
@@ -364,9 +413,11 @@ namespace beta.Models
                     }
                     else
                     {
-                        Send("NICK " + _altNick);
-                        Send("USER " + _altNick + " 0 * :" + _altNick);
-                        _nick = _altNick;
+                        var rand = new Random();
+                        var randomNick = "Guest" + rand.Next(0, 9) + rand.Next(0, 9) + rand.Next(0, 9);
+                        Send("NICK " + randomNick);
+                        Send("USER " + randomNick + " 0 * :" + randomNick);
+                        _nick = randomNick;
                     }
                     break;
                 case "JOIN": // someone joined
@@ -479,7 +530,7 @@ namespace beta.Models
         public void Write(byte[] data)
         {
             //if (_client == null) { throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)"); }
-            ssl.Write(data, 0, data.Length);
+            stream.Write(data, 0, data.Length);
         }
 
         public void Write(string data)
