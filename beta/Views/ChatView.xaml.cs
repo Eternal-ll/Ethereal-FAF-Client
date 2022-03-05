@@ -168,7 +168,7 @@ namespace beta.Views
             MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
 
             //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
-            IrcClient = new IrcClient("116.202.155.226", 6697);
+            IrcClient = new IrcClient("lobby.faforever.com", 6667);
             
             string nick = Settings.Default.PlayerNick;
             string id = Settings.Default.PlayerId.ToString();

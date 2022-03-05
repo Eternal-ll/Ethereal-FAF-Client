@@ -17,6 +17,7 @@ namespace beta.Models
         #endregion
         public virtual string Name { get; }
         public virtual string Version { get; }
+        public string OriginalName { get; set; }
     }
     public class GameMap : Map
     {

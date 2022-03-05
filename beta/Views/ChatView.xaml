@@ -1134,21 +1134,55 @@
                 VirtualizingPanel.IsVirtualizing="True">
                 <ListBox.Resources>
                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Padding" Value="0 2"/>
                         <Setter Property="Margin" Value="0 0 20 0"/>
                         <Setter Property="Focusable" Value="False"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}"
+                                         Value="True">
+                                <Setter Property="Padding" Value="0 4"/>
+                            </DataTrigger>
+                        </Style.Triggers>
                     </Style>
+                    
+                    <Style x:Key="ImageStyle" TargetType="Image">
+                        <Setter Property="RenderOptions.EdgeMode" Value="Unspecified"/>
+                        <Setter Property="SnapsToDevicePixels" Value="True"/>
+                        <Setter Property="RenderOptions.BitmapScalingMode" Value="LowQuality"/>
+                    </Style>
+                    
                     <DataTemplate DataType="{x:Type models:PlayerInfoMessage}">
-                        <Grid>
+                        <Grid ShowGridLines="False">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
                                 <ColumnDefinition Width="16"/>
                                 <ColumnDefinition/>
-                                <ColumnDefinition/>
+                                <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <Image Stretch="Uniform" Height="18">
                                 <Image.Style>
-                                    <Style TargetType="Image">
+                                    <Style TargetType="Image" BasedOn="{StaticResource ImageStyle}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Avatar, Converter={StaticResource IsNullConverter}}"
+                                                         Value="False">
+                                                <Setter Property="Source" Value="{Binding Avatar}"/>
+                                                <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                            
+                            <Image Stretch="Uniform" Height="16"
+                                   Width="16" Grid.Column="1"
+                                   HorizontalAlignment="Left">
+                                <Image.Style>
+                                    <Style TargetType="Image" BasedOn="{StaticResource ImageStyle}">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Flag, Converter={StaticResource IsNullConverter}}"
                                                          Value="False">
@@ -1158,48 +1192,115 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                            <TextBlock Margin="6 0 0 0" Text="{Binding login}" Grid.Column="1"/>
-                            <Image Stretch="Uniform" Height="20" Grid.Column="2" HorizontalAlignment="Right">
-                                <Image.Style>
-                                    <Style TargetType="Image">
+
+                            <TextBlock Text="{Binding login}" Grid.Column="2"
+                                       Margin="6 0 0 0"
+                                       HorizontalAlignment="Left"/>
+                            
+                            <ContentControl Grid.Column="2" Grid.Row="1"
+                                            Margin="-16 0 0 0">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}"
-                                                         Value="False">
-                                                <Setter Property="Source" Value="{Binding Game.Map.SmallPreview}"/>
-                                                <Setter Property="ToolTip">
+                                            <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}" Value="False">
+                                                <Setter Property="Content">
                                                     <Setter.Value>
-                                                        <ToolTip>
-                                                            <ContentControl Content="{Binding Game}"/>
-                                                            <!--<Grid d:DataContext="{x:Type models:GameInfoMessage}">
-                                                                <Grid.RowDefinitions>
-                                                                    <RowDefinition/>
-                                                                    <RowDefinition/>
-                                                                </Grid.RowDefinitions>
-                                                                <Grid.ColumnDefinitions>
-                                                                    <ColumnDefinition/>
-                                                                    <ColumnDefinition/>
-                                                                </Grid.ColumnDefinitions>
-                                                                <Image Source="{Binding Game.Map.SmallPreview}"/>
-                                                                <StackPanel Grid.Column="1" Margin="10 0 0 0">
-                                                                    <TextBlock Text="{Binding Game.title}"/>
-                                                                </StackPanel>
-                                                            </Grid>-->
-                                                        </ToolTip>
+                                                        <StackPanel Margin="0 0 0 4"
+                                                                    Orientation="Horizontal">
+                                                            <TextBlock Opacity=".5"
+                                                                       FontSize="12"
+                                                                       HorizontalAlignment="Left">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="Playing on"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Game.State}" Value="Open">
+                                                                                <Setter Property="Text" Value="On"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding GameState}" Value="Host">
+                                                                                <Setter Property="Text" Value="Hosting"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <TextBlock Margin="4 0 0 0" FontSize="12" Text="{Binding Game.MapName}"
+                                                                       MaxWidth="160">
+                                                                <TextBlock.ToolTip>
+                                                                    <ToolTip>
+                                                                        <Grid ShowGridLines="False">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                <ColumnDefinition/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Grid.RowDefinitions>
+                                                                                <RowDefinition/>
+                                                                                <RowDefinition/>
+                                                                            </Grid.RowDefinitions>
+                                                                            <StackPanel>
+                                                                                <Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>
+                                                                                <TextBlock DataContext="{Binding Game}"
+                                                                                           Margin="0 10 0 0"
+                                                                                           Style="{StaticResource PlayersTextBlockStyle}">
+                                                                                    <Run Style="{StaticResource NumPlayersRunStyle}"/>
+                                                                                    <Run Text="/" FontSize="12"/>
+                                                                                    <Run Text="{Binding max_players}"/>
+                                                                                </TextBlock>
+                                                                            </StackPanel>
+                                                                            <ItemsControl Grid.Column="1"
+                                                                                          Margin="10 0 0 0"
+                                                                                          DataContext="{Binding Game}"
+                                                                                          Style="{StaticResource TeamsItemsStyle}"/>
+                                                                        </Grid>
+                                                                        <!--<ContentControl Content="{Binding Game}"/>-->
+                                                                        
+                                                                    </ToolTip>
+                                                                </TextBlock.ToolTip>
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Opacity" Value=".5"/>
+                                                                        <Style.Triggers>
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter Property="Opacity" Value="1"/>
+                                                                            </Trigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </StackPanel>
                                                     </Setter.Value>
                                                 </Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+
+                            <!--<Image Margin="10 -10 0 -10"
+                                   Grid.Column="3"
+                                   Grid.RowSpan="2"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Right">
+                                <Image.Style>
+                                    <Style TargetType="Image" BasedOn="{StaticResource ImageStyle}">
+                                        <Setter Property="Source" Value="{Binding Game.Map.SmallPreview}"/>
+                                        <Setter Property="ToolTip">
+                                            <Setter.Value>
+                                                <ToolTip>
+                                                    <ContentControl Content="{Binding Game}"/>
+                                                </ToolTip>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
                                 </Image.Style>
-                            </Image>
+                            </Image>-->
                         </Grid>
                     </DataTemplate>
+                    
                     <DataTemplate DataType="{x:Type models:UnknownPlayer}">
-                        <StackPanel Orientation="Horizontal">
-                            <Border VerticalAlignment="Center" BorderThickness="1" Background="GhostWhite" CornerRadius="4" Padding="0">
-                                <TextBlock Text="IRC" FontSize="12" FontWeight="UltraBold" Margin="4 0" Foreground="Black"/>
-                            </Border>
-                            <TextBlock Text="{Binding login}" Margin="6 0 0 0"/>
+                        <StackPanel Orientation="Vertical" Margin="40 0 0 0">
+                            <TextBlock Text="{Binding login}"/>
+                            <TextBlock Text="IRC user" Opacity=".5" FontSize="12"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.Resources>

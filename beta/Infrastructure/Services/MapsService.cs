@@ -6,50 +6,34 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using beta.Properties;
 
 namespace beta.Infrastructure.Services
 {
     public class MapsService : IMapsService
     {
         private readonly ICacheService CacheService;
+        private readonly IApiService ApiService;
 
         private readonly List<string> LocalMaps = new();
-        private readonly List<GameMap> GameMaps = new();
+        private readonly List<GameMap> CachedMaps = new();
+
         private readonly FileSystemWatcher LocalWatcher;
 
-        private string path = @"C:\Users\Eternal\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\";
-
-        public string[] LocalPaths;
-        private string _PathToLegacyMaps;
-        private string PathToLegacyMaps
-        {
-            get
-            {
-                var pathToGame = Properties.Settings.Default.PathToGame;
-                if (pathToGame != null)
-                {
-                    return pathToGame + @"\maps\";
-                }
-                return null;
-            }
-        }
-        public MapsService(ICacheService cacheService)
+        private string PathToLegacyMaps => Settings.Default.PathToGame != null ? Settings.Default.PathToGame + @"\maps\" : null;
+        public MapsService(ICacheService cacheService, IApiService apiService)
         {
             CacheService = cacheService;
+            ApiService = apiService;
 
-            LocalPaths = new string[]
-            {
-                @"C:\Users\Eternal\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\"
-            };
-
-            var path = Environment.ExpandEnvironmentVariables(Properties.Settings.Default.PathToMaps);
+            var path = App.GetPathToFolder(Folder.Maps);
             var folders = Directory.GetDirectories(path);
             for (int j = 0; j < folders.Length; j++)
             {
                 var folder = folders[j].Split('\\')[^1];
                 LocalMaps.Add(folder);
             }
-            
+
             LocalWatcher = new()
             {
                 Path = path,
@@ -91,7 +75,7 @@ namespace beta.Infrastructure.Services
             }
             else
             {
-                pathToMaps = Properties.Settings.Default.PathToMaps;
+                pathToMaps = App.GetPathToFolder(Folder.Maps);
                 for (int i = 0; i < localMaps.Count; i++)
                 {
                     if (i + 1 == localMaps.Count)
@@ -196,9 +180,22 @@ namespace beta.Infrastructure.Services
         public GameMap GetMap(Uri uri, bool attachScenario = true)
         {
             var mapName = uri.Segments[^1].Substring(0, uri.Segments[^1].Length - 4);
+
+            var isLegacyMap = IsLegacyMap(mapName);
+
+
+            var cachedMaps = CachedMaps;
+            for (int i = 0; i < cachedMaps.Count; i++)
+            {
+                var cachedMap = cachedMaps[i];
+                if (cachedMap.OriginalName.Equals(mapName, StringComparison.OrdinalIgnoreCase))
+                    return cachedMap;
+            }
+
             GameMap map = new()
             {
-                IsLegacy = IsLegacyMap(mapName)
+                IsLegacy = isLegacyMap,
+                OriginalName = mapName
             };
 
             //neroxis_map_generator_1.8.5_c6gjzaqfmuove_aida.png
@@ -215,9 +212,12 @@ namespace beta.Infrastructure.Services
                 App.Current.Dispatcher.Invoke(() =>
                 {
                     map.SmallPreview = GetMapPreview(uri);
-                    map.Scenario = attachScenario ? GetMapScenario(mapName, map.IsLegacy) : null;
+                    map.Scenario = attachScenario ? GetMapScenario(mapName, isLegacyMap) : null;
                 },System.Windows.Threading.DispatcherPriority.Background);
             }
+
+            CachedMaps.Add(map);
+
             return map;
         }
 

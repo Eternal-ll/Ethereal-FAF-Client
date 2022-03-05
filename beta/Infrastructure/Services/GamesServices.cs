@@ -157,6 +157,9 @@ namespace beta.Infrastructure.Services
             //if (game.Host == null)
             game.Host = PlayersService.GetPlayer(game.host);
 
+            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+            attachScenario: true);
+
             if (game.num_players == 0)
             {
                 // if game is empty, we adding it to suspicious list and monitoring it during next updates
@@ -170,8 +173,6 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
-            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-            attachScenario: true);
 
             // finally if nothing matched we adding it to IdleGames
             idleGames.Add(game);

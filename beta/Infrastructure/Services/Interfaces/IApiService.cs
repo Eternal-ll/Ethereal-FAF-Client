@@ -1,7 +1,9 @@
-﻿namespace beta.Infrastructure.Services.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IApiService
     {
-        public string GET(string path);
+        public Task<string> GET(string path);
     }
 }

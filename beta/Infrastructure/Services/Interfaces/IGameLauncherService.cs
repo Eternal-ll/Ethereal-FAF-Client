@@ -10,6 +10,6 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<TestDownloaderModel>> PatchUpdateRequired;
 
         public void JoinGame();
-        public void JoinGame(GameInfoMessage game);
+        public Task JoinGame(GameInfoMessage game);
     }
 }

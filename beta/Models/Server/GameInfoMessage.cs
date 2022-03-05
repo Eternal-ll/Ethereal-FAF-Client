@@ -225,9 +225,9 @@ namespace beta.Models.Server
         {
             get
             {
-                if (Map.Scenario != null)
-                    if (Map.Scenario.TryGetValue("name", out var name))
-                        return name;
+                if (Map?.Scenario != null)
+                    if (Map.Name != null)
+                        return Map.Name;
 
                 string formattedMapName = string.Empty;
                 for (int i = 0; i < _mapname.Length; i++)

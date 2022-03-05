@@ -40,8 +40,7 @@
             <ScrollViewer
                    VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling">
-                <ItemsControl x:Name="IRCItemsControl"
-                Background="Gray">
+                <ItemsControl x:Name="IRCItemsControl">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"/>

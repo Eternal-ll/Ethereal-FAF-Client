@@ -42,7 +42,7 @@ namespace beta.Infrastructure.Services
 
             }
         }
-        public void JoinGame(GameInfoMessage game)
+        public async Task JoinGame(GameInfoMessage game)
         {
             /* SEND
             "command": "game_join",
@@ -60,7 +60,7 @@ namespace beta.Infrastructure.Services
             "rating_type": "global",
              */
             LastGame = game;
-            if (!ConfirmPatch(game.FeaturedMod))
+            if (!await ConfirmPatch(game.FeaturedMod))
             {
 
             }
@@ -97,9 +97,9 @@ namespace beta.Infrastructure.Services
             */
         }
 
-        private bool ConfirmPatch(FeaturedMod featuredMod)
+        private async Task<bool> ConfirmPatch(FeaturedMod featuredMod)
         {
-            var json = ApiService.GET($"featuredMods/{(int)featuredMod}/files/latest");
+            var json = await ApiService.GET($"featuredMods/{(int)featuredMod}/files/latest");
             if (json == null) return false;
 
             var response = JsonSerializer.Deserialize<Record>(json);
@@ -156,10 +156,9 @@ namespace beta.Infrastructure.Services
             return true;
         }
 
-        private void Model_DownloadFinished(object sender, EventArgs<bool> e)
+        private async void Model_DownloadFinished(object sender, EventArgs<bool> e)
         {
-            if (e)
-                JoinGame(LastGame);
+            if (e) await JoinGame(LastGame).ConfigureAwait(false);
 
             ((TestDownloaderModel)sender).DownloadFinished -= Model_DownloadFinished;
         }

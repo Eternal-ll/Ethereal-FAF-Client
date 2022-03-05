@@ -6,25 +6,102 @@
         xmlns:local="clr-namespace:beta.Views.Windows"
         mc:Ignorable="d"
         Title="RichTextBoxWindow" Height="450" Width="800">
-    <RichTextBox Background="White" Foreground="Black">
+    <RichTextBox Background="White" Foreground="Black" Padding="0"
+                 BorderThickness="0"
+                 BorderBrush="Transparent"
+                 IsReadOnly="True"
+                 >
         <FlowDocument>
-            <Paragraph Background="WhiteSmoke">
-                <Run Text="Test"/>
-                <Bold>
-                    TEST
-                </Bold>
+            <FlowDocument.Resources>
+                <Style TargetType="Paragraph">
+                    <Setter Property="Padding" Value="10 4"/>
+                    <Setter Property="Margin" Value="0"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="Gray" Opacity=".1"/>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </FlowDocument.Resources>
+            <Paragraph>
                 <InlineUIContainer>
-                    <Image Source="{StaticResource Flag.AD}" Height="20"/>
+                    <Image Height="16"
+                           Stretch="Uniform"
+                           Margin="0 -3">
+                        <Image.Source>
+                            <BitmapImage UriSource="C:\\Users\\Eternal\\source\\repos\\Ethereal-FAF-Client\\beta\\bin\\Debug\\net5.0-windows10.0.18362.0\\cache\\players\\avatars\\2v2gold_1.png"/>
+                        </Image.Source>
+                    </Image>
                 </InlineUIContainer>
+                <InlineUIContainer>
+                    <Image Source="{StaticResource Flag.AD}" Height="16"
+                           Stretch="Uniform"
+                           Margin="0 -3"/>
+                </InlineUIContainer>
+                <Run Text="Zlo" FontWeight="Bold" Foreground="Orange"/>
+                <Run Text="Today at 13:48" FontSize="12" Foreground="Gray"/>
+                <LineBreak/>
+                <InlineUIContainer>
+                    <Border CornerRadius="4" Margin="0 4 0 -5">
+                        <Border.Background>
+                            <SolidColorBrush Color="SkyBlue" Opacity=".4"/>
+                        </Border.Background>
+                        <TextBlock Text="@4z0t" FontWeight="DemiBold" Padding="4 0">
+                        </TextBlock>
+                    </Border>
+                </InlineUIContainer>
+                <Run Text="этот луа джит понижает CPU score в 5 раз, у меня было где-то 123 CPU на pentium 3 @3gghz  когда просто в фаф он зашкаливал но вроде был 1100 (если в обзерверы зайти было видно)"/>
             </Paragraph>
-            <Section>
-                <List>
-                    <ListItem>
-                        
-                    </ListItem>
-                    <ListItem/>
-                </List>
-            </Section>
+            <Paragraph>
+                <Run Text="xeon 2420v2 CPU score 230 -> 56 (до патча меняющего CPU score вообще было 300-340)
+Но в тесте в игре с AI прогнал на +10 на 10 минут вперёд и стало +8 и затем запустил секундомер и измерял как быстро игра идёт
+замерял где 1 минута,  90 сек, 2 минуты "/>
+                <Run Text="13:48">
+                    <Run.Style>
+                        <Style TargetType="Run">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Paragraph}},
+                                    Path=IsMouseOver}"
+                                             Value="True">
+                                    <Setter Property="Foreground" Value="Gray"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Run.Style>
+                </Run>
+            </Paragraph>
+            <Paragraph>
+                <Run Text="обычный:
+1 13:54
+1:30 15:16
+2 16:20
+
+jit:
+1 13:42
+1:30 14:59
+2 16:10"/>
+                <Run Text="13:48">
+                    <Run.Style>
+                        <Style TargetType="Run">
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Paragraph}},
+                                    Path=IsMouseOver}"
+                                             Value="True">
+                                    <Setter Property="Foreground" Value="Gray"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Run.Style>
+                </Run>
+            </Paragraph>
         </FlowDocument>
     </RichTextBox>
 </Window>
