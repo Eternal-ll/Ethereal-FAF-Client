@@ -67,7 +67,7 @@ namespace beta.Views
             var lobby = (GameInfoMessage)e.Item;
             e.Accepted = false;
 
-            if (lobby.game_type != "custom" || lobby.FeaturedMod != FeaturedMod.FAF || lobby.sim_mods.Count > 0)
+            if (lobby.game_type != "custom" || lobby.FeaturedMod != FeaturedMod.FAF || lobby.sim_mods != null)
                 return;
 
             if (_IsMapsBlacklistEnabled && MapsBlackList.Count > 0)

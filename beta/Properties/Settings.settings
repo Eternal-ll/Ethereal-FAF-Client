@@ -41,9 +41,6 @@
     <Setting Name="Height" Type="System.Double" Scope="User">
       <Value Profile="(Default)">600</Value>
     </Setting>
-    <Setting Name="PathToGame" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="IsMapsBlacklistEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -55,6 +52,15 @@
     </Setting>
     <Setting Name="IsPrivateGamesHidden" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="PathToMaps" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\%username%\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\</Value>
+    </Setting>
+    <Setting Name="PathToMods" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\%username%\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Mods\</Value>
+    </Setting>
+    <Setting Name="PathToGame" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

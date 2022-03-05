@@ -124,7 +124,8 @@
                   PresentationOptions:Freeze="True">
         <DrawingImage.Drawing>
             <GeometryDrawing Brush="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
-                             Geometry="{StaticResource MapGenIconPathGeometry}"/>
+                             Geometry="{StaticResource MapGenIconPathGeometry}"
+                  PresentationOptions:Freeze="True"/>
         </DrawingImage.Drawing>
     </DrawingImage>
     <DrawingImage x:Key="CoopIcon"

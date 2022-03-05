@@ -7,12 +7,13 @@
         MapsSmallPreviews = 1,
         MapsLargePreviews = 2,
 
+        Game = 3,
         Mods = 4,
         Maps = 5,
 
         ProgramData = 6,
 
-        PlayerAvatars = 4,
+        PlayerAvatars = 8,
         Emoji = 10
     }
 }

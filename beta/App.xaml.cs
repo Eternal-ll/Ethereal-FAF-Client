@@ -24,12 +24,20 @@ namespace beta
         {
             return folder switch
             {
+                Folder.Game => beta.Properties.Settings.Default.PathToGame,
+
+                // Mods & Maps
+                Folder.Maps => Environment.ExpandEnvironmentVariables(beta.Properties.Settings.Default.PathToMaps),
+                Folder.Mods => Environment.ExpandEnvironmentVariables(beta.Properties.Settings.Default.PathToMods),
+
                 // CACHE
                 Folder.MapsSmallPreviews => CurrentDirectory + "\\cache\\previews\\small\\",
                 Folder.MapsLargePreviews => CurrentDirectory + "\\cache\\previews\\large\\",
-                Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
+
+                Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 
+                // PATCH
                 Folder.ProgramData => "C:\\ProgramData\\FAForever\\",
 
                 Folder.Common => CurrentDirectory + "\\cache\\common\\",
@@ -47,7 +55,6 @@ namespace beta
 #if DEBUG
             //DebugWindow.Show();
 #endif
-
             IsDesignMode = false;
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);

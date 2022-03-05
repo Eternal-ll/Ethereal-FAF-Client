@@ -220,7 +220,7 @@
                 Style="{StaticResource PreviewImageStyle}">
                 <Border.Background>
                     <ImageBrush Stretch="Uniform"
-                                ImageSource="{Binding Map.MapPreviewSource, Mode=OneWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">
+                                ImageSource="{Binding Map.SmallPreview, Mode=OneWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">
                     </ImageBrush>
                 </Border.Background>
                 <Grid>

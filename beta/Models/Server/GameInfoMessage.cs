@@ -1,5 +1,4 @@
-﻿using beta.Infrastructure.Services;
-using beta.Models.Server.Base;
+﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
@@ -141,15 +140,15 @@ namespace beta.Models.Server
         #region Custom properties
 
         #region Map
-        private Map _Map;
-        public Map Map
+        private GameMap _Map;
+        public GameMap Map
         {
             get => _Map;
             set
             {
                 if (Set(ref _Map, value))
                 {
-                    OnPropertyChanged(nameof(Map.MapPreviewSource));
+                    OnPropertyChanged(nameof(Map.SmallPreview));
                 }
             }
         }

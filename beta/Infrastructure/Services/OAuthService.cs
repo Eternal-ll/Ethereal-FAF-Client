@@ -132,7 +132,7 @@ namespace beta.Infrastructure.Services
             var stream = SafeRequest("https://hydra.faforever.com/oauth2/auth?" +
                             "response_type=code&" +
                             "client_id=faf-python-client&" +
-                            "redirect_uri=http%3A%2F%2Flocalhost&" +
+                            "redirect_uri=http://localhost&" +
                             "scope=openid+offline+public_profile+lobby&" +
                             "state=" + generatedState);
 
@@ -144,7 +144,6 @@ namespace beta.Infrastructure.Services
 
             string _csrf = string.Empty;
             string login_challenge = string.Empty;
-
 
             Logger.LogInformation("Parsing data to get _csrf and login_challenge");
 
@@ -262,7 +261,7 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
 
             if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"grant_type=refresh_token&refresh_token={refresh_token}&client_id=faf-python-client"))))
+                OAuthExtension.GetQueryByteArrayContent($"grant_type=refresh_token&refresh_token={refresh_token}&client_id=faf-python-client&redirect_uri=http://localhost"))))
                 result = OAuthState.AUTHORIZED;
             else Logger.LogWarning("Something went wrong in the JSON data parsing part");
 

@@ -100,7 +100,9 @@ namespace beta.Models.Server
             GameState.Open => App.Current.Resources["PlayerGameStatus.open"],
             GameState.Playing => App.Current.Resources["PlayerGameStatus.playing"],
             GameState.Host => App.Current.Resources["PlayerGameStatus.host"],
-            GameState.Playing5 => App.Current.Resources["PlayerGameStatus.playing5"]
+            GameState.Playing5 => App.Current.Resources["PlayerGameStatus.playing5"],
+            GameState.None => null,
+            _=> null
         };
         #endregion
 

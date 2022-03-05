@@ -180,18 +180,6 @@ namespace beta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string PathToGame {
-            get {
-                return ((string)(this["PathToGame"]));
-            }
-            set {
-                this["PathToGame"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool IsMapsBlacklistEnabled {
             get {
@@ -235,6 +223,44 @@ namespace beta.Properties {
             }
             set {
                 this["IsPrivateGamesHidden"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\%username%\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged" +
+            " Alliance\\Maps\\")]
+        public string PathToMaps {
+            get {
+                return ((string)(this["PathToMaps"]));
+            }
+            set {
+                this["PathToMaps"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\%username%\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged" +
+            " Alliance\\Mods\\")]
+        public string PathToMods {
+            get {
+                return ((string)(this["PathToMods"]));
+            }
+            set {
+                this["PathToMods"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PathToGame {
+            get {
+                return ((string)(this["PathToGame"]));
+            }
+            set {
+                this["PathToGame"] = value;
             }
         }
     }

@@ -21,20 +21,20 @@ namespace beta.Infrastructure.Services
             var localFilePath = cacheFolder + uri.Segments[^1];
 
             BitmapImage image = new();
-            image.CacheOption = BitmapCacheOption.OnDemand;
 
-            //if (folder == Folder.MapsLargePreviews)
-            //{
-            //    image.DecodePixelHeight = 512;
-            //    image.DecodePixelWidth = 512;
-            //}
-            //else
-            //{
-            //    image.DecodePixelHeight = 100;
-            //    image.DecodePixelWidth = 100;
-            //}
+            if (folder == Folder.MapsLargePreviews)
+            {
+                image.DecodePixelHeight = 256;
+                image.DecodePixelWidth = 256;
+            }
+            else if (folder == Folder.MapsSmallPreviews)
+            {
+                image.DecodePixelHeight = 100;
+                image.DecodePixelWidth = 100;
+            }
 
             image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnDemand;
 
             if (File.Exists(localFilePath))
             {
@@ -46,8 +46,11 @@ namespace beta.Infrastructure.Services
             }
             image.UriSource = uri;
             image.EndInit();
-            image.DownloadCompleted += (s, e) =>
+
+            void handler(object s, EventArgs e)
             {
+                image.DownloadCompleted -= handler;
+
                 PngBitmapEncoder encoder = new();
                 encoder.Frames.Add(BitmapFrame.Create(image));
 
@@ -55,7 +58,9 @@ namespace beta.Infrastructure.Services
 
                 encoder.Save(filestream);
                 image.Freeze();
-            };
+            }
+
+            image.DownloadCompleted += handler; 
 
             return image;
         }

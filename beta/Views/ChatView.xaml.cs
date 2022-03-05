@@ -75,8 +75,8 @@ namespace beta.Views
         {
             var filter = _FilterText;
             if (filter.Length == 0) return;
-            var player = (PlayerInfoMessage)e.Item;
-            e.Accepted = player.login.Contains(filter, StringComparison.OrdinalIgnoreCase) || (player.clan != null && player.clan.Contains(filter, StringComparison.OrdinalIgnoreCase));
+            var player = (IPlayer)e.Item;
+            e.Accepted = player.login.Contains(filter, StringComparison.OrdinalIgnoreCase);
         }
 
         public Channel()
@@ -166,7 +166,6 @@ namespace beta.Views
 
             MessageInput.TextChanged += OnMessageInputTextChanged;
             MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
-            return;
 
             //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
             IrcClient = new IrcClient("116.202.155.226", 6697);
@@ -448,10 +447,7 @@ namespace beta.Views
                 var channel = Channels[i];
                 if (channel.Name == e.Channel)
                 {
-                    for (int j = 0; j < channel.Users.Count; j++)
-                    {
-                        users.Add(channel.Users[j]);
-                    }
+                    users = channel.Users;
                     break;
                 }
             }

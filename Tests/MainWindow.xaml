@@ -1,34 +1,17 @@
-﻿<Window x:Class="beta.Views.Windows.CacheTests"
+﻿<Window x:Class="Tests.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:beta.Views.Windows"
-        mc:Ignorable="d"    
-        d:DataContext="{d:DesignInstance {x:Type local:CacheTests}}"
-        
-        Title="CacheTests" Height="1000" Width="800">
+        xmlns:local="clr-namespace:Tests"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance {x:Type local:MainWindow}}"
+        Title="MainWindow" Height="450" Width="800">
     <Grid Background="Black">
         <ListBox ItemsSource="{Binding Test, UpdateSourceTrigger=PropertyChanged}"
-             HorizontalAlignment="Center"
              Background="Transparent"
              Name="ListBox"
-             VirtualizingPanel.CacheLength="0"
-             VirtualizingPanel.CacheLengthUnit="Pixel"
-             VirtualizingPanel.IsContainerVirtualizable="True"
-             VirtualizingPanel.IsVirtualizing="True"
-             VirtualizingPanel.VirtualizationMode="Recycling">
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal"
-             VirtualizingPanel.CacheLength="0"
-             VirtualizingPanel.CacheLengthUnit="Pixel"
-             VirtualizingPanel.IsContainerVirtualizable="True"
-             VirtualizingPanel.IsVirtualizing="True"
-             VirtualizingPanel.VirtualizationMode="Recycling"
-                           />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
+             VirtualizingPanel.IsVirtualizing="True">
             <!--<ListBox.Resources>
             <Style TargetType="ListBoxItem">
                 <Style.Triggers>
