@@ -66,7 +66,7 @@ namespace beta.Views.Windows
 
                     if (File.Exists(path))
                     {
-                        var md5 = Tools.CalculateMD5(path);
+                        var md5 = Tools.CalculateMD5FromFile(path);
                         if (md5 == item.attributes["md5"].ToString())
                         {
                             response.data[i] = null;

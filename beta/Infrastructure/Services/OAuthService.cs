@@ -299,6 +299,8 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
+            //Settings.Default.PlayerPassword = password;
+
             FetchOAuthToken(code);
         }
 

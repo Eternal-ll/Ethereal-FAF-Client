@@ -75,7 +75,7 @@
                                              HorizontalContentAlignment="Stretch"
                                              VerticalContentAlignment="Stretch"/>
             <ui:NavigationView.Background>
-                <SolidColorBrush Color="Black" Opacity=".5"/>
+                <SolidColorBrush Color="Black" Opacity=".4"/>
             </ui:NavigationView.Background>
         </ui:NavigationView>
 

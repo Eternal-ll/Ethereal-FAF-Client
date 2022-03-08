@@ -25,11 +25,12 @@ namespace beta.Infrastructure.Services
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
         public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
+        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeInfo;
         #endregion
 
         #region Properties
 
-        private readonly ManagedTcpClient Client = new();
+        private ManagedTcpClient Client;
         public ManagedTcpClient TcpClient => Client;
 
         private readonly IOAuthService OAuthService;
@@ -57,7 +58,6 @@ namespace beta.Infrastructure.Services
             Logger = logger;
 #endif
             OAuthService.Result += OnAuthResult;
-            Client.DataReceived += OnDataReceived;
 
             #region Response actions for server
             //Operations.Add(ServerCommand.notice, OnNoticeData);
@@ -88,10 +88,13 @@ namespace beta.Infrastructure.Services
             //}).Start();
         }
         #endregion
-
-        public void Connect(IPEndPoint ip)
+        public void Connect()
         {
-            Client.Connect(ip.Address.ToString(), ip.Port);
+            Client = new(port: 8002)
+            {
+                ThreadName = "TCP Lobby Server"
+            };
+            Client.DataReceived += OnDataReceived;
         }
         public string GenerateUID(string session)
         {
@@ -127,12 +130,27 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation($"Starting authorization process to lobby server");
             //Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
 #endif
-
-            if (Client.TcpClient == null)
-                Client.Connect();
-            else if (!Client.TcpClient.Connected)
+            // TODO Fix
+            if (Client == null)
             {
-                Client.Connect();
+                Client = new(port: 8002)
+                {
+                    ThreadName = "TCP Lobby Server"
+                };
+                Client.DataReceived += OnDataReceived;
+                ManagedTcpClientState state = ManagedTcpClientState.NotConnected;
+                Client.StateChanged += (s, e) =>
+                {
+                    state = ManagedTcpClientState.Connected;
+                };
+                while (state == ManagedTcpClientState.NotConnected)
+                {
+                    Thread.Sleep(10);
+                }
+                if (state != ManagedTcpClientState.Connected)
+                {
+                    return;
+                }
             }
 
             string session = GetSession();
@@ -188,13 +206,13 @@ namespace beta.Infrastructure.Services
 
             return response.GetRequiredJsonRowValue(2);
         }
-        public void Send(string command) => Client.WriteLine(command);
+        public void Send(string command) => Client.Write(command);
 
         public void Ping()
         {
             WaitingPong = true;
             Stopwatch.Start();
-            Client.WriteLine("{\"command\":\"ping\"}");
+            Client.Write("{\"command\":\"ping\"}");
         }
 
         private void OnAuthResult(object sender, EventArgs<OAuthState> e)
@@ -236,7 +254,8 @@ namespace beta.Infrastructure.Services
         protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
         protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayer?.Invoke(this, e);
         protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGame?.Invoke(this, e);
-        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e); 
+        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);
+        protected virtual void OnWelcomeInfo(EventArgs<WelcomeMessage> e) => WelcomeInfo?.Invoke(this, e);
         #endregion
 
         #region Server response actions
@@ -250,6 +269,7 @@ namespace beta.Infrastructure.Services
             Settings.Default.PlayerId = welcomeMessage.id;
             Settings.Default.PlayerNick = welcomeMessage.login;
             OnAuthorization(true);
+            OnWelcomeInfo(welcomeMessage);
         }
 
         private void OnIrcPassowrdData(string json)
@@ -307,7 +327,7 @@ namespace beta.Infrastructure.Services
         {
 #if DEBUG
             //Logger.LogInformation($"Received ping, starting timer...");
-            //Client.Write("{\"command\":\"pong\"}");
+            Client.Write("{\"command\":\"pong\"}");
             //Stopwatch.Start();
 #endif
         }

@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Models.Server;
 using beta.ViewModels.Base;
 using System.Collections.Generic;

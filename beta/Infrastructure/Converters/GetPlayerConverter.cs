@@ -40,7 +40,25 @@ namespace beta.Infrastructure.Converters
             if (value is string player)
                 playerName = player;
 
-            return PlayersService.GetPlayer(playerName);
+            bool isChatMod = playerName.StartsWith('@');
+
+            if (isChatMod)
+            {
+                playerName = playerName.Substring(1);
+            }
+
+            var playerInstance = PlayersService.GetPlayer(playerName);
+            if (playerInstance == null)
+            {
+                return new UnknownPlayer()
+                {
+                    login = playerName,
+                    IsChatModerator = isChatMod
+                };
+            }
+            playerInstance.IsChatModerator = isChatMod;
+
+            return playerInstance;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

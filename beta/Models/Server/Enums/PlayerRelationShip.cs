@@ -4,6 +4,8 @@
     {
         None = 0,
         Friend = 1,
-        Foe = 2
+        Foe = 2,
+        Clan = 3,
+        Me = 4
     }
 }

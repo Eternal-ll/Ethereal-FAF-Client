@@ -8,8 +8,8 @@ namespace beta.Views.Modals
     /// </summary>
     public partial class PatchUpdateView : UserControl
     {
-        public TestDownloaderModel Model { get; set; }
-        public PatchUpdateView(TestDownloaderModel model)
+        public TestDownloaderVM Model { get; set; }
+        public PatchUpdateView(TestDownloaderVM model)
         {
             InitializeComponent();
             Model = model;

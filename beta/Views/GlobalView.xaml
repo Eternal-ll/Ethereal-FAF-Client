@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
-                    xmlns:models="clr-namespace:beta.Models.Server"
+             xmlns:models="clr-namespace:beta.Models"
+             xmlns:sModels="clr-namespace:beta.Models.Server"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:GlobalView}}">
@@ -670,7 +671,7 @@
                                             </Setter>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
-                                                     Value="{x:Type models:GameInfoMessage}">
+                                                     Value="{x:Type sModels:GameInfoMessage}">
                                             <Setter Property="Content" Value="{Binding}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -704,7 +705,7 @@
             </ListBox>
             <ContentControl Grid.Column="1" Width="340">
                 <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type models:GameInfoMessage}">
+                    <DataTemplate DataType="{x:Type sModels:GameInfoMessage}">
                         <ScrollViewer Margin="20 0 -30 30">
                             <StackPanel Margin="0 0 40 0">
                                 <ui:ListViewHeaderItem Content="{Binding title}"/>
@@ -1008,9 +1009,9 @@
                                 <ScrollViewer Margin="0 20 0 0">
                                     <ItemsControl ItemsSource="{Binding Teams}">
                                         <ItemsControl.Resources>
-                                            <DataTemplate DataType="{x:Type models:PlayerInfoMessage}">
+                                            <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                                                 <Grid
-                                            d:DataContext="{d:DesignInstance {x:Type models:PlayerInfoMessage}}"
+                                            d:DataContext="{d:DesignInstance {x:Type sModels:PlayerInfoMessage}}"
                                             ShowGridLines="False">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="20"/>
@@ -1171,7 +1172,7 @@
                                 <Setter Property="Content" Value="{x:Null}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding ElementName=IdleGames, Path=SelectedItem, Converter={StaticResource ObjectToTypeConverter}}"
-                                         Value="{x:Type models:GameInfoMessage}">
+                                         Value="{x:Type sModels:GameInfoMessage}">
                                 <Setter Property="Content" Value="{Binding ElementName=IdleGames, Path=SelectedItem}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding ElementName=IdleGames, Path=SelectedIndex}"

@@ -84,6 +84,8 @@ namespace beta.Models
 
         #region Events
 
+        public event EventHandler<ChannelMessageEventArgs> TopicReceived;
+
         public event EventHandler<StringEventArgs> Pinged = delegate { };
         public event EventHandler<UpdateUsersEventArgs> UpdateUsers = delegate { };
         public event EventHandler<UserJoinedEventArgs> UserJoined = delegate { };
@@ -263,7 +265,8 @@ namespace beta.Models
         public void Dispose()
         {
             stream.Dispose();
-            ssl.Dispose();
+            TcpClient.Dispose();
+            //ssl.Dispose();
         }
         #endregion
 
@@ -275,7 +278,6 @@ namespace beta.Models
         /// Listens for messages from the server
         /// </summary>
         /// 
-        private readonly StringBuilder builder = new();
         private void Listen()
         {
             //if (TcpClient == null) return;
@@ -295,6 +297,7 @@ namespace beta.Models
                 //              == \n
                 if (nextByte[0] == 10)
                 {
+                    StringBuilder builder = new();
                     ParseData(builder.Clear()
                         .Append(StringEncoder.GetChars(_queuedMsg.ToArray()))
                         .ToString());
@@ -332,17 +335,19 @@ namespace beta.Models
             // re-act according to the IRC Commands
             switch (ircCommand)
             {
+                //https://modern.ircdocs.horse/#names-message
                 case "001": // server welcome message, after this we can join
                     Fire_Connected();
                     return;
                     Send("MODE " + _nick + " +B");
                     Fire_Connected();    //TODO: this might not work
                     break;
-                case "333": // Channel owner?
+                case "332": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
+                    //  "<client> <channel> :<topic>"
 
                     break;
-                case "332": // Topic?
-
+                case "333": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
+                    //  "<client> <channel> <nick> <setat>"
                     break;
                 case "353": // member list
                     {
@@ -391,6 +396,9 @@ namespace beta.Models
                     break;
 
                 case "432": //Nickname is unavailable: Being held for registered user
+
+                    //SendMessage("NickServ", Nick);
+                    //SendMessage("NickServ", "identify" + ServerPass);
                     var rnd = new Random();
                     var rndomNick = Nick + rnd.Next(0, 9) + rnd.Next(0, 9) + rnd.Next(0, 9);
                     Send("NICK " + rndomNick);
@@ -401,6 +409,8 @@ namespace beta.Models
 
                     // notify user
                     Fire_NickTaken(takenNick);
+                    //SendMessage("NickServ", Nick);
+                    //SendMessage("NickServ", "identify" + ServerPass);
 
                     // try alt nick if it's the first time 
                     if (takenNick == _altNick)
@@ -422,8 +432,40 @@ namespace beta.Models
                     break;
                 case "JOIN": // someone joined
                     {
-                        var channel = ircData[2];
-                        var user = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
+                        //:ThurnisHaley!396062@Clk-10163F26.hsd1.ma.comcast.net JOIN :#aeolus
+                        StringBuilder sb = new();
+
+                        string user = null;
+                        string channel = null;
+                        int i = 1;
+                        while (i < data.Length)
+                        {
+                            var letter = data[i];
+
+                            if (letter == '!')
+                            {
+                                user = sb.ToString();
+                                sb.Clear();
+                                break;
+                            }
+
+                            sb.Append(letter);
+                            i++;
+                        }
+                        while (i < data.Length)
+                        {
+                            var letter = data[i];
+
+                            if (letter == '\r')
+                            {
+                                sb.Remove(0, 1);
+                                channel = sb.ToString();
+                                break;
+                            }
+
+                            if (letter == ':' || sb.Length > 0) sb.Append(letter);
+                            i++;
+                        }
                         Fire_UserJoined(new UserJoinedEventArgs(channel, user));
                     }
                     break;
@@ -527,28 +569,9 @@ namespace beta.Models
         {
             return StripMessage(string.Join(" ", strArray, startIndex, strArray.Length - startIndex));
         }
-        public void Write(byte[] data)
-        {
-            //if (_client == null) { throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)"); }
-            stream.Write(data, 0, data.Length);
-        }
+        private void Write(byte[] data) => stream.Write(data, 0, data.Length);
 
-        public void Write(string data)
-        {
-            if (data == null) { return; }
-            Write(StringEncoder.GetBytes(data));
-        }
-        /// <summary>
-        /// Send message to server
-        /// </summary>
-        /// <param name="message">Message to send</param>
-        private void Send(string message)
-        {
-            Write(message + " \r\n");
-            return;
-            //writer.WriteLine(message);
-            //writer.Flush();
-        }
+        private void Send(string message) => Write(StringEncoder.GetBytes(message + '\r'));
         #endregion
     }
 

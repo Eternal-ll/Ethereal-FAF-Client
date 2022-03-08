@@ -12,10 +12,11 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
         public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
         public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
+        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeInfo;
 
         public ManagedTcpClient TcpClient { get; }
 
-        public void Connect(IPEndPoint ip);
+        public void Connect();
         public void Authorize();
         public void Ping();
         public string GenerateUID(string session);

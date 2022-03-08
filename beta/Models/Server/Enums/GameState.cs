@@ -4,5 +4,6 @@
     {
         Open = 0,
         Playing = 1,
+        closed = 2
     }
 }

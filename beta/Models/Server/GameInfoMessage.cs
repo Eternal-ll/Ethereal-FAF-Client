@@ -292,7 +292,8 @@ namespace beta.Models.Server
 
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        /// Open / Playing
+        //Open / Playing / Closed
+        //TODO Cant converter "closed" to enum
         public GameState State { get; set; }
         public string game_type { get; set; }
 

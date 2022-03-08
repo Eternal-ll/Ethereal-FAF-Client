@@ -1,8 +1,9 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Converters;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
 using beta.Properties;
-using beta.ViewModels.Base;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -17,74 +18,6 @@ using System.Windows.Data;
 
 namespace beta.Views
 {
-    public class Channel : ViewModel
-    {
-        #region Name
-        private string _Name;
-        public string Name
-        {
-            get => _Name;
-            set
-            {
-                if (Set(ref _Name, value))
-                    OnPropertyChanged(nameof(FormattedName));
-            }
-        }
-        public string FormattedName => _Name.Substring(1);
-        #endregion
-
-        #region Title
-        private string _Title;
-        public string Title
-        {
-            get => _Title;
-            set => Set(ref _Title, value);
-        }
-        #endregion
-
-        #region History
-        public ObservableCollection<ChannelMessage> History { get; set; } = new();
-        #endregion
-
-        #region Users
-        private readonly ObservableCollection<IPlayer> _Users = new();
-        public ObservableCollection<IPlayer> Users => _Users;
-        #endregion
-
-        #region UsersView
-        public readonly CollectionViewSource UsersViewSource = new();
-        public ICollectionView UsersView => UsersViewSource.View;
-        #endregion
-
-        #region FilterText
-        private string _FilterText = "";
-        public string FilterText
-        {
-            get => _FilterText;
-            set
-            {
-                if (Set(ref _FilterText, value))
-                {
-                    UsersView.Refresh();
-                }
-            }
-        }
-        #endregion
-
-        private void OnFilterText(object sender, FilterEventArgs e)
-        {
-            var filter = _FilterText;
-            if (filter.Length == 0) return;
-            var player = (IPlayer)e.Item;
-            e.Accepted = player.login.Contains(filter, StringComparison.OrdinalIgnoreCase);
-        }
-
-        public Channel()
-        {
-            UsersViewSource.Source = Users;
-            UsersViewSource.Filter += OnFilterText;
-        }
-    }
     /// <summary>
     /// Interaction logic for ChatView.xaml
     /// </summary>
@@ -100,24 +33,89 @@ namespace beta.Views
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         #endregion
 
-        private readonly IrcClient IrcClient;
+        #region IsChatMapPreviewEnabled
+        private bool _IsChatMapPreviewEnabled;
+        public bool IsChatMapPreviewEnabled
+        {
+            get => _IsChatMapPreviewEnabled;
+            set
+            {
+                if (_IsChatMapPreviewEnabled != value)
+                {
+                    _IsChatMapPreviewEnabled = value;
+                    OnPropertyChanged(nameof(IsChatMapPreviewEnabled));
+                }
+            }
+        }
+        #endregion
+
         private readonly IPlayersService PlayersService;
-        
-        private readonly ObservableCollection<Channel> _Channels = new();
-        public ObservableCollection<Channel> Channels => _Channels;
+        private readonly IIrcService IrcService;
+
+        public ObservableCollection<IrcChannelVM> Channels { get; } = new();
 
         #region SelectedChannel
-        private Channel _SelectedChannel;
-        public Channel SelectedChannel
+        private IrcChannelVM _SelectedChannel;
+        public IrcChannelVM SelectedChannel
         {
             get => _SelectedChannel;
             set
             {
-                _SelectedChannel = value;
-                OnPropertyChanged(nameof(SelectedChannel));
+                if (value != _SelectedChannel)
+                {
+                    _SelectedChannel = value;
+                    OnPropertyChanged(nameof(SelectedChannel));
+                    UpdateSelectedChannelUsers();
+                    if (value != null)
+                    {
+                        _SelectedChannel.Users.CollectionChanged -= Users_CollectionChanged;
+                        value.Users.CollectionChanged += Users_CollectionChanged;
+                    }
+                }
+            }
+        }
+
+        private void Users_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (sender is ObservableCollection<string> users)
+            {
+                if (users != _SelectedChannel.Users)
+                {
+                    users.CollectionChanged -= Users_CollectionChanged;
+                    return;
+                }
+
+                var players = SelectedChatPlayers;
+                switch (e.Action)
+                {
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                        for (int i = 0; i < e.NewItems.Count; i++)
+                        {
+                            players.Add(GetChatPlayer(e.NewItems[i].ToString()));
+                        }
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                        for (int i = 0; i < e.OldItems.Count; i++)
+                        {
+                            players.Remove(GetChatPlayer(e.OldItems[i].ToString()));
+                        }
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
+                        break;
+                    case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                        break;
+                }
+                //View.Refresh();
             }
         }
         #endregion
+
+        private ObservableCollection<IPlayer> SelectedChatPlayers = new();
+
+        private readonly CollectionViewSource SelectedChannelUsersViewSource = new();
+        public ICollectionView View => SelectedChannelUsersViewSource.View;
 
         #region Thickness
         // for suggestion box above the input box
@@ -155,38 +153,177 @@ namespace beta.Views
             InitializeComponent();
 
             PlayersService = App.Services.GetService<IPlayersService>();
-
-            DataContext = this;
-
-            Channels.Add(new() { Name = "#server" });
-            SelectedChannel = Channels[0];
-
-            App.Current.MainWindow.Closing += MainWindow_Closing;
-
-
-            MessageInput.TextChanged += OnMessageInputTextChanged;
-            MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
-
-            //BindingOperations.EnableCollectionSynchronization(LobbySessionService.Players, _lock);
-            IrcClient = new IrcClient("lobby.faforever.com", 6667);
+            IrcService = App.Services.GetService<IIrcService>();
             
             string nick = Settings.Default.PlayerNick;
             string id = Settings.Default.PlayerId.ToString();
             string password = Settings.Default.irc_password;
-            IrcClient.Nick = nick;
-            IrcClient.ServerPass = password;
-            IrcClient.Connect();
-            IrcClient.ServerMessage += IrcClient_ServerMessage;
-            IrcClient.ChannelMessage += IrcClient_ChannelMessage;
-            IrcClient.UpdateUsers += IrcClient_UpdateUsers;
-            IrcClient.OnConnect += IrcClient_OnConnect;
+
+            //IrcService.Authorize(nick, password);
+
+            PropertyGroupDescription groupDescription = new("", new ChatUserGroupConverter());
+            groupDescription.GroupNames.Add("Me");
+            groupDescription.GroupNames.Add("Moderators");
+            groupDescription.GroupNames.Add("Friends");
+            groupDescription.GroupNames.Add("Clan");
+            groupDescription.GroupNames.Add("Players");
+            groupDescription.GroupNames.Add("IRC users");
+            groupDescription.GroupNames.Add("Foes");
+            SelectedChannelUsersViewSource.GroupDescriptions.Add(groupDescription);
+
+            DataContext = this;
+
+            App.Current.MainWindow.Closing += MainWindow_Closing;
+
+            MessageInput.TextChanged += OnMessageInputTextChanged;
+            MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
+        }
+
+        private IPlayer GetChatPlayer(string user)
+        {
+            bool isChatMod = user.StartsWith('@');
+
+            if (isChatMod) user = user.Substring(1);
+
+            var player = PlayersService.GetPlayer(user);
+            if (player != null)
+            {
+                player.IsChatModerator = isChatMod;
+                return player;
+            }
+            else
+            {
+                return new UnknownPlayer()
+                {
+                    IsChatModerator = isChatMod,
+                    login = user
+                };
+            }
+        }
+        private void UpdateSelectedChannelUsers()
+        {
+            ObservableCollection<IPlayer> players = SelectedChatPlayers;
+            players.Clear();
+            var users = _SelectedChannel.Users;
+            for (int i = 0; i < users.Count; i++)
+            {
+                players.Add(GetChatPlayer(users[i]));
+            }
+
+            //using var defer = View.DeferRefresh();
+        }
+        private bool TryGetChannel(string channelName, out IrcChannelVM channel)
+        {
+            var channels = Channels;
+            for (int i = 0; i < channels.Count; i++)
+            {
+                if (channels[i].Name == channelName)
+                {
+                    channel =  channels[i];
+                    return true;
+                }
+            }
+            channel = null;
+            return false;
+        }
+        private void IrcClient_UserLeft(object sender, UserLeftEventArgs e)
+        {
+            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+            {
+                channel.Users.Remove(e.User);
+            }
+            else
+            {
+                var channels = Channels;
+                for (int i = 0; i < channels.Count; i++)
+                {
+                    channels[i].Users.Remove(e.User);
+                }
+            }
+        }
+        private void IrcClient_UserJoined(object sender, UserJoinedEventArgs e)
+        {
+            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+            {
+                channel.Users.Add(e.User);
+            }
+            else
+            {
+
+            }
+        }
+        private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
+        {
+            if (TryGetChannel(e.Channel, out var channel))
+            {
+                ObservableCollection<string> users = channel.Users;
+
+                for (int i = 0; i < e.UserList.Length; i++)
+                {
+                    //var playerInfo = PlayersService.GetPlayer(e.UserList[i]);
+                    //if (playerInfo != null)
+                    //    users.Add(playerInfo);
+                    //else users.Add(new UnknownPlayer()
+                    //{
+                    //    login = e.UserList[i]
+                    //});
+                    users.Add(e.UserList[i]);
+                }
+            }
+        }
+        private void IrcClient_OnConnect(object sender, EventArgs e)
+        {
+            //IrcClient.JoinChannel("#aeolus");
+            Channels.Add(new() { Name = "#aeolus" });
+        }
+        private void IrcClient_ChannelMessage(object sender, ChannelMessageEventArgs e)
+        {
+            e.Message = e.Message.Replace('\n', ' ');
+            e.Message = e.Message.Replace('\r', ' ');
+            e.From = e.From.Replace('\n', ' ');
+            e.From = e.From.Replace('\r', ' ');
+
+            var login = "@" + Settings.Default.PlayerNick;
+
+            for (int i = 0; i < Channels.Count; i++)
+            {
+                var channel = Channels[i];
+                if (channel.Name == e.Channel)
+                {
+                    var len = channel.History.Count - 1;
+
+                    if (len >= 0)
+                    {
+                        var previousMsg = channel.History[len];
+                        while (previousMsg.From == null && len > 0)
+                        {
+                            len--;
+                            previousMsg = channel.History[len];
+                        }
+
+                        if (previousMsg.From == e.From)
+                            e.From = null;
+                    }
+                    channel.History.Add(new()
+                    {
+                        From = e.From,
+                        Message = e.Message,
+                        HasMention = e.Message.Contains(login, StringComparison.OrdinalIgnoreCase)
+                    });
+                    break;
+                }
+            }
+        }
+        private void IrcClient_ServerMessage(object sender, StringEventArgs e)
+        {
+            e.Result = e.Result.Replace('\n', ' ');
+            e.Result = e.Result.Replace('\r', ' ');
+            Channels[0].History.Add(new() { Message = e.Result });
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            if (IrcClient != null)
-            if (IrcClient.Connected)
-            IrcClient.Dispose();
+            IrcService.Quit();
         }
 
         private void OnMessageInputPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -317,15 +454,6 @@ namespace beta.Views
 
         private int _foundedIndex;
         private int _keyWordLen;
-        private IEnumerable<string> Test = new List<string>()
-        {
-            "Test",
-            "Tes32t",
-            "Tesert",
-            "Testre",
-            "Tesgrt",
-            "Tefst",
-        };
         private string _previousText = "";
         private void OnMessageInputTextChanged(object sender, TextChangedEventArgs e)
         {
@@ -438,82 +566,6 @@ namespace beta.Views
             }
             _previousText = input.Text;
         }
-
-        private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
-        {
-            ObservableCollection<IPlayer> users = new();
-            for (int i = 0; i < Channels.Count; i++)
-            {
-                var channel = Channels[i];
-                if (channel.Name == e.Channel)
-                {
-                    users = channel.Users;
-                    break;
-                }
-            }
-
-            for (int i = 0; i < e.UserList.Length; i++)
-            {
-                var playerInfo = PlayersService.GetPlayer(e.UserList[i]);
-                if (playerInfo != null)
-                    users.Add(playerInfo);
-                else users.Add(new UnknownPlayer()
-                {
-                    login = e.UserList[i]
-                });
-            }
-        }
-        private void IrcClient_OnConnect(object sender, EventArgs e)
-        {
-            IrcClient.JoinChannel("#aeolus");
-            Channels.Add(new() { Name = "#aeolus" });
-        }
-
-        private void IrcClient_ChannelMessage(object sender, ChannelMessageEventArgs e)
-        {
-            e.Message = e.Message.Replace('\n', ' ');
-            e.Message = e.Message.Replace('\r', ' ');
-            e.From = e.From.Replace('\n', ' ');
-            e.From = e.From.Replace('\r', ' ');
-
-            var login = "@" + Settings.Default.PlayerNick;
-
-            for (int i = 0; i < Channels.Count; i++)
-            {
-                var channel = Channels[i];
-                if (channel.Name == e.Channel)
-                {
-                    var len = channel.History.Count - 1;
-
-                    if (len >= 0)
-                    {
-                        var previousMsg = channel.History[len];
-                        while (previousMsg.From == null && len > 0)
-                        {
-                            len--;
-                            previousMsg = channel.History[len];
-                        }
-
-                        if (previousMsg.From == e.From)
-                            e.From = null;
-                    }
-                    channel.History.Add(new()
-                    {
-                        From = e.From,
-                        Message = e.Message,
-                        HasMention = e.Message.Contains(login, StringComparison.OrdinalIgnoreCase)
-                    }) ;
-                    break;
-                }
-            }
-        }
-
-        private void IrcClient_ServerMessage(object sender, StringEventArgs e)
-        {
-            e.Result = e.Result.Replace('\n', ' ');
-            e.Result = e.Result.Replace('\r', ' ');
-            Channels[0].History.Add(new() { Message = e.Result });
-        }
         private void JoinChannelInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
@@ -523,10 +575,10 @@ namespace beta.Views
                 if (channel[0] != '#')
                     channel = "#" + channel;
 
-                if (!IrcClient.Connected)
-                {
-                    return;
-                }
+                //if (!IrcClient.Connected)
+                //{
+                //    return;
+                //}
 
                 for (int i = 0; i < Channels.Count; i++)
                 {
@@ -537,7 +589,7 @@ namespace beta.Views
                     }
                 }
 
-                IrcClient.JoinChannel(channel);
+                //IrcClient.JoinChannel(channel);
                 Channels.Add(new() { Name = channel });
 
                 JoinChannelInput.Text = string.Empty;

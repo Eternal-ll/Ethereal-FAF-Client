@@ -7,7 +7,7 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IGameLauncherService
     {
-        public event EventHandler<EventArgs<TestDownloaderModel>> PatchUpdateRequired;
+        public event EventHandler<EventArgs<TestDownloaderVM>> PatchUpdateRequired;
 
         public void JoinGame();
         public Task JoinGame(GameInfoMessage game);

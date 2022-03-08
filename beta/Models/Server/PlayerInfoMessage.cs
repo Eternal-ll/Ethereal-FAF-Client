@@ -14,6 +14,7 @@ namespace beta.Models.Server
 
         Open = 1,
         Playing = 2,
+        Closed = 3,
 
         Host = 4,
 
@@ -27,12 +28,14 @@ namespace beta.Models.Server
         public string tooltip { get; set; }
     }
 
+    // unused
     public struct PlayerAlias
     {
         public string name { get; set; }
         public DateTime changeTime;
     }
 
+    // unused
     public enum PlayerState
     {
         IDLE = 1,
@@ -41,14 +44,6 @@ namespace beta.Models.Server
         JOINING = 4,
         SEARCHING_LADDER = 5,
         STARTING_AUTOMATCH = 6,
-    }
-    public interface IPlayer
-    {
-        public string login { get; set; }
-    }
-    public class UnknownPlayer : IPlayer
-    {
-        public string login { get; set; }
     }
     
     public static class PlayerInfoExtensions
@@ -62,12 +57,6 @@ namespace beta.Models.Server
             orig.Updated = DateTime.Now;
             return orig;
         }
-    }
-
-    public class PlayerNote
-    {
-        public Color Color { get; set; }
-        public string Text { get; set; }
     }
 
     public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer

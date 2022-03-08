@@ -3,14 +3,13 @@ using beta.Infrastructure.Commands;
 using beta.Models.API;
 using beta.ViewModels.Base;
 using System;
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace beta.ViewModels
 {
-    public class TestDownloaderModel : ViewModel
+    public class TestDownloaderVM : ViewModel
     {
         public event EventHandler<EventArgs<bool>> DownloadFinished;
 
@@ -117,7 +116,7 @@ namespace beta.ViewModels
 
         private Record Record;
 
-        public TestDownloaderModel(Record record)
+        public TestDownloaderVM(Record record)
         {
             _FilesCount = record.FeaturedModFiles.Count;
             Record = record;

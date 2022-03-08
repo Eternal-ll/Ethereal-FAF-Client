@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 
 namespace beta
@@ -53,7 +54,7 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
 #if DEBUG
-            //DebugWindow.Show();
+            DebugWindow.Show();
 #endif
             IsDesignMode = false;
 

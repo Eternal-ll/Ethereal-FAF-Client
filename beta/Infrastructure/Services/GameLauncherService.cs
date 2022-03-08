@@ -21,7 +21,7 @@ namespace beta.Infrastructure.Services
     public class GameLauncherService : IGameLauncherService
     {
         #region Events
-        public event EventHandler<EventArgs<TestDownloaderModel>> PatchUpdateRequired;
+        public event EventHandler<EventArgs<TestDownloaderVM>> PatchUpdateRequired;
         #endregion
 
         private readonly IApiService ApiService;
@@ -125,7 +125,7 @@ namespace beta.Infrastructure.Services
 
                 if (File.Exists(path))
                 {
-                    var md5 = Tools.CalculateMD5(path);
+                    var md5 = Tools.CalculateMD5FromFile(path);
                     if (md5 != item.attributes["md5"].ToString())
                     {
                         record.FeaturedModFiles.Add(item);
@@ -145,7 +145,7 @@ namespace beta.Infrastructure.Services
                 // false if no bin folder in path to the game
                 if (!CopyOriginalBin()) return false;
 
-                TestDownloaderModel model = new(record);
+                TestDownloaderVM model = new(record);
 
                 OnPatchUpdateRequired(model);
 
@@ -160,7 +160,7 @@ namespace beta.Infrastructure.Services
         {
             if (e) await JoinGame(LastGame).ConfigureAwait(false);
 
-            ((TestDownloaderModel)sender).DownloadFinished -= Model_DownloadFinished;
+            ((TestDownloaderVM)sender).DownloadFinished -= Model_DownloadFinished;
         }
 
         private bool CopyOriginalBin()
@@ -184,6 +184,6 @@ namespace beta.Infrastructure.Services
             return true;
         }
 
-        private void OnPatchUpdateRequired(TestDownloaderModel model) => PatchUpdateRequired?.Invoke(this, model);
+        private void OnPatchUpdateRequired(TestDownloaderVM model) => PatchUpdateRequired?.Invoke(this, model);
     }
 }

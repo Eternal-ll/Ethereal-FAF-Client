@@ -51,11 +51,20 @@ namespace beta.Infrastructure.Services
 
             sessionService.NewPlayer += OnNewPlayer;
             sessionService.SocialInfo += OnNewSocialInfo;
+            sessionService.WelcomeInfo += OnWelcomeInfo;
         }
+
 
         #endregion
 
+        private PlayerInfoMessage Me;
+
         #region Event listeners
+        private void OnWelcomeInfo(object sender, EventArgs<WelcomeMessage> e)
+        {
+            Me = e.Arg.me;
+            Me.RelationShip = PlayerRelationShip.Me;
+        }
         private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
         {
             FriendsIds = e.Arg.friends;
@@ -89,7 +98,7 @@ namespace beta.Infrastructure.Services
                         }
                     }
         }
-        private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
+        private void OnNewPlayer(object sender  , EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
             var players = _Players;
@@ -99,23 +108,34 @@ namespace beta.Infrastructure.Services
 
             var friendsIds = FriendsIds;
             var foesIds = FoesIds;
+            var me = Me;
 
-            // TODO REWRITE?
-            if (friendsIds != null && friendsIds.Length > 0)
-                for (int i = 0; i < friendsIds.Length; i++)
-                    if (friendsIds[i] == player.id)
-                    {
-                        player.RelationShip = PlayerRelationShip.Friend;
-                        break;
-                    }
+            if (me?.clan != null)
+                if (player.clan == me.clan) player.RelationShip = PlayerRelationShip.Clan;
 
-            if (foesIds != null && foesIds.Length > 0)
-                for (int i = 0; i < foesIds.Length; i++)
-                    if (foesIds[i] == player.id)
-                    {
-                        player.RelationShip = PlayerRelationShip.Foe;
-                        break;
-                    }
+            if (player.id != me.id)
+            {
+                // TODO REWRITE?
+                if (friendsIds != null && friendsIds.Length > 0)
+                    for (int i = 0; i < friendsIds.Length; i++)
+                        if (friendsIds[i] == player.id)
+                        {
+                            player.RelationShip = PlayerRelationShip.Friend;
+                            break;
+                        }
+
+                if (foesIds != null && foesIds.Length > 0)
+                    for (int i = 0; i < foesIds.Length; i++)
+                        if (foesIds[i] == player.id)
+                        {
+                            player.RelationShip = PlayerRelationShip.Foe;
+                            break;
+                        }
+            }
+            else
+            {
+                player.RelationShip = PlayerRelationShip.Me;
+            }
 
             #endregion
 

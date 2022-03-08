@@ -6,64 +6,22 @@
         mc:Ignorable="d"
         Title="ServerDebugWindow" Height="450" Width="800">
     <TabControl Background="Gray">
+        <TabControl.Resources>
+            <Style TargetType="Paragraph">
+                <Setter Property="Margin" Value="0"/>
+            </Style>
+        </TabControl.Resources>
         <TabItem Header="Lobby">
-            <ScrollViewer
-                   VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling">
-                <ItemsControl x:Name="ItemsControl" 
-                Background="Gray">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBox Background="Transparent"
-                             BorderThickness="0"
-                             Foreground="Black"
-                             Padding="0"
-                             Margin="0"
-                             TextWrapping="Wrap"
-                             Text="{Binding Mode=OneWay}"
-                             IsReadOnly="True">
-                                <TextBox.Style>
-                                    <Style/>
-                                </TextBox.Style>
-                            </TextBox>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <Grid>
+                <RichTextBox x:Name="Lobby" Background="White" Foreground="Black"/>
+                <Button Content="Test" Background="Black" Click="Button_Click"/>
+            </Grid>
         </TabItem>
         <TabItem Header="IRC">
-            <ScrollViewer
-                   VirtualizingPanel.IsVirtualizing="True"
-                  VirtualizingPanel.VirtualizationMode="Recycling">
-                <ItemsControl x:Name="IRCItemsControl">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBox Background="Transparent"
-                             BorderThickness="0"
-                             Foreground="Black"
-                             Padding="0"
-                             Margin="0"
-                             TextWrapping="Wrap"
-                             Text="{Binding Mode=OneWay}"
-                             IsReadOnly="True">
-                                <TextBox.Style>
-                                    <Style/>
-                                </TextBox.Style>
-                            </TextBox>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <Grid>
+                <RichTextBox x:Name="IRC" Background="White" Foreground="Black"/>
+                <Button Content="Test" Background="Black" Click="Button_Click"/>
+            </Grid>
         </TabItem>
     </TabControl>
 </Window>

@@ -1,5 +1,4 @@
-﻿using beta.Models.Server;
-using beta.ViewModels.Base;
+﻿using beta.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Media;
 

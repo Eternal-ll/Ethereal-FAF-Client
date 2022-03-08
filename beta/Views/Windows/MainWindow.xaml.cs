@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Properties;
 using beta.Views.Modals;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,14 +47,12 @@ namespace beta.Views.Windows
             Height = Settings.Default.Height;
 
             Closing += OnMainWindowClosing;
-            Settings.Default.PropertyChanged += OnSettingChange;
 
-
-            SessionService.TcpClient.StateChanged += SessionService_StateChanged;
+            //SessionService.TcpClient.StateChanged += SessionService_StateChanged;
             GameLauncherService.PatchUpdateRequired += OnPatchUpdateRequired;
         }
 
-        private void OnPatchUpdateRequired(object sender, Infrastructure.EventArgs<ViewModels.TestDownloaderModel> e)
+        private void OnPatchUpdateRequired(object sender, Infrastructure.EventArgs<ViewModels.TestDownloaderVM> e)
         {
             //{
             Dialog.Dispatcher.Invoke(() =>
@@ -71,15 +70,15 @@ namespace beta.Views.Windows
             });
         }
 
-        private void SessionService_StateChanged(object sender, Models.TcpClientState e)
+        private void SessionService_StateChanged(object sender, ManagedTcpClientState e)
         {
-            if (e == Models.TcpClientState.Disconnected)
+            if (e == ManagedTcpClientState.Disconnected)
             {
                 Dialog.ShowAsync();
                 SessionService.Authorize();
             }
 
-            if (e == Models.TcpClientState.Connected)
+            if (e == ManagedTcpClientState.Connected)
             {
                 if (Dialog != null)
                     Dialog.Hide();
@@ -127,6 +126,5 @@ namespace beta.Views.Windows
                 ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
             }
         }
-        private void OnSettingChange(object sender, System.ComponentModel.PropertyChangedEventArgs e) => ((Settings)sender).Save();
     }
 }

@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:models="clr-namespace:beta.Models.Server"
+                    xmlns:sModels="clr-namespace:beta.Models.Server"
+                    xmlns:models="clr-namespace:beta.Models"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="d"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -16,8 +17,8 @@
 
     <Style x:Key="TeamsItemsStyle" TargetType="ItemsControl">
         <Style.Resources>
-            <DataTemplate DataType="{x:Type models:PlayerInfoMessage}">
-                <Grid d:DataContext="{d:DesignInstance {x:Type models:PlayerInfoMessage}}"
+            <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                <Grid d:DataContext="{d:DesignInstance {x:Type sModels:PlayerInfoMessage}}"
                                   ShowGridLines="False">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="20"/>
@@ -238,7 +239,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <DataTemplate x:Key="PlayerCard" d:DataType="{x:Type models:PlayerInfoMessage}">
+    <DataTemplate x:Key="PlayerCard" d:DataType="{x:Type sModels:PlayerInfoMessage}">
         <Grid DataContext="{Binding Converter={StaticResource GetPlayerConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="16"/>
@@ -368,18 +369,18 @@
         </Grid>
     </ui:Flyout>
 
-    <DataTemplate DataType="{x:Type models:GameInfoMessage}">
+    <DataTemplate DataType="{x:Type sModels:GameInfoMessage}">
         <Grid
             Focusable="False"
             ShowGridLines="False"
             Background="Transparent"
             HorizontalAlignment="Stretch"
-            d:DataContext="{d:DesignInstance {x:Type models:GameInfoMessage}}">
+            d:DataContext="{d:DesignInstance {x:Type sModels:GameInfoMessage}}">
             <Grid.Resources>
                 <SolidColorBrush x:Key="Bg" Color="Black" Opacity=".5"/>
             </Grid.Resources>
             <Grid.RowDefinitions>
-                <RowDefinition Height="10"/>
+                <RowDefinition Height="0"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -395,7 +396,8 @@
                 FontSize="14"/>-->
 
             <Border Grid.Row="1" Style="{StaticResource MapPreviewBorderStyle}"
-                    ToolTip="{Binding mapname}">
+                    ToolTip="{Binding mapname}"
+                    Margin="4">
                 <Grid>
                     <!--<Grid.Style>
                         <Style TargetType="Grid">
@@ -897,7 +899,7 @@
                     CommandParameter="{Binding}"
                     HorizontalAlignment="Left"
                     Content="Join"/>
-                <Button
+                <!--<Button
                     Background="Transparent"
                     Grid.Column="2"
                     Style="{StaticResource LobbyContainerBtnStyle}"
@@ -922,7 +924,7 @@
                             </Style>
                         </Path.Style>
                     </Path>
-                </Button>
+                </Button>-->
             </Grid>
             <Border Grid.Row="1" Grid.Column="1"
                     HorizontalAlignment="Right"
