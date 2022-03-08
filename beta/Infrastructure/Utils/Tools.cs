@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
@@ -59,7 +60,13 @@ namespace beta.Infrastructure.Utils
         }
 
 
-        public static string CalculateMD5(string filename)
+        public static string CalculateMD5FromText(string text)
+        {
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(text));
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+        public static string CalculateMD5FromFile(string filename)
         {
             using var md5 = MD5.Create();
             using var stream = File.OpenRead(filename);
