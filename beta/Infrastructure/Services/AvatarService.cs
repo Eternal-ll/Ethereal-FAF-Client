@@ -10,7 +10,6 @@ namespace beta.Infrastructure.Services
     {
         private readonly ISessionService SessionService;
         private readonly ICacheService CacheService;
-        private readonly List<BitmapImage> Cache = new();
 
         public AvatarService(
             ISessionService sessionService,
