@@ -95,7 +95,7 @@ namespace beta.Views
         #endregion
 
         #region WelcomeGridVisibility
-        private Visibility _WelcomeGridVisibility = Visibility.Collapsed;
+        private Visibility _WelcomeGridVisibility = Visibility.Visible;
         public Visibility WelcomeGridVisibility
         {
             get => _WelcomeGridVisibility;
@@ -108,6 +108,7 @@ namespace beta.Views
             }
         } 
         #endregion
+
         #region ChatGridVisibility
         private Visibility _ChatGridVisibility = Visibility.Collapsed;
         public Visibility ChatGridVisibility
@@ -116,7 +117,6 @@ namespace beta.Views
             set => Set(ref _ChatGridVisibility, value);
         } 
         #endregion
-
 
         private readonly object _lock = new object();
 
