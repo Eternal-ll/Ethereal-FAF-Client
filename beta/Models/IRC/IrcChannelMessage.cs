@@ -18,6 +18,11 @@ namespace beta.Models.IRC
         public IrcPrivateMessage(string from, string text) : base(text) => From = from;
     }
 
+    public class ServerNotifyMessage : Base.IrcMessage
+    {
+        public ServerNotifyMessage(string text) : base(text) { }
+    }
+
     public class IrcUserJoin
     {
         public string Channel { get; }
@@ -50,13 +55,13 @@ namespace beta.Models.IRC
             Topic = topic;
         }
     }
-    public class IrcChannelTopicChanged
+    public class IrcChannelTopicChangedBy
     {
         public string Channel { get; }
         public string By { get; }
         public DateTime At { get; }
 
-        public IrcChannelTopicChanged(string channel, string by, string at)
+        public IrcChannelTopicChangedBy(string channel, string by, string at)
         {
             Channel = channel;
             By = by;
