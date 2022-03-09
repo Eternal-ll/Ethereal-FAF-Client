@@ -8,14 +8,18 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
+using beta.Models.Debugger;
 
 namespace beta
 {
+  
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App
     {
+        
+
         public static IServiceProvider Services => Hosting.Services;
         public static bool IsDesignMode { get; private set; } = true;
         private static IHost _Hosting;
@@ -47,15 +51,10 @@ namespace beta
             };
         }
 
-#if DEBUG
-        public readonly static ServerDebugWindow DebugWindow = new();
-#endif
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-#if DEBUG
-            DebugWindow.Show();
-#endif
+            AppDebugger.Init();
             IsDesignMode = false;
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);
