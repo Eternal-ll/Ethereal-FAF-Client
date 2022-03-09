@@ -82,20 +82,10 @@ namespace beta.Views
         {
             var selectedItem = (NavigationViewItem)args.SelectedItem;
             string selectedItemTag = (string)selectedItem.Tag;
-#if DEBUG
-            if (selectedItemTag == null || selectedItemTag.Length == 0) return;
-#endif
-            //if (selectedItemTag == "Logout")
-            //{
-            //    // Initialize logout process
-            //    return;
-            //}
 
             string pageName = "beta.Views." + selectedItemTag + "View";
             Type pageType = typeof(GlobalView).Assembly.GetType(pageName);
-#if DEBUG
-            if (pageType == null) return;
-#endif
+
             ContentFrame.Content = GetPage(pageType);
         } 
         #endregion
