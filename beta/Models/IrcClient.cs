@@ -7,6 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using beta.Models.Debugger;
 
 namespace beta.Models
 {
@@ -314,9 +315,7 @@ namespace beta.Models
         /// <param name="data">message from the server</param>
         private void ParseData(string data)
         {
-#if DEBUG
-            App.DebugWindow.LOGIRC(data);
-#endif
+            AppDebugger.LOGIRC(data);
             // split the data into parts
             string[] ircData = data.Split(' ');
 

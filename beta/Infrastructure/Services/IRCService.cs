@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
+using beta.Models.Debugger;
 
 namespace beta.Infrastructure.Services
 {
@@ -118,10 +119,8 @@ namespace beta.Infrastructure.Services
                 if (e == ManagedTcpClientState.Connected)
                 {
                     client.DataReceived += ManagedTcpClient_DataReceived;
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"Connected to IRC Server");
-                    App.DebugWindow.LOGIRC($"Sending authorization information...");
-#endif
+                    AppDebugger.LOGIRC($"Connected to IRC Server");
+                    AppDebugger.LOGIRC($"Sending authorization information...");
                     Authorize();
                 }
             }
@@ -180,13 +179,13 @@ namespace beta.Infrastructure.Services
                 ManagedTcpClient.Dispose();
                 ManagedTcpClient = null;
                 IsIRCConnected = false;
-#if DEBUG
-                App.DebugWindow.LOGIRC($"Disconnected from IRC Server");
-#endif
+
+                AppDebugger.LOGIRC($"Disconnected from IRC Server");
+
             }
-#if DEBUG
-            App.DebugWindow.LOGIRC($"You sent: {message}");
-#endif
+
+            AppDebugger.LOGIRC($"You sent: {message}");
+
         }
 
         public void Test()
@@ -242,24 +241,18 @@ namespace beta.Infrastructure.Services
                 case "001": // server welcome message, after this we can join
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
                     IsIRCConnected = true;
-#if DEBUG
-                    App.DebugWindow.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
-#endif
+                    AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
                     break;
                 case "321": // start of list of 322
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"Start of available channels");
-#endif
+
+                    AppDebugger.LOGIRC($"Start of available channels");
+
                     break;
                 case "322": // channel information after 321
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"Channel: {ircData[3]}, users: {ircData[4]}");
-#endif
+                    AppDebugger.LOGIRC($"Channel: {ircData[3]}, users: {ircData[4]}");
                     break;
                 case "323": // end of list of 322
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"End of available channels");
-#endif
+                    AppDebugger.LOGIRC($"End of available channels");
                     break;
                 case "332": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
                     //:irc.faforever.com 332 Eternal- #aeolus :FAF rules:...
@@ -271,16 +264,16 @@ namespace beta.Infrastructure.Services
                     sb.Remove(sb.Length - 2, 2);
 
                     OnChannelTopicUpdated(new(ircData[3], sb.ToString()));
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"Channel: {ircData[3]} topic: {sb}");
-#endif
+
+                    AppDebugger.LOGIRC($"Channel: {ircData[3]} topic: {sb}");
+
                     break;
                 case "333": // Sent to a client to let them know who set the topic (<nick>) and when they set it (<setat> is a unix timestamp). Sent after RPL_TOPIC.
                     //:irc.faforever.com 333 Eternal- #aeolus Giebmasse_irc 1635328010
                     OnChannelTopicChangedBy(new(ircData[3], ircData[4], ircData[5]));
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"Topic in channel: {ircData[3]} set by: {ircData[4]} at: {DateTime.UnixEpoch.AddSeconds(double.Parse(ircData[5]))}");
-#endif
+
+                    AppDebugger.LOGIRC($"Topic in channel: {ircData[3]} set by: {ircData[4]} at: {DateTime.UnixEpoch.AddSeconds(double.Parse(ircData[5]))}");
+
                     break;
                 case "353": // channel users
                     {
@@ -289,10 +282,10 @@ namespace beta.Infrastructure.Services
                         var users = data[data.LastIndexOf(':')..^2].Split();
 
                         OnChannelUsersReceived(new(channel, users));
-#if DEBUG   
-                        //App.DebugWindow.LOGIRC($"channel: {channel} users count: {users.Length}");
-                        App.DebugWindow.LOGIRC($"channel: {channel} users: {string.Join(", ", users)}");
-#endif
+
+                        //AppDebugger.LOGIRC($"channel: {channel} users count: {users.Length}");
+                        AppDebugger.LOGIRC($"channel: {channel} users: {string.Join(", ", users)}");
+
                     }
                     break;
 
@@ -314,9 +307,9 @@ namespace beta.Infrastructure.Services
                         string channel = ircData[2][1..^1];
 
                         OnUserJoined(new(channel, from));
-#if DEBUG
-                        App.DebugWindow.LOGIRC($"user: {from} joined to {channel}");
-#endif
+
+                        AppDebugger.LOGIRC($"user: {from} joined to {channel}");
+
                     }
                     break;
                 case "KICK":
@@ -329,16 +322,16 @@ namespace beta.Infrastructure.Services
                     }
                     sb.Remove(0, 1);
                     sb.Remove(sb.Length - 2, 2);
-#if DEBUG
+
                     if (sb.Length > 0)
                     {
-                        App.DebugWindow.LOGIRC($"user: {from} changed topic in channel: {ircData[2]} to: {sb}");
+                        AppDebugger.LOGIRC($"user: {from} changed topic in channel: {ircData[2]} to: {sb}");
                     }
                     else
                     {
-                        App.DebugWindow.LOGIRC($"user: {from} removed topic in channel: {ircData[2]}");
+                        AppDebugger.LOGIRC($"user: {from} removed topic in channel: {ircData[2]}");
                     }
-#endif
+
                     break;
                 case "MODE": // MODE was set
                     {
@@ -359,17 +352,17 @@ namespace beta.Infrastructure.Services
                         //}
 
                         // TODO: event for userMode's
-#if DEBUG
-                        App.DebugWindow.LOGIRC($"{data}");
-#endif
+
+                        AppDebugger.LOGIRC($"{data}");
+
                     }
                     break;
                 case "NICK": // someone changed their nick
                     var to = data[(data.LastIndexOf(':') + 1)..^1];
                     OnUserChangedName(new(from, to));
-#if DEBUG
-                    App.DebugWindow.LOGIRC($"user: {from} changed his nickname from: {from} to: {to}");
-#endif
+
+                    AppDebugger.LOGIRC($"user: {from} changed his nickname from: {from} to: {to}");
+
                     break;
                 case "NOTICE": // someone sent a notice
                     {
@@ -390,9 +383,9 @@ namespace beta.Infrastructure.Services
                             if (letter == ':' || sb.Length > 0) sb.Append(letter);
                             i++;
                         }
-#if DEBUG
-                        App.DebugWindow.LOGIRC($"!!! Notice from {from}: {message}");
-#endif
+
+                        AppDebugger.LOGIRC($"!!! Notice from {from}: {message}");
+
                     }
                     break;
                 case "PRIVMSG": // message was sent to the channel or as private
@@ -409,25 +402,25 @@ namespace beta.Infrastructure.Services
                         if (target[0] == '#')
                         {
                             OnChannelMessage(new(target, from, sb.ToString()));
-#if DEBUG
-                            App.DebugWindow.LOGIRC($"user: {from} in channel: {ircData[2]} sent: {sb} ");
-#endif
+
+                            AppDebugger.LOGIRC($"user: {from} in channel: {ircData[2]} sent: {sb} ");
+
                         }
                         else
                         {
                             OnPrivateMessage(new(from, sb.ToString()));
-#if DEBUG
-                            App.DebugWindow.LOGIRC($"user: {from} sent private message: {sb} ");
-#endif
+
+                            AppDebugger.LOGIRC($"user: {from} sent private message: {sb} ");
+
                         }
                     }
                     break;
                 case "PART":
                     {
                         OnUserLeft(new(ircData[2], from));
-#if DEBUG
-                        App.DebugWindow.LOGIRC($"user: {from} left from {ircData[2]}");
-#endif
+
+                        AppDebugger.LOGIRC($"user: {from} left from {ircData[2]}");
+
                     }
                     break;
                 case "QUIT":// someone left
@@ -435,16 +428,16 @@ namespace beta.Infrastructure.Services
                         //:Mavr390!15632@93DACFB2.4D35C09C.2CB4B448.IP QUIT :Quit: Mavr390
 
                         OnUserDisconnected(from);
-#if DEBUG
-                        App.DebugWindow.LOGIRC($"user: {from} disconnected from IRC server");
-#endif
+
+                        AppDebugger.LOGIRC($"user: {from} disconnected from IRC server");
+
                     }
                     break;
                 default:
 
-#if DEBUG
-                    App.DebugWindow.LOGIRC(data);
-#endif
+
+                    AppDebugger.LOGIRC(data);
+
                     break;
             }
 

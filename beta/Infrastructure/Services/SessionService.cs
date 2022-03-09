@@ -14,6 +14,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using beta.Models.Debugger;
 
 namespace beta.Infrastructure.Services
 {
@@ -240,9 +241,9 @@ namespace beta.Infrastructure.Services
 
                     //App.DebugWindow.LOGLobby(json.ToJsonFormat());
                 }
-#if DEBUG
-                else App.DebugWindow.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
-#endif
+
+                else AppDebugger.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
+
         }
 #if DEBUG
             //else App.DebugWindow.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
@@ -330,11 +331,11 @@ namespace beta.Infrastructure.Services
         private void OnPong(string json = null)
         {
             WaitingPong = true;
-#if DEBUG
+
             //Logger.LogInformation($"Received PONG, time elapsed: {Stopwatch.Elapsed.ToString("c")}");
             //Stopwatch.Stop();
-            App.DebugWindow.LOGLobby($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
-#endif
+            AppDebugger.LOGLobby($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
+
             Stopwatch.Reset();
         } 
         #endregion
