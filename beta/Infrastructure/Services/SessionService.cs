@@ -70,7 +70,7 @@ namespace beta.Infrastructure.Services
             Operations.Add(ServerCommand.game_info, OnGameData);
             //Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
 
-            //Operations.Add(ServerCommand.ping, OnPing);
+            Operations.Add(ServerCommand.ping, OnPing);
             Operations.Add(ServerCommand.pong, OnPong);
 
             Operations.Add(ServerCommand.invalid, OnInvalidData);
@@ -90,10 +90,7 @@ namespace beta.Infrastructure.Services
         #endregion
         public void Connect()
         {
-            Client = new(port: 8002)
-            {
-                ThreadName = "TCP Lobby Server"
-            };
+            Client = new(threadName: "TCP Lobby Client", port: 8002);
             Client.DataReceived += OnDataReceived;
         }
         public string GenerateUID(string session)
