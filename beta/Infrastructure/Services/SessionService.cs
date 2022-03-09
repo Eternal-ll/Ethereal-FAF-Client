@@ -135,17 +135,20 @@ namespace beta.Infrastructure.Services
                     ThreadName = "TCP Lobby Server"
                 };
                 Client.DataReceived += OnDataReceived;
-                ManagedTcpClientState state = ManagedTcpClientState.NotConnected;
+                // TODO Requires some better logic maybe
+                ManagedTcpClientState state = ManagedTcpClientState.Disconnected;
                 Client.StateChanged += (s, e) =>
                 {
                     state = ManagedTcpClientState.Connected;
                 };
-                while (state == ManagedTcpClientState.NotConnected)
+                while (state == ManagedTcpClientState.Disconnected)
                 {
                     Thread.Sleep(10);
                 }
                 if (state != ManagedTcpClientState.Connected)
                 {
+                    // TODO Raise events
+                    OnAuthorization(false);
                     return;
                 }
             }

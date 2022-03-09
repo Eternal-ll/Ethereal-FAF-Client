@@ -69,17 +69,29 @@ namespace beta.Views
         private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>
             Dispatcher.Invoke(() =>
             {
-                // release used resources
-                Canvas.Children.Clear();
-                Canvas = null;
+                if (e)
+                {
+                    // release used resources
+                    Canvas.Children.Clear();
+                    Canvas = null;
 
-                // remove listeners of events
-                OAuthService.Result -= OnOAuthAuthorizationFinish;
-                SessionService.Authorized -= OnLobbySessionServiceAuthorizationFinish;
-                // call UI thread and invoke our instructions
-                // events coming from different thread and can raise exception
-                NavigationManager.Navigate(new MainView());
-                return;
+                    // remove listeners of events
+                    OAuthService.Result -= OnOAuthAuthorizationFinish;
+                    SessionService.Authorized -= OnLobbySessionServiceAuthorizationFinish;
+                    // call UI thread and invoke our instructions
+                    // events coming from different thread and can raise exception
+                    NavigationManager.Navigate(new MainView());
+                }
+                else
+                {
+                    for (int i = 0; i < Canvas.Children.Count; i++)
+                        Canvas.Children[i].Visibility = Visibility.Visible;
+
+                    ProgressRing.Visibility = Visibility.Collapsed;
+
+                    WarnDialog.Content = "Cant connect to FAF lobby server";
+                    WarnDialog.ShowAsync();
+                }
             });
 
         private void OnCheckBoxClick(object sender, RoutedEventArgs e) => Settings.Default.AutoJoin = ((CheckBox)sender).IsChecked.Value;
