@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -325,11 +324,7 @@ namespace beta.Infrastructure.Services
 
         private void OnPing(string json = null)
         {
-#if DEBUG
-            //Logger.LogInformation($"Received ping, starting timer...");
             Client.Write("{\"command\":\"pong\"}");
-            //Stopwatch.Start();
-#endif
         }
 
         private void OnPong(string json = null)
