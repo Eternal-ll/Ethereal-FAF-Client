@@ -13,7 +13,7 @@ namespace beta.Infrastructure.Services
     {
         #region Events
         public event EventHandler<EventArgs<ManagedTcpClientState>> StateChanged;
-        public event EventHandler IrcConnected;
+        public event EventHandler<bool> IrcConnected;
 
         /// <summary>
         /// User connected to IRC server
@@ -52,13 +52,12 @@ namespace beta.Infrastructure.Services
         /// <summary>
         /// Specific channel topic changed by specific user
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelTopicChanged>> ChannelTopicChangedBy;
+        public event EventHandler<EventArgs<IrcChannelTopicChangedBy>> ChannelTopicChangedBy;
         
         /// <summary>
         /// 
         /// </summary>
         public event EventHandler<EventArgs<IrcChannelUsers>> ChannelUsersReceived;
-
 
         #endregion
 
@@ -75,14 +74,28 @@ namespace beta.Infrastructure.Services
         #region Public
 
         #region ConnectionState
-        private ManagedTcpClientState _ConnectionState;
-        public ManagedTcpClientState ConnectionState
+        private ManagedTcpClientState _TCPConnectionState;
+        public ManagedTcpClientState TCPConnectionState
         {
-            get => _ConnectionState;
-            set => Set(ref _ConnectionState, value);
-        } 
+            get => _TCPConnectionState;
+            set => Set(ref _TCPConnectionState, value);
+        }
         #endregion
 
+        #region IsIRCConnected
+        private bool _IsIRCConnected;
+        public bool IsIRCConnected
+        {
+            get => _IsIRCConnected;
+            set
+            {
+                if (Set(ref _IsIRCConnected, value))
+                {
+                    OnIrcConnected(false);
+                }
+            }
+        }
+        #endregion
         #endregion
 
         #endregion
@@ -166,6 +179,7 @@ namespace beta.Infrastructure.Services
             {
                 ManagedTcpClient.Dispose();
                 ManagedTcpClient = null;
+                IsIRCConnected = false;
 #if DEBUG
                 App.DebugWindow.LOGIRC($"Disconnected from IRC Server");
 #endif
@@ -227,7 +241,7 @@ namespace beta.Infrastructure.Services
                 //https://modern.ircdocs.horse/#names-message
                 case "001": // server welcome message, after this we can join
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
-                    OnIrcConnected();
+                    IsIRCConnected = true;
 #if DEBUG
                     App.DebugWindow.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
 #endif
@@ -436,7 +450,7 @@ namespace beta.Infrastructure.Services
 
         }
 
-        private void OnIrcConnected() => IrcConnected?.Invoke(this, null);
+        private void OnIrcConnected(bool isConnected) => IrcConnected?.Invoke(this, isConnected);
 
         private void OnUserConnected(string user) => UserConnected?.Invoke(this, user);
         private void OnUserDisconnected(string user) => UserDisconnected?.Invoke(this, user);
@@ -450,7 +464,7 @@ namespace beta.Infrastructure.Services
         private void OnChannelMessage(IrcChannelMessage data) => ChannedMessageReceived?.Invoke(this, data);
 
         private void OnChannelTopicUpdated(IrcChannelTopicUpdated data) => ChannelTopicUpdated?.Invoke(this, data);
-        private void OnChannelTopicChangedBy(IrcChannelTopicChanged data) => ChannelTopicChangedBy?.Invoke(this, data);
+        private void OnChannelTopicChangedBy(IrcChannelTopicChangedBy data) => ChannelTopicChangedBy?.Invoke(this, data);
         private void OnChannelUsersReceived(IrcChannelUsers data) => ChannelUsersReceived?.Invoke(this, data);
 
         #endregion

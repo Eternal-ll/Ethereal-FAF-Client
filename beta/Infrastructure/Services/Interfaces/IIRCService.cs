@@ -1,14 +1,17 @@
 ﻿using beta.Models;
 using beta.Models.IRC;
 using System;
+using System.ComponentModel;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface IIrcService
+    public interface IIrcService : INotifyPropertyChanged
     {
         public void Test();
+
         #region Events
         public event EventHandler<EventArgs<ManagedTcpClientState>> StateChanged;
+        public event EventHandler<bool> IrcConnected;
 
         /// <summary>
         /// User connected to IRC server
@@ -45,12 +48,18 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <summary>
         /// Specific channel topic changed by specific user
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelTopicChanged>> ChannelTopicChangedBy;
+        public event EventHandler<EventArgs<IrcChannelTopicChangedBy>> ChannelTopicChangedBy;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public event EventHandler<EventArgs<IrcChannelUsers>> ChannelUsersReceived;
 
         #endregion
 
         #region Properties
-
+        public bool IsIRCConnected { get; }
+        public ManagedTcpClientState TCPConnectionState { get; }
         #endregion
 
         #region Methods

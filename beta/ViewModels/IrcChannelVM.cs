@@ -1,4 +1,5 @@
-﻿using beta.Models;
+﻿using beta.Models.IRC;
+using beta.Models.IRC.Base;
 using beta.ViewModels.Base;
 using System.Collections.ObjectModel;
 
@@ -6,19 +7,7 @@ namespace beta.ViewModels
 {
     public class IrcChannelVM : ViewModel
     {
-        #region Name
-        private string _Name;
-        public string Name
-        {
-            get => _Name;
-            set
-            {
-                if (Set(ref _Name, value))
-                    OnPropertyChanged(nameof(FormattedName));
-            }
-        }
-        public string FormattedName => _Name.Substring(1);
-        #endregion
+        public string Name { get; }
 
         #region Topic
         private string _Topic;
@@ -29,12 +18,18 @@ namespace beta.ViewModels
         }
         #endregion
 
-        #region History
-        public ObservableCollection<ChannelMessage> History { get; } = new();
+        #region TopicChangeBy
+        private IrcChannelTopicChangedBy _IrcChannelTopicChangedBy;
+        public IrcChannelTopicChangedBy TopicChangedBy
+        {
+            get => _IrcChannelTopicChangedBy;
+            set=> Set(ref _IrcChannelTopicChangedBy, value);
+        }
+
         #endregion
 
-        #region Users
         public ObservableCollection<string> Users { get; } = new();
-        #endregion
+        public ObservableCollection<IrcMessage> History { get; } = new();
+        public IrcChannelVM(string name) => Name = name;
     }
 }

@@ -1,17 +1,14 @@
-﻿using beta.Infrastructure.Converters;
+﻿using beta.Infrastructure;
+using beta.Infrastructure.Converters;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
-using beta.Models.Server;
+using beta.Models.IRC;
 using beta.Properties;
 using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -31,7 +28,18 @@ namespace beta.Views
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        protected virtual bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
+        {
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(PropertyName);
+            return true;
+        }
         #endregion
+
+        private readonly IPlayersService PlayersService;
+        private readonly IIrcService IrcService;
 
         #region IsChatMapPreviewEnabled
         private bool _IsChatMapPreviewEnabled;
@@ -49,9 +57,6 @@ namespace beta.Views
         }
         #endregion
 
-        private readonly IPlayersService PlayersService;
-        private readonly IIrcService IrcService;
-
         public ObservableCollection<IrcChannelVM> Channels { get; } = new();
 
         #region SelectedChannel
@@ -66,85 +71,54 @@ namespace beta.Views
                     _SelectedChannel = value;
                     OnPropertyChanged(nameof(SelectedChannel));
                     UpdateSelectedChannelUsers();
-                    if (value != null)
-                    {
-                        _SelectedChannel.Users.CollectionChanged -= Users_CollectionChanged;
-                        value.Users.CollectionChanged += Users_CollectionChanged;
-                    }
                 }
-            }
-        }
-
-        private void Users_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (sender is ObservableCollection<string> users)
-            {
-                if (users != _SelectedChannel.Users)
-                {
-                    users.CollectionChanged -= Users_CollectionChanged;
-                    return;
-                }
-
-                var players = SelectedChatPlayers;
-                switch (e.Action)
-                {
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-                        for (int i = 0; i < e.NewItems.Count; i++)
-                        {
-                            players.Add(GetChatPlayer(e.NewItems[i].ToString()));
-                        }
-                        break;
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
-                        for (int i = 0; i < e.OldItems.Count; i++)
-                        {
-                            players.Remove(GetChatPlayer(e.OldItems[i].ToString()));
-                        }
-                        break;
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
-                        break;
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Move:
-                        break;
-                    case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
-                        break;
-                }
-                //View.Refresh();
             }
         }
         #endregion
 
-        private ObservableCollection<IPlayer> SelectedChatPlayers = new();
+        private readonly ObservableCollection<IPlayer> SelectedChannelPlayers = new();
 
-        private readonly CollectionViewSource SelectedChannelUsersViewSource = new();
-        public ICollectionView View => SelectedChannelUsersViewSource.View;
+        private readonly CollectionViewSource SelectedChannelPlayersViewSource = new();
+        public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
 
-        #region Thickness
-        // for suggestion box above the input box
-        // offset on X from left
-        private Thickness _Thickness;
-        public Thickness Thickness
+        #region FilterText
+        private string _FilterText = string.Empty;
+        public string FilterText
         {
-            get => _Thickness;
+            get => _FilterText;
             set
             {
-                _Thickness = value;
-                OnPropertyChanged(nameof(Thickness));
+                if (Set(ref _FilterText, value))
+                    SelectedChannelPlayersView.Refresh();
             }
         }
         #endregion
 
-        #region VisibilityTest
-        // visibility of suggestionBox
-        private Visibility _Visibility = Visibility.Hidden;
-        public Visibility VisibilityTest
+        #region WelcomeGridVisibility
+        private Visibility _WelcomeGridVisibility = Visibility.Collapsed;
+        public Visibility WelcomeGridVisibility
         {
-            get => _Visibility;
+            get => _WelcomeGridVisibility;
             set
             {
-                _Visibility = value;
-                OnPropertyChanged(nameof(VisibilityTest));
+                if (Set(ref _WelcomeGridVisibility, value))
+                {
+                    ChatGridVisibility = value == Visibility.Visible ? Visibility.Collapsed : Visibility;
+                }
             }
-        }
+        } 
         #endregion
+        #region ChatGridVisibility
+        private Visibility _ChatGridVisibility = Visibility.Collapsed;
+        public Visibility ChatGridVisibility
+        {
+            get => _ChatGridVisibility;
+            set => Set(ref _ChatGridVisibility, value);
+        } 
+        #endregion
+
+
+        private readonly object _lock = new object();
 
         #endregion
 
@@ -152,14 +126,27 @@ namespace beta.Views
         {
             InitializeComponent();
 
+            DataContext = this;
+
             PlayersService = App.Services.GetService<IPlayersService>();
             IrcService = App.Services.GetService<IIrcService>();
-            
-            string nick = Settings.Default.PlayerNick;
-            string id = Settings.Default.PlayerId.ToString();
-            string password = Settings.Default.irc_password;
 
+            //string nick = Settings.Default.PlayerNick;
+            //string id = Settings.Default.PlayerId.ToString();
+            //string password = Settings.Default.irc_password;
             //IrcService.Authorize(nick, password);
+
+            if (IrcService.IsIRCConnected)
+            {
+                WelcomeGridVisibility = Visibility.Collapsed;
+                SelectedChannelPlayersViewSource.Source = SelectedChannelPlayers;
+            }
+            else
+            {
+                WelcomeGridVisibility = Visibility.Visible;
+                BindingOperations.EnableCollectionSynchronization(PlayersService.Players, _lock);
+                SelectedChannelPlayersViewSource.Source = PlayersService.Players;
+            }
 
             PropertyGroupDescription groupDescription = new("", new ChatUserGroupConverter());
             groupDescription.GroupNames.Add("Me");
@@ -169,14 +156,84 @@ namespace beta.Views
             groupDescription.GroupNames.Add("Players");
             groupDescription.GroupNames.Add("IRC users");
             groupDescription.GroupNames.Add("Foes");
-            SelectedChannelUsersViewSource.GroupDescriptions.Add(groupDescription);
+            SelectedChannelPlayersViewSource.GroupDescriptions.Add(groupDescription);
 
-            DataContext = this;
+            SelectedChannelPlayersViewSource.Filter += PlayersFilter;
+
+            #region IrcService event listeners
+            IrcService.IrcConnected += OnIrcConnected;
+
+            IrcService.ChannelUsersReceived += OnChannelUsersReceived;
+            IrcService.ChannelTopicUpdated += OnChannelTopicUpdated;
+            IrcService.ChannelTopicChangedBy += OnChannelTopicChangedBy;
+            IrcService.UserJoined += OnChannelUserJoin;
+            IrcService.UserLeft += OnChannelUserLeft;
+
+            IrcService.ChannedMessageReceived += OnChannelMessageReceived; 
+            #endregion
 
             App.Current.MainWindow.Closing += MainWindow_Closing;
+        }
 
-            MessageInput.TextChanged += OnMessageInputTextChanged;
-            MessageInput.PreviewKeyDown += OnMessageInputPreviewKeyDown;
+        private void OnIrcConnected(object sender, bool e)
+        {
+            if (e)
+            {
+                WelcomeGridVisibility = Visibility.Collapsed;
+                SelectedChannelPlayersViewSource.Source = SelectedChannelPlayers;
+                BindingOperations.DisableCollectionSynchronization(PlayersService.Players);
+            }
+            else
+            {
+                WelcomeGridVisibility = Visibility.Visible;
+                BindingOperations.EnableCollectionSynchronization(PlayersService.Players, _lock);
+                SelectedChannelPlayersViewSource.Source = PlayersService.Players;
+            }
+        }
+
+        private void PlayersFilter(object sender, FilterEventArgs e)
+        {
+            var player = (IPlayer)e.Item;
+
+            if (FilterText.Length == 0) return;
+
+            e.Accepted = player.login.StartsWith(FilterText);
+        }
+
+        private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
+        {
+            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            {
+                channel.History.Add(e.Arg);
+            }
+            else
+            {
+                // todo
+            }
+        }
+
+        private void OnChannelTopicChangedBy(object sender, EventArgs<IrcChannelTopicChangedBy> e)
+        {
+            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            {
+                channel.TopicChangedBy = e.Arg;
+            }
+            else
+            {
+                // todo
+            }
+        }
+
+        private void OnChannelTopicUpdated(object sender, EventArgs<IrcChannelTopicUpdated> e)
+        {
+            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            {
+                channel.Topic = e.Arg.Topic;
+            }
+            else
+            {
+                // todo
+            }
         }
 
         private IPlayer GetChatPlayer(string user)
@@ -202,9 +259,10 @@ namespace beta.Views
         }
         private void UpdateSelectedChannelUsers()
         {
-            ObservableCollection<IPlayer> players = SelectedChatPlayers;
+            var players = SelectedChannelPlayers;
+            var users = SelectedChannel.Users;
+
             players.Clear();
-            var users = _SelectedChannel.Users;
             for (int i = 0; i < users.Count; i++)
             {
                 players.Add(GetChatPlayer(users[i]));
@@ -226,347 +284,59 @@ namespace beta.Views
             channel = null;
             return false;
         }
-        private void IrcClient_UserLeft(object sender, UserLeftEventArgs e)
+
+        #region Events listeners
+
+        private void OnChannelUserLeft(object sender, EventArgs<IrcUserLeft> e)
         {
-            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
-                channel.Users.Remove(e.User);
+                channel.Users.Remove(e.Arg.User);
+
+                if (channel.Name.Equals(SelectedChannel.Name))
+                {
+                    SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                }
             }
             else
             {
-                var channels = Channels;
-                for (int i = 0; i < channels.Count; i++)
-                {
-                    channels[i].Users.Remove(e.User);
-                }
+                // todo
             }
         }
-        private void IrcClient_UserJoined(object sender, UserJoinedEventArgs e)
+        private void OnChannelUserJoin(object sender, EventArgs<IrcUserJoin> e)
         {
-            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
-                channel.Users.Add(e.User);
+                channel.Users.Add(e.Arg.User);
+
+                if (channel.Name.Equals(SelectedChannel.Name))
+                {
+                    SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                }
             }
             else
             {
-
+                // todo
             }
         }
-        private void IrcClient_UpdateUsers(object sender, UpdateUsersEventArgs e)
+        private void OnChannelUsersReceived(object sender, EventArgs<IrcChannelUsers> e)
         {
-            if (TryGetChannel(e.Channel, out var channel))
+            if (!TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
-                ObservableCollection<string> users = channel.Users;
-
-                for (int i = 0; i < e.UserList.Length; i++)
-                {
-                    //var playerInfo = PlayersService.GetPlayer(e.UserList[i]);
-                    //if (playerInfo != null)
-                    //    users.Add(playerInfo);
-                    //else users.Add(new UnknownPlayer()
-                    //{
-                    //    login = e.UserList[i]
-                    //});
-                    users.Add(e.UserList[i]);
-                }
-            }
-        }
-        private void IrcClient_OnConnect(object sender, EventArgs e)
-        {
-            //IrcClient.JoinChannel("#aeolus");
-            Channels.Add(new() { Name = "#aeolus" });
-        }
-        private void IrcClient_ChannelMessage(object sender, ChannelMessageEventArgs e)
-        {
-            e.Message = e.Message.Replace('\n', ' ');
-            e.Message = e.Message.Replace('\r', ' ');
-            e.From = e.From.Replace('\n', ' ');
-            e.From = e.From.Replace('\r', ' ');
-
-            var login = "@" + Settings.Default.PlayerNick;
-
-            for (int i = 0; i < Channels.Count; i++)
-            {
-                var channel = Channels[i];
-                if (channel.Name == e.Channel)
-                {
-                    var len = channel.History.Count - 1;
-
-                    if (len >= 0)
-                    {
-                        var previousMsg = channel.History[len];
-                        while (previousMsg.From == null && len > 0)
-                        {
-                            len--;
-                            previousMsg = channel.History[len];
-                        }
-
-                        if (previousMsg.From == e.From)
-                            e.From = null;
-                    }
-                    channel.History.Add(new()
-                    {
-                        From = e.From,
-                        Message = e.Message,
-                        HasMention = e.Message.Contains(login, StringComparison.OrdinalIgnoreCase)
-                    });
-                    break;
-                }
-            }
-        }
-        private void IrcClient_ServerMessage(object sender, StringEventArgs e)
-        {
-            e.Result = e.Result.Replace('\n', ' ');
-            e.Result = e.Result.Replace('\r', ' ');
-            Channels[0].History.Add(new() { Message = e.Result });
-        }
-
-        private void MainWindow_Closing(object sender, CancelEventArgs e)
-        {
-            IrcService.Quit();
-        }
-
-        private void OnMessageInputPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            ChangedByKey = true;
-
-            var listbox = SuggestionListBox;
-            var input = MessageInput;
-
-            if (e.Key == System.Windows.Input.Key.Enter)
-            {
-                if (VisibilityTest != Visibility.Visible)
-                {
-                    string nick = Settings.Default.PlayerNick;
-                    var mention = input.Text.Contains(nick, StringComparison.OrdinalIgnoreCase);
-
-                    var lent = SelectedChannel.History.Count - 1;
-                    if (lent >= 0)
-                    {
-                        var previousNick = SelectedChannel.History[lent].From;
-                        while (previousNick == null && lent > 0)
-                        {
-                            lent--;
-                            previousNick = SelectedChannel.History[lent].From;
-                        }
-
-                        if (previousNick == nick)
-                            nick = null;
-                    }
-
-                    SelectedChannel.History.Add(new()
-                    {
-                        From = nick,
-                        Message = input.Text,
-                        HasMention = mention
-                    }) ;
-                    MessageInput.Text = string.Empty;
-                    return;
-                }
-                if(input.Text[^1] != ' ')
-                    input.Text += " ";
-                input.Select(input.Text.Length, 0);
-                _foundedIndex = -1;
-
-                SuggestionListBox.ItemsSource = null;
-                VisibilityTest = Visibility.Collapsed;
-
-                return;
+                channel = new(e.Arg.Channel);
             }
 
-            if (listbox.ItemsSource == null) return;
-
-            var selectedIndex = listbox.SelectedIndex;
-            var len = listbox.Items.Count - 1;
-
-            var originalIndex = _foundedIndex;
-            var keyWordLen = _keyWordLen;
-
-            var text = input.Text;
-            //text = text.Substring(0, )
-
-            if (e.Key == System.Windows.Input.Key.Down)
+            for (int i = 0; i < e.Arg.Users.Length; i++)
             {
-                var previousItem = (PlayerInfoMessage)SuggestionListBox.SelectedItem;
-
-                if (selectedIndex < len)
-                    listbox.SelectedIndex++;
-                else listbox.SelectedIndex = 0;
-
-                var itemg = (PlayerInfoMessage)listbox.Items[listbox.SelectedIndex];
-                var item = itemg.login.Substring(keyWordLen);
-
-                var start = text.Substring(0, _foundedIndex);
-
-                input.Text = start + item;
-                if (previousItem != null)
-                {
-                    var t = _foundedIndex + previousItem.login.Length - keyWordLen;
-
-                    // TODO FIX ME
-                    // !!!!!!!!!!!!!!!!!!!!!!
-                    try
-                    {
-                        if (t < input.Text.Length)
-                            input.Text += text.Substring(t);
-                    }
-                    catch (Exception ex)
-                    {
-                        //MessageBox.Show(ex.ToString());
-                    }
-                }
-                else input.Text += text.Substring(_foundedIndex);
-                input.CaretIndex = start.Length + item.Length;
-            }
-            if (e.Key == System.Windows.Input.Key.Up)
-            {
-                var previousItem = (PlayerInfoMessage)SuggestionListBox.SelectedItem;
-                if (selectedIndex > 0)
-                    listbox.SelectedIndex--;
-                else listbox.SelectedIndex = len;
-
-                var itemg = (PlayerInfoMessage)listbox.Items[listbox.SelectedIndex];
-                var item = itemg.login.Substring(keyWordLen);
-
-                var start = text.Substring(0, _foundedIndex);
-
-                input.Text = start + item;
-                if (previousItem != null)
-                {
-                    var t = _foundedIndex + previousItem.login.Length - keyWordLen;
-
-                    // TODO FIX ME
-                    try
-                    {
-                        if (t < input.Text.Length)
-                            input.Text += text.Substring(t);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.ToString());
-                    }
-                }
-                else input.Text += text.Substring(_foundedIndex);
-                input.CaretIndex = start.Length + item.Length;
-            }
-        }
-        private bool ChangedByKey = false;
-
-        private int _foundedIndex;
-        private int _keyWordLen;
-        private string _previousText = "";
-        private void OnMessageInputTextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!ChangedByKey) return;
-            ChangedByKey = false;
-
-            var input = MessageInput;
-
-            var text = input.Text;
-            var len = text.Length;
-
-            var isDeletingAction = _previousText.Length > text.Length;
-            if (isDeletingAction)
-                if (input.CaretIndex > 0)
-                    _foundedIndex--;
-
-            if (len == 0)
-            {
-                SuggestionListBox.ItemsSource = null;
-                VisibilityTest = Visibility.Collapsed;
-                return;
+                channel.Users.Add(e.Arg.Users[i]);
             }
 
-            StringBuilder sb = new();
+            Channels.Add(channel);
+        } 
 
-            for (int i = 0; i < len; i++)
-            {
-                var letter = text[i];
+        #endregion
 
-                if (letter == '@')
-                {
-
-                    sb.Append(letter);
-                    Char innerL = '0';
-                    bool gg = false;
-                    while (innerL != ' ' && i < len - 1)
-                    {
-                        i++;
-                        innerL = text[i];
-                        if (innerL == '@' || innerL == ' ')
-                        {
-                            if (input.CaretIndex != i)
-                                sb.Clear();
-                            else gg = true;
-                            break;
-                        }
-                        sb.Append(innerL);
-                    }
-
-                    if (sb.Length <= 2)
-                    {
-                        sb.Clear();
-                    }
-
-                    var currentIndex = i + 1;
-
-                    bool test = sb.Length > 2 && input.CaretIndex == currentIndex;
-
-                    if (gg)
-                        test = sb.Length > 2;
-
-                    if (test)
-                    {
-                        var word = sb.ToString().Trim().Substring(1);
-                        var suggestions = PlayersService.GetPlayers(word).ToArray();
-
-                        if (suggestions.Length > 0)
-                        {
-                            if (suggestions.Length == 1)
-                            {
-                                if (suggestions[0].login.Equals(word, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    SuggestionListBox.ItemsSource = null;
-                                    VisibilityTest = Visibility.Collapsed;
-                                    return;
-                                }
-                            }
-
-                            SuggestionListBox.ItemsSource = suggestions;
-                            SuggestionListBox.SelectedIndex = 0;
-                            VisibilityTest = Visibility.Visible;
-
-                            var width = MessageInput.ActualWidth;
-                            var height = MessageInput.ActualHeight;
-                            for (int j = 0; j < width; j++)
-                            {
-                                var func = MessageInput.GetCharacterIndexFromPoint(new(j, height / 2), false);
-                                if (func == i - word.Length)
-                                {
-                                    Thickness = new Thickness(j, 0, 0, 10);
-                                    break;
-                                }
-                            }
-
-                            var player = suggestions[0];
-                            //input.Text = text + player;
-                            _previousText = text + player;
-                            if (gg) currentIndex--;
-                            _foundedIndex = currentIndex;
-                            _keyWordLen = word.Length;
-                            //input.Select(currentIndex, currentIndex + player.Length);
-                            return;
-                        }
-                        sb.Clear();
-                    }
-
-                    //SuggestionListBox.ItemsSource = null;
-                    //VisibilityTest = Visibility.Collapsed;
-                }
-            }
-            _previousText = input.Text;
-        }
-        private void JoinChannelInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void JoinToChannelOnEnter(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
             {
@@ -575,25 +345,11 @@ namespace beta.Views
                 if (channel[0] != '#')
                     channel = "#" + channel;
 
-                //if (!IrcClient.Connected)
-                //{
-                //    return;
-                //}
-
-                for (int i = 0; i < Channels.Count; i++)
-                {
-                    if (Channels[i].Name == channel)
-                    {
-                        // raise something
-                        return;
-                    }
-                }
-
-                //IrcClient.JoinChannel(channel);
-                Channels.Add(new() { Name = channel });
+                IrcService.Join(channel);
 
                 JoinChannelInput.Text = string.Empty;
             }
         }
+        private void MainWindow_Closing(object sender, CancelEventArgs e) => IrcService.Quit();
     }
 }
