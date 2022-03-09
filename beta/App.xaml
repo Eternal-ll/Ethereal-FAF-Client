@@ -22,7 +22,10 @@
                     
                     <cmd:RemoveFriendCommand x:Key="RemoveFriendCommand"/>
                     <cmd:RemoveFoeCommand x:Key="RemoveFoeCommand"/>
-                
+
+                    <cmd:ConnectToIrcCommand x:Key="ConnectToIrcCommand"/>
+                    <cmd:DisconnectFromIrcCommand x:Key="DisconnectFromIrcCommand"/>
+
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>

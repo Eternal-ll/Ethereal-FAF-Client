@@ -39,6 +39,8 @@ namespace beta.Models
             TcpThread = new(DoConnect);
             TcpThread.Start();
         }
+        public ManagedTcpClient(string threadName, string host = "lobby.faforever.com", int port = 6667)
+            : this(host, port) => ThreadName = threadName;
         #endregion
 
         #region Properties
@@ -75,7 +77,10 @@ namespace beta.Models
         public void Connect()
         {
             OnStateChanged(ManagedTcpClientState.PendingConnection);
-            TcpThread = new(DoConnect);
+            TcpThread = new(DoConnect)
+            {
+                Name = ThreadName
+            };
             TcpThread.Start();
         }
         public void Write(byte[] data)

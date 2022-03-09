@@ -1,25 +1,21 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Models;
-using beta.Views.Windows;
+using beta.Models.Debugger;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
-using beta.Models.Debugger;
 
 namespace beta
 {
-  
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
     public partial class App
     {
-        
-
         public static IServiceProvider Services => Hosting.Services;
         public static bool IsDesignMode { get; private set; } = true;
         private static IHost _Hosting;
@@ -55,6 +51,7 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
             AppDebugger.Init();
+
             IsDesignMode = false;
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);

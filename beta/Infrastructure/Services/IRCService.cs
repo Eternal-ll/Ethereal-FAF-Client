@@ -92,7 +92,7 @@ namespace beta.Infrastructure.Services
             {
                 if (Set(ref _IsIRCConnected, value))
                 {
-                    OnIrcConnected(false);
+                    OnIrcConnected(value);
                 }
             }
         }
@@ -139,10 +139,7 @@ namespace beta.Infrastructure.Services
                 ManagedTcpClient = null;
             }
 
-            ManagedTcpClient = new()
-            {
-                ThreadName = "IRC TCP Service"
-            };
+            ManagedTcpClient = new(threadName: "IRC TCP Client");
             ManagedTcpClient.StateChanged += ManagedTcpClient_StateChanged;
         }
 
@@ -190,8 +187,8 @@ namespace beta.Infrastructure.Services
 
         public void Test()
         {
-            //Send(IrcCommands.Join("#aeolus"));
-            Send(IrcCommands.Quit());
+            Send(IrcCommands.Leave("#aeolus"));
+            //Send(IrcCommands.Quit());
             //Connect(null, 0);
             //Authorize();
             //Send(IrcCommands.Message("#aeolus", "Check check"));
@@ -277,10 +274,9 @@ namespace beta.Infrastructure.Services
                     break;
                 case "353": // channel users
                     {
-                        //:irc.faforever.com 353 Eternal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
+                        //:irc.faforever.com 353 Eter   nal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
                         var channel = ircData[4];
-                        var users = data[data.LastIndexOf(':')..^2].Split();
-
+                        var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
                         OnChannelUsersReceived(new(channel, users));
 
                         //AppDebugger.LOGIRC($"channel: {channel} users count: {users.Length}");

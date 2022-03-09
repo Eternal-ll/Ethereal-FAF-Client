@@ -1,7 +1,10 @@
 ﻿using beta.Infrastructure.Navigation;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Views.Modals;
+using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows.Controls;
 
@@ -10,21 +13,36 @@ namespace beta.Views
     /// <summary>
     /// Interaction logic for MainView.xaml
     /// </summary>
-    public partial class MainView : INavigationAware
+    public partial class MainView : INavigationAware, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new(propertyName));
+
         #region NavigationManager
 
         private INavigationManager NavigationManager;
         public void OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
         #endregion
 
+        private readonly IIrcService IrcService;
+
         private ContentDialog Dialog;
+
+        public bool IsIrcConnected => IrcService.IsIRCConnected;
 
         #region Ctor
         public MainView()
         {
             InitializeComponent();
+            DataContext = this;
+
             Profile.Content = Properties.Settings.Default.PlayerNick;
+
+            IrcService = App.Services.GetService<IIrcService>();
+            IrcService.IrcConnected += (s, e) =>
+            {
+                OnPropertyChanged(nameof(IsIrcConnected));
+            };
 
             Pages = new UserControl[]
             {
@@ -65,6 +83,7 @@ namespace beta.Views
         #endregion
 
         private readonly UserControl[] Pages;
+
         private UserControl GetPage(Type type)
         {
             var enumerator = Pages.GetEnumerator();

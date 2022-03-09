@@ -13,7 +13,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:ChatView}">
-    <Grid>
+    <Grid x:Name="GlobalGrid">
         <Grid.Resources>
             <Style x:Key="PlayerListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                 <Setter Property="Padding" Value="0 4"/>
@@ -21,7 +21,6 @@
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             </Style>
-
 
             <Style TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
                 <Setter Property="IsExpanded" Value="True"/>
@@ -281,35 +280,68 @@
                 </Grid>
             </DataTemplate>
             <!--#endregion-->
-            
-        </Grid.Resources>
-        <!--#region Welcome grid -->
-        <Grid Visibility="{Binding WelcomeGridVisibility}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="1" Margin="0 100 40 100" HorizontalAlignment="Center"
-                    Padding="20"
-                    Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                    CornerRadius="20">
-                <Border.Effect>
-                    <DropShadowEffect
+
+            <Style x:Key="BorderStyle" TargetType="Border">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect
                                 ShadowDepth="10"
                                 BlurRadius="20"
                                 Direction="-90"
                                 Opacity=".2"/>
-                </Border.Effect>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Background" Value="{DynamicResource NavigationViewExpandedPaneBackground}"/>
+            </Style>
+        </Grid.Resources>
+        
+        <!--#region Welcome grid -->
+        <Grid Visibility="{Binding WelcomeGridVisibility}"
+              Margin="30 32 0 0"
+              HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <Border Padding="10"
+                        Style="{StaticResource BorderStyle}"
+                        CornerRadius="10">
+                    <TextBlock Text="FAForever IRC Chat"
+                               FontSize="16"
+                               FontWeight="Bold"/>
+                </Border>
+                <TextBlock Margin="10 20 0 10" FontWeight="DemiBold">
+                    <Run Text="Status: " Foreground="White"/>
+                    <Run Text="• Offline" Foreground="Red"/>
+                </TextBlock>
+                <TextBlock Opacity=".7"
+                           Margin="10 0 10 10">
+                    <Run Text="IRC Service" FontWeight="Bold"/>
+                    <Run Text="is turned off, but you are still able to watch for players"/>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <Button Margin="10 20" Content="Connect to IRC server" Click="OnConnectRequestBtnClick"
+                            IsEnabled="{Binding IsRequestConnectBtnEnabled}"/>
+                    <ui:ProgressRing IsActive="{Binding PendingConnectionToIRC}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <Border Grid.Row="1"
+                    Margin="0 20 0 30"
+                    Padding="20"
+                    CornerRadius="20"
+                    Style="{StaticResource BorderStyle}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="{Binding SelectedChannelPlayersView.SourceCollection.Count, StringFormat='{}{0} players'}"
-                               FontSize="16"
+                    <TextBlock FontSize="16"
                                FontWeight="Bold">
                         <Run Text="Online: " Foreground="LightGreen"/>
+                        <Run Text="{Binding OnlinePlayersView.SourceCollection.Count, StringFormat='{}{0} players',Mode=OneWay}"/>
                     </TextBlock>
                     <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
                              ui:ControlHelper.PlaceholderText="Search players"
@@ -317,7 +349,7 @@
                              Grid.Row="1"
                              BorderThickness="0"/>
                     <Border Grid.Row="2">
-                        <ListBox ItemsSource="{Binding SelectedChannelPlayersView}"
+                        <ListBox ItemsSource="{Binding OnlinePlayersView}"
                              Background="Transparent"
                              VirtualizingPanel.IsContainerVirtualizable="True"
                              VirtualizingPanel.IsVirtualizingWhenGrouping="True"
@@ -333,6 +365,7 @@
             </Border>
         </Grid>
         <!--#endregion-->
+        
         <!--#region Chat grid -->
         <Grid Visibility="{Binding ChatGridVisibility}">
             <Grid.Resources>
@@ -403,7 +436,7 @@
                     </Style.Triggers>
                 </Style>
 
-                <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}" x:Key="ts">
                     <StackPanel MaxWidth="200"
                             Margin="0 0 0 10">
                         <StackPanel.Style>
@@ -965,17 +998,65 @@
                             SelectedItem="{Binding SelectedChannel}"
                             BorderThickness="0"
                             Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                            DisplayMemberPath="FormattedName"
                             Padding="20 6 20 10"
                             FontWeight="DemiBold"
-                            ui:ControlHelper.CornerRadius="6"/>
+                            ui:ControlHelper.CornerRadius="6"
+                                MaxDropDownHeight="200">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="Gray" Opacity=".3"/>
+                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedUnfocused" Color="Gray" Opacity=".3"/>
+                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="Gray" Opacity=".4"/>
+                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="Gray" Opacity=".1"/>
+                                </ComboBox.Resources>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Left"/>
+                                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                    Padding="4 2 4 4"
+                                                    Margin="0 1 0 0"
+                                                    Background="Transparent"
+                                                    Command="{DynamicResource LeaveFromChannelCommand}"
+                                                    CommandParameter="{Binding Name}">
+                                                <Path 
+                                                  Stretch="Uniform"
+                                                    Margin="0 2 0 0"
+                                                  Height="10"
+                                                  Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z">
+                                                    <Path.Style>
+                                                        <Style TargetType="Path">
+                                                            <Setter Property="Fill" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                                                Path=Foreground}"/>
+                                                            <Setter Property="Opacity" Value=".6"/>
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
+                                                                Path=IsSelected}" Value="True">
+                                                                    <!--<Setter Property="Visibility" Value="Collapsed"/>-->
+                                                                    <!--<Setter Property="Fill" Value="Red"/>-->
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
+                                                                Path=IsMouseOver}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                    <!--<Setter Property="Fill" Value="Red"/>-->
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                             <Button
                             Background="{DynamicResource NavigationViewExpandedPaneBackground}"
                             ToolTip="Join channel"
                             Margin="10 0 0 0"
                             Content=" + "
                             FontWeight="Bold"
-                            ui:ControlHelper.CornerRadius="6">
+                            ui:ControlHelper.CornerRadius="6"
+                                Click="OnShowJoinToChannelClick">
                                 <ui:FlyoutService.Flyout>
                                     <ui:Flyout Placement="BottomEdgeAlignedLeft">
                                         <StackPanel
@@ -997,7 +1078,6 @@
                                     </ui:Flyout>
                                 </ui:FlyoutService.Flyout>
                             </Button>
-                            <TextBlock Text="{Binding SelectedChannel.Topic}"/>
                         </StackPanel>
                     </ui:TitleBarButton>
                 </StackPanel>
@@ -1347,7 +1427,7 @@
 
                 <TextBlock
                 Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                Text="{Binding View.Count, StringFormat='Chat users: {0} players', UpdateSourceTrigger=PropertyChanged}"
+                Text="{Binding SelectedChannelPlayersView.Count, StringFormat='Chat users: {0} players', UpdateSourceTrigger=PropertyChanged}"
                 FontWeight="DemiBold"
                 Padding="0 6 0  0"
                 Margin="18 0 0 0"/>
