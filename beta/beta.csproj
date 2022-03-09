@@ -9,6 +9,10 @@
 	<PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
 	<UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\Images\flags\ad.png" />
