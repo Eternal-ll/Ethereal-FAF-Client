@@ -73,6 +73,10 @@ namespace beta.Views
                     _SelectedChannel = value;
                     OnPropertyChanged(nameof(SelectedChannel));
                     UpdateSelectedChannelUsers();
+
+                    //if (value != null)
+                    //    TestInputControl.Users = value.Users;
+                    TestInputControl.SelectedChannel = value;
                 }
             }
         }
@@ -95,7 +99,7 @@ namespace beta.Views
             {
                 if (Set(ref _FilterText, value))
                 {
-                    if (SelectedChannelPlayersView != null)
+                    if (IrcService.IsIRCConnected)
                         SelectedChannelPlayersView.Refresh();
                     else OnlinePlayersView.Refresh();
                 }
@@ -157,11 +161,6 @@ namespace beta.Views
             PlayersService = App.Services.GetService<IPlayersService>();
             IrcService = App.Services.GetService<IIrcService>();
 
-            //string nick = Settings.Default.PlayerNick;
-            //string id = Settings.Default.PlayerId.ToString();
-            //string password = Settings.Default.irc_password;
-            //IrcService.Authorize(nick, password);
-
             if (IrcService.IsIRCConnected)
             {
                 WelcomeGridVisibility = Visibility.Collapsed;
@@ -196,17 +195,19 @@ namespace beta.Views
             IrcService.UserJoined += OnChannelUserJoin;
             IrcService.UserLeft += OnChannelUserLeft;
 
-            IrcService.ChannedMessageReceived += OnChannelMessageReceived; 
+            IrcService.ChannedMessageReceived += OnChannelMessageReceived;
             #endregion
+
+            TestInputControl.LeaveRequired += (s, e) =>
+            {
+                OnLeaveFromChannelCommand(SelectedChannel.Name);
+            };
 
             App.Current.MainWindow.Closing += MainWindow_Closing;
 
             _LeaveFromChannelCommand = new LambdaCommand(OnLeaveFromChannelCommand);
-            var t = GlobalGrid.Resources;
             GlobalGrid.Resources.Add("LeaveFromChannelCommand", _LeaveFromChannelCommand);
         }
-
-        private void OnConnectRequestBtnClick(object sender, RoutedEventArgs e) => ConnectToIRC();
         private void OnShowJoinToChannelClick(object sender, RoutedEventArgs e) => JoinChannelInput.Focus();
         private void MainWindow_Closing(object sender, CancelEventArgs e) => IrcService.Quit();
 
@@ -223,12 +224,6 @@ namespace beta.Views
 
                 JoinChannelInput.Text = string.Empty;
             }
-        }
-
-        private void ConnectToIRC()
-        {
-            PendingConnectionToIRC = true;
-            IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
         }
 
         #region LeaveFromChannelCommand
@@ -250,13 +245,17 @@ namespace beta.Views
                 i++;
             }
 
-            if (i > 0)
+            if (SelectedChannel == null)
             {
-                SelectedChannel = Channels[i - 1];
-            }
-            else if (i < Channels.Count - 1)
-            {
-                SelectedChannel = Channels[i + 1];
+                //i--;
+                //if ()
+                //{
+                //    SelectedChannel = Channels[i - 2];
+                //}
+                //else if (i < Channels.Count - 1)
+                //{
+                //    SelectedChannel = Channels[i + 1];
+                //}
             }
         }
 
@@ -357,7 +356,7 @@ namespace beta.Views
         {
             if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
-                channel.History.Add(e.Arg);
+                Dispatcher.Invoke(() => channel.History.Add(e.Arg));
             }
             else
             {
@@ -397,7 +396,7 @@ namespace beta.Views
 
                 if (channel.Name.Equals(SelectedChannel.Name))
                 {
-                    SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                    SelectedChannelPlayers.Remove(GetChatPlayer(e.Arg.User));
                 }
             }
             else
@@ -412,7 +411,8 @@ namespace beta.Views
                 //Dispatcher.Invoke(() => Channels.Add(channel));
                 channel.Users.Add(e.Arg.User);
 
-                if (channel.Name.Equals(SelectedChannel.Name))
+                // TODO null SelectedChannel
+                if (channel.Name.Equals(SelectedChannel?.Name))
                 {
                     SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
                 }
@@ -428,6 +428,7 @@ namespace beta.Views
             {
                 channel = new(e.Arg.Channel);
                 Channels.Add(channel);
+                SelectedChannel = channel;
                 //Dispatcher.Invoke(() => Channels.Add(channel));
                 //BindingOperations.EnableCollectionSynchronization(channel.Users, _lock);
                 BindingOperations.EnableCollectionSynchronization(channel.History, _lock);

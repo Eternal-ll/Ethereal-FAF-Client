@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using beta.Models.Debugger;
+using beta.Models.IRC.Enums;
 
 namespace beta.Infrastructure.Services
 {
@@ -327,6 +328,7 @@ namespace beta.Infrastructure.Services
                     {
                         AppDebugger.LOGIRC($"user: {from} removed topic in channel: {ircData[2]}");
                     }
+                    OnChannelTopicUpdated(new(ircData[2], sb.ToString()));
 
                     break;
                 case "MODE": // MODE was set
@@ -437,6 +439,47 @@ namespace beta.Infrastructure.Services
                     break;
             }
 
+        }
+
+        public void SendCommand(IrcUserCommand command, string text, string channel)
+        {
+            /* FORMAT
+            
+            /<Command> <params> <params>
+
+             */
+            switch (command)
+            {
+                case IrcUserCommand.INVITE:
+                    channel = text.Split()[1][1..];
+                    string target = text.Split()[1];
+                    SendInvite(target, channel);
+                    break;
+                case IrcUserCommand.JOIN:
+                    channel = text.Split()[1];
+                    if (!channel.StartsWith('#')) channel = "#" + channel;
+                    Join(channel);
+                    break;
+                case IrcUserCommand.KICK:
+                    channel = text.Split()[1][1..];
+                    break;
+                case IrcUserCommand.LIST:
+                    break;
+                case IrcUserCommand.PRIVMSG:
+                    break;
+                case IrcUserCommand.QUIT:
+                    Quit();
+                    break;
+                case IrcUserCommand.TOPIC:
+                    string newTopic = text[text.IndexOf(' ')..];
+                    SetTopic(channel, newTopic);
+                    break;
+                case IrcUserCommand.PART:
+                    Leave(channel);
+                    break;
+                default:
+                    throw new NotImplementedException("IRC Command is not recognized");
+            }
         }
 
         private void OnIrcConnected(bool isConnected) => IrcConnected?.Invoke(this, isConnected);

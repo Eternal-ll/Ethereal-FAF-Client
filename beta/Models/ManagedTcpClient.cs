@@ -11,10 +11,10 @@ namespace beta.Models
 {
     public enum ManagedTcpClientState : byte
     {
-        NotConnected,
+        Disconnected,
+        //NotConnected,
         TimedOut,
         CantConnect,
-        Disconnected,
         PendingConnection,
         Connected
     }

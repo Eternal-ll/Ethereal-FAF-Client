@@ -1,5 +1,6 @@
 ﻿using beta.Models;
 using beta.Models.IRC;
+using beta.Models.IRC.Enums;
 using System;
 using System.ComponentModel;
 
@@ -66,6 +67,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public void Connect(string host, int port);
 
         #region IRC
+        public void SendCommand(IrcUserCommand command, string writtenText, string channel = null);
         public void Authorize(string nickname, string password);
 
         public void Join(string channel, string key = null);

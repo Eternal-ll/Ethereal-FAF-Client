@@ -1,8 +1,13 @@
-﻿using beta.Models;
-using System.Collections.Generic;
+﻿using beta.Infrastructure;
+using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
+using beta.Models.IRC;
+using beta.Models.IRC.Enums;
+using beta.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,18 +23,53 @@ namespace beta.Resources.Controls
         Player,
         Emoji
     }
-    public class Command  
+    public abstract class ChatCommand  
     {
         public string Name { get; }
         public string Description { get; }
         public string Group { get; }
         public string[] Fields { get; }
-        public Command(string name, string description, string group, string[] fields = null)
+        public ChatCommand(string name, string description, string group, string[] fields = null)
         {
-            Name = '/' + name;
+            Name = "/" + name;
             Description = description;
             Group = group;
             Fields = fields;
+        }
+    }
+
+    public class IrcCommand : ChatCommand
+    {
+        public IrcUserCommand Code { get; }
+        public IrcCommand(IrcUserCommand code, string description, string group, string[] fields = null)
+            : base(code.ToString().ToLower(), description, group, fields) => Code = code;
+    }
+
+    public class ClientCommand : ChatCommand
+    {
+        public ClientCommand(string name, string description, string group, string[] fields = null)
+            : base(name, description, group, fields)
+        { }
+    }
+
+    public class BotCommand : ChatCommand
+    {
+        public string Bot { get; }
+        public BotCommand(string bot, string name, string description, string group, string[] fields = null) : base(name, description, group, fields)
+        {
+            Bot = bot;
+        }
+    }
+
+    public class SuperInputMessage
+    {
+        public InputMode InputMode { get; }
+        public string Text { get; }
+
+        public SuperInputMessage(string text, InputMode inputMode)
+        {
+            Text = text;
+            InputMode = inputMode;
         }
     }
     /// <summary>
@@ -46,7 +86,38 @@ namespace beta.Resources.Controls
             field = value;
             OnPropertyChanged(PropertyName);
             return true;
-        } 
+        }
+        #endregion
+
+        public EventHandler LeaveRequired;
+
+        private void OnLeaveRequired() => LeaveRequired?.Invoke(this, null);
+
+        private readonly IIrcService IrcService;
+
+        #region Chat properties
+
+        public ObservableCollection<string> Users { get; set; }
+        private IrcChannelVM _SelectedChannel;
+        public IrcChannelVM SelectedChannel
+        {
+            get => _SelectedChannel;
+            set
+            {
+                if (Set(ref _SelectedChannel, value))
+                {
+                    if (value != null)
+                    {
+                        Users = value.Users;
+                    }
+                    else
+                    {
+                        Users.Clear();
+                    }
+                }
+            }
+        }
+
         #endregion
 
         public TestControl()
@@ -57,30 +128,9 @@ namespace beta.Resources.Controls
             //RichTextBox.PreviewTextInput += RichTextBox_PreviewTextInput;
             //RichTextBox.TextInput += RichTextBox_TextInput;
             RichTextBox.PreviewKeyDown += RichTextBox_PreviewKeyDown;
+            IrcService = App.Services.GetService<IIrcService>();
         }
         public TextBox Input => RichTextBox;
-
-        private List<string> tests = new()
-        {
-            "wfgfvdw",
-            "fwefe",
-            "gefregr",
-            "grdfgt",
-            "ewfdv",
-            "ffdge",
-            "wefs",
-            "rg",
-            "grdgewfeges",
-            "vg",
-            "gsdfgefv",
-            "gewfrg",
-            "rtsv",
-            "d",
-            "erg",
-            "regwef",
-            "fv"
-        };
-
 
         private void RichTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -116,11 +166,55 @@ namespace beta.Resources.Controls
                 {
                     if (_SelectedCommand != null)
                     {
-                        RichTextBox.Text = _SelectedCommand.Name + ' ';
-                        RichTextBox.SelectionStart = RichTextBox.Text.Length;
-                        //CommandSelected = true;
+                        if (!IsCommandSelected)
+                        {
+                            RichTextBox.Text = _SelectedCommand.Name + ' ';
+                            RichTextBox.SelectionStart = RichTextBox.Text.Length;
+                            return;
+                        }
+
+                        bool isAllFilled = true;
+
+                        if (SelectedCommandFields.Count != 0)
+                        {
+                            foreach (var key in SelectedCommandFields.Keys)
+                            {
+                                if (SelectedCommandFields[key].Length == 0)
+                                {
+                                    isAllFilled = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        IsRequiredFieldsFilled = isAllFilled;
+
+                        if (isAllFilled)
+                        {
+                            var command = ((IrcCommand)SelectedCommand);
+
+                            // Because we setting NULL to SelectedChannel on ChatView below
+                            string channel = SelectedChannel?.Name;
+
+                            if (command.Code == IrcUserCommand.PART)
+                            {
+                                // SelectedChannel != null;
+                                OnLeaveRequired();
+                                // SelectedChannel = null;
+                            }
+
+                            IrcService.SendCommand(command.Code, CurrentText, channel);
+                            CurrentText = string.Empty;
+                        }
+                        return;
                     }
                 }
+                if (CurrentText.Trim().Length > 0)
+                {
+                    SelectedChannel.History.Add(new IrcChannelMessage(SelectedChannel.Name, Properties.Settings.Default.PlayerNick, CurrentText));
+                    IrcService.SendMessage(SelectedChannel.Name, CurrentText);
+                }
+                CurrentText = string.Empty;
                 e.Handled = true;   
             }
                 
@@ -224,15 +318,16 @@ namespace beta.Resources.Controls
                         WrittenCommand = data[0];
 
                         SuggestedCommands.Clear();
+                        IsCommandSelected = false;
                         for (int i = 0; i < AvailableCommands.Length; i++)
                         {
                             var command = AvailableCommands[i];
                             if (command.Name.StartsWith(WrittenCommand))
                                 SuggestedCommands.Add(command);
-                            if (command.Name.Equals(WrittenCommand))
+                            if (command.Name.Equals(WrittenCommand, StringComparison.OrdinalIgnoreCase))
                             {
                                 SelectedCommand = command;
-                                OnPropertyChanged(nameof(SelectedCommandFieldsFillingVisibility));
+                                IsCommandSelected = true;
                             }
                         }
                         OnPropertyChanged(nameof(CommandsHelperVisibility));
@@ -276,14 +371,12 @@ namespace beta.Resources.Controls
                     else
                     {
                         SuggestedCommands.Clear();
-                        OnPropertyChanged(nameof(SelectedCommandFieldsFillingVisibility));
                         OnPropertyChanged(nameof(CommandsHelperVisibility));
                     }
                 }
             }
         }
         #endregion
-
 
         #region Players auto suggestion on TAB
 
@@ -398,11 +491,13 @@ namespace beta.Resources.Controls
                 }
 
                 SuggestedPlayers.Clear();
-                for (int i = 0; i < tests.Count; i++)
-                {
-                    if (tests[i].StartsWith(completionText))
-                        SuggestedPlayers.Add(tests[i]);
-                }
+
+                if (Users != null)
+                    for (int i = 0; i < Users.Count; i++)
+                    {
+                        if (Users[i].StartsWith(completionText))
+                            SuggestedPlayers.Add(Users[i]);
+                    }
 
                 OnPropertyChanged(nameof(PlayersSuggestionBoxVisiblity));
 
@@ -449,8 +544,8 @@ namespace beta.Resources.Controls
         private string WrittenCommand = string.Empty;
 
         #region SelectedCommand
-        private Command _SelectedCommand;
-        public Command SelectedCommand
+        private ChatCommand _SelectedCommand;
+        public ChatCommand SelectedCommand
         {
             get => _SelectedCommand;
             set
@@ -515,20 +610,52 @@ namespace beta.Resources.Controls
         }
         #endregion
 
-        public Visibility CommandsHelperVisibility => SuggestedCommands.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        public Visibility SelectedCommandFieldsFillingVisibility => WrittenCommand.Equals(SelectedCommand?.Name) ? Visibility.Visible : Visibility.Collapsed;
+        #region IsCommandSelected
+        private bool _IsCommandSelected;
+        public bool IsCommandSelected
+        {
+            get => _IsCommandSelected;
+            set
+            {
+                if (Set(ref _IsCommandSelected, value))
+                {
+                    OnPropertyChanged(nameof(SelectedCommandFieldsFillingVisibility));
+                }
+            }
+        }
+        #endregion
 
-        private static Command[] AvailableCommands = new Command[]
+        #region IsRequiredFieldsFilled
+        private bool _IsRequiredFieldsFilled;
+        public bool IsRequiredFieldsFilled
+        {
+            get => _IsRequiredFieldsFilled;
+            set
+            {
+                if (Set(ref _IsRequiredFieldsFilled, value))
+                {
+
+                }
+            }
+        }
+        #endregion
+
+        public Visibility CommandsHelperVisibility => SuggestedCommands.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility SelectedCommandFieldsFillingVisibility => IsCommandSelected ? Visibility.Visible : Visibility.Collapsed;
+
+        private static ChatCommand[] AvailableCommands = new ChatCommand[]
         {
             // join to <channel>
-            new("join", "Join to specific channel", "Built-in", new[]{"channel"}),
+            new IrcCommand(IrcUserCommand.JOIN, "Join to specific channel", "Built-in", new[]{"channel"}),
             // invite <target> to <channel>
             // to channel
             // to TMM
             // to game
-            new("invite", "Invite specific player to current channel", "Built-in", new[]{"player", "place"}),
+            new IrcCommand(IrcUserCommand.INVITE, "Invite specific player to current channel", "Built-in", new[]{"player"}),
             // change topic of <channel> to <text>
-            new("topic", "Change topic for current channel", "Built-in", new[]{"text"}),
+            new IrcCommand(IrcUserCommand.TOPIC, "Change topic for current channel", "Built-in", new[]{"text"}),
+            new IrcCommand(IrcUserCommand.QUIT, "Disconnect from IRC server", "Built-in", Array.Empty<string>()),
+            new IrcCommand(IrcUserCommand.PART, "Leave from current channel", "Built-in", Array.Empty<string>()),
             // invite to current game
             //new("game", ""),
             // Invite players to TMM. Should be implemented with party players so in the chat will appear card with party players,
@@ -546,19 +673,21 @@ namespace beta.Resources.Controls
             //new("tenor", ""),
         };
 
-        public ObservableCollection<Command> SuggestedCommands { get; } = new();
+        public ObservableCollection<ChatCommand> SuggestedCommands { get; } = new();
 
         private void CommandsViewFilter(object sender, FilterEventArgs e)
         {
             var filter = _CurrentText;
-            var command = (Command)e.Item;
+            var command = (ChatCommand)e.Item;
 
-            var isReadyCommand = filter.IndexOf(' ');
-
-            if (isReadyCommand != -1 && command.Name.Equals(filter[..isReadyCommand]))
+            if (!IsCommandSelected)
             {
-                SelectedCommand = command;
-                return;
+                if (command.Name.Equals(WrittenCommand, StringComparison.OrdinalIgnoreCase))
+                {
+                    SelectedCommand = command;
+                    IsCommandSelected = true;
+                    return;
+                }
             }
 
             if (command.Name.StartsWith(filter)) return;
@@ -567,6 +696,5 @@ namespace beta.Resources.Controls
         }
 
         #endregion
-
     }
 }

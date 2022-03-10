@@ -48,33 +48,42 @@
                     Padding="10"
                     Margin="10 4">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Visibility="{Binding SelectedCommandFieldsFillingVisibility}"
-                                    Margin="0 4 0 10">
-                            <TextBlock Text="Required fields: " VerticalAlignment="Center"/>
-                            <ItemsControl ItemsSource="{Binding SelectedCommandFields}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <WrapPanel/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Padding="8 4" Margin="4 0" CornerRadius="4" TextElement.Foreground="Black">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="LightGreen"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Value}" Value="">
-                                                            <Setter Property="Background">
-                                                                <Setter.Value>
-                                                                    <SolidColorBrush Color="LightCoral" Opacity=".8"/>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock>
+                        <Grid Visibility="{Binding SelectedCommandFieldsFillingVisibility}">
+                            <StackPanel Orientation="Horizontal" Margin="0 4 0 10">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCommandFields.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <TextBlock Text="Required fields: " VerticalAlignment="Center"/>
+                                <ItemsControl ItemsSource="{Binding SelectedCommandFields}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Padding="8 4" Margin="4 0" CornerRadius="4" TextElement.Foreground="Black">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="LightGreen"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Value}" Value="">
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <SolidColorBrush Color="LightCoral" Opacity=".8"/>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock>
                                             <Run Text="{Binding Key, StringFormat='{}{0}: ', Mode=OneWay}" FontSize="12">
                                                 <Run.Foreground>
                                                     <SolidColorBrush Color="Black" Opacity=".8"/>
@@ -92,12 +101,13 @@
                                                     </Style>
                                                 </Run.Style>
                                             </Run>
-                                            </TextBlock>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                                                </TextBlock>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Grid>
                         <ListBox
                             ItemsSource="{Binding SuggestedCommands}"
                             MaxHeight="400"
@@ -123,7 +133,7 @@
                                 </Style>
                             </ListBox.Resources>
                             <ListBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type local:Command}">
+                                <DataTemplate DataType="{x:Type local:ChatCommand}">
                                     <Grid ShowGridLines="False">
                                         <Grid.RowDefinitions>
                                             <RowDefinition/>
