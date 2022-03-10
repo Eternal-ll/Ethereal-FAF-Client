@@ -82,10 +82,12 @@ namespace beta.Infrastructure.Services
                     {
                         return null;
                     }
-
                     if (localMaps[i].Equals(mapName, StringComparison.OrdinalIgnoreCase))
                     {
-                        formattedMapName = mapName.Substring(0, mapName.IndexOf('.'));
+                        // TODO -1 error
+                        var isVersion = mapName.IndexOf('.');
+                        if (isVersion != -1)
+                            formattedMapName = mapName.Substring(0, isVersion);
                         break;
                     }
                 }
