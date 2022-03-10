@@ -214,7 +214,7 @@
         <Setter Property="Background">
             <Setter.Value>
                 <ImageBrush Stretch="Uniform"
-                            ImageSource="{Binding Map.SmallPreview, Mode=OneWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">
+                            ImageSource="{Binding Map.SmallPreview}">
                 </ImageBrush>
             </Setter.Value>
         </Setter>
@@ -266,7 +266,8 @@
         </Grid>
     </ui:Flyout>
 
-
+    <SolidColorBrush Color="Black" Opacity=".5" x:Key="BackgroundHalfBlack"/>
+    
     <ui:Flyout x:Key="MapDetailedFlyout" Placement="Bottom">
         <Grid>
             <ui:ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -290,13 +291,75 @@
                 Stretch="UniformToFill"
                 Height="400"
                 Width="400"/>
+            <WrapPanel
+                Orientation="Horizontal"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Left"
+                Margin="4 4 0 0">
+                <WrapPanel.Resources>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Map.Scenario}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </WrapPanel.Resources>
+                <Border Background="Orange"
+                        CornerRadius="4"
+                        Padding="6 4"
+                        ToolTip="Original SC:Forged Alliance map">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Map.IsLegacy}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Path Fill="Black"
+                          Height="14"
+                          Stretch="Uniform"
+                          Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
+                </Border>
+                <Border Background="{StaticResource BackgroundHalfBlack}"
+                        CornerRadius="4"
+                        Padding="8 4"
+                        ToolTip="Map name"
+                        Visibility="Visible"
+                        Margin="6 0 0 0">
+                    <TextBlock Text="{Binding MapName}"/>
+                </Border>
+                <Border Background="{StaticResource BackgroundHalfBlack}"
+                        CornerRadius="4"
+                        Padding="8 4"
+                        Margin="6 0 0 0"
+                        ToolTip="Map size">
+                    <TextBlock Text="{Binding Map.Size}"/>
+                </Border>
+                <Border Background="{StaticResource BackgroundHalfBlack}"
+                        CornerRadius="4"
+                        Padding="8 4"
+                        Margin="6 0 0 0"
+                        ToolTip="Mexs count">
+                    <TextBlock Text="{Binding Map.MexesCount}"/>
+                </Border>
+                <Border Background="{StaticResource BackgroundHalfBlack}"
+                        CornerRadius="4"
+                        Padding="8 4"
+                        Margin="6 0 0 0"
+                        ToolTip="Hydrocarbons count">
+                    <TextBlock Text="{Binding Map.HydrosCount}"/>
+                </Border>
+            </WrapPanel>
 
-            <Border CornerRadius="4"
-                    Margin="0 10 0 0"
-                    Padding="10 6"
+            <Border Padding="10 6"
                     Width="400"
                     HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom">
+                    VerticalAlignment="Bottom"
+                    ToolTip="Description"
+                    Background="{StaticResource BackgroundHalfBlack}">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>
@@ -306,65 +369,7 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <ItemsControl>
-                    <ItemsControl.Style>
-                        <Style TargetType="ItemsControl">
-                            <Setter Property="ItemsSource" Value="{Binding Map.Scenario}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Map.Scenario}" Value="{x:Null}">
-                                    <Setter Property="ItemsSource" Value="{x:Null}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ItemsControl.Style>
-                    <ItemsControl.Resources>
-                        <Style TargetType="TextBlock" x:Key="ScenarioKeyStyle">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding}" Value="name">
-                                    <Setter Property="Text" Value="Name:"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="AdaptiveMap">
-                                    <Setter Property="Text" Value="Adaptive:"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="type">
-                                    <Setter Property="Text" Value="Type:"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="size">
-                                    <Setter Property="Text" Value="Size:"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="description">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Setter Property="Text" Value="Description:"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="map_version">
-                                    <Setter Property="Text" Value="Version:"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                        <Style TargetType="TextBlock" x:Key="ScenarioValueStyle">
-                            <Setter Property="Margin" Value="10 0 0 0"/>
-                            <Setter Property="Text" Value="{Binding Value}"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Key}" Value="description">
-                                    <Setter Property="Margin" Value="0"/>
-                                    <Setter Property="Text" Value="{Binding Value, StringFormat='Description: {0}'}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ItemsControl.Resources>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Style="{StaticResource ScenarioKeyStyle}" DataContext="{Binding Key}"/>
-                                <TextBlock Style="{StaticResource ScenarioValueStyle}" MaxWidth="400"
-                                           TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-                <Border.Background>
-                    <SolidColorBrush Color="Black" Opacity=".5"/>
-                </Border.Background>
+                <TextBlock Text="{Binding Map.Description}" TextWrapping="Wrap"/>
             </Border>
         </Grid>
     </ui:Flyout>
@@ -409,17 +414,30 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>-->
+                            
+                    <Path Fill="LightGreen"
+                              ToolTip="Original game map"
+                              Data="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <!--<Style.Triggers>
+                                        <DataTrigger Binding="{Binding Map.IsLegacy}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>-->
+                            </Style>
+                        </Path.Style>
+                    </Path>
 
                     <Border
-                        CornerRadius="4"
+                            CornerRadius="4"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Top"
                         Margin="4 4 0 0"
-                        ToolTip="Secured with password"
-                        Padding="6">
-                        <Border.Background>
-                            <SolidColorBrush Color="Black" Opacity=".5"/>
-                        </Border.Background>
+                            ToolTip="Secured with password"
+                            Padding="6"
+                            Background="{StaticResource BackgroundHalfBlack}">
                         <Path
                             Fill="White"
                             Height="14"
@@ -441,10 +459,8 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         Margin="0 0 4 4"
-                        ToolTip="Version">
-                        <Border.Background>
-                            <SolidColorBrush Color="Black" Opacity=".5"/>
-                        </Border.Background>
+                        ToolTip="Version"
+                            Background="{StaticResource BackgroundHalfBlack}">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -500,6 +516,39 @@
                         </Button>
                     </Border>
 
+                            
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="0 0 4 0"
+                            Padding="4 8 4 4"
+                            CornerRadius="0 0 4 4"
+                            Background="Orange"
+                            ToolTip="Original SC:Forged Alliance map">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Opacity" Value=".5"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                                        Path=IsMouseOver}" Value="True">
+                                        <Setter Property="Opacity" Value=".7"/>
+                                    </DataTrigger>
+
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Opacity" Value="1"/>
+                                    </Trigger>
+                                    
+                                    <DataTrigger Binding="{Binding Map.IsLegacy}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <Path Fill="Black"
+                              Height="14"
+                              Stretch="Uniform"
+                              Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" />
+                        <!--<TextBlock Text="O" Foreground="Black"/>-->
+                    </Border>
 
                     <!--UNUSED. FOR FUTURE. CREATE / DELETE map-->
                     <Border
@@ -507,7 +556,7 @@
                         VerticalAlignment="Bottom"
                         Visibility="Collapsed"
                         Margin="4 0 0 4"
-                        Background="{StaticResource Bg}"
+                        Background="{StaticResource BackgroundHalfBlack}"
                         Padding="6"
                         CornerRadius="4">
                         <Border.Style>
@@ -543,13 +592,16 @@
                         VerticalAlignment="Top"
                         Margin="0 4 4 0"
                         ToolTip="Map version"
-                        Padding="4">
-                        <Border.Background>
-                            <SolidColorBrush Color="Black" Opacity=".5"/>
-                        </Border.Background>
+                        Padding="4"
+                        Background="{StaticResource BackgroundHalfBlack}">
                         <Border.Style>
                             <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}},
+                                        Path=IsMouseOver}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding MapVersion.Length}" Value="0">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>

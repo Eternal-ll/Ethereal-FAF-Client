@@ -44,7 +44,21 @@ namespace beta.Models
 
         #region Scenario properties
         public override string Name => Scenario?["name"];
-        public string Description => Scenario?["description"];
+        public string Description
+        {
+            get
+            {
+                var desc = Scenario?["description"];
+                if (desc != null)
+                {
+                    var isArr = desc.IndexOf('>');
+                    if (isArr != -1)
+                        desc = desc[(isArr + 1)..];
+                    return desc;
+                }
+                return null;
+            }
+        }
         public string Size
         {
             get
@@ -61,13 +75,13 @@ namespace beta.Models
                         size = (width / 51.2).ToString() + " x ";
                         if (sizes[0] == sizes[1])
                         {
-                            size += size;
+                            size += size.Split()[0] + " km";
                         }
                         else
                         {
                             if (int.TryParse(sizes[1], out int height))
                             {
-                                size += (height / 51.2).ToString();
+                                size += (height / 51.2).ToString() + " km";
                             }
                         }
                     }
@@ -84,11 +98,11 @@ namespace beta.Models
         // for future
         public bool IsLegacy { get; set; }
 
-        public bool IsRanked = false;
+        //public bool IsRanked = false;
             
-        public IPlayer Author = null;
+        //public IPlayer Author = null;
 
-        public double AverageRating = 0;
+        //public double AverageRating = 0;
       /*
         public Review[] Reviews
 

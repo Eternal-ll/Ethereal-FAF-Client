@@ -118,6 +118,7 @@ namespace beta.Models.Server
                 
             orig.sim_mods = newInfo.sim_mods;
 
+            //orig.Map = newInfo.Map;
 
             //Map update
             if (orig.mapname != newInfo.mapname)
@@ -159,8 +160,8 @@ namespace beta.Models.Server
         {
             get
             {
-                //if (game_type == "coop")
-                //    return PreviewType.Coop;
+                if (game_type == "coop")
+                    return PreviewType.Coop;
                 if (mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase))
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
@@ -225,25 +226,26 @@ namespace beta.Models.Server
         {
             get
             {
-                if (Map?.Scenario != null)
-                    if (Map.Name != null)
-                        return Map.Name;
-
-                string formattedMapName = string.Empty;
-                for (int i = 0; i < _mapname.Length; i++)
+                //switch (Map)
+                //{
+                //    case GameMap gameMap:
+                if (Map.Name != null) return Map.Name;
+                else
                 {
-                    if (_mapname[i] == '_' || _mapname[i] == '-')
+                    var parts = _mapname.Split('.')[0].Split('_');
+                    for (int i = 0; i < parts.Length; i++)
                     {
-                        formattedMapName += ' ';
-                        formattedMapName += char.ToUpper(_mapname[i + 1]);
-                        i++;
+                        parts[i] = char.ToUpper(parts[i][0]) + parts[i][1..];
                     }
-                    else if (_mapname[i] == '.')
-                        break;
-                    else if (i == 0) formattedMapName += char.ToUpper(_mapname[i]);
-                    else formattedMapName += _mapname[i];
+                    return string.Join(' ', parts);
                 }
-                return formattedMapName;
+                //    case NeroxisMap neroxisMap:
+                //        return neroxisMap.Name;
+                //        case CoopMap coopMap:
+                //        return "Coop : " + _mapname;
+                //    default:
+                //        return "Unknown: " + _mapname;
+                //}
             }
         }
 

@@ -105,7 +105,8 @@ namespace beta.Infrastructure.Services
             #region Searching matches in list of idle games
             for (int i = 0; i < idleGames.Count; i++)
             {
-                if (idleGames[i].host == game.host)
+                var idleGame = idleGames[i];
+                if (idleGame.host == game.host)
                 {
                     if (game.launched_at != null)
                     {
@@ -115,8 +116,14 @@ namespace beta.Infrastructure.Services
                         return;
                     }
 
+                    if (idleGame.mapname != game.mapname)
+                    {
+                        idleGame.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
+                        attachScenario: true);
+                    }
+
                     // Updating idle game states
-                    if (!idleGames[i].Update(game))
+                    if (!idleGame.Update(game))
                     {
                         // returns false if num_players == 0, game is died
                         idleGames.RemoveAt(i);
@@ -135,12 +142,7 @@ namespace beta.Infrastructure.Services
                     var liveGame = liveGames[i];
                     if (liveGame.host == game.host)
                     {
-                        if (liveGame.mapname != game.mapname)
-                        {
-                            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                                attachScenario: true);
-                        }
-                        // Updating idle game states
+                        // Updating live game states
                         if (!liveGame.Update(game))
                         {
                             // returns false if num_players == 0, game is died
@@ -158,8 +160,9 @@ namespace beta.Infrastructure.Services
             //if (game.Host == null)
             game.Host = PlayersService.GetPlayer(game.host);
 
+
             game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-            attachScenario: true);
+                attachScenario: true);
 
             if (game.num_players == 0)
             {

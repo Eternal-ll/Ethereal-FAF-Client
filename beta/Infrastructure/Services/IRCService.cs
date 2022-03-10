@@ -174,7 +174,7 @@ namespace beta.Infrastructure.Services
             ManagedTcpClient?.Write(message + '\r');
             if (message.StartsWith("QUIT"))
             {
-                ManagedTcpClient.Dispose();
+                ManagedTcpClient?.Dispose();
                 ManagedTcpClient = null;
                 IsIRCConnected = false;
 
@@ -399,7 +399,14 @@ namespace beta.Infrastructure.Services
 
                         if (target[0] == '#')
                         {
-                            OnChannelMessage(new(target, from, sb.ToString()));
+                            IrcChannelMessage msg = new(target, from, sb.ToString());
+                            OnChannelMessage(msg);
+
+                            // TODO hardcoded xD but still
+                            if (msg.HasMention)
+                            {
+
+                            }
 
                             AppDebugger.LOGIRC($"user: {from} in channel: {ircData[2]} sent: {sb} ");
 
