@@ -6,10 +6,13 @@ namespace beta.Models.IRC
     {
         public string Channel { get; }
         public string From { get; }
+        public bool HasMention { get; }
         public IrcChannelMessage(string channel, string from, string text) : base(text)
         {
             Channel = channel;
             From = from;
+            // Is it worth it? XD
+            HasMention = text.Contains(Properties.Settings.Default.PlayerNick, StringComparison.OrdinalIgnoreCase);
         }
     }
     public class IrcPrivateMessage : Base.IrcMessage
