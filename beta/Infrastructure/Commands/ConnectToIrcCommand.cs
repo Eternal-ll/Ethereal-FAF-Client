@@ -8,7 +8,7 @@ namespace beta.Infrastructure.Commands
     {
         private readonly IIrcService IrcService;
         public ConnectToIrcCommand() => IrcService = App.Services.GetService<IIrcService>();
-        public override bool CanExecute(object parameter) => !IrcService.IsIRCConnected;
+        public override bool CanExecute(object parameter) =>IrcService.TCPConnectionState == Models.ManagedTcpClientState.Disconnected;
         public override void Execute(object parameter) => IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
     }
     internal class DisconnectFromIrcCommand : Base.Command
