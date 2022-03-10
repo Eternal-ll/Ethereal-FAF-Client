@@ -42,10 +42,10 @@
                     <Setter.Value>
                         <ControlTemplate>
                             <Expander
-                                        Margin="10 0"
-                                        Padding="0 4"
-                                        FontSize="16"
-                                        VirtualizingPanel.IsVirtualizing="True">
+                                Margin="10 0"
+                                Padding="0 4"
+                                FontSize="16"
+                                VirtualizingPanel.IsVirtualizing="True">
                                 <Expander.Header>
                                     <StackPanel Orientation="Horizontal">
                                         <StackPanel.Style>
@@ -54,7 +54,7 @@
                                                 <Setter Property="FrameworkElement.Opacity" Value=".8"/>
                                                 <Style.Triggers>
                                                     <!--TODO BINDINGs ERRORs-->
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
+                                                    <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
                                                                 Path=IsMouseOver, Mode=OneWay}" Value="true">
                                                         <Setter Property="FrameworkElement.Opacity" Value=".5"/>
                                                     </DataTrigger>
@@ -65,7 +65,7 @@
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
                                                                 Path=IsChecked, Mode=OneWay}" Value="False">
                                                         <Setter Property="FrameworkElement.Opacity" Value=".3"/>
-                                                    </DataTrigger>
+                                                    </DataTrigger>-->
                                                 </Style.Triggers>
                                             </Style>
                                         </StackPanel.Style>
@@ -172,9 +172,26 @@
                         </Image.Style>
                     </Image>
 
-                    <TextBlock Text="{Binding login}" Grid.Column="2"
-                                       Margin="6 0 0 0"
-                                       HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left">
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Setter Property="Text" Value="{Binding clan, StringFormat='[{0}]'}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding clan}" Value="{x:Null}">
+                                            <Setter Property="Text" Value=""/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                        <Run Text="{Binding login}"/>
+                        <TextBlock.ToolTip>
+                            <ToolTip>
+                                <ItemsControl ItemsSource="{Binding ratings}" ItemTemplate="{StaticResource PlayerRatingsDataTemplate}"/>
+                            </ToolTip>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
 
                     <ContentControl Grid.Column="2" Grid.Row="1"
                                             Margin="-16 0 0 0">
@@ -253,9 +270,8 @@
                         </ContentControl.Style>
                     </ContentControl>
 
-                    <Image Margin="10 -10 10 -10"
-                                   Height="40" Width="40" Stretch="Uniform"
-                                   Grid.Column="3" Grid.RowSpan="2">
+                    <Image Margin="10 -10 10 -10" Height="40" Width="40" Stretch="Uniform"
+                           Grid.Column="3" Grid.RowSpan="2">
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -276,7 +292,6 @@
                             </Style>
                         </Image.Style>
                     </Image>
-
                 </Grid>
             </DataTemplate>
             <!--#endregion-->
@@ -321,7 +336,8 @@
                     <Run Text="is turned off, but you are still able to watch for players"/>
                 </TextBlock>
                 <StackPanel Orientation="Horizontal">
-                    <Button Margin="10 20" Content="Connect to IRC server" Click="OnConnectRequestBtnClick"
+                    <Button Margin="10 20" Content="Connect to IRC server"
+                            Command="{StaticResource ConnectToIrcCommand}"
                             IsEnabled="{Binding IsRequestConnectBtnEnabled}"/>
                     <ui:ProgressRing IsActive="{Binding PendingConnectionToIRC}"/>
                 </StackPanel>
@@ -1021,9 +1037,11 @@
                                                 <Path 
                                                   Stretch="Uniform"
                                                     Margin="0 2 0 0"
+                                                    Fill="Gray"
                                                   Height="10"
                                                   Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z">
-                                                    <Path.Style>
+                                                    <!--TODO BINDING ERRORS-->
+                                                    <!--<Path.Style>
                                                         <Style TargetType="Path">
                                                             <Setter Property="Fill" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
                                                                 Path=Foreground}"/>
@@ -1032,17 +1050,17 @@
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
                                                                 Path=IsSelected}" Value="True">
-                                                                    <!--<Setter Property="Visibility" Value="Collapsed"/>-->
-                                                                    <!--<Setter Property="Fill" Value="Red"/>-->
+                                                                    --><!--<Setter Property="Visibility" Value="Collapsed"/>-->
+                                                                    <!--<Setter Property="Fill" Value="Red"/>--><!--
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
                                                                 Path=IsMouseOver}" Value="True">
                                                                     <Setter Property="Visibility" Value="Visible"/>
-                                                                    <!--<Setter Property="Fill" Value="Red"/>-->
+                                                                    --><!--<Setter Property="Fill" Value="Red"/>--><!--
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
-                                                    </Path.Style>
+                                                    </Path.Style>-->
                                                 </Path>
                                             </Button>
                                         </Grid>
@@ -1312,7 +1330,7 @@
                                         Grid.Row="1"
                                         Opacity=".8"
                                             Margin="0 2"
-                                        behavior:TextBlockExtensions.BindableInlines="{Binding Message, Converter={StaticResource TextConverter}}"
+                                        behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
                                         TextWrapping="Wrap"/>
                                     </StackPanel>
                                     <Canvas
@@ -1385,6 +1403,7 @@
                        TextWrapping="Wrap"
                        Opacity=".5"
                        Margin="30 10 30 0"
+                           IsHitTestVisible="False"
                        Grid.Row="1"/>
             </Grid>
             <!--#endregion-->
@@ -1398,8 +1417,8 @@
                 <Grid.Style>
                     <Style TargetType="Grid">
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedChannel.Users.Count}"
-                                     Value="0">
+                            <DataTrigger Binding="{Binding SelectedChannel}"
+                                     Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </Style.Triggers>
@@ -1620,8 +1639,8 @@
                     <Style TargetType="GridSplitter">
                         <Setter Property="Background" Value="Transparent"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedChannel.Users.Count}"
-                                     Value="0">
+                            <DataTrigger Binding="{Binding SelectedChannel}"
+                                     Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">

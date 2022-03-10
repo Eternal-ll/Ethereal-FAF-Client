@@ -76,5 +76,37 @@
         </MenuItem>
         <!--#endregion-->
     </ContextMenu>
-    
+
+    <DataTemplate x:Key="PlayerRatingsDataTemplate">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding Key}"/>
+            <TextBlock DataContext="{Binding Value}" Grid.Column="1" HorizontalAlignment="Right" Margin="10 0 0 0">
+                <Run Text="{Binding DisplayedRating, Mode=OneWay}"/>
+                <Run BaselineAlignment="Top" FontSize="10">
+                    <Run.Style>
+                        <Style TargetType="Run">
+                            <Setter Property="Text" Value="{Binding DisplayedRatingDifference, Mode=OneWay}"/>
+                            <Setter Property="Foreground" Value="Red"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RatingChange, Mode=OneWay}" Value="0">
+                                    <Setter Property="Text" Value=""/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RatingChange, Mode=OneWay}" Value="1">
+                                    <Setter Property="Foreground" Value="Lime"/>
+                                    <Setter Property="Text" Value="{Binding DisplayedRatingDifference, Mode=OneWay, StringFormat='+{0}'}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Run.Style>
+                </Run>
+                <Run Text="{Binding rating[0], Mode=OneWay, StringFormat='{} {0:0}'}" Foreground="Gray"/>
+                <Run Text="{Binding rating[1], Mode=OneWay, StringFormat='+- {0:0}'}" Foreground="Gray"/>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+
 </ResourceDictionary>
