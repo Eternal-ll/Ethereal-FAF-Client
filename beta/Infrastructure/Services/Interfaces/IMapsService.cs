@@ -1,4 +1,5 @@
 ﻿using beta.Models;
+using beta.Models.Enums;
 using beta.Models.Server;
 using System;
 using System.Windows.Media.Imaging;
@@ -12,5 +13,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AttachMapScenario(GameMap map);
         public void Download(Uri url);
+
+        public LocalMapState CheckLocalMap(string name);
     }
 }

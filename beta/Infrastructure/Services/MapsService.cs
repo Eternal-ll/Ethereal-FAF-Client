@@ -45,8 +45,55 @@ namespace beta.Infrastructure.Services
 
             LocalWatcher.Created += OnNewLocalMap;
             LocalWatcher.Deleted += OnDeletingLocalMap;
-        }
+        }   
 
+        public LocalMapState CheckLocalMap(string name)
+        {
+            if (name == null) return LocalMapState.Unknown;
+
+            int? version = null;
+            var data = name.Split('.');
+            if (data.Length > 1)
+            {
+                if (int.TryParse(data[1], out var v))
+                {
+                    version = v;
+                }
+                name = data[0];
+            }
+
+            var localMaps = LocalMaps;
+            for (int i = 0; i < localMaps.Count; i++)
+            {
+                var local = localMaps[i];
+                data = local.Split('.');
+
+                if (name != data[0]) continue;
+
+                if (data.Length > 1)
+                {
+                    if (int.TryParse(data[1], out var v))
+                    {
+                        if (version == null)
+                        {
+                            return LocalMapState.Older;
+                        }
+
+                        if (v > version)
+                        {
+                            return LocalMapState.Older;
+                        }
+                        else
+                        {
+                            return LocalMapState.Newest;
+                        }
+                    }
+                }
+                return LocalMapState.Same;
+
+            }
+            return LocalMapState.NotExist;
+        }
         public bool IsLegacyMap(string name) => Enum.IsDefined(typeof(LegacyMap), name.ToUpper());
 
         private void OnDeletingLocalMap(object sender, FileSystemEventArgs e)
