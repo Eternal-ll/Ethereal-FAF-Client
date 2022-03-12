@@ -43,7 +43,7 @@ namespace beta.Infrastructure.Services
                 }
 
                 //CONTENT-TYPE header
-                request.Content = new StringContent("{\"name\":\"John Doe\",\"age\":33}", Encoding.UTF8, "application/vnd.api+json");
+                //request.Content = new StringContent("{\"name\":\"John Doe\",\"age\":33}", Encoding.UTF8, "application/vnd.api+json");
 
 
                 var response = await client.SendAsync(request);
