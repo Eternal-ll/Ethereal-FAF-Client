@@ -73,5 +73,18 @@ namespace beta.Infrastructure.Utils
             var hash = md5.ComputeHash(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
+
+        public static int CalculateMapSizeInKm(int pixel)
+        {
+            if (pixel == 64) return 1;
+            if (pixel == 128) return 2;
+            return int.Parse((pixel / 51.2).ToString());
+        }
+        public static int CalculateMapSizeInPixels(int km)
+        {
+            if (km == 1) return 64;
+            if (km == 2) return 128;
+            return int.Parse((km * 51.2).ToString());
+        }
     }
 }
