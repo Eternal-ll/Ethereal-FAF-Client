@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -52,8 +53,17 @@ namespace beta.Views.Windows
 
             MapsService = App.Services.GetService<IMapsService>();
             CacheService = App.Services.GetService<ICacheService>();
-
+            
+            BuildQuery();
             DoRequest();
+
+            WidthsList.SelectionChanged += MapSizesSelectionChanged;
+            HeigthsList.SelectionChanged += MapSizesSelectionChanged;
+        }
+
+        private void MapSizesSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            BuildQuery();
         }
 
         #region Status
@@ -98,28 +108,30 @@ namespace beta.Views.Windows
             get => _PageNumber;
             set
             {
-                value = value < 1 ? 1 : value;
+                if (value > AvailablePagesCount) value = 1;
+                else if (value == 0) value = AvailablePagesCount;
 
-                if (value > AvailablePages) value = 1;
-
-                if (Set(ref _PageNumber, value))
+                if (SetStandardField(ref _PageNumber, value))
                 {
-                    if (AvailablePages != 0) DoRequest();
+                    PageIndexChanged = true;
+                    if (AvailablePagesCount != 0) DoRequest();
                 }
             }
         }
         #endregion
 
+        public int[] AvailablePages => Enumerable.Range(1, AvailablePagesCount).ToArray();
+
         #region AvailablePages
-        private int _AvailablePages;
-        public int AvailablePages
+        private int _AvailablePagesCount;
+        public int AvailablePagesCount
         {
-            get => _AvailablePages;
+            get => _AvailablePagesCount;
             set
             {
-                if (Set(ref _AvailablePages, value))
+                if (Set(ref _AvailablePagesCount, value))
                 {
-
+                    OnPropertyChanged(nameof(AvailablePages));
                 }
             }
         }
@@ -141,9 +153,9 @@ namespace beta.Views.Windows
             get => _PageSize;
             set
             {
-                if (Set(ref _PageSize, value))
+                if (SetStandardField(ref _PageSize, value))
                 {
-                    PageNumber = 1;
+                    //PageNumber = 1;
                     DoRequest();
                 }
             }
@@ -211,7 +223,7 @@ namespace beta.Views.Windows
             get => _IsOnlyRanked;
             set
             {
-                if (Set(ref _IsOnlyRanked, value))
+                if (SetStandardField(ref _IsOnlyRanked, value))
                 {
                     DoRequest();
                 }
@@ -226,7 +238,7 @@ namespace beta.Views.Windows
             get => _IsOnlyRecommended;
             set
             {
-                if (Set(ref _IsOnlyRecommended, value))
+                if (SetStandardField(ref _IsOnlyRecommended, value))
                 {
                     DoRequest();
                 }
@@ -249,52 +261,12 @@ namespace beta.Views.Windows
         }
         #endregion
 
-        #region Standard mode fields
-
-        public Visibility StandardFormVisibility => !IsAdvancedModEnabled ? Visibility.Visible : Visibility.Collapsed;
-
-        #region MapName
-        private string _MapName = string.Empty;
-        public string MapName
-        {
-            get => _MapName;
-            set => Set(ref _MapName, value);
-        }
-        #endregion
-
-        #region AuthorName
-        private string _AuthorName = string.Empty;
-        public string AuthorName
-        {
-            get => _AuthorName;
-            set => Set(ref _AuthorName, value);
-        }
-        #endregion
-
         #region MapSizes
         private readonly int[] _MapSizes = new int[]
         {
             1, 2, 5, 10, 20, 40, 80
         };
         public int[] MapSizes => _MapSizes;
-        #endregion
-
-        #region MapWidth
-        private int[] _SelectedMapWidths;
-        public IList SelectedMapWidths
-        {
-            get => HeigthsList.SelectedItems;
-            //set => Set(ref _SelectedMapWidths, value);
-        }
-        #endregion
-
-        #region MapHeight
-        private int[] _SelectedMapHeights;
-        public IList SelectedMapHeights
-        {
-            get => WidthsList.SelectedItems;
-            //set => Set(ref _SelectedMapHeights, value);
-        }
         #endregion
 
         #region MapSlots
@@ -306,12 +278,65 @@ namespace beta.Views.Windows
 
         #endregion
 
+        #region Standard mode fields
+
+        public Visibility StandardFormVisibility => !IsAdvancedModEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        private bool SetStandardField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Set(ref field, value, propertyName))
+            {
+                BuildQuery();
+                return true;
+            }
+            return false;
+        }
+
+        #region MapName
+        private string _MapName = string.Empty;
+        public string MapName
+        {
+            get => _MapName;
+            set => SetStandardField(ref _MapName, value);
+        }
+        #endregion
+
+        #region AuthorName
+        private string _AuthorName = string.Empty;
+        public string AuthorName
+        {
+            get => _AuthorName;
+            set => SetStandardField(ref _AuthorName, value);
+        }
+        #endregion
+
+        #region Selected map sizes
+        public IList SelectedMapWidths
+        {
+            get
+            {
+                IList t = new List<int>();
+                Dispatcher.Invoke(() => t = WidthsList.SelectedItems);
+                return t;
+            }
+        }
+        public IList SelectedMapHeights
+        {
+            get
+            {
+                IList t = new List<int>();
+                Dispatcher.Invoke(() => t = HeigthsList.SelectedItems);
+                return t;
+            }
+        }
+        #endregion
+
         #region MinimumSlots
         private int? _MinimumSlots;
         public int? MinimumSlots
         {
             get => _MinimumSlots;
-            set => Set(ref _MinimumSlots, value);
+            set => SetStandardField(ref _MinimumSlots, value);
         }
         #endregion
 
@@ -320,12 +345,11 @@ namespace beta.Views.Windows
         public int? MaximumSlots
         {
             get => _MaximumSlots;
-            set => Set(ref _MaximumSlots, value);
+            set => SetStandardField(ref _MaximumSlots, value);
         }
         #endregion
 
         #endregion
-
 
         #region SelectedMap
         private ApiUniversalData _SelectedMap;
@@ -337,7 +361,7 @@ namespace beta.Views.Windows
         #endregion
 
         #region LastQuery
-        private string _LastQuery;
+        private string _LastQuery = String.Empty;
         public string LastQuery
         {
             get => _LastQuery;
@@ -345,19 +369,30 @@ namespace beta.Views.Windows
         }
         #endregion
 
+        #region CurrentQuery
+        private string _CurrentQuery;
+        public string CurrentQuery
+        {
+            get => _CurrentQuery;
+            set => Set(ref _CurrentQuery, value);
+        }
+        #endregion
 
         #region Cache
+
         private readonly Dictionary<int, string> AuthorIdToLogin = new();
 
         #endregion
 
-
+        #region Results ICollection view
         private readonly CollectionViewSource ResponseViewSource = new();
-        public ICollectionView ResponseView => ResponseViewSource.View;
+        public ICollectionView ResponseView => ResponseViewSource.View; 
+        #endregion
 
         private Thread RequestThread;
+        private bool PageIndexChanged = false;
 
-        private string BuildQuery()
+        private void BuildQuery()
         {
             StringBuilder query = new();
 
@@ -442,11 +477,11 @@ namespace beta.Views.Windows
                 query.Append(filter);
             }
 
-            query.Append($"page[size]={PageSize}&page[number]={PageNumber}&page[totals]=None&include=author,latestVersion,reviewsSummary");
+            query.Append($"page[size]={PageSize}");
 
             string fullQuery = query.ToString();
 
-            return query.ToString();
+            CurrentQuery = query.ToString();
         }
         private void DoRequest()
         {
@@ -455,12 +490,19 @@ namespace beta.Views.Windows
                 return;
             }
 
-            currentQuery = $"https://api.faforever.com/data/map?" + BuildQuery();
-
-            if (LastQuery != null && LastQuery == currentQuery)
+            if (LastQuery == CurrentQuery)
             {
-                return;
+                if (!PageIndexChanged) return;
             }
+            else
+            {
+                if (!PageIndexChanged)
+                {
+                    _PageNumber = 1;
+                }
+            }
+
+            CurrentQuery += $"&page[number]={PageNumber}";
 
             //SelectedMap = null;
 
@@ -469,13 +511,12 @@ namespace beta.Views.Windows
             RequestThread.Start();
 
         }
-        string currentQuery = null;
         private void Request()
         {
-            var query = currentQuery;
+            var query = CurrentQuery;
             Stopwatch watcher = new();
             watcher.Start();
-            WebRequest webRequest = WebRequest.Create(currentQuery);
+            WebRequest webRequest = WebRequest.Create("https://api.faforever.com/data/map?" + query + "&page[totals]=None&include=author,latestVersion,reviewsSummary");
 
             try
             {
@@ -483,7 +524,6 @@ namespace beta.Views.Windows
                 var json = new StreamReader(stream).ReadToEnd();
 
                 var data = JsonSerializer.Deserialize<ApiUniversalResults>(json);
-
 
                 for (int i = 0; i < data.Data.Length; i++)
                 {
@@ -541,11 +581,15 @@ namespace beta.Views.Windows
                 }
 
                 Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
-                PageNumber = data.Meta.Page.PageNumber;
-                AvailablePages = data.Meta.Page.AvaiablePagesCount;
+                AvailablePagesCount = data.Meta.Page.AvaiablePagesCount;
+                
+                _PageNumber = data.Meta.Page.PageNumber;
+                OnPropertyChanged(nameof(PageNumber));
+                PageIndexChanged = false;
+                
                 TotalRecords = data.Meta.Page.TotalRecords;
 
-                LastQuery = query;
+                LastQuery = CurrentQuery;
             }
             catch (Exception ex)
             {
@@ -566,7 +610,7 @@ namespace beta.Views.Windows
         {
             if (1 >= PageNumber)
             {
-                PageNumber = AvailablePages;
+                PageNumber = AvailablePagesCount;
                 return;
             }
 
@@ -575,7 +619,7 @@ namespace beta.Views.Windows
 
         private void NextPageClick(object sender, RoutedEventArgs e)
         {
-            if (PageNumber >= AvailablePages)
+            if (PageNumber >= AvailablePagesCount)
             {
                 PageNumber = 1;
                 return;
@@ -586,5 +630,17 @@ namespace beta.Views.Windows
 
         private void RemoveMinClick(object sender, RoutedEventArgs e) => MinimumSlots = null;
         private void RemoveMaxClick(object sender, RoutedEventArgs e) => MaximumSlots = null;
+
+        private void OnCurrentPageMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (e.Delta < 0)
+            {
+                PageNumber--;
+            }
+            else
+            {
+                PageNumber++;
+            }
+        }
     }
 }

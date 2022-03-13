@@ -33,6 +33,38 @@
                 </Style.Triggers>
             </Style>
 
+            <Style TargetType="CheckBox" BasedOn="{StaticResource DefaultCheckBoxStyle}">
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                <Style.Triggers>
+                    <Trigger Property="Text" Value="">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <Style TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
+                <Style.Triggers>
+                    <Trigger Property="SelectedIndex" Value="-1">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <Style x:Key="MapInfoBorderStyle" TargetType="Border">
                 <Setter Property="Margin" Value="10 10 0 0"/>
                 <Setter Property="Background" Value="{StaticResource BackgroundHalfBlack}"/>
@@ -120,7 +152,7 @@
                                 <Setter Property="Height" Value="32"/>
                             </Style>
                         </StackPanel.Resources>
-                        <TextBlock Text="Sizes: " FontSize="14" VerticalAlignment="Center" Margin="10 0 4 0"/>
+                        <TextBlock Text="Sizes: " FontSize="14" VerticalAlignment="Center" Margin="20 0 4 0"/>
                         <ToggleButton Content="Width"/>
                         <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
                             Path=Children[1]}"/>-->
@@ -165,9 +197,6 @@
             </StackPanel>
         </Grid>
         <StackPanel Margin="10 0 10 10" Grid.Row="1">
-            <StackPanel>
-                <CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Content="Enable advanced search mode"/>
-            </StackPanel>
             <WrapPanel TextBlock.FontSize="14">
                 <WrapPanel.Resources>
                     <Style TargetType="TextBlock">
@@ -176,10 +205,7 @@
                     </Style>
                 </WrapPanel.Resources>
                 <Button Content="Search" Click="Button_Click" IsEnabled="{Binding IsInputBlocked}"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Last query:" FontSize="14" VerticalAlignment="Center" Margin="10 0"/>
-                    <TextBox IsReadOnly="True" Text="{Binding LastQuery}" ToolTip="Last query" TextWrapping="Wrap"/>
-                </StackPanel>
+                <CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>
                 <TextBlock Text="Page size"/>
                 <ComboBox ItemsSource="{Binding AvaiablePageSizes}" SelectedValue="{Binding PageSize}" IsEnabled="{Binding IsInputBlocked}"/>
                 <TextBlock Text="Page number"/>
@@ -187,20 +213,33 @@
                     <Button VerticalAlignment="Stretch" IsEnabled="{Binding IsInputBlocked}" Click="PreviousPageClick">
                         <Path Style="{StaticResource ButtonPatStyle}" Data="M20,10V14H11L14.5,17.5L12.08,19.92L4.16,12L12.08,4.08L14.5,6.5L11,10H20Z" />
                     </Button>
-                    <ui:NumberBox Text="{Binding PageNumber, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsInputBlocked}" BorderThickness="0"/>
+                    <ComboBox SelectedItem="{Binding PageNumber}" ItemsSource="{Binding AvailablePages}" MaxDropDownHeight="300"
+                              IsEnabled="{Binding IsInputBlocked}"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              VirtualizingPanel.IsContainerVirtualizable="True"
+                              PreviewMouseWheel="OnCurrentPageMouseWheel"/>
+                    <!--<ui:NumberBox Text="{Binding PageNumber, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsInputBlocked}" BorderThickness="0"/>-->
                     <Button VerticalAlignment="Stretch" IsEnabled="{Binding IsInputBlocked}" Click="NextPageClick">
                         <Path Style="{StaticResource ButtonPatStyle}" Data="M4,10V14H13L9.5,17.5L11.92,19.92L19.84,12L11.92,4.08L9.5,6.5L13,10H4Z"/>
                     </Button>
                 </StackPanel>
-                <TextBlock Text="{Binding AvailablePages, StringFormat=' / {0}'}" FontSize="18" FontWeight="DemiBold" Margin="0"/>
+                <TextBlock Text="{Binding AvailablePagesCount, StringFormat=' / {0}'}" FontSize="18" FontWeight="DemiBold" Margin="0"/>
                 <TextBlock Text="{Binding TotalRecords, StringFormat='Total records: {0}'}" Opacity=".5"/>
                 <TextBlock Text="{Binding Elapsed, StringFormat='Elapsed: {0:c}'}"/>
             </WrapPanel>
+            <StackPanel Orientation="Horizontal" Margin="0 4 0 0">
+                <TextBlock Text="Query:" FontSize="14" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding CurrentQuery}" Padding="6 4" ToolTip="Last query" Margin="10 0 0 0" TextWrapping="Wrap" Background="Transparent"/>
+                <Border Style="{StaticResource MapInfoBorderStyle}" Margin="4 0 0 0" Background="Transparent" ToolTip="{Binding LastQuery}">
+                    <Path Data="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" />
+                </Border>
+            </StackPanel>
         </StackPanel>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition MinWidth="480"/>
-                <ColumnDefinition MinWidth="400"/>
+                <ColumnDefinition MinWidth="400" Width=".3*"/>
             </Grid.ColumnDefinitions>
 
             <ui:ProgressRing Grid.Row="2" IsActive="{Binding IsPendingRequest}"
