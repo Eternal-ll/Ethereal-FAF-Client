@@ -4,9 +4,463 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:beta.Views.Windows"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:apiModels="clr-namespace:beta.Models.API"
         mc:Ignorable="d"
-        Title="Maps" Height="450" Width="800">
-    <Grid>
-        
+        Title="Maps" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance {x:Type local:Maps}}">
+    <Grid Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"
+          TextElement.Foreground="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style x:Key="ButtonPatStyle" TargetType="Path">
+                <Setter Property="Fill" Value="White"/>
+                <Setter Property="Stretch" Value="Uniform"/>
+                <Setter Property="Opacity" Value=".5"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                Path=IsMouseOver}" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                Path=IsEnabled}" Value="False">
+                        <Setter Property="Opacity" Value=".3"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="MapInfoBorderStyle" TargetType="Border">
+                <Setter Property="Margin" Value="10 10 0 0"/>
+                <Setter Property="Background" Value="{StaticResource BackgroundHalfBlack}"/>
+                <Setter Property="Padding" Value="8 4"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Style.Resources>
+                    <Style TargetType="Path">
+                        <Setter Property="Fill" Value="White"/>
+                        <Setter Property="Stretch" Value="Uniform"/>
+                        <Setter Property="Height" Value="15"/>
+                    </Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Margin" Value="6 0 0 0"/>
+                    </Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Orientation" Value="Horizontal"/>
+                    </Style>
+                </Style.Resources>
+            </Style>
+        </Grid.Resources>
+        <Grid Margin="10">
+            <StackPanel Visibility="{Binding StandardFormVisibility}">
+                <WrapPanel>
+                    <TextBox ui:ControlHelper.PlaceholderText="Map name"
+                             Text="{Binding MapName, UpdateSourceTrigger=PropertyChanged}"
+                             MinWidth="140"
+                             VerticalAlignment="Top"/>
+                    <Border Style="{StaticResource MapInfoBorderStyle}" Background="Transparent"  Margin="2 0 4 0" VerticalAlignment="Center"
+                            ToolTip="*name* - contains&#10;name* - starts with&#10;name - equal">
+                        <Path Data="M10,19H13V22H10V19M12,2C17.35,2.22 19.68,7.62 16.5,11.67C15.67,12.67 14.33,13.33 13.67,14.17C13,15 13,16 13,17H10C10,15.33 10,13.92 10.67,12.92C11.33,11.92 12.67,11.33 13.5,10.67C15.92,8.43 15.32,5.26 12,5A3,3 0 0,0 9,8H6A6,6 0 0,1 12,2Z" />
+                    </Border>
+                    <TextBox ui:ControlHelper.PlaceholderText="Author name"
+                             Text="{Binding AuthorName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="10 0 0 0"
+                             MinWidth="140"
+                             VerticalAlignment="Top"/>
+                    <Border Style="{StaticResource MapInfoBorderStyle}" Background="Transparent"  Margin="2 0 4 0" VerticalAlignment="Center"
+                            ToolTip="*name* - contains&#10;name* - starts with&#10;name - equal">
+                        <Path Data="M10,19H13V22H10V19M12,2C17.35,2.22 19.68,7.62 16.5,11.67C15.67,12.67 14.33,13.33 13.67,14.17C13,15 13,16 13,17H10C10,15.33 10,13.92 10.67,12.92C11.33,11.92 12.67,11.33 13.5,10.67C15.92,8.43 15.32,5.26 12,5A3,3 0 0,0 9,8H6A6,6 0 0,1 12,2Z" />
+                    </Border>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Slots" FontSize="14" VerticalAlignment="Center" Margin="10 0 4 0"/>
+                        <ComboBox ItemsSource="{Binding MapSlots}" SelectedValue="{Binding MinimumSlots}" ui:ControlHelper.PlaceholderText="Min"/>
+                        <Button VerticalAlignment="Stretch" Click="RemoveMinClick">
+                            <Path Style="{StaticResource ButtonPatStyle}"
+                                  Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding MinimumSlots}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <ComboBox ItemsSource="{Binding MapSlots}" SelectedValue="{Binding MaximumSlots}" ui:ControlHelper.PlaceholderText="Max"/>
+                        <Button VerticalAlignment="Stretch" Click="RemoveMaxClick">
+                            <Path Style="{StaticResource ButtonPatStyle}"
+                                  Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding MaximumSlots}" Value="{x:Null}">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+                                <Setter Property="ItemsPanel">
+                                    <Setter.Value>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                <Setter Property="Padding" Value="6 2"/>
+                                <Setter Property="Height" Value="32"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <TextBlock Text="Sizes: " FontSize="14" VerticalAlignment="Center" Margin="10 0 4 0"/>
+                        <ToggleButton Content="Width"/>
+                        <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
+                            Path=Children[1]}"/>-->
+                        <ListBox x:Name="WidthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Multiple" ItemStringFormat='0 km'
+                                 VerticalAlignment="Stretch">
+                            <ListBox.Style>
+                                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
+                            Path=Children[1].IsChecked}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Setter Property="SelectedItem" Value="{x:Null}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.Style>
+                        </ListBox>
+                        <ToggleButton Content="Height"/>
+                        <ListBox x:Name="HeigthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Multiple" ItemStringFormat='0 km'>
+                            <ListBox.Style>
+                                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
+                            Path=Children[3].IsChecked}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Setter Property="SelectedItem" Value="{x:Null}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.Style>
+                        </ListBox>
+                        <!--<Expander Header="Width" ExpandDirection="Right" Margin="4 0" Height="34">
+                        </Expander>
+                        <Expander Header="Height" ExpandDirection="Right" Margin="4 0" Height="34">
+                        </Expander>-->
+                        <!--<ComboBox ItemsSource="{Binding MapSizes}" SelectedValue="{Binding MinimumSlots}" ui:ControlHelper.PlaceholderText="Width"/>-->
+                        <!--<ComboBox ItemsSource="{Binding MapSizes}" SelectedValue="{Binding MaximumSlots}" ui:ControlHelper.PlaceholderText="Height"/>-->
+                    </StackPanel>
+                    <CheckBox IsChecked="{Binding IsOnlyRanked}" Content="Show only ranked" IsEnabled="{Binding IsInputBlocked}" Margin="10 0 0 0"/>
+                    <CheckBox IsChecked="{Binding IsOnlyRecommended}" Content="Show only recommended" IsEnabled="{Binding IsInputBlocked}" Margin="10 0 0 0"/>
+                </WrapPanel>
+            </StackPanel>
+        </Grid>
+        <StackPanel Margin="10 0 10 10" Grid.Row="1">
+            <StackPanel>
+                <CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Content="Enable advanced search mode"/>
+            </StackPanel>
+            <WrapPanel TextBlock.FontSize="14">
+                <WrapPanel.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Margin" Value="4 0"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+                </WrapPanel.Resources>
+                <Button Content="Search" Click="Button_Click" IsEnabled="{Binding IsInputBlocked}"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Last query:" FontSize="14" VerticalAlignment="Center" Margin="10 0"/>
+                    <TextBox IsReadOnly="True" Text="{Binding LastQuery}" ToolTip="Last query" TextWrapping="Wrap"/>
+                </StackPanel>
+                <TextBlock Text="Page size"/>
+                <ComboBox ItemsSource="{Binding AvaiablePageSizes}" SelectedValue="{Binding PageSize}" IsEnabled="{Binding IsInputBlocked}"/>
+                <TextBlock Text="Page number"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button VerticalAlignment="Stretch" IsEnabled="{Binding IsInputBlocked}" Click="PreviousPageClick">
+                        <Path Style="{StaticResource ButtonPatStyle}" Data="M20,10V14H11L14.5,17.5L12.08,19.92L4.16,12L12.08,4.08L14.5,6.5L11,10H20Z" />
+                    </Button>
+                    <ui:NumberBox Text="{Binding PageNumber, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsInputBlocked}" BorderThickness="0"/>
+                    <Button VerticalAlignment="Stretch" IsEnabled="{Binding IsInputBlocked}" Click="NextPageClick">
+                        <Path Style="{StaticResource ButtonPatStyle}" Data="M4,10V14H13L9.5,17.5L11.92,19.92L19.84,12L11.92,4.08L9.5,6.5L13,10H4Z"/>
+                    </Button>
+                </StackPanel>
+                <TextBlock Text="{Binding AvailablePages, StringFormat=' / {0}'}" FontSize="18" FontWeight="DemiBold" Margin="0"/>
+                <TextBlock Text="{Binding TotalRecords, StringFormat='Total records: {0}'}" Opacity=".5"/>
+                <TextBlock Text="{Binding Elapsed, StringFormat='Elapsed: {0:c}'}"/>
+            </WrapPanel>
+        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="480"/>
+                <ColumnDefinition MinWidth="400"/>
+            </Grid.ColumnDefinitions>
+
+            <ui:ProgressRing Grid.Row="2" IsActive="{Binding IsPendingRequest}"
+                         Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         IsHitTestVisible="False"/>
+            <ListBox Grid.Row="2" Visibility="{Binding IsResultListVisilbe}"
+                 SelectedItem="{Binding SelectedMap}"
+                     ItemsSource="{Binding ResponseView}"
+                 Background="Transparent"
+                 VirtualizingPanel.IsVirtualizing="True"
+                 VirtualizingPanel.VirtualizationMode="Recycling"
+                 VirtualizingPanel.IsContainerVirtualizable="True">
+                <ListBox.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                    </Style>
+
+                    <DataTemplate DataType="{x:Type apiModels:ApiUniversalData}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width=".2*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Border Width="200" Height="200" CornerRadius="10">
+                                <Border.Background>
+                                    <ImageBrush ImageSource="{Binding MapSmallPreview}"/>
+                                </Border.Background>
+                            </Border>
+
+                            <StackPanel Grid.Column="1">
+                                <WrapPanel>
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Author">
+                                        <StackPanel>
+                                            <Path Data="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
+                                            <TextBlock Text="{Binding DisplayedName}"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Author">
+                                        <StackPanel>
+                                            <Path Data="M21.7,13.35L20.7,14.35L18.65,12.3L19.65,11.3C19.86,11.09 20.21,11.09 20.42,11.3L21.7,12.58C21.91,12.79 21.91,13.14 21.7,13.35M12,18.94L18.06,12.88L20.11,14.93L14.06,21H12V18.94M12,14C7.58,14 4,15.79 4,18V20H10V18.11L14,14.11C13.34,14.03 12.67,14 12,14M12,4A4,4 0 0,0 8,8A4,4 0 0,0 12,12A4,4 0 0,0 16,8A4,4 0 0,0 12,4Z" />
+                                            <TextBlock Text="{Binding AuthorLogin}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}">
+                                        <Border.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock Margin="0" FontSize="14">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding Description}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Description.Length}" Value="0">
+                                                                    <Setter Property="Text" Value="No description"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </ToolTip>
+                                        </Border.ToolTip>
+                                        <StackPanel>
+                                            <Path Data="M17 9H16.5 17M7 15H10C10.08 14.32 10.23 13.64 10.5 13H7V15M11.9 10.9C13.17 9.64 14.84 9 16.5 9H7V11H11.82C11.85 10.97 11.87 10.94 11.9 10.9M11.9 20.1C12.26 20.45 12.65 20.74 13.06 21H5C3.9 21 3 20.11 3 19V5C3 3.9 3.9 3 5 3H9.18C9.5 2.16 10.14 1.5 11 1.2C12.53 .64 14.25 1.44 14.82 3H19C20.11 3 21 3.9 21 5V10.82C20.4 10.24 19.72 9.8 19 9.5V5H17V7H7V5H5V19H11.03C11.27 19.39 11.57 19.76 11.9 20.1M11 4C11 4.55 11.45 5 12 5S13 4.55 13 4 12.55 3 12 3 11 3.45 11 4M23.39 21L22 22.39L18.88 19.32C18.19 19.75 17.37 20 16.5 20C14 20 12 18 12 15.5S14 11 16.5 11 21 13 21 15.5C21 16.38 20.75 17.21 20.31 17.9L23.39 21M19 15.5C19 14.12 17.88 13 16.5 13S14 14.12 14 15.5 15.12 18 16.5 18 19 16.88 19 15.5Z" />
+                                            <TextBlock Text="Description"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Map sizes">
+                                        <StackPanel>
+                                            <Path Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
+                                            <TextBlock>
+                                        <Run Text="{Binding Height, Mode=OneWay}"/> 
+                                        <Run Text="{Binding Width, Mode=OneWay, StringFormat='x {0} km'}"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}">
+                                        <Border.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock Margin="0" Text="{Binding CreateTime, StringFormat='Created: {0}'}"/>
+                                            </ToolTip>
+                                        </Border.ToolTip>
+                                        <StackPanel>
+                                            <Path Data="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z" />
+                                            <!--<TextBlock Text="Created at"/>-->
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}">
+                                        <Border.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock Margin="0" Text="{Binding UpdateTime, StringFormat='Updated: {0}'}"/>
+                                            </ToolTip>
+                                        </Border.ToolTip>
+                                        <StackPanel>
+                                            <Path Data="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z" />
+                                            <!--<TextBlock Text="{Binding UpdateTime}"/>-->
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Version">
+                                        <StackPanel>
+                                            <Path Data="M19,8L15,12H18A6,6 0 0,1 12,18C11,18 10.03,17.75 9.2,17.3L7.74,18.76C8.97,19.54 10.43,20 12,20A8,8 0 0,0 20,12H23M6,12A6,6 0 0,1 12,6C13,6 13.97,6.25 14.8,6.7L16.26,5.24C15.03,4.46 13.57,4 12,4A8,8 0 0,0 4,12H1L5,16L9,12" />
+                                            <TextBlock Text="{Binding Version, StringFormat='v.{0}'}"/>
+                                        </StackPanel>
+                                    </Border>
+
+
+                                    <Border Style="{StaticResource MapInfoBorderStyle}">
+                                        <Border.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock Margin="0" Text="{Binding GamesPlayed, StringFormat='Played {0} times'}"/>
+                                            </ToolTip>
+                                        </Border.ToolTip>
+                                        <StackPanel>
+                                            <Path Height="12" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                            <TextBlock Text="{Binding GamesPlayed}"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border ToolTip="Recommended by FAF">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource MapInfoBorderStyle}">
+                                                <Setter Property="Background" Value="Orange"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRecommended}" Value="false">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <Path Fill="Black" Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
+                                            <TextBlock Text="Recommended" Foreground="Black"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border ToolTip="Will be the game ranked">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource MapInfoBorderStyle}">
+                                                <Setter Property="DataContext" Value="Ranked"/>
+                                                <Setter Property="Background" Value="LightGreen"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                Path=DataContext.IsRanked}" Value="false">
+                                                        <Setter Property="DataContext" Value="Not ranked"/>
+                                                        <Setter Property="Background" Value="Red"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <Path Fill="Black" Data="M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z" />
+                                            <TextBlock Text="{Binding}" Foreground="Black"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border ToolTip="Download">
+                                        <Border.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding DownloadUrl}"/>
+                                        </Border.InputBindings>
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource MapInfoBorderStyle}">
+                                                <!--<Setter Property="Background" Value="Orange"/>-->
+                                                <Setter Property="Opacity" Value=".7"/>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Opacity" Value="1"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <Path Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                                            <TextBlock>
+                                        <Run Text="Download"/>
+                                        <Run Text="direct link" FontSize="12" Foreground="Gray"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </WrapPanel>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" >
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ReviewsSummaryData}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <!--<ui:RatingControl PlaceholderValue="{Binding SummaryFiveRate, Mode=OneWay}" IsHitTestVisible="False"/>-->
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Average rating">
+                                        <StackPanel>
+                                            <Path Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" />
+                                            <TextBlock>
+                                        <Run Text="{Binding SummaryFiveRate, StringFormat='{}{0:0.#}', Mode=OneWay}"/>
+                                        <Run Text="/ 5" FontSize="12" Foreground="Gray"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MapInfoBorderStyle}" ToolTip="Unique score">
+                                        <StackPanel>
+                                            <Path Data="M5 5H7V11H5V5M10 5H8V11H10V5M5 19H7V13H5V19M10 13H8V19H10V17H15V15H10V13M2 21H4V3H2V21M20 3V7H13V5H11V11H13V9H20V15H18V13H16V19H18V17H20V21H22V3H20Z" />
+                                            <TextBlock Text="{Binding SummaryScore, Mode=OneWay}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                    <!--<Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                    <Setter Property="Focusable" Value="False"/>
+                </Style>-->
+                </ListBox.Resources>
+            </ListBox>
+
+            
+            <Grid Grid.Column="1"
+                  Background="{StaticResource BackgroundHalfBlack}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedMap}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <TextBlock HorizontalAlignment="Center" FontSize="20" Opacity=".6" VerticalAlignment="Center" Margin="0" Text="Select map"/>
+            </Grid>
+            <ContentControl Content="{Binding SelectedMap}" Grid.Column="1">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type apiModels:ApiUniversalData}">
+                        <ScrollViewer>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Image Source="{Binding MapLargePreview, Mode=OneWay}"/>
+                            </Grid>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </ContentControl.Resources>
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedMap}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
+
+            <GridSplitter Margin="0 0 0 0" HorizontalAlignment="Left" Grid.Column="1" Width="2"/>
+        </Grid>
     </Grid>
 </Window>
