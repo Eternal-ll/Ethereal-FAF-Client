@@ -110,12 +110,7 @@ namespace beta.Infrastructure.Behaviors
 
         private static void OnVerticalOffsetChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
         {
-            ScrollViewer scrollViewer = target as ScrollViewer;
-
-            if (scrollViewer is not null)
-            {
-                scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
-            }
+            (target as ScrollViewer)?.ScrollToVerticalOffset((double)e.NewValue);
         }
 
         #endregion
@@ -146,15 +141,13 @@ namespace beta.Infrastructure.Behaviors
         {
             var target = sender;
 
-            if (target is ScrollViewer)
+            if (target is ScrollViewer scroller)
             {
-                ScrollViewer scroller = target as ScrollViewer;
                 scroller.Loaded += new RoutedEventHandler(scrollerLoaded);
             }
 
-            if (target is ListBox) 
+            if (target is ListBox listbox)
             {
-                ListBox listbox = target as ListBox;
                 listbox.Loaded += new RoutedEventHandler(listboxLoaded);
             }
         }
@@ -210,9 +203,7 @@ namespace beta.Infrastructure.Behaviors
 
         private static void UpdateScrollPosition(object sender)
         {
-            ListBox listbox = sender as ListBox;
-
-            if (listbox is not null)
+            if (sender is ListBox listbox)
             {
                 double scrollTo = 0;
 
@@ -234,7 +225,7 @@ namespace beta.Infrastructure.Behaviors
 
         #region SetEventHandlersForScrollViewer Helper
 
-        private static void SetEventHandlersForScrollViewer(ScrollViewer scroller) 
+        private static void SetEventHandlersForScrollViewer(ScrollViewer scroller)
         {
             scroller.PreviewMouseWheel += new MouseWheelEventHandler(ScrollViewerPreviewMouseWheel);
             scroller.PreviewKeyDown += new KeyEventHandler(ScrollViewerPreviewKeyDown);

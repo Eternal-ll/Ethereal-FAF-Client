@@ -12,10 +12,7 @@ namespace beta.Infrastructure.Commands
         {
             if (parameter is null) return;
 
-            Uri uri = null;
-            
-            if (parameter is Uri)
-                uri = (Uri)parameter;
+            Uri uri = parameter as Uri;
 
             if (parameter is string text)
                 Uri.TryCreate(text, UriKind.Absolute, out uri);

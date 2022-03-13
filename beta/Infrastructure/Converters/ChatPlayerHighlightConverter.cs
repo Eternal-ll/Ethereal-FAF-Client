@@ -53,7 +53,7 @@ namespace beta.Infrastructure.Converters
                 var inline = enumrator.Current;
                 if (inline is InlineUIContainer ui)
                 {
-                    if (!(ui.Child is Image or GifImage))
+                    if (ui.Child is not (Image or GifImage))
                     {
                         return false;
                     }
