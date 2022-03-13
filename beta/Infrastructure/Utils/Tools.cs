@@ -74,17 +74,27 @@ namespace beta.Infrastructure.Utils
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
 
-        public static int CalculateMapSizeInKm(int pixel)
+        public static int CalculateMapSizeToKm(int pixel) => pixel switch
         {
-            if (pixel == 64) return 1;
-            if (pixel == 128) return 2;
-            return int.Parse((pixel / 51.2).ToString());
-        }
-        public static int CalculateMapSizeInPixels(int km)
+            64 => 1,
+            128 => 2,
+            256 => 5,
+            512 => 10,
+            1024 => 20,
+            2048 => 40,
+            4096 => 80,
+            _ => throw new NotImplementedException()
+        };
+        public static int CalculateMapSizeToPixels(int km) => km switch
         {
-            if (km == 1) return 64;
-            if (km == 2) return 128;
-            return int.Parse((km * 51.2).ToString());
-        }
+            1 => 64,
+            2 => 128,
+            5 => 256,
+            10 => 512,
+            20 => 1024,
+            40 => 2048,
+            80 => 4096,
+            _ => throw new NotImplementedException()
+        };
     }
 }
