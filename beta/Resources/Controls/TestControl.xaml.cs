@@ -492,7 +492,7 @@ namespace beta.Resources.Controls
 
                 SuggestedPlayers.Clear();
 
-                if (Users != null)
+                if (Users is not null)
                     for (int i = 0; i < Users.Count; i++)
                     {
                         if (Users[i].StartsWith(completionText))
@@ -552,7 +552,7 @@ namespace beta.Resources.Controls
             {
                 if (Set(ref _SelectedCommand, value))
                 {
-                    if (value != null)
+                    if (value is not null)
                     {
                         ObservableDictionary<string, string> commandValues = new();
                         for (int i = 0; i < value.Fields.Length; i++)

@@ -37,13 +37,11 @@ namespace beta.Views.Windows
             // confirm parent and name are valid.
             if (parent is null || string.IsNullOrEmpty(name)) return null;
 
-            //if ((parent as FrameworkElement)?.Name == name) return parent;
-            if (parent is FrameworkElement && (parent as FrameworkElement).Name == name) return parent;
-
+            if ((parent as FrameworkElement)?.Name == name) return parent;
+         
             DependencyObject result = null;
 
-            //(parent as FrameworkElement)?.ApplyTemplate();
-            if (parent is FrameworkElement) (parent as FrameworkElement).ApplyTemplate();
+           (parent as FrameworkElement)?.ApplyTemplate();
 
             int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < childrenCount; i++)
@@ -68,7 +66,7 @@ namespace beta.Views.Windows
 
             DependencyObject foundChild = null;
 
-            if (parent is FrameworkElement) (parent as FrameworkElement).ApplyTemplate();
+             (parent as FrameworkElement)?.ApplyTemplate();
 
             int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
             for (int i = 0; i < childrenCount; i++)

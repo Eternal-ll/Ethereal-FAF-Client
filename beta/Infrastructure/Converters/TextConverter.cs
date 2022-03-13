@@ -186,8 +186,7 @@ namespace beta.Infrastructure.Converters
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is null ) return null;
-            var text = value as string;
+            if (value is not string text) return null;
             IList<Inline> Inlines = new List<Inline>();
 
             StringBuilder textBuilder = new();
