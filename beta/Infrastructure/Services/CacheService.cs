@@ -10,7 +10,7 @@ namespace beta.Infrastructure.Services
     {
         public BitmapImage GetImage(Uri uri, Folder folder = Folder.Common)
         {
-            if (uri == null)
+            if (uri is null)
                 throw new ArgumentNullException();
 
             var cacheFolder = App.GetPathToFolder(folder);

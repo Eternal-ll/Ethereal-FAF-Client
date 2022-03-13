@@ -80,7 +80,7 @@ namespace beta.Views.Windows
 
             if (e == ManagedTcpClientState.Connected)
             {
-                if (Dialog != null)
+                if (Dialog is not null)
                     Dialog.Hide();
             }
         }

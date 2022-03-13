@@ -77,9 +77,9 @@ namespace beta.Models.API
         {
             get
             {
-                if (_AuthorLogin != null) return _AuthorLogin;
+                if (_AuthorLogin is not null) return _AuthorLogin;
 
-                if (AuthorData != null)
+                if (AuthorData is not null)
                 {
                     _AuthorLogin = AuthorData["login"];
                     AuthorData = null;
@@ -99,7 +99,7 @@ namespace beta.Models.API
             get
             {
                 var desc = MapData?["description"];
-                if (desc == null) return null;
+                if (desc is null) return null;
 
                 var del = desc.IndexOf('>');
 
@@ -114,7 +114,7 @@ namespace beta.Models.API
         {
             get
             {
-                if (MapData?["width"] == null) return null;
+                if (MapData?["width"] is null) return null;
 
                 return Tools.CalculateMapSizeToKm(int.Parse(MapData["width"]));
             }
@@ -123,7 +123,7 @@ namespace beta.Models.API
         {
             get
             {
-                if (MapData?["height"] == null) return null;
+                if (MapData?["height"] is null) return null;
 
                 return Tools.CalculateMapSizeToKm(int.Parse(MapData["height"]));
             }
@@ -138,9 +138,9 @@ namespace beta.Models.API
 
         public Dictionary<string, string> ReviewsSummaryData { get; set; }
         #region Reviews summary getters
-        public double SummaryPositive => ReviewsSummaryData?["positive"] == null ? 0 : double.Parse(ReviewsSummaryData["positive"].Replace('.', ','));
-        public int SummaryReviews => ReviewsSummaryData?["reviews"] == null ? 0 : int.Parse(ReviewsSummaryData["reviews"]);
-        public double SummaryScore => ReviewsSummaryData?["score"] == null ? 0 : double.Parse(ReviewsSummaryData["score"].Replace('.', ','));
+        public double SummaryPositive => ReviewsSummaryData?["positive"] is null ? 0 : double.Parse(ReviewsSummaryData["positive"].Replace('.', ','));
+        public int SummaryReviews => ReviewsSummaryData?["reviews"] is null ? 0 : int.Parse(ReviewsSummaryData["reviews"]);
+        public double SummaryScore => ReviewsSummaryData?["score"] is null ? 0 : double.Parse(ReviewsSummaryData["score"].Replace('.', ','));
         public double SummaryLowerBound => double.TryParse(ReviewsSummaryData?["lowerBound"].Replace('.', ',').Replace("null", null), out var result) ? result : 0;
         public double SummaryFiveRate => SummaryLowerBound != 0 ? 5 * SummaryLowerBound : -1;
         #endregion
@@ -181,7 +181,7 @@ namespace beta.Models.API
 
         public Dictionary<string, string> GetAttributesFromIncluded(ApiDataType type, int id)
         {
-            if (Included == null) return null;
+            if (Included is null) return null;
 
             for (int i = 0; i < Included.Length; i++)
             {

@@ -228,13 +228,13 @@ namespace beta.Models
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
         {
-            if (CollectionChanged != null)
+            if (CollectionChanged is not null)
                 CollectionChanged(this, args);
         }
 
         protected virtual void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
+            if (PropertyChanged is not null)
                 PropertyChanged(this, new PropertyChangedEventArgs(name));
         }
 
@@ -492,7 +492,7 @@ namespace beta.Models
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
         {
-            if (array == null)
+            if (array is null)
             {
                 throw new ArgumentNullException("CopyTo() failed:  array parameter was null");
             }
@@ -572,7 +572,7 @@ namespace beta.Models
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
+            if (info is null)
             {
                 throw new ArgumentNullException("info");
             }
@@ -589,7 +589,7 @@ namespace beta.Models
 
         public virtual void OnDeserialization(object sender)
         {
-            if (_siInfo != null)
+            if (_siInfo is not null)
             {
                 Collection<DictionaryEntry> entries = (Collection<DictionaryEntry>)
                     _siInfo.GetValue("entries", typeof(Collection<DictionaryEntry>));

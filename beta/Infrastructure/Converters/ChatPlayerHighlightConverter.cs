@@ -11,7 +11,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return false;
+            if (value is null) return false;
             var textBlock = (TextBlock)value;
             var inlines = textBlock.Inlines;
 
@@ -43,7 +43,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return false;
+            if (value is null) return false;
             var textBlock = (TextBlock)value;
             var inlines = textBlock.Inlines;
 

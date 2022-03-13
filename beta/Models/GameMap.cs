@@ -49,7 +49,7 @@ namespace beta.Models
             get
             {
                 var desc = Scenario?["description"];
-                if (desc != null)
+                if (desc is not null)
                 {
                     var isArr = desc.IndexOf('>');
                     if (isArr != -1)
@@ -65,7 +65,7 @@ namespace beta.Models
             {
                 var size = Scenario?["size"];
 
-                if (size == null) return null;
+                if (size is null) return null;
 
                 var sizes = size.Replace(" ", string.Empty).Split(',');
 

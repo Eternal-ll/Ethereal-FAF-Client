@@ -21,7 +21,7 @@ namespace beta.Infrastructure.Services
 
             client.DefaultRequestHeaders.Add("User-Agent", "FAF Client");
             var token = Properties.Settings.Default.access_token;
-            if (token != null)
+            if (token is not null)
             {
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer token");
             }
@@ -37,7 +37,7 @@ namespace beta.Infrastructure.Services
                 using HttpRequestMessage request = new(HttpMethod.Get, "https://api.faforever.com/" + path);
 
                 var token = Properties.Settings.Default.access_token;
-                if (token != null)
+                if (token is not null)
                 {
                     request.Headers.Authorization = new("Bearer", token);
                 }

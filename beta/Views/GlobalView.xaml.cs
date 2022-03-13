@@ -332,7 +332,7 @@ namespace beta.Views
         public ICommand RemoveKeyWordCommand => _RemoveKeyWordCommand;
         public void OnRemoveKeyWordCommand(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
             MapsBlackList.Remove(parameter.ToString());
 
             if (_IsMapsBlacklistEnabled)

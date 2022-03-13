@@ -10,7 +10,7 @@ namespace beta.Infrastructure.Commands
 
         public override void Execute(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
 
             Uri uri = null;
             
@@ -20,7 +20,7 @@ namespace beta.Infrastructure.Commands
             if (parameter is string text)
                 Uri.TryCreate(text, UriKind.Absolute, out uri);
 
-            if (uri != null)
+            if (uri is not null)
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = uri.ToString(),

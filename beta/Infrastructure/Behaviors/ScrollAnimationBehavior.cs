@@ -12,12 +12,12 @@ namespace beta.Infrastructure.Behaviors
     {
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
-            if (depObj != null)
+            if (depObj is not null)
             {
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
+                    if (child is T)
                     {
                         yield return (T)child;
                     }
@@ -112,7 +112,7 @@ namespace beta.Infrastructure.Behaviors
         {
             ScrollViewer scrollViewer = target as ScrollViewer;
 
-            if (scrollViewer != null)
+            if (scrollViewer is not null)
             {
                 scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
             }
@@ -146,13 +146,13 @@ namespace beta.Infrastructure.Behaviors
         {
             var target = sender;
 
-            if (target != null && target is ScrollViewer)
+            if (target is ScrollViewer)
             {
                 ScrollViewer scroller = target as ScrollViewer;
                 scroller.Loaded += new RoutedEventHandler(scrollerLoaded);
             }
 
-            if (target != null && target is ListBox) 
+            if (target is ListBox) 
             {
                 ListBox listbox = target as ListBox;
                 listbox.Loaded += new RoutedEventHandler(listboxLoaded);
@@ -212,7 +212,7 @@ namespace beta.Infrastructure.Behaviors
         {
             ListBox listbox = sender as ListBox;
 
-            if (listbox != null)
+            if (listbox is not null)
             {
                 double scrollTo = 0;
 
@@ -220,7 +220,7 @@ namespace beta.Infrastructure.Behaviors
                 {
                     ListBoxItem tempItem = listbox.ItemContainerGenerator.ContainerFromItem(listbox.Items[i]) as ListBoxItem;
 
-                    if (tempItem != null)
+                    if (tempItem is not null)
                     {
                         scrollTo += tempItem.ActualHeight;
                     }

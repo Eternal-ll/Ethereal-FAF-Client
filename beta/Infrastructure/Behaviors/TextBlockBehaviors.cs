@@ -24,7 +24,7 @@ namespace beta.Infrastructure.Behaviors
         {
             var Target = d as TextBlock;
 
-            if (Target != null)
+            if (Target is not null)
             {
                 Target.Inlines.Clear();
                 Target.Inlines.AddRange((System.Collections.IEnumerable)e.NewValue);

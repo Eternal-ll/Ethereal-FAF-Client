@@ -113,12 +113,12 @@ namespace beta.Models.Server
             {
                 if (Set(ref _Game, value))
                 {
-                    if (value == null)
+                    if (value is null)
                     {
                         GameState = GameState.None;
                         return;
                     }
-                    if (value.launched_at != null)
+                    if (value.launched_at is not null)
                     {
                         var timeDifference = DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(value.launched_at.Value);
                         GameState = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
@@ -200,12 +200,12 @@ namespace beta.Models.Server
             {
                 if (value != _ratings)
                 {
-                    if (_ratings != null)
+                    if (_ratings is not null)
                         foreach (var item in value)
                         {
                             if (_ratings.TryGetValue(item.Key, out Rating rating))
                             {
-                                if (rating == null) continue;
+                                if (rating is null) continue;
                                 rating.RatingDifference[0] += item.Value.rating[0] - rating.rating[0];
                                 rating.RatingDifference[1] += item.Value.rating[1] - rating.rating[1];
                                 rating.GamesDifference++;

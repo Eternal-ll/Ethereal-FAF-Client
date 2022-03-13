@@ -75,7 +75,7 @@ namespace beta.Properties
   /// public void Foo([ItemNotNull]List&lt;string&gt; books)
   /// {
   ///   foreach (var book in books) {
-  ///     if (book != null) // Warning: Expression is always true
+  ///     if (book is not null) // Warning: Expression is always true
   ///      Console.WriteLine(book.ToUpper());
   ///   }
   /// }
@@ -254,7 +254,7 @@ namespace beta.Properties
   /// </summary>
   /// <example><code>
   /// void Foo(string param) {
-  ///   if (param == null)
+  ///   if (param is null)
   ///     throw new ArgumentNullException("par"); // Warning: Cannot resolve symbol
   /// }
   /// </code></example>

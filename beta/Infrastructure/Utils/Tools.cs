@@ -15,7 +15,7 @@ namespace beta.Infrastructure.Utils
         public static DependencyObject FindChild(DependencyObject parent, string name)
         {
             // confirm parent and name are valid.
-            if (parent == null || string.IsNullOrEmpty(name)) return null;
+            if (parent is null || string.IsNullOrEmpty(name)) return null;
 
             if (parent is FrameworkElement && (parent as FrameworkElement).Name == name) return parent;
 
@@ -28,7 +28,7 @@ namespace beta.Infrastructure.Utils
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
                 result = FindChild(child, name);
-                if (result != null) break;
+                if (result is not null) break;
             }
 
             return result;
@@ -41,7 +41,7 @@ namespace beta.Infrastructure.Utils
             where T : DependencyObject
         {
             // confirm parent is valid.
-            if (parent == null) return null;
+            if (parent is null) return null;
             if (parent is T) return parent as T;
 
             DependencyObject foundChild = null;
@@ -53,7 +53,7 @@ namespace beta.Infrastructure.Utils
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
                 foundChild = FindChild<T>(child);
-                if (foundChild != null) break;
+                if (foundChild is not null) break;
             }
 
             return foundChild as T;

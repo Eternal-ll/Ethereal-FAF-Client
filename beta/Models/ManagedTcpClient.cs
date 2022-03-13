@@ -85,7 +85,7 @@ namespace beta.Models
         }
         public void Write(byte[] data)
         {
-            if (TcpClient == null)
+            if (TcpClient is null)
             {
                 throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
             }
@@ -174,7 +174,7 @@ namespace beta.Models
             finally
             {
                 OnStateChanged(ManagedTcpClientState.Disconnected);
-                if (TcpClient != null)
+                if (TcpClient is not null)
                 {
                     Stream.Dispose();
                     TcpClient.Close();
@@ -186,7 +186,7 @@ namespace beta.Models
         #region Private
         private void StartListenThread()
         {
-            if (TcpThread != null) { return; }
+            if (TcpThread is not null) { return; }
 
             TcpThread = new Thread(ListenerLoop)
             {
@@ -210,8 +210,8 @@ namespace beta.Models
         {
             var c = TcpClient;
 
-            if (c == null) return;
-            if (c.Connected == false) return;
+            if (c is null) return;
+            if (!c.Connected) return;
 
             int bytesAvailable = c.Available;
             if (bytesAvailable == 0)

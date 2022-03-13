@@ -76,8 +76,8 @@ namespace beta.Views.Windows
                             switch (type)
                             {
                                 case "title":
-                                    if (news[i] == null)
-                                    news[i] = new()
+                                    
+                                    news[i] ??= new()
                                     {
                                         Title = text
                                     };
@@ -93,13 +93,13 @@ namespace beta.Views.Windows
                                 case "_embedded": news[i].Author = text;
                                     break;
                                 case "source_url":
-                                    if (news[i] == null)
+                                    if (news[i] is null)
                                     {
-                                        if (previous == null)
+                                        if (previous is null)
                                         {
                                             previous = new(text.Replace("\\/", "/"));
                                         }
-                                        if (previous != null)
+                                        if (previous is not null)
                                         {
                                             news[i - 1].MediaUri = previous;
                                             previous = new(text.Replace("\\/", "/"));
@@ -136,7 +136,7 @@ namespace beta.Views.Windows
             
             for (int j = 0; j < news.Length; j++)
             {
-                if (news[j] != null)
+                if (news[j] is not null)
                     Dispatcher.Invoke(() =>
                     News.Add(news[j]));
             }
@@ -164,7 +164,7 @@ namespace beta.Views.Windows
 
         private void OnTestCommand(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
 
             var item = (Border)parameter;
 

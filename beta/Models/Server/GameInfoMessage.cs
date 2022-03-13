@@ -30,7 +30,7 @@ namespace beta.Models.Server
         {
             get
             {
-                if (Players == null || Players.Length == 0) return 0;
+                if (Players is null || Players.Length == 0) return 0;
                 int sum = 0;
                 for (int i = 0; i < Players.Length; i++)
                     if (Players[i] is PlayerInfoMessage player)
@@ -191,7 +191,7 @@ namespace beta.Models.Server
         {
             get
             {
-                if (_Teams == null || _Teams.Length == 0) return 0;
+                if (_Teams is null || _Teams.Length == 0) return 0;
                 int sum = 0;
                 for (int i = 0; i < _Teams.Length; i++)
                     sum += _Teams[i].AverageRating;
@@ -229,7 +229,7 @@ namespace beta.Models.Server
                 //switch (Map)
                 //{
                 //    case GameMap gameMap:
-                if (Map.Name != null) return Map.Name;
+                if (Map.Name is not null) return Map.Name;
                 else
                 {
                     var parts = _mapname.Split('.')[0].Split('_');

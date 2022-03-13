@@ -108,7 +108,7 @@ namespace beta.Infrastructure.Services
                 var idleGame = idleGames[i];
                 if (idleGame.host == game.host)
                 {
-                    if (game.launched_at != null)
+                    if (game.launched_at is not null)
                     {
                         // game is launched, removing from IdleGames and moving to LiveGames
                         idleGames.RemoveAt(i);
@@ -135,7 +135,7 @@ namespace beta.Infrastructure.Services
 
             #region Processing if game is live
             // if game is live
-            if (game.launched_at != null)
+            if (game.launched_at is not null)
             {
                 for (int i = 0; i < liveGames.Count; i++)
                 {
@@ -157,7 +157,7 @@ namespace beta.Infrastructure.Services
             // if we passed this way, that we didnt found matches in LiveGames
 
             // filling host by player instance
-            //if (game.Host == null)
+            //if (game.Host is null)
             game.Host = PlayersService.GetPlayer(game.host);
 
 
@@ -171,7 +171,7 @@ namespace beta.Infrastructure.Services
                 SuspiciousGames.Add(game);
             }
 
-            if (game.launched_at != null)
+            if (game.launched_at is not null)
             {
                 liveGames.Add(game);
                 return;
@@ -191,7 +191,7 @@ namespace beta.Infrastructure.Services
             // TODO: FIX ME Need to rework player game status
 
             //var playerStatus = GameState.Open;
-            //if (game.launched_at != null)
+            //if (game.launched_at is not null)
             //{
             //    var timeDifference = DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(game.launched_at.Value);
             //    playerStatus = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
@@ -204,7 +204,7 @@ namespace beta.Infrastructure.Services
                 for (int i = 0; i < valuePair.Value.Length; i++)
                 {
                     var player = PlayersService.GetPlayer(valuePair.Value[i]);
-                    if (player == null)
+                    if (player is null)
                     {
                         players[i] = new UnknownPlayer()
                         {
@@ -214,7 +214,7 @@ namespace beta.Infrastructure.Services
                     }
 
                     //player.GameState = playerStatus;
-                    if (player.Game == null)
+                    if (player.Game is null)
                         player.Game = game;
                     else if (player.Game.uid != game.uid)
                         player.Game = game;

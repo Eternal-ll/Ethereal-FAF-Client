@@ -186,7 +186,7 @@ namespace beta.Infrastructure.Converters
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return null;
+            if (value is null ) return null;
             var text = value as string;
             IList<Inline> Inlines = new List<Inline>();
 
@@ -275,7 +275,7 @@ namespace beta.Infrastructure.Converters
                     {
                         var login = sb.ToString().Substring(1).Replace(" ", "");
                         var player = PlayersService.GetPlayer(login);
-                        if (player != null)
+                        if (player is not null)
                         {
                             Inlines.Add(new InlineUIContainer()
                             {
