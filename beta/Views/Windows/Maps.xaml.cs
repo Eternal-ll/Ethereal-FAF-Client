@@ -1,4 +1,5 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Models.API;
 using beta.Models.API.Enums;
@@ -17,6 +18,8 @@ using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace beta.Views.Windows
 {
@@ -58,7 +61,43 @@ namespace beta.Views.Windows
             DoRequest();
 
             WidthsList.SelectionChanged += MapSizesSelectionChanged;
-            HeigthsList.SelectionChanged += MapSizesSelectionChanged;
+            HeightsList.SelectionChanged += MapSizesSelectionChanged;
+
+            Closed += (s, e) =>
+            {
+                App.Current.Shutdown();
+            };
+
+            ResultListBox.SizeChanged += ResultListBox_SizeChanged;
+
+            _SearchForAuthorCommand = new LambdaCommand(OnSearchForAuthorCommand);
+
+            _ShowBigPreviewCommand = new LambdaCommand(OnShowBigPreviewCommand);
+            _CloseBigPreviewCommand = new LambdaCommand(OnCloseBigPreviewCommand);
+
+            Resources.Add("SearchForAuthorCommand", _SearchForAuthorCommand);
+            Resources.Add("ShowBigPreviewCommand", _ShowBigPreviewCommand);
+        }
+
+        private void ResultListBox_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            CalculateGridColumns(e.NewSize.Width);
+        }
+
+        private void CalculateGridColumns(double size)
+        {
+            if (!IsGridEnabled) return;
+
+            if (IsDescriptionEnabled)
+            {
+                if (size < 960) GridColumns = 1;
+                else GridColumns = Convert.ToInt32(size / 580);
+            }
+            else
+            {
+                if (size < 400) GridColumns = 1;
+                else GridColumns = Convert.ToInt32(size / 267);
+            }
         }
 
         private void MapSizesSelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -77,7 +116,7 @@ namespace beta.Views.Windows
                 {
                     OnPropertyChanged(nameof(IsPendingRequest));
                     OnPropertyChanged(nameof(IsInputBlocked));
-                    OnPropertyChanged(nameof(IsResultListVisilbe));
+                    OnPropertyChanged(nameof(IsResultListVisible));
                     if (value == ApiState.Idle)
                     {
                         //Dispatcher.Invoke(() => ResponseView.Refref());
@@ -90,17 +129,18 @@ namespace beta.Views.Windows
 
         public bool IsPendingRequest => _Status == ApiState.PendingRequest;
         public bool IsInputBlocked => !IsPendingRequest;
-        public Visibility IsResultListVisilbe => _Status == ApiState.Idle ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility IsResultListVisible => _Status == ApiState.Idle ? Visibility.Visible : Visibility.Collapsed;
 
-        #region IsAutoRequestEnabled
-        private bool _IsAutoRequestEnabled;
-        public bool IsAutoRequestEnabled
+        #region BigPreviewVisibility
+        private Visibility _BigPreviewVisibility = Visibility.Collapsed;
+        public Visibility BigPreviewVisibility
         {
-            get => _IsAutoRequestEnabled;
-            set => Set(ref _IsAutoRequestEnabled, value);
+            get => _BigPreviewVisibility;
+            set => Set(ref _BigPreviewVisibility, value);
         }
         #endregion
 
+        #region Result page properties
         #region PageNumber
         private int _PageNumber = 1;
         public int PageNumber
@@ -120,9 +160,10 @@ namespace beta.Views.Windows
         }
         #endregion
 
+        #region AvailablePages
         public int[] AvailablePages => Enumerable.Range(1, AvailablePagesCount).ToArray();
 
-        #region AvailablePages
+        #region AvailablePagesCount
         private int _AvailablePagesCount;
         public int AvailablePagesCount
         {
@@ -135,6 +176,7 @@ namespace beta.Views.Windows
                 }
             }
         }
+        #endregion
         #endregion
 
         #region AvaiablePageSizes
@@ -175,6 +217,7 @@ namespace beta.Views.Windows
                 }
             }
         }
+        #endregion
         #endregion
 
         #region Elapsed
@@ -325,7 +368,7 @@ namespace beta.Views.Windows
             get
             {
                 IList t = new List<int>();
-                Dispatcher.Invoke(() => t = HeigthsList.SelectedItems);
+                Dispatcher.Invoke(() => t = HeightsList.SelectedItems);
                 return t;
             }
         }
@@ -384,13 +427,194 @@ namespace beta.Views.Windows
 
         #endregion
 
-        #region Results ICollection view
+        #region UI View
+
+        #region IsSortEnabled
+        private bool _IsSortEnabled;
+        public bool IsSortEnabled
+        {
+            get => _IsSortEnabled;
+            set
+            {
+                if (Set(ref _IsSortEnabled, value))
+                {
+                    OnPropertyChanged(nameof(SortPanelVisibility));
+
+                    if (!value)
+                    {
+                        //ResponseViewSource.LiveSortingProperties.Clear();
+                        //ResponseView.SortDescriptions.Clear();
+                        BuildQuery();
+                        DoRequest();
+                    }
+                    if (value && ResponseView.SortDescriptions.Count == 0)
+                    {
+                        SelectedSort = SortDescriptions[0];
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Sort properties
+
+        public Visibility SortPanelVisibility => IsSortEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        public SortDescription[] SortDescriptions => new SortDescription[]
+        {
+            new SortDescription(nameof(ApiUniversalData.DisplayedName), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiUniversalData.AuthorLogin), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.MaxPlayers), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.GamesPlayed), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiUniversalData.IsRanked), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiUniversalData.IsRecommended), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.Height), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.Width), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.SummaryLowerBound), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.SummaryScore), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.SummaryReviews), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.UpdateTime), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiUniversalData.CreateTime), ListSortDirection.Ascending)
+        };
+
+        #region SelectedSort
+        private SortDescription _SelectedSort;
+        public SortDescription SelectedSort
+        {
+            get => _SelectedSort;
+            set
+            {
+                if (SetStandardField(ref _SelectedSort, value))
+                {
+                    OnPropertyChanged(nameof(SortDirection));
+
+                    if (IsSortEnabled)
+                    {
+                        DoRequest();
+                    }
+
+                    //CollectionViewSource.LiveSortingProperties.Clear();
+                    //CollectionViewSource.LiveSortingProperties.Add(value.PropertyName);
+                    //SortDirection = ListSortDirection.Ascending;
+                    //ResponseView.SortDescriptions.Clear();
+                    //ResponseView.SortDescriptions.Add(value);
+                }
+            }
+        }
+        #endregion
+
+        #region SortDirection
+        public ListSortDirection SortDirection
+        {
+            get => SelectedSort.Direction;
+            set
+            {
+                if (SelectedSort.Direction == ListSortDirection.Ascending)
+                {
+                    SelectedSort = new(SelectedSort.PropertyName, ListSortDirection.Descending);
+                }
+                else SelectedSort = new(SelectedSort.PropertyName, ListSortDirection.Ascending);
+            }
+        }
+        #endregion
+
+        #region ChangeSortDirectionCommmand
+        private ICommand _ChangeSortDirectionCommmand;
+        public ICommand ChangeSortDirectionCommmand => _ChangeSortDirectionCommmand ??= new LambdaCommand(OnChangeSortDirectionCommmand);
+        public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
+        #endregion
+
+        #endregion
+
+        #region ResponseView
         private readonly CollectionViewSource ResponseViewSource = new();
-        public ICollectionView ResponseView => ResponseViewSource.View; 
+        public ICollectionView ResponseView => ResponseViewSource.View;
+        #endregion
+
+        #region IsExtendedViewEnabled
+        private bool _IsExtendedViewEnabled;
+        public bool IsExtendedViewEnabled
+        {
+            get => _IsExtendedViewEnabled;
+            set
+            {
+                if (Set(ref _IsExtendedViewEnabled, value))
+                {
+                    OnPropertyChanged(nameof(ExtendedPanelVisibility));
+                }
+            }
+        }
+        #endregion
+
+        public Visibility ExtendedPanelVisibility => IsExtendedViewEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsDescriptionEnabled
+        private bool _IsDescriptionEnabled = true;
+        public bool IsDescriptionEnabled
+        {
+            get => _IsDescriptionEnabled;
+            set
+            {
+                if (Set(ref _IsDescriptionEnabled, value))
+                {
+                    OnPropertyChanged(nameof(DescriptionVisibility));
+                    if (IsGridEnabled)
+                    {
+                        CalculateGridColumns(ResultListBox.ActualWidth);
+                    }   
+                }
+            }
+        }
+        #endregion
+
+        public Visibility DescriptionVisibility => IsDescriptionEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsGridEnabled
+        private bool _IsGridEnabled;
+        public bool IsGridEnabled
+        {
+            get => _IsGridEnabled;
+            set
+            {
+                if (Set(ref _IsGridEnabled, value))
+                {
+                    CalculateGridColumns(ResultListBox.ActualWidth);
+                }
+            }
+        }
+        #endregion
+
+        #region GridColumns
+        private int _GridColumns;
+        public int GridColumns
+        {
+            get => _GridColumns;
+            set => Set(ref _GridColumns, value);
+        }
+        #endregion
+
         #endregion
 
         private Thread RequestThread;
         private bool PageIndexChanged = false;
+
+        private string GetSortProperty() => SelectedSort.PropertyName switch
+        {
+            nameof(ApiUniversalData.DisplayedName) => "displayName",
+            //nameof(ApiUniversalData.AuthorLogin) => "",
+            nameof(ApiUniversalData.MaxPlayers) => "latestVersion.maxPlayers",
+            nameof(ApiUniversalData.GamesPlayed) => "gamesPlayed",
+            //nameof(ApiUniversalData.IsRanked) => "",
+            //nameof(ApiUniversalData.IsRecommended) => "",
+            nameof(ApiUniversalData.Height) => "latestVersion.width",
+            nameof(ApiUniversalData.Width) => "latestVersion.width",
+            nameof(ApiUniversalData.SummaryLowerBound) => "reviewsSummary.lowerBound",
+            nameof(ApiUniversalData.SummaryScore) => "reviewsSummary.score",
+            nameof(ApiUniversalData.SummaryReviews) => "reviewsSummary.reviews",
+            nameof(ApiUniversalData.CreateTime) => "latestVersion.createTime",
+            nameof(ApiUniversalData.UpdateTime) => "latestVersion.updateTime",
+            _ => null,
+        };
 
         private void BuildQuery()
         {
@@ -408,7 +632,7 @@ namespace beta.Views.Windows
                     filter.Append($"displayName=='{MapName}';");
                 }
 
-                if (AuthorName.Length > 0)
+                if (AuthorName?.Length > 0)
                 {
                     filter.Append($"author.login=='{AuthorName}';");
                 }
@@ -439,7 +663,7 @@ namespace beta.Views.Windows
                     for (int i = 0; i < SelectedMapHeights.Count; i++)
                     {
                         var num = int.Parse(SelectedMapHeights[i].ToString());
-                        filter.Append($"'{Tools.CalculateMapSizeInPixels(num)}',");
+                        filter.Append($"'{Tools.CalculateMapSizeToPixels(num)}',");
                     }
                     // Remove last ','
                     filter.Remove(filter.Length - 1, 1);
@@ -452,7 +676,7 @@ namespace beta.Views.Windows
                     for (int i = 0; i < SelectedMapWidths.Count; i++)
                     {
                         var num = int.Parse(SelectedMapWidths[i].ToString());
-                        filter.Append($"'{Tools.CalculateMapSizeInPixels(num)}',");
+                        filter.Append($"'{Tools.CalculateMapSizeToPixels(num)}',");
                     }
                     // Remove last ','
                     filter.Remove(filter.Length - 1, 1);
@@ -475,6 +699,22 @@ namespace beta.Views.Windows
             if (filter.Length > 0)
             {
                 query.Append(filter);
+            }
+
+            StringBuilder sort = new();
+            if (IsSortEnabled)
+            {
+                var sortProperty = GetSortProperty();
+                if (sortProperty  != null)
+                {
+                    query.Append("sort=");
+                    if (SelectedSort.Direction == ListSortDirection.Descending)
+                    {
+                        query.Append('-');
+                    }
+                    query.Append(sortProperty);
+                    query.Append('&');
+                }
             }
 
             query.Append($"page[size]={PageSize}");
@@ -567,17 +807,34 @@ namespace beta.Views.Windows
                     }
                     #endregion
 
-                    #region Check if installed
+                    // Check if installed
                     map.LocalState = MapsService.CheckLocalMap(map.FolderName);
-                    #endregion
 
-                    // small map preview
-                    Dispatcher.Invoke(() => map.MapSmallPreview = CacheService.GetImage(new(map.ThumbnailUrlSmall), Models.Folder.MapsSmallPreviews),
-                        System.Windows.Threading.DispatcherPriority.Background);
+                    // Check if legacy map
+                    map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
 
-                    // small big preview
-                    Dispatcher.Invoke(() => map.MapLargePreview = CacheService.GetImage(new(map.ThumbnailUrlLarge), Models.Folder.MapsLargePreviews),
-                        System.Windows.Threading.DispatcherPriority.Background);
+                    if (map.ThumbnailUrlSmall != null)
+                    {
+                        // small map preview
+                        Dispatcher.Invoke(() => map.MapSmallPreview = CacheService.GetImage(new(map.ThumbnailUrlSmall), Models.Folder.MapsSmallPreviews),
+                            System.Windows.Threading.DispatcherPriority.Background);
+                    }
+
+                    if (map.ThumbnailUrlLarge != null)
+                    {
+                        // small big preview
+                        Dispatcher.Invoke(() => map.MapLargePreview = CacheService.GetImage(new(map.ThumbnailUrlLarge), Models.Folder.MapsLargePreviews),
+                            System.Windows.Threading.DispatcherPriority.Background);
+                    }
+
+                    if (map.ThumbnailUrlLarge == null && map.ThumbnailUrlSmall == null)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            map.MapSmallPreview = App.Current.Resources["QuestionIcon"] as ImageSource;
+                            map.MapLargePreview = App.Current.Resources["QuestionIcon"] as ImageSource;
+                        });
+                    }
                 }
 
                 Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
@@ -604,8 +861,54 @@ namespace beta.Views.Windows
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) => DoRequest();
+        #region Commands
 
+        #region SearchForAuthorCommand
+        private ICommand _SearchForAuthorCommand;
+
+        private void OnSearchForAuthorCommand(object parameter)
+        {
+            if (parameter == null) return;
+
+            if (parameter.ToString().Length == 0) return;
+            if (parameter.ToString() == "Unknown") return;
+
+            AuthorName = parameter.ToString();
+            BuildQuery();
+            DoRequest();
+        }
+        #endregion
+
+        #region SearchForSameSizeCommand
+        private ICommand _SearchForSameSizeCommand;
+
+        private void OnSearchForSameSizeCommand(object parameter)
+        {
+            WidthsList.SelectedItem = Tools.CalculateMapSizeToPixels(int.Parse(parameter.ToString()));
+            HeightsList.SelectedItem = Tools.CalculateMapSizeToPixels(int.Parse(parameter.ToString()));
+            BuildQuery();
+            DoRequest();
+        }
+        #endregion
+
+        #region CloseBigPreviewCommand
+        private ICommand _CloseBigPreviewCommand;
+        public ICommand CloseBigPreviewCommand => _CloseBigPreviewCommand;
+
+        private void OnCloseBigPreviewCommand(object parameter) => BigPreviewVisibility = Visibility.Collapsed;
+        #endregion
+
+        #region ShowBigPreviewCommand
+        private ICommand _ShowBigPreviewCommand;
+        public ICommand ShowBigPreviewCommand => _ShowBigPreviewCommand;
+
+        private void OnShowBigPreviewCommand(object parameter) => BigPreviewVisibility = Visibility.Visible;
+        #endregion
+
+
+        #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e) => DoRequest();
         private void PreviousPageClick(object sender, RoutedEventArgs e)
         {
             if (1 >= PageNumber)
@@ -616,7 +919,6 @@ namespace beta.Views.Windows
 
             PageNumber--;
         }
-
         private void NextPageClick(object sender, RoutedEventArgs e)
         {
             if (PageNumber >= AvailablePagesCount)
@@ -627,11 +929,9 @@ namespace beta.Views.Windows
 
             PageNumber++;
         }
-
         private void RemoveMinClick(object sender, RoutedEventArgs e) => MinimumSlots = null;
         private void RemoveMaxClick(object sender, RoutedEventArgs e) => MaximumSlots = null;
-
-        private void OnCurrentPageMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void OnCurrentPageMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (e.Delta < 0)
             {

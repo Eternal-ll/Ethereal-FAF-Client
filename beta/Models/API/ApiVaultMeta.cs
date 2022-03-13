@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace beta.Models.API
 {
@@ -65,10 +65,10 @@ namespace beta.Models.API
         public ApiUniversalRelationships Relations { get; set; }
 
         #region Custom properties
-
+        public bool IsLegacyMap { get; set; }
         public LocalMapState LocalState { get; set; }
-        public BitmapImage MapSmallPreview { get; set; }
-        public BitmapImage MapLargePreview { get; set; }
+        public ImageSource MapSmallPreview { get; set; }
+        public ImageSource MapLargePreview { get; set; }
 
         public Dictionary<string, string> AuthorData { get; set; }
         #region Author data getters
@@ -116,7 +116,7 @@ namespace beta.Models.API
             {
                 if (MapData?["width"] == null) return null;
 
-                return Tools.CalculateMapSizeInKm(int.Parse(MapData["width"]));
+                return Tools.CalculateMapSizeToKm(int.Parse(MapData["width"]));
             }
         }
         public int? Height
@@ -125,9 +125,10 @@ namespace beta.Models.API
             {
                 if (MapData?["height"] == null) return null;
 
-                return Tools.CalculateMapSizeInKm(int.Parse(MapData["height"]));
+                return Tools.CalculateMapSizeToKm(int.Parse(MapData["height"]));
             }
         }
+        public bool? IsHidden => bool.TryParse(MapData?["hidden"], out var result) ? result : null;
         public string FolderName => MapData?["folderName"];
         public string MaxPlayers => MapData?["maxPlayers"];
         public string DownloadUrl => MapData?["downloadUrl"];
@@ -140,7 +141,7 @@ namespace beta.Models.API
         public double SummaryPositive => ReviewsSummaryData?["positive"] == null ? 0 : double.Parse(ReviewsSummaryData["positive"].Replace('.', ','));
         public int SummaryReviews => ReviewsSummaryData?["reviews"] == null ? 0 : int.Parse(ReviewsSummaryData["reviews"]);
         public double SummaryScore => ReviewsSummaryData?["score"] == null ? 0 : double.Parse(ReviewsSummaryData["score"].Replace('.', ','));
-        public double SummaryLowerBound => ReviewsSummaryData?["lowerBound"] == null ? 0 : double.Parse(ReviewsSummaryData["lowerBound"].Replace('.', ','));
+        public double SummaryLowerBound => double.TryParse(ReviewsSummaryData?["lowerBound"].Replace('.', ',').Replace("null", null), out var result) ? result : 0;
         public double SummaryFiveRate => SummaryLowerBound != 0 ? 5 * SummaryLowerBound : -1;
         #endregion
 
