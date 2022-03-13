@@ -14,6 +14,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public void AttachMapScenario(GameMap map);
         public void Download(Uri url);
 
+
+        public bool IsLegacyMap(string name);
         public LocalMapState CheckLocalMap(string name);
     }
 }

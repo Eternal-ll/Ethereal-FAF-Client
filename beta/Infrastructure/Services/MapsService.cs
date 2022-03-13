@@ -117,6 +117,8 @@ namespace beta.Infrastructure.Services
 
             string formattedMapName = string.Empty;
 
+            // Legacy maps stored in vaults, so this is mostly useless code
+            // we have to copy original maps to local maps folder as example
             if (isLegacy && PathToLegacyMaps != null)
             {
                 pathToMaps = PathToLegacyMaps;
@@ -132,10 +134,7 @@ namespace beta.Infrastructure.Services
                     }
                     if (localMaps[i].Equals(mapName, StringComparison.OrdinalIgnoreCase))
                     {
-                        // TODO -1 error
-                        var isVersion = mapName.IndexOf('.');
-                        if (isVersion != -1)
-                            formattedMapName = mapName.Substring(0, isVersion);
+                        formattedMapName = mapName.Split('.')[0];
                         break;
                     }
                 }
