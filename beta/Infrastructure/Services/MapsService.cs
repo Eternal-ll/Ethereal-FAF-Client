@@ -21,7 +21,7 @@ namespace beta.Infrastructure.Services
 
         private readonly FileSystemWatcher LocalWatcher;
 
-        private string PathToLegacyMaps => Settings.Default.PathToGame != null ? Settings.Default.PathToGame + @"\maps\" : null;
+        private string PathToLegacyMaps => Settings.Default.PathToGame is not null ? Settings.Default.PathToGame + @"\maps\" : null;
         public MapsService(ICacheService cacheService, IApiService apiService)
         {
             CacheService = cacheService;
@@ -49,7 +49,7 @@ namespace beta.Infrastructure.Services
 
         public LocalMapState CheckLocalMap(string name)
         {
-            if (name == null) return LocalMapState.Unknown;
+            if (name is null) return LocalMapState.Unknown;
 
             int? version = null;
             var data = name.Split('.');
@@ -74,7 +74,7 @@ namespace beta.Infrastructure.Services
                 {
                     if (int.TryParse(data[1], out var v))
                     {
-                        if (version == null)
+                        if (version is null)
                         {
                             return LocalMapState.Older;
                         }
@@ -119,7 +119,7 @@ namespace beta.Infrastructure.Services
 
             // Legacy maps stored in vaults, so this is mostly useless code
             // we have to copy original maps to local maps folder as example
-            if (isLegacy && PathToLegacyMaps != null)
+            if (isLegacy && PathToLegacyMaps is not null)
             {
                 pathToMaps = PathToLegacyMaps;
             }
@@ -175,7 +175,7 @@ namespace beta.Infrastructure.Services
                 using (var reader = new StreamReader(pathToMaps + pathToScenario))
                 {
                     string line;
-                    while ((line = reader.ReadLine()) != null)
+                    while ((line = reader.ReadLine()) is not null )
                     {
                         if (counter == 0) break;
 
@@ -204,7 +204,7 @@ namespace beta.Infrastructure.Services
                         string line;
                         int massCounter = 0;
                         int hydroCounter = 0;
-                        while ((line = reader.ReadLine()) != null)
+                        while ((line = reader.ReadLine()) is not null)
                         {
                             if (line.Contains("\'Mass\'"))
                                 massCounter++;

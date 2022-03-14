@@ -23,7 +23,7 @@ namespace beta.Resources.Controls
         Player,
         Emoji
     }
-    public abstract class ChatCommand  
+    public abstract class ChatCommand
     {
         public string Name { get; }
         public string Description { get; }
@@ -79,7 +79,7 @@ namespace beta.Resources.Controls
     {
         #region INPC
         public event PropertyChangedEventHandler PropertyChanged;
-        private protected void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new(propertyName)); 
+        private protected void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new(propertyName));
         protected virtual bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
         {
             if (Equals(field, value)) return false;
@@ -106,7 +106,7 @@ namespace beta.Resources.Controls
             {
                 if (Set(ref _SelectedChannel, value))
                 {
-                    if (value != null)
+                    if (value is not null)
                     {
                         Users = value.Users;
                     }
@@ -164,7 +164,7 @@ namespace beta.Resources.Controls
 
                 if (_InputMode == InputMode.Command)
                 {
-                    if (_SelectedCommand != null)
+                    if (_SelectedCommand is not null)
                     {
                         if (!IsCommandSelected)
                         {
@@ -198,7 +198,7 @@ namespace beta.Resources.Controls
 
                             if (command.Code == IrcUserCommand.PART)
                             {
-                                // SelectedChannel != null;
+                                // SelectedChannel is not null;
                                 OnLeaveRequired();
                                 // SelectedChannel = null;
                             }
@@ -215,9 +215,9 @@ namespace beta.Resources.Controls
                     IrcService.SendMessage(SelectedChannel.Name, CurrentText);
                 }
                 CurrentText = string.Empty;
-                e.Handled = true;   
+                e.Handled = true;
             }
-                
+
             if (e.Key == Key.Down)
             {
                 if (AutoCompletionEnabled)
@@ -331,7 +331,7 @@ namespace beta.Resources.Controls
                             }
                         }
                         OnPropertyChanged(nameof(CommandsHelperVisibility));
-                        if (SuggestedCommands.Count > 0 && SelectedCommand == null) SelectedCommandIndex = 0;
+                        if (SuggestedCommands.Count > 0 && SelectedCommand is null) SelectedCommandIndex = 0;
 
                         var writtenValues = value[WrittenCommand.Length..].Trim();
 
@@ -340,7 +340,7 @@ namespace beta.Resources.Controls
                             var values = writtenValues.Split(' ');
                             int i = 0;
 
-                            if (SelectedCommandFields != null)
+                            if (SelectedCommandFields is not null)
                             {
                                 SelectedCommandFields.Clear();
 
@@ -358,7 +358,7 @@ namespace beta.Resources.Controls
                         }
                         else
                         {
-                            if (SelectedCommandFields != null)
+                            if (SelectedCommandFields is not null)
                             {
                                 SelectedCommandFields.Clear();
                                 for (int j = 0; j < SelectedCommand?.Fields.Length; j++)
@@ -436,7 +436,7 @@ namespace beta.Resources.Controls
             {
                 if (Set(ref _SelectedPlayer, value))
                 {
-                    if (value != null)
+                    if (value is not null)
                     {
                         CurrentText = completionLine + value;
                         RichTextBox.SelectionStart = _CurrentText.Length;
@@ -492,7 +492,7 @@ namespace beta.Resources.Controls
 
                 SuggestedPlayers.Clear();
 
-                if (Users != null)
+                if (Users is not null)
                     for (int i = 0; i < Users.Count; i++)
                     {
                         if (Users[i].StartsWith(completionText))
@@ -552,7 +552,7 @@ namespace beta.Resources.Controls
             {
                 if (Set(ref _SelectedCommand, value))
                 {
-                    if (value != null)
+                    if (value is not null)
                     {
                         ObservableDictionary<string, string> commandValues = new();
                         for (int i = 0; i < value.Fields.Length; i++)

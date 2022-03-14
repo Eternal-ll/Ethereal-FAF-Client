@@ -128,7 +128,7 @@ namespace beta.Infrastructure.Services
             //Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
 #endif
             // TODO Fix
-            if (Client == null)
+            if (Client is null)
             {
                 Client = new(port: 8002)
                 {

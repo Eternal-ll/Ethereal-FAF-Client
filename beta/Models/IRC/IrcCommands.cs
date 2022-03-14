@@ -46,7 +46,7 @@ namespace beta.Models.IRC
         /// <param name="keys"></param>
         /// <returns></returns>
         internal static string Join(string[] channels, string[] keys = null) =>
-            "JOIN " + string.Join(',', channels) + " " + keys != null ? string.Join(',', keys) : null;
+            "JOIN " + string.Join(',', channels) + " " + keys is not null ? string.Join(',', keys) : null;
         /// <summary>
         /// Causes a user to leave the channel
         /// </summary>

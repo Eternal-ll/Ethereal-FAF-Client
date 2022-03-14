@@ -207,7 +207,7 @@ namespace beta.Models
         /// </summary>
         public void Disconnect()
         {
-            if (TcpClient != null)
+            if (TcpClient is not null)
             {
                 if (TcpClient.Connected)
                 {
@@ -222,7 +222,7 @@ namespace beta.Models
         /// <param name="channel">Channel to join</param>
         public void JoinChannel(string channel)
         {
-            if (TcpClient != null && TcpClient.Connected)
+            if (TcpClient is not null && TcpClient.Connected)
             {
                 Send("JOIN " + channel);
             }
@@ -281,8 +281,8 @@ namespace beta.Models
         /// 
         private void Listen()
         {
-            //if (TcpClient == null) return;
-            //if (TcpClient.Connected == false) return;
+            //if (TcpClient is null) return;
+            //if (TcpClient.Connected is false) return;
 
             var c = TcpClient;
 

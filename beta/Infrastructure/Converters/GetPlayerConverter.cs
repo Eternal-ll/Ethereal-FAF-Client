@@ -25,7 +25,7 @@ namespace beta.Infrastructure.Converters
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return null;
+            if (value is null) return null;
 
             var playerName = string.Empty;
 
@@ -33,7 +33,7 @@ namespace beta.Infrastructure.Converters
                 return value;
 
             if (value is ChannelMessage channelMessage)
-                if (channelMessage.From != null)
+                if (channelMessage.From is not null)
                     playerName = channelMessage.From;
                 else return null;
 
@@ -48,7 +48,7 @@ namespace beta.Infrastructure.Converters
             }
 
             var playerInstance = PlayersService.GetPlayer(playerName);
-            if (playerInstance == null)
+            if (playerInstance is null)
             {
                 return new UnknownPlayer()
                 {

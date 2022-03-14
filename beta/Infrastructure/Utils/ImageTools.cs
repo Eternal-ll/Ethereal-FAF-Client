@@ -114,7 +114,7 @@ namespace beta.Infrastructure.Utils
             try
             {
                 Stream smarket = bmp.StreamSource; ;
-                if (smarket != null && smarket.Length > 0)
+                if (smarket is not null && smarket.Length > 0)
                 {
                     //Set the current location
                     smarket.Position = 0;
@@ -151,7 +151,7 @@ namespace beta.Infrastructure.Utils
             Bitmap img = null;
             try
             {
-                if (bytes != null && bytes.Length != 0)
+                if (bytes is not null && bytes.Length != 0)
                 {
                     MemoryStream ms = new MemoryStream(bytes);
                     img = new Bitmap(ms);

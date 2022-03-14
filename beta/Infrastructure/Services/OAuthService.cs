@@ -94,7 +94,7 @@ namespace beta.Infrastructure.Services
         {
             try
             {
-                if (data != null)
+                if (data is not null)
                     return HttpClient.PostAsync(requestUri, data).Result.Content.ReadAsStream();
                 return HttpClient.GetStreamAsync(requestUri).Result;
             }
@@ -136,7 +136,7 @@ namespace beta.Infrastructure.Services
                             "scope=openid+offline+public_profile+lobby&" +
                             "state=" + generatedState);
 
-            if (stream == null) return null;
+            if (stream is null) return null;
 
             var streamReader = new StreamReader(stream);
 
@@ -147,7 +147,7 @@ namespace beta.Infrastructure.Services
 
             Logger.LogInformation("Parsing data to get _csrf and login_challenge");
 
-            while ((line = streamReader.ReadLine()) != null)
+            while ((line = streamReader.ReadLine()) is not null)
                 if (_csrf.Length != 0 && login_challenge.Length != 0)
                     break; 
                 else if (line.Contains(nameof(_csrf)))
@@ -178,7 +178,7 @@ namespace beta.Infrastructure.Services
 
             Logger.LogInformation("Parsing data to get consent_challenge");
 
-            while ((line = streamReader.ReadLine()) != null)
+            while ((line = streamReader.ReadLine()) is not null)
                 if (consent_challenge.Length != 0)
                     break;
                 else if (line.Contains(nameof(consent_challenge))) 
@@ -293,7 +293,7 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation("Starting process of authorization");
 
             var code = GetOAuthCode(usernameOrEmail, password);
-            if (code == null)
+            if (code is null)
             {
                 // TODO: invoke some error events?
                 return;
@@ -357,7 +357,7 @@ namespace beta.Infrastructure.Services
                         }
                         cb.Clear();
                         keyword = string.Empty;
-                        if (payload[3] != null)
+                        if (payload[3] is not null)
                         {
                             break;
                         }

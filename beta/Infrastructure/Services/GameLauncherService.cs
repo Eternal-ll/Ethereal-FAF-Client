@@ -37,7 +37,7 @@ namespace beta.Infrastructure.Services
 
         public void JoinGame()
         {
-            if (LastGame != null)
+            if (LastGame is not null)
             {
 
             }
@@ -100,11 +100,11 @@ namespace beta.Infrastructure.Services
         private async Task<bool> ConfirmPatch(FeaturedMod featuredMod)
         {
             var json = await ApiService.GET($"featuredMods/{(int)featuredMod}/files/latest");
-            if (json == null) return false;
+            if (json is null) return false;
 
             var response = JsonSerializer.Deserialize<Record>(json);
 
-            if (response.FeaturedModFiles == null) return false;
+            if (response.FeaturedModFiles is null) return false;
 
             var localPath = App.GetPathToFolder(Models.Folder.ProgramData);
 
@@ -167,7 +167,7 @@ namespace beta.Infrastructure.Services
         {
             var pathToBin = Properties.Settings.Default.PathToGame + "\\bin";
 
-            if (pathToBin == null || pathToBin.Length == 0) return false;
+            if (pathToBin is null || pathToBin.Length == 0) return false;
             if (!Directory.Exists(pathToBin)) return false;
 
             var localPath = App.GetPathToFolder(Models.Folder.ProgramData) + "bin";

@@ -647,12 +647,12 @@ namespace beta.Views.Windows
                     filter.Append("recommended=='true';");
                 }
 
-                if (MinimumSlots != null)
+                if (MinimumSlots is not null)
                 {
                     filter.Append($"latestVersion.maxPlayers=ge='{MinimumSlots}';");
                 }
 
-                if (MaximumSlots != null)
+                if (MaximumSlots is not null)
                 {
                     filter.Append($"latestVersion.maxPlayers=le='{MaximumSlots}';");
                 }
@@ -705,7 +705,7 @@ namespace beta.Views.Windows
             if (IsSortEnabled)
             {
                 var sortProperty = GetSortProperty();
-                if (sortProperty  != null)
+                if (sortProperty is not null )
                 {
                     query.Append("sort=");
                     if (SelectedSort.Direction == ListSortDirection.Descending)
@@ -725,7 +725,7 @@ namespace beta.Views.Windows
         }
         private void DoRequest()
         {
-            if (RequestThread != null)
+            if (RequestThread is not null)
             {
                 return;
             }
@@ -771,9 +771,9 @@ namespace beta.Views.Windows
 
                     #region Loading data Author / Map / Reviews summaries
                     // it is complicated...
-                    if (data.Included != null)
+                    if (data.Included is not null)
                     {
-                        if (map.Relations.Author?.Data != null)
+                        if (map.Relations.Author?.Data is not null)
                         {
                             var authorId = map.Relations.Author.Data.Id;
                             if (AuthorIdToLogin.TryGetValue(authorId, out var login))
@@ -791,15 +791,15 @@ namespace beta.Views.Windows
                             }
                         }
 
-                        if (map.Relations.LatestVersion?.Data != null)
+                        if (map.Relations.LatestVersion?.Data is not null)
                         {
                             map.MapData = data.GetAttributesFromIncluded(ApiDataType.mapVersion, map.Relations.LatestVersion.Data.Id);
                         }
 
-                        if (map.Relations.ReviewsSummary?.Data != null)
+                        if (map.Relations.ReviewsSummary?.Data is not null)
                         {
                             map.ReviewsSummaryData = data.GetAttributesFromIncluded(ApiDataType.mapReviewsSummary, map.Relations.ReviewsSummary.Data.Id);
-                            if (map.ReviewsSummaryData != null)
+                            if (map.ReviewsSummaryData is not null)
                             {
 
                             }
@@ -813,21 +813,21 @@ namespace beta.Views.Windows
                     // Check if legacy map
                     map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
 
-                    if (map.ThumbnailUrlSmall != null)
+                    if (map.ThumbnailUrlSmall is not null)
                     {
                         // small map preview
                         Dispatcher.Invoke(() => map.MapSmallPreview = CacheService.GetImage(new(map.ThumbnailUrlSmall), Models.Folder.MapsSmallPreviews),
                             System.Windows.Threading.DispatcherPriority.Background);
                     }
 
-                    if (map.ThumbnailUrlLarge != null)
+                    if (map.ThumbnailUrlLarge is not null)
                     {
                         // small big preview
                         Dispatcher.Invoke(() => map.MapLargePreview = CacheService.GetImage(new(map.ThumbnailUrlLarge), Models.Folder.MapsLargePreviews),
                             System.Windows.Threading.DispatcherPriority.Background);
                     }
 
-                    if (map.ThumbnailUrlLarge == null && map.ThumbnailUrlSmall == null)
+                    if (map.ThumbnailUrlLarge is null && map.ThumbnailUrlSmall is null)
                     {
                         Dispatcher.Invoke(() =>
                         {
@@ -868,7 +868,7 @@ namespace beta.Views.Windows
 
         private void OnSearchForAuthorCommand(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
 
             if (parameter.ToString().Length == 0) return;
             if (parameter.ToString() == "Unknown") return;

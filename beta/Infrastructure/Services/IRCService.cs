@@ -134,7 +134,7 @@ namespace beta.Infrastructure.Services
         }
         public void Connect(string host, int port)
         {
-            if (ManagedTcpClient != null)
+            if (ManagedTcpClient is not null)
             {
                 ManagedTcpClient.Dispose();
                 ManagedTcpClient = null;

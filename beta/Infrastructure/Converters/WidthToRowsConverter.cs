@@ -8,7 +8,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return 1;
+            if (value is null) return 1;
 
             var width = (double)value;
 

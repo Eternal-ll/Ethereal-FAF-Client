@@ -74,7 +74,7 @@ namespace beta.Views
                     OnPropertyChanged(nameof(SelectedChannel));
                     UpdateSelectedChannelUsers();
 
-                    //if (value != null)
+                    //if (value is not null)
                     //    TestInputControl.Users = value.Users;
                     TestInputControl.SelectedChannel = value;
                 }
@@ -245,7 +245,7 @@ namespace beta.Views
                 i++;
             }
 
-            if (SelectedChannel == null)
+            if (SelectedChannel is null)
             {
                 //i--;
                 //if ()
@@ -277,7 +277,7 @@ namespace beta.Views
             if (isChatMod) user = user.Substring(1);
 
             var player = PlayersService.GetPlayer(user);
-            if (player != null)
+            if (player is not null)
             {
                 player.IsChatModerator = isChatMod;
                 return player;
@@ -297,7 +297,7 @@ namespace beta.Views
             // TODO Check for duplicates someday... I saw two players on visual users list
             players.Clear();
 
-            if (SelectedChannel == null) return;
+            if (SelectedChannel is null) return;
 
             var users = SelectedChannel.Users;
 
@@ -438,8 +438,7 @@ namespace beta.Views
             {
                 channel.Users.Add(e.Arg.Users[i]);
             }
-
-            if (SelectedChannel == null)
+            if (SelectedChannel is null)
             {
                 SelectedChannel = channel;
             }

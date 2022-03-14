@@ -68,7 +68,7 @@ namespace beta.Infrastructure.Services
             string json = $"{{ \"command\":\"{command}\", \"{relation.ToString().ToLower()}\": {id} }}";
 
             var player = PlayersService.GetPlayer(id);
-            if (player != null)
+            if (player is not null)
             {
                 if (command == "social_remove")
                     relation = PlayerRelationShip.None;

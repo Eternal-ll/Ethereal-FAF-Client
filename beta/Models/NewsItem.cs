@@ -17,7 +17,7 @@ namespace beta.Models
         {
             get
             {
-                if (_BitmapImage == null)
+                if (_BitmapImage is null)
                 {
                     _BitmapImage = new BitmapImage(MediaUri, new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore));
                     _BitmapImage.DownloadCompleted += (s, e) => OnPropertyChanged(nameof(ImageVisibility));

@@ -74,7 +74,7 @@ namespace beta.Infrastructure.Services
             var foesIds = e.Arg.foes;
 
             // TODO REWRITE?
-            if (friendsIds != null && friendsIds.Length > 0)
+            if (friendsIds is not null && friendsIds.Length > 0)
                 for (int i = 0; i < friendsIds.Length; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
@@ -86,7 +86,7 @@ namespace beta.Infrastructure.Services
                         }
                     }
 
-            if (foesIds != null && foesIds.Length > 0)
+            if (foesIds is not null && foesIds.Length > 0)
                 for (int i = 0; i < foesIds.Length; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
@@ -98,7 +98,7 @@ namespace beta.Infrastructure.Services
                         }
                     }
         }
-        private void OnNewPlayer(object sender  , EventArgs<PlayerInfoMessage> e)
+        private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
         {
             var player = e.Arg;
             var players = _Players;
@@ -110,13 +110,13 @@ namespace beta.Infrastructure.Services
             var foesIds = FoesIds;
             var me = Me;
 
-            if (me?.clan != null)
+            if (me?.clan is not null)
                 if (player.clan == me.clan) player.RelationShip = PlayerRelationShip.Clan;
 
             if (player.id != me.id)
             {
                 // TODO REWRITE?
-                if (friendsIds != null && friendsIds.Length > 0)
+                if (friendsIds is not null && friendsIds.Length > 0)
                     for (int i = 0; i < friendsIds.Length; i++)
                         if (friendsIds[i] == player.id)
                         {
@@ -124,7 +124,7 @@ namespace beta.Infrastructure.Services
                             break;
                         }
 
-                if (foesIds != null && foesIds.Length > 0)
+                if (foesIds is not null && foesIds.Length > 0)
                     for (int i = 0; i < foesIds.Length; i++)
                         if (foesIds[i] == player.id)
                         {
@@ -144,9 +144,9 @@ namespace beta.Infrastructure.Services
                 var matchedPlayer = players[id];
 
                 // If avatar is changed
-                if (matchedPlayer.avatar != null)
+                if (matchedPlayer.avatar is not null)
                 {
-                    if (player.avatar != null)
+                    if (player.avatar is not null)
                     {
                         if (player.avatar.url.Segments[^1] != matchedPlayer.avatar.url.Segments[^1])
                             // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
@@ -163,7 +163,7 @@ namespace beta.Infrastructure.Services
                 int count = players.Count;
 
                 // Check for avatar
-                if (player.avatar != null)
+                if (player.avatar is not null)
                 {
                     // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
                     System.Windows.Application.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),

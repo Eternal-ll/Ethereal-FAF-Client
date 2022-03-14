@@ -22,9 +22,7 @@ namespace beta.Infrastructure.Behaviors
 
         private static void OnBindableInlinesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var Target = d as TextBlock;
-
-            if (Target != null)
+            if (d is TextBlock Target)
             {
                 Target.Inlines.Clear();
                 Target.Inlines.AddRange((System.Collections.IEnumerable)e.NewValue);
