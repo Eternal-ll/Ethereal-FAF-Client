@@ -112,19 +112,20 @@ namespace beta.Infrastructure.Services
             Connect(null, 0);
         }
 
-        private void ManagedTcpClient_StateChanged(object sender, ManagedTcpClientState e)
+        private void TcpClientStateChanged(object sender, ManagedTcpClientState e)
         {
             if (sender is ManagedTcpClient client)
             {
-                client.StateChanged -= ManagedTcpClient_StateChanged;
                 if (e == ManagedTcpClientState.Connected)
                 {
+                    client.StateChanged -= TcpClientStateChanged;
                     client.DataReceived += ManagedTcpClient_DataReceived;
                     AppDebugger.LOGIRC($"Connected to IRC Server");
                     AppDebugger.LOGIRC($"Sending authorization information...");
                     Authorize();
                 }
             }
+            OnStateChanged(e);
         }
         private void Authorize()
         {
@@ -141,7 +142,7 @@ namespace beta.Infrastructure.Services
             }
 
             ManagedTcpClient = new(threadName: "IRC TCP Client");
-            ManagedTcpClient.StateChanged += ManagedTcpClient_StateChanged;
+            ManagedTcpClient.StateChanged += TcpClientStateChanged;
         }
 
         public void Join(string channel, string key = null) => Send(IrcCommands.Join(channel, key));
@@ -171,9 +172,16 @@ namespace beta.Infrastructure.Services
 
         private void Send(string message)
         {
+            //TODO fix 
+            if (ManagedTcpClient?.TcpClient.Connected == false)
+            {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                return;
+            }
             ManagedTcpClient?.Write(message + '\r');
             if (message.StartsWith("QUIT"))
             {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
                 ManagedTcpClient?.Dispose();
                 ManagedTcpClient = null;
                 IsIRCConnected = false;
@@ -183,7 +191,6 @@ namespace beta.Infrastructure.Services
             }
 
             AppDebugger.LOGIRC($"You sent: {message}");
-
         }
 
         public void Test()
@@ -211,7 +218,7 @@ namespace beta.Infrastructure.Services
             string[] ircData = data.Split(' ');
 
             // if the message starts with PING we must PONG back
-            if (ircData[0] == "PING")
+            if (data.StartsWith("PING"))
             {
                 Send(IrcCommands.Pong(ircData[1][1..^1]));
                 return;
@@ -240,6 +247,8 @@ namespace beta.Infrastructure.Services
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
                     IsIRCConnected = true;
                     AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
+
+                    Join("#aeolus");
                     break;
                 case "321": // start of list of 322
 
@@ -440,7 +449,10 @@ namespace beta.Infrastructure.Services
                     break;
                 default:
 
-
+                    if (data.StartsWith("ERROR"))
+                    {
+                        OnStateChanged(ManagedTcpClientState.Disconnected);
+                    }
                     AppDebugger.LOGIRC(data);
 
                     break;
@@ -487,6 +499,12 @@ namespace beta.Infrastructure.Services
                 default:
                     throw new NotImplementedException("IRC Command is not recognized");
             }
+        }
+
+        private void OnStateChanged(ManagedTcpClientState e)
+        {
+            TCPConnectionState = e;
+            StateChanged?.Invoke(this, e);
         }
 
         private void OnIrcConnected(bool isConnected) => IrcConnected?.Invoke(this, isConnected);
