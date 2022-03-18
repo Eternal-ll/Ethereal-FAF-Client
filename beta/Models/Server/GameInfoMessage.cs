@@ -229,7 +229,7 @@ namespace beta.Models.Server
                 //switch (Map)
                 //{
                 //    case GameMap gameMap:
-                if (Map.Name is not null) return Map.Name;
+                if (Map?.Name is not null) return Map.Name;
                 else
                 {
                     var parts = _mapname.Split('.')[0].Split('_');
