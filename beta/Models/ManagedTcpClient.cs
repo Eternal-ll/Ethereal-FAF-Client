@@ -12,7 +12,6 @@ namespace beta.Models
     public enum ManagedTcpClientState : byte
     {
         Disconnected,
-        //NotConnected,
         TimedOut,
         CantConnect,
         PendingConnection,
@@ -146,6 +145,7 @@ namespace beta.Models
 
         private void DoConnect()
         {
+            OnStateChanged(ManagedTcpClientState.PendingConnection);
             try
             {
                 TcpClient = new(Host, Port);
