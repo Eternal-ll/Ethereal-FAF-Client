@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -97,5 +98,21 @@ namespace beta.Infrastructure.Utils
             80 => 4096,
             _ => throw new NotImplementedException()
         };
+
+        public static long GetFileSize(string url)
+        {
+            long result = -1;
+            var req = WebRequest.Create(url);
+            req.Method = "HEAD";
+            using (WebResponse resp = req.GetResponse())
+            {
+                if (long.TryParse(resp.Headers.Get("Content-Length"), out long ContentLength))
+                {
+                    result = ContentLength;
+                }
+            }
+            return result;
+        }
+        public static long GetFileSize(Uri uri) => GetFileSize(uri.OriginalString);
     }
 }
