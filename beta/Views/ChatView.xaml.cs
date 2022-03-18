@@ -116,7 +116,7 @@ namespace beta.Views
             {
                 if (Set(ref _WelcomeGridVisibility, value))
                 {
-                    ChatGridVisibility = value == Visibility.Visible ? Visibility.Collapsed : Visibility;
+                    ChatGridVisibility = value == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
                 }
             }
         } 
@@ -196,12 +196,29 @@ namespace beta.Views
             IrcService.UserLeft += OnChannelUserLeft;
 
             IrcService.ChannedMessageReceived += OnChannelMessageReceived;
+
+            IrcService.StateChanged += (s, e) =>
+            {
+                var t = e.Arg;
+                if (e.Arg == ManagedTcpClientState.PendingConnection)
+                {
+                    PendingConnectionToIRC = true;
+                    //WelcomeGridVisibility = Visibility.Visible;
+                }
+                else if (e.Arg == ManagedTcpClientState.Connected)
+                {
+                    PendingConnectionToIRC = false;
+                    //WelcomeGridVisibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    PendingConnectionToIRC = false;
+                    //WelcomeGridVisibility = Visibility.Visible;
+                }
+            };
             #endregion
 
-            TestInputControl.LeaveRequired += (s, e) =>
-            {
-                OnLeaveFromChannelCommand(SelectedChannel.Name);
-            };
+            TestInputControl.LeaveRequired += (s, e) => OnLeaveFromChannelCommand(SelectedChannel.Name);
 
             App.Current.MainWindow.Closing += MainWindow_Closing;
 
@@ -247,6 +264,7 @@ namespace beta.Views
 
             if (SelectedChannel is null)
             {
+                if (Channels.Count > 0) SelectedChannel = Channels[0];
                 //i--;
                 //if ()
                 //{
@@ -330,7 +348,7 @@ namespace beta.Views
             if (e)
             {
                 WelcomeGridVisibility = Visibility.Collapsed;
-                PendingConnectionToIRC = false;
+                //PendingConnectionToIRC = false;
                 //BindingOperations.DisableCollectionSynchronization(PlayersService.Players);
                 //OnlinePlayersViewSource.Source = null;
 
