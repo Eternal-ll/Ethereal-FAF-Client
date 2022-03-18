@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Views.Modals;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
@@ -28,7 +29,19 @@ namespace beta.Views
 
         private ContentDialog Dialog;
 
-        public bool IsIrcConnected => IrcService.IsIRCConnected;
+        private ManagedTcpClientState _IrcState;
+        public ManagedTcpClientState IrcState
+        {
+            get => _IrcState;
+            set
+            {
+                if (!Equals(value, _IrcState))
+                {
+                    _IrcState = value;
+                    OnPropertyChanged(nameof(IrcState));
+                }
+            }
+        }
 
         #region Ctor
         public MainView()
@@ -39,10 +52,9 @@ namespace beta.Views
             Profile.Content = Properties.Settings.Default.PlayerNick;
 
             IrcService = App.Services.GetService<IIrcService>();
-            IrcService.IrcConnected += (s, e) =>
-            {
-                OnPropertyChanged(nameof(IsIrcConnected));
-            };
+            IrcService.StateChanged += (s, e) => IrcState = e;
+
+            IrcState = IrcService.TCPConnectionState;
 
             Pages = new UserControl[]
             {
@@ -51,6 +63,7 @@ namespace beta.Views
                 new GlobalView(),
                 new AnalyticsView(),
                 new SettingsView(),
+                new MapsView()
             };
 
             // TODO rewrite
