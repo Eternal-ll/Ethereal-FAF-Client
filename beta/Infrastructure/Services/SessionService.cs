@@ -34,6 +34,7 @@ namespace beta.Infrastructure.Services
         public ManagedTcpClient TcpClient => Client;
 
         private readonly IOAuthService OAuthService;
+        private readonly IIrcService IrcService;
 
         private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
         private bool WaitingPong = false;
@@ -47,13 +48,14 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region CTOR
-        public SessionService(IOAuthService oAuthService
+        public SessionService(IOAuthService oAuthService, IIrcService ircService
 #if DEBUG
             , ILogger<SessionService> logger
 #endif
             )
         {
             OAuthService = oAuthService;
+            IrcService = ircService;
 #if DEBUG
             Logger = logger;
 #endif
@@ -139,17 +141,17 @@ namespace beta.Infrastructure.Services
                 ManagedTcpClientState state = ManagedTcpClientState.Disconnected;
                 Client.StateChanged += (s, e) =>
                 {
-                    state = ManagedTcpClientState.Connected;
+                    state = e;
+                    if (e == ManagedTcpClientState.CantConnect || e == ManagedTcpClientState.TimedOut)
+                    {
+                        // TODO Raise events
+                        OnAuthorization(false);
+                        return;
+                    }
                 };
-                while (state == ManagedTcpClientState.Disconnected)
+                while (state != ManagedTcpClientState.Connected)
                 {
                     Thread.Sleep(10);
-                }
-                if (state != ManagedTcpClientState.Connected)
-                {
-                    // TODO Raise events
-                    OnAuthorization(false);
-                    return;
                 }
             }
 
@@ -276,6 +278,11 @@ namespace beta.Infrastructure.Services
         {
             string password = json.GetRequiredJsonRowValue(2);
             Settings.Default.irc_password = password;
+
+            if (Settings.Default.ConnectIRC)
+            {
+                IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+            }
         }
         private void OnSocialData(string json)
         {

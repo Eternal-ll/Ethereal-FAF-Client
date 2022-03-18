@@ -263,5 +263,17 @@ namespace beta.Properties {
                 this["PathToGame"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ConnectIRC {
+            get {
+                return ((bool)(this["ConnectIRC"]));
+            }
+            set {
+                this["ConnectIRC"] = value;
+            }
+        }
     }
 }
