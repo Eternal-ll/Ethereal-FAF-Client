@@ -235,6 +235,7 @@ namespace beta.Models.Server
                     var parts = _mapname.Split('.')[0].Split('_');
                     for (int i = 0; i < parts.Length; i++)
                     {
+                        if (parts[i].Length == 0) continue;
                         parts[i] = char.ToUpper(parts[i][0]) + parts[i][1..];
                     }
                     return string.Join(' ', parts);
