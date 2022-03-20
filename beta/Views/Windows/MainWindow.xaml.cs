@@ -54,19 +54,26 @@ namespace beta.Views.Windows
 
         private void OnPatchUpdateRequired(object sender, Infrastructure.EventArgs<ViewModels.TestDownloaderVM> e)
         {
-            //{
             Dialog.Dispatcher.Invoke(() =>
             {
-                var view = new PatchUpdateView(e);
-                Dialog.Content = view;
-                Dialog.ShowAsync();
-                view.Model.DownloadFinished += (s, e) =>
+                // TODO write new downloader model
+                try
                 {
-                    view = null;
-                    Dialog.Content = null;
-                    Dialog.Hide();
-                    GameLauncherService.JoinGame();
-                };
+                    var view = new PatchUpdateView(e);
+                    Dialog.Content = view;
+                    Dialog.ShowAsync();
+                    view.Model.DownloadFinished += (s, e) =>
+                    {
+                        view = null;
+                        Dialog.Content = null;
+                        Dialog.Hide();
+                        GameLauncherService.JoinGame();
+                    };
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             });
         }
 
