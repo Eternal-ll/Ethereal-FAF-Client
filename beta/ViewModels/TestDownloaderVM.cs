@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure;
 using beta.Infrastructure.Commands;
+using beta.Models;
 using beta.Models.API;
 using beta.ViewModels.Base;
 using System;
@@ -78,8 +79,8 @@ namespace beta.ViewModels
         #endregion
 
         #region FilesCount
-        private int _FilesCount;
-        public int FilesCount => _FilesCount;
+        //private int _FilesCount;
+        public int FilesCount => Models.Length;
         #endregion
 
         #region Speed
@@ -104,9 +105,11 @@ namespace beta.ViewModels
             IsCanceled = true;
 
             CurrentState = $"Cancelled. Wait until the current file is loaded";
+            webClient.CancelAsync();
+            task.TrySetCanceled();
+            task.Task.Dispose();
         }
         #endregion
-
 
         private DateTime lastUpdate;
         private long lastBytes = 0;
@@ -114,12 +117,11 @@ namespace beta.ViewModels
         private WebClient webClient;
         private bool IsCanceled = false;
 
-        private Record Record;
+        private readonly DownloadModel[] Models;
 
-        public TestDownloaderVM(Record record)
+        public TestDownloaderVM(params DownloadModel[] models)
         {
-            _FilesCount = record.FeaturedModFiles.Count;
-            Record = record;
+            Models = models;
 
             webClient = new()
             {
@@ -127,27 +129,8 @@ namespace beta.ViewModels
                 CachePolicy = new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore)
             };
             webClient.DownloadProgressChanged += DownloadProgressChanged;
-            webClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
-            webClient.OpenWriteCompleted += WebClient_OpenWriteCompleted;
-            webClient.OpenReadCompleted += WebClient_OpenReadCompleted;
-
 
             _CancelCommand = new LambdaCommand(OnCancelCommand);
-        }
-
-        private void WebClient_OpenReadCompleted(object sender, OpenReadCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void WebClient_OpenWriteCompleted(object sender, OpenWriteCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void WebClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         public long GetFileSize(string url)
@@ -167,48 +150,41 @@ namespace beta.ViewModels
 
         private string GetSize(long bytes)
         {
-            var kb = Convert.ToInt32(bytes) / 1024;
+            var kb = Convert.ToInt64(bytes) / 1024;
             var mb = Math.Round(kb * .001, 1);
             return kb > 1000 ? mb + " MB" : kb > 1 ? kb + " KB" : bytes + " B";
         }
 
+        public void DoDownload() => Task.Run(Download);
         public async Task Download()
         {
-            var record = Record;
-
-            var pathLocal = App.GetPathToFolder(Models.Folder.ProgramData);
+            var models = Models;
 
             long fullSize = 0;
 
-            for (int i = 0; i < record.FeaturedModFiles.Count; i++)
+            for (int i = 0; i < models.Length; i++)
             {
-                var sizeBytes = GetFileSize(record.FeaturedModFiles[i].attributes["url"].ToString());
-                fullSize += sizeBytes;
-                record.FeaturedModFiles[i].FileSize = GetSize(sizeBytes);
+                fullSize += models[i].Size;
             }
 
             FilesSize = GetSize(fullSize);
 
-            for (int i = 0; i < record.FeaturedModFiles.Count; i++)
+            for (int i = 0; i < models.Length; i++)
             {
                 if (IsCanceled) break;
+                var item = models[i];
 
-                var item = record.FeaturedModFiles[i];
-                if (item is null) continue;
+                var pathLocal = item.TargetFolder + item.FileName;
 
-                var path = pathLocal
-                + item.attributes["group"].ToString() + "\\"
-                + item.attributes["name"].ToString();
+                CurrentState = $"Downloading: \"{item.FileName}\"";
+                CurrentPathToFile = pathLocal;
 
-                CurrentState = $"Downloading: \"{item.attributes["name"]}\"";
-                CurrentPathToFile = path;
+                CurrentFileSize = GetSize(item.Size);
 
-                CurrentFileSize = item.FileSize;
-
-                await webClient.DownloadFileTaskAsync(item.attributes["url"].ToString(), path);
+                await webClient.DownloadFileTaskAsync(item.Url.AbsoluteUri, pathLocal);
             }
-                
-            GlobalProgressValue = 100;
+
+            if (!IsCanceled) GlobalProgressValue = 100;
 
             webClient.DownloadProgressChanged -= DownloadProgressChanged;
             webClient.Dispose();
@@ -217,6 +193,7 @@ namespace beta.ViewModels
             DownloadFinished?.Invoke(this, !IsCanceled);
 
         }
+        TaskCompletionSource<object> task;
         private void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             var now = DateTime.UtcNow;
@@ -234,24 +211,24 @@ namespace beta.ViewModels
                 lastUpdate = now;
             }
 
-            GlobalProgressValue = globalProgressValue + (e.ProgressPercentage / _FilesCount);
+            GlobalProgressValue = globalProgressValue + (e.ProgressPercentage / FilesCount);
             FileProgressValue = e.ProgressPercentage;
 
             _CurrentFileDownloadedSize += e.BytesReceived;
+            _DownloadedSize = _CurrentFileDownloadedSize;
 
             if (e.ProgressPercentage == 100)
             {
-                _DownloadedSize += e.TotalBytesToReceive;
                 _CurrentFileDownloadedSize = 0;
 
                 CurrentFileIndex++;
                 lastBytes = 0;
                 lastUpdate = now;
-                globalProgressValue += e.ProgressPercentage / _FilesCount;
-                OnPropertyChanged(nameof(DownloadedSize));
+                globalProgressValue += e.ProgressPercentage / FilesCount;
             }
 
 
+            OnPropertyChanged(nameof(DownloadedSize));
             OnPropertyChanged(nameof(Speed));
             OnPropertyChanged(nameof(CurrentFileDownloadedSize));
         }

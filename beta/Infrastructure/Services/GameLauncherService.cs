@@ -5,6 +5,7 @@ using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -102,65 +103,80 @@ namespace beta.Infrastructure.Services
             var json = await ApiService.GET($"featuredMods/{(int)featuredMod}/files/latest");
             if (json is null) return false;
 
-            var response = JsonSerializer.Deserialize<Record>(json);
-
-            if (response.FeaturedModFiles is null) return false;
+            var response = JsonSerializer.Deserialize<ApiFeaturedModFileResults>(json);
 
             var localPath = App.GetPathToFolder(Models.Folder.ProgramData);
 
             #region Check MD5 of existed files. Clearing list of required files to download
-            Record record = new Record();
-            record.FeaturedModFiles = new();
-            for (int i = 0; i < response.FeaturedModFiles.Count; i++)
-            {
-                var item = response.FeaturedModFiles[i];
 
-                var path = localPath + item.attributes["group"].ToString();
+            bool download = false;
+
+            for (int i = 0; i < response.Data.Length; i++)
+            {
+                var item = response.Data[i];
+
+                var path = localPath + item.Group + "\\";
 
                 // TODO Move this checks of Bin / Gamedata
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
 
-                path = path + "\\" + item.attributes["name"].ToString();
+                path += item.Name;
 
                 if (File.Exists(path))
                 {
                     var md5 = Tools.CalculateMD5FromFile(path);
-                    if (md5 != item.attributes["md5"].ToString())
+                    if (md5 == item.MD5)
                     {
-                        record.FeaturedModFiles.Add(item);
+                        response.Data[i] = null;
+                        //record.FeaturedModFiles.Add(item);
                         //response.FeaturedModFiles.RemoveAt(i);
                     }
+                    else
+                    {
+                        download = true;
+                    }
                 }
-                else record.FeaturedModFiles.Add(item);
+                else
+                {
+                    download = true;
+                }
             }
             #endregion
 
             // if not 0, then we have files to update
-            if (record.FeaturedModFiles.Count != 0)
+
+            if (download)
             {
+                List<DownloadModel> models = new();
+                for (int i = 0; i < response.Data.Length; i++)
+                {
+                    var item = response.Data[i];
+                    if (item is null)
+                        continue;
+                    models.Add(new(item.Url, localPath + item.Group + "\\", item.Name));
+                }
                 // TODO FIX ME. Currently no optimized update
                 // we just updating the whole Bin folder again
 
                 // false if no bin folder in path to the game
                 if (!CopyOriginalBin()) return false;
 
-                TestDownloaderVM model = new(record);
+                TestDownloaderVM model = new(models.ToArray());
 
                 OnPatchUpdateRequired(model);
 
                 model.DownloadFinished += Model_DownloadFinished;
-
                 return false;
             }
             return true;
         }
 
-        private async void Model_DownloadFinished(object sender, EventArgs<bool> e)
+        private async void Model_DownloadFinished(object sender, EventArgs<bool> finished)
         {
-            if (e) await JoinGame(LastGame).ConfigureAwait(false);
-
             ((TestDownloaderVM)sender).DownloadFinished -= Model_DownloadFinished;
+
+            if (finished) await JoinGame(LastGame);
         }
 
         private bool CopyOriginalBin()

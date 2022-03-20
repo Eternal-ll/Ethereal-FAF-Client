@@ -14,7 +14,7 @@ namespace beta.Views.Modals
             InitializeComponent();
             Model = model;
             DataContext = this;
-            Model.Download();
+            Model.DoDownload();
         }
     }
 }

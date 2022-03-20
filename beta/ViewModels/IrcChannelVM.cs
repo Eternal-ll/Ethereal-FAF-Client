@@ -30,6 +30,7 @@ namespace beta.ViewModels
 
         public ObservableCollection<string> Users { get; } = new();
         public ObservableCollection<IrcMessage> History { get; } = new();
+
         public IrcChannelVM(string name) => Name = name;
     }
 }
