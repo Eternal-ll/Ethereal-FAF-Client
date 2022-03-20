@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Utils;
+using beta.Models.API.Base;
 using beta.Models.API.Enums;
 using beta.Models.Enums;
 using System;
@@ -10,45 +11,12 @@ using System.Windows.Media;
 
 namespace beta.Models.API
 {
-    /// <summary>
-    /// Contains <see cref="Id"/>, <see cref="Type"/>
-    /// </summary>
-    public class ApiUniversalTypeId
-    {
-        [JsonPropertyName("id")]
-        public string _IdString { get; set; }
-        public int Id => int.Parse(_IdString);
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ApiDataType Type { get; set; }
-    }
-    /// <summary>
-    /// Contains <see cref="ApiUniversalTypeId.Id"/>, <see cref="ApiUniversalTypeId.Type"/>, <see cref="Attributes"/>
-    /// </summary>
-    public class ApiUniversalWithAttributes : ApiUniversalTypeId
-    {
-        [JsonPropertyName("attributes")]
-        [JsonConverter(typeof(DictionaryStringConverter))]
-        public Dictionary<string, string> Attributes { get; set; }
-    }
-    public class ApiVaultPage
-    {
-        [JsonPropertyName("limit")]
-        public int Size { get; set; }
-        [JsonPropertyName("totalRecords")]
-        public int TotalRecords { get; set; }
-        [JsonPropertyName("number")]
-        public int PageNumber { get; set; }
-        [JsonPropertyName("totalPages")]
-        public int AvaiablePagesCount { get; set; }
-    }
     public class ApiVaultMeta
     {
         [JsonPropertyName("page")]
         public ApiVaultPage Page { get; set; }
     }
-    public class ApiUniversalData : ApiUniversalWithAttributes
+    public class ApiMapData : ApiUniversalWithRelations
     {
         #region Attributes getters
         public string DisplayedName => Attributes?["displayName"];
@@ -60,9 +28,6 @@ namespace beta.Models.API
         public string CreateTime => Attributes?["createTime"];
         public string UpdateTime => Attributes?["updateTime"];
         #endregion
-
-        [JsonPropertyName("relationships")]
-        public ApiUniversalRelationships Relations { get; set; }
 
         #region Custom properties
         public bool IsLegacyMap { get; set; }
@@ -128,6 +93,8 @@ namespace beta.Models.API
                 return Tools.CalculateMapSizeToKm(int.Parse(MapData["height"]));
             }
         }
+
+        public string MapSize => $"{Width}x{Height} km";
         public bool? IsHidden => bool.TryParse(MapData?["hidden"], out var result) ? result : null;
         public string FolderName => MapData?["folderName"];
         public string MaxPlayers => MapData?["maxPlayers"];
@@ -148,33 +115,16 @@ namespace beta.Models.API
         #endregion
     }
 
-    public class ApiUniversalRelationShip
+    public class ApiFeaturedModFileResults
     {
         [JsonPropertyName("data")]
-        public ApiUniversalTypeId Data { get; set; }
-    }
-    public class ApiUniversalRelationships
-    {
-        [JsonPropertyName("author")]
-        public ApiUniversalRelationShip Author { get; set; }
-
-        [JsonPropertyName("latestVersion")]
-        public ApiUniversalRelationShip LatestVersion { get; set; }
-
-        [JsonPropertyName("reviewsSummary")]
-        public ApiUniversalRelationShip ReviewsSummary { get; set; }
+        public ApiFeaturedModFileData[] Data { get; set; }
     }
 
-    public abstract class ApiVaultResult
-    {
-        [JsonPropertyName("meta")]
-        public ApiVaultMeta Meta { get; set; }
-    }
     public class ApiUniversalResults
     {
         [JsonPropertyName("data")]
-        public ApiUniversalData[] Data { get; set; }
-
+        public ApiMapData[] Data { get; set; }
 
         [JsonPropertyName("included")]
         public ApiUniversalWithAttributes[] Included { get; set; }
@@ -196,14 +146,13 @@ namespace beta.Models.API
             return null;
         }
 
-
         [JsonPropertyName("meta")]
         public ApiVaultMeta Meta { get; set; }
     }
-    public class ApiUniversalResult
+    public class ApiMapResult
     {
         [JsonPropertyName("data")]
-        public ApiUniversalData Data { get; set; }
+        public ApiMapData Data { get; set; }
     }
 
     public class DictionaryStringConverter : JsonConverter<Dictionary<string, string>>

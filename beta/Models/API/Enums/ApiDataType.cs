@@ -12,5 +12,7 @@
         mapStatistics,
 
         player,
+
+        featuredModFile
     }
 }

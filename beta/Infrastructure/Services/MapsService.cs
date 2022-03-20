@@ -28,10 +28,10 @@ namespace beta.Infrastructure.Services
             ApiService = apiService;
 
             var path = App.GetPathToFolder(Folder.Maps);
-            var folders = Directory.GetDirectories(path);
-            for (int j = 0; j < folders.Length; j++)
+            var maps = Directory.GetDirectories(path);
+            for (int j = 0; j < maps.Length; j++)
             {
-                var folder = folders[j].Split('\\')[^1];
+                var folder = maps[j].Split('\\')[^1];
                 LocalMaps.Add(folder);
             }
 
@@ -68,7 +68,8 @@ namespace beta.Infrastructure.Services
                 var local = localMaps[i];
                 data = local.Split('.');
 
-                if (name != data[0]) continue;
+                // TODO fix... Maps with upper letter
+                if (!name.Equals(data[0], StringComparison.OrdinalIgnoreCase)) continue;
 
                 if (data.Length > 1)
                 {
@@ -110,6 +111,7 @@ namespace beta.Infrastructure.Services
         {
             //throw new NotImplementedException();
         }
+        public string[] GetLocalMaps() => LocalMaps.ToArray();
         public Dictionary<string, string> GetMapScenario(string mapName, bool isLegacy = false)
         {
             var localMaps = LocalMaps;
@@ -118,7 +120,7 @@ namespace beta.Infrastructure.Services
             string formattedMapName = string.Empty;
 
             // Legacy maps stored in vaults, so this is mostly useless code
-            // we have to copy original maps to local maps folder as example
+            // we need to copy original maps to local maps folder as example
             if (isLegacy && PathToLegacyMaps is not null)
             {
                 pathToMaps = PathToLegacyMaps;

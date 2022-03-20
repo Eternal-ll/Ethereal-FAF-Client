@@ -17,5 +17,6 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public bool IsLegacyMap(string name);
         public LocalMapState CheckLocalMap(string name);
+        public string[] GetLocalMaps();
     }
 }
