@@ -18,6 +18,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<ICacheService, CacheService>()
             .AddSingleton<IGameLauncherService, GameLauncherService>()
             .AddSingleton<IIrcService, IrcService>()
+            .AddSingleton<INoteService, NoteService>()
 
             .AddTransient<IApiService, ApiService>()
             ;
