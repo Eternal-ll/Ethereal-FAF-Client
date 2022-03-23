@@ -31,6 +31,9 @@
                     <DataTrigger Binding="{Binding Name}" Value="IRC users">
                         <Setter Property="IsExpanded" Value="False"/>
                     </DataTrigger>
+                    <DataTrigger Binding="{Binding Name}" Value="Players">
+                        <Setter Property="IsExpanded" Value="False"/>
+                    </DataTrigger>
                     <DataTrigger Binding="{Binding Items.Count}" Value="0">
                         <Setter Property="Visibility" Value="Collapsed"/>
                         <Setter Property="Height" Value="50"/>
