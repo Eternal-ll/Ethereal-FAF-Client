@@ -226,9 +226,8 @@ namespace beta.Infrastructure.Services
                 //https://modern.ircdocs.horse/#names-message
                 case "001": // server welcome message, after this we can join
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
-                    IsIRCConnected = true;
+                    OnIrcConnected(true);
                     AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
-
                     Join("#aeolus");
                     break;
                 case "321": // start of list of 322
@@ -488,7 +487,11 @@ namespace beta.Infrastructure.Services
             StateChanged?.Invoke(this, e);
         }
 
-        private void OnIrcConnected(bool isConnected) => IrcConnected?.Invoke(this, isConnected);
+        private void OnIrcConnected(bool isConnected)
+        {
+            IsIRCConnected = isConnected;
+            IrcConnected?.Invoke(this, isConnected);
+        }
 
         private void OnUserConnected(string user) => UserConnected?.Invoke(this, user);
         private void OnUserDisconnected(string user) => UserDisconnected?.Invoke(this, user);
