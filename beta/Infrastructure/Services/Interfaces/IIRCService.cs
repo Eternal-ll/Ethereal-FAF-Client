@@ -32,6 +32,11 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<EventArgs<IrcUserLeft>> UserLeft;
 
         /// <summary>
+        /// User changed his nickname
+        /// </summary>
+        public event EventHandler<EventArgs<IrcUserChangedName>> UserChangedName;
+
+        /// <summary>
         /// Private message received from specific user
         /// </summary>
         public event EventHandler<EventArgs<IrcPrivateMessage>> PrivateMessageReceived;

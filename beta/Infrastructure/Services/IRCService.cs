@@ -176,14 +176,14 @@ namespace beta.Infrastructure.Services
 
         public void Test()
         {
-            Send(IrcCommands.Leave("#aeolus"));
+            //Send(IrcCommands.Leave("#aeolus"));
             //Send(IrcCommands.Quit());
             //Connect(null, 0);
             //Authorize();
             //Send(IrcCommands.Message("#aeolus", "Check check"));
             //Send(IrcCommands.Join("#test"));
             //Send(IrcCommands.Nickname(Nick + "1"));
-            //Send(IrcCommands.Nickname(Nick));
+            Send(IrcCommands.Nickname("Eternal-"));
             //Send("INVITE MarcSpector #aeolus1");
             //Send(IrcCommands.Leave("#aeolus1"));
             //Send(IrcCommands.Join("#aeolus2", "test")); 
@@ -275,8 +275,10 @@ namespace beta.Infrastructure.Services
                     }
                     break;
 
-                case "432": //Nickname is unavailable: Being held for registered user
                 case "433":
+
+                    break;//Nickname is unavailable: Being held for registered user
+                case "432":
                     Send(IrcCommands.Nickname(Nick + 1));
                     Timer timer = null;
                     TimerCallback tm = new(ChangeNickName);
@@ -285,6 +287,7 @@ namespace beta.Infrastructure.Services
                     void ChangeNickName(object obj)
                     {
                         Send(IrcCommands.Nickname(Properties.Settings.Default.PlayerNick));
+                        timer.Dispose();
                     };
                     break;
                 case "JOIN": // someone joined
