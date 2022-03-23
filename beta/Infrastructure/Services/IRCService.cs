@@ -11,7 +11,7 @@ using beta.Models.IRC.Enums;
 
 namespace beta.Infrastructure.Services
 {
-    internal class IrcService : ViewModel, IIrcService
+    internal class IrcService : IIrcService
     {
         #region Events
         public event EventHandler<EventArgs<ManagedTcpClientState>> StateChanged;
@@ -75,29 +75,10 @@ namespace beta.Infrastructure.Services
 
         #region Public
 
-        #region ConnectionState
-        private ManagedTcpClientState _TCPConnectionState;
-        public ManagedTcpClientState TCPConnectionState
-        {
-            get => _TCPConnectionState;
-            set => Set(ref _TCPConnectionState, value);
-        }
-        #endregion
+        public ManagedTcpClientState TCPConnectionState { get; set; }
 
-        #region IsIRCConnected
-        private bool _IsIRCConnected;
-        public bool IsIRCConnected
-        {
-            get => _IsIRCConnected;
-            set
-            {
-                if (Set(ref _IsIRCConnected, value))
-                {
-                    OnIrcConnected(value);
-                }
-            }
-        }
-        #endregion
+        public bool IsIRCConnected { get; set; }
+
         #endregion
 
         #endregion

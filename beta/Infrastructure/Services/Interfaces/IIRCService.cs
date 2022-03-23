@@ -2,11 +2,10 @@
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
-using System.ComponentModel;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    public interface IIrcService : INotifyPropertyChanged
+    public interface IIrcService
     {
         public void Test();
 
