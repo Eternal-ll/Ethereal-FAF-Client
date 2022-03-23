@@ -249,6 +249,7 @@ namespace beta.Models
         {
             IsListening = true;
             TcpClient.Close();
+            OnStateChanged(ManagedTcpClientState.Disconnected);
         }
         #endregion
     }

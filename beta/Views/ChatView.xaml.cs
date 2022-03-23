@@ -3,6 +3,7 @@ using beta.Infrastructure.Commands;
 using beta.Infrastructure.Converters;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Enums;
 using beta.Models.IRC;
 using beta.Properties;
 using beta.ViewModels;
@@ -99,7 +100,7 @@ namespace beta.Views
             {
                 if (Set(ref _FilterText, value))
                 {
-                    if (IrcService.IsIRCConnected)
+                    if (IrcService.State == IrcState.Connected)
                         SelectedChannelPlayersView.Refresh();
                     else OnlinePlayersView.Refresh();
                 }
@@ -161,7 +162,7 @@ namespace beta.Views
             PlayersService = App.Services.GetService<IPlayersService>();
             IrcService = App.Services.GetService<IIrcService>();
 
-            if (IrcService.IsIRCConnected)
+            if (IrcService.State == IrcState.Connected)
             {
                 WelcomeGridVisibility = Visibility.Collapsed;
             }
@@ -187,7 +188,7 @@ namespace beta.Views
             OnlinePlayersViewSource.Filter += PlayersFilter;
 
             #region IrcService event listeners
-            IrcService.IrcConnected += OnIrcConnected;
+            IrcService.StateChanged += OnStateChanged;
 
             IrcService.ChannelUsersReceived += OnChannelUsersReceived;
             IrcService.ChannelTopicUpdated += OnChannelTopicUpdated;
@@ -197,29 +198,6 @@ namespace beta.Views
             IrcService.UserChangedName += OnUserChangedName;
 
             IrcService.ChannedMessageReceived += OnChannelMessageReceived;
-
-            IrcService.StateChanged += (s, e) =>
-            {
-                var t = e.Arg;
-                if (e.Arg == ManagedTcpClientState.PendingConnection)
-                {
-                    PendingConnectionToIRC = true;
-                }
-                else if (e.Arg == ManagedTcpClientState.Connected)
-                {
-                    PendingConnectionToIRC = false;
-                }
-                else
-                {
-                    PendingConnectionToIRC = false;
-                    WelcomeGridVisibility = Visibility.Visible;
-
-                    for (int i = 0; i < Channels.Count; i++)
-                    {
-                        Channels[i].Users.Clear();
-                    }
-                }
-            };
             #endregion
 
             TestInputControl.LeaveRequired += (s, e) => OnLeaveFromChannelCommand(SelectedChannel.Name);
@@ -232,6 +210,52 @@ namespace beta.Views
             GlobalGrid.Resources.Add("LeaveFromChannelCommand", _LeaveFromChannelCommand);
         }
 
+
+        #region Commands
+
+        #region LeaveFromChannelCommand
+        private ICommand _LeaveFromChannelCommand;
+        public ICommand LeaveFromChannelCommand => _LeaveFromChannelCommand;
+        private void OnLeaveFromChannelCommand(object parameter)
+        {
+            var channel = parameter.ToString();
+            IrcService.Leave(channel);
+            int i = 0;
+
+            while (i < Channels.Count)
+            {
+                if (Channels[i].Name == channel)
+                {
+                    Channels.RemoveAt(i);
+                }
+
+                i++;
+            }
+
+            if (SelectedChannel is null)
+            {
+                if (Channels.Count > 0) SelectedChannel = Channels[0];
+                //i--;
+                //if ()
+                //{
+                //    SelectedChannel = Channels[i - 2];
+                //}
+                //else if (i < Channels.Count - 1)
+                //{
+                //    SelectedChannel = Channels[i + 1];
+                //}
+            }
+        }
+
+        #endregion
+
+        #region UpdateUsersCommand
+        private ICommand _RefreshUserListCommand;
+        public ICommand RefreshUserListCommand => _RefreshUserListCommand;
+        private void OnRefreshUserListCommand(object parameter) => UpdateSelectedChannelUsers();
+        #endregion
+
+        #endregion
         private void OnUserChangedName(object sender, EventArgs<IrcUserChangedName> e)
         {
             for (int i = 0; i < Channels.Count; i++)
@@ -275,41 +299,6 @@ namespace beta.Views
             }
         }
 
-        #region LeaveFromChannelCommand
-        private ICommand _LeaveFromChannelCommand;
-        public ICommand LeaveFromChannelCommand => _LeaveFromChannelCommand;
-        private void OnLeaveFromChannelCommand(object parameter)
-        {
-            var channel = parameter.ToString();
-            IrcService.Leave(channel);
-            int i = 0;
-
-            while (i < Channels.Count)
-            {
-                if (Channels[i].Name == channel)
-                {
-                    Channels.RemoveAt(i);
-                }
-
-                i++;
-            }
-
-            if (SelectedChannel is null)
-            {
-                if (Channels.Count > 0) SelectedChannel = Channels[0];
-                //i--;
-                //if ()
-                //{
-                //    SelectedChannel = Channels[i - 2];
-                //}
-                //else if (i < Channels.Count - 1)
-                //{
-                //    SelectedChannel = Channels[i + 1];
-                //}
-            }
-        }
-
-        #endregion
 
         private void PlayersFilter(object sender, FilterEventArgs e)
         {
@@ -377,32 +366,50 @@ namespace beta.Views
         }
 
         #region Events listeners
-        private void OnIrcConnected(object sender, bool e)
+        private void OnStateChanged(object sender, EventArgs<IrcState> e)
         {
-            if (e)
+            PendingConnectionToIRC = true;
+            switch (e.Arg)
             {
-                WelcomeGridVisibility = Visibility.Collapsed;
-                //PendingConnectionToIRC = false;
-                //BindingOperations.DisableCollectionSynchronization(PlayersService.Players);
-                //OnlinePlayersViewSource.Source = null;
+                case IrcState.Connected:
+                    break;
+                case IrcState.Disconnected:
+                    PendingConnectionToIRC = false;
+                    break;
+                case IrcState.PendingConnection:
+                    break;
+                case IrcState.CantConnect:
+                    break;
+                case IrcState.TimedOut:
+                    break;
+                case IrcState.PendingAuthorization:
+                    break;
+                case IrcState.CantAuthorize:
+                    break;
+                case IrcState.Authorized:
+                    WelcomeGridVisibility = Visibility.Collapsed;
 
-                for (int i = 0; i < Channels.Count; i++)
-                {
-                    IrcService.Join(Channels[i].Name);
-                }
-            }
-            else
+                    for (int i = 0; i < Channels.Count; i++)
+                    {
+                        IrcService.Join(Channels[i].Name);
+                    }
+
+                    _FilterText = string.Empty;
+                    OnPropertyChanged(nameof(FilterText));
+                    PendingConnectionToIRC = false;
+                    break;
+                case IrcState.Throttled:
+                    break;
+            };
+
+            if (e.Arg != IrcState.Connected && e.Arg != IrcState.Authorized)
             {
                 WelcomeGridVisibility = Visibility.Visible;
                 for (int i = 0; i < Channels.Count; i++)
                 {
                     Channels[i].Users.Clear();
                 }
-                //BindingOperations.EnableCollectionSynchronization(PlayersService.Players, _lock);
-                //OnlinePlayersViewSource.Source = PlayersService.Players;
             }
-            _FilterText = string.Empty;
-            OnPropertyChanged(nameof(FilterText));
         }
 
         private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
@@ -498,16 +505,6 @@ namespace beta.Views
             }
             return channel;
         }
-        #endregion
-
-        #region Commands
-
-        #region UpdateUsersCommand
-        private ICommand _RefreshUserListCommand;
-        public ICommand RefreshUserListCommand => _RefreshUserListCommand;
-        private void OnRefreshUserListCommand(object parameter) => UpdateSelectedChannelUsers();
-        #endregion
-
         #endregion
     }
 }

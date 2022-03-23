@@ -1,4 +1,5 @@
 ﻿using beta.Models;
+using beta.Models.Enums;
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
@@ -9,9 +10,10 @@ namespace beta.Infrastructure.Services.Interfaces
     {
         public void Test();
 
+        public IrcState State { get; set; }
+
         #region Events
-        public event EventHandler<EventArgs<ManagedTcpClientState>> StateChanged;
-        public event EventHandler<bool> IrcConnected;
+        public event EventHandler<EventArgs<IrcState>> StateChanged;
 
         /// <summary>
         /// User connected to IRC server
@@ -62,13 +64,9 @@ namespace beta.Infrastructure.Services.Interfaces
 
         #endregion
 
-        #region Properties
-        public bool IsIRCConnected { get; }
-        public ManagedTcpClientState TCPConnectionState { get; }
-        #endregion
-
         #region Methods
         public void Connect(string host, int port);
+        public void Restart(string nickname, string password);
 
         #region IRC
         public void SendCommand(IrcUserCommand command, string writtenText, string channel = null);

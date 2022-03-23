@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Enums;
 using beta.Views.Modals;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
@@ -29,8 +30,8 @@ namespace beta.Views
 
         private ContentDialog Dialog;
 
-        private ManagedTcpClientState _IrcState;
-        public ManagedTcpClientState IrcState
+        private IrcState _IrcState;
+        public IrcState IrcState
         {
             get => _IrcState;
             set
@@ -54,7 +55,7 @@ namespace beta.Views
             IrcService = App.Services.GetService<IIrcService>();
             IrcService.StateChanged += (s, e) => IrcState = e;
 
-            IrcState = IrcService.TCPConnectionState;
+            IrcState = IrcService.State;
 
             Pages = new UserControl[]
             {

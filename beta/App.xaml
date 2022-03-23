@@ -25,6 +25,7 @@
 
                     <cmd:ConnectToIrcCommand x:Key="ConnectToIrcCommand"/>
                     <cmd:DisconnectFromIrcCommand x:Key="DisconnectFromIrcCommand"/>
+                    <cmd:RefreshIrcCommand x:Key="RefreshIrcCommand"/>
 
                 </ResourceDictionary>
                 <ResourceDictionary>

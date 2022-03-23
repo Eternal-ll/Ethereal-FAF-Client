@@ -8,14 +8,14 @@ using System.Text;
 using System.Threading;
 using beta.Models.Debugger;
 using beta.Models.IRC.Enums;
+using beta.Models.Enums;
 
 namespace beta.Infrastructure.Services
 {
     internal class IrcService : IIrcService
     {
         #region Events
-        public event EventHandler<EventArgs<ManagedTcpClientState>> StateChanged;
-        public event EventHandler<bool> IrcConnected;
+        public event EventHandler<EventArgs<IrcState>> StateChanged;
 
         /// <summary>
         /// User connected to IRC server
@@ -65,27 +65,37 @@ namespace beta.Infrastructure.Services
 
         #region Properties
 
-        #region Private
-
         private ManagedTcpClient ManagedTcpClient;
 
         private string Nick;
         private string Password;
-        #endregion
 
-        #region Public
-
-        public ManagedTcpClientState TCPConnectionState { get; set; }
-
-        public bool IsIRCConnected { get; set; }
-
-        #endregion
+        private IrcState _State;
+        public IrcState State
+        {
+            get => _State;
+            set
+            {
+                if (_State != value)
+                {
+                    _State = value;
+                    OnStateChanged(value);
+                }
+            }
+        }
 
         #endregion
 
         #region Methods
 
         #region Public
+
+        public void Restart(string nickname, string password)
+        {
+            Quit();
+            Authorize(nickname, password);
+        }
+
         public void Authorize(string nickname, string password)
         {
             Nick = nickname;
@@ -95,18 +105,25 @@ namespace beta.Infrastructure.Services
 
         private void TcpClientStateChanged(object sender, ManagedTcpClientState e)
         {
-            if (sender is ManagedTcpClient client)
+            switch (e)
             {
-                if (e == ManagedTcpClientState.Connected)
-                {
-                    client.StateChanged -= TcpClientStateChanged;
+                case ManagedTcpClientState.Disconnected: State = IrcState.Disconnected;
+                    break;
+                case ManagedTcpClientState.TimedOut: State = IrcState.TimedOut;
+                    break;
+                case ManagedTcpClientState.CantConnect: State = IrcState.CantConnect;
+                    break;
+                case ManagedTcpClientState.PendingConnection: State = IrcState.PendingConnection;
+                    break;
+                case ManagedTcpClientState.Connected:
+                    var client = (ManagedTcpClient)sender;
                     client.DataReceived += ManagedTcpClient_DataReceived;
                     AppDebugger.LOGIRC($"Connected to IRC Server");
                     AppDebugger.LOGIRC($"Sending authorization information...");
                     Authorize();
-                }
+                    State = IrcState.Connected;
+                    break;
             }
-            OnStateChanged(e);
         }
         private void Authorize()
         {
@@ -153,22 +170,25 @@ namespace beta.Infrastructure.Services
 
         private void Send(string message)
         {
+            if (ManagedTcpClient == null)
+            {
+                return;
+                //throw new NullReferenceException(nameof(ManagedTcpClient));
+            }
+
             //TODO fix 
             if (ManagedTcpClient?.TcpClient.Connected == false)
             {
-                OnStateChanged(ManagedTcpClientState.Disconnected);
+                State = IrcState.Disconnected;
                 return;
             }
             ManagedTcpClient?.Write(message + '\r');
             if (message.StartsWith("QUIT"))
             {
-                OnStateChanged(ManagedTcpClientState.Disconnected);
                 ManagedTcpClient?.Dispose();
                 ManagedTcpClient = null;
-                IsIRCConnected = false;
 
                 AppDebugger.LOGIRC($"Disconnected from IRC Server");
-
             }
 
             AppDebugger.LOGIRC($"You sent: {message}");
@@ -226,7 +246,7 @@ namespace beta.Infrastructure.Services
                 //https://modern.ircdocs.horse/#names-message
                 case "001": // server welcome message, after this we can join
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
-                    OnIrcConnected(true);
+                    State = IrcState.Authorized;
                     AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
                     Join("#aeolus");
                     break;
@@ -434,7 +454,7 @@ namespace beta.Infrastructure.Services
 
                     if (data.StartsWith("ERROR"))
                     {
-                        OnStateChanged(ManagedTcpClientState.Disconnected);
+                        State = IrcState.Throttled;
                     }
                     AppDebugger.LOGIRC(data);
 
@@ -484,17 +504,7 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        private void OnStateChanged(ManagedTcpClientState e)
-        {
-            TCPConnectionState = e;
-            StateChanged?.Invoke(this, e);
-        }
-
-        private void OnIrcConnected(bool isConnected)
-        {
-            IsIRCConnected = isConnected;
-            IrcConnected?.Invoke(this, isConnected);
-        }
+        private void OnStateChanged(IrcState state) => StateChanged?.Invoke(this, state);
 
         private void OnUserConnected(string user) => UserConnected?.Invoke(this, user);
         private void OnUserDisconnected(string user) => UserDisconnected?.Invoke(this, user);
