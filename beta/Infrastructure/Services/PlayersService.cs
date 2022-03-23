@@ -22,6 +22,7 @@ namespace beta.Infrastructure.Services
 
         private readonly ISessionService SessionService;
         private readonly IAvatarService AvatarService;
+        private readonly INoteService NoteService;
 
         #endregion
 
@@ -44,14 +45,30 @@ namespace beta.Infrastructure.Services
 
         public PlayersService(
             ISessionService sessionService,
-            IAvatarService avatarService)
+            IAvatarService avatarService,
+            INoteService noteService)
         {
             SessionService = sessionService;
             AvatarService = avatarService;
+            NoteService = noteService;
 
             sessionService.NewPlayer += OnNewPlayer;
             sessionService.SocialInfo += OnNewSocialInfo;
             sessionService.WelcomeInfo += OnWelcomeInfo;
+
+            System.Windows.Application.Current.Exit += (s, e) =>
+            {
+                var players = Players;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    var player = players[i];
+                    if (player.Note.Text.Trim().Length > 0)
+                    {
+                        NoteService.Set(player.login, player.Note.Text);
+                    }
+                }
+                NoteService.Save();
+            };
         }
 
 
@@ -102,6 +119,19 @@ namespace beta.Infrastructure.Services
         {
             var player = e.Arg;
             var players = _Players;
+
+            #region Add note about player
+
+            if (NoteService.TryGet(player.login, out var note))
+            {
+                player.Note = new(note);
+            }
+            else
+            {
+                player.Note = new();
+            }
+
+            #endregion
 
             // TODO REWRITE?
             #region Matching friends & foes

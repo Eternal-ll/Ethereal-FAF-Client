@@ -95,15 +95,6 @@ namespace beta.Models.Server
         };
         #endregion
 
-        #region Note
-        private string _Note;
-        public string Note
-        {
-            get => _Note;
-            set => Set(ref _Note, value);
-        }
-        #endregion
-
         #region Game
         private GameInfoMessage _Game;
         public GameInfoMessage Game
@@ -142,11 +133,11 @@ namespace beta.Models.Server
 
         // SOCIAL
         #region Note
-        private PlayerNote _PlayerNote;
-        public PlayerNote PlayerNote
+        private PlayerNoteVM _Note;
+        public PlayerNoteVM Note
         {
-            get => _PlayerNote;
-            set=>Set(ref _PlayerNote, value);
+            get => _Note;
+            set => Set(ref _Note, value);
         }
         #endregion
 
