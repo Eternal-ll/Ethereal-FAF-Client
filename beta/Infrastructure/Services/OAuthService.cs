@@ -29,6 +29,10 @@ namespace beta.Infrastructure.Services
         private readonly HttpClient HttpClient = new(new HttpClientHandler { UseProxy = false });
 
         private readonly ILogger Logger;
+        /// <summary>
+        /// Поток для OAuth авторизации
+        /// </summary>
+        private Thread AuthorizationThread;
         public OAuthService(ILogger<OAuthService> logger)
         {
             Logger = logger;
@@ -242,17 +246,22 @@ namespace beta.Infrastructure.Services
         {
             Logger.LogInformation("Starting fetching OAuth token by code");
 
+            // создаем заранее неуспешный результат получения токена
             OAuthState result = OAuthState.INVALID;
 
             Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
 
+            // используем безопасную обертку для запросов (SafeRequest) с вложенным запросом (GetQueryByteArrayContent)
+            // и пытаемся разобрать результат и получить данные по токену
             if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
                 OAuthExtension.GetQueryByteArrayContent($"grant_type=authorization_code&code={code}&client_id=faf-python-client&redirect_uri=http://localhost"))))
+                // если все прошло успешно, меняем результат действий
                 result = OAuthState.AUTHORIZED;
             else Logger.LogWarning("Something went wrong in the JSON data parsing part");
             
             Logger.LogInformation(result.ToString());
-
+            
+            // поднимаем событие изменения состояние сервиса с указанием результата и сообщения
             OnStateChanged(new(result, result switch
             {
                 OAuthState.INVALID => "Something went wrong on using refresh token",
@@ -304,10 +313,16 @@ namespace beta.Infrastructure.Services
             // TODO
         }
 
+        /// <summary>
+        /// OAuth2 аутентификация с использованием логина (почты) и пароля
+        /// </summary>
+        /// <param name="usernameOrEmail">Логин или почта от аккаунта</param>
+        /// <param name="password">Пароль от аккаунта</param>
         public void Auth(string usernameOrEmail, string password)
         {
             Logger.LogInformation("Starting process of authorization");
 
+            // Получаем уникальный код для запроса токена
             var code = GetOAuthCode(usernameOrEmail, password);
             if (code is null)
             {
@@ -316,9 +331,27 @@ namespace beta.Infrastructure.Services
             }
 
             //Settings.Default.PlayerPassword = password;
-
+            
+            // Запрашиваем токен
             FetchOAuthToken(code);
         }
+
+        //public void DoAuth(string usernameOrEmail, string password)
+        //{
+        //    // Поток авторизации чем-то занят и будущем надо будет уведомить пользователя об этом
+        //    if (AuthorizationThread is not null)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //    // создаем поток авторизации и передаем параметры в метод
+        //    AuthorizationThread = new(()=> Auth(usernameOrEmail, password));
+            
+        //    // на самом деле до этого все было относительно костыльно,
+        //    // я создавал поток сразу в AuthView для авторизации
+
+        //    // здесь нужно поднимать какое-нибудь событие, что начинается процесс авторизации
+
+        //}
 
         protected virtual void OnStateChanged(OAuthEventArgs e) => StateChanged?.Invoke(this, e);
 
@@ -328,9 +361,16 @@ namespace beta.Infrastructure.Services
             int? pos = line!.IndexOf("value=\"", StringComparison.Ordinal) + 7;
             return pos.HasValue ? line.Substring(pos.Value, line.Length - 3 - pos.Value) : null;
         }
-
+        /// <summary>
+        /// Разбор <paramref name="sr"/> JSON формата на данные токена
+        /// </summary>
+        /// <param name="sr"></param>
+        /// <returns></returns>
         private bool FetchOAuthPayload(Stream sr)
         {
+            // Честно, можно было не париться и просто сериализовать результат
+            // я просто занимался ерундой
+
             //  "access_token": "**********",
             //    "expires_in": "**********",
             //      "id_token": "**********",
@@ -338,27 +378,42 @@ namespace beta.Infrastructure.Services
             //         "scope": "openid offline public_profile lobby",
             //    "token_type": "bearer"
 
+            // создаем билдеры 
+            // билдер идентификаторов
             StringBuilder sb = new();
+            // билдер значений
             StringBuilder cb = new();
-            char[] buffer = new char[1];
-            byte[] byteBuffer = new byte[1];
-            string keyword = string.Empty;
 
+            // буффер для посимвольного чтения стрима
+            char[] buffer = new char[1];
+            // байтовый буффер, я на самом деле прикалывался
+            byte[] byteBuffer = new byte[1];
+            // переменная для заполнения уникальных идентификаторов из JSON (payload)
+            string keyword = string.Empty;
+            // массив для нужных данных из JSON
             string[] payload = new string[4];
 
+            // пока можем читать стрим
             while (sr.CanRead)
             {
+                // сохраняем текущий байт в буффер
                 sr.Read(byteBuffer, 0, 1);
+                // преобразуем текущей байт в символ
                 buffer[0] = Convert.ToChar(byteBuffer[0]);
 
+                // если идентификатор начал заполнение
                 if (keyword.Length > 0)
                 {
+                    // если это разделитель и билдер значений заполнен
                     if (buffer[0] == '\"' && cb.Length > 3)
                     {
+                        // в зависимости от идентификатора выполняем нужные инструкции
                         switch (keyword)
                         {
                             case "\"error": return false;
                             case "\"access_token":
+                                // билдер подхватывает пробел и разделитель после идентификатора
+                                // _"
                                 payload[0] = cb.Remove(0, 2).ToString();
                                 break;
                             case "\",\"expires_in":
@@ -371,6 +426,7 @@ namespace beta.Infrastructure.Services
                                 payload[3] = cb.Remove(0, 2).ToString();
                                 break;
                         }
+                        //
                         cb.Clear();
                         keyword = string.Empty;
                         if (payload[3] is not null)
@@ -383,17 +439,23 @@ namespace beta.Infrastructure.Services
                     continue;
                 }
 
+                // если билдер идентификаторов начал заполнение
                 if (sb.Length > 0)
                 {
+                    // если обнаружен конечный разделитель и присутствует заполнение
                     if (buffer[0] == '\"' && sb.Length > 2)
                     {
+                        // сохраняем идентификатор
                         keyword = sb.ToString();
+                        // очищаем билдер
                         sb.Clear();
                     }
+                    // заполняем дальше
                     sb.Append(buffer[0]);
                     continue;
                 }
 
+                // если обнаружили разделитель
                 if (buffer[0] == '\"')
                 {
                     sb.Append(buffer[0]);

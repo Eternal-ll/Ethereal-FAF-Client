@@ -98,16 +98,28 @@ namespace beta.Views
 
         private void OnCheckBoxClick(object sender, RoutedEventArgs e) => Settings.Default.AutoJoin = ((CheckBox)sender).IsChecked.Value;
 
+        /// <summary>
+        /// Запускаем авторизацию в нвоом потоке
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnAuthorizationButtonClick(object sender, RoutedEventArgs e)
         {
+            // здесь все очень костыльно, нужно было все выносить в сам сервис,
+            // поднимать события авторизации и уведомлять оттуда...
+
+            // получаем введенные данные
             var login = LoginInput.Text;
             var password = PasswordInput.Password;
 
+            // скрываем весь UI интерфейс, опять же можно было сделать по событиям (если правильно)
             for (int i = 0; i < Canvas.Children.Count; i++)
                 Canvas.Children[i].Visibility = Visibility.Collapsed;
-
+            
+            // делаем видимым кольцо загрузки, уведомляем пользователя о начале авторизации
             ProgressRing.Visibility = Visibility.Visible;
 
+            // создаем новый поток и запускаем метод авторизации с передачей нужных параметров
             new Thread(()=> OAuthService.Auth(login, password))
             {
                 Name = "OAuthorization thread",
