@@ -60,7 +60,7 @@ namespace beta.Infrastructure.Services
 #if DEBUG
             Logger = logger;
 #endif
-            OAuthService.Result += OnAuthResult;
+            OAuthService.StateChanged += OnAuthResult;
 
             #region Response actions for server
             //Operations.Add(ServerCommand.notice, OnNoticeData);
@@ -218,9 +218,9 @@ namespace beta.Infrastructure.Services
             Client.Write("{\"command\":\"ping\"}");
         }
 
-        private void OnAuthResult(object sender, EventArgs<OAuthState> e)
+        private void OnAuthResult(object sender, OAuthEventArgs e)
         {
-            if (e.Arg == OAuthState.AUTHORIZED)
+            if (e.State == OAuthState.AUTHORIZED)
                 Authorize();
         }
 

@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,7 +59,7 @@ namespace beta.Views
             // starting listening events
 
             // raising up after finishing OAuth2 authorization
-            OAuthService.Result += OnOAuthAuthorizationFinish;
+            OAuthService.StateChanged += OnOAuthAuthorizationFinish;
             
             // raising up after finishing lobby session authorization
             SessionService.Authorized += OnLobbySessionServiceAuthorizationFinish;
@@ -77,7 +78,7 @@ namespace beta.Views
                     Canvas = null;
 
                     // remove listeners of events
-                    OAuthService.Result -= OnOAuthAuthorizationFinish;
+                    OAuthService.StateChanged -= OnOAuthAuthorizationFinish;
                     SessionService.Authorized -= OnLobbySessionServiceAuthorizationFinish;
                     // call UI thread and invoke our instructions
                     // events coming from different thread and can raise exception
@@ -120,41 +121,18 @@ namespace beta.Views
             CloseButtonText = "Ok"
         };
 
-        private void OnOAuthAuthorizationFinish(object sender, Infrastructure.EventArgs<OAuthState> e)
+        private void OnOAuthAuthorizationFinish(object sender, OAuthEventArgs e)
         {
+            if (e.State == OAuthState.AUTHORIZED) return;
             Dispatcher.Invoke(() =>
             {
-                switch (e.Arg)
-                {
-                    case OAuthState.AUTHORIZED:
-                        for (int i = 0; i < Canvas.Children.Count; i++)
-                            Canvas.Children[i].Visibility = Visibility.Collapsed;
-                        ProgressRing.Visibility = Visibility.Visible;
-                        return;
-                    case OAuthState.INVALID:
-                        WarnDialog.Content = "Invalid authorization parameters";
-                        break;
-                    case OAuthState.NO_CONNECTION:
-                        WarnDialog.Content = "No connection.\nPlease check your internet connection";
-                        break;
-                    case OAuthState.NO_TOKEN:
-                        WarnDialog.Content = "Something went wrong on auto-join.\nPlease use authorization form again";
-                        break;
-                    case OAuthState.TIMED_OUT:
-                        WarnDialog.Content = "Server is not responses";
-                        break;
-                    case OAuthState.EMPTY_FIELDS:
-                        WarnDialog.Content = "Empty fields";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                WarnDialog.Content = e.Message;
 
                 for (int i = 0; i < Canvas.Children.Count; i++)
                     Canvas.Children[i].Visibility = Visibility.Visible;
 
                 ProgressRing.Visibility = Visibility.Collapsed;
-
+                
                 WarnDialog.ShowAsync();
             });
         }

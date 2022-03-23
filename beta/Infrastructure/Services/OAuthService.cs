@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace beta.Infrastructure.Services
     }
     public class OAuthService : IOAuthService
     {
-        public event EventHandler<EventArgs<OAuthState>> Result;
+        public event EventHandler<OAuthEventArgs> StateChanged;
 
         private readonly HttpClient HttpClient = new(new HttpClientHandler { UseProxy = false });
 
@@ -101,9 +102,14 @@ namespace beta.Infrastructure.Services
             }
             catch (Exception e)
             {
-                if (e is HttpRequestException) OnResult(OAuthState.NO_CONNECTION);
-                else if (e is AggregateException) OnResult(OAuthState.NO_CONNECTION);
-                else OnResult(OAuthState.INVALID);
+                if (e is HttpRequestException || e is AggregateException)
+                {
+                    OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
+                }
+                else
+                {
+                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
+                }
             }
 
             return null;
@@ -116,7 +122,7 @@ namespace beta.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrWhiteSpace(password))
             {
                 Logger.LogWarning("Given usernameOrEmail or password is empty or null");
-                Result?.Invoke(this, OAuthState.EMPTY_FIELDS);
+                OnStateChanged(new(OAuthState.EMPTY_FIELDS, "Fill required fields"));
                 return null;
             }
 
@@ -189,7 +195,7 @@ namespace beta.Infrastructure.Services
 
             if (consent_challenge.Length == 0)
             {
-                Result?.Invoke(this, OAuthState.INVALID);
+                OnStateChanged(new(OAuthState.INVALID, "Wrong user data"));
                 return null;
             }
             #endregion
@@ -210,20 +216,21 @@ namespace beta.Infrastructure.Services
             }
             catch (Exception e)
             {
-                Logger.LogWarning("Something went wrong on POST request");
-                if (e is HttpRequestException) OnResult(OAuthState.NO_CONNECTION);
-                else OnResult(OAuthState.INVALID);
-
+                Logger.LogWarning($"Something went wrong on POST user.faforever.com/oauth2/consent");
+                if (e is HttpRequestException || e is AggregateException)
+                {
+                    OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
+                }
+                else
+                {
+                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
+                }
             }
             
             string code = callback?.Query.Substring(6, callback.Query.IndexOf("&scope", StringComparison.Ordinal) - 6);
 
 
             Logger.LogInformation("code - " + code);
-            //int statePos = callback!.Query.IndexOf("state=", StringComparison.Ordinal);
-            //string state = callback.Query.Substring(statePos, 
-            //    callback.Query.Length - statePos);
-            //state = state.Remove(0, 6);
 
             //Debug.WriteLine(nameof(code) + " - " + code);
             //Debug.WriteLine(nameof(state) + " - " + state);
@@ -245,8 +252,12 @@ namespace beta.Infrastructure.Services
             else Logger.LogWarning("Something went wrong in the JSON data parsing part");
             
             Logger.LogInformation(result.ToString());
-            
-            Result?.Invoke(this, result);
+
+            OnStateChanged(new(result, result switch
+            {
+                OAuthState.INVALID => "Something went wrong on using refresh token",
+                OAuthState.AUTHORIZED => "Authorized",
+            }));
         }
         public void RefreshOAuthToken(string refresh_token)
         {
@@ -268,7 +279,11 @@ namespace beta.Infrastructure.Services
 
             Logger.LogInformation(result.ToString());
 
-            Result?.Invoke(this, result);
+            OnStateChanged(new(result, result switch
+            {
+                OAuthState.INVALID => "Something went wrong on using refresh token",
+                OAuthState.AUTHORIZED => "Authorized",
+            }));
         }
       
         public void Auth()
@@ -277,16 +292,16 @@ namespace beta.Infrastructure.Services
             if (string.IsNullOrEmpty(Settings.Default.access_token))
                 if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
                     RefreshOAuthToken(Settings.Default.refresh_token);
-                else Result!.Invoke(this, OAuthState.NO_TOKEN);
+                else OnStateChanged(new(OAuthState.NO_TOKEN, "No authorization token"));
             else if ((Settings.Default.expires_in - DateTime.UtcNow).TotalSeconds < 10)
                 // TODO FIX ME Not working
                 RefreshOAuthToken(Settings.Default.refresh_token);
-            else Result!.Invoke(this, OAuthState.AUTHORIZED);
+            else OnStateChanged(new(OAuthState.AUTHORIZED, "Authorized"));
         }
 
         public void Auth(string access_token)
         {
-            // TODO: KAPPA
+            // TODO
         }
 
         public void Auth(string usernameOrEmail, string password)
@@ -305,7 +320,7 @@ namespace beta.Infrastructure.Services
             FetchOAuthToken(code);
         }
 
-        protected virtual void OnResult(EventArgs<OAuthState> e) => Result?.Invoke(this, e);
+        protected virtual void OnStateChanged(OAuthEventArgs e) => StateChanged?.Invoke(this, e);
 
         private string GetHiddenValue(string line)
         {
