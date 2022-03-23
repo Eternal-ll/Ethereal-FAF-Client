@@ -1553,6 +1553,7 @@
                                         <Separator Opacity=".5" Margin="0 6 0 10"/>
                                         <CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>
                                         <CheckBox Content="Enable game preview" IsChecked="False"/>
+                                        <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2" Margin="0 10 0 0"/>
                                     </StackPanel>
                                 </Border>
                             </Canvas>
@@ -1566,7 +1567,7 @@
                     Margin="9 4 10 10"
                     ui:ControlHelper.CornerRadius="6"
                     ui:ControlHelper.PlaceholderText="Search players"
-                    Text=""/>
+                    Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
                     <!--#endregion-->
                 </Grid>
 

@@ -194,6 +194,7 @@ namespace beta.Views
             IrcService.ChannelTopicChangedBy += OnChannelTopicChangedBy;
             IrcService.UserJoined += OnChannelUserJoin;
             IrcService.UserLeft += OnChannelUserLeft;
+            IrcService.UserChangedName += OnUserChangedName;
 
             IrcService.ChannedMessageReceived += OnChannelMessageReceived;
 
@@ -213,7 +214,12 @@ namespace beta.Views
                 else
                 {
                     PendingConnectionToIRC = false;
-                    //WelcomeGridVisibility = Visibility.Visible;
+                    WelcomeGridVisibility = Visibility.Visible;
+
+                    for (int i = 0; i < Channels.Count; i++)
+                    {
+                        Channels[i].Users.Clear();
+                    }
                 }
             };
             #endregion
@@ -223,8 +229,36 @@ namespace beta.Views
             App.Current.MainWindow.Closing += MainWindow_Closing;
 
             _LeaveFromChannelCommand = new LambdaCommand(OnLeaveFromChannelCommand);
+            _RefreshUserListCommand = new LambdaCommand(OnRefreshUserListCommand);
+
             GlobalGrid.Resources.Add("LeaveFromChannelCommand", _LeaveFromChannelCommand);
         }
+
+        private void OnUserChangedName(object sender, EventArgs<IrcUserChangedName> e)
+        {
+            for (int i = 0; i < Channels.Count; i++)
+            {
+                var channel = Channels[i];
+
+                for (int j = 0; j < channel.Users.Count; j++)
+                {
+                    var user = channel.Users[j];
+                    if (user == e.Arg.From)
+                    {
+                        channel.Users[j] = e.Arg.To;
+
+                        if (SelectedChannel.Name == channel.Name)
+                        {
+                            // TODO, we are reloading the whole list
+                            UpdateSelectedChannelUsers();
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
         private void OnShowJoinToChannelClick(object sender, RoutedEventArgs e) => JoinChannelInput.Focus();
         private void MainWindow_Closing(object sender, CancelEventArgs e) => IrcService.Quit();
 
@@ -285,7 +319,7 @@ namespace beta.Views
 
             if (FilterText.Length == 0) return;
 
-            e.Accepted = player.login.StartsWith(FilterText);
+            e.Accepted = player.login.StartsWith(FilterText, System.StringComparison.OrdinalIgnoreCase);
         }
 
         private IPlayer GetChatPlayer(string user)
@@ -312,6 +346,7 @@ namespace beta.Views
         private void UpdateSelectedChannelUsers()
         {
             var players = SelectedChannelPlayers;
+
             // TODO Check for duplicates someday... I saw two players on visual users list
             players.Clear();
 
@@ -324,6 +359,7 @@ namespace beta.Views
                 players.Add(GetChatPlayer(users[i]));
             }
 
+            //OnPropertyChanged(nameof(SelectedChannelPlayersView));
             //SelectedChannelPlayersView.Refresh();
             //using var defer = View.DeferRefresh();
         }
@@ -367,7 +403,8 @@ namespace beta.Views
                 //BindingOperations.EnableCollectionSynchronization(PlayersService.Players, _lock);
                 //OnlinePlayersViewSource.Source = PlayersService.Players;
             }
-            Dispatcher.Invoke(() => FilterText = string.Empty);
+            _FilterText = string.Empty;
+            OnPropertyChanged(nameof(FilterText));
         }
 
         private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
@@ -384,26 +421,16 @@ namespace beta.Views
 
         private void OnChannelTopicChangedBy(object sender, EventArgs<IrcChannelTopicChangedBy> e)
         {
-            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
-            {
-                channel.TopicChangedBy = e.Arg;
-            }
-            else
-            {
-                // todo
-            }
+            var channel = GetChannel(e.Arg.Channel);
+
+            channel.TopicChangedBy = e.Arg;
         }
 
         private void OnChannelTopicUpdated(object sender, EventArgs<IrcChannelTopicUpdated> e)
         {
-            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
-            {
-                channel.Topic = e.Arg.Topic;
-            }
-            else
-            {
-                // todo
-            }
+            var channel = GetChannel(e.Arg.Channel);
+
+            channel.Topic = e.Arg.Topic;
         }
 
         private void OnChannelUserLeft(object sender, EventArgs<IrcUserLeft> e)
@@ -427,12 +454,15 @@ namespace beta.Views
             if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
                 //Dispatcher.Invoke(() => Channels.Add(channel));
-                channel.Users.Add(e.Arg.User);
-
-                // TODO null SelectedChannel
-                if (channel.Name.Equals(SelectedChannel?.Name))
+                if (!channel.Users.Contains(e.Arg.User))
                 {
-                    SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                    channel.Users.Add(e.Arg.User);
+
+                    // TODO null SelectedChannel
+                    if (channel.Name.Equals(SelectedChannel?.Name))
+                    {
+                        SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                    }
                 }
             }
             else
@@ -442,14 +472,12 @@ namespace beta.Views
         }
         private void OnChannelUsersReceived(object sender, EventArgs<IrcChannelUsers> e)
         {
-            if (!TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            var channel = GetChannel(e.Arg.Channel);
+
+            // User join event working earlier and we getting double current authorized player
+            if (channel.Users.Count == 1)
             {
-                channel = new(e.Arg.Channel);
-                Channels.Add(channel);
-                SelectedChannel = channel;
-                //Dispatcher.Invoke(() => Channels.Add(channel));
-                //BindingOperations.EnableCollectionSynchronization(channel.Users, _lock);
-                BindingOperations.EnableCollectionSynchronization(channel.History, _lock);
+                channel.Users.Clear();
             }
 
             for (int i = 0; i < e.Arg.Users.Length; i++)
@@ -465,6 +493,30 @@ namespace beta.Views
                 UpdateSelectedChannelUsers();
             }
         }
+
+        private IrcChannelVM GetChannel(string name)
+        {
+            if (!TryGetChannel(name, out IrcChannelVM channel))
+            {
+                channel = new(name);
+                Channels.Add(channel);
+                SelectedChannel = channel;
+                //Dispatcher.Invoke(() => Channels.Add(channel));
+                //BindingOperations.EnableCollectionSynchronization(channel.Users, _lock);
+                BindingOperations.EnableCollectionSynchronization(channel.History, _lock);
+            }
+            return channel;
+        }
+        #endregion
+
+        #region Commands
+
+        #region UpdateUsersCommand
+        private ICommand _RefreshUserListCommand;
+        public ICommand RefreshUserListCommand => _RefreshUserListCommand;
+        private void OnRefreshUserListCommand(object parameter) => UpdateSelectedChannelUsers();
+        #endregion
+
         #endregion
     }
 }
