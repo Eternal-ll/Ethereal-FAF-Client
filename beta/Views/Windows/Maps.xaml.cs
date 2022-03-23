@@ -395,8 +395,8 @@ namespace beta.Views.Windows
         #endregion
 
         #region SelectedMap
-        private ApiUniversalData _SelectedMap;
-        public ApiUniversalData SelectedMap
+        private ApiMapData _SelectedMap;
+        public ApiMapData SelectedMap
         {
             get => _SelectedMap;
             set => Set(ref _SelectedMap, value);
@@ -462,19 +462,19 @@ namespace beta.Views.Windows
 
         public SortDescription[] SortDescriptions => new SortDescription[]
         {
-            new SortDescription(nameof(ApiUniversalData.DisplayedName), ListSortDirection.Ascending),
-            //new SortDescription(nameof(ApiUniversalData.AuthorLogin), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.MaxPlayers), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.GamesPlayed), ListSortDirection.Ascending),
-            //new SortDescription(nameof(ApiUniversalData.IsRanked), ListSortDirection.Ascending),
-            //new SortDescription(nameof(ApiUniversalData.IsRecommended), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.Height), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.Width), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.SummaryLowerBound), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.SummaryScore), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.SummaryReviews), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.UpdateTime), ListSortDirection.Ascending),
-            new SortDescription(nameof(ApiUniversalData.CreateTime), ListSortDirection.Ascending)
+            new SortDescription(nameof(ApiMapData.DisplayedName), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiMapData.AuthorLogin), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.MaxPlayers), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.GamesPlayed), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiMapData.IsRanked), ListSortDirection.Ascending),
+            //new SortDescription(nameof(ApiMapData.IsRecommended), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.Height), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.Width), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.SummaryLowerBound), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.SummaryScore), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.SummaryReviews), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.UpdateTime), ListSortDirection.Ascending),
+            new SortDescription(nameof(ApiMapData.CreateTime), ListSortDirection.Ascending)
         };
 
         #region SelectedSort
@@ -600,19 +600,19 @@ namespace beta.Views.Windows
 
         private string GetSortProperty() => SelectedSort.PropertyName switch
         {
-            nameof(ApiUniversalData.DisplayedName) => "displayName",
-            //nameof(ApiUniversalData.AuthorLogin) => "",
-            nameof(ApiUniversalData.MaxPlayers) => "latestVersion.maxPlayers",
-            nameof(ApiUniversalData.GamesPlayed) => "gamesPlayed",
-            //nameof(ApiUniversalData.IsRanked) => "",
-            //nameof(ApiUniversalData.IsRecommended) => "",
-            nameof(ApiUniversalData.Height) => "latestVersion.width",
-            nameof(ApiUniversalData.Width) => "latestVersion.width",
-            nameof(ApiUniversalData.SummaryLowerBound) => "reviewsSummary.lowerBound",
-            nameof(ApiUniversalData.SummaryScore) => "reviewsSummary.score",
-            nameof(ApiUniversalData.SummaryReviews) => "reviewsSummary.reviews",
-            nameof(ApiUniversalData.CreateTime) => "latestVersion.createTime",
-            nameof(ApiUniversalData.UpdateTime) => "latestVersion.updateTime",
+            nameof(ApiMapData.DisplayedName) => "displayName",
+            //nameof(ApiMapData.AuthorLogin) => "",
+            nameof(ApiMapData.MaxPlayers) => "latestVersion.maxPlayers",
+            nameof(ApiMapData.GamesPlayed) => "gamesPlayed",
+            //nameof(ApiMapData.IsRanked) => "",
+            //nameof(ApiMapData.IsRecommended) => "",
+            nameof(ApiMapData.Height) => "latestVersion.width",
+            nameof(ApiMapData.Width) => "latestVersion.width",
+            nameof(ApiMapData.SummaryLowerBound) => "reviewsSummary.lowerBound",
+            nameof(ApiMapData.SummaryScore) => "reviewsSummary.score",
+            nameof(ApiMapData.SummaryReviews) => "reviewsSummary.reviews",
+            nameof(ApiMapData.CreateTime) => "latestVersion.createTime",
+            nameof(ApiMapData.UpdateTime) => "latestVersion.updateTime",
             _ => null,
         };
 

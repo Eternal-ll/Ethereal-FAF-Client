@@ -422,7 +422,7 @@
                         <Setter Property="TextWrapping" Value="Wrap"/>
                     </Style>
 
-                    <DataTemplate DataType="{x:Type apiModels:ApiUniversalData}">
+                    <DataTemplate DataType="{x:Type apiModels:ApiMapData}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
