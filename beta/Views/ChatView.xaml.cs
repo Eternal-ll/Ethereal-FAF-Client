@@ -204,12 +204,10 @@ namespace beta.Views
                 if (e.Arg == ManagedTcpClientState.PendingConnection)
                 {
                     PendingConnectionToIRC = true;
-                    //WelcomeGridVisibility = Visibility.Visible;
                 }
                 else if (e.Arg == ManagedTcpClientState.Connected)
                 {
                     PendingConnectionToIRC = false;
-                    //WelcomeGridVisibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -249,8 +247,8 @@ namespace beta.Views
 
                         if (SelectedChannel.Name == channel.Name)
                         {
-                            // TODO, we are reloading the whole list
-                            UpdateSelectedChannelUsers();
+                            SelectedChannelPlayers.Remove(GetChatPlayer(user));
+                            SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.To));
                         }
 
                         break;
@@ -409,14 +407,9 @@ namespace beta.Views
 
         private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
         {
-            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
-            {
-                Dispatcher.Invoke(() => channel.History.Add(e.Arg));
-            }
-            else
-            {
-                // todo
-            }
+            var channel = GetChannel(e.Arg.Channel);
+
+            Dispatcher.Invoke(() => channel.History.Add(e.Arg));
         }
 
         private void OnChannelTopicChangedBy(object sender, EventArgs<IrcChannelTopicChangedBy> e)
@@ -453,12 +446,10 @@ namespace beta.Views
         {
             if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
             {
-                //Dispatcher.Invoke(() => Channels.Add(channel));
                 if (!channel.Users.Contains(e.Arg.User))
                 {
                     channel.Users.Add(e.Arg.User);
 
-                    // TODO null SelectedChannel
                     if (channel.Name.Equals(SelectedChannel?.Name))
                     {
                         SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
