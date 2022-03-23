@@ -15,6 +15,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using beta.Models.Debugger;
+using beta.Models.Enums;
 
 namespace beta.Infrastructure.Services
 {

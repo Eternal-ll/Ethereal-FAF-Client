@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.Logging;
 using System;

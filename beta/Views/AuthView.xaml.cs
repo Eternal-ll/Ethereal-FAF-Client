@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
