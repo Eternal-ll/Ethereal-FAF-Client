@@ -156,6 +156,8 @@ namespace beta.Models.Server
         }
         #endregion
 
+        public string LoginWithClan => clan == null ? login : $"[{clan}] {login}";
+
         public DateTime? Updated { get; set; }
 
         #endregion

@@ -88,10 +88,6 @@ namespace beta.Views
         private readonly CollectionViewSource SelectedChannelPlayersViewSource = new();
         public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
 
-
-        private readonly CollectionViewSource OnlinePlayersViewSource = new();
-        public ICollectionView OnlinePlayersView => OnlinePlayersViewSource.View;
-
         #region FilterText
         private string _FilterText = string.Empty;
         public string FilterText
@@ -101,48 +97,7 @@ namespace beta.Views
             {
                 if (Set(ref _FilterText, value))
                 {
-                    if (IrcService.State == IrcState.Connected)
-                        SelectedChannelPlayersView.Refresh();
-                    else OnlinePlayersView.Refresh();
-                }
-            }
-        }
-        #endregion
-
-        #region WelcomeGridVisibility
-        private Visibility _WelcomeGridVisibility = Visibility.Visible;
-        public Visibility WelcomeGridVisibility
-        {
-            get => _WelcomeGridVisibility;
-            set
-            {
-                if (Set(ref _WelcomeGridVisibility, value))
-                {
-                    ChatGridVisibility = value == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-                }
-            }
-        } 
-        #endregion
-
-        #region ChatGridVisibility
-        private Visibility _ChatGridVisibility = Visibility.Collapsed;
-        public Visibility ChatGridVisibility
-        {
-            get => _ChatGridVisibility;
-            set => Set(ref _ChatGridVisibility, value);
-        }
-        #endregion
-
-        #region PendingConnectionToIRC
-        private bool _PendingConnectionToIRC;
-        public bool PendingConnectionToIRC
-        {
-            get => _PendingConnectionToIRC;
-            set
-            {
-                if (Set(ref _PendingConnectionToIRC, value))
-                {
-                    OnPropertyChanged(nameof(IsRequestConnectBtnEnabled));
+                    SelectedChannelPlayersView.Refresh();
                 }
             }
         }
@@ -157,9 +112,7 @@ namespace beta.Views
         }
         #endregion
 
-        public bool IsRequestConnectBtnEnabled => !PendingConnectionToIRC;
-
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
 
         #endregion
 
@@ -172,19 +125,11 @@ namespace beta.Views
             PlayersService = App.Services.GetService<IPlayersService>();
             IrcService = App.Services.GetService<IIrcService>();
 
-            if (IrcService.State == IrcState.Connected)
-            {
-                WelcomeGridVisibility = Visibility.Collapsed;
-            }
-
-            BindingOperations.EnableCollectionSynchronization(PlayersService.Players, _lock);
-            OnlinePlayersViewSource.Source = PlayersService.Players;
-
             SelectedChannelPlayersViewSource.Source = SelectedChannelPlayers;
             BindingOperations.EnableCollectionSynchronization(SelectedChannelPlayers, _lock);
             BindingOperations.EnableCollectionSynchronization(Channels, _lock);
 
-            PropertyGroupDescription groupDescription = new("", new ChatUserGroupConverter());
+            PropertyGroupDescription groupDescription = new(null, new ChatUserGroupConverter());
             groupDescription.GroupNames.Add("Me");
             groupDescription.GroupNames.Add("Moderators");
             groupDescription.GroupNames.Add("Friends");
@@ -195,7 +140,6 @@ namespace beta.Views
             SelectedChannelPlayersViewSource.GroupDescriptions.Add(groupDescription);
 
             SelectedChannelPlayersViewSource.Filter += PlayersFilter;
-            OnlinePlayersViewSource.Filter += PlayersFilter;
 
             #region IrcService event listeners
             IrcService.StateChanged += OnStateChanged;
@@ -385,43 +329,15 @@ namespace beta.Views
         #region Events listeners
         private void OnStateChanged(object sender, EventArgs<IrcState> e)
         {
-            PendingConnectionToIRC = true;
-            switch (e.Arg)
+            if (e.Arg == IrcState.Authorized)
             {
-                case IrcState.Connected:
-                    break;
-                case IrcState.Disconnected:
-                    PendingConnectionToIRC = false;
-                    break;
-                case IrcState.PendingConnection:
-                    break;
-                case IrcState.CantConnect:
-                    break;
-                case IrcState.TimedOut:
-                    break;
-                case IrcState.PendingAuthorization:
-                    break;
-                case IrcState.CantAuthorize:
-                    break;
-                case IrcState.Authorized:
-                    WelcomeGridVisibility = Visibility.Collapsed;
-
-                    for (int i = 0; i < Channels.Count; i++)
-                    {
-                        IrcService.Join(Channels[i].Name);
-                    }
-
-                    _FilterText = string.Empty;
-                    OnPropertyChanged(nameof(FilterText));
-                    PendingConnectionToIRC = false;
-                    break;
-                case IrcState.Throttled:
-                    break;
-            };
-
-            if (e.Arg != IrcState.Connected && e.Arg != IrcState.Authorized)
+                for (int i = 0; i < Channels.Count; i++)
+                {
+                    IrcService.Join(Channels[i].Name);
+                }
+            }
+            else if (e.Arg != IrcState.Connected)
             {
-                WelcomeGridVisibility = Visibility.Visible;
                 for (int i = 0; i < Channels.Count; i++)
                 {
                     Channels[i].Users.Clear();

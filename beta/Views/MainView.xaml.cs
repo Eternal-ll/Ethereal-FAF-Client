@@ -60,7 +60,7 @@ namespace beta.Views
             Pages = new UserControl[]
             {
                 new HomeView(),
-                new ChatView(),
+                new ChatControlView(),
                 new GlobalView(),
                 new AnalyticsView(),
                 new SettingsView(),
@@ -70,9 +70,9 @@ namespace beta.Views
             // TODO rewrite
             if (string.IsNullOrWhiteSpace(Properties.Settings.Default.PathToGame))
             {
-                var defaultPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance\bin\SupremeCommander.exe";
+                var steamPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance\bin\SupremeCommander.exe";
 
-                if (!File.Exists(defaultPath))
+                if (!File.Exists(steamPath))
                 {
                     Dialog = new ContentDialog();
 
@@ -89,7 +89,7 @@ namespace beta.Views
                 else
                 {
                     // TODO INVOKE SOMETHING AND SHOW TO USER
-                    Properties.Settings.Default.PathToGame = defaultPath;
+                    Properties.Settings.Default.PathToGame = steamPath;
                 }   
             }
         }

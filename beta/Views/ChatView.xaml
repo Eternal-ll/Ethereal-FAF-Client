@@ -10,29 +10,32 @@
              xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:controls="clr-namespace:beta.Resources.Controls"
              xmlns:custom="clr-namespace:beta.Resources.Controls"
+             xmlns:vm="clr-namespace:beta.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance local:ChatView}">
+    <!--ViewModel is not ready-->
+    <!--<UserControl.DataContext>
+        <vm:ChatViewModel/>
+    </UserControl.DataContext>-->
     <Grid x:Name="GlobalGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
         <Grid.Resources>
             <Style x:Key="PlayerListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                 <Setter Property="Padding" Value="0 4"/>
                 <Setter Property="Margin" Value="0 0 20 0"/>
-                <!--<Setter Property="Focusable" Value="False"/>-->
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             </Style>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
 
-            <Style x:Key="ClippedBorder" TargetType="Border">
-                <Setter Property="Clip">
-                    <Setter.Value>
-                        <MultiBinding Converter="{StaticResource BorderClipConverter}">
-                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
-                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
-                            <Binding Path="CornerRadius" RelativeSource="{RelativeSource Self}"/>
-                        </MultiBinding>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            <ui:Flyout x:Key="MessagePlayerCardFlyout" Placement="RightEdgeAlignedTop">
+                <ContentControl Content="{Binding Converter={StaticResource GetPlayerConverter}}"
+                                    Style="{StaticResource PlayerCardContentControlStyle}"/>
+            </ui:Flyout>
+
 
             <Style TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
                 <Setter Property="IsExpanded" Value="True"/>
@@ -172,35 +175,9 @@
                         </Image.Style>
                     </Image>
 
-                    <Image Stretch="Uniform" Height="16"
-                                   Width="16" Grid.Column="1"
-                                   HorizontalAlignment="Right">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Flag, Converter={StaticResource IsNullConverter}}"
-                                                         Value="False">
-                                        <Setter Property="Source" Value="{Binding Flag}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
+                    <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" Margin="4 0 0 0"/>
 
-                    <TextBlock Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left">
-                        <Run>
-                            <Run.Style>
-                                <Style TargetType="Run">
-                                    <Setter Property="Text" Value="{Binding clan, StringFormat='[{0}]'}"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding clan}" Value="{x:Null}">
-                                            <Setter Property="Text" Value=""/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Run.Style>
-                        </Run>
-                        <Run Text="{Binding login}"/>
+                    <TextBlock Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left" Text="{Binding LoginWithClan}">
                         <TextBlock.ToolTip>
                             <ToolTip>
                                 <ItemsControl ItemsSource="{Binding ratings}" ItemTemplate="{StaticResource PlayerRatingsDataTemplate}"/>
@@ -250,18 +227,14 @@
                                                                     </Grid.RowDefinitions>
                                                                     <StackPanel>
                                                                         <Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>
-                                                                        <TextBlock DataContext="{Binding Game}"
-                                                                                           Margin="0 10 0 0"
-                                                                                           Style="{StaticResource PlayersTextBlockStyle}">
-                                                                                    <Run Style="{StaticResource NumPlayersRunStyle}"/>
-                                                                                    <Run Text="/" FontSize="12"/>
-                                                                                    <Run Text="{Binding max_players}"/>
+                                                                        <TextBlock DataContext="{Binding Game}" Margin="0 10 0 0" Style="{StaticResource PlayersTextBlockStyle}">
+                                                                            <Run Style="{StaticResource NumPlayersRunStyle}"/>
+                                                                            <Run Text="/" FontSize="12"/>
+                                                                            <Run Text="{Binding max_players}"/>
                                                                         </TextBlock>
                                                                     </StackPanel>
-                                                                    <ItemsControl Grid.Column="1"
-                                                                                          Margin="10 0 0 0"
-                                                                                          DataContext="{Binding Game}"
-                                                                                          Style="{StaticResource TeamsItemsStyle}"/>
+                                                                    <ItemsControl Grid.Column="1" Margin="10 0 0 0" DataContext="{Binding Game}" 
+                                                                                  Style="{StaticResource TeamsItemsStyle}"/>
                                                                 </Grid>
                                                             </ToolTip>
                                                         </TextBlock.ToolTip>
@@ -324,96 +297,7 @@
                 <Setter Property="Background" Value="{DynamicResource NavigationViewExpandedPaneBackground}"/>
             </Style>
         </Grid.Resources>
-        
-        <!--#region Welcome grid -->
-        <Grid Visibility="{Binding WelcomeGridVisibility}"
-              Margin="30 32 0 0"
-              HorizontalAlignment="Left">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <StackPanel>
-                <Border Padding="10"
-                        Style="{StaticResource BorderStyle}"
-                        CornerRadius="10">
-                    <TextBlock Text="FAForever IRC Chat"
-                               FontSize="16"
-                               FontWeight="Bold"/>
-                </Border>
-                <TextBlock Margin="10 20 0 10" FontWeight="DemiBold">
-                    <Run Text="Status: " Foreground="White"/>
-                    <Run Text="• Offline" Foreground="Red"/>
-                </TextBlock>
-                <TextBlock Opacity=".7"
-                           Margin="10 0 10 10">
-                    <Run Text="IRC Service" FontWeight="Bold"/>
-                    <Run Text="is turned off, but you are still able to watch for players"/>
-                </TextBlock>
-                <StackPanel Orientation="Horizontal">
-                    <Button Margin="10 20" Content="Connect to IRC server"
-                            Command="{StaticResource ConnectToIrcCommand}"
-                            IsEnabled="{Binding IsRequestConnectBtnEnabled}"/>
-                    <ui:ProgressRing IsActive="{Binding PendingConnectionToIRC}"/>
-                </StackPanel>
-            </StackPanel>
-
-            <Border Grid.Row="1"
-                    Margin="0 20 0 30"
-                    Padding="20"
-                    CornerRadius="20"
-                    Style="{StaticResource BorderStyle}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock FontSize="16"
-                               FontWeight="Bold">
-                        <Run Text="Online: " Foreground="LightGreen"/>
-                        <Run Text="{Binding OnlinePlayersView.SourceCollection.Count, StringFormat='{}{0} players',Mode=OneWay}"/>
-                    </TextBlock>
-                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                             ui:ControlHelper.PlaceholderText="Search players"
-                             Margin="0 20"
-                             Grid.Row="1"
-                             BorderThickness="0"/>
-                    <Border Grid.Row="2">
-                        <ListBox ItemsSource="{Binding OnlinePlayersView}"
-                             Background="Transparent"
-                             VirtualizingPanel.IsContainerVirtualizable="True"
-                             VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                             VirtualizingPanel.IsVirtualizing="True"
-                             ItemContainerStyle="{StaticResource PlayerListBoxItemStyle}"
-                             MinWidth="300">
-                            <ListBox.GroupStyle>
-                                <GroupStyle/>
-                            </ListBox.GroupStyle>
-                        </ListBox>
-                    </Border>
-                </Grid>
-            </Border>
-        </Grid>
-        <!--#endregion-->
-        
-        <!--#region Chat grid -->
-        <Grid Visibility="{Binding ChatGridVisibility}">
-            <Grid.Resources>
-                <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
-                
-                <ui:Flyout x:Key="MessagePlayerCardFlyout" Placement="RightEdgeAlignedTop">
-                    <ContentControl Content="{Binding Converter={StaticResource GetPlayerConverter}}"
-                                    Style="{StaticResource PlayerCardContentControlStyle}"/>
-                </ui:Flyout>
-
-            </Grid.Resources>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <!--#region Main Block -->
+        <!--#region Main Block -->
             <Grid>
                 <Grid.Resources>
                     <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#111111"/>
@@ -858,256 +742,254 @@
             </Grid>
             <!--#endregion-->
 
-            <!--#region Right block with users -->
-            <Grid
-            Grid.Column="1"
-            Margin="2 0 0 0"
-            Panel.ZIndex="2"
-            Background="{DynamicResource NavigationViewExpandedPaneBackground}">
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedChannel}"
-                                     Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="32"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Grid.Resources>
-                    <Storyboard x:Key="OpacityAnimationShow">
-                        <DoubleAnimation
-                    Storyboard.TargetProperty="Opacity" 
-                    To="1" 
-                    Duration="0:0:0.2"/>
-                    </Storyboard>
-                    <Storyboard x:Key="OpacityAnimationHide">
-                        <DoubleAnimation
-                    Storyboard.TargetProperty="Opacity" 
-                    To="0"
-                    Duration="0:0:0.2"/>
-                    </Storyboard>
-                </Grid.Resources>
+        <!--#region Right block with users -->
+        <Grid
+        Grid.Column="1"
+        Margin="2 0 0 0"
+        Panel.ZIndex="2"
+        Background="{DynamicResource NavigationViewExpandedPaneBackground}">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedChannel}"
+                                    Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <Storyboard x:Key="OpacityAnimationShow">
+                    <DoubleAnimation
+                Storyboard.TargetProperty="Opacity" 
+                To="1" 
+                Duration="0:0:0.2"/>
+                </Storyboard>
+                <Storyboard x:Key="OpacityAnimationHide">
+                    <DoubleAnimation
+                Storyboard.TargetProperty="Opacity" 
+                To="0"
+                Duration="0:0:0.2"/>
+                </Storyboard>
+            </Grid.Resources>
 
-                <TextBlock
+            <TextBlock
+            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
+            Text="{Binding SelectedChannelPlayersView.Count, StringFormat='Chat users: {0} players', UpdateSourceTrigger=PropertyChanged}"
+            FontWeight="DemiBold"
+            Padding="0 6 0  0"
+            Margin="18 0 0 0"/>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!--#region Chat options -->
+                <Button
+                Margin="8 6 0 0"
+                Height="30"
+                Width="30"
                 Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                Text="{Binding SelectedChannelPlayersView.Count, StringFormat='Chat users: {0} players', UpdateSourceTrigger=PropertyChanged}"
-                FontWeight="DemiBold"
-                Padding="0 6 0  0"
-                Margin="18 0 0 0"/>
-
-                <Grid Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <!--#region Chat options -->
-                    <Button
-                    Margin="8 6 0 0"
-                    Height="30"
-                    Width="30"
-                    Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                    Padding="0"
-                    ui:ControlHelper.CornerRadius="4"
-                    VerticalAlignment="Top">
-                        <Grid>
-                            <Path
-                            Margin="6"
-                            Stretch="Uniform"
-                            Fill="White"
-                            Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
-                            />
+                Padding="0"
+                ui:ControlHelper.CornerRadius="4"
+                VerticalAlignment="Top">
+                    <Grid>
+                        <Path
+                        Margin="6"
+                        Stretch="Uniform"
+                        Fill="White"
+                        Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
+                        />
+                        <Canvas
+                        Margin="0 -8 0 0"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top">
                             <Canvas
-                            Margin="0 -8 0 0"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Top">
-                                <Canvas
-                                Canvas.Right="0"
-                                Background="Transparent"
-                                Width="20"
-                                Height="{Binding ElementName=MoreWindow, Path=ActualHeight}"
-                                IsHitTestVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
-                                            Path=IsMouseOver}"/>
-                                <Border
-                                x:Name="MoreWindow"
-                                Padding="10"
-                                CornerRadius="6"
-                                Canvas.Right="13"
-                                Background="{StaticResource NavigationViewDefaultPaneBackground}">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Opacity" Value="0"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="Opacity" Value="0">
-                                                    <Setter Property="IsHitTestVisible" Value="False"/>
-                                                </Trigger>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
-                                            Path=IsMouseOver}"
-                                                     Value="True">
-                                                    <DataTrigger.EnterActions>
-                                                        <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
-                                                    </DataTrigger.EnterActions>
-                                                    <DataTrigger.ExitActions>
-                                                        <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
-                                                    </DataTrigger.ExitActions>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <Border.Effect>
-                                        <DropShadowEffect
-                                        Color="#111111"
-                                        Opacity=".4"
-                                        Direction="-90"
-                                        BlurRadius="30"/>
-                                    </Border.Effect>
-                                    <StackPanel MinWidth="140">
-                                        <TextBlock Text="Filter players" FontWeight="DemiBold" />
-                                        <Separator Opacity=".5" Margin="0 6 0 10"/>
-                                        <ComboBox
-                                        FontSize="13"
-                                        SelectedIndex="0"
-                                        ui:ControlHelper.Header="Chat users"
-                                        HorizontalAlignment="Stretch"
-                                        BorderThickness="0">
-                                            <ComboBoxItem Content="All"/>
-                                            <ComboBoxItem Content="Players only"/>
-                                        </ComboBox>
+                            Canvas.Right="0"
+                            Background="Transparent"
+                            Width="20"
+                            Height="{Binding ElementName=MoreWindow, Path=ActualHeight}"
+                            IsHitTestVisible="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                        Path=IsMouseOver}"/>
+                            <Border
+                            x:Name="MoreWindow"
+                            Padding="10"
+                            CornerRadius="6"
+                            Canvas.Right="13"
+                            Background="{StaticResource NavigationViewDefaultPaneBackground}">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Opacity" Value="0"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="Opacity" Value="0">
+                                                <Setter Property="IsHitTestVisible" Value="False"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                        Path=IsMouseOver}"
+                                                    Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Border.Effect>
+                                    <DropShadowEffect
+                                    Color="#111111"
+                                    Opacity=".4"
+                                    Direction="-90"
+                                    BlurRadius="30"/>
+                                </Border.Effect>
+                                <StackPanel MinWidth="140">
+                                    <TextBlock Text="Filter players" FontWeight="DemiBold" />
+                                    <Separator Opacity=".5" Margin="0 6 0 10"/>
+                                    <ComboBox
+                                    FontSize="13"
+                                    SelectedIndex="0"
+                                    ui:ControlHelper.Header="Chat users"
+                                    HorizontalAlignment="Stretch"
+                                    BorderThickness="0">
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="Players only"/>
+                                    </ComboBox>
 
 
-                                        <TextBlock Text="Sort players" FontWeight="DemiBold" Margin="0 20 0 0"/>
-                                        <Separator Opacity=".5" Margin="0 6 0 10"/>
-                                        <ComboBox
-                                        FontSize="13"
-                                        SelectedIndex="0"
-                                        ui:ControlHelper.Header="By rating"
-                                        HorizontalAlignment="Stretch"
-                                        BorderThickness="0">
-                                            <ComboBoxItem Content="All"/>
-                                            <ComboBoxItem Content="Ladder"/>
-                                            <ComboBoxItem Content="Global"/>
-                                            <ComboBoxItem Content="2 vs 2"/>
-                                            <ComboBoxItem Content="4 vs 4"/>
-                                        </ComboBox>
+                                    <TextBlock Text="Sort players" FontWeight="DemiBold" Margin="0 20 0 0"/>
+                                    <Separator Opacity=".5" Margin="0 6 0 10"/>
+                                    <ComboBox
+                                    FontSize="13"
+                                    SelectedIndex="0"
+                                    ui:ControlHelper.Header="By rating"
+                                    HorizontalAlignment="Stretch"
+                                    BorderThickness="0">
+                                        <ComboBoxItem Content="All"/>
+                                        <ComboBoxItem Content="Ladder"/>
+                                        <ComboBoxItem Content="Global"/>
+                                        <ComboBoxItem Content="2 vs 2"/>
+                                        <ComboBoxItem Content="4 vs 4"/>
+                                    </ComboBox>
 
 
-                                        <TextBlock Text="Chat options" FontWeight="DemiBold" Margin="0 20 0 0"/>
-                                        <Separator Opacity=".5" Margin="0 6 0 10"/>
-                                        <CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>
-                                        <CheckBox Content="Enable game preview" IsChecked="False"/>
-                                        <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2" Margin="0 10 0 0"/>
-                                    </StackPanel>
-                                </Border>
-                            </Canvas>
-                        </Grid>
-                    </Button>
-                    <!--#endregion-->
-                    <!--#region Users search box -->
-                    <TextBox
-                    Grid.Column="1"
-                    BorderThickness="0"
-                    Margin="9 4 10 10"
-                    ui:ControlHelper.CornerRadius="6"
-                    ui:ControlHelper.PlaceholderText="Search players"
-                    Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
-                    <!--#endregion-->
-                </Grid>
-
-                <!--#region Channel users -->
-                <ListBox Grid.Row="2"
-                     ItemsSource="{Binding SelectedChannelPlayersView}"
-                         SelectedItem="{Binding SelectedUser}"
-                     Background="Transparent"
-                     VirtualizingPanel.IsContainerVirtualizable="True"
-                     VirtualizingPanel.IsVirtualizingWhenGrouping="True"
-                     VirtualizingPanel.IsVirtualizing="True"
-                         ItemContainerStyle="{StaticResource PlayerListBoxItemStyle}">
-                    <ListBox.GroupStyle>
-                        <GroupStyle>
-                        </GroupStyle>
-                    </ListBox.GroupStyle>
-                    <ListBox.Resources>
-                        <DataTemplate DataType="{x:Type models:UnknownPlayer}">
-                            <StackPanel Orientation="Vertical" Margin="54 0 0 0">
-                                <TextBlock Text="{Binding login}"/>
-                                <TextBlock Text="IRC user" Opacity=".5" FontSize="12"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.Resources>
-                </ListBox>
+                                    <TextBlock Text="Chat options" FontWeight="DemiBold" Margin="0 20 0 0"/>
+                                    <Separator Opacity=".5" Margin="0 6 0 10"/>
+                                    <CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>
+                                    <CheckBox Content="Enable game preview" IsChecked="False"/>
+                                    <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2" Margin="0 10 0 0"/>
+                                </StackPanel>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                </Button>
                 <!--#endregion-->
-
-                <!--#region Shadow box on users list -->
-                <Canvas
-                Grid.Row="2"
-                VerticalAlignment="Top"
-                Height="40"
-                Panel.ZIndex="1"
-                SnapsToDevicePixels="True"
-                Background="#111111"
-                IsHitTestVisible="False">
-                    <Canvas.OpacityMask>
-                        <LinearGradientBrush EndPoint=".5, 0" StartPoint=".5, 1">
-                            <GradientStop Color="#00000000" Offset="0"/>
-                            <GradientStop Color="Black" Offset=".9"/>
-                        </LinearGradientBrush>
-                    </Canvas.OpacityMask>
-                    <Canvas.Style>
-                        <Style TargetType="Canvas">
-                            <Setter Property="Opacity" Value="0"/>
-                            <Style.Triggers>
-                                <!--TODO FIX ME SOLUTION in GlobalView -->
-                                <!--<DataTrigger Binding="{Binding ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
-                                     Value="True">
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
-                                </DataTrigger.EnterActions>
-                                <DataTrigger.ExitActions>
-                                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
-                                </DataTrigger.ExitActions>
-                            </DataTrigger>-->
-                            </Style.Triggers>
-                        </Style>
-                    </Canvas.Style>
-                </Canvas>
+                <!--#region Users search box -->
+                <TextBox
+                Grid.Column="1"
+                BorderThickness="0"
+                Margin="9 4 10 10"
+                ui:ControlHelper.CornerRadius="6"
+                ui:ControlHelper.PlaceholderText="Search players"
+                Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
                 <!--#endregion-->
-
             </Grid>
+
+            <!--#region Channel users -->
+            <ListBox Grid.Row="2"
+                    ItemsSource="{Binding SelectedChannelPlayersView}"
+                        SelectedItem="{Binding SelectedUser}"
+                    Background="Transparent"
+                    VirtualizingPanel.IsContainerVirtualizable="True"
+                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                    VirtualizingPanel.IsVirtualizing="True"
+                        ItemContainerStyle="{StaticResource PlayerListBoxItemStyle}">
+                <ListBox.GroupStyle>
+                    <GroupStyle>
+                    </GroupStyle>
+                </ListBox.GroupStyle>
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                        <StackPanel Orientation="Vertical" Margin="54 0 0 0">
+                            <TextBlock Text="{Binding login}"/>
+                            <TextBlock Text="IRC user" Opacity=".5" FontSize="12"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.Resources>
+            </ListBox>
             <!--#endregion-->
 
-            <GridSplitter
+            <!--#region Shadow box on users list -->
+            <Canvas
+            Grid.Row="2"
+            VerticalAlignment="Top"
+            Height="40"
+            Panel.ZIndex="1"
+            SnapsToDevicePixels="True"
+            Background="#111111"
+            IsHitTestVisible="False">
+                <Canvas.OpacityMask>
+                    <LinearGradientBrush EndPoint=".5, 0" StartPoint=".5, 1">
+                        <GradientStop Color="#00000000" Offset="0"/>
+                        <GradientStop Color="Black" Offset=".9"/>
+                    </LinearGradientBrush>
+                </Canvas.OpacityMask>
+                <Canvas.Style>
+                    <Style TargetType="Canvas">
+                        <Setter Property="Opacity" Value="0"/>
+                        <Style.Triggers>
+                            <!--TODO FIX ME SOLUTION in GlobalView -->
+                            <!--<DataTrigger Binding="{Binding ContentVerticalOffset, Converter={StaticResource MoreThanConverter}}"
+                                    Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationShow}"/>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource OpacityAnimationHide}"/>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>-->
+                        </Style.Triggers>
+                    </Style>
+                </Canvas.Style>
+            </Canvas>
+            <!--#endregion-->
+
+        </Grid>
+        <!--#endregion-->
+
+        <GridSplitter
             Grid.Column="1"
             Width="2"
             Panel.ZIndex="1"
             ShowsPreview="True"
             HorizontalAlignment="Left"
             ToolTip="Splitter">
-                <GridSplitter.Style>
-                    <Style TargetType="GridSplitter">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SelectedChannel}"
+            <GridSplitter.Style>
+                <Style TargetType="GridSplitter">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedChannel}"
                                      Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="BlueViolet"/>
-                                <Setter Property="Panel.ZIndex" Value="2"/>
-                            </Trigger>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="Background" Value="BlueViolet"/>
-                                <Setter Property="Panel.ZIndex" Value="2"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </GridSplitter.Style>
-            </GridSplitter>
-        </Grid>
-        <!--#endregion-->
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="BlueViolet"/>
+                            <Setter Property="Panel.ZIndex" Value="2"/>
+                        </Trigger>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter Property="Background" Value="BlueViolet"/>
+                            <Setter Property="Panel.ZIndex" Value="2"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </GridSplitter.Style>
+        </GridSplitter>
     </Grid>
 </UserControl>

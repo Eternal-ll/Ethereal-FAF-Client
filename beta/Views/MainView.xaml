@@ -46,7 +46,7 @@
 
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="Home" Tag="Home" Icon="{StaticResource HomePathIcon}"/>
-                <ui:NavigationViewItem Tag="Chat" Icon="{StaticResource ChatPathIcon}">
+                <ui:NavigationViewItem Tag="ChatControl" Icon="{StaticResource ChatPathIcon}">
                     <TextBlock>
                         <Run Text="Chat"/>
                         <Run Text="•">

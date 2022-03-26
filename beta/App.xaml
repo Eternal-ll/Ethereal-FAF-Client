@@ -43,7 +43,7 @@
 
                     <!--Chat converters-->
                     <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
-                    
+
                     <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
                     <converter:CheckIfEmojiOnlyConverter x:Key="CheckIfEmojiOnlyConverter"/>
 
@@ -52,7 +52,6 @@
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
                 </ResourceDictionary>
-
 
                 <ui:ThemeResources RequestedTheme="Dark">
                     <ui:ThemeResources.ThemeDictionaries>
@@ -76,9 +75,21 @@
                 </ui:ThemeResources>
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
+
+
+                <ResourceDictionary Source="Resources/Styles/ListBoxItemStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ListBoxStyles.xaml"/>
+
+
+
                 <ResourceDictionary Source="Resources/ResourceDictionaries/PathIcons.xaml"/>
-                <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
+
+                <ResourceDictionary Source="Resources/Templates/PlayerDataTemplates.xaml"/>
+
+                <ResourceDictionary Source="Resources/Styles/ContentControlStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/BorderStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
