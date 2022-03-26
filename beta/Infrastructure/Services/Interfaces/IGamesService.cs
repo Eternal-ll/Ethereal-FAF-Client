@@ -6,7 +6,7 @@ namespace beta.Infrastructure.Services.Interfaces
     /// <summary>
     /// 
     /// </summary>
-    public interface IGamesServices
+    public interface IGamesService
     {
         /// <summary>
         /// Available idle games for joining

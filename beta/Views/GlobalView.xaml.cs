@@ -345,7 +345,7 @@ namespace beta.Views
         public static object NewItemPlaceholder => CollectionView.NewItemPlaceholder;
         public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
 
-        private readonly IGamesServices GamesServices;
+        private readonly IGamesService GamesServices;
         private readonly object _lock = new();
 
         #endregion
@@ -364,7 +364,7 @@ namespace beta.Views
 
             IdleGamesScrollViewer = Tools.FindChild<ScrollViewer>(IdleGames);
 
-            GamesServices = App.Services.GetRequiredService<IGamesServices>();
+            GamesServices = App.Services.GetRequiredService<IGamesService>();
 
             //var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;

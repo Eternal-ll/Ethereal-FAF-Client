@@ -281,7 +281,7 @@ namespace beta.Infrastructure.Services
 
             if (Settings.Default.ConnectIRC)
             {
-                IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+                //IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
             }
         }
         private void OnSocialData(string json)

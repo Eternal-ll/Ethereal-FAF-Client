@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 
 namespace beta.Infrastructure.Services
 {
-    public class GamesServices : ViewModel, IGamesServices
+    public class GamesService : ViewModel, IGamesService
     {
         #region Properties
 
@@ -29,7 +29,7 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        public GamesServices(
+        public GamesService(
             ISessionService sessionService,
             IPlayersService playerService,
             IMapsService mapService)

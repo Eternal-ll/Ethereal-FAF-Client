@@ -10,7 +10,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IOAuthService, OAuthService>()
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<IPlayersService, PlayersService>()
-            .AddSingleton<IGamesServices, GamesServices>()
+            .AddSingleton<IGamesService, GamesService>()
             //.AddSingleton<IIrcService, IrcService>()
             .AddSingleton<IAvatarService, AvatarService>()
             .AddSingleton<IMapsService, MapsService>()
