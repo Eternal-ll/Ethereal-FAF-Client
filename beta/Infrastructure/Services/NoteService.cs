@@ -17,14 +17,6 @@ namespace beta.Infrastructure.Services
         public NoteService()
         {
             Task.Run(() => Load());
-
-            //System.Windows.Application.Current.Exit += (s, e) =>
-            //{
-            //    if (!IsEmpty())
-            //    {
-            //        Save();
-            //    }
-            //};
         }
 
         private async Task Load()

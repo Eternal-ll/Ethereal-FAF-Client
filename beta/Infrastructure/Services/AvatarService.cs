@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using System;
-using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services

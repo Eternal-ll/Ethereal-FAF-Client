@@ -1,3 +1,4 @@
+using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using System.Collections.Generic;

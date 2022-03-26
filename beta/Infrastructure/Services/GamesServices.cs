@@ -19,18 +19,11 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        #region IdleGames
-        private readonly ObservableCollection<GameInfoMessage> _IdleGames = new();
-        public ObservableCollection<GameInfoMessage> IdleGames => _IdleGames;
-        #endregion
-
-        #region LiveGames
-        private readonly ObservableCollection<GameInfoMessage> _LiveGames = new();
-        public ObservableCollection<GameInfoMessage> LiveGames => _LiveGames;
-        #endregion
+        public ObservableCollection<GameInfoMessage> IdleGames { get; } = new();
+        public ObservableCollection<GameInfoMessage> LiveGames { get; } = new();
 
         /// <summary>
-        /// Idle games without players. Bugged or just created
+        /// Idle games without players. Bugged or have been created with 0 players
         /// </summary>
         private readonly List<GameInfoMessage> SuspiciousGames = new();
 
@@ -46,30 +39,14 @@ namespace beta.Infrastructure.Services
             MapService = mapService;
 
             sessionService.NewGame += OnNewGame;
-            //Random rndm = new();
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    IdleGames.Add(new GameInfoMessage()
-            //    {
-            //        title = "Neroxis_test_test_1.2.4_",
-            //        mapname = "Neroxis_test_test_1.2.4_",
-            //        MapPreviewSource = App.Current.Resources["MapGenIcon"] as ImageSource,
-            //        max_players = rndm.Next(2, 16),
-            //        featured_mod = "faf",
-            //        game_type = "custom",
-            //        sim_mods = new(),
-            //        num_players = rndm.Next(2, 16),
-            //        host = rndm.Next(1000, 10000).ToString()
-            //    });
-            //}
         }
 
         private void OnNewGame(object sender, EventArgs<GameInfoMessage> e)
         {
             var game = e.Arg;
 
-            var idleGames = _IdleGames;
-            var liveGames = _LiveGames;
+            var idleGames = IdleGames;
+            var liveGames = LiveGames;
             var suspiciousGames = SuspiciousGames;
             // Update in-game players status
 

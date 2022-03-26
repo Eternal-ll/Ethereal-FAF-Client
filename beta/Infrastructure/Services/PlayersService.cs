@@ -1,4 +1,5 @@
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
@@ -8,11 +9,6 @@ using System.Collections.ObjectModel;
 
 namespace beta.Infrastructure.Services
 {
-    public enum ComparisonMethod
-    {
-        STARTS_WITH = 0,
-        CONTAINS = 1
-    }
     public class PlayersService : ViewModel, IPlayersService
     {
 
@@ -36,8 +32,8 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        private int[] FriendsIds { get; set; }
-        private int[] FoesIds { get; set; }
+        private int[] FriendsIds { get; set; } = Array.Empty<int>();
+        private int[] FoesIds { get; set; } = Array.Empty<int>();
 
         #endregion
 
@@ -133,34 +129,26 @@ namespace beta.Infrastructure.Services
 
             #endregion
 
-            // TODO REWRITE?
-            #region Matching friends & foes
+            #region Matching clanmates & friends & foes
 
             var friendsIds = FriendsIds;
             var foesIds = FoesIds;
             var me = Me;
 
-            if (me?.clan is not null)
-                if (player.clan == me.clan) player.RelationShip = PlayerRelationShip.Clan;
-
             if (player.id != me.id)
             {
-                // TODO REWRITE?
-                if (friendsIds is not null && friendsIds.Length > 0)
-                    for (int i = 0; i < friendsIds.Length; i++)
-                        if (friendsIds[i] == player.id)
-                        {
-                            player.RelationShip = PlayerRelationShip.Friend;
-                            break;
-                        }
-
-                if (foesIds is not null && foesIds.Length > 0)
-                    for (int i = 0; i < foesIds.Length; i++)
-                        if (foesIds[i] == player.id)
-                        {
-                            player.RelationShip = PlayerRelationShip.Foe;
-                            break;
-                        }
+                if (IsClanMate(player.clan))
+                {
+                    player.RelationShip = PlayerRelationShip.Clan;
+                }
+                else if (IsFriend(player.id))
+                {
+                    player.RelationShip = PlayerRelationShip.Friend;
+                }
+                else if (IsFoe(player.id))
+                {
+                    player.RelationShip = PlayerRelationShip.Foe;
+                }
             }
             else
             {
@@ -173,17 +161,11 @@ namespace beta.Infrastructure.Services
             {
                 var matchedPlayer = players[id];
 
-                // If avatar is changed
-                if (matchedPlayer.avatar is not null)
+                if (!Equals(matchedPlayer.avatar, player.avatar) && player.avatar != null)
                 {
-                    if (player.avatar is not null)
-                    {
-                        if (player.avatar.url.Segments[^1] != matchedPlayer.avatar.url.Segments[^1])
-                            // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                            System.Windows.Application.Current.Dispatcher.Invoke(() => matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
-                            System.Windows.Threading.DispatcherPriority.Background);
-                    }
-                    else player.Avatar = null;
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
+                    System.Windows.Threading.DispatcherPriority.Background);
                 }
 
                 matchedPlayer.Update(player);
@@ -262,5 +244,34 @@ namespace beta.Infrastructure.Services
                             else { }
                         else yield return enumerator.Current;
         }
+
+        private bool IsClanMate(string clan) => Equals(Me.clan, clan);
+        public bool IsClanMate(PlayerInfoMessage player) => IsClanMate(player.clan);//player.clan != null ? IsClanMate(player.clan) : false;
+
+        private bool IsFriend(int id)
+        {
+            var friends = FriendsIds;
+            if (friends.Length == 0) return false;
+
+            for (int i = 0; i < friends.Length; i++)
+            {
+                if (friends[i] == id) return true;
+            }
+            return false;
+        }
+        public bool IsFriend(PlayerInfoMessage player) => IsFriend(player.id);
+
+        private bool IsFoe(int id)
+        {
+            var foes = FoesIds;
+            if (foes.Length == 0) return false;
+
+            for (int i = 0; i < foes.Length; i++)
+            {
+                if (foes[i] == id) return true;
+            }
+            return false;
+        }
+        public bool IsFoe(PlayerInfoMessage player) => IsFoe(player.id);
     }
 }

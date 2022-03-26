@@ -53,7 +53,6 @@
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
                 </ResourceDictionary>
 
-                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
 
                 <ui:ThemeResources RequestedTheme="Dark">
                     <ui:ThemeResources.ThemeDictionaries>
@@ -79,6 +78,7 @@
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
                 <ResourceDictionary Source="Resources/ResourceDictionaries/PathIcons.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

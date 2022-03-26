@@ -88,6 +88,7 @@ namespace beta.Views
         private readonly CollectionViewSource SelectedChannelPlayersViewSource = new();
         public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
 
+
         private readonly CollectionViewSource OnlinePlayersViewSource = new();
         public ICollectionView OnlinePlayersView => OnlinePlayersViewSource.View;
 
@@ -144,6 +145,15 @@ namespace beta.Views
                     OnPropertyChanged(nameof(IsRequestConnectBtnEnabled));
                 }
             }
+        }
+        #endregion
+
+        #region SelectedUser
+        private IPlayer _SelectedUser;
+        public IPlayer SelectedUser
+        {
+            get => _SelectedUser;
+            set => Set(ref _SelectedUser, value);
         }
         #endregion
 
@@ -206,10 +216,10 @@ namespace beta.Views
 
             _LeaveFromChannelCommand = new LambdaCommand(OnLeaveFromChannelCommand);
             _RefreshUserListCommand = new LambdaCommand(OnRefreshUserListCommand);
+            _HideSelectedUserCommand = new LambdaCommand(OnHideSelectedUserCommand);
 
             GlobalGrid.Resources.Add("LeaveFromChannelCommand", _LeaveFromChannelCommand);
         }
-
 
         #region Commands
 
@@ -255,7 +265,14 @@ namespace beta.Views
         private void OnRefreshUserListCommand(object parameter) => UpdateSelectedChannelUsers();
         #endregion
 
+        #region HideSelectedUserCommand
+        private ICommand _HideSelectedUserCommand;
+        public ICommand HideSelectedUserCommand => _HideSelectedUserCommand;
+        private void OnHideSelectedUserCommand(object parameter) => SelectedUser = null;
         #endregion
+
+        #endregion
+
         private void OnUserChangedName(object sender, EventArgs<IrcUserChangedName> e)
         {
             for (int i = 0; i < Channels.Count; i++)

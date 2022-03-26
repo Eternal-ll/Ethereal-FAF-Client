@@ -8,24 +8,18 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
-    public enum GameState : byte
-    {
-        None = 0,
-
-        Open = 1,
-        Playing = 2,
-        Closed = 3,
-
-        Host = 4,
-
-        Playing5 = 9
-    }
 
     public class PlayerAvatar
     {
         public Uri url { get; set; }
         
         public string tooltip { get; set; }
+        //public override bool Equals(object obj)
+        //{
+        //    if (obj == null) return false;
+
+        //    return (obj is PlayerAvatar other) && other.url.Segments[^1] == url.Segments[^1];
+        //}
     }
 
     // unused

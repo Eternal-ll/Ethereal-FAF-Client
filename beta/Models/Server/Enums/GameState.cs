@@ -2,8 +2,14 @@
 {
     public enum GameState : byte
     {
-        Open = 0,
-        Playing = 1,
-        closed = 2
+        None = 0,
+
+        Open = 1,
+        Playing = 2,
+        Closed = 3,
+
+        Host = 4,
+
+        Playing5 = 9
     }
 }

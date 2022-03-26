@@ -1,14 +1,12 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Debugger;
+using beta.Models.Enums;
 using beta.Models.IRC;
-using beta.ViewModels.Base;
+using beta.Models.IRC.Enums;
 using System;
-using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using beta.Models.Debugger;
-using beta.Models.IRC.Enums;
-using beta.Models.Enums;
 
 namespace beta.Infrastructure.Services
 {
@@ -70,6 +68,7 @@ namespace beta.Infrastructure.Services
         private string Nick;
         private string Password;
 
+        #region State
         private IrcState _State;
         public IrcState State
         {
@@ -82,7 +81,8 @@ namespace beta.Infrastructure.Services
                     OnStateChanged(value);
                 }
             }
-        }
+        } 
+        #endregion
 
         #endregion
 
