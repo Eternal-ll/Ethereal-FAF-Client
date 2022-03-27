@@ -1,4 +1,4 @@
-using beta.Infrastructure.Services.Interfaces;
+    using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
@@ -58,7 +58,7 @@ namespace beta.Infrastructure.Services
                 for (int i = 0; i < players.Count; i++)
                 {
                     var player = players[i];
-                    if (player.Note.Text.Trim().Length > 0)
+                    if (player.Note.Text?.Trim().Length > 0)
                     {
                         NoteService.Set(player.login, player.Note.Text);
                     }
@@ -128,11 +128,7 @@ namespace beta.Infrastructure.Services
 
             if (NoteService.TryGet(player.login, out var note))
             {
-                player.Note = new(note);
-            }
-            else
-            {
-                player.Note = new();
+                player.Note.Text = note;
             }
 
             #endregion

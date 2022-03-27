@@ -40,7 +40,7 @@ namespace beta.Views
                 ProgressRing.Visibility = Visibility.Visible;
 
                 // launch OAuth2 authorization in service
-                new Thread(() => OAuthService.Auth())
+                new Thread(() => OAuthService.AuthAsync())
                 {
                     Name = "OAuthorization thread",
                     IsBackground = true
@@ -120,7 +120,7 @@ namespace beta.Views
             ProgressRing.Visibility = Visibility.Visible;
 
             // создаем новый поток и запускаем метод авторизации с передачей нужных параметров
-            new Thread(()=> OAuthService.Auth(login, password))
+            new Thread(()=> OAuthService.AuthAsync(login, password))
             {
                 Name = "OAuthorization thread",
                 IsBackground=true

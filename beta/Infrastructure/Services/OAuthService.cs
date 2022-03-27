@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Enums;
+using beta.Models.OAuth;
 using beta.Properties;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,7 +10,8 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -29,10 +31,7 @@ namespace beta.Infrastructure.Services
         private readonly HttpClient HttpClient = new(new HttpClientHandler { UseProxy = false });
 
         private readonly ILogger Logger;
-        /// <summary>
-        /// Поток для OAuth авторизации
-        /// </summary>
-        private Thread AuthorizationThread;
+
         public OAuthService(ILogger<OAuthService> logger)
         {
             Logger = logger;
@@ -94,38 +93,38 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        #region SafeRequest methods
-        private Stream SafeRequest(string requestUri) => SafeRequest(requestUri, null);
-        private Stream SafeRequest(string requestUri, ByteArrayContent data = null)
+        private async Task<Stream> SafeRequest(string requestUri) => await SafeRequest(requestUri, null);
+        private async Task<Stream> SafeRequest(string requestUri, ByteArrayContent data = null)
         {
+            Logger.LogInformation($"POST {requestUri}, data: \n{data?.ReadAsStringAsync().Result}");
             try
             {
                 if (data is not null)
-                    return HttpClient.PostAsync(requestUri, data).Result.Content.ReadAsStream();
-                return HttpClient.GetStreamAsync(requestUri).Result;
+                    return await (await HttpClient.PostAsync(requestUri, data)).Content.ReadAsStreamAsync();
+                return await HttpClient.GetStreamAsync(requestUri);
             }
             catch (Exception e)
             {
+                Logger.LogError(e.Message, e.StackTrace);
                 if (e is HttpRequestException || e is AggregateException)
                 {
                     OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
                 }
                 else
                 {
-                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
+                    OnStateChanged(new(OAuthState.INVALID, $"Something went wrong on {requestUri} endpoint", e.StackTrace));
                 }
             }
 
             return null;
         }
-        #endregion
 
-        private string GetOAuthCode(string usernameOrEmail, string password)
+        private async Task<string> GetOAuthCodeAsync(string usernameOrEmail, string password)
         {
-            Logger.LogInformation("Starting process of getting OAuth code");
+            Logger.LogInformation("Getting OAuth code by username or e-mail and password");
             if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrWhiteSpace(password))
             {
-                Logger.LogWarning("Given usernameOrEmail or password is empty or null");
+                Logger.LogWarning("Given usernameOrEmail and password is empty");
                 OnStateChanged(new(OAuthState.EMPTY_FIELDS, "Fill required fields"));
                 return null;
             }
@@ -134,22 +133,16 @@ namespace beta.Infrastructure.Services
 
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
 
-            Logger.LogInformation(nameof(generatedState) + " - " + generatedState);
+            Logger.LogInformation(@generatedState);
 
             #region GET hydra.faforever.com/oauth2/auth
 
-            Logger.LogInformation("GET https://hydra.faforever.com/oauth2/auth");
-
-            var stream = SafeRequest("https://hydra.faforever.com/oauth2/auth?" +
-                            "response_type=code&" +
-                            "client_id=faf-python-client&" +
-                            "redirect_uri=http://localhost&" +
-                            "scope=openid+offline+public_profile+lobby&" +
-                            "state=" + generatedState);
+            var stream = await SafeRequest(
+                @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState);
 
             if (stream is null) return null;
 
-            var streamReader = new StreamReader(stream);
+            StreamReader streamReader = new(stream);
 
             string line;
 
@@ -166,24 +159,29 @@ namespace beta.Infrastructure.Services
                 else if (line.Contains(nameof(login_challenge)))
                     login_challenge = GetHiddenValue(line);
 
-            Logger.LogInformation("_csrf - " + _csrf);
-            Logger.LogInformation("login_challenge - " + login_challenge);
+            streamReader.Dispose();
+            await stream.DisposeAsync();
 
             if (_csrf.Length == 0 || login_challenge.Length == 0)
+            {
+                Logger.LogWarning("CSRF or login_challenge not found in response");
                 return null;
+            }
 
             #endregion
 
             #region POST user.faforever.com/oauth2/login
-
-            Logger.LogInformation("POST https://user.faforever.com/oauth2/login");
             StringBuilder builder = new();
 
-            streamReader = new StreamReader(SafeRequest("https://user.faforever.com/oauth2/login", builder
+            stream = await SafeRequest("https://user.faforever.com/oauth2/login", builder
                 .Append("_csrf=").Append(_csrf)
                 .Append("&login_challenge=").Append(login_challenge)
                 .Append("&usernameOrEmail=").Append(usernameOrEmail)
-                .Append("&password=").Append(password).GetQueryByteArrayContent()));
+                .Append("&password=").Append(password).GetQueryByteArrayContent());
+
+            if (stream is null) return null;
+
+            streamReader = new StreamReader(stream);
 
             string consent_challenge = string.Empty;
 
@@ -194,6 +192,9 @@ namespace beta.Infrastructure.Services
                     break;
                 else if (line.Contains(nameof(consent_challenge))) 
                     consent_challenge = GetHiddenValue(line);
+
+            streamReader.Dispose();
+            await stream.DisposeAsync();
 
             Logger.LogInformation(nameof(consent_challenge) + " - " + consent_challenge);
 
@@ -230,8 +231,10 @@ namespace beta.Infrastructure.Services
                     OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
                 }
             }
+
+            if (callback is null) return null;
             
-            string code = callback?.Query.Substring(6, callback.Query.IndexOf("&scope", StringComparison.Ordinal) - 6);
+            string code = callback.Query[6..callback.Query.IndexOf("&scope", StringComparison.Ordinal)];
 
 
             Logger.LogInformation("code - " + code);
@@ -242,98 +245,68 @@ namespace beta.Infrastructure.Services
 
             return code;
         }
-        public void FetchOAuthToken(string code)
+        //private async Task<bool> FetchOAuthTokenAsync(string code)
+        //{
+        //    Logger.LogInformation("Fetching OAuth token by code");
+
+        //    if (code is null) return false;
+
+        //    return await FetchOAuthDataAsync(code);
+        //}
+
+        public async Task<bool> RefreshOAuthTokenAsync(string refresh_token)
         {
-            Logger.LogInformation("Starting fetching OAuth token by code");
+            Logger.LogInformation("Refreshing OAuth token");
 
-            // создаем заранее неуспешный результат получения токена
-            OAuthState result = OAuthState.INVALID;
-
-            Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
-
-            // используем безопасную обертку для запросов (SafeRequest) с вложенным запросом (GetQueryByteArrayContent)
-            // и пытаемся разобрать результат и получить данные по токену
-            if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"grant_type=authorization_code&code={code}&client_id=faf-python-client&redirect_uri=http://localhost"))))
-                // если все прошло успешно, меняем результат действий
-                result = OAuthState.AUTHORIZED;
-            else Logger.LogWarning("Something went wrong in the JSON data parsing part");
-            
-            Logger.LogInformation(result.ToString());
-            
-            // поднимаем событие изменения состояние сервиса с указанием результата и сообщения
-            OnStateChanged(new(result, result switch
-            {
-                OAuthState.INVALID => "Something went wrong on using refresh token",
-                OAuthState.AUTHORIZED => "Authorized",
-            }));
+            return await FetchOAuthDataAsync(refresh_token, true);
         }
-        public void RefreshOAuthToken(string refresh_token)
+        private async Task<bool> FetchOAuthDataAsync(string data, bool isRefreshToken = false)
         {
-            Logger.LogInformation("Starting refreshing OAuth token by refresh token");
+            string type = isRefreshToken ? "grant_type=refresh_token&refresh_token=" : "grant_type=authorization_code&code=";
+            type += data;
 
-            if (string.IsNullOrWhiteSpace(refresh_token))
-            {
-                throw new ArgumentNullException(nameof(refresh_token));
-            }
+            var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",
+                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=faf-python-client&redirect_uri=http://localhost"));
 
-            OAuthState result = OAuthState.INVALID;
-
-            Logger.LogInformation("POST https://hydra.faforever.com/oauth2/token");
-
-            if (FetchOAuthPayload(SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"grant_type=refresh_token&refresh_token={refresh_token}&client_id=faf-python-client&redirect_uri=http://localhost"))))
-                result = OAuthState.AUTHORIZED;
-            else Logger.LogWarning("Something went wrong in the JSON data parsing part");
-
-            Logger.LogInformation(result.ToString());
-
-            OnStateChanged(new(result, result switch
-            {
-                OAuthState.INVALID => "Something went wrong on using refresh token",
-                OAuthState.AUTHORIZED => "Authorized",
-            }));
+            return await TryParseTokenBearerAsync(stream);
         }
       
-        public void Auth()
+        public async Task AuthAsync()
         {
-            // TODO: move or we are fine? xD
-            if (string.IsNullOrEmpty(Settings.Default.access_token))
-                if (!string.IsNullOrEmpty(Settings.Default.refresh_token))
-                    RefreshOAuthToken(Settings.Default.refresh_token);
-                else OnStateChanged(new(OAuthState.NO_TOKEN, "No authorization token"));
-            else if ((Settings.Default.expires_in - DateTime.UtcNow).TotalSeconds < 10)
-                // TODO FIX ME Not working
-                RefreshOAuthToken(Settings.Default.refresh_token);
+            if (string.IsNullOrWhiteSpace(Settings.Default.access_token) || string.IsNullOrWhiteSpace(Settings.Default.refresh_token))
+            {
+                OnStateChanged(new(OAuthState.NO_TOKEN, "No token"));
+                return;
+            }
+
+            if ((Settings.Default.expires_in - DateTime.UtcNow).TotalSeconds < 10)
+            {
+                if (await RefreshOAuthTokenAsync(Settings.Default.refresh_token))
+                {
+
+                }
+                else
+                {
+                    OnStateChanged(new(OAuthState.INVALID, "Cant authorize using token"));
+                }
+            }
             else OnStateChanged(new(OAuthState.AUTHORIZED, "Authorized"));
         }
 
-        public void Auth(string access_token)
-        {
-            // TODO
-        }
-
-        /// <summary>
-        /// OAuth2 аутентификация с использованием логина (почты) и пароля
-        /// </summary>
-        /// <param name="usernameOrEmail">Логин или почта от аккаунта</param>
-        /// <param name="password">Пароль от аккаунта</param>
-        public void Auth(string usernameOrEmail, string password)
+        public async Task AuthAsync(string usernameOrEmail, string password)
         {
             Logger.LogInformation("Starting process of authorization");
 
-            // Получаем уникальный код для запроса токена
-            var code = GetOAuthCode(usernameOrEmail, password);
+            var code = await GetOAuthCodeAsync(usernameOrEmail, password);
             if (code is null)
             {
                 // TODO: invoke some error events?
                 return;
             }
-
-            //Settings.Default.PlayerPassword = password;
-            
-            // Запрашиваем токен
-            FetchOAuthToken(code);
+            await FetchOAuthDataAsync(code);
+            //OnStateChanged(await FetchOAuthTokenAsync(code)
+            //    ? (new(OAuthState.AUTHORIZED, "Authorized"))
+            //    : (new(OAuthState.INVALID, "Something went wrong. Check internet access to https://hydra.faforever.com/oauth2/token")));
         }
 
         //public void DoAuth(string usernameOrEmail, string password)
@@ -353,121 +326,46 @@ namespace beta.Infrastructure.Services
 
         //}
 
-        protected virtual void OnStateChanged(OAuthEventArgs e) => StateChanged?.Invoke(this, e);
+        private void OnStateChanged(OAuthEventArgs e)
+        {
+            Logger.LogInformation(e.State.ToString());
+            StateChanged?.Invoke(this, e);
+        }
 
         private string GetHiddenValue(string line)
         {
-            // TODO: rewrite me
-            int? pos = line!.IndexOf("value=\"", StringComparison.Ordinal) + 7;
-            return pos.HasValue ? line.Substring(pos.Value, line.Length - 3 - pos.Value) : null;
+            int pos = line.IndexOf("value=\"", StringComparison.Ordinal) + 7;
+            return pos == -1 ? null : line[pos..^3];
         }
-        /// <summary>
-        /// Разбор <paramref name="sr"/> JSON формата на данные токена
-        /// </summary>
-        /// <param name="sr"></param>
-        /// <returns></returns>
-        private bool FetchOAuthPayload(Stream sr)
+
+        private async Task<bool> TryParseTokenBearerAsync(Stream stream)
         {
-            // Честно, можно было не париться и просто сериализовать результат
-            // я просто занимался ерундой
+            if (stream is null) return false;
 
-            //  "access_token": "**********",
-            //    "expires_in": "**********",
-            //      "id_token": "**********",
-            // "refresh_token": "***********",
-            //         "scope": "openid offline public_profile lobby",
-            //    "token_type": "bearer"
-
-            // создаем билдеры 
-            // билдер идентификаторов
-            StringBuilder sb = new();
-            // билдер значений
-            StringBuilder cb = new();
-
-            // буффер для посимвольного чтения стрима
-            char[] buffer = new char[1];
-            // байтовый буффер, я на самом деле прикалывался
-            byte[] byteBuffer = new byte[1];
-            // переменная для заполнения уникальных идентификаторов из JSON (payload)
-            string keyword = string.Empty;
-            // массив для нужных данных из JSON
-            string[] payload = new string[4];
-
-            // пока можем читать стрим
-            while (sr.CanRead)
+            try
             {
-                // сохраняем текущий байт в буффер
-                sr.Read(byteBuffer, 0, 1);
-                // преобразуем текущей байт в символ
-                buffer[0] = Convert.ToChar(byteBuffer[0]);
+                var data = await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
+                await stream.DisposeAsync();
 
-                // если идентификатор начал заполнение
-                if (keyword.Length > 0)
+                if (data.AccessToken is null)
                 {
-                    // если это разделитель и билдер значений заполнен
-                    if (buffer[0] == '\"' && cb.Length > 3)
-                    {
-                        // в зависимости от идентификатора выполняем нужные инструкции
-                        switch (keyword)
-                        {
-                            case "\"error": return false;
-                            case "\"access_token":
-                                // билдер подхватывает пробел и разделитель после идентификатора
-                                // _"
-                                payload[0] = cb.Remove(0, 2).ToString();
-                                break;
-                            case "\",\"expires_in":
-                                payload[1] = cb.Remove(0, 1).ToString().Replace(",", null);
-                                break;
-                            case "\"id_token":
-                                payload[2] = cb.Remove(0, 2).ToString();
-                                break;
-                            case "\",\"refresh_token":
-                                payload[3] = cb.Remove(0, 2).ToString();
-                                break;
-                        }
-                        //
-                        cb.Clear();
-                        keyword = string.Empty;
-                        if (payload[3] is not null)
-                        {
-                            break;
-                        }
-                        continue;
-                    }
-                    cb.Append(buffer[0]);
-                    continue;
+                    throw new Exception();
                 }
 
-                // если билдер идентификаторов начал заполнение
-                if (sb.Length > 0)
-                {
-                    // если обнаружен конечный разделитель и присутствует заполнение
-                    if (buffer[0] == '\"' && sb.Length > 2)
-                    {
-                        // сохраняем идентификатор
-                        keyword = sb.ToString();
-                        // очищаем билдер
-                        sb.Clear();
-                    }
-                    // заполняем дальше
-                    sb.Append(buffer[0]);
-                    continue;
-                }
-
-                // если обнаружили разделитель
-                if (buffer[0] == '\"')
-                {
-                    sb.Append(buffer[0]);
-                }
+                Settings.Default.access_token = data.AccessToken;
+                Settings.Default.expires_in = data.ExpiresAt;
+                Settings.Default.id_token = data.IdToken;
+                Settings.Default.refresh_token = data.RefreshToken;
+                OnStateChanged(new(OAuthState.AUTHORIZED,""));
+                return true;
             }
-
-            Settings.Default.access_token = payload[0];
-            Settings.Default.expires_in = DateTime.UtcNow.AddSeconds(double.Parse(payload[1]));
-            Settings.Default.id_token = payload[2];
-            Settings.Default.refresh_token = payload[3];
-
-            return true;
+            catch (Exception ex)
+            {
+                Logger.LogError($"{ex.Message}\n{ex.StackTrace}");
+                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
+                await stream.DisposeAsync();
+            }
+            return false;
         }
     }
 }

@@ -7,39 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
-{
-
-    public class PlayerAvatar
-    {
-        public Uri url { get; set; }
-        
-        public string tooltip { get; set; }
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj == null) return false;
-
-        //    return (obj is PlayerAvatar other) && other.url.Segments[^1] == url.Segments[^1];
-        //}
-    }
-
-    // unused
-    public struct PlayerAlias
-    {
-        public string name { get; set; }
-        public DateTime changeTime;
-    }
-
-    // unused
-    public enum PlayerState
-    {
-        IDLE = 1,
-        PLAYING = 2,
-        HOSTING = 3,
-        JOINING = 4,
-        SEARCHING_LADDER = 5,
-        STARTING_AUTOMATCH = 6,
-    }
-    
+{    
     public static class PlayerInfoExtensions
     {
         public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
@@ -127,7 +95,8 @@ namespace beta.Models.Server
 
         // SOCIAL
         #region Note
-        private PlayerNoteVM _Note;
+        //TODO
+        private PlayerNoteVM _Note = new();
         public PlayerNoteVM Note
         {
             get => _Note;

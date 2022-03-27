@@ -293,7 +293,7 @@ namespace beta.Infrastructure.Services
         {
             // TODO FIX ME???? ERROR UP?
             Settings.Default.access_token = null;
-            OAuthService.Auth();
+            OAuthService.AuthAsync();
         }
 
         private void OnPlayerData(string json)

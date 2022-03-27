@@ -1,6 +1,7 @@
 ﻿using beta.Models.Server;
 using beta.Models.Server.Enums;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
