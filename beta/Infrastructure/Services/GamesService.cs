@@ -2,6 +2,7 @@
 using beta.Models;
 using beta.Models.Server;
 using beta.ViewModels.Base;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -9,6 +10,10 @@ namespace beta.Infrastructure.Services
 {
     public class GamesService : ViewModel, IGamesService
     {
+        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
+        public event EventHandler<EventArgs<GameInfoMessage>> GameUpdated;
+        public event EventHandler<EventArgs<GameInfoMessage>> GameRemoved;
+
         #region Properties
 
         #region Services
@@ -68,12 +73,15 @@ namespace beta.Infrastructure.Services
                     continue;
                 }
 
-                var difference = System.DateTime.UtcNow - suspiciousGames[i].CreatedTime.Value;
+                var difference = DateTime.UtcNow - suspiciousGames[i].CreatedTime.Value;
 
                 if (difference.TotalSeconds > 120)
                 {
                     if (suspiciousGames[i].num_players == 0)
+                    {
                         idleGames.Remove(suspiciousGames[i]);
+                        OnGameRemoved(suspiciousGames[i]);
+                    }
                     suspiciousGames.RemoveAt(i);
                 }
             }
@@ -104,6 +112,12 @@ namespace beta.Infrastructure.Services
                     {
                         // returns false if num_players == 0, game is died
                         idleGames.RemoveAt(i);
+
+                        OnGameRemoved(idleGame);
+                    }
+                    else
+                    {
+                        OnGameUpdated(idleGame);
                     }
                     return;
                 }
@@ -124,6 +138,12 @@ namespace beta.Infrastructure.Services
                         {
                             // returns false if num_players == 0, game is died
                             liveGames.RemoveAt(i);
+
+                            OnGameRemoved(liveGame);
+                        }
+                        else
+                        {
+                            OnGameUpdated(liveGame);
                         }
                         return;
                     }
@@ -144,19 +164,22 @@ namespace beta.Infrastructure.Services
             if (game.num_players == 0)
             {
                 // if game is empty, we adding it to suspicious list and monitoring it during next updates
-                game.CreatedTime = System.DateTime.UtcNow;
+                game.CreatedTime = DateTime.UtcNow;
                 SuspiciousGames.Add(game);
             }
 
             if (game.launched_at is not null)
             {
                 liveGames.Add(game);
+                OnNewGame(game);
                 return;
             }
 
 
             // finally if nothing matched we adding it to IdleGames
             idleGames.Add(game);
+
+            OnNewGame(game);
         }
 
         public InGameTeam[] GetInGameTeams(GameInfoMessage game)
@@ -204,5 +227,10 @@ namespace beta.Infrastructure.Services
             }
             return teams;
         }
+
+
+        private void OnNewGame(GameInfoMessage game) => NewGame?.Invoke(this, game);
+        private void OnGameUpdated(GameInfoMessage game) => GameUpdated?.Invoke(this, game);
+        private void OnGameRemoved(GameInfoMessage game) => GameRemoved?.Invoke(this, game);
     }
 }

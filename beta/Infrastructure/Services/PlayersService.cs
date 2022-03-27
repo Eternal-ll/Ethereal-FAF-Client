@@ -32,8 +32,8 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        private int[] FriendsIds { get; set; } = Array.Empty<int>();
-        private int[] FoesIds { get; set; } = Array.Empty<int>();
+        private List<int> FriendsIds { get; set; } = new();
+        private List<int> FoesIds { get; set; } = new();
 
         #endregion
 
@@ -77,6 +77,14 @@ namespace beta.Infrastructure.Services
         {
             Me = e.Arg.me;
             Me.RelationShip = PlayerRelationShip.Me;
+
+            // TODO
+            if (Players.Count == 0)
+            {
+                Players.Add(Me);
+                PlayerLoginToId.Add(Me.login.ToLower(), 0);
+                PlayerUIDToId.Add(Me.id, 0);
+            }
         }
         private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
         {
@@ -87,8 +95,8 @@ namespace beta.Infrastructure.Services
             var foesIds = e.Arg.foes;
 
             // TODO REWRITE?
-            if (friendsIds is not null && friendsIds.Length > 0)
-                for (int i = 0; i < friendsIds.Length; i++)
+            if (friendsIds is not null && friendsIds.Count > 0)
+                for (int i = 0; i < friendsIds.Count; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
                         var player = Players[id];
@@ -99,8 +107,8 @@ namespace beta.Infrastructure.Services
                         }
                     }
 
-            if (foesIds is not null && foesIds.Length > 0)
-                for (int i = 0; i < foesIds.Length; i++)
+            if (foesIds is not null && foesIds.Count > 0)
+                for (int i = 0; i < foesIds.Count; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
                         var player = Players[id];
@@ -251,9 +259,9 @@ namespace beta.Infrastructure.Services
         private bool IsFriend(int id)
         {
             var friends = FriendsIds;
-            if (friends.Length == 0) return false;
+            if (friends.Count == 0) return false;
 
-            for (int i = 0; i < friends.Length; i++)
+            for (int i = 0; i < friends.Count; i++)
             {
                 if (friends[i] == id) return true;
             }
@@ -264,14 +272,26 @@ namespace beta.Infrastructure.Services
         private bool IsFoe(int id)
         {
             var foes = FoesIds;
-            if (foes.Length == 0) return false;
+            if (foes.Count == 0) return false;
 
-            for (int i = 0; i < foes.Length; i++)
+            for (int i = 0; i < foes.Count; i++)
             {
                 if (foes[i] == id) return true;
             }
             return false;
         }
         public bool IsFoe(PlayerInfoMessage player) => IsFoe(player.id);
+
+        public bool TryGetPlayer(string login, out PlayerInfoMessage player)
+        {
+            player = GetPlayer(login);
+            return player is not null;
+        }
+
+        public bool TryGetPlayer(int id, out PlayerInfoMessage player)
+        {
+            player = GetPlayer(id);
+            return player is not null;
+        }
     }
 }

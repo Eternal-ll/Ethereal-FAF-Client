@@ -160,7 +160,7 @@ namespace beta.Models.Server
         {
             get
             {
-                if (game_type == "coop")
+                if (GameType == GameType.Coop)
                     return PreviewType.Coop;
                 if (mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase))
                     return PreviewType.Neroxis;
@@ -298,7 +298,10 @@ namespace beta.Models.Server
         //Open / Playing / Closed
         //TODO Cant converter "closed" to enum
         public GameState State { get; set; }
-        public string game_type { get; set; }
+
+        [JsonPropertyName("game_type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public GameType GameType { get; set; }
 
         [JsonPropertyName("featured_mod")]
         [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -1,5 +1,6 @@
 ﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
@@ -10,8 +11,8 @@ namespace beta.Models.Server
         [JsonPropertyName("autojoin")]
         public string[] autojoin { get; set; }
         public string[] channels { get; set; }
-        public int[] friends { get; set; }
-        public int[] foes { get; set; }
+        public List<int> friends { get; set; }
+        public List<int> foes { get; set; }
         public int power { get; set; }
         public string command { get; set; }
     }

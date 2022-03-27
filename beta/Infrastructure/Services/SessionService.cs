@@ -243,7 +243,7 @@ namespace beta.Infrastructure.Services
                 {
                     response.Invoke(json);
 
-                    //App.DebugWindow.LOGLobby(json.ToJsonFormat());
+                    //AppDebugger.LOGLobby(json.ToJsonFormat());
                 }
 
                 else AppDebugger.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
@@ -314,6 +314,8 @@ namespace beta.Infrastructure.Services
                 for (int i = 0; i < gameInfoMessage.games.Length; i++)
                     OnNewGame(gameInfoMessage.games[i]);
             else OnNewGame(gameInfoMessage);
+
+            //AppDebugger.LOGLobby(json.ToJsonFormat());
         }
         private void OnMatchmakerData(string json)
         {
