@@ -21,7 +21,7 @@
         <WindowChrome ResizeBorderThickness="5,5,5,5" CaptionHeight="5" />
     </WindowChrome.WindowChrome>-->
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
-        <Grid x:Name="AppTitleBar" Visibility="Collapsed">
+        <!--<Grid x:Name="AppTitleBar" Visibility="Collapsed" ShowGridLines="False">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Setter Property="TextElement.Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
@@ -54,16 +54,16 @@
                     />
                 <TextBlock Margin="24 0" Foreground="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
                            Text="Ethereal FAF client" FontWeight="SemiBold"/>
-                <!--<Glyphs
+                --><!--<Glyphs
                     Margin="24 0"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FontUri             = "C:\WINDOWS\Fonts\ARIAL.TTF"
                     FontRenderingEmSize = "14"
                     UnicodeString       = "Ethereal FAF Client"
-                    Fill                = "{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"/>-->
+                    Fill                = "{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"/>--><!--
             </StackPanel>
-        </Grid>
+        </Grid>-->
         
         <ContentControl Name="MainFrame" IsTabStop="False"/>
         <ContentControl Name="ModalFrame" IsTabStop="False"/>
