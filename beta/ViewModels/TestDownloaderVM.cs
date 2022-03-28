@@ -1,7 +1,6 @@
 ﻿using beta.Infrastructure;
 using beta.Infrastructure.Commands;
-using beta.Models;
-using beta.Models.API;
+using beta.Infrastructure.Utils;
 using beta.ViewModels.Base;
 using System;
 using System.Net;
@@ -15,8 +14,8 @@ namespace beta.ViewModels
         public event EventHandler<EventArgs<bool>> DownloadFinished;
 
         #region GlobalProgressValue
-        private int _GlobalProgressValue;
-        public int GlobalProgressValue
+        private double _GlobalProgressValue;
+        public double GlobalProgressValue
         {
             get => _GlobalProgressValue;
             set => Set(ref _GlobalProgressValue, value);
@@ -70,12 +69,12 @@ namespace beta.ViewModels
 
         #region CurrentFileDownloadedSize
         private long _CurrentFileDownloadedSize;
-        public string CurrentFileDownloadedSize => GetSize(_CurrentFileDownloadedSize);
+        public string CurrentFileDownloadedSize => _CurrentFileDownloadedSize.ToFileSize();
         #endregion
 
         #region DownloadedSize
         private long _DownloadedSize;
-        public string DownloadedSize => GetSize(_DownloadedSize);
+        public string DownloadedSize => _DownloadedSize.ToFileSize();
         #endregion
 
         #region FilesCount
@@ -85,7 +84,7 @@ namespace beta.ViewModels
 
         #region Speed
         private long _Speed;
-        public string Speed => GetSize(_Speed) + "/sec";
+        public string Speed => _Speed.ToFileSize() + "/sec";//GetSize(_Speed) + "/sec";
         #endregion
 
         #region FilesSize
@@ -106,14 +105,12 @@ namespace beta.ViewModels
 
             CurrentState = $"Cancelled. Wait until the current file is loaded";
             webClient.CancelAsync();
-            task.TrySetCanceled();
-            task.Task.Dispose();
         }
         #endregion
 
         private DateTime lastUpdate;
         private long lastBytes = 0;
-        private int globalProgressValue = 0;
+        private double globalProgressValue = 0;
         private WebClient webClient;
         private bool IsCanceled = false;
 
@@ -167,7 +164,7 @@ namespace beta.ViewModels
                 fullSize += models[i].Size;
             }
 
-            FilesSize = GetSize(fullSize);
+            FilesSize = fullSize.ToFileSize();
 
             for (int i = 0; i < models.Length; i++)
             {
@@ -179,7 +176,9 @@ namespace beta.ViewModels
                 CurrentState = $"Downloading: \"{item.FileName}\"";
                 CurrentPathToFile = pathLocal;
 
-                CurrentFileSize = GetSize(item.Size);
+                CurrentFileSize = item.Size.ToFileSize();
+
+                CurrentFileIndex++;
 
                 await webClient.DownloadFileTaskAsync(item.Url.AbsoluteUri, pathLocal);
             }
@@ -193,40 +192,53 @@ namespace beta.ViewModels
             DownloadFinished?.Invoke(this, !IsCanceled);
 
         }
-        TaskCompletionSource<object> task;
+        long backup = 0;
         private void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            var now = DateTime.UtcNow;
-            var timeSpan = now - lastUpdate;
-            if (timeSpan.Seconds == 1)
-            {
-                var bytesChange = e.BytesReceived - lastBytes;
-                _Speed = bytesChange / timeSpan.Seconds;
-                lastBytes = e.BytesReceived;
-                lastUpdate = now;
-            }
-            else if (timeSpan.Seconds > 1)
-            {
-                lastBytes = e.BytesReceived;
-                lastUpdate = now;
-            }
-
             GlobalProgressValue = globalProgressValue + (e.ProgressPercentage / FilesCount);
-            FileProgressValue = e.ProgressPercentage;
 
-            _CurrentFileDownloadedSize += e.BytesReceived;
-            _DownloadedSize = _CurrentFileDownloadedSize;
+            //var now = DateTime.UtcNow;
+            //var timeSpan = now - lastUpdate;
+            var bytesChange = e.BytesReceived - lastBytes;
+            _Speed = bytesChange;
+            //var now = DateTime.UtcNow;
+            //var timeSpan = now - lastUpdate;
+
+            //if (timeSpan.Seconds < 1)
+            //{
+            //    lastBytes = e.BytesReceived;
+            //    lastUpdate = now;
+            //    return;
+            //}
+
+            //if (timeSpan.Seconds == 1)
+            //{
+            //    var bytesChange = e.BytesReceived - lastBytes + backup;
+            //    _Speed = bytesChange / timeSpan.Seconds;
+            //    lastBytes = e.BytesReceived + backup;
+            //    lastUpdate = now;
+            //    backup = 0;
+            //}
+            //else
+            //{
+            //    lastBytes = e.BytesReceived;
+            //    lastUpdate = now;
+            //}
+            //FileProgressValue = e.ProgressPercentage;
+
+            //_CurrentFileDownloadedSize += e.BytesReceived;
+            //_DownloadedSize = _CurrentFileDownloadedSize;
 
             if (e.ProgressPercentage == 100)
             {
-                _CurrentFileDownloadedSize = 0;
+                //_CurrentFileDownloadedSize = 0;
 
-                CurrentFileIndex++;
                 lastBytes = 0;
-                lastUpdate = now;
-                globalProgressValue += e.ProgressPercentage / FilesCount;
+                backup = 0;
+                globalProgressValue += FilesCount * .001;
             }
-
+            lastBytes = e.BytesReceived;
+            //lastUpdate = now;
 
             OnPropertyChanged(nameof(DownloadedSize));
             OnPropertyChanged(nameof(Speed));
