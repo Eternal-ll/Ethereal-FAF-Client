@@ -63,6 +63,13 @@
         <ItemsControl ItemsSource="{Binding ratings}" ItemTemplate="{StaticResource PlayerRatingsDataTemplate}"/>
     </ToolTip>
 
+    <DataTemplate DataType="{x:Type models:GameMap}">
+        <Grid>
+            <Image Stretch="Uniform" Source="{Binding NewPreview}"/>
+            <ui:ProgressRing IsActive="{Binding IsPreviewLoading}"/>
+        </Grid>
+    </DataTemplate>
+
     <DataTemplate x:Key="PlayerCardDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
         <StackPanel MaxWidth="200" Margin="0 0 0 10">
             <StackPanel.Style>
@@ -176,7 +183,7 @@
                     </TextBlock.Style>
                 </TextBlock>
                 <StackPanel Orientation="Horizontal">
-                    <Image Width="24" Height="24" Stretch="Uniform" Source="{Binding Game.Map.SmallPreview}">
+                    <Image Width="24" Height="24" Stretch="Uniform" Source="{Binding Game.Map.NewPreview}">
                         <!--<Image.Style>
                                     <Style TargetType="Image">
                                         <Style.Triggers>
@@ -653,13 +660,19 @@
                 </ContentControl.Style>
             </ContentControl>-->
 
-            <ContentControl Content="{Binding Game.Map}" Grid.Column="3" Grid.RowSpan="2">
-                <ContentControl.Resources>
-                    <DataTemplate DataType="{x:Type models:GameMap}">
-                        <Image Height="40" Width="40" Stretch="Uniform" Source="{Binding SmallPreview}"/>
-                    </DataTemplate>
-                </ContentControl.Resources>
+            <ContentControl Height="40" Width="40" Content="{Binding Game.Map}" Grid.Column="3" Grid.RowSpan="2">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Game.Map}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
             </ContentControl>
+
+
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

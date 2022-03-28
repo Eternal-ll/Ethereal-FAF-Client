@@ -1,11 +1,15 @@
-﻿using beta.ViewModels.Base;
+﻿using beta.Infrastructure.Utils;
+using beta.ViewModels.Base;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models
 {
     public abstract class Map : ViewModel
     {
+        public virtual ImageSource NewPreview { get; }
+
         #region SmallPreview
         public ImageSource _SmallPreview;
         public ImageSource SmallPreview
@@ -14,12 +18,54 @@ namespace beta.Models
             set => Set(ref _SmallPreview, value);
         } 
         #endregion
+
         public virtual string Name { get; }
         public virtual string Version { get; }
         public string OriginalName { get; set; }
     }
     public class GameMap : Map
     {
+        #region ImageSource
+        private byte[] _ImageSource;
+        public byte[] ImageSource
+        {
+            get => _ImageSource;
+            set
+            {
+                if (Set(ref _ImageSource, value))
+                {
+                    OnPropertyChanged(nameof(NewPreview));
+                    if (value is not null)
+                    {
+                        IsPreviewLoading = false;
+                    }
+                }
+            }
+        }
+        #endregion
+        private BitmapImage BitmapImage;
+        public override ImageSource NewPreview
+        {
+            get
+            {
+                if (ImageSource is null) return null;
+                if (ImageSource.Length == 0)
+                {
+                    return App.Current.Resources["QuestionIcon"] as ImageSource;
+                }
+                return BitmapImage ??= ImageSource.ToBitmapImage();
+            }
+        }
+
+        #region IsPreviewLoading
+        private bool _IsPreviewLoading = true;
+        public bool IsPreviewLoading
+        {
+            get => _IsPreviewLoading;
+            set => Set(ref _IsPreviewLoading, value);
+        }
+        #endregion
+
         #region Scenario
         private Dictionary<string, string> _Scenario;
         public Dictionary<string, string> Scenario
@@ -106,14 +152,16 @@ namespace beta.Models
       */
     }
 
-    public class CoopMap : Map
+    public class NeroxisMap : Map
     {
         public override string Name => "Neroxis Map Generator";
         public override string Version => base.Version;
-        public CoopMap() => SmallPreview = App.Current.Resources["CoopIcon"] as ImageSource;
+        public override ImageSource NewPreview => App.Current.Resources["MapGenIcon"] as ImageSource;
+        public NeroxisMap(string originalName) => OriginalName = originalName;
     }
-    public class NeroxisMap : Map
+    public class CoopMap : Map
     {
-        public NeroxisMap() => SmallPreview = App.Current.Resources["MapGenIcon"] as ImageSource;
+        public override ImageSource NewPreview => App.Current.Resources["CoopIcon"] as ImageSource;
+        public CoopMap(string originalName) => OriginalName = originalName;
     }
 }

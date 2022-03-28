@@ -1,5 +1,6 @@
 ﻿using beta.Models;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services.Interfaces
@@ -13,5 +14,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="folder"></param>
         /// <returns></returns>
         public BitmapImage GetImage(Uri uri, Folder folder);
+
+        public Task<byte[]> GetBitmapSource(Uri uri, Folder folder);
     }
 }

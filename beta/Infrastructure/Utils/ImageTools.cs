@@ -14,38 +14,33 @@ namespace beta.Infrastructure.Utils
         // Bitmap --> BitmapImage
         public static BitmapImage BitmapToBitmapImage(Bitmap bitmap)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                bitmap.Save(stream, ImageFormat.Png); // Pit: When the format is Bmp, no transparency
+            using MemoryStream stream = new MemoryStream();
+            bitmap.Save(stream, ImageFormat.Png); // Pit: When the format is Bmp, no transparency
 
-                stream.Position = 0;
-                BitmapImage result = new BitmapImage();
-                result.BeginInit();
-                // According to MSDN, "The default OnDemand cache option retains access to the stream until the image is needed."
-                // Force the bitmap to load right now so we can dispose the stream.
-                result.CacheOption = BitmapCacheOption.OnLoad;
-                result.StreamSource = stream;
-                result.EndInit();
-                result.Freeze();
-                return result;
-            }
+            stream.Position = 0;
+            BitmapImage result = new BitmapImage();
+            result.BeginInit();
+            // According to MSDN, "The default OnDemand cache option retains access to the stream until the image is needed."
+            // Force the bitmap to load right now so we can dispose the stream.
+            result.CacheOption = BitmapCacheOption.OnLoad;
+            result.StreamSource = stream;
+            result.EndInit();
+            result.Freeze();
+            return result;
         }
-
 
         // BitmapImage --> Bitmap
         public static Bitmap BitmapImageToBitmap(BitmapImage bitmapImage)
         {
             // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
 
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
-                enc.Save(outStream);
-                Bitmap bitmap = new Bitmap(outStream);
+            using MemoryStream outStream = new MemoryStream();
+            BitmapEncoder enc = new BmpBitmapEncoder();
+            enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+            enc.Save(outStream);
+            Bitmap bitmap = new Bitmap(outStream);
 
-                return new Bitmap(bitmap);
-            }
+            return new Bitmap(bitmap);
         }
 
         // RenderTargetBitmap --> BitmapImage
@@ -113,15 +108,13 @@ namespace beta.Infrastructure.Utils
             byte[] bytearray = null;
             try
             {
-                Stream smarket = bmp.StreamSource; ;
+                Stream smarket = bmp.StreamSource;
                 if (smarket is not null && smarket.Length > 0)
                 {
                     //Set the current location
                     smarket.Position = 0;
-                    using (BinaryReader br = new BinaryReader(smarket))
-                    {
-                        bytearray = br.ReadBytes((int)smarket.Length);
-                    }
+                    using BinaryReader br = new BinaryReader(smarket);
+                    bytearray = br.ReadBytes((int)smarket.Length);
                 }
             }
             catch (Exception ex)
@@ -131,20 +124,18 @@ namespace beta.Infrastructure.Utils
             return bytearray;
         }
 
-
+        public static BitmapImage ToBitmapImage(this byte[] array) => ByteArrayToBitmapImage(array);
         // byte[] --> BitmapImage
         public static BitmapImage ByteArrayToBitmapImage(byte[] array)
         {
-            using (var ms = new MemoryStream(array))
-            {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad; // here
-                image.StreamSource = ms;
-                image.EndInit();
-                image.Freeze();
-                return image;
-            }
+            using var ms = new MemoryStream(array);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = ms;
+            image.EndInit();
+            image.Freeze();
+            return image;
         }
         public static Bitmap ConvertByteArrayToBitmap(byte[] bytes)
         {

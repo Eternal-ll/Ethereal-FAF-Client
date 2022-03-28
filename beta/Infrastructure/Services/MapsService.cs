@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using beta.Properties;
 using beta.Models.Server;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -259,11 +260,11 @@ namespace beta.Infrastructure.Services
                 return gameMap;
             }
 
-            App.Current.Dispatcher.Invoke(() =>
+            Task.Run(async () =>
             {
-                gameMap.SmallPreview = GetMapPreview(uri);
+                gameMap.ImageSource = await CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews);
                 gameMap.Scenario = attachScenario ? GetMapScenario(mapName, isLegacyMap) : null;
-            },System.Windows.Threading.DispatcherPriority.Background);
+            });
 
             CachedMaps.Add(gameMap);
 
@@ -271,68 +272,12 @@ namespace beta.Infrastructure.Services
         }
 
         // UNUSED
-        public Map GetMap(Uri uri, PreviewType previewType, bool attachScenario = true)
+        public Map GetMap(Uri uri, PreviewType previewType, bool attachScenario = true) => previewType switch
         {
-            switch (previewType)
-            {
-                case PreviewType.Coop:
-                    CoopMap coopMap = new()
-                    {
-                        OriginalName = uri.Segments[^1]
-                    };
-                    App.Current.Dispatcher.Invoke(() =>
-                    coopMap.SmallPreview = App.Current.Resources["CoopIcon"] as ImageSource,
-                    System.Windows.Threading.DispatcherPriority.Background);
-                    return coopMap;
-
-                case PreviewType.Neroxis:
-                    NeroxisMap neroxisMap = new()
-                    {
-                        OriginalName = uri.Segments[^1]
-                    };
-                    App.Current.Dispatcher.Invoke(() => neroxisMap.SmallPreview = App.Current.Resources["MapGenIcon"] as ImageSource,
-                    System.Windows.Threading.DispatcherPriority.Background);
-                    return neroxisMap;
-
-                case PreviewType.Normal:
-                    var mapName = uri.Segments[^1].Substring(0, uri.Segments[^1].Length - 4);
-
-                    var isLegacyMap = IsLegacyMap(mapName);
-
-                    var cachedMaps = CachedMaps;
-                    for (int i = 0; i < cachedMaps.Count; i++)
-                    {
-                        var cachedMap = cachedMaps[i];
-                        if (cachedMap.OriginalName.Equals(mapName, StringComparison.OrdinalIgnoreCase))
-                            return cachedMap;
-                    }
-
-                    GameMap gameMap = new()
-                    {
-                        IsLegacy = isLegacyMap,
-                        OriginalName = mapName
-                    };
-
-                    App.Current.Dispatcher.Invoke(() =>
-                    {
-                        gameMap.SmallPreview = GetMapPreview(uri);
-                        gameMap.Scenario = attachScenario ? GetMapScenario(mapName, isLegacyMap) : null;
-                    }, System.Windows.Threading.DispatcherPriority.Background);
-
-                    CachedMaps.Add(gameMap);
-
-                    return gameMap;
-                default:
-                    gameMap = new()
-                    {
-                        OriginalName = uri.Segments[^1]
-                    };
-
-                    App.Current.Dispatcher.Invoke(() => gameMap.SmallPreview = App.Current.Resources["QuestionIcon"] as ImageSource,
-                    System.Windows.Threading.DispatcherPriority.Background);
-                    return gameMap;
-            }
-        }
+            PreviewType.Coop => new CoopMap(uri.Segments[^1]),
+            PreviewType.Neroxis => new NeroxisMap(uri.Segments[^1]),
+            _ => GetMap(uri, attachScenario),
+        };
 
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews) => CacheService.GetImage(uri, folder);
 

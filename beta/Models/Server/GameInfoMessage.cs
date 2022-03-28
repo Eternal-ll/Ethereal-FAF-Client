@@ -150,6 +150,7 @@ namespace beta.Models.Server
                 if (Set(ref _Map, value))
                 {
                     OnPropertyChanged(nameof(Map.SmallPreview));
+                    OnPropertyChanged(nameof(Map.NewPreview));
                 }
             }
         }

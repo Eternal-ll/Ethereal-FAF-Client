@@ -2,6 +2,10 @@
 using beta.Models;
 using System;
 using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
@@ -94,6 +98,41 @@ namespace beta.Infrastructure.Services
                     return;
                 default:
                     return;
+            }
+        }
+
+        public async Task<byte[]> GetBitmapSource(Uri uri, Folder folder)
+        {
+            var cacheFolder = App.GetPathToFolder(folder);
+            // TODO do we need this check so often?
+            if (!Directory.Exists(cacheFolder))
+                Directory.CreateDirectory(cacheFolder);
+
+            var localFilePath = cacheFolder + uri.Segments[^1];
+
+            if (File.Exists(localFilePath))
+            {
+                return await File.ReadAllBytesAsync(localFilePath);
+            }
+            else
+            {
+                byte[] data = null;
+                try
+                {
+                    WebRequest request = WebRequest.Create(uri);
+                    using var response = await request.GetResponseAsync();
+                    using MemoryStream ms = new();
+                    await response.GetResponseStream().CopyToAsync(ms);
+                    data = ms.ToArray();
+
+                    using FileStream filestream = new(localFilePath, FileMode.Create);
+                    await filestream.WriteAsync(data);
+                }
+                catch(Exception ex)
+                {
+                    data = Array.Empty<byte>();
+                }
+                return data;
             }
         }
     }

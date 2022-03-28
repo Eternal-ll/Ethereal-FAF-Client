@@ -267,6 +267,8 @@
     <None Remove="Resources\Images\flags\za.png" />
     <None Remove="Resources\Images\flags\zm.png" />
     <None Remove="Resources\Images\flags\zw.png" />
+    <None Remove="Resources\Images\MapResources\hydrocarbon_strategic.png" />
+    <None Remove="Resources\Images\MapResources\mass_strategic.png" />
     <None Remove="Resources\Images\PlayerGameStatus\host.png" />
     <None Remove="Resources\Images\PlayerGameStatus\open.png" />
     <None Remove="Resources\Images\PlayerGameStatus\playing.png" />
@@ -279,6 +281,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Images\MapResources\hydrocarbon_strategic.png" />
+    <Resource Include="Resources\Images\MapResources\mass_strategic.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\open.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\playing.png" />

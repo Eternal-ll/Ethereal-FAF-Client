@@ -208,17 +208,17 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="MapPreviewBorderStyle" TargetType="Border">
+    <Style x:Key="MapPreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Width" Value="70"/>
         <Setter Property="Height" Value="70"/>
-        <Setter Property="Background">
+        <!--<Setter Property="Background">
             <Setter.Value>
                 <ImageBrush Stretch="Uniform"
-                            ImageSource="{Binding Map.SmallPreview}">
+                            ImageSource="{Binding Map.NewPreview}">
                 </ImageBrush>
             </Setter.Value>
-        </Setter>
+        </Setter>-->
         <Style.Triggers>
             <DataTrigger Binding="{Binding PreviewType}" Value="0">
                 <Setter Property="Width" Value="100"/>
@@ -412,6 +412,7 @@
                     ToolTip="{Binding mapname}"
                     Margin="4">
                 <Grid>
+                    <ContentControl Content="{Binding Map}" ToolTip="{Binding mapname}"/>
                     <!--<Grid.Style>
                         <Style TargetType="Grid">
                             <Style.Triggers>
