@@ -1,14 +1,16 @@
 ﻿using beta.Models;
+using beta.ViewModels;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IDownloadService
     {
-        public Task<Download> StartDownload(Uri fileUrl);
-        public Task<Download> StartDownload(string url);
-        public void CancelDownload(Download download);
-        public Download Last { get; }
+        //public event EventHandler NewDownload;
+        public ObservableCollection<DownloadViewModel> Downloads { get; }
+        public Task<DownloadViewModel> DownloadAsync(params DownloadItem[] downloads);
+        public Task Cancel(DownloadViewModel model);
     }
 }

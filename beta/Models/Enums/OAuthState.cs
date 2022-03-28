@@ -7,6 +7,7 @@
         NO_TOKEN,
         INVALID,
         TIMED_OUT,
+        PendingAuthorization,
         AUTHORIZED,
     }
 }

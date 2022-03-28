@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
         ui:WindowHelper.UseModernWindowStyle="True"
-        mc:Ignorable="d"
-        Title="Ethereal FAF Client" Height="450" Width="800"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:ThemeManager.RequestedTheme="Dark"
+        mc:Ignorable="d"
+        Title="Ethereal FAF Client" Height="450" Width="800"
         x:Name="Window">
     <!--<Window.Background>
         <ImageBrush>

@@ -82,7 +82,7 @@ namespace beta.Views
                     SessionService.Authorized -= OnLobbySessionServiceAuthorizationFinish;
                     // call UI thread and invoke our instructions
                     // events coming from different thread and can raise exception
-                    NavigationManager.Navigate(new MainView());
+                    NavigationManager.Navigate(new NavigationView());
                 }
                 else
                 {

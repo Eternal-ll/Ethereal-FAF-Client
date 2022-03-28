@@ -1,0 +1,17 @@
+﻿<Window x:Class="beta.Views.Windows.NewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:view="clr-namespace:beta.Views"
+        mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:ThemeManager.RequestedTheme="Dark"
+        Height="{Binding ElementName=MainView, Path=DataContext.Height}"
+        Width="{Binding ElementName=MainView, Path=DataContext.Width}"
+        Top="{Binding ElementName=MainView, Path=DataContext.Top}"
+        Left="{Binding ElementName=MainView, Path=DataContext.Left}">
+    <view:MainView x:Name="MainView"/>
+</Window>

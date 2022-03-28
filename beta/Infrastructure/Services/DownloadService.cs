@@ -1,44 +1,39 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.ViewModels;
 using beta.ViewModels.Base;
-using System;
 using System.Collections.ObjectModel;
-using System.IO;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
     public class DownloadService : ViewModel, IDownloadService
     {
-        public string DOWNLOAD_FOLDER => "C:\\tmp";
+        public ObservableCollection<DownloadViewModel> Downloads { get; } = new();
 
-        public readonly ObservableCollection<Download> Downloads = new();
-
-        private Download _Last;
-        public Download Last
+        public async Task Cancel(DownloadViewModel model)
         {
-            get => _Last;
-            set => Set(ref _Last, value);
+
         }
 
-        public async Task<Download> StartDownload(Uri uri)
+        public async Task<DownloadViewModel> DownloadAsync(params DownloadItem[] downloads)
         {
-            var downloadModel = new Download(uri.AbsoluteUri);
+            DownloadViewModel model = new(downloads);
 
-            Downloads.Add(downloadModel);
-            Last = downloadModel;
+            model.Completed += OnDownloadCompleted;
 
-            await downloadModel.Start(Path.Combine(DOWNLOAD_FOLDER, uri.Segments[^1]));
-
-            return downloadModel;
-        }
-        public Task<Download> StartDownload(string url) => StartDownload(new Uri(url));
-
-        public void CancelDownload(Download download)
-        {
-            download.Cancel();
-            Downloads.Remove(download);
+            await model.DownloadAll().ConfigureAwait(false);
+            Downloads.Add(model);
+            return model;
         }
 
+        private void OnDownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            var model = (DownloadViewModel)sender;
+            model.Completed -= OnDownloadCompleted;
+            // TODO Dispose?
+            Downloads.Remove(model);
+        }
     }
 }

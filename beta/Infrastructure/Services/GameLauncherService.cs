@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
+using beta.Models;
 using beta.Models.API;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
@@ -22,18 +23,22 @@ namespace beta.Infrastructure.Services
     public class GameLauncherService : IGameLauncherService
     {
         #region Events
-        public event EventHandler<EventArgs<TestDownloaderVM>> PatchUpdateRequired;
+        public event EventHandler PatchUpdateRequired;
         #endregion
 
         private readonly IApiService ApiService;
+        private readonly IDownloadService DownloadService;
 
         public GameLauncherState State { get; set; }
         public bool GameIsRunning { get; set; } = false;
         private GameInfoMessage LastGame;
 
-        public GameLauncherService(IApiService apiService)
+        public GameLauncherService(
+            IApiService apiService,
+            IDownloadService downloadService)
         {
             ApiService = apiService;
+            DownloadService = downloadService;
         }
 
         public void JoinGame()
@@ -148,13 +153,13 @@ namespace beta.Infrastructure.Services
 
             if (download)
             {
-                List<DownloadModel> models = new();
+                List<DownloadItem> models = new();
                 for (int i = 0; i < response.Data.Length; i++)
                 {
                     var item = response.Data[i];
                     if (item is null)
                         continue;
-                    models.Add(new(item.Url, localPath + item.Group + "\\", item.Name));
+                    models.Add(new(localPath + item.Group + "\\", item.Name, item.Url.AbsoluteUri));
                 }
                 // TODO FIX ME. Currently no optimized update
                 // we just updating the whole Bin folder again
@@ -162,21 +167,21 @@ namespace beta.Infrastructure.Services
                 // false if no bin folder in path to the game
                 if (!CopyOriginalBin()) return false;
 
-                TestDownloaderVM model = new(models.ToArray());
+                var model = await DownloadService.DownloadAsync(models.ToArray()).ConfigureAwait(false);
 
-                OnPatchUpdateRequired(model);
+                OnPatchUpdateRequired();
 
-                model.DownloadFinished += Model_DownloadFinished;
+                model.Completed += OnDownloadCompleted;
                 return false;
             }
             return true;
         }
 
-        private async void Model_DownloadFinished(object sender, EventArgs<bool> finished)
+        private async void OnDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
-            ((TestDownloaderVM)sender).DownloadFinished -= Model_DownloadFinished;
+            ((DownloadViewModel)sender).Completed -= OnDownloadCompleted;
 
-            if (finished) await JoinGame(LastGame);
+            if (!e.Cancelled) await JoinGame(LastGame);
         }
 
         private bool CopyOriginalBin()
@@ -200,6 +205,6 @@ namespace beta.Infrastructure.Services
             return true;
         }
 
-        private void OnPatchUpdateRequired(TestDownloaderVM model) => PatchUpdateRequired?.Invoke(this, model);
+        private void OnPatchUpdateRequired() => PatchUpdateRequired?.Invoke(this, null);
     }
 }

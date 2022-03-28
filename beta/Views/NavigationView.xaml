@@ -1,0 +1,169 @@
+﻿<UserControl x:Class="beta.Views.NavigationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:control="clr-namespace:beta.Resources.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800"
+             x:Name="this">
+    <Grid>
+        <ui:NavigationView x:Name="UINavigationView"
+                           IsBackButtonVisible="Collapsed"
+                           PaneDisplayMode="Auto"
+                           SelectionChanged="OnNavigationViewSelectionChanged"
+                           IsSettingsVisible="False"
+                           CompactPaneLength="50"
+                           OpenPaneLength="200"
+                           IsTabStop="False">
+            <ui:NavigationView.Resources>
+                <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FF1F1F1F"/>
+                <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="#FF1F1F1F"/>
+                <SolidColorBrush x:Key="FlyoutBorderThemeBrush" Color="#FF1F1F1F"/>
+
+                <Style TargetType="control:CrossFadeContentControl">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="control:CrossFadeContentControl">
+                                <Grid>
+                                    <ContentPresenter
+                                        x:Name="FirstContentPresenter"
+                                        Content="{x:Null}"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                    <ContentPresenter
+                                        x:Name="SecondContentPresenter"
+                                        Content="{x:Null}"
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ui:NavigationView.Resources>
+
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Home" Tag="Home" Icon="{StaticResource HomePathIcon}"/>
+                <ui:NavigationViewItem Tag="ChatControl" Icon="{StaticResource ChatPathIcon}">
+                    <TextBlock>
+                        <Run Text="Chat"/>
+                        <Run Text="•">
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Setter Property="Foreground" Value="Orange"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IrcState}" Value="0">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IrcState}" Value="7">
+                                            <Setter Property="Foreground" Value="LightGreen"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="ToolTip" Value="Connecting to IRC"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IrcState}" Value="0">
+                                        <Setter Property="ToolTip" Value="IRC disconnected"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IrcState}" Value="7">
+                                        <Setter Property="ToolTip" Value="Authorized in IRC"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IrcState}" Value="8">
+                                        <Setter Property="ToolTip" Value="Throttled: too much reconnects"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <ui:NavigationViewItem.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="{Binding IrcState}"/>
+                            <MenuItem Padding="10 2">
+                                <MenuItem.Style>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                        <Setter Property="Command" Value="{StaticResource ConnectToIrcCommand}"/>
+                                        <Setter Property="Header" Value="Connect to IRC"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IrcState}" Value="2">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Header" Value="Connecting"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IrcState}" Value="7">
+                                                <Setter Property="Command" Value="{StaticResource DisconnectFromIrcCommand}"/>
+                                                <Setter Property="Header" Value="Disconnect from IRC"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </MenuItem.Style>
+                            </MenuItem>
+                            <MenuItem Header="Reconnect to IRC" Command="{StaticResource RefreshIrcCommand}"/>
+                        </ContextMenu>
+                    </ui:NavigationViewItem.ContextMenu>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItemSeparator/>
+                <ui:NavigationViewItem Content="Global" Tag="Global" Icon="{StaticResource EathPathIcon}"/>
+                <ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>
+                <ui:NavigationViewItemSeparator/>
+                <ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem Content="Maps" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
+                        <ui:NavigationViewItem Content="Mods" Tag="Mods" Icon="{StaticResource ModsPathIcon}"/>
+                    </ui:NavigationViewItem.MenuItems>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Analytics" Tag="Analytics">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:PathIcon Data="M12,3L2,12H5V20H19V12H22M9,18H7V12H9M13,18H11V10H13M17,18H15V14H17"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+            </ui:NavigationView.MenuItems>
+
+            <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem x:Name="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
+                <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
+                <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
+            </ui:NavigationView.FooterMenuItems>
+
+            <control:CrossFadeContentControl x:Name="ContentFrame"
+                                             Margin="0 -32 0 0"
+                                             HorizontalContentAlignment="Stretch"
+                                             VerticalContentAlignment="Stretch"/>
+            <ui:NavigationView.Background>
+                <SolidColorBrush Color="Black" Opacity=".4"/>
+            </ui:NavigationView.Background>
+        </ui:NavigationView>
+
+        <TextBlock FontWeight="SemiBold"
+                   Margin="12 6"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Padding="38 0 0 0">
+            <TextBlock.Background>
+                <VisualBrush Stretch="None"
+                             AlignmentX="Left">
+                    <VisualBrush.Visual>
+                        <ui:PathIcon Height="12"
+                                     Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
+                                     />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </TextBlock.Background>
+            <TextBlock.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Text" Value=""/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=UINavigationView, Path=IsPaneOpen}" Value="True">
+                            <Setter Property="Text" Value="Ethereal FAF client"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Resources>
+        </TextBlock>
+    </Grid>
+</UserControl>

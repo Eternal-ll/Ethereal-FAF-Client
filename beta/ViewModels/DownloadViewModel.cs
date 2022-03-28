@@ -1,78 +1,86 @@
-﻿using beta.Infrastructure.Utils;
-using beta.Models;
+﻿using beta.Models;
+using Downloader;
 using System;
-using System.Threading;
+using System.ComponentModel;
+using System.IO;
+using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
+using beta.Infrastructure.Utils;
 
 namespace beta.ViewModels
 {
-    public class DownloadModel
-    {
-        public Uri Url { get; }
-        private string _FileName;
-        public string FileName => _FileName is not null ? _FileName : Url.Segments[^1];
-        public string TargetFolder { get; }
-
-        public long? _Size;
-        public long Size
-        {
-            get
-            {
-                if (_Size is null)
-                {
-                    _Size = Tools.GetFileSize(Url);
-                }
-                return _Size.Value;
-            }
-        }
-
-        public DownloadModel(Uri url, string targetFolder, string fileName = null)
-        {
-            Url = url;
-
-            if (!targetFolder.EndsWith('\\'))
-            {
-                throw new Exception($"Path to target folder should end with '\\' {targetFolder}");
-            }
-
-            TargetFolder = targetFolder;
-
-            if (fileName is not null)
-            {
-                _FileName = fileName;
-            }
-        }
-
-    }
     public class DownloadViewModel : Base.ViewModel
     {
-        #region Properties
+        public event EventHandler<AsyncCompletedEventArgs> Completed;
 
-        #region GlobalProgressValue
-        private int _GlobalProgressValue;
-        public int GlobalProgressValue
+        public DownloadViewModel(string name, params DownloadItem[] downloads) : this(downloads)
         {
-            get => _GlobalProgressValue;
-            set => Set(ref _GlobalProgressValue, value);
+            Name = name;
+        }
+
+        public DownloadViewModel(params DownloadItem[] downloads)
+        {
+            Downloads = downloads;
+            Task.Factory.StartNew(async () => _TotalSize = await CalculateTotalSize(downloads).ConfigureAwait(false));
+        }
+
+        private static DownloadConfiguration GetDownloadConfiguration()
+        {
+            string version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1";
+            //var cookies = new CookieContainer();
+            //cookies.Add(new Cookie("download-type", "test") { Domain = "domain.com" });
+
+            return new DownloadConfiguration
+            {
+                BufferBlockSize = 8000, // usually, hosts support max to 8000 bytes, default values is 8000
+                ChunkCount = 8, // file parts to download, default value is 1
+                MaximumBytesPerSecond = 0, //1024 * 1024 * 2, // download speed limited to 2MB/s, default values is zero or unlimited
+                MaxTryAgainOnFailover = int.MaxValue, // the maximum number of times to fail
+                OnTheFlyDownload = false, // caching in-memory or not? default values is true
+                ParallelDownload = true, // download parts of file as parallel or not. Default value is false
+                TempDirectory = Path.GetTempPath(), // Set the temp path for buffering chunk files, the default path is Path.GetTempPath()
+                Timeout = 1000, // timeout (millisecond) per stream block reader, default values is 1000
+                RequestConfiguration = {
+                    // config and customize request headers
+                    Accept = "*/*",
+                    //CookieContainer = cookies,
+                    Headers = new WebHeaderCollection(), // { Add your custom headers }
+                    KeepAlive = true,
+                    ProtocolVersion = HttpVersion.Version11, // Default value is HTTP 1.1
+                    UseDefaultCredentials = false,
+                    UserAgent = $"Ethereal FAF Client {version}",
+                    //Proxy = new WebProxy() {
+                    //    Address = new Uri("http://YourProxyServer/proxy.pac"),
+                    //    UseDefaultCredentials = false,
+                    //    Credentials = System.Net.CredentialCache.DefaultNetworkCredentials,
+                    //    BypassProxyOnLocal = true
+                    //}
+                }
+            };
+        }
+
+        #region Name
+        private string _Name = "Unknown";
+        public string Name
+        {
+            get => _Name;
+            set => Set(ref _Name, value);
         }
         #endregion
 
-        #region FileProgressValue
-        private int _FileProgressValue;
-        public int FileProgressValue
+        #region CurrentDownloadModel
+        private DownloadModel _CurrentDownloadModel;
+        public DownloadModel CurrentDownloadModel
         {
-            get => _FileProgressValue;
-            set => Set(ref _FileProgressValue, value);
+            get => _CurrentDownloadModel;
+            set => Set(ref _CurrentDownloadModel, value);
         }
         #endregion
 
-        #region CurrentState
-        private string _CurrentState;
-        public string CurrentState
-        {
-            get => _CurrentState;
-            set => Set(ref _CurrentState, value);
-        }
+        #region TotalSize
+        private long _TotalSize;
+        public string TotalSize => _TotalSize.CalcMemoryMensurableUnit();
         #endregion
 
         #region CurrentFileIndex
@@ -84,129 +92,103 @@ namespace beta.ViewModels
         }
         #endregion
 
-        #region CurrentPathToFile
-        private string _CurrentPathToFile;
-        public string CurrentPathToFile
+        #region CurrentFileDownloadProgress
+        private double _CurrentFileDownloadProgress;
+        public double CurrentFileDownloadProgress
         {
-            get => _CurrentPathToFile;
-            set => Set(ref _CurrentPathToFile, value);
+            get => _CurrentFileDownloadProgress;
+            set => Set(ref _CurrentFileDownloadProgress, value);
         }
         #endregion
 
-        #region CurrentFileSize
-        private string _CurrentFileSize;
-        public string CurrentFileSize
+        #region DownloadProgress
+        private double _DownloadProgress;
+        public double DownloadProgress
         {
-            get => _CurrentFileSize;
-            set => Set(ref _CurrentFileSize, value);
+            get => DownloadProgress;
+            set => Set(ref _DownloadProgress, value);
         }
         #endregion
 
-        #region CurrentFileDownloadedSize
-        private long _CurrentFileDownloadedSize;
-        public string CurrentFileDownloadedSize => GetSize(_CurrentFileDownloadedSize);
-        #endregion
+        public int FilesToDownload => Downloads.Length;
 
-        #region DownloadedSize
-        private long _DownloadedSize;
-        public string DownloadedSize => GetSize(_DownloadedSize);
-        #endregion
+        private DownloadConfiguration CurrentDownloadConfiguration;
 
-        #region FilesCount
-        public int FilesCount => DownloadModels.Length;
-        #endregion
+        private readonly DownloadItem[] Downloads;
 
-        #region Speed
-        private long _Speed;
-        public string Speed => GetSize(_Speed) + "/sec";
-        #endregion
-
-        // on fly
-        #region FilesSize
-        private long _FilesSize;
-        public string FilesSize => GetSize(_FilesSize);
-        #endregion
-
-        private DownloadModel[] DownloadModels;
-        private DownloadModel CurrentDownloadModel;
-        private Download CurrentDownload;
-
-        #endregion
-        public DownloadViewModel(params DownloadModel[] downloads)
+        private static async Task<long> CalculateTotalSize(DownloadItem[] downloads)
         {
-            DownloadModels = downloads;
-
-            #region Calculating full size
-            long fullSize = 0;
+            long total = 0;
 
             for (int i = 0; i < downloads.Length; i++)
             {
-                fullSize += downloads[i].Size;
+                var download = downloads[i];
+                WebRequest request = WebRequest.Create(download.Url);
+                request.Method = "HEAD";
+                var response = await request.GetResponseAsync();
+                total += response.ContentLength;
             }
 
-            _FilesSize = fullSize; 
-            #endregion
+            return total;
         }
 
-        #region Methods
+        //public async Task Cancel() => CurrentDownloadModel.CancelAsync();
 
-        public void Cancel()
-        {
-            CurrentDownload.Cancel();
-        }
+        public async Task DownloadAll() => await Task.Factory.StartNew(async () => await DownloadAll(Downloads).ConfigureAwait(false)).ConfigureAwait(false);
 
-        public void DoDownload()
+        private async Task DownloadAll(DownloadItem[] downloads)
         {
-            new Thread(async () => await Download()).Start();
-        }
-
-        private DateTime lastUpdate;
-        private long lastBytes = 0;
-        private int globalProgressValue = 0;
-        private async Task Download()
-        {
-            for (int i = 0; i < DownloadModels.Length; i++)
+            for (int i = 0; i < downloads.Length; i++)
             {
-                var dm = DownloadModels[i];
-                Download d = new(dm.Url.AbsoluteUri);
-                d.BytesReceivedPerSec += (s, e) =>
-                {
-                    var bytesChange = e - lastBytes;
-                    _Speed = bytesChange;
-                    lastBytes = e;
-
-                    var percentage = (int)(dm.Size / 100 * e);
-                    GlobalProgressValue = globalProgressValue + (percentage/ FilesCount);
-                    FileProgressValue = percentage;
-
-                    _CurrentFileDownloadedSize += e;
-
-                    if (percentage == 100)
-                    {
-                        _DownloadedSize += e;
-                        _CurrentFileDownloadedSize = 0;
-
-                        CurrentFileIndex++;
-                        lastBytes = 0;
-                        globalProgressValue += percentage / FilesCount;
-                        OnPropertyChanged(nameof(DownloadedSize));
-                    }
-
-
-                    OnPropertyChanged(nameof(Speed));
-                    OnPropertyChanged(nameof(CurrentFileDownloadedSize));
-                };
-                await d.Start(dm.TargetFolder);
+                CurrentFileIndex = i + 1;
+                // begin download from url
+                DownloadService ds = await DownloadFile(downloads[i]).ConfigureAwait(false);
+                // clear download to order new of one
+                ds.Clear();
             }
         }
 
-        private static string GetSize(long bytes)
+        private  async Task<DownloadModel> DownloadFile(DownloadItem downloadItem)
         {
-            var kb = Convert.ToInt32(bytes) / 1024;
-            var mb = Math.Round(kb * .001, 1);
-            return kb > 1000 ? mb + " MB" : kb > 1 ? kb + " KB" : bytes + " B";
+            CurrentDownloadConfiguration = GetDownloadConfiguration();
+            CurrentDownloadModel = new (CurrentDownloadConfiguration);
+            //CurrentDownloadModel.ChunkDownloadProgressChanged += OnChunkDownloadProgressChanged;
+            CurrentDownloadModel.DownloadProgressChanged += OnDownloadProgressChanged;
+            CurrentDownloadModel.DownloadFileCompleted += OnDownloadFileCompleted;
+            CurrentDownloadModel.DownloadStarted += OnDownloadStarted;
+
+            if (string.IsNullOrWhiteSpace(downloadItem.FileName))
+            {
+                await CurrentDownloadModel.DownloadFileTaskAsync(downloadItem.Url, new DirectoryInfo(downloadItem.FolderPath)).ConfigureAwait(false);
+            }
+            //else
+            //{
+            //    await CurrentDownloadModel.DownloadFileTaskAsync(downloadItem.Url, downloadItem.FileName).ConfigureAwait(false);
+            //}
+
+            return CurrentDownloadModel;
         }
 
-        #endregion
+        private void OnDownloadStarted(object sender, DownloadStartedEventArgs e)
+        {
+
+        }
+
+        private void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            CurrentFileDownloadProgress = 0;
+            total = DownloadProgress;
+            if (CurrentFileIndex == Downloads.Length || e.Cancelled)
+            {
+                Completed?.Invoke(this, e);
+            }
+        }
+
+        private double total = 0;
+        private void OnDownloadProgressChanged(object sender, Downloader.DownloadProgressChangedEventArgs e)
+        {
+            CurrentFileDownloadProgress = e.ProgressPercentage;
+            DownloadProgress = (total + e.ProgressPercentage) / Downloads.Length;
+        }
     }
 }
