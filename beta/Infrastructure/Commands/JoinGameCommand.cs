@@ -2,7 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Commands
 {
@@ -15,10 +15,12 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (parameter is GameInfoMessage game)
-                new Thread(() => GameLauncherService.JoinGame(game))
-                {
-                    Name = "Game launcher thread"
-                }.Start();
+                //GameLauncherService.JoinGame(game);
+            Task.Run(async () => await GameLauncherService.JoinGame(game));
+            //new Thread(() => GameLauncherService.JoinGame(game))
+            //{
+            //    Name = "Game launcher thread"
+            //}.Start();
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using beta.Infrastructure.Utils;
+using System.Net.Http;
 
 namespace beta.ViewModels
 {
@@ -61,10 +62,10 @@ namespace beta.ViewModels
         }
 
         #region Name
-        private string _Name = "Unknown";
+        private string _Name;
         public string Name
         {
-            get => _Name;
+            get => _Name ?? Downloads[CurrentFileIndex - 1].FileName;
             set => Set(ref _Name, value);
         }
         #endregion
@@ -88,7 +89,13 @@ namespace beta.ViewModels
         public int CurrentFileIndex
         {
             get => _CurrentFileIndex;
-            set => Set(ref _CurrentFileIndex, value);
+            set
+            {
+                if (Set(ref _CurrentFileIndex, value))
+                {
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
         }
         #endregion
 
@@ -105,7 +112,7 @@ namespace beta.ViewModels
         private double _DownloadProgress;
         public double DownloadProgress
         {
-            get => DownloadProgress;
+            get => _DownloadProgress;
             set => Set(ref _DownloadProgress, value);
         }
         #endregion
@@ -120,14 +127,17 @@ namespace beta.ViewModels
         {
             long total = 0;
 
-            for (int i = 0; i < downloads.Length; i++)
-            {
-                var download = downloads[i];
-                WebRequest request = WebRequest.Create(download.Url);
-                request.Method = "HEAD";
-                var response = await request.GetResponseAsync();
-                total += response.ContentLength;
-            }
+            //for (int i = 0; i < downloads.Length; i++)
+            //{
+            //    var download = downloads[i];
+            //    HttpClient client = new();
+                
+            //    var t = await client.GetAsync(download.Url, HttpCompletionOption.ResponseContentRead);
+            //    WebRequest request = WebRequest.Create(download.Url);
+            //    request.Method = "GET";
+            //    var response = await request.GetResponseAsync();
+            //    total += response.ContentLength;
+            //}
 
             return total;
         }
@@ -157,14 +167,16 @@ namespace beta.ViewModels
             CurrentDownloadModel.DownloadFileCompleted += OnDownloadFileCompleted;
             CurrentDownloadModel.DownloadStarted += OnDownloadStarted;
 
-            if (string.IsNullOrWhiteSpace(downloadItem.FileName))
+            File.Delete(downloadItem.FolderPath + downloadItem.FileName);
+
+            if (!string.IsNullOrWhiteSpace(downloadItem.FileName))
+            {
+                await CurrentDownloadModel.DownloadFileTaskAsync(downloadItem.Url, downloadItem.FolderPath + downloadItem.FileName).ConfigureAwait(false);
+            }
+            else
             {
                 await CurrentDownloadModel.DownloadFileTaskAsync(downloadItem.Url, new DirectoryInfo(downloadItem.FolderPath)).ConfigureAwait(false);
             }
-            //else
-            //{
-            //    await CurrentDownloadModel.DownloadFileTaskAsync(downloadItem.Url, downloadItem.FileName).ConfigureAwait(false);
-            //}
 
             return CurrentDownloadModel;
         }
@@ -189,6 +201,9 @@ namespace beta.ViewModels
         {
             CurrentFileDownloadProgress = e.ProgressPercentage;
             DownloadProgress = (total + e.ProgressPercentage) / Downloads.Length;
+
+            if (_TotalSize is 0) _TotalSize = e.TotalBytesToReceive;
+            OnPropertyChanged(nameof(TotalSize));
         }
     }
 }

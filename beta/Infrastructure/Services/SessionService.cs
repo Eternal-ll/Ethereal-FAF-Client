@@ -186,9 +186,7 @@ namespace beta.Infrastructure.Services
                 .Append("\"}\n")
                 .ToString();
 
-#if DEBUG
-            Logger.LogInformation($"Sending data for authorization on server: {@command}");
-#endif
+            Logger.LogInformation($"Sending data for authentication to lobby-server...");
 
             Client.Write(Encoding.UTF8.GetBytes(command));
         }

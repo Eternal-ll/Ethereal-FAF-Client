@@ -5,10 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:control="clr-namespace:beta.Resources.Controls"
+             xmlns:vm="clr-namespace:beta.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              x:Name="this">
     <Grid>
+        <Grid.Resources>
+            <DataTemplate DataType="{x:Type vm:DownloadViewModel}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Name}"/>
+                    <ProgressBar Value="{Binding DownloadProgress}" Width="100" Margin="4 0 0 0"/>
+                    <TextBlock Text="{Binding DownloadProgress, StringFormat='{}{0:0}%'}" Margin="4 0 0 0" Opacity=".5"/>
+                </StackPanel>
+            </DataTemplate>
+        </Grid.Resources>
         <ui:NavigationView x:Name="UINavigationView"
                            IsBackButtonVisible="Collapsed"
                            PaneDisplayMode="Auto"
@@ -165,5 +175,34 @@
                 </Style>
             </TextBlock.Resources>
         </TextBlock>
+
+        <ui:TitleBarButton Width="NaN" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right"
+                           Margin="0 0 140 0" FontFamily="SegoiUI" FontSize="14">
+            <ui:TitleBarButton.Style>
+                <Style TargetType="ui:TitleBarButton">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Downloads.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ui:TitleBarButton.Style>
+            <ui:FlyoutService.Flyout>
+                <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Downloads}">
+                            
+                        </ItemsControl>
+                    </StackPanel>
+                </ui:Flyout>
+            </ui:FlyoutService.Flyout>
+            <Border>
+                <StackPanel Orientation="Horizontal" Margin="10 0">
+                    <Path Fill="White" Stretch="Uniform" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                    <TextBlock Text="{Binding Downloads.Count}" Margin="4 0 0 0"/>
+                    <ContentControl Content="{Binding Download}" Margin="10 0 0 0"/>
+                </StackPanel>
+            </Border>
+        </ui:TitleBarButton>
     </Grid>
 </UserControl>

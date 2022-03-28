@@ -2,10 +2,8 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
-using ModernWpf;
 using ModernWpf.Controls;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace beta.Views.Windows
 {

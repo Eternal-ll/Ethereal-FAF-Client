@@ -25,6 +25,8 @@ namespace beta.Models
     }
     public class GameMap : Map
     {
+        public GameMap(string originalName) => OriginalName = originalName;
+
         #region ImageSource
         private byte[] _ImageSource;
         public byte[] ImageSource
@@ -43,6 +45,7 @@ namespace beta.Models
             }
         }
         #endregion
+
         private BitmapImage BitmapImage;
         public override ImageSource NewPreview
         {

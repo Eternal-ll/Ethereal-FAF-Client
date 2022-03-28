@@ -1,14 +1,16 @@
 ﻿using beta.Infrastructure.Navigation;
 using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
 using beta.Models.Enums;
+using beta.ViewModels;
 using beta.Views.Modals;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace beta.Views
 {
@@ -27,9 +29,26 @@ namespace beta.Views
         #endregion
 
         private readonly IIrcService IrcService;
+        private readonly IDownloadService DownloadService;
 
         private ContentDialog Dialog;
 
+        public ObservableCollection<DownloadViewModel> Downloads => DownloadService.Downloads;
+        private DownloadViewModel _Download;
+        public DownloadViewModel Download
+        {
+            get => _Download;
+            set
+            {
+                if (_Download != value)
+                {
+                    _Download = value;
+                    OnPropertyChanged(nameof(Download));
+                }
+            }
+        }
+
+        #region IrcState
         private IrcState _IrcState;
         public IrcState IrcState
         {
@@ -42,7 +61,8 @@ namespace beta.Views
                     OnPropertyChanged(nameof(IrcState));
                 }
             }
-        }
+        } 
+        #endregion
 
         #region Ctor
         public NavigationView()
@@ -51,6 +71,20 @@ namespace beta.Views
             DataContext = this;
 
             Profile.Content = Properties.Settings.Default.PlayerNick;
+
+            DownloadService = App.Services.GetService<IDownloadService>();
+            BindingOperations.EnableCollectionSynchronization(DownloadService.Downloads, new());
+            Downloads.CollectionChanged += (s, e) =>
+            {
+                if (Downloads.Count > 0)
+                {
+                    Download = Downloads[^1];
+                }
+                else
+                {
+                    Download = null;
+                }
+            };
 
             IrcService = App.Services.GetService<IIrcService>();
             IrcService.StateChanged += (s, e) => IrcState = e;

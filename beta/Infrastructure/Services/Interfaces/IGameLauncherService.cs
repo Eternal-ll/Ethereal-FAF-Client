@@ -7,8 +7,6 @@ namespace beta.Infrastructure.Services.Interfaces
     public interface IGameLauncherService
     {
         public event EventHandler PatchUpdateRequired;
-
-        public void JoinGame();
         public Task JoinGame(GameInfoMessage game);
     }
 }

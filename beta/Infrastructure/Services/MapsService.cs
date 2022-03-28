@@ -1,29 +1,34 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Enums;
+using beta.Models.Server;
+using beta.Properties;
+using beta.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using beta.Properties;
-using beta.Models.Server;
+using System.IO.Compression;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
 {
     public class MapsService : IMapsService
     {
+        public event EventHandler<string> DownloadCompleted;
+
         private readonly ICacheService CacheService;
         private readonly IApiService ApiService;
+        private readonly IDownloadService DownloadService;
 
         private readonly List<string> LocalMaps = new();
         private readonly Dictionary<string, GameMap> CachedMaps = new();
-
         private readonly FileSystemWatcher LocalWatcher;
 
+        public string[] GetLocalMaps() => LocalMaps.ToArray();
+
         private string PathToLegacyMaps => Settings.Default.PathToGame is not null ? Settings.Default.PathToGame + @"\maps\" : null;
-        public MapsService(ICacheService cacheService, IApiService apiService)
+        public MapsService(ICacheService cacheService, IApiService apiService, IDownloadService downloadService)
         {
             CacheService = cacheService;
             ApiService = apiService;
@@ -46,11 +51,17 @@ namespace beta.Infrastructure.Services
 
             LocalWatcher.Created += OnNewLocalMap;
             LocalWatcher.Deleted += OnDeletingLocalMap;
-        }   
+            DownloadService = downloadService;
+        }
 
         public LocalMapState CheckLocalMap(string name)
         {
             if (name is null) return LocalMapState.Unknown;
+
+            if (IsLegacyMap(name))
+            {
+                return LocalMapState.Same;
+            }
 
             int? version = null;
             var data = name.Split('.');
@@ -112,7 +123,6 @@ namespace beta.Infrastructure.Services
         {
             //throw new NotImplementedException();
         }
-        public string[] GetLocalMaps() => LocalMaps.ToArray();
         public Dictionary<string, string> GetMapScenario(string mapName, bool isLegacy = false)
         {
             var localMaps = LocalMaps;
@@ -194,7 +204,7 @@ namespace beta.Infrastructure.Services
                             }
                             if (scenario.ContainsKey(data[0]))
                             {
-                                scenario[data[0]] = data[1];
+                                if (scenario[data[0]].Length == 0) scenario[data[0]] = data[1];
                                 counter--;
                             }
                         }
@@ -224,9 +234,34 @@ namespace beta.Infrastructure.Services
             return null;
         }
 
-        public void Download(Uri url)
+        /// <summary>
+        /// https://content.faforever.com/maps/scmp_haz04.v0001.zip
+        /// </summary>
+        /// <param name="uri"></param>
+        public async Task<DownloadViewModel> Download(Uri uri)
         {
-            throw new NotImplementedException();
+            var commonPath = App.GetPathToFolder(Folder.Common);
+            var name = uri.Segments[^1];
+            DownloadItem dModel = new(commonPath, name, uri.AbsoluteUri);
+
+            var model = await DownloadService.DownloadAsync(dModel);
+            model.Completed += (s, e) =>
+            {
+                if (e.Cancelled)
+                {
+                    return;
+                }
+
+                string zipPath = commonPath + name;
+
+                string extractPath = App.GetPathToFolder(Folder.Maps);
+
+                ZipFile.ExtractToDirectory(zipPath, extractPath);
+                File.Delete(zipPath);
+
+                DownloadCompleted?.Invoke(this, name[..^4]);
+            };
+            return model;
         }
 
         public GameMap GetMap(Uri uri, bool attachScenario = true)
@@ -244,7 +279,7 @@ namespace beta.Infrastructure.Services
             //neroxis_map_generator_1.8.5_c6gjzaqfmuove_aida.png
             //https://content.faforever.com/maps/previews/small/neroxis_map_generator_1.8.5_c6gjzaqfmuove_aida.png
 
-            GameMap gameMap = new()
+            GameMap gameMap = new(mapName)
             {
                 IsLegacy = isLegacyMap,
                 OriginalName = mapName
