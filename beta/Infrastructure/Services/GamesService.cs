@@ -157,7 +157,6 @@ namespace beta.Infrastructure.Services
             //if (game.Host is null)
             game.Host = PlayersService.GetPlayer(game.host);
 
-
             game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
                 attachScenario: true);
 

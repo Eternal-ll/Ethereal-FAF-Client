@@ -53,6 +53,10 @@ namespace beta.Models
                 {
                     return App.Current.Resources["QuestionIcon"] as ImageSource;
                 }
+                if (ImageSource.Length == 1)
+                {
+                    return App.Current.Resources["MapGenIcon"] as ImageSource;
+                }
                 return BitmapImage ??= ImageSource.ToBitmapImage();
             }
         }

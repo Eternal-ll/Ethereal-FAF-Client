@@ -18,7 +18,7 @@ namespace beta.Infrastructure.Services
         private readonly IApiService ApiService;
 
         private readonly List<string> LocalMaps = new();
-        private readonly List<GameMap> CachedMaps = new();
+        private readonly Dictionary<string, GameMap> CachedMaps = new();
 
         private readonly FileSystemWatcher LocalWatcher;
 
@@ -231,16 +231,14 @@ namespace beta.Infrastructure.Services
 
         public GameMap GetMap(Uri uri, bool attachScenario = true)
         {
-            var mapName = uri.Segments[^1].Substring(0, uri.Segments[^1].Length - 4);
+            var mapName = uri.Segments[^1][0..^4];
 
             var isLegacyMap = IsLegacyMap(mapName);
 
             var cachedMaps = CachedMaps;
-            for (int i = 0; i < cachedMaps.Count; i++)
+            if (cachedMaps.TryGetValue(mapName, out var cachedMap))
             {
-                var cachedMap = cachedMaps[i];
-                if (cachedMap.OriginalName.Equals(mapName, StringComparison.OrdinalIgnoreCase))
-                    return cachedMap;
+                return cachedMap;
             }
 
             //neroxis_map_generator_1.8.5_c6gjzaqfmuove_aida.png
@@ -254,9 +252,7 @@ namespace beta.Infrastructure.Services
 
             if (uri.Segments[^1].StartsWith("neroxis"))
             {
-                App.Current.Dispatcher.Invoke(() =>
-                gameMap.SmallPreview = App.Current.Resources["MapGenIcon"] as ImageSource,
-                System.Windows.Threading.DispatcherPriority.Background);
+                gameMap.ImageSource = new byte[1];
                 return gameMap;
             }
 
@@ -266,7 +262,7 @@ namespace beta.Infrastructure.Services
                 gameMap.Scenario = attachScenario ? GetMapScenario(mapName, isLegacyMap) : null;
             });
 
-            CachedMaps.Add(gameMap);
+            CachedMaps.Add(mapName, gameMap);
 
             return gameMap;
         }
