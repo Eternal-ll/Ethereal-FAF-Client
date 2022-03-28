@@ -345,7 +345,7 @@
                         Margin="6 0 0 0"
                         ToolTip="Mexs count">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{StaticResource MassResourceImage}"/>
+                        <Image Height="18" Stretch="Uniform" Margin="0 0 4 0"  Source="{StaticResource MassResourceImage}"/>
                         <TextBlock Text="{Binding Map.MexesCount}"/>
                     </StackPanel>
                 </Border>
@@ -355,7 +355,7 @@
                         Margin="6 0 0 0"
                         ToolTip="Hydrocarbons count">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{StaticResource HydroCarbonResourceImage}"/>
+                        <Image Height="16" Stretch="Uniform" Margin="0 0 6 0" Source="{StaticResource HydroCarbonResourceImage}"/>
                         <TextBlock Text="{Binding Map.HydrosCount}"/>
                     </StackPanel>
                 </Border>
