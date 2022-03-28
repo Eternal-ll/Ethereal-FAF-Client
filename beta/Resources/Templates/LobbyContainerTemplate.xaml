@@ -344,14 +344,20 @@
                         Padding="8 4"
                         Margin="6 0 0 0"
                         ToolTip="Mexs count">
-                    <TextBlock Text="{Binding Map.MexesCount}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{StaticResource MassResourceImage}"/>
+                        <TextBlock Text="{Binding Map.MexesCount}"/>
+                    </StackPanel>
                 </Border>
                 <Border Background="{StaticResource BackgroundHalfBlack}"
                         CornerRadius="4"
                         Padding="8 4"
                         Margin="6 0 0 0"
                         ToolTip="Hydrocarbons count">
-                    <TextBlock Text="{Binding Map.HydrosCount}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{StaticResource HydroCarbonResourceImage}"/>
+                        <TextBlock Text="{Binding Map.HydrosCount}"/>
+                    </StackPanel>
                 </Border>
             </WrapPanel>
 

@@ -8,6 +8,9 @@
     <BitmapImage x:Key="PlayerGameStatus.playing5" UriSource="../Images/PlayerGameStatus/playing5.png"/>
     <BitmapImage x:Key="PlayerGameStatus.unknown" UriSource="../Images/PlayerGameStatus/unknown.png"/>
 
+    <BitmapImage x:Key="MassResourceImage" DecodePixelWidth="32" DecodePixelHeight="32" UriSource="../Images/MapResources/mass_strategic.png"/>
+    <BitmapImage x:Key="HydroCarbonResourceImage" DecodePixelWidth="32" DecodePixelHeight="32" UriSource="../Images/MapResources/hydrocarbon_strategic.png"/>
+
     <PathGeometry x:Key="MapGenIconPathGeometry"
                   PresentationOptions:Freeze="True"
                   Figures="M27.8,66.8L4.4,55C2,53.7,0,50.5,0,47.8V21c0-2.8,2-4,4.4-2.8l23.5,11.9c2.4,1.2,4.4,4.4,4.4,7.2v26.7
