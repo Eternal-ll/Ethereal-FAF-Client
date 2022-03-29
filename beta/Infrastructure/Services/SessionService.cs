@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Threading;
 using beta.Models.Debugger;
 using beta.Models.Enums;
+using beta.Infrastructure.Utils;
 
 namespace beta.Infrastructure.Services
 {
@@ -98,30 +99,42 @@ namespace beta.Infrastructure.Services
         }
         public string GenerateUID(string session)
         {
+            Logger.LogInformation($"Generating UID for session: {session}");
+            
             if (string.IsNullOrWhiteSpace(session))
+            {
+                Logger.LogWarning("Passed session value is empty");
                 return null;
+            }
 
             string result = null;
 
-            // TODO: invoke some error events?
-            if (!File.Exists(Environment.CurrentDirectory + "\\faf-uid.exe"))
-                return null;
+            Logger.LogInformation("Getting path to faf-uid.exe");
 
-            Process process = new();
-            process.StartInfo.FileName = "faf-uid.exe";
-            process.StartInfo.Arguments = session;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.CreateNoWindow = true;
+            var file = Tools.GetPathToFafUid();
+            Logger.LogInformation($"Got the path: {file}");
+            Process process = new()
+            {
+                StartInfo = new()
+                {
+                    FileName = file,
+                    Arguments = session,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                }
+            };
             process.Start();
+
+            Logger.LogInformation("Starting process of faf-uid.exe");
             while (!process.StandardOutput.EndOfStream)
             {
-
-                // TODO: i didnt get it, why it doesnt work on async. Looks like main dispatcher being busy and stucks
-                result += process.StandardOutput.ReadLine();
+                var line = process.StandardOutput.ReadLine();
+                Logger.LogInformation($"Output line: {line}");
+                result += line;
             }
             process.Close();
-
+            Logger.LogInformation($"faf-uid.exe process is closed");
             return result;
         }
         public void Authorize()

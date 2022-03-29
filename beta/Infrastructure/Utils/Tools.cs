@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -117,6 +116,19 @@ namespace beta.Infrastructure.Utils
 
             result = result.Replace("/", ".");
             return result;
+        }
+
+        public static string GetPathToFafUid() => ExtractAndReturnPath(Properties.Resources.faf_uid, "faf-uid.exe");
+        public static string GetPathToIceAdapterJar() => ExtractAndReturnPath(Properties.Resources.faf_ice_adapter, "faf-ice-adapter");
+        private static string ExtractAndReturnPath(byte[] binary, string name)
+        {
+            string path = App.CurrentDirectory + "\\Third-party applications\\";
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            path += name;
+            if (File.Exists(path)) return path;
+            using FileStream fs = new(path, FileMode.Create);
+            fs.Write(binary);
+            return path;
         }
     }
 }
