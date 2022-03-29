@@ -2,37 +2,118 @@
 {
     public enum ServerCommand : byte
     {
-        #region Receive
-        // READ
+        /// <summary>
+        /// Incoming notification
+        /// </summary>
+        notice,
 
-        notice = 0,
+        /// <summary>
+        /// Incoming session id
+        /// </summary>
+        session,
+        /// <summary>
+        /// Incoming IRC password
+        /// </summary>
+        irc_password,
+        /// <summary>
+        /// Incoming welcome message
+        /// </summary>
+        welcome,
+        /// <summary>
+        /// Incoming social data
+        /// </summary>
+        social,
+        /// <summary>
+        /// Incoming information about player(s)
+        /// </summary>
+        player_info,
+        /// <summary>
+        /// Incoming information about game(s)
+        /// </summary>
+        game_info,
+        /// <summary>
+        /// Incoming Match Maker info
+        /// </summary>
+        matchmaker_info,
+        /// <summary>
+        /// Incoming Map vault info
+        /// </summary>
+        mapvault_info,
 
-        session = 1,
-        irc_password = 2,
-        welcome = 3,
-        social = 4,
-        player_info = 5,
-        game_info = 6,
-        matchmaker_info = 7,
-        mapvault_info = 8,
+        /// <summary>
+        /// Incoming ping command
+        /// </summary>
+        ping,
+        /// <summary>
+        /// Outgoing pong command
+        /// </summary>
+        pong,
 
-        ping = 9,
-        pong = 10,
-        #endregion
+        /// <summary>
+        /// Incoming game launch message
+        /// </summary>
+        game_launch,
 
-        // WRITE
-        set_party_factions = 20,
-        restore_game_session = 21,
-        game_matchmaking = 22,
+        /// <summary>
+        /// Incoming invite to party for Team Match Making
+        /// </summary>
+        party_invite,
+        /// <summary>
+        /// Incoming new information about party
+        /// </summary>
+        update_party,
+        /// <summary>
+        /// Outgoing invite to <recipient_id> to join the party
+        /// </summary>
+        invite_to_party,
+        /// <summary>
+        /// Incoming kick from party
+        /// </summary>
+        kicked_from_party,
+        /// <summary>
+        /// Outgoing command to set party factions
+        /// </summary>
+        set_party_factions,
 
-        game_host = 23,
-        game_join = 24,
 
-        invite_to_party = 25,
 
-        // on lobby server authorization
-        invalid = 99,
+        /// <summary>
+        /// Incoming message that TMM match is found
+        /// </summary>
+        match_found,
+        /// <summary>
+        /// Incoming message that TMM match cancelled
+        /// </summary>
+        match_cancelled,
+        /// <summary>
+        /// Incoming TMM queue information?
+        /// </summary>
+        search_info,
 
-        unknown = 100
+        /// <summary>
+        /// Outgoing command to restore game session on reconnect to lobby-server
+        /// </summary>
+        restore_game_session,
+        
+        /// <summary>
+        /// Join/Leave from TMM queue
+        /// </summary>
+        game_matchmaking,
+
+        /// <summary>
+        /// Outgoing command to host game
+        /// </summary>
+        game_host,
+        
+        /// <summary>
+        /// Outgoing command to join game with <uid>
+        /// </summary>
+        game_join,
+
+
+        /// <summary>
+        /// Incoming message that we did something wrong and the lobby-server will disconnect
+        /// </summary>
+        invalid,
     }
 }
