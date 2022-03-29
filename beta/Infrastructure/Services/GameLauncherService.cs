@@ -6,7 +6,6 @@ using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels;
 using Microsoft.Extensions.Logging;
-using ModernWpf.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,35 +30,34 @@ namespace beta.Infrastructure.Services
     public class GameLauncherService : IGameLauncherService
     {
         public event EventHandler<GameLauncherState> GameLauncherStateChanged;
-        public event EventHandler<string> MapRequired;
 
-        public event EventHandler PatchUpdateRequired;
-
-        private readonly IApiService ApiService;
         private readonly IDownloadService DownloadService;
         private readonly IMapsService MapsService;
         private readonly ILogger Logger;
 
-        public GameLauncherState State { get; set; }
-        public bool GameIsRunning { get; set; } = false;
+        #region State
+        private GameLauncherState _State;
+        public GameLauncherState State
+        {
+            get => _State;
+            set
+            {
+                if (!Equals(_State, value))
+                {
+                    _State = value;
+                    OnStateChanged(value);
+                }
+            }
+        } 
+        #endregion
+
         private GameInfoMessage LastGame;
 
-        public GameLauncherService(
-            IApiService apiService,
-            IDownloadService downloadService, IMapsService mapsService, ILogger<GameLauncherService> logger)
+        public GameLauncherService(IDownloadService downloadService, IMapsService mapsService, ILogger<GameLauncherService> logger)
         {
-            ApiService = apiService;
             DownloadService = downloadService;
             MapsService = mapsService;
             Logger = logger;
-        }
-
-        public async Task JoinGame()
-        {
-            if (LastGame is not null)
-            {
-                await JoinGame(LastGame);
-            }
         }
 
         public async Task JoinGame(GameInfoMessage game)
@@ -132,7 +130,7 @@ namespace beta.Infrastructure.Services
 
             if (LastGame is not null)
             {
-                JoinGame();
+                JoinGame(LastGame);
             }
         }
 
@@ -143,9 +141,9 @@ namespace beta.Infrastructure.Services
             {
                 Logger.LogInformation($"Required map {e} is downloaded");
                 ((IMapsService)sender).DownloadCompleted -= OnRequiredMapDownloadCompleted;
-                
+
                 // launch cycle again
-                JoinGame();
+                JoinGame(LastGame);
             }
         }
 
@@ -253,7 +251,7 @@ namespace beta.Infrastructure.Services
         {
             ((DownloadViewModel)sender).Completed -= OnDownloadCompleted;
 
-            if (!e.Cancelled) await JoinGame();
+            if (!e.Cancelled) await JoinGame(LastGame);
         }
 
         private bool CopyOriginalBin()
@@ -327,11 +325,16 @@ namespace beta.Infrastructure.Services
             */
         }
 
-        private void OnPatchUpdateRequired() => PatchUpdateRequired?.Invoke(this, null);
-        private void OnStateChanged(GameLauncherState arg)
+
+        public Task Join(GameInfoMessage game)
         {
-            State = arg;
-            GameLauncherStateChanged?.Invoke(this, arg);
+            throw new NotImplementedException();
         }
+
+        public Task HostAsync(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false)
+        {
+            throw new NotImplementedException();
+        }
+        private void OnStateChanged(GameLauncherState arg) => GameLauncherStateChanged?.Invoke(this, arg);
     }
 }
