@@ -48,9 +48,9 @@ namespace beta.Infrastructure.Services
             AvatarService = avatarService;
             NoteService = noteService;
 
-            sessionService.NewPlayer += OnNewPlayer;
-            sessionService.SocialInfo += OnNewSocialInfo;
-            sessionService.WelcomeInfo += OnWelcomeInfo;
+            sessionService.NewPlayerReceived += OnNewPlayer;
+            sessionService.SocialDataReceived += OnNewSocialInfo;
+            sessionService.WelcomeDataReceived += OnWelcomeInfo;
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {

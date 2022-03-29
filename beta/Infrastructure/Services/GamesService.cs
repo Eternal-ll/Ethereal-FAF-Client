@@ -43,7 +43,7 @@ namespace beta.Infrastructure.Services
             PlayersService = playerService;
             MapService = mapService;
 
-            sessionService.NewGame += OnNewGame;
+            sessionService.NewGameReceived += OnNewGame;
         }
 
         private void OnNewGame(object sender, EventArgs<GameInfoMessage> e)

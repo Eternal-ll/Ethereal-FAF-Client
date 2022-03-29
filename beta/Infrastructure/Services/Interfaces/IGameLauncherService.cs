@@ -9,6 +9,7 @@ namespace beta.Infrastructure.Services.Interfaces
     {
         public Task JoinGame(GameInfoMessage game);
 
+        public Task Join(string uid);
         public Task Join(GameInfoMessage game);
 
         /// <summary>

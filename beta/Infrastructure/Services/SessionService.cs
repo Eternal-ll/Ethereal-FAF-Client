@@ -10,8 +10,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using beta.Models.Debugger;
@@ -25,16 +23,19 @@ namespace beta.Infrastructure.Services
     {
         #region Events
         public event EventHandler<EventArgs<bool>> Authorized;
-        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
-        public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
-        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeInfo;
+        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayerReceived;
+        public event EventHandler<EventArgs<GameInfoMessage>> NewGameReceived;
+        public event EventHandler<EventArgs<SocialMessage>> SocialDataReceived;
+        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeDataReceived;
+        public event EventHandler<EventArgs<NoticeMessage>> NotificationReceived;
+        //public event EventHandler<EventArgs<QueueData>> QueueDataReceived;
+        public event EventHandler<EventArgs<MatchMakerData>> MatchMakerDataReceived;
+        public event EventHandler<EventArgs<GameLaunchData>> GameLaunchDataReceived;
         #endregion
 
         #region Properties
 
         private ManagedTcpClient Client;
-        public ManagedTcpClient TcpClient => Client;
 
         private readonly IOAuthService OAuthService;
         private readonly IIrcService IrcService;
@@ -65,15 +66,15 @@ namespace beta.Infrastructure.Services
             OAuthService.StateChanged += OnAuthResult;
 
             #region Response actions for server
-            //Operations.Add(ServerCommand.notice, OnNoticeData);
-            
+            Operations.Add(ServerCommand.notice, OnNoticeData);
+
             Operations.Add(ServerCommand.irc_password, OnIrcPassowrdData);
             Operations.Add(ServerCommand.welcome, OnWelcomeData);
             Operations.Add(ServerCommand.social, OnSocialData);
 
             Operations.Add(ServerCommand.player_info, OnPlayerData);
             Operations.Add(ServerCommand.game_info, OnGameData);
-            //Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
+            Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
 
             Operations.Add(ServerCommand.ping, OnPing);
             Operations.Add(ServerCommand.pong, OnPong);
@@ -197,7 +198,12 @@ namespace beta.Infrastructure.Services
 
             return response.GetRequiredJsonRowValue(2);
         }
-        public void Send(string command) => Client.Write(command);
+        public void Send(string command)
+        {
+            Logger.LogInformation($"Sent to lobby-server:\n{command}");
+            AppDebugger.LOGLobby($"Sent to lobby-server:\n {command.ToJsonFormat()}");
+            Client.Write(command);
+        }
 
         public void Ping()
         {
@@ -241,17 +247,17 @@ namespace beta.Infrastructure.Services
 
         #region Events invokers
         protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
-        protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayer?.Invoke(this, e);
-        protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGame?.Invoke(this, e);
-        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialInfo?.Invoke(this, e);
-        protected virtual void OnWelcomeInfo(EventArgs<WelcomeMessage> e) => WelcomeInfo?.Invoke(this, e);
+        protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayerReceived?.Invoke(this, e);
+        protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGameReceived?.Invoke(this, e);
+        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialDataReceived?.Invoke(this, e);
+        protected virtual void OnWelcomeInfo(EventArgs<WelcomeMessage> e) => WelcomeDataReceived?.Invoke(this, e);
+        protected virtual void OnNotificationReceived(EventArgs<NoticeMessage> e) => NotificationReceived?.Invoke(this, e);
+        protected virtual void OnMatchMakerDataReceived(EventArgs<MatchMakerData> e) => MatchMakerDataReceived?.Invoke(this, e);
+        protected virtual void OnGameLaunchDataReceived(EventArgs<GameLaunchData> e) => GameLaunchDataReceived?.Invoke(this, e);
         #endregion
 
         #region Server response actions
-        private void OnNoticeData(string json)
-        {
-            // TODO
-        }
+        private void OnNoticeData(string json) => OnNotificationReceived(JsonSerializer.Deserialize<NoticeMessage>(json));
         private void OnWelcomeData(string json)
         {
             var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
@@ -304,20 +310,15 @@ namespace beta.Infrastructure.Services
 
             //AppDebugger.LOGLobby(json.ToJsonFormat());
         }
-        private void OnMatchmakerData(string json)
-        {
-            var matchmakerMessage = JsonSerializer.Deserialize<QueueMessage>(json);
-            if (matchmakerMessage.queues?.Length > 0)
-            {
-                // payload with queues
-            }
-        }
+        private void OnMatchmakerData(string json) => OnMatchMakerDataReceived(JsonSerializer.Deserialize<MatchMakerData>(json));
 
         // VAULTS
         private void OnMapVaultData(string json)
         {
 
         }
+
+        private void OnGameLaunchData(string json) => OnGameLaunchDataReceived(JsonSerializer.Deserialize<GameLaunchData>(json));
 
         private void OnPing(string json = null) => Client.Write(ServerCommands.Pong);
 

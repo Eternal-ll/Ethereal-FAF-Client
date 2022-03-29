@@ -961,7 +961,7 @@
                 <Button
                     Style="{StaticResource LobbyContainerBtnStyle}"
                     Command="{StaticResource JoinGameCommand}"
-                    CommandParameter="{Binding}"
+                    CommandParameter="{Binding uid}"
                     HorizontalAlignment="Left"
                     Content="Join"/>
                 <!--<Button

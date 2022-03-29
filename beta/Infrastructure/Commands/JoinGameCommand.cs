@@ -1,6 +1,5 @@
 ﻿using beta.Infrastructure.Commands.Base;
 using beta.Infrastructure.Services.Interfaces;
-using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
@@ -14,9 +13,10 @@ namespace beta.Infrastructure.Commands
 
         public override void Execute(object parameter)
         {
-            if (parameter is GameInfoMessage game)
+            Task.Run(() => GameLauncherService.Join(parameter.ToString()));
+            //if (parameter is GameInfoMessage game)
                 //GameLauncherService.JoinGame(game);
-            Task.Run(async () => await GameLauncherService.JoinGame(game));
+            //Task.Run(async () => await GameLauncherService.JoinGame(game));
             //new Thread(() => GameLauncherService.JoinGame(game))
             //{
             //    Name = "Game launcher thread"

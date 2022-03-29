@@ -1,20 +1,19 @@
-﻿using beta.Models;
-using beta.Models.Server;
+﻿using beta.Models.Server;
 using System;
-using System.Net;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
     public interface ISessionService
     {
         public event EventHandler<EventArgs<bool>> Authorized;
-
-        public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
-        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
-        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeInfo;
-
-        public ManagedTcpClient TcpClient { get; }
+        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayerReceived;
+        public event EventHandler<EventArgs<GameInfoMessage>> NewGameReceived;
+        public event EventHandler<EventArgs<SocialMessage>> SocialDataReceived;
+        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeDataReceived;
+        public event EventHandler<EventArgs<NoticeMessage>> NotificationReceived;
+        //public event EventHandler<EventArgs<QueueData>> QueueDataReceived;
+        public event EventHandler<EventArgs<MatchMakerData>> MatchMakerDataReceived;
+        public event EventHandler<EventArgs<GameLaunchData>> GameLaunchDataReceived;
 
         public void Connect();
         public void Authorize();

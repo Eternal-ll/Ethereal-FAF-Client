@@ -3,6 +3,7 @@ using beta.Infrastructure.Utils;
 using beta.Models;
 using beta.Models.API;
 using beta.Models.Server;
+using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,7 @@ namespace beta.Infrastructure.Services
     public enum GameLauncherState : byte
     {
         Idle,
+        SentCommandToJoin,
         DownloadingMods,
         DownloadingMap,
         Updating,
@@ -31,6 +33,7 @@ namespace beta.Infrastructure.Services
     {
         public event EventHandler<GameLauncherState> GameLauncherStateChanged;
 
+        private readonly ISessionService SessionService;
         private readonly IDownloadService DownloadService;
         private readonly IMapsService MapsService;
         private readonly ILogger Logger;
@@ -53,31 +56,31 @@ namespace beta.Infrastructure.Services
 
         private GameInfoMessage LastGame;
 
-        public GameLauncherService(IDownloadService downloadService, IMapsService mapsService, ILogger<GameLauncherService> logger)
+        public GameLauncherService(IDownloadService downloadService, IMapsService mapsService, ILogger<GameLauncherService> logger, ISessionService sessionService)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
             Logger = logger;
+            SessionService = sessionService;
+        }
+
+        public async Task Join(string uid)
+        {
+            State = GameLauncherState.Idle;
+            if (State == GameLauncherState.Idle)
+            {
+                State = GameLauncherState.SentCommandToJoin;
+                SessionService.Send(ServerCommands.JoinGame(uid));
+            }
+            else
+            {
+                Logger.LogWarning($"Trying to join to game when state is : {State}");
+            }
         }
 
         public async Task JoinGame(GameInfoMessage game)
         {
             Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
-            /* SEND
-            "command": "game_join",
-            "uid": _
-            */
-
-            /* REPLY
-            "command": "game_launch",
-            "args": ["/numgames", players.hosting.game_count[RatingType.GLOBAL]],
-            "mod": "faf",
-            "uid": 42,
-            "name": "Test Game Name",
-            "init_mode": InitMode.NORMAL_LOBBY.value,
-            "game_type": "custom",
-            "rating_type": "global",
-             */
 
             LastGame = game;
 
