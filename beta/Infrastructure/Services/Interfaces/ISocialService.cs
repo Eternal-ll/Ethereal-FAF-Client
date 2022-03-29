@@ -9,8 +9,10 @@ namespace beta.Infrastructure.Services.Interfaces
     {
         public SocialMessage SocialMessage { get; set; }
 
-        public void AddRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend);
-        public void RemoveRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend);
+        public void AddFriend(int id);
+        public void AddFoe(int id);
+        public void RemoveFriend(int id);
+        public void RemoveFoe(int id);
 
         public List<PlayerInfoMessage> GetFriends();
         public List<PlayerInfoMessage> GetFoes();

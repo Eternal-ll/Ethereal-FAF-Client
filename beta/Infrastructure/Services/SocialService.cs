@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
+using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using System.Collections.Generic;
 
@@ -39,51 +40,23 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region Methods
-        public void AddFriend(int id) => AddRelationShip(id);
-        public void AddFoe(int id) => AddRelationShip(id, PlayerRelationShip.Foe);
+        public void AddFriend(int id) => SendCommand(ServerCommands.AddFriend(id.ToString()), id, PlayerRelationShip.Friend);
+        public void AddFoe(int id) => SendCommand(ServerCommands.AddFoe(id.ToString()), id, PlayerRelationShip.Foe);
+        public void RemoveFriend(int id) => SendCommand(ServerCommands.RemoveFriend(id.ToString()), id, PlayerRelationShip.Friend, true);
+        public void RemoveFoe(int id) => SendCommand(ServerCommands.RemoveFoe(id.ToString()), id, PlayerRelationShip.Foe, true);
 
-        public void RemoveFriend(int id) => RemoveRelationShip(id);
-        public void RemoveFoe(int id) => RemoveRelationShip(id, PlayerRelationShip.Foe);
-
-        public void AddRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
+        private void SendCommand(string command, int id, PlayerRelationShip relation, bool isRemoving = false)
         {
-            SendCommand("social_add", id, relation);
-        }
-        public void RemoveRelationShip(int id, PlayerRelationShip relation = PlayerRelationShip.Friend)
-        {
-            SendCommand("social_remove", id, relation);
-        }
-
-        private void SendCommand(string command, int id, PlayerRelationShip relation)
-        {
-            /*
-            
-            "command": "social_add",
-            "friend": 2
-
-            "command": "social_remove",
-            "friend": 1
-
-            "command": "social_add",
-            "foe": 2
-
-            "command": "social_remove",
-            "foe": 1
-
-            */
-
-            string json = $"{{ \"command\":\"{command}\", \"{relation.ToString().ToLower()}\": {id} }}";
-
             var player = PlayersService.GetPlayer(id);
             if (player is not null)
             {
-                if (command == "social_remove")
+                if (isRemoving)
                     relation = PlayerRelationShip.None;
                 
                 player.RelationShip = relation;
             }
 
-            SessionService.Send(json);
+            SessionService.Send(command);
         }
 
         public List<PlayerInfoMessage> GetFriends()
