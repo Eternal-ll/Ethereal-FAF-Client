@@ -17,6 +17,7 @@ using System.Threading;
 using beta.Models.Debugger;
 using beta.Models.Enums;
 using beta.Infrastructure.Utils;
+using beta.Models.Server.Base;
 
 namespace beta.Infrastructure.Services
 {
@@ -139,10 +140,8 @@ namespace beta.Infrastructure.Services
         }
         public void Authorize()
         {
-#if DEBUG
             Logger.LogInformation($"Starting authorization process to lobby server");
-            //Logger.LogInformation($"TCP client is connected? {Client.TcpClient.Connected}");
-#endif
+
             // TODO Fix
             if (Client is null)
             {
@@ -173,35 +172,12 @@ namespace beta.Infrastructure.Services
             string accessToken = Settings.Default.access_token;
             string generatedUID = GenerateUID(session);
 
-#if DEBUG
-            Logger.LogInformation($"{nameof(accessToken)}");
-            Logger.LogInformation($"{nameof(session)}");
-            Logger.LogInformation($"{nameof(generatedUID)}");
-#endif
 
-
-            StringBuilder builder = new();
-
-            /*
-            {
-                "command": "auth",
-                "token": "......",
-                "unique_id": "faf-uid.exe".
-                "session": "...."
-
-            */
-
-            var command = builder
-                .Append("{\"command\":\"auth\",\"token\":\"")
-                .Append(accessToken)
-                .Append("\",\"unique_id\":\"").Append(generatedUID)
-                .Append("\",\"session\":\"").Append(session)
-                .Append("\"}\n")
-                .ToString();
+            string authJson = ServerCommands.PassAuthentication(accessToken, generatedUID, session);
 
             Logger.LogInformation($"Sending data for authentication to lobby-server...");
 
-            Client.Write(Encoding.UTF8.GetBytes(command));
+            Client.Write(authJson);
         }
         public string GetSession()
         {
@@ -227,7 +203,7 @@ namespace beta.Infrastructure.Services
         {
             WaitingPong = true;
             Stopwatch.Start();
-            Client.Write("{\"command\":\"ping\"}");
+            Client.Write(ServerCommands.Ping);
         }
 
         private void OnAuthResult(object sender, OAuthEventArgs e)
@@ -343,18 +319,15 @@ namespace beta.Infrastructure.Services
 
         }
 
-        private void OnPing(string json = null)
-        {
-            Client.Write("{\"command\":\"pong\"}");
-        }
+        private void OnPing(string json = null) => Client.Write(ServerCommands.Pong);
 
         private void OnPong(string json = null)
         {
-            WaitingPong = true;
+            WaitingPong = false;
 
             //Logger.LogInformation($"Received PONG, time elapsed: {Stopwatch.Elapsed.ToString("c")}");
             //Stopwatch.Stop();
-            AppDebugger.LOGLobby($"\nTIME ELAPSED: {Stopwatch.Elapsed:c}");
+            AppDebugger.LOGLobby($"Received PONG. TIME ELAPSED: {Stopwatch.Elapsed:c}");
 
             Stopwatch.Reset();
         } 

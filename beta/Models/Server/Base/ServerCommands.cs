@@ -77,7 +77,7 @@ namespace beta.Models.Server.Base
         /// Requests MatchMaker info
         /// </summary>
         /// <returns></returns>
-        public static string RequestMatchMakerInfo() => "{\"command\": \"matchmaker_info\"}";
+        public static string RequestMatchMakerInfo => "{\"command\": \"matchmaker_info\"}";
 
         /// <summary>
         /// Invite player to party
@@ -119,7 +119,10 @@ namespace beta.Models.Server.Base
         /// Leave from MatchMaker party
         /// </summary>
         /// <returns></returns>
-        public static string LeaveFromParty() => "{'command': 'leave_party'}";
+        public static string LeaveFromParty => "{'command': 'leave_party'}";
+
+        public static string Ping => "{\"command\":\"ping\"}";
+        public static string Pong => "{\"command\":\"pong\"}";
 
     }
 }

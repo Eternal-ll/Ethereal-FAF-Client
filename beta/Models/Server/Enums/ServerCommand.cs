@@ -110,6 +110,11 @@
         /// </summary>
         game_join,
 
+        /// <summary>
+        /// Incoming/Outgoing message for ICE servers
+        /// </summary>
+        ice_servers,
+
 
         /// <summary>
         /// Incoming message that we did something wrong and the lobby-server will disconnect
