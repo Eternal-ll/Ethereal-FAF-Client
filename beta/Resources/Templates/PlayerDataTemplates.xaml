@@ -20,8 +20,8 @@
         <Setter Property="Visibility" Value="Collapsed"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding Avatar, Converter={StaticResource IsNullConverter}}" Value="False">
-                <Setter Property="Source" Value="{Binding Avatar}"/>
-                <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
+                <Setter Property="Source" Value="{Binding Avatar.Preview}"/>
+                <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
                 <Setter Property="Visibility" Value="Visible"/>
             </DataTrigger>
         </Style.Triggers>

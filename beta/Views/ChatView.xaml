@@ -161,19 +161,7 @@
                         <RowDefinition/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Image Stretch="Uniform" Height="20">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Avatar, Converter={StaticResource IsNullConverter}}"
-                                                         Value="False">
-                                        <Setter Property="Source" Value="{Binding Avatar}"/>
-                                        <Setter Property="ToolTip" Value="{Binding avatar.tooltip}"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
+                    <Image Stretch="Uniform" Height="20" Style="{StaticResource AvatarImageStyle}"/>
 
                     <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" Margin="4 0 0 0"/>
 

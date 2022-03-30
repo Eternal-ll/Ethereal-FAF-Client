@@ -6,6 +6,7 @@ using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -165,26 +166,14 @@ namespace beta.Infrastructure.Services
             {
                 var matchedPlayer = players[id];
 
-                if (!Equals(matchedPlayer.avatar, player.avatar) && player.avatar != null)
-                {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
-                    System.Windows.Threading.DispatcherPriority.Background);
-                }
+                Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar));
 
                 matchedPlayer.Update(player);
             }
             else
             {
                 int count = players.Count;
-
-                // Check for avatar
-                if (player.avatar is not null)
-                {
-                    // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),
-                    System.Windows.Threading.DispatcherPriority.Background);
-                }
+                Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar));
 
                 players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);

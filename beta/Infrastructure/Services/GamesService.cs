@@ -27,6 +27,8 @@ namespace beta.Infrastructure.Services
         public ObservableCollection<GameInfoMessage> IdleGames { get; } = new();
         public ObservableCollection<GameInfoMessage> LiveGames { get; } = new();
 
+        public Dictionary<long, GameInfoMessage> GamesDictionary { get; } = new();
+
         /// <summary>
         /// Idle games without players. Bugged or have been created with 0 players
         /// </summary>
@@ -226,10 +228,20 @@ namespace beta.Infrastructure.Services
             }
             return teams;
         }
+        public GameInfoMessage GetGame(long uid)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryGetGame(long uid, out GameInfoMessage game)
+        {
+            throw new NotImplementedException();
+        }
 
 
         private void OnNewGame(GameInfoMessage game) => NewGame?.Invoke(this, game);
         private void OnGameUpdated(GameInfoMessage game) => GameUpdated?.Invoke(this, game);
         private void OnGameRemoved(GameInfoMessage game) => GameRemoved?.Invoke(this, game);
+
     }
 }
