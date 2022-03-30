@@ -34,6 +34,7 @@ namespace beta.Infrastructure.Services
         public event EventHandler<GameLauncherState> GameLauncherStateChanged;
 
         private readonly ISessionService SessionService;
+        private readonly IGamesService GamesService;
         private readonly IDownloadService DownloadService;
         private readonly IMapsService MapsService;
         private readonly ILogger Logger;
@@ -56,26 +57,25 @@ namespace beta.Infrastructure.Services
 
         private GameInfoMessage LastGame;
 
-        public GameLauncherService(IDownloadService downloadService, IMapsService mapsService, ILogger<GameLauncherService> logger, ISessionService sessionService)
+        public GameLauncherService(
+            IDownloadService downloadService,
+            IMapsService mapsService,
+            ISessionService sessionService,
+            IGamesService gamesService,
+            ILogger<GameLauncherService> logger)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
             Logger = logger;
             SessionService = sessionService;
+
+            SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
+            GamesService = gamesService;
         }
 
-        public async Task Join(string uid)
+        private void OnGameLaunchDataReceived(object sender, EventArgs<GameLaunchData> e)
         {
-            State = GameLauncherState.Idle;
-            if (State == GameLauncherState.Idle)
-            {
-                State = GameLauncherState.SentCommandToJoin;
-                SessionService.Send(ServerCommands.JoinGame(uid));
-            }
-            else
-            {
-                Logger.LogWarning($"Trying to join to game when state is : {State}");
-            }
+            var data = e.Arg;
         }
 
         public async Task JoinGame(GameInfoMessage game)

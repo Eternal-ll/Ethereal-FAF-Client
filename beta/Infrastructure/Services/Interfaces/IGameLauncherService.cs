@@ -1,6 +1,5 @@
 ﻿using beta.Models.Server;
 using beta.Models.Server.Enums;
-using System;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
@@ -8,8 +7,6 @@ namespace beta.Infrastructure.Services.Interfaces
     public interface IGameLauncherService
     {
         public Task JoinGame(GameInfoMessage game);
-
-        public Task Join(string uid);
         public Task Join(GameInfoMessage game);
 
         /// <summary>
