@@ -13,7 +13,9 @@ namespace beta.Models.Server
         public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
         {
             orig.login = newP.login;
-            orig.Avatar = newP.Avatar;
+
+            // updates from AvatarService.UpdatePlayerAvatarAsync
+            //orig.Avatar = newP.Avatar;
 
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
