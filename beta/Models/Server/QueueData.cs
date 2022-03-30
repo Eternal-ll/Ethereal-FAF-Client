@@ -10,7 +10,7 @@ namespace beta.Models.Server
 
 
         [JsonPropertyName("queue_name")]
-        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MatchMakerType Type { get; set; }
         public string Name
         {
