@@ -168,6 +168,14 @@ namespace beta.Infrastructure.Services
                     Thread.Sleep(10);
                 }
             }
+            else
+            {
+                if (Client.TcpClient is null)
+                {
+                    Client = null;
+                    Authorize();
+                }
+            }
 
             string session = GetSession();
             string accessToken = Settings.Default.access_token;
