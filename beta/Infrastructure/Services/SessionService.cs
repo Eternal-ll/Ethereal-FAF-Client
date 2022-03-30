@@ -113,13 +113,13 @@ namespace beta.Infrastructure.Services
 
             Logger.LogInformation("Getting path to faf-uid.exe");
 
-            var file = Tools.GetPathToFafUid();
+            var file = Tools.GetFafUidFileInfo();
             Logger.LogInformation($"Got the path: {file}");
             Process process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = file,
+                    FileName = file.FullName,
                     Arguments = session,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,

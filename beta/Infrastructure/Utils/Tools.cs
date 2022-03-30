@@ -118,8 +118,8 @@ namespace beta.Infrastructure.Utils
             return result;
         }
 
-        public static string GetPathToFafUid() => ExtractAndReturnPath(Properties.Resources.faf_uid, "faf-uid.exe");
-        public static string GetPathToIceAdapterJar() => ExtractAndReturnPath(Properties.Resources.faf_ice_adapter, "faf-ice-adapter");
+        public static FileInfo GetFafUidFileInfo() => new(ExtractAndReturnPath(Properties.Resources.faf_uid, "faf-uid.exe"));
+        public static FileInfo GetIceAdapterJarFileInfo() => new(ExtractAndReturnPath(Properties.Resources.faf_ice_adapter, "faf-ice-adapter"));
         private static string ExtractAndReturnPath(byte[] binary, string name)
         {
             string path = App.CurrentDirectory + "\\Third-party applications\\";
