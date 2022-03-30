@@ -348,8 +348,7 @@ namespace beta.Views
         private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
         {
             var channel = GetChannel(e.Arg.Channel);
-
-            Dispatcher.Invoke(() => channel.History.Add(e.Arg));
+            channel.History.Add(e.Arg);
         }
 
         private void OnChannelTopicChangedBy(object sender, EventArgs<IrcChannelTopicChangedBy> e)
@@ -432,7 +431,6 @@ namespace beta.Views
                 channel = new(name);
                 Channels.Add(channel);
                 SelectedChannel = channel;
-                //Dispatcher.Invoke(() => Channels.Add(channel));
                 //BindingOperations.EnableCollectionSynchronization(channel.Users, _lock);
                 BindingOperations.EnableCollectionSynchronization(channel.History, _lock);
             }
