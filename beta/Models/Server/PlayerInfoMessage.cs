@@ -3,17 +3,17 @@ using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
-{    
+{
     public static class PlayerInfoExtensions
     {
         public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
         {
             orig.login = newP.login;
-            orig.avatar = newP.avatar;
+            orig.Avatar = newP.Avatar;
 
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
@@ -81,15 +81,6 @@ namespace beta.Models.Server
                     GameState = value.host.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
                 }
             }
-        }
-        #endregion
-
-        #region Avatar
-        private BitmapImage _Avatar;
-        public BitmapImage Avatar
-        {
-            get => _Avatar;
-            set => Set(ref _Avatar, value);
         }
         #endregion
 
@@ -179,11 +170,20 @@ namespace beta.Models.Server
                     OnPropertyChanged(nameof(ratings));
                 }
             }
+        }
+        #endregion
+
+        // TODO RENAME to PlayerAvatarData?
+
+        #region Avatar
+        private PlayerAvatar _Avatar;
+        [JsonPropertyName("avatar")]
+        public PlayerAvatar Avatar
+        {
+            get => _Avatar;
+            set => Set(ref _Avatar, value);
         } 
         #endregion
-        
-        // TODO RENAME to PlayerAvatarData?
-        public PlayerAvatar avatar { get; set; }
 
         public PlayerInfoMessage[] players { get; set; }
     }
