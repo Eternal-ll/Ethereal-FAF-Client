@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
@@ -75,7 +76,7 @@ namespace beta.ViewModels
 
         }
 
-        private void OnIrcStateChanged(object sender, Infrastructure.EventArgs<Models.Enums.IrcState> e) =>
-            PendingConnectionToIRC = e.Arg != Models.Enums.IrcState.Disconnected;
+        private void OnIrcStateChanged(object sender, IrcState e) =>
+            PendingConnectionToIRC = e != IrcState.Disconnected;
     }
 }

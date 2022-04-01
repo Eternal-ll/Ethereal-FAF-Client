@@ -49,9 +49,9 @@ namespace beta.Infrastructure.Services
             AvatarService = avatarService;
             NoteService = noteService;
 
-            sessionService.NewPlayerReceived += OnNewPlayer;
-            sessionService.SocialDataReceived += OnNewSocialInfo;
-            sessionService.WelcomeDataReceived += OnWelcomeInfo;
+            sessionService.NewPlayerReceived += OnNewPlayerReceived;
+            sessionService.SocialDataReceived += OnNewSocialDataReceived;
+            sessionService.WelcomeDataReceived += OnWelcomeDataReceived;
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
@@ -71,12 +71,12 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        private PlayerInfoMessage Me;
+        public PlayerInfoMessage Me { get; private set; }
 
         #region Event listeners
-        private void OnWelcomeInfo(object sender, EventArgs<WelcomeMessage> e)
+        private void OnWelcomeDataReceived(object sender, WelcomeData e)
         {
-            Me = e.Arg.me;
+            Me = e.me;
             Me.RelationShip = PlayerRelationShip.Me;
 
             // TODO
@@ -87,13 +87,13 @@ namespace beta.Infrastructure.Services
                 PlayerUIDToId.Add(Me.id, 0);
             }
         }
-        private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
+        private void OnNewSocialDataReceived(object sender, SocialData e)
         {
-            FriendsIds = e.Arg.friends;
-            FoesIds = e.Arg.foes;
+            FriendsIds = e.friends;
+            FoesIds = e.foes;
 
-            var friendsIds = e.Arg.friends;
-            var foesIds = e.Arg.foes;
+            var friendsIds = e.friends;
+            var foesIds = e.foes;
 
             // TODO REWRITE?
             if (friendsIds is not null && friendsIds.Count > 0)
@@ -120,9 +120,8 @@ namespace beta.Infrastructure.Services
                         }
                     }
         }
-        private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
+        private void OnNewPlayerReceived(object sender, PlayerInfoMessage player)
         {
-            var player = e.Arg;
             var players = _Players;
 
             #region Add note about player

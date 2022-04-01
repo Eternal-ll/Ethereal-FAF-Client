@@ -14,13 +14,22 @@
         <TabItem Header="Lobby">
             <Grid>
                 <RichTextBox x:Name="Lobby" Background="White" Foreground="Black"/>
-                <Button Content="Test" Background="Black" Click="Button_Click"/>
             </Grid>
         </TabItem>
         <TabItem Header="IRC">
             <Grid>
                 <RichTextBox x:Name="IRC" Background="White" Foreground="Black"/>
-                <Button Content="Test" Background="Black" Click="Button_Click"/>
+                <Button Content="Break" Background="Black" Click="Button_Click"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Ice-Adapter.exe">
+            <Grid>
+                <RichTextBox x:Name="Ice" Background="White" Foreground="Black"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Ice JSON-RPC client">
+            <Grid>
+                <RichTextBox x:Name="IceJsonRPC" Background="White" Foreground="Black"/>
             </Grid>
         </TabItem>
     </TabControl>

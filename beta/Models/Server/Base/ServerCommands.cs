@@ -80,6 +80,11 @@ namespace beta.Models.Server.Base
         public static string RequestMatchMakerInfo => "{\"command\": \"matchmaker_info\"}";
 
         /// <summary>
+        /// Request ICE servers for Ice Adapter
+        /// </summary>
+        public static string RequestIceServers => "{\"command\": \"ice_servers\"}";
+
+        /// <summary>
         /// Invite player to party
         /// </summary>
         /// <param name="id">Player id</param>
@@ -90,16 +95,16 @@ namespace beta.Models.Server.Base
         /// </summary>
         /// <param name="uid">Game uid</param>
         /// <returns></returns>
-        public static string RestoreGameSession(string uid) => $"{{'command': 'restore_game_session', 'game_id': {uid}}}";
+        public static string RestoreGameSession(string uid) => $"{{\"command\": \"restore_game_session\", \"game_id\": {uid}}}";
 
         /// <summary>
         /// Join to MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
-        public static string JoinToMatchMakingQueue(string queue) => $"{{'command': 'game_matchmaking', 'queue_name': 'queue', 'state': 'start'}}";
+        public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"queue\", \"state\": \"start\"}}";
 
-        // #"{{'command': 'set_party_factions', 'factions': }}";
+        // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
         // TODO
         public static string SetPartyFactions() => throw new NotImplementedException();
 
@@ -108,21 +113,34 @@ namespace beta.Models.Server.Base
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string AcceptPartyInvite(string id) => $"{{'command':'accept_party_invite', 'sender_id': {id}}}";
+        public static string AcceptPartyInvite(string id) => $"{{\"command\":\"accept_party_invite\", \"sender_id\": {id}}}";
         /// <summary>
         /// Kick player from MatchMaker party
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string KickPlayerFromParty(string id) => $"{{'command':'kick_player_from_party', 'kicked_player_id': {id}}}";
+        public static string KickPlayerFromParty(string id) => $"{{\"command\":\"kick_player_from_party\", \"kicked_player_id\": {id}}}";
         /// <summary>
         /// Leave from MatchMaker party
         /// </summary>
         /// <returns></returns>
-        public static string LeaveFromParty => "{'command': 'leave_party'}";
+        public static string LeaveFromParty => "{\"command\": \"leave_party\"}";
 
         public static string Ping => "{\"command\":\"ping\"}";
         public static string Pong => "{\"command\":\"pong\"}";
+
+
+        // GAME GPGNET Commands
+        public static string UniversalGameCommand(string command, string args) => $"{{\"command\": \"{command}\", \"target\": \"game\", \"args\": {args}}}";
+
+        // ICE
+
+        //{
+        //  "command": "IceMsg",
+        //  "target": "game",
+        //  "args": [66531, "{\"srcId\":302176,\"destId\":66531,\"password\":\"5aolj0n984or5vn1907ccn3bp8\",\"ufrag\":\"fsaa71fvi2m4nq\",\"candidates\":[{\"foundation\":\"1\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"192.168.26.1\",\"port\":6231,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"0\",\"relPort\":0},{\"foundation\":\"2\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"fe80:0:0:0:9806:9143:b3b6:bfae\",\"port\":6231,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"1\",\"relPort\":0},{\"foundation\":\"3\",\"protocol\":\"udp\",\"priority\":1677724415,\"ip\":\"85.26.234.215\",\"port\":60772,\"type\":\"SERVER_REFLEXIVE_CANDIDATE\",\"generation\":0,\"id\":\"2\",\"relAddr\":\"192.168.26.1\",\"relPort\":6231},{\"foundation\":\"4\",\"protocol\":\"udp\",\"priority\":2815,\"ip\":\"116.202.155.226\",\"port\":15152,\"type\":\"RELAYED_CANDIDATE\",\"generation\":0,\"id\":\"3\",\"relAddr\":\"85.26.234.215\",\"relPort\":60772}]}"]
+        //  }
+        //public static string IceMessage(string remoteId, string args) => $"{{'command}}";
 
     }
 }

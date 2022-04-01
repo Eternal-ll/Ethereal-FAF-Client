@@ -7,7 +7,7 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface ISocialService
     {
-        public SocialMessage SocialMessage { get; set; }
+        public SocialData SocialMessage { get; set; }
 
         public void AddFriend(int id);
         public void AddFoe(int id);

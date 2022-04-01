@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Extensions;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Debugger;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +48,6 @@ namespace beta
             };
         }
 
-
         protected override async void OnStartup(StartupEventArgs e)
         {
             AppDebugger.Init();
@@ -73,9 +73,14 @@ namespace beta
 
             var host = Hosting;
 
+            var gameSession = Services.GetService<IGameSessionService>();
+            gameSession.Close();
+
             await host.StopAsync().ConfigureAwait(false);
             host.Dispose();
             _Hosting = null;
+
+            Environment.Exit(-1);
         }
 
         public static void ConfigureServices(HostBuilderContext host, IServiceCollection services) => services

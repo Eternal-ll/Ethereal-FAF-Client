@@ -36,6 +36,6 @@ namespace beta.ViewModels
 
         private void UpdateState() => IsConnected = IrcService.State == IrcState.Authorized;
 
-        private void OnIrcStateChanged(object sender, Infrastructure.EventArgs<IrcState> e) => UpdateState();
+        private void OnIrcStateChanged(object sender, IrcState e) => UpdateState();
     }
 }

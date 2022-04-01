@@ -5,15 +5,19 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface ISessionService
     {
-        public event EventHandler<EventArgs<bool>> Authorized;
-        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayerReceived;
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGameReceived;
-        public event EventHandler<EventArgs<SocialMessage>> SocialDataReceived;
-        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeDataReceived;
-        public event EventHandler<EventArgs<NoticeMessage>> NotificationReceived;
-        //public event EventHandler<EventArgs<QueueData>> QueueDataReceived;
-        public event EventHandler<EventArgs<MatchMakerData>> MatchMakerDataReceived;
-        public event EventHandler<EventArgs<GameLaunchData>> GameLaunchDataReceived;
+        public event EventHandler<bool> Authorized;
+        public event EventHandler<PlayerInfoMessage> NewPlayerReceived;
+        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<SocialData> SocialDataReceived;
+        public event EventHandler<WelcomeData> WelcomeDataReceived;
+        public event EventHandler<NotificationData> NotificationReceived;
+        //public event EventHandler<QueueData> QueueDataReceived;
+        public event EventHandler<MatchMakerData> MatchMakerDataReceived;
+        public event EventHandler<GameLaunchData> GameLaunchDataReceived;
+        public event EventHandler<IceServersData> IceServersDataReceived;
+        public event EventHandler<IceUniversalData> IceUniversalDataReceived;
+
+        public bool IsAuthorized { get; }
 
         public void Connect();
         public void Authorize();

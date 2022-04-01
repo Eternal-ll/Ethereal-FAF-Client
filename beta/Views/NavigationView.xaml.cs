@@ -104,9 +104,9 @@ namespace beta.Views
             // TODO rewrite
             if (string.IsNullOrWhiteSpace(Properties.Settings.Default.PathToGame))
             {
-                var steamPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance\bin\SupremeCommander.exe";
+                var steamPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance";
 
-                if (!File.Exists(steamPath))
+                if (!Directory.Exists(steamPath))
                 {
                     Dialog = new ContentDialog();
 

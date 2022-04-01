@@ -15,10 +15,11 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IMapsService, MapsService>()
             .AddSingleton<ISocialService, SocialService>()
             .AddSingleton<ICacheService, CacheService>()
-            .AddSingleton<IGameLauncherService, GameLauncherService>()
+            .AddSingleton<IGameSessionService, GameSessionService>()
             .AddSingleton<IIrcService, IrcService>()
             .AddSingleton<INoteService, NoteService>()
             .AddSingleton<IDownloadService, DownloadService>()
+            .AddSingleton<IIceService, IceService>()
 
             .AddTransient<IApiService, ApiService>()
             ;

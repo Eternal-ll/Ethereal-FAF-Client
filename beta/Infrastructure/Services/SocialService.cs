@@ -25,7 +25,7 @@ namespace beta.Infrastructure.Services
         private readonly ISessionService SessionService;
         private readonly IPlayersService PlayersService;
 
-        public SocialMessage SocialMessage { get; set; }
+        public SocialData SocialMessage { get; set; }
 
         #endregion
 

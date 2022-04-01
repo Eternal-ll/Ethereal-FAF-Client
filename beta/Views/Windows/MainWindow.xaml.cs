@@ -11,7 +11,7 @@ namespace beta.Views.Windows
     public partial class MainWindow : Window
     {
         private readonly ISessionService SessionService;
-        private readonly IGameLauncherService GameLauncherService;
+        private readonly IGameSessionService GameLauncherService;
 
         private ContentDialog Dialog;
         public MainWindow()
@@ -19,7 +19,7 @@ namespace beta.Views.Windows
             InitializeComponent();
 
             SessionService = App.Services.GetService<ISessionService>();
-            GameLauncherService = App.Services.GetService<IGameLauncherService>();
+            GameLauncherService = App.Services.GetService<IGameSessionService>();
 
             NavigationManager navManager = new(MainFrame, ModalFrame);
             navManager.Navigate(new AuthView());

@@ -12,10 +12,11 @@ namespace beta.Infrastructure.Services.Interfaces
         #region Properties
         
         public ObservableCollection<PlayerInfoMessage> Players { get; }
+        public PlayerInfoMessage Me { get; }
 
         #endregion
 
-        #region Functions
+            #region Functions
 
         public PlayerInfoMessage GetPlayer(string login);
         public PlayerInfoMessage GetPlayer(int id);

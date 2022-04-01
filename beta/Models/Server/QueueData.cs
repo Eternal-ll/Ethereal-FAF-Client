@@ -4,11 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
-    public class QueueData : IServerMessage
+    public class QueueData : ServerMessage
     {
-        public ServerCommand Command { get; set; }
-
-
         [JsonPropertyName("queue_name")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public MatchMakerType Type { get; set; }

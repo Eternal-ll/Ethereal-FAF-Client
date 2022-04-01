@@ -7,8 +7,8 @@ namespace beta.Infrastructure.Commands
 {
     internal class JoinGameCommand : Command
     {
-        private readonly IGameLauncherService GameLauncherService;
-        public JoinGameCommand() => GameLauncherService = App.Services.GetService<IGameLauncherService>();
+        private readonly IGameSessionService GameLauncherService;
+        public JoinGameCommand() => GameLauncherService = App.Services.GetService<IGameSessionService>();
         public override bool CanExecute(object parameter) => true;
 
         public override void Execute(object parameter)

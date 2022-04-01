@@ -20,7 +20,7 @@ namespace beta.ViewModels
         {
             SocialService = App.Services.GetService<ISocialService>();
             GamesService = App.Services.GetService<IGamesService>();
-            GamesService.NewGame += OnNewGame;
+            GamesService.NewGameReceived += OnNewGame;
             GamesService.GameUpdated += OnGameUpdated;
             GamesService.GameRemoved += OnGameRemoved;
 
@@ -231,9 +231,8 @@ namespace beta.ViewModels
             return false;
         }
 
-        private void OnGameRemoved(object sender, Infrastructure.EventArgs<GameInfoMessage> e)
+        private void OnGameRemoved(object sender, GameInfoMessage game)
         {
-            var game = e.Arg;
             if (game.GameType != GameType) return;
 
             if (Games.Remove(game))
@@ -242,9 +241,8 @@ namespace beta.ViewModels
             }
         }
 
-        private void OnGameUpdated(object sender, Infrastructure.EventArgs<GameInfoMessage> e)
+        private void OnGameUpdated(object sender, GameInfoMessage game)
         {
-            var game = e.Arg;
             if (game.GameType != GameType) return;
 
             if (UpdateGame(game))
@@ -253,9 +251,8 @@ namespace beta.ViewModels
             }
         }
 
-        private void OnNewGame(object sender, Infrastructure.EventArgs<GameInfoMessage> e)
+        private void OnNewGame(object sender, GameInfoMessage game)
         {
-            var game = e.Arg;
             if (game.GameType != GameType) return;
             Games.Add(game);
         }

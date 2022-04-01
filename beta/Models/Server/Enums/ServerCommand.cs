@@ -31,6 +31,10 @@
         /// </summary>
         game_info,
         /// <summary>
+        /// Incoming data for Ice-Adapter
+        /// </summary>
+        game,
+        /// <summary>
         /// Incoming Match Maker info
         /// </summary>
         matchmaker_info,
@@ -106,5 +110,17 @@
         /// Incoming message that we did something wrong and the lobby-server will disconnect
         /// </summary>
         invalid,
+
+
+        // ICE commands ------------------
+
+        // Using IceUniversalData as wrap class
+
+        JoinGame,
+        HostGame,
+        ConnectToPeer,
+        DisconnectFromPeer,
+        IceMsg
+
     }
 }

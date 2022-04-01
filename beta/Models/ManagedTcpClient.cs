@@ -26,6 +26,11 @@ namespace beta.Models
         #endregion
 
         #region CTOR
+        public ManagedTcpClient()
+        {
+
+        }
+
         /// <summary>
         /// Using non SSL port by default
         /// </summary>
@@ -59,10 +64,11 @@ namespace beta.Models
         private readonly List<byte> ByteCache = new();
 
         public TcpClient TcpClient;
+        public int Port;
+        public string Host;
+
         private NetworkStream Stream;
         private Thread TcpThread;
-        private readonly int Port;
-        private readonly string Host;
         #endregion
 
         #endregion
@@ -78,20 +84,31 @@ namespace beta.Models
             OnStateChanged(ManagedTcpClientState.PendingConnection);
             TcpThread = new(DoConnect)
             {
-                Name = ThreadName
+                Name = ThreadName,
+                IsBackground = true,
             };
             TcpThread.Start();
         }
-        public void Write(byte[] data)
+        public bool Write(byte[] data)
         {
             if (TcpClient is null)
             {
-                throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+                //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
             }
-            Stream.Write(data, 0, data.Length);
+            else if (!TcpClient.Connected)
+            {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                return false;
+            }
+            if (Stream is not null)
+            {
+                Stream.Write(data, 0, data.Length);
+                return true;
+            }
+            return false;
         }
 
-        public void Write(string data) => Write(StringEncoder.GetBytes(data + '\n'));
+        public bool Write(string data) => Write(StringEncoder.GetBytes(data + '\n'));
 
         public string WriteLineAndGetReply(string data, ServerCommand command, TimeSpan timeout)
         {
@@ -149,6 +166,7 @@ namespace beta.Models
             try
             {
                 TcpClient = new(Host, Port);
+
                 Stream = TcpClient.GetStream();
                 OnStateChanged(ManagedTcpClientState.Connected);
 
@@ -176,7 +194,7 @@ namespace beta.Models
                 OnStateChanged(ManagedTcpClientState.Disconnected);
                 if (TcpClient is not null)
                 {
-                    Stream.Dispose();
+                    //Stream.Dispose();
                     TcpClient.Close();
                 }
                 TcpThread = null;

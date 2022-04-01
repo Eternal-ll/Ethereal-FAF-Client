@@ -9,9 +9,9 @@ namespace beta.Infrastructure.Services.Interfaces
     /// </summary>
     public interface IGamesService
     {
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
-        public event EventHandler<EventArgs<GameInfoMessage>> GameUpdated;
-        public event EventHandler<EventArgs<GameInfoMessage>> GameRemoved;
+        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<GameInfoMessage> GameUpdated;
+        public event EventHandler<GameInfoMessage> GameRemoved;
 
         /// <summary>
         /// Available idle games for joining

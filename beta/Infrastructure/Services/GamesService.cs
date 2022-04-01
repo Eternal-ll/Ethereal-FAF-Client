@@ -10,9 +10,9 @@ namespace beta.Infrastructure.Services
 {
     public class GamesService : ViewModel, IGamesService
     {
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
-        public event EventHandler<EventArgs<GameInfoMessage>> GameUpdated;
-        public event EventHandler<EventArgs<GameInfoMessage>> GameRemoved;
+        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<GameInfoMessage> GameUpdated;
+        public event EventHandler<GameInfoMessage> GameRemoved;
 
         #region Properties
 
@@ -45,12 +45,12 @@ namespace beta.Infrastructure.Services
             PlayersService = playerService;
             MapService = mapService;
 
-            sessionService.NewGameReceived += OnNewGame;
+            sessionService.NewGameReceived += OnNewGameReceived;
         }
 
-        private void OnNewGame(object sender, EventArgs<GameInfoMessage> e)
+        private void OnNewGameReceived(object sender, GameInfoMessage e)
         {
-            var game = e.Arg;
+            var game = e;
 
             var idleGames = IdleGames;
             var liveGames = LiveGames;
@@ -172,7 +172,7 @@ namespace beta.Infrastructure.Services
             if (game.launched_at is not null)
             {
                 liveGames.Add(game);
-                OnNewGame(game);
+                OnNewGameReceived(game);
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace beta.Infrastructure.Services
             // finally if nothing matched we adding it to IdleGames
             idleGames.Add(game);
 
-            OnNewGame(game);
+            OnNewGameReceived(game);
         }
 
         public InGameTeam[] GetInGameTeams(GameInfoMessage game)
@@ -239,7 +239,7 @@ namespace beta.Infrastructure.Services
         }
 
 
-        private void OnNewGame(GameInfoMessage game) => NewGame?.Invoke(this, game);
+        private void OnNewGameReceived(GameInfoMessage game) => NewGameReceived?.Invoke(this, game);
         private void OnGameUpdated(GameInfoMessage game) => GameUpdated?.Invoke(this, game);
         private void OnGameRemoved(GameInfoMessage game) => GameRemoved?.Invoke(this, game);
 

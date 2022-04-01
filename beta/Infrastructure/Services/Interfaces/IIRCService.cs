@@ -1,5 +1,4 @@
-﻿using beta.Models;
-using beta.Models.Enums;
+﻿using beta.Models.Enums;
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
@@ -13,54 +12,54 @@ namespace beta.Infrastructure.Services.Interfaces
         public IrcState State { get; set; }
 
         #region Events
-        public event EventHandler<EventArgs<IrcState>> StateChanged;
+        public event EventHandler<IrcState> StateChanged;
 
         /// <summary>
         /// User connected to IRC server
         /// </summary>
-        public event EventHandler<EventArgs<string>> UserConnected;
+        public event EventHandler<string> UserConnected;
         /// <summary>
         /// User disconnected from IRC server
         /// </summary>
-        public event EventHandler<EventArgs<string>> UserDisconnected;
+        public event EventHandler<string> UserDisconnected;
 
         /// <summary>
         /// User joined to specific channel
         /// </summary>
-        public event EventHandler<EventArgs<IrcUserJoin>> UserJoined;
+        public event EventHandler<IrcUserJoin> UserJoined;
         /// <summary>
         /// User left from specific channel
         /// </summary>
-        public event EventHandler<EventArgs<IrcUserLeft>> UserLeft;
+        public event EventHandler<IrcUserLeft> UserLeft;
 
         /// <summary>
         /// User changed his nickname
         /// </summary>
-        public event EventHandler<EventArgs<IrcUserChangedName>> UserChangedName;
+        public event EventHandler<IrcUserChangedName> UserChangedName;
 
         /// <summary>
         /// Private message received from specific user
         /// </summary>
-        public event EventHandler<EventArgs<IrcPrivateMessage>> PrivateMessageReceived;
+        public event EventHandler<IrcPrivateMessage> PrivateMessageReceived;
         /// <summary>
         /// Channel message received from specific channel
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelMessage>> ChannedMessageReceived;
+        public event EventHandler<IrcChannelMessage> ChannedMessageReceived;
 
         /// <summary>
         /// Specific channel topic updated
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelTopicUpdated>> ChannelTopicUpdated;
+        public event EventHandler<IrcChannelTopicUpdated> ChannelTopicUpdated;
 
         /// <summary>
         /// Specific channel topic changed by specific user
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelTopicChangedBy>> ChannelTopicChangedBy;
+        public event EventHandler<IrcChannelTopicChangedBy> ChannelTopicChangedBy;
 
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<EventArgs<IrcChannelUsers>> ChannelUsersReceived;
+        public event EventHandler<IrcChannelUsers> ChannelUsersReceived;
 
         #endregion
 

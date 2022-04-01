@@ -68,7 +68,7 @@ namespace beta.Views
             AutoJoinCheckBox.IsChecked = Settings.Default.AutoJoin;
         }
             
-        private void OnLobbySessionServiceAuthorizationFinish(object sender, Infrastructure.EventArgs<bool> e) =>
+        private void OnLobbySessionServiceAuthorizationFinish(object sender, bool e) =>
             Dispatcher.Invoke(() =>
             {
                 if (e)

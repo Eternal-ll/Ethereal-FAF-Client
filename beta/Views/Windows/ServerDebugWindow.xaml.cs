@@ -31,6 +31,21 @@ namespace beta.Views.Windows
             });
         }
 
+        public void LOGICE(string data)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Ice.AppendText(data + '\n');
+            });
+        }
+        public void LOGJSONRPC(string data)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                IceJsonRPC.AppendText(data + '\n');
+            });
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             IrcService.Test();

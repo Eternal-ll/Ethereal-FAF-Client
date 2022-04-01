@@ -58,6 +58,8 @@ namespace beta.Infrastructure.Services
         {
             if (name is null) return LocalMapState.Unknown;
 
+            name = name.Replace("%20", " ");
+
             if (IsLegacyMap(name))
             {
                 return LocalMapState.Same;
@@ -256,7 +258,8 @@ namespace beta.Infrastructure.Services
 
                 string extractPath = App.GetPathToFolder(Folder.Maps);
 
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
+                ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+
                 File.Delete(zipPath);
 
                 DownloadCompleted?.Invoke(this, name[..^4]);

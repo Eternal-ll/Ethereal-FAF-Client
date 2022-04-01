@@ -20,6 +20,9 @@ namespace beta.Models.Debugger
         [Conditional("DEBUG")]
         public static void LOGIRC(string data) => DebugWindow.LOGIRC(data);
 
-
+        [Conditional("DEBUG")]
+        public static void LOGICE(string data) => DebugWindow.LOGICE(data);
+        [Conditional("DEBUG")]
+        public static void LOGJSONRPC(string data) => DebugWindow.LOGJSONRPC(data);
     }
 }

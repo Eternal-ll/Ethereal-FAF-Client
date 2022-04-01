@@ -217,7 +217,7 @@ namespace beta.Views
 
         #endregion
 
-        private void OnUserChangedName(object sender, EventArgs<IrcUserChangedName> e)
+        private void OnUserChangedName(object sender, IrcUserChangedName e)
         {
             for (int i = 0; i < Channels.Count; i++)
             {
@@ -226,14 +226,14 @@ namespace beta.Views
                 for (int j = 0; j < channel.Users.Count; j++)
                 {
                     var user = channel.Users[j];
-                    if (user == e.Arg.From)
+                    if (user == e.From)
                     {
-                        channel.Users[j] = e.Arg.To;
+                        channel.Users[j] = e.To;
 
                         if (SelectedChannel.Name == channel.Name)
                         {
                             SelectedChannelPlayers.Remove(GetChatPlayer(user));
-                            SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.To));
+                            SelectedChannelPlayers.Add(GetChatPlayer(e.To));
                         }
 
                         break;
@@ -327,16 +327,16 @@ namespace beta.Views
         }
 
         #region Events listeners
-        private void OnStateChanged(object sender, EventArgs<IrcState> e)
+        private void OnStateChanged(object sender, IrcState e)
         {
-            if (e.Arg == IrcState.Authorized)
+            if (e == IrcState.Authorized)
             {
                 for (int i = 0; i < Channels.Count; i++)
                 {
                     IrcService.Join(Channels[i].Name);
                 }
             }
-            else if (e.Arg != IrcState.Connected)
+            else if (e != IrcState.Connected)
             {
                 for (int i = 0; i < Channels.Count; i++)
                 {
@@ -345,35 +345,35 @@ namespace beta.Views
             }
         }
 
-        private void OnChannelMessageReceived(object sender, EventArgs<IrcChannelMessage> e)
+        private void OnChannelMessageReceived(object sender, IrcChannelMessage e)
         {
-            var channel = GetChannel(e.Arg.Channel);
-            channel.History.Add(e.Arg);
+            var channel = GetChannel(e.Channel);
+            channel.History.Add(e);
         }
 
-        private void OnChannelTopicChangedBy(object sender, EventArgs<IrcChannelTopicChangedBy> e)
+        private void OnChannelTopicChangedBy(object sender, IrcChannelTopicChangedBy e)
         {
-            var channel = GetChannel(e.Arg.Channel);
+            var channel = GetChannel(e.Channel);
 
-            channel.TopicChangedBy = e.Arg;
+            channel.TopicChangedBy = e;
         }
 
-        private void OnChannelTopicUpdated(object sender, EventArgs<IrcChannelTopicUpdated> e)
+        private void OnChannelTopicUpdated(object sender, IrcChannelTopicUpdated e)
         {
-            var channel = GetChannel(e.Arg.Channel);
+            var channel = GetChannel(e.Channel);
 
-            channel.Topic = e.Arg.Topic;
+            channel.Topic = e.Topic;
         }
 
-        private void OnChannelUserLeft(object sender, EventArgs<IrcUserLeft> e)
+        private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
-            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
             {
-                channel.Users.Remove(e.Arg.User);
+                channel.Users.Remove(e.User);
 
                 if (channel.Name.Equals(SelectedChannel.Name))
                 {
-                    SelectedChannelPlayers.Remove(GetChatPlayer(e.Arg.User));
+                    SelectedChannelPlayers.Remove(GetChatPlayer(e.User));
                 }
             }
             else
@@ -381,17 +381,17 @@ namespace beta.Views
                 // todo
             }
         }
-        private void OnChannelUserJoin(object sender, EventArgs<IrcUserJoin> e)
+        private void OnChannelUserJoin(object sender, IrcUserJoin e)
         {
-            if (TryGetChannel(e.Arg.Channel, out IrcChannelVM channel))
+            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
             {
-                if (!channel.Users.Contains(e.Arg.User))
+                if (!channel.Users.Contains(e.User))
                 {
-                    channel.Users.Add(e.Arg.User);
+                    channel.Users.Add(e.User);
 
                     if (channel.Name.Equals(SelectedChannel?.Name))
                     {
-                        SelectedChannelPlayers.Add(GetChatPlayer(e.Arg.User));
+                        SelectedChannelPlayers.Add(GetChatPlayer(e.User));
                     }
                 }
             }
@@ -400,9 +400,9 @@ namespace beta.Views
                 // todo
             }
         }
-        private void OnChannelUsersReceived(object sender, EventArgs<IrcChannelUsers> e)
+        private void OnChannelUsersReceived(object sender, IrcChannelUsers e)
         {
-            var channel = GetChannel(e.Arg.Channel);
+            var channel = GetChannel(e.Channel);
 
             // User join event working earlier and we getting double current authorized player
             if (channel.Users.Count == 1)
@@ -410,9 +410,9 @@ namespace beta.Views
                 channel.Users.Clear();
             }
 
-            for (int i = 0; i < e.Arg.Users.Length; i++)
+            for (int i = 0; i < e.Users.Length; i++)
             {
-                channel.Users.Add(e.Arg.Users[i]);
+                channel.Users.Add(e.Users[i]);
             }
             if (SelectedChannel is null)
             {

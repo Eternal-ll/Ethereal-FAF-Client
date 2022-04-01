@@ -4,9 +4,7 @@ using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.Properties;
-#if DEBUG
 using Microsoft.Extensions.Logging;
-#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,15 +20,17 @@ namespace beta.Infrastructure.Services
     public class SessionService : ISessionService
     {
         #region Events
-        public event EventHandler<EventArgs<bool>> Authorized;
-        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayerReceived;
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGameReceived;
-        public event EventHandler<EventArgs<SocialMessage>> SocialDataReceived;
-        public event EventHandler<EventArgs<WelcomeMessage>> WelcomeDataReceived;
-        public event EventHandler<EventArgs<NoticeMessage>> NotificationReceived;
-        //public event EventHandler<EventArgs<QueueData>> QueueDataReceived;
-        public event EventHandler<EventArgs<MatchMakerData>> MatchMakerDataReceived;
-        public event EventHandler<EventArgs<GameLaunchData>> GameLaunchDataReceived;
+        public event EventHandler<bool> Authorized;
+        public event EventHandler<PlayerInfoMessage> NewPlayerReceived;
+        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<SocialData> SocialDataReceived;
+        public event EventHandler<WelcomeData> WelcomeDataReceived;
+        public event EventHandler<NotificationData> NotificationReceived;
+        //public event EventHandler<QueueData> QueueDataReceived;
+        public event EventHandler<MatchMakerData> MatchMakerDataReceived;
+        public event EventHandler<GameLaunchData> GameLaunchDataReceived;
+        public event EventHandler<IceServersData> IceServersDataReceived;
+        public event EventHandler<IceUniversalData> IceUniversalDataReceived;
         #endregion
 
         #region Properties
@@ -45,24 +45,31 @@ namespace beta.Infrastructure.Services
         private Stopwatch Stopwatch = new();
         private Stopwatch TimeOutWatcher = new();
 
-#if DEBUG
+        private bool _IsAuthorized;
+        public bool IsAuthorized
+        {
+            get => _IsAuthorized;
+            set
+            {
+                if (!Equals(value, _IsAuthorized))
+                {
+                    _IsAuthorized = value;
+                    OnAuthorized(value);
+                }
+            }
+        }
+
         private readonly ILogger Logger;
-#endif
 
         #endregion
 
         #region CTOR
-        public SessionService(IOAuthService oAuthService, IIrcService ircService
-#if DEBUG
-            , ILogger<SessionService> logger
-#endif
+        public SessionService(IOAuthService oAuthService, IIrcService ircService, ILogger<SessionService> logger
             )
         {
             OAuthService = oAuthService;
             IrcService = ircService;
-#if DEBUG
             Logger = logger;
-#endif
             OAuthService.StateChanged += OnAuthResult;
 
             #region Response actions for server
@@ -79,7 +86,18 @@ namespace beta.Infrastructure.Services
             Operations.Add(ServerCommand.ping, OnPing);
             Operations.Add(ServerCommand.pong, OnPong);
 
+            Operations.Add(ServerCommand.ice_servers, OnIceServersData);
+            Operations.Add(ServerCommand.game_launch, OnGameLaunchData);
+
             Operations.Add(ServerCommand.invalid, OnInvalidData);
+
+
+            // Ice/Game/GpgNet related commands
+            Operations.Add(ServerCommand.JoinGame, OnIceUniversalData);
+            Operations.Add(ServerCommand.HostGame, OnIceUniversalData);
+            Operations.Add(ServerCommand.ConnectToPeer, OnIceUniversalData);
+            Operations.Add(ServerCommand.DisconnectFromPeer, OnIceUniversalData);
+            Operations.Add(ServerCommand.IceMsg, OnIceUniversalData);
             #endregion
 
             //new Thread(() =>
@@ -102,7 +120,7 @@ namespace beta.Infrastructure.Services
         public string GenerateUID(string session)
         {
             Logger.LogInformation($"Generating UID for session: {session}");
-            
+
             if (string.IsNullOrWhiteSpace(session))
             {
                 Logger.LogWarning("Passed session value is empty");
@@ -159,7 +177,8 @@ namespace beta.Infrastructure.Services
                     if (e == ManagedTcpClientState.CantConnect || e == ManagedTcpClientState.TimedOut)
                     {
                         // TODO Raise events
-                        OnAuthorization(false);
+                        //OnAuthorization(false);
+                        IsAuthorized = false;
                         return;
                     }
                 };
@@ -172,8 +191,23 @@ namespace beta.Infrastructure.Services
             {
                 if (Client.TcpClient is null)
                 {
-                    Client = null;
-                    Authorize();
+                    ManagedTcpClientState state = ManagedTcpClientState.Disconnected;
+                    Client.StateChanged += (s, e) =>
+                    {
+                        state = e;
+                        if (e == ManagedTcpClientState.CantConnect || e == ManagedTcpClientState.TimedOut)
+                        {
+                            // TODO Raise events
+                            //OnAuthorization(false);
+                            IsAuthorized = false;
+                            return;
+                        }
+                    };
+                    while (state != ManagedTcpClientState.Connected)
+                    {
+                        Thread.Sleep(10);
+                    }
+                    Client.Connect();
                 }
             }
 
@@ -208,7 +242,7 @@ namespace beta.Infrastructure.Services
         }
         public void Send(string command)
         {
-            Logger.LogInformation($"Sent to lobby-server:\n{command}");
+            //Logger.LogInformation($"Sent to lobby-server:\n{command}");
             AppDebugger.LOGLobby($"Sent to lobby-server:\n {command.ToJsonFormat()}");
             Client.Write(command);
         }
@@ -250,29 +284,40 @@ namespace beta.Infrastructure.Services
                 else AppDebugger.LOGLobby($"-------------- WARNING! NO RESPONSE FOR COMMAND: {command} ----------------\n" + json.ToJsonFormat());
 
             }
-            //else App.DebugWindow.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
+            else AppDebugger.LOGLobby($"-------------- WARNING! UNKNOWN COMMAND: {commandText} ----------------\n" + json.ToJsonFormat());
         }
 
         #region Events invokers
-        protected virtual void OnAuthorization(EventArgs<bool> e) => Authorized?.Invoke(this, e);
-        protected virtual void OnNewPlayer(EventArgs<PlayerInfoMessage> e) => NewPlayerReceived?.Invoke(this, e);
-        protected virtual void OnNewGame(EventArgs<GameInfoMessage> e) => NewGameReceived?.Invoke(this, e);
-        protected virtual void OnSocialInfo(EventArgs<SocialMessage> e) => SocialDataReceived?.Invoke(this, e);
-        protected virtual void OnWelcomeInfo(EventArgs<WelcomeMessage> e) => WelcomeDataReceived?.Invoke(this, e);
-        protected virtual void OnNotificationReceived(EventArgs<NoticeMessage> e) => NotificationReceived?.Invoke(this, e);
-        protected virtual void OnMatchMakerDataReceived(EventArgs<MatchMakerData> e) => MatchMakerDataReceived?.Invoke(this, e);
-        protected virtual void OnGameLaunchDataReceived(EventArgs<GameLaunchData> e) => GameLaunchDataReceived?.Invoke(this, e);
+        protected virtual void OnAuthorized(bool e) => Authorized?.Invoke(this, e);
+        protected virtual void OnNewPlayerReceived(PlayerInfoMessage e) => NewPlayerReceived?.Invoke(this, e);
+        protected virtual void OnNewGameReceived(GameInfoMessage e) => NewGameReceived?.Invoke(this, e);
+        protected virtual void OnSocialDataReceived(SocialData e) => SocialDataReceived?.Invoke(this, e);
+        protected virtual void OnWelcomeDataReceived(WelcomeData e) => WelcomeDataReceived?.Invoke(this, e);
+        protected virtual void OnNotificationReceived(NotificationData e) => NotificationReceived?.Invoke(this, e);
+        protected virtual void OnMatchMakerDataReceived(MatchMakerData e) => MatchMakerDataReceived?.Invoke(this, e);
+        protected virtual void OnGameLaunchDataReceived(GameLaunchData e) => GameLaunchDataReceived?.Invoke(this, e);
+        protected virtual void OnIceServersDataReceived(IceServersData e) => IceServersDataReceived?.Invoke(this, e);
+        protected virtual void OnIceUniversalDataReceived(IceUniversalData e) => IceUniversalDataReceived?.Invoke(this, e);
         #endregion
 
         #region Server response actions
-        private void OnNoticeData(string json) => OnNotificationReceived(JsonSerializer.Deserialize<NoticeMessage>(json));
+        private void OnIceUniversalData(string json)
+        {
+            var t = JsonSerializer.Deserialize<IceUniversalData>(json);
+            OnIceUniversalDataReceived(t);
+        }
+
+        private void OnNoticeData(string json) => OnNotificationReceived(JsonSerializer.Deserialize<NotificationData>(json));
         private void OnWelcomeData(string json)
         {
-            var welcomeMessage = JsonSerializer.Deserialize<WelcomeMessage>(json);
+            var welcomeMessage = JsonSerializer.Deserialize<WelcomeData>(json);
             Settings.Default.PlayerId = welcomeMessage.id;
             Settings.Default.PlayerNick = welcomeMessage.login;
-            OnAuthorization(true);
-            OnWelcomeInfo(welcomeMessage);
+
+            OnWelcomeDataReceived(welcomeMessage);
+
+            //OnAuthorization(true);
+            if (!IsAuthorized) IsAuthorized = true;
         }
 
         private void OnIrcPassowrdData(string json)
@@ -284,12 +329,11 @@ namespace beta.Infrastructure.Services
             {
                 //IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
             }
+
+            //if (!IsAuthorized) IsAuthorized = true;
         }
-        private void OnSocialData(string json)
-        {
-            // Do i really need to invoke Event? 
-            OnSocialInfo(JsonSerializer.Deserialize<SocialMessage>(json));
-        }
+        private void OnIceServersData(string json) => OnIceServersDataReceived(JsonSerializer.Deserialize<IceServersData>(json));
+        private void OnSocialData(string json) => OnSocialDataReceived(JsonSerializer.Deserialize<SocialData>(json));
         private void OnInvalidData(string json = null)
         {
             // TODO FIX ME???? ERROR UP?
@@ -303,8 +347,8 @@ namespace beta.Infrastructure.Services
             if (playerInfoMessage.players.Length > 0)
                 // payload with players
                 for (int i = 0; i < playerInfoMessage.players.Length; i++)
-                    OnNewPlayer(playerInfoMessage.players[i]);
-            else OnNewPlayer(playerInfoMessage);
+                    OnNewPlayerReceived(playerInfoMessage.players[i]);
+            else OnNewPlayerReceived(playerInfoMessage);
         }
 
         private void OnGameData(string json)
@@ -313,8 +357,8 @@ namespace beta.Infrastructure.Services
             if (gameInfoMessage.games?.Length > 0)
                 // payload with lobbies
                 for (int i = 0; i < gameInfoMessage.games.Length; i++)
-                    OnNewGame(gameInfoMessage.games[i]);
-            else OnNewGame(gameInfoMessage);
+                    OnNewGameReceived(gameInfoMessage.games[i]);
+            else OnNewGameReceived(gameInfoMessage);
 
             //AppDebugger.LOGLobby(json.ToJsonFormat());
         }

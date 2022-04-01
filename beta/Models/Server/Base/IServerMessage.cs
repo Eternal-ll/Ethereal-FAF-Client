@@ -1,4 +1,5 @@
 ﻿using beta.Models.Server.Enums;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.Server.Base
 {
@@ -8,6 +9,12 @@ namespace beta.Models.Server.Base
 
         //[JsonPropertyName("command")]
         //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public ServerCommand Command { get; set; }
+    }
+    public abstract class ServerMessage : IServerMessage
+    {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonPropertyName("command")]
         public ServerCommand Command { get; set; }
     }
 }
