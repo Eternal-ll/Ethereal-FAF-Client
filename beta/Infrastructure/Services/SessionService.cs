@@ -1,7 +1,11 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Infrastructure.Utils;
 using beta.Models;
+using beta.Models.Debugger;
+using beta.Models.Enums;
 using beta.Models.Server;
+using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.Properties;
 using Microsoft.Extensions.Logging;
@@ -10,10 +14,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
-using beta.Models.Debugger;
-using beta.Models.Enums;
-using beta.Infrastructure.Utils;
-using beta.Models.Server.Base;
 
 namespace beta.Infrastructure.Services
 {
@@ -21,8 +21,10 @@ namespace beta.Infrastructure.Services
     {
         #region Events
         public event EventHandler<bool> Authorized;
-        public event EventHandler<PlayerInfoMessage> NewPlayerReceived;
-        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<GameInfoMessage> GameReceived;
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
         public event EventHandler<SocialData> SocialDataReceived;
         public event EventHandler<WelcomeData> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
@@ -43,7 +45,6 @@ namespace beta.Infrastructure.Services
         private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
         private bool WaitingPong = false;
         private Stopwatch Stopwatch = new();
-        private Stopwatch TimeOutWatcher = new();
 
         private bool _IsAuthorized;
         public bool IsAuthorized
@@ -64,8 +65,7 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region CTOR
-        public SessionService(IOAuthService oAuthService, IIrcService ircService, ILogger<SessionService> logger
-            )
+        public SessionService(IOAuthService oAuthService, IIrcService ircService, ILogger<SessionService> logger)
         {
             OAuthService = oAuthService;
             IrcService = ircService;
@@ -99,17 +99,6 @@ namespace beta.Infrastructure.Services
             Operations.Add(ServerCommand.DisconnectFromPeer, OnIceUniversalData);
             Operations.Add(ServerCommand.IceMsg, OnIceUniversalData);
             #endregion
-
-            //new Thread(() =>
-            //{
-            //    Stopwatch.Start();
-            //    while (true)
-            //    {
-            //        if (TimeOutWatcher.Elapsed.TotalSeconds > 180)
-            //            Ping();
-            //        Thread.Sleep(6000);
-            //    }
-            //}).Start();
         }
         #endregion
         public void Connect()
@@ -289,8 +278,10 @@ namespace beta.Infrastructure.Services
 
         #region Events invokers
         protected virtual void OnAuthorized(bool e) => Authorized?.Invoke(this, e);
-        protected virtual void OnNewPlayerReceived(PlayerInfoMessage e) => NewPlayerReceived?.Invoke(this, e);
-        protected virtual void OnNewGameReceived(GameInfoMessage e) => NewGameReceived?.Invoke(this, e);
+        protected virtual void OnPlayerReceived(PlayerInfoMessage e) => PlayerReceived?.Invoke(this, e);
+        protected virtual void OnPlayersReceived(PlayerInfoMessage[] e) => PlayersReceived?.Invoke(this, e);
+        protected virtual void OnGameReceived(GameInfoMessage e) => GameReceived?.Invoke(this, e);
+        protected virtual void OnGamesReceived(GameInfoMessage[] e) => GamesReceived?.Invoke(this, e);
         protected virtual void OnSocialDataReceived(SocialData e) => SocialDataReceived?.Invoke(this, e);
         protected virtual void OnWelcomeDataReceived(WelcomeData e) => WelcomeDataReceived?.Invoke(this, e);
         protected virtual void OnNotificationReceived(NotificationData e) => NotificationReceived?.Invoke(this, e);
@@ -301,11 +292,7 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region Server response actions
-        private void OnIceUniversalData(string json)
-        {
-            var t = JsonSerializer.Deserialize<IceUniversalData>(json);
-            OnIceUniversalDataReceived(t);
-        }
+        private void OnIceUniversalData(string json) => OnIceUniversalDataReceived(JsonSerializer.Deserialize<IceUniversalData>(json));
 
         private void OnNoticeData(string json) => OnNotificationReceived(JsonSerializer.Deserialize<NotificationData>(json));
         private void OnWelcomeData(string json)
@@ -344,21 +331,17 @@ namespace beta.Infrastructure.Services
         private void OnPlayerData(string json)
         {
             var playerInfoMessage = JsonSerializer.Deserialize<PlayerInfoMessage>(json);
-            if (playerInfoMessage.players.Length > 0)
-                // payload with players
-                for (int i = 0; i < playerInfoMessage.players.Length; i++)
-                    OnNewPlayerReceived(playerInfoMessage.players[i]);
-            else OnNewPlayerReceived(playerInfoMessage);
+            if (playerInfoMessage.players is not null)
+                OnPlayersReceived(playerInfoMessage.players);
+            else OnPlayerReceived(playerInfoMessage);
         }
 
         private void OnGameData(string json)
         {
             var gameInfoMessage = JsonSerializer.Deserialize<GameInfoMessage>(json);
-            if (gameInfoMessage.games?.Length > 0)
-                // payload with lobbies
-                for (int i = 0; i < gameInfoMessage.games.Length; i++)
-                    OnNewGameReceived(gameInfoMessage.games[i]);
-            else OnNewGameReceived(gameInfoMessage);
+            if (gameInfoMessage.games is not null)
+                OnGamesReceived(gameInfoMessage.games);
+            else OnGameReceived(gameInfoMessage);
 
             //AppDebugger.LOGLobby(json.ToJsonFormat());
         }

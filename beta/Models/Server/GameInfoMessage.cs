@@ -64,6 +64,12 @@ namespace beta.Models.Server
 
     public static class GameInfoExtensions
     {
+        /// <summary>
+        /// Returns false if game is end
+        /// </summary>
+        /// <param name="orig"></param>
+        /// <param name="newInfo"></param>
+        /// <returns></returns>
         public static bool Update(this GameInfoMessage orig, GameInfoMessage newInfo)
         {
             if (orig.num_players > newInfo.num_players && newInfo.num_players == 0)

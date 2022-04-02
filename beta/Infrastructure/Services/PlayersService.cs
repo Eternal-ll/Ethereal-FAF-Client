@@ -1,4 +1,4 @@
-    using beta.Infrastructure.Services.Interfaces;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
@@ -49,9 +49,10 @@ namespace beta.Infrastructure.Services
             AvatarService = avatarService;
             NoteService = noteService;
 
-            sessionService.NewPlayerReceived += OnNewPlayerReceived;
+            sessionService.PlayerReceived += OnPlayerReceived;
             sessionService.SocialDataReceived += OnNewSocialDataReceived;
             sessionService.WelcomeDataReceived += OnWelcomeDataReceived;
+            sessionService.PlayersReceived += OnPlayersReceived;
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
@@ -67,6 +68,11 @@ namespace beta.Infrastructure.Services
                 NoteService.Save();
             };
         }
+
+        private void OnPlayersReceived(object sender, PlayerInfoMessage[] e) => Task.Run(async () =>
+        {
+            foreach (var player in e) await HandlePlayerData(player);
+        });
 
 
         #endregion
@@ -120,10 +126,9 @@ namespace beta.Infrastructure.Services
                         }
                     }
         }
-        private void OnNewPlayerReceived(object sender, PlayerInfoMessage player)
+        private async Task HandlePlayerData(PlayerInfoMessage player)
         {
             var players = _Players;
-
             #region Add note about player
 
             if (NoteService.TryGet(player.login, out var note))
@@ -165,35 +170,45 @@ namespace beta.Infrastructure.Services
             {
                 var matchedPlayer = players[id];
 
-                Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar));
+                await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar);
+                //await Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar));
 
                 matchedPlayer.Update(player);
             }
             else
             {
                 int count = players.Count;
-                Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar));
+                await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar);
+                //Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar));
 
                 players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);
                 PlayerUIDToId.Add(player.id, count);
             }
         }
+        private void OnPlayerReceived(object sender, PlayerInfoMessage player) => Task.Run(() => HandlePlayerData(player));
 
         #endregion
 
 
         public PlayerInfoMessage GetPlayer(string login)
         {
-            login = login.ToLower();
-            if (login.Length <= 0 || login.Trim().Length <= 0) return null;
+            if (string.IsNullOrEmpty(login)) return null;
 
-            if (PlayerLoginToId.TryGetValue(login, out var id))
+            if (PlayerLoginToId.TryGetValue(login.ToLower(), out var id))
             {
                 return Players[id];
             }
 
             return null;
+        }
+
+        public bool TryGetPlayer(string login, out PlayerInfoMessage player)
+        {
+            player = GetPlayer(login);
+            if (string.IsNullOrWhiteSpace(login)) return false;
+
+            return player is not null;
         }
 
         public PlayerInfoMessage GetPlayer(int uid)
@@ -266,16 +281,86 @@ namespace beta.Infrastructure.Services
         }
         public bool IsFoe(PlayerInfoMessage player) => IsFoe(player.id);
 
-        public bool TryGetPlayer(string login, out PlayerInfoMessage player)
-        {
-            player = GetPlayer(login);
-            return player is not null;
-        }
-
         public bool TryGetPlayer(int id, out PlayerInfoMessage player)
         {
             player = GetPlayer(id);
             return player is not null;
+        }
+
+        public bool AddGameToPlayer(string login, GameInfoMessage game)
+        {
+            if (string.IsNullOrWhiteSpace(login)) return false;
+            if (game is null) return false;
+
+            if (TryGetPlayer(login, out var player))
+            {
+                if (player.Game is not null)
+                {
+                    // TODO log if this happens
+                }
+                player.Game = game;
+                return true;
+            }
+            return false;
+        }
+
+        public bool AddGameToPlayers(string[] logins, GameInfoMessage game)
+        {
+            if (logins is null || logins.Length == 0) return false;
+            if (game is null) return false;
+
+            bool done = true;
+            foreach (string login in logins)
+            {
+                if (!AddGameToPlayer(login, game))
+                {
+                    done = false;
+                }
+            }
+            return done;
+        }
+
+        public bool RemoveGameFromPlayer(string login, long? uid = null)
+        {
+            if (string.IsNullOrWhiteSpace(login)) return false;
+
+            if (TryGetPlayer(login, out var player))
+            {
+                if (player.Game is null)
+                {
+                    // TODO log if this happens
+                }
+
+                if (uid.HasValue)
+                {
+                    if (player.Game.uid != uid.Value)
+                    {
+                        // TODO log if this happens
+                    }
+                    player.Game = null;
+                }
+                else
+                {
+                    player.Game = null;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveGameFromPlayers(string[] logins, long? uid = null)
+        {
+            if (logins is null || logins.Length == 0) return false;
+
+            bool done = true;
+            foreach (string login in logins)
+            {
+                if (!RemoveGameFromPlayer(login, uid))
+                {
+                    done = false;
+                }
+            }
+            return done;
         }
     }
 }

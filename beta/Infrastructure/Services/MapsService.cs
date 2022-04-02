@@ -56,7 +56,7 @@ namespace beta.Infrastructure.Services
 
         public LocalMapState CheckLocalMap(string name)
         {
-            if (name is null) return LocalMapState.Unknown;
+            if (string.IsNullOrWhiteSpace(name)) return LocalMapState.Unknown;
 
             name = name.Replace("%20", " ");
 
@@ -314,6 +314,45 @@ namespace beta.Infrastructure.Services
         };
 
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews) => CacheService.GetImage(uri, folder);
+
+        public async Task<GameMap> GetGameMap(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+
+            var cachedMaps = CachedMaps;
+            if (cachedMaps.TryGetValue(name, out var cachedMap))
+            {
+                return cachedMap;
+            }
+
+            var isLegacy = IsLegacyMap(name);
+
+            GameMap gameMap = new(name)
+            {
+                IsLegacy = isLegacy,
+                OriginalName = name
+            };
+
+            // TODO
+            if (name.StartsWith("neroxis"))
+            {
+                gameMap.ImageSource = new byte[1];
+                return gameMap;
+            }
+
+            Uri uri = new($"https://content.faforever.com/maps/previews/small/{name}.png");
+            Task.Run(async() =>
+            {
+                gameMap.ImageSource = await CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews);
+                if (isLegacy)
+                {
+                    gameMap.Scenario = GetMapScenario(name, true);
+                }
+            });
+
+            CachedMaps.Add(name, gameMap);
+            return gameMap;
+        }
 
         //https://api.faforever.com/data/map
         //include=latestVersion,reviewsSummary&page[size]=50&page[number]=1&page[totals]=None

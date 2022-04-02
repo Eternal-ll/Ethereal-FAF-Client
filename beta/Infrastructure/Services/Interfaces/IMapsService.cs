@@ -20,5 +20,15 @@ namespace beta.Infrastructure.Services.Interfaces
         public bool IsLegacyMap(string name);
         public LocalMapState CheckLocalMap(string name);
         public string[] GetLocalMaps();
+
+
+        // TODO new methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name">Raw map name (example adaptive_wonder_open.0004)</param>
+        /// <returns>Game map</returns>
+        public Task<GameMap> GetGameMap(string name);
     }
 }

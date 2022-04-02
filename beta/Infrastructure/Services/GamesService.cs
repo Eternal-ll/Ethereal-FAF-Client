@@ -5,6 +5,8 @@ using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -28,6 +30,7 @@ namespace beta.Infrastructure.Services
         public ObservableCollection<GameInfoMessage> LiveGames { get; } = new();
 
         public Dictionary<long, GameInfoMessage> GamesDictionary { get; } = new();
+        public List<GameInfoMessage> Games { get; } = new();
 
         /// <summary>
         /// Idle games without players. Bugged or have been created with 0 players
@@ -45,21 +48,117 @@ namespace beta.Infrastructure.Services
             PlayersService = playerService;
             MapService = mapService;
 
-            sessionService.NewGameReceived += OnNewGameReceived;
+            sessionService.GameReceived += OnGameReceived;
+            sessionService.GamesReceived += OnGamesReceived;
         }
 
-        private void OnNewGameReceived(object sender, GameInfoMessage e)
+        private void OnGamesReceived(object sender, GameInfoMessage[] e) => Task.Run(async () =>
         {
-            var game = e;
+            foreach (var game in e) await HandleGameData(game);
+        });
 
+        private bool TryGetGame(long uid, out GameInfoMessage game)
+        {
+            var games = Games;
+            for (int i = 0; i < games.Count; i++)
+            {
+                if (games[i].uid == uid)
+                {
+                    game = games[i];
+                    return true;
+                }
+            }
+            game = null;
+            return false;
+        }
+
+        private async Task<bool> UpdateGame(GameInfoMessage orig, GameInfoMessage newData)
+        {
+            if (orig.num_players > newData.num_players && newData.num_players == 0)
+                return false;
+
+            if (orig.sim_mods.Count == 0 && orig.sim_mods.Count > 1)
+            {
+                // idk
+            }
+
+            // for visual UI notification, that players amount is changed
+            orig.PlayersCountChanged = newData.num_players - orig.num_players;
+
+            orig.title = newData.title;
+
+            orig.num_players = newData.num_players;
+
+
+            // players update area
+
+            List<string> origPlayers = new();
+            foreach (var team in orig.teams) origPlayers.AddRange(team.Value);
+
+            List<string> newPlayers = new();
+            foreach (var team in newData.teams) origPlayers.AddRange(team.Value);
+            
+            PlayersService.RemoveGameFromPlayers(origPlayers
+                .Except(newPlayers)
+                .ToArray());
+
+            PlayersService.AddGameToPlayers(newPlayers
+                .Except(origPlayers)
+                .ToArray(), orig);
+
+            orig.Teams = newData.Teams;
+
+
+            // map area update
+
+            if (orig.mapname != newData.mapname)
+            {
+                orig.map_file_path = newData.map_file_path;
+                orig.max_players = newData.max_players;
+
+                orig.Map = await MapService.GetGameMap(newData.mapname);
+
+                // should it be updates latest, because it triggers UI updates for other map related fields
+                orig.mapname = newData.mapname;
+            }
+
+            return true;
+        }
+
+
+        private async Task HandleGameData(GameInfoMessage newGame)
+        {
+            var games = Games;
+
+            //TODO rewrite for Task?
+            newGame.Teams = GetInGameTeams(newGame);
+
+            if (TryGetGame(newGame.uid, out var game))
+            {
+                if (!await UpdateGame(game, newGame)) return;
+
+                if (games.Remove(game)) OnGameRemoved(game);
+            }
+            else
+            {
+                // currently we are not supporting UI notification about new game
+                if (newGame.num_players == 0) return;
+
+                newGame.Map = await MapService.GetGameMap(newGame.mapname);
+            }
+
+            // TODO remove
+            await OldHandleGameData(newGame);
+        }
+
+        private async Task OldHandleGameData(GameInfoMessage game)
+        {
             var idleGames = IdleGames;
             var liveGames = LiveGames;
             var suspiciousGames = SuspiciousGames;
             // Update in-game players status
 
             game.Teams = GetInGameTeams(game);
-            game.teams = null;
-            game.sim_mods = game.sim_mods.Count == 0 ? null : game.sim_mods;
 
             #region Checking suspicious games with NO PLAYERS
 
@@ -93,6 +192,11 @@ namespace beta.Infrastructure.Services
             for (int i = 0; i < idleGames.Count; i++)
             {
                 var idleGame = idleGames[i];
+                if (idleGame is null)
+                {
+                    IdleGames.RemoveAt(i);
+                    continue;
+                }
                 if (idleGame.host == game.host)
                 {
                     if (game.launched_at is not null)
@@ -110,7 +214,7 @@ namespace beta.Infrastructure.Services
                     }
 
                     // Updating idle game states
-                    if (!idleGame.Update(game))
+                    if (!await UpdateGame(idleGame, game))
                     {
                         // returns false if num_players == 0, game is died
                         idleGames.RemoveAt(i);
@@ -136,7 +240,7 @@ namespace beta.Infrastructure.Services
                     if (liveGame.host == game.host)
                     {
                         // Updating live game states
-                        if (!liveGame.Update(game))
+                        if (!await UpdateGame(liveGame, game))
                         {
                             // returns false if num_players == 0, game is died
                             liveGames.RemoveAt(i);
@@ -182,6 +286,8 @@ namespace beta.Infrastructure.Services
 
             OnNewGameReceived(game);
         }
+
+        private void OnGameReceived(object sender, GameInfoMessage e) => Task.Run(() => HandleGameData(e));
 
         public InGameTeam[] GetInGameTeams(GameInfoMessage game)
         {
@@ -233,10 +339,6 @@ namespace beta.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public bool TryGetGame(long uid, out GameInfoMessage game)
-        {
-            throw new NotImplementedException();
-        }
 
 
         private void OnNewGameReceived(GameInfoMessage game) => NewGameReceived?.Invoke(this, game);

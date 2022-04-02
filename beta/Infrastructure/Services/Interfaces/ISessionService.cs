@@ -6,8 +6,11 @@ namespace beta.Infrastructure.Services.Interfaces
     public interface ISessionService
     {
         public event EventHandler<bool> Authorized;
-        public event EventHandler<PlayerInfoMessage> NewPlayerReceived;
-        public event EventHandler<GameInfoMessage> NewGameReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<GameInfoMessage> GameReceived;
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
+
         public event EventHandler<SocialData> SocialDataReceived;
         public event EventHandler<WelcomeData> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
