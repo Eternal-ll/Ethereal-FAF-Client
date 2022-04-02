@@ -94,11 +94,11 @@ namespace beta.Models.Ice
             }
             if (ManagedTcpClient.Write(json))
             {
-                AppDebugger.LOGJSONRPC($"----SENT------\n{json.ToJsonFormat()}");
+                AppDebugger.LOGJSONRPC($"Sent:{json.ToJsonFormat()}");
                 return true;
             }
 
-            AppDebugger.LOGJSONRPC($"----DID NOT SEND (TCP Offline)------\n{json.ToJsonFormat()}");
+            AppDebugger.LOGJSONRPC($"!!!!!!!!!!!!!!!!\n{json.ToJsonFormat()}");
             return false;
         }
 
@@ -128,19 +128,16 @@ namespace beta.Models.Ice
                 ThreadName = "JSON-RPC TCP Client"
             };
 
-            //DataToSend.Add(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+            DataToSend.Add(IceJsonRpcMethods.AskStatus(++JsonRpcId));
 
             ManagedTcpClient.Connect();
             ManagedTcpClient.StateChanged += ManagedTcpClient_StateChanged;
-            ManagedTcpClient.DataReceived += OnRpcDataReceived;
+            ManagedTcpClient.DataReceived += OnJsonRpcDataReceived;
         }
 
         private bool IsInitialized = false;
-        private void OnRpcDataReceived(object sender, string json)
+        private void OnJsonRpcDataReceived(object sender, string json)
         {
-            //AppDebugger.LOGJSONRPC(json);
-            //{"result":"{\"version\":\"SNAPSHOT\",\"ice_servers_size\":0,\"lobby_port\":27122,\"init_mode\":\"normal\",\"options\":{\"player_id\":302176,\"player_login\":\"Eternal-\",\"rpc_port\":52448,\"gpgnet_port\":24492},\"gpgpnet\":{\"local_port\":24492,\"connected\":false,\"game_state\":\"\",\"task_string\":\"-\"},\"relays\":[]}","id":1,"jsonrpc":"2.0"}
-
             if (json.StartsWith("{\"me"))
             {
                 var raw = json[(json.IndexOf(':') + 2)..^18];
@@ -153,66 +150,33 @@ namespace beta.Models.Ice
                     case "onConnectionStateChanged":
                         var connected = args == "[\"Connected\"]";
                         ConnectionToGpgNetServerChanged?.Invoke(this, connected);
-
-                        //Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
 
                         if (connected) Logger.LogInformation(args);
                         else Logger.LogCritical(args);
                         break;
                     case "onGpgNetMessageReceived":
-                        //["GameState",["Idle"]]
                         var data = args.Split(',');
                         var command = data[0][2..^1];
                         var param = data[1][..^1];
-
-                        switch (command)
-                        {
-                            case "GameState":
-                                Logger.LogInformation(args);
-                                //{'command': 'GameState', 'target': 'game', 'args': ['Idle']}
-                                break;
-                            default:
-                                Logger.LogError($"No cover for data: " + args);
-                                break;
-                        }
                         GpgNetMessageReceived?.Invoke(this, new(command, param));
                         break;
                     case "onIceMsg":
+                        args = '[' + args[(args.IndexOf(',') + 1)..];
                         Logger.LogInformation($"From RPC received (onIceMsg): ({args.Length} lenght)");
                         IceMessageReceived?.Invoke(this, args);
                         break;
                     case "onIceConnectionStateChanged":
-                        Logger.LogWarning(args);
                         data = args[1..^2].Split(',');
-
                         var state = data[2][1..];
                         var localPId = data[0];
                         var remotePId = data[1];
-
-                        if (Enum.TryParse<IceState>(state, true, out var iceState))
-                            switch (iceState)
-                            {
-                                case IceState.New:
-                                case IceState.Checking:
-                                case IceState.Closed:
-                                case IceState.Connected:
-                                case IceState.Completed:
-                                    Logger.LogInformation(args);
-                                    break;
-                                case IceState.Failed:
-                                    Logger.LogCritical(args);
-                                    break;
-                                case IceState.Disconnected:
-                                    Logger.LogWarning(args);
-                                    break;
-                            }
-
-                        //Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        Logger.LogInformation(args);
+                        Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     case "onConnected":
-                        Logger.LogInformation("!!!!!!");
                         Logger.LogInformation(args);
-                        //Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     default:
                         break;
@@ -221,8 +185,6 @@ namespace beta.Models.Ice
             else
             {
                 //{"id":null,"error":{"code":-32700,"message":"Parse Error"},"jsonrpc":"2.0"}
-
-                // response
                 var jsonRpc = JsonSerializer.Deserialize<JsonRpcData>(json);
 
                 if (jsonRpc.result is not null & jsonRpc.result.Contains("version"))
@@ -238,6 +200,7 @@ namespace beta.Models.Ice
                 {
 
                 }
+                Logger.LogInformation($"Received RPC data: (id: {jsonRpc.id}) {jsonRpc.result}");
             }
 
         }

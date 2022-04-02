@@ -67,18 +67,18 @@ namespace beta.Models.Ice
         /// <summary>
         /// The connection state https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IceState state { get; set; }
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public string state { get; set; }
         /// <summary>
         /// The gathering state https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceGatheringState
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IceGatheringState gathering_state { get; set; }
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public string gathering_state { get; set; }
         /// <summary>
         /// Returns a string which indicates the state of the data channel's underlying data connection. It can have on of the following values: connecting, open, closing, or closed.
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RTCDataChannelState datachannel_state { get; set; }
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public string datachannel_state { get; set; }
         /// <summary>
         /// Is the peer connected? Needs to be in sync with the remote peer.
         /// </summary>
@@ -94,13 +94,13 @@ namespace beta.Models.Ice
         /// <summary>
         /// The type of the local candidate
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IceCandidateType loc_cand_type { get; set; }
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public string loc_cand_type { get; set; }
         /// <summary>
         /// The type of the remote candidate
         /// </summary>
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public IceCandidateType rem_cand_type { get; set; }
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
+        public string rem_cand_type { get; set; }
         /// <summary>
         /// The time it took to connect to the peer in seconds
         /// </summary>

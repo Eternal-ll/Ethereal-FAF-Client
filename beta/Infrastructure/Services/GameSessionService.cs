@@ -206,11 +206,8 @@ namespace beta.Infrastructure.Services
         {
             if (SessionService.IsAuthorized)
             {
-                //{"method":"onIceMsg","params":[302176,324532,"{\"srcId\":302176,\"destId\":324532,\"password\":\"1l8rbovk7mdb2ojuheclr5lu2u\",\"ufrag\":\"3tusd1fvj4rer9\",\"candidates\":[{\"foundation\":\"1\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"192.168.74.1\",\"port\":7005,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"0\",\"relPort\":0},{\"foundation\":\"2\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"fe80:0:0:0:9806:9143:b3b6:bfae\",\"port\":7005,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"1\",\"relPort\":0},{\"foundation\":\"3\",\"protocol\":\"udp\",\"priority\":1677724415,\"ip\":\"85.26.232.73\",\"port\":45869,\"type\":\"SERVER_REFLEXIVE_CANDIDATE\",\"generation\":0,\"id\":\"2\",\"relAddr\":\"192.168.74.1\",\"relPort\":7005},{\"foundation\":\"4\",\"protocol\":\"udp\",\"priority\":2815,\"ip\":\"116.202.155.226\",\"port\":19471,\"type\":\"RELAYED_CANDIDATE\",\"generation\":0,\"id\":\"3\",\"relAddr\":\"85.26.232.73\",\"relPort\":45869}]}"],"jsonrpc":"2.0"}
-                //{"command": "IceMsg", "target": "game", "args": [302176,324532,"{\"srcId\":302176,\"destId\":324532,\"password\":\"1l8rbovk7mdb2ojuheclr5lu2u\",\"ufrag\":\"3tusd1fvj4rer9\",\"candidates\":[{\"foundation\":\"1\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"192.168.74.1\",\"port\":7005,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"0\",\"relPort\":0},{\"foundation\":\"2\",\"protocol\":\"udp\",\"priority\":2130706431,\"ip\":\"fe80:0:0:0:9806:9143:b3b6:bfae\",\"port\":7005,\"type\":\"HOST_CANDIDATE\",\"generation\":0,\"id\":\"1\",\"relPort\":0},{\"foundation\":\"3\",\"protocol\":\"udp\",\"priority\":1677724415,\"ip\":\"85.26.232.73\",\"port\":45869,\"type\":\"SERVER_REFLEXIVE_CANDIDATE\",\"generation\":0,\"id\":\"2\",\"relAddr\":\"192.168.74.1\",\"relPort\":7005},{\"foundation\":\"4\",\"protocol\":\"udp\",\"priority\":2815,\"ip\":\"116.202.155.226\",\"port\":19471,\"type\":\"RELAYED_CANDIDATE\",\"generation\":0,\"id\":\"3\",\"relAddr\":\"85.26.232.73\",\"relPort\":45869}]}"]}
-                var cmd = ServerCommands.UniversalGameCommand("IceMsg", e);
                 Logger.LogInformation($"Sending Ice message to lobby-server: ({e.Length} lenght)");
-                SessionService.Send(cmd);
+                SessionService.Send(ServerCommands.UniversalGameCommand("IceMsg", e));
             }
             else
             {

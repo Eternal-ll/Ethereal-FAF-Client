@@ -29,8 +29,8 @@ namespace beta.Models.Ice
             {
                 StartInfo = new()
                 {
-                    FileName = @"C:\Program Files (x86)\Forged Alliance Forever\lib\ice-adapter\faf-ice-adapter.exe",//$"java.exe",
-                    Arguments = args,//$"-jar \"{file.FullName}\" {args}",
+                    FileName = $"java.exe",
+                    Arguments = $"-jar \"{file.FullName}\" {args}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
