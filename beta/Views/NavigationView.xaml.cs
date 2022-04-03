@@ -95,7 +95,8 @@ namespace beta.Views
             {
                 new HomeView(),
                 new ChatControlView(),
-                new GlobalView(),
+                //new GlobalView(),
+                new CustomGamesView(),
                 new AnalyticsView(),
                 new SettingsView(),
                 new MapsView()

@@ -137,33 +137,33 @@ namespace beta.Infrastructure.Services
 
             #region GET hydra.faforever.com/oauth2/auth
 
-            var stream = await SafeRequest(
-                @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState);
+            var stream = await SafeRequest(@"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState);
 
             if (stream is null) return null;
 
             StreamReader streamReader = new(stream);
-
+            //var data = streamReader.ReadToEnd();
             string line;
 
             string _csrf = string.Empty;
-            string login_challenge = string.Empty;
+            string challenge = string.Empty;
 
             Logger.LogInformation("Parsing data to get _csrf and login_challenge");
 
             while ((line = streamReader.ReadLine()) is not null)
-                if (_csrf.Length != 0 && login_challenge.Length != 0)
+                if (_csrf.Length != 0 && challenge.Length != 0)
                     break; 
-                else if (line.Contains(nameof(_csrf)))
+                else if (line.Contains("_csrf"))
                     _csrf = GetHiddenValue(line);
-                else if (line.Contains(nameof(login_challenge)))
-                    login_challenge = GetHiddenValue(line);
+                else if (line.Contains("challenge"))
+                    challenge = GetHiddenValue(line);
 
             streamReader.Dispose();
             await stream.DisposeAsync();
 
-            if (_csrf.Length == 0 || login_challenge.Length == 0)
+            if (_csrf.Length == 0 || challenge.Length == 0)
             {
+                OnStateChanged(new(OAuthState.INVALID, $"CSRF or login_challenge not found in response"));
                 Logger.LogWarning("CSRF or login_challenge not found in response");
                 return null;
             }
@@ -175,7 +175,7 @@ namespace beta.Infrastructure.Services
 
             stream = await SafeRequest("https://user.faforever.com/oauth2/login", builder
                 .Append("_csrf=").Append(_csrf)
-                .Append("&login_challenge=").Append(login_challenge)
+                .Append("&challenge=").Append(challenge)
                 .Append("&usernameOrEmail=").Append(usernameOrEmail)
                 .Append("&password=").Append(password).GetQueryByteArrayContent());
 
@@ -190,7 +190,7 @@ namespace beta.Infrastructure.Services
             while ((line = streamReader.ReadLine()) is not null)
                 if (consent_challenge.Length != 0)
                     break;
-                else if (line.Contains(nameof(consent_challenge))) 
+                else if (line.Contains("challenge")) 
                     consent_challenge = GetHiddenValue(line);
 
             streamReader.Dispose();
@@ -216,7 +216,7 @@ namespace beta.Infrastructure.Services
                         .Append("_csrf=").Append(_csrf)
                         .Append("&action=permit&")
                         .Append("authorize=Authorize&")
-                        .Append("consent_challenge=").Append(consent_challenge)
+                        .Append("challenge=").Append(consent_challenge)
                         .GetQueryByteArrayContent()).Result.Headers.Location;
             }
             catch (Exception e)

@@ -249,14 +249,6 @@ namespace beta.Infrastructure.Services
                 Authorize();
         }
 
-#if DEBUG
-        private readonly List<ServerCommand> AllowedToDebugCommands = new()
-        {
-            //ServerCommand.notice,
-            //ServerCommand.session,
-        };
-#endif
-
         private void OnDataReceived(object sender, string json)
         {
             //TimeOutWatcher.Restart();

@@ -3,38 +3,111 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace beta.ViewModels
 {
+    public class PropertyFilterDescription
+    {
+        public PropertyFilterDescription(string displayedProperty, string property)
+        {
+            DisplayedProperty = displayedProperty;
+            Property = property;
+        }
+
+        public string DisplayedProperty { get; }
+        public string Property { get; }
+    }
+    public enum FilterDescription
+    {
+        None,
+        Contains,
+        StartsWith,
+        EndsWith,
+    }
+    public class BlockedMapDescription
+    {
+        public BlockedMapDescription(string name, FilterDescription filter)
+        {
+            Name = name;
+            Filter = filter;
+        }
+
+        public string Name { get; }
+        public FilterDescription Filter { get; }
+
+    }
     public abstract class GamesViewModel : Base.ViewModel
     {
         public abstract GameType GameType { get; }
 
         private readonly ISocialService SocialService;
         private readonly IGamesService GamesService;
+
+        private string[] Foes;
+        private string[] Friends;
+
+        private readonly object _lock = new();
+        //private Dispatcher Dispatcher => GamesViewSource.Dispatcher;
         public GamesViewModel()
         {
+            Games = new();
+            GamesViewSource = new();
+            return;
             SocialService = App.Services.GetService<ISocialService>();
             GamesService = App.Services.GetService<IGamesService>();
             GamesService.NewGameReceived += OnNewGame;
             GamesService.GameUpdated += OnGameUpdated;
             GamesService.GameRemoved += OnGameRemoved;
+            BindingOperations.EnableCollectionSynchronization(Games, _lock);
 
-            IdleGamesViewSource.Filter += OnGameFilter;
-            LiveGamesViewSource.Filter += OnGameFilter;
+            PropertyGroupDescription var = new(nameof(GameInfoMessage.uid));
+
+            //IdleGamesViewSource.GroupDescriptions.Add(var);
+            //LiveGamesViewSource.GroupDescriptions.Add(var);
+
+            var games = GamesService.Games;
+
+            if (games.Count > 0)
+                foreach (var game in games)
+                {
+                    Games.Add(game);
+                }
+            else GamesService.GamesReceived += OnGamesReceived;
+            
+            GamesViewSource.Filter += OnGameFilter;
+
+            GamesViewSource.Source = Games;
+
+            //Foes = SocialService.GetFoes;
         }
 
-        public ObservableCollection<GameInfoMessage> Games { get; } = new();
+        public ObservableCollection<GameInfoMessage> Games { get; }
 
-        public ICollectionView IdleGames => IdleGamesViewSource.View;
-        public ICollectionView LiveGames => LiveGamesViewSource.View;
+        public ICollectionView GamesView => GamesViewSource.View;
 
-        private readonly CollectionViewSource IdleGamesViewSource = new();
-        private readonly CollectionViewSource LiveGamesViewSource = new();
+        private readonly CollectionViewSource GamesViewSource;
+
+        #region SelectedGame
+        private GameInfoMessage _SelectedGame;
+        public GameInfoMessage SelectedGame
+        {
+            get => _SelectedGame;
+            set
+            {
+                if (Set(ref _SelectedGame, value))
+                {
+
+                }
+            }
+        }
+        #endregion
 
         #region FilterText
         private string _FilterText;
@@ -45,10 +118,56 @@ namespace beta.ViewModels
             {
                 if (Set(ref _FilterText, value))
                 {
-                    RefreshGames();
+                    switch (SelectedFilterDescription.Property)
+                    {
+                        case nameof(GameInfoMessage.max_players):
+                        case nameof(GameInfoMessage.num_players):
+                        case nameof(GameInfoMessage.rating_max):
+                        case nameof(GameInfoMessage.rating_min):
+                        case nameof(GameInfoMessage.AverageRating):
+                            if (!int.TryParse(value, out _))
+                            {
+                                return;
+                            }
+                            break;
+                    }
+
+                    GamesView.Refresh();
                 }
             }
         }
+        #endregion
+
+        #region FilterDescription
+        public static PropertyFilterDescription[] FilterDescriptions => new PropertyFilterDescription[]
+        {
+            //new("None", null),
+            new("Title",(nameof(GameInfoMessage.title))),
+            new("Host name",(nameof(GameInfoMessage.host))),
+            new("Map name",(nameof(GameInfoMessage.mapname))),
+            new("Max players",(nameof(GameInfoMessage.max_players))),
+            new("Num players",(nameof(GameInfoMessage.num_players))),
+            new("Max rating",(nameof(GameInfoMessage.rating_max))),
+            new("Min rating",(nameof(GameInfoMessage.rating_min))),
+            //new("",(nameof(GameInfoMessage.AverageRating)))
+        };
+
+        #endregion
+
+        #region SelectedFilterDescription
+        private PropertyFilterDescription _SelectedFilterDescription = FilterDescriptions[0];
+        public PropertyFilterDescription SelectedFilterDescription
+        {
+            get => _SelectedFilterDescription;
+            set
+            {
+                if (Set(ref _SelectedFilterDescription, value))
+                {
+                    if (!string.IsNullOrWhiteSpace(FilterText)) GamesView.Refresh();
+                }
+            }
+        }
+
         #endregion
 
         #region IsLiveGamesOnView
@@ -62,8 +181,12 @@ namespace beta.ViewModels
                 {
                     if (!string.IsNullOrWhiteSpace(FilterText))
                     {
-                        FilterText = null;
+                        _FilterText = null;
+                        OnPropertyChanged(nameof(FilterText));
                     }
+
+                    GamesView.Refresh();
+
                 }
             }
         }
@@ -78,7 +201,33 @@ namespace beta.ViewModels
             {
                 if (Set(ref _IsFoesGamesHidden, value))
                 {
-                    RefreshGames();
+                    if (value)
+                    {
+                        _IsOnlyFriendsGamesVisible = false;
+                        OnPropertyChanged(nameof(IsOnlyFriendsGamesVisible));
+                    }
+                    if (Foes?.Length > 1) GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        #region IsOnlyFriendsGamesVisible
+        private bool _IsOnlyFriendsGamesVisible;
+        public bool IsOnlyFriendsGamesVisible
+        {
+            get => _IsOnlyFriendsGamesVisible;
+            set
+            {
+                if (Set(ref _IsOnlyFriendsGamesVisible, value))
+                {
+                    if (value)
+                    {
+                        _IsFoesGamesHidden = false;
+                        OnPropertyChanged(nameof(IsFoesGamesHidden));
+                    }
+
+                    if (Friends?.Length > 1) GamesView.Refresh();
                 }
             }
         }
@@ -91,21 +240,16 @@ namespace beta.ViewModels
             get => _IsSortEnabled;
             set
             {
-                if (_IsSortEnabled != value)
+                if (Set(ref _IsSortEnabled, value))
                 {
-                    _IsSortEnabled = value;
-
-                    //View.Refresh();
-                    OnPropertyChanged(nameof(IsSortEnabled));
-
-                    if (!value)
+                    if (value)
                     {
-                        ClearSort();
+                        SelectedSort = SortDescriptions[0];
                     }
-                    //if (value && View.SortDescriptions.Count == 0)
-                    //{
-                    //    SelectedSort = SortDescriptions[0];
-                    //}
+                    else
+                    {
+                        GamesViewSource.LiveSortingProperties.Clear();
+                    }
                 }
             }
         }
@@ -139,7 +283,7 @@ namespace beta.ViewModels
                     OnPropertyChanged(nameof(SelectedSort));
                     OnPropertyChanged(nameof(SortDirection));
 
-                    SetSort(value);
+                    GamesViewSource.LiveSortingProperties.Add(value.PropertyName);
                 }
             }
         }
@@ -166,68 +310,221 @@ namespace beta.ViewModels
         public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
         #endregion
 
-        private void ClearSort()
+        #region Maps black list area
+
+        #region IsMapsBlacklistEnabled
+        private bool _IsMapsBlacklistEnabled; // TODO default value
+        public bool IsMapsBlacklistEnabled
         {
-            if (IsLiveGamesOnView)
+            get => _IsMapsBlacklistEnabled;
+            set
             {
-                LiveGamesViewSource.LiveSortingProperties.Clear();
-            }
-            else
-            {
-                IdleGamesViewSource.LiveSortingProperties.Clear();
+                if (Set(ref _IsMapsBlacklistEnabled, value))
+                {
+                    if (MapsBlackList.Count > 0)
+                        GamesView.Refresh();
+                }
             }
         }
+        #endregion
 
-        private void SetSort(SortDescription sort)
+        public ObservableCollection<BlockedMapDescription> MapsBlackList { get; } = new();
+
+        public static FilterDescription[] MapFilterDescriptions = new FilterDescription[]
         {
-            ClearSort();
-            if (IsLiveGamesOnView)
-            {
-                LiveGamesViewSource.LiveSortingProperties.Add(sort.PropertyName);
-            }
-            else
-            {
-                IdleGamesViewSource.LiveSortingProperties.Add(sort.PropertyName);
-            }
+            FilterDescription.Contains,
+            FilterDescription.StartsWith,
+            FilterDescription.EndsWith,
+        };
+
+        #region SelectedMapFilterDescription
+        private FilterDescription _SelectedMapFilterDescription = MapFilterDescriptions[0];
+        public FilterDescription SelectedMapFilterDescription
+        {
+            get => _SelectedMapFilterDescription;
+            set => Set(ref _SelectedMapFilterDescription, value);
         }
 
+        #endregion
 
+        #region InputKeyWord
+        private string _InputKeyWord = string.Empty;
+        public string InputKeyWord
+        {
+            get => _InputKeyWord;
+            set => Set(ref _InputKeyWord, value);
+        }
+        #endregion
+
+        #region AddKeyWordCommand
+        private ICommand _AddKeyWordCommand;
+        public ICommand AddKeyWordCommand => _AddKeyWordCommand ?? new LambdaCommand(OnAddKeyWordCommand, CanAddKeyWordCommand);
+        private bool CanAddKeyWordCommand(object parameter) => !string.IsNullOrWhiteSpace(_InputKeyWord);
+        public void OnAddKeyWordCommand(object parameter)
+        {
+            if (string.IsNullOrWhiteSpace(parameter.ToString())) return;
+
+            BlockedMapDescription filter = new(parameter.ToString(), SelectedMapFilterDescription);
+
+            var blocked = MapsBlackList;
+
+            foreach (var mapFilter in blocked)
+            {
+                if (mapFilter.Name.Equals(filter.Name, StringComparison.OrdinalIgnoreCase) && mapFilter.Filter == filter.Filter) return;
+            }
+            blocked.Add(filter);
+            InputKeyWord = string.Empty;
+
+            if (IsMapsBlacklistEnabled) GamesView.Refresh();
+        }
+        #endregion
+
+        #region RemoveKeyWordCommand
+        private ICommand _RemoveKeyWordCommand;
+        public ICommand RemoveKeyWordCommand => _RemoveKeyWordCommand ??= new LambdaCommand(OnRemoveKeyWordCommand);
+        public void OnRemoveKeyWordCommand(object parameter)
+        {
+            if (parameter is BlockedMapDescription filter)
+                if (MapsBlackList.Remove(filter) && IsMapsBlacklistEnabled) GamesView.Refresh();
+        }
+        #endregion
+
+        #endregion
         protected abstract bool FilterGame(GameInfoMessage game);
+        private bool CommonFilter(GameInfoMessage game)
+        {
+            return true;
+            // TODO not supported
+            if (game.FeaturedMod != FeaturedMod.FAF || game.mapname.StartsWith("neroxis")) return false;
+
+            if (IsLiveGamesOnView)
+            {
+                if (game.State != GameState.Playing)
+                    return false;
+            }
+            else
+            {
+                if (game.State != GameState.Open)
+                    return false;
+            }
+
+
+            if (IsMapsBlacklistEnabled)
+            {
+                var blocked = MapsBlackList;
+                if (blocked.Count > 0)
+                for (int i = 0; i < blocked.Count; i++)
+                    {
+                        var filterDesc = blocked[i];
+                        switch (filterDesc.Filter)
+                        {
+                            case FilterDescription.Contains:
+                                if (game.mapname.Contains(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                break;
+                            case FilterDescription.StartsWith:
+                                if (game.mapname.StartsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                break;
+                            case FilterDescription.EndsWith:
+                                if (game.mapname.EndsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                break;
+                        }
+                    }
+            }
+
+            if (IsOnlyFriendsGamesVisible)
+            {
+                var friends = Friends;
+                bool passed = false;
+
+                if (friends is not null)
+                {
+                    foreach (var foe in friends)
+                        if (foe.Equals(game.host, StringComparison.OrdinalIgnoreCase))
+                            passed = true;
+
+                    if (!passed) return false;
+                }
+            }
+
+            if (IsFoesGamesHidden)
+            {
+                var foes = Foes;
+
+                if (foes is not null)
+                    foreach (var foe in foes)
+                        if (foe.Equals(game.host, StringComparison.OrdinalIgnoreCase))
+                            return false;
+            }
+
+            var filter = FilterText;
+
+            if (!string.IsNullOrWhiteSpace(FilterText))
+            {
+                var selectedFilter = SelectedFilterDescription;
+                switch (selectedFilter.Property)
+                {
+                    case nameof(GameInfoMessage.title):
+                        if (!game.title.Contains(filter)) return false;
+                        break;
+                    case nameof(GameInfoMessage.host):
+                        if (!game.host.Contains(filter)) return false;
+                        break;
+                    case nameof(GameInfoMessage.mapname):
+                        if (!game.mapname.Contains(filter)) return false;
+                        break;
+                }
+                if (int.TryParse(FilterText, out var number))
+                    switch (selectedFilter.Property)
+                    {
+                        case nameof(GameInfoMessage.max_players):
+                            if (game.max_players != number) return false;
+                            break;
+                        case nameof(GameInfoMessage.num_players):
+                            if (game.num_players != number) return false;
+                            break;
+                        case nameof(GameInfoMessage.rating_max):
+                            if (game.rating_max.HasValue)
+                            {
+                                if (game.rating_max < number) return false;
+                            }
+                            else return false;
+                            break;
+                        case nameof(GameInfoMessage.rating_min):
+                            if (game.rating_min.HasValue)
+                            {
+                                if (game.rating_min > number) return false;
+                            }
+                            else return false;
+                            break;
+                        case nameof(GameInfoMessage.AverageRating):
+                            if (game.AverageRating < number) return false;
+                            break;
+                    }
+            }
+
+            return FilterGame(game);
+        }
+
         private void OnGameFilter(object sender, FilterEventArgs e)
         {
             var game = (GameInfoMessage)e.Item;
-            if (IsFoesGamesHidden)
-            {
-                var foes = SocialService.GetFoes();
-                for (int i = 0; i < foes.Count; i++)
-                {
-                    if (foes[i].login.Equals(game.host, System.StringComparison.OrdinalIgnoreCase))
-                    {
-                        e.Accepted = false;
-                        return;
-                    }
-                }
-            }
-            e.Accepted = FilterGame(game);
+            //e.Accepted = false;
+            //if (game.State != GameState.Open) return;
+            e.Accepted = CommonFilter(game);
         }
 
-        private void RefreshGames()
-        {
-            if (IsLiveGamesOnView) LiveGames.Refresh(); else IdleGames.Refresh();
-        }
-
-        private bool UpdateGame(GameInfoMessage updatedGame)
+        private bool TryGetIndexOfGame(long uid, out int id)
         {
             var games = Games;
             for (int i = 0; i < games.Count; i++)
             {
-                var game = games[i];
-                if (game.uid == updatedGame.uid)
+                if (games[i].uid == uid)
                 {
-                    game.Update(updatedGame);
+                    id = i;
                     return true;
                 }
             }
+            id = -1;
             return false;
         }
 
@@ -235,27 +532,124 @@ namespace beta.ViewModels
         {
             if (game.GameType != GameType) return;
 
-            if (Games.Remove(game))
-            {
-
-            }
+            //Dispatcher.BeginInvoke(() =>
+            //{
+                if (TryGetIndexOfGame(game.uid, out var id))
+                {
+                    Games.RemoveAt(id);
+                }
+            //});
         }
 
         private void OnGameUpdated(object sender, GameInfoMessage game)
         {
             if (game.GameType != GameType) return;
 
-            if (UpdateGame(game))
-            {
-
-            }
+            //Dispatcher.BeginInvoke(() =>
+            //{
+                if (TryGetIndexOfGame(game.uid, out var id))
+                {
+                    Games[id] = game;
+                }
+            //});
         }
 
         private void OnNewGame(object sender, GameInfoMessage game)
         {
             if (game.GameType != GameType) return;
-            Games.Add(game);
+            //Dispatcher.BeginInvoke(() =>
+            //{
+                if (TryGetIndexOfGame(game.uid, out var id))
+                {
+                    Games[id] = game;
+                }
+                else
+                {
+                    Games.Add(game);
+                }
+            //});
         }
+
+        private void OnGamesReceived(object sender, GameInfoMessage[] e)
+        {
+            //Dispatcher.BeginInvoke(() =>
+            //{
+                GamesViewSource.Filter -= OnGameFilter;
+                foreach (var game in e)
+                {
+                    if (game.GameType != GameType) continue;
+
+                    if (TryGetIndexOfGame(game.uid, out var id))
+                    {
+                        Games[id] = game;
+                    }
+                    else
+                    {
+                        Games.Add(game);
+                    }
+                }
+                GamesViewSource.Filter += OnGameFilter;
+                GamesView.Refresh();
+            //});
+        }
+
+        #region View toggles
+
+        #region IsDataGridView
+        private bool _IsDataGridView;
+        public bool IsDataGridView
+        {
+            get => _IsDataGridView;
+            set
+            {
+                if (Set(ref _IsDataGridView, value))
+                {
+
+                }
+            }
+        }
+        #endregion
+
+        #region IsGridView
+        private bool _IsGridView = true;
+        public bool IsGridView
+        {
+            get => _IsGridView;
+            set
+            {
+                if (Set(ref _IsGridView, value))
+                {
+                    //IsListView = !value;
+                }
+            }
+        }
+        #endregion
+
+        //#region IsListView
+        //private bool _IsListView;
+        //public bool IsListView
+        //{
+        //    get => _IsListView;
+        //    set
+        //    {
+        //        if (Set(ref _IsListView, value))
+        //        {
+        //            IsGridView = !value;
+        //        }
+        //    }
+        //}
+        //#endregion
+
+        #region IsExtendedViewEnabled
+        private bool _IsExtendedViewEnabled;
+        public bool IsExtendedViewEnabled
+        {
+            get => _IsExtendedViewEnabled;
+            set => Set(ref _IsExtendedViewEnabled, value);
+        }
+        #endregion
+
+        #endregion
     }
     public class CustomGamesViewModel : GamesViewModel
     {

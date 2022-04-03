@@ -2,6 +2,7 @@
 using beta.Models.Server;
 using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace beta.Infrastructure.Services
@@ -20,16 +21,20 @@ namespace beta.Infrastructure.Services
         - Modifying the currently selected avatar
         */
 
-        #region Properties
+        public event EventHandler<string> AddedFriend;
+        public event EventHandler<string> AddedFoe;
+        public event EventHandler<string> RemovedFriend;
+        public event EventHandler<string> RemovedFoe;
 
         private readonly ISessionService SessionService;
         private readonly IPlayersService PlayersService;
 
         public SocialData SocialMessage { get; set; }
 
-        #endregion
+        public string[] Friends => throw new NotImplementedException();
 
-        #region Ctor
+        public string[] Foes => throw new NotImplementedException();
+
         public SocialService(
             ISessionService sessionService,
             IPlayersService playersService)
@@ -37,7 +42,6 @@ namespace beta.Infrastructure.Services
             SessionService = sessionService;
             PlayersService = playersService;
         }
-        #endregion
 
         #region Methods
         public void AddFriend(int id) => SendCommand(ServerCommands.AddFriend(id.ToString()), id, PlayerRelationShip.Friend);

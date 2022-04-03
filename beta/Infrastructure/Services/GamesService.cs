@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,11 @@ namespace beta.Infrastructure.Services
 {
     public class GamesService : ViewModel, IGamesService
     {
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
         public event EventHandler<GameInfoMessage> NewGameReceived;
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
+        public event EventHandler<long> UidGameRemoved;
 
         #region Properties
 
@@ -55,6 +58,7 @@ namespace beta.Infrastructure.Services
         private void OnGamesReceived(object sender, GameInfoMessage[] e) => Task.Run(async () =>
         {
             foreach (var game in e) await HandleGameData(game);
+            GamesReceived?.Invoke(this, e);
         });
 
         private bool TryGetGame(long uid, out GameInfoMessage game)
@@ -74,8 +78,8 @@ namespace beta.Infrastructure.Services
 
         private async Task<bool> UpdateGame(GameInfoMessage orig, GameInfoMessage newData)
         {
-            if (orig.num_players > newData.num_players && newData.num_players == 0)
-                return false;
+            //if (orig.num_players > newData.num_players && newData.num_players == 0)
+            //    return false;
 
             if (orig.sim_mods.Count == 0 && orig.sim_mods.Count > 1)
             {
@@ -118,18 +122,50 @@ namespace beta.Infrastructure.Services
 
                 orig.Map = await MapService.GetGameMap(newData.mapname);
 
-                // should it be updates latest, because it triggers UI updates for other map related fields
+                // should be updates latest, because it triggers UI updates for other map related fields
                 orig.mapname = newData.mapname;
             }
 
             return true;
         }
 
+        private void HandleOnGameClose(GameInfoMessage game)
+        {
+            List<string> playersToClear = new();
+            foreach (var team in game.teams) playersToClear.AddRange(team.Value);
+
+            if (TryGetGame(game.uid, out var foundGame))
+            {
+                // optimize from dublicates
+                foreach (var team in foundGame.teams) playersToClear.AddRange(team.Value);
+                Games.Remove(foundGame);
+                foundGame = null;
+            }
+
+            PlayersService.RemoveGameFromPlayers(playersToClear.ToArray());
+            UidGameRemoved?.Invoke(this, game.uid);
+            OnGameRemoved(game);
+        }
+
 
         private async Task HandleGameData(GameInfoMessage newGame)
         {
-            var games = Games;
+            switch (newGame.State)
+            {
+                case GameState.Open:
+                    break;
+                case GameState.Playing:
+                    break;
+                case GameState.Closed:
+                    HandleOnGameClose(newGame);
+                    return;
+                default:
+                    // LOG
+                    return;
+            }
 
+            var games = Games;
+            
             //TODO rewrite for Task?
             newGame.Teams = GetInGameTeams(newGame);
 
@@ -142,7 +178,7 @@ namespace beta.Infrastructure.Services
             else
             {
                 // currently we are not supporting UI notification about new game
-                if (newGame.num_players == 0) return;
+                if (newGame.num_players == 0 || newGame.State == GameState.Closed) return;
 
                 newGame.Map = await MapService.GetGameMap(newGame.mapname);
             }

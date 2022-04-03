@@ -1,5 +1,6 @@
 ﻿using beta.Models.Server;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace beta.Infrastructure.Services.Interfaces
@@ -9,6 +10,7 @@ namespace beta.Infrastructure.Services.Interfaces
     /// </summary>
     public interface IGamesService
     {
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
         public event EventHandler<GameInfoMessage> NewGameReceived;
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
@@ -22,6 +24,8 @@ namespace beta.Infrastructure.Services.Interfaces
         /// Launched games
         /// </summary>
         public ObservableCollection<GameInfoMessage> LiveGames { get; }
+
+        public List<GameInfoMessage> Games { get; }
 
         /// <summary>
         /// 
