@@ -211,6 +211,7 @@ namespace beta.Resources.Controls
                 }
                 if (CurrentText.Trim().Length > 0)
                 {
+                    if (SelectedChannel is null) return;
                     SelectedChannel.History.Add(new IrcChannelMessage(SelectedChannel.Name, Properties.Settings.Default.PlayerNick, CurrentText));
                     IrcService.SendMessage(SelectedChannel.Name, CurrentText);
                 }
