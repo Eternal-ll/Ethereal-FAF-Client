@@ -29,7 +29,6 @@ namespace beta.ViewModels
 
             if (Settings.Default.AutoJoin)
             {
-                return;
                 Task.Run(() => OAuthService.AuthAsync());
             }
         }
@@ -164,6 +163,8 @@ namespace beta.ViewModels
             {
                 OAuthService.StateChanged -= OAuthService_StateChanged;
             }
+
+            base.Dispose(disposing);
         }
     }
 }

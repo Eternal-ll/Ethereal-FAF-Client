@@ -40,8 +40,8 @@ namespace beta.ViewModels
 
             Task.Run(() =>
             {
-                //ChildViewModel = new AuthorizationViewModel();
-                ChildViewModel = new NavigationViewModel();
+                ChildViewModel = new AuthorizationViewModel();
+                //ChildViewModel = new NavigationViewModel();
             });
         }
 

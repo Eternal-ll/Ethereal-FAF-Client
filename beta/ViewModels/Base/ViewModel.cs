@@ -23,9 +23,9 @@ namespace beta.ViewModels.Base
         }
 
         private bool _Disposed;
-        protected virtual void Dispose(bool Disposing)
+        protected virtual void Dispose(bool disposing)
         {
-            if (!Disposing || _Disposed) return;
+            if (!disposing || _Disposed) return;
             _Disposed = true;
             // Освобождение управляемых ресурсов
         }
