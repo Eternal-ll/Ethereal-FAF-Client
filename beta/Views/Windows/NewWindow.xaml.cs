@@ -11,6 +11,12 @@ namespace beta.Views.Windows
         public NewWindow()
         {
             InitializeComponent();
+
+            Left = Settings.Default.Left;
+            Top = Settings.Default.Top;
+            Height = Settings.Default.Height;
+            Width = Settings.Default.Width;
+
             Closing += OnWindowClosing;
         }
 

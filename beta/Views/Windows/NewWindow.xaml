@@ -8,10 +8,6 @@
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:ThemeManager.RequestedTheme="Dark"
-        Height="{Binding ElementName=MainView, Path=DataContext.Height}"
-        Width="{Binding ElementName=MainView, Path=DataContext.Width}"
-        Top="{Binding ElementName=MainView, Path=DataContext.Top}"
-        Left="{Binding ElementName=MainView, Path=DataContext.Left}">
+        ui:ThemeManager.RequestedTheme="Dark">
     <view:MainView x:Name="MainView"/>
 </Window>
