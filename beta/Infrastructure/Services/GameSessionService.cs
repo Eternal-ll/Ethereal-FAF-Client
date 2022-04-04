@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public class GameSessionService : IGameSessionService
+    internal class GameSessionService : IGameSessionService
     {
         public event EventHandler<GameInfoMessage> GameFilled;
 
@@ -30,6 +30,7 @@ namespace beta.Infrastructure.Services
         private readonly IMapsService MapsService;
         private readonly IIceService IceService;
         private readonly IPlayersService PlayersService;
+        private readonly INotificationService NotificationService;
         private readonly ILogger Logger;
 
         private GameInfoMessage LastGame;
@@ -45,7 +46,7 @@ namespace beta.Infrastructure.Services
             IMapsService mapsService,
             ISessionService sessionService,
             IGamesService gamesService,
-            ILogger<GameSessionService> logger, IIceService iceService, IPlayersService playersService)
+            ILogger<GameSessionService> logger, IIceService iceService, IPlayersService playersService, INotificationService notificationService)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
@@ -64,6 +65,7 @@ namespace beta.Infrastructure.Services
 
             IceService.IceServersReceived += IceService_IceServersReceived;
             PlayersService = playersService;
+            NotificationService = notificationService;
         }
 
         private void SessionService_IceUniversalDataReceived(object sender, IceUniversalData e)
@@ -229,6 +231,18 @@ namespace beta.Infrastructure.Services
         public async Task JoinGame(GameInfoMessage game)
         {
             Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
+
+            if (game.mapname.StartsWith("neroxis"))
+            {
+                await NotificationService.ShowPopupAsync("Unsupported map");
+                return;
+            }
+
+            if (game.FeaturedMod != FeaturedMod.FAF)
+            {
+                await NotificationService.ShowPopupAsync("Unsupported game mode");
+                return;
+            }
 
             LastGame = game;
 

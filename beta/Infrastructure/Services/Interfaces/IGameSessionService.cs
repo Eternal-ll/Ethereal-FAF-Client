@@ -28,7 +28,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// </summary>
         RUNNING = 4
     }
-    public interface IGameSessionService
+    internal interface IGameSessionService
     {
         public event EventHandler<GameInfoMessage> GameFilled;
 
