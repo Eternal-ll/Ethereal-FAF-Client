@@ -10,11 +10,11 @@
             <Run Text="No game detected" FontWeight="DemiBold" FontSize="16"/>
             <LineBreak/>
             <LineBreak/>
-            <Run Text="Select folder with Supreme Command: Forged Alliance"/>
+            <Run Text="Paste directory with Supreme Command: Forged Alliance"/>
             <LineBreak/>
             <Run Text='Example: "C:\Supreme Commander Forged Alliance"' FontSize="12" Foreground="Gray"/>
         </TextBlock>
-        <Button Margin="0 10" Content="Select" Click="Button_Click"/>
+        <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBlock x:Name="ErrorTextBlock"/>
     </StackPanel>
 </UserControl>
