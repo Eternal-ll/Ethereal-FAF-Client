@@ -200,7 +200,7 @@ namespace beta.Resources.Controls
             if (_oldContentPresenter is not null)
             {
                 _oldContentPresenter.Visibility = Visibility.Collapsed;
-                _oldContentPresenter.Content = null;
+                Dispatcher.Invoke(() => _oldContentPresenter.Content = null);
             }
 
             _fadeOutAnimation = null;
