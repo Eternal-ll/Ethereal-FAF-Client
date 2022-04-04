@@ -44,8 +44,7 @@
         </Grid.Resources>
         
         <MediaElement x:Name="Player" LoadedBehavior="Play" MediaEnded="OnTrailerEnded" Stretch="UniformToFill"
-                      MediaOpened="Player_MediaOpened" Opacity="0"
-                      Source="C:\Users\Eternal\source\repos\Ethereal-FAF-Client\beta\bin\Debug\net5.0-windows10.0.18362.0\Resources\Media\Trailer\trailer.mp4">
+                      MediaOpened="Player_MediaOpened" Opacity="0">
             <MediaElement.Style>
                 <Style TargetType="MediaElement">
                     <Setter Property="Volume" Value=".1"/>
@@ -151,7 +150,17 @@
                     </StackPanel>
 
                     <ToggleButton x:Name="HideToggleButton" Background="Transparent" Visibility="{Binding InputVisibility}"
-                                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-18 -14" ToolTip="Hide panel">
+                                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-18 -14">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Setter Property="ToolTip" Value="Hide panel"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="ToolTip" Value="Show panel"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
                         <Path Fill="White" Stretch="Uniform">
                             <Path.Style>
                                 <Style TargetType="Path">
@@ -174,7 +183,17 @@
         </Grid>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20">
-            <ToggleButton x:Name="VolumeToggleButton" Background="Transparent" ToolTip="Turn off volume" Margin="0 0 10 0">
+            <ToggleButton x:Name="VolumeToggleButton" Background="Transparent" Margin="0 0 10 0">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                        <Setter Property="ToolTip" Value="Turn off volume"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="ToolTip" Value="Turn on volume"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
                 <Path Fill="White" Stretch="Uniform" Height="20">
                     <Path.Style>
                         <Style TargetType="Path">

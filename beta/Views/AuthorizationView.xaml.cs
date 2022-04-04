@@ -1,4 +1,6 @@
-﻿using System;
+﻿using beta.Infrastructure.Utils;
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
@@ -13,10 +15,14 @@ namespace beta.Views
         public AuthorizationView()
         {
             InitializeComponent();
-            
+            Task.Run(() =>
+            {
+                var trailer = Tools.GetTrailerFileInfo();
+                Dispatcher.Invoke(() => Player.Source = new(trailer.FullName));
+            });
         }
 
-        readonly DoubleAnimation animation = new DoubleAnimation
+        private readonly DoubleAnimation ToZeroOpacity = new()
         {
             From = 1,
             To = 0,
@@ -29,12 +35,12 @@ namespace beta.Views
         {
             var media = (MediaElement)sender;
 
-            media.BeginAnimation(UIElement.OpacityProperty, animation);
+            media.BeginAnimation(UIElement.OpacityProperty, ToZeroOpacity);
 
             media.Position = TimeSpan.Zero;
         }
 
-        readonly DoubleAnimation ToOneOpacity = new DoubleAnimation
+        private readonly DoubleAnimation ToOneOpacity = new()
         {
             From = 0,
             To = 1,
@@ -48,17 +54,16 @@ namespace beta.Views
             media.BeginAnimation(UIElement.OpacityProperty, ToOneOpacity);
 
         }
-
-        private bool Initialized = false;
+        private bool IsControlInitialized = false;
         private void UserControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (Initialized && (bool)e.NewValue == false)
+            if (IsControlInitialized && (bool)e.NewValue == false)
             {
                 Player.Volume = 0;
             }
             if ((bool)e.NewValue == true)
             {
-                Initialized = true;
+                IsControlInitialized = true;
             }
         }
 

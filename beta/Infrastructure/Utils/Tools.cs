@@ -120,9 +120,11 @@ namespace beta.Infrastructure.Utils
 
         public static FileInfo GetFafUidFileInfo() => new(ExtractAndReturnPath(Properties.Resources.faf_uid, "faf-uid.exe"));
         public static FileInfo GetIceAdapterJarFileInfo() => new(ExtractAndReturnPath(Properties.Resources.faf_ice_adapter, "faf-ice-adapter"));
-        private static string ExtractAndReturnPath(byte[] binary, string name)
+        public static FileInfo GetTrailerFileInfo() => new(ExtractAndReturnPath(Properties.Resources.FafTrailer, "Trailer.mp4", @"\Cache\Media\Trailer\"));
+        private static string ExtractAndReturnPath(byte[] binary, string name, string destination = null)
         {
             string path = App.CurrentDirectory + "\\Third-party applications\\";
+            if (!string.IsNullOrWhiteSpace(destination)) path = App.CurrentDirectory + destination;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             path += name;
             if (File.Exists(path)) return path;

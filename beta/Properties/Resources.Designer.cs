@@ -69,7 +69,6 @@ namespace beta.Properties {
                 return ((byte[])(obj));
             }
         }
-        public static byte[] test => faf_uid;
         
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
@@ -77,6 +76,16 @@ namespace beta.Properties {
         internal static byte[] faf_uid {
             get {
                 object obj = ResourceManager.GetObject("faf-uid", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] FafTrailer {
+            get {
+                object obj = ResourceManager.GetObject("FafTrailer", resourceCulture);
                 return ((byte[])(obj));
             }
         }
