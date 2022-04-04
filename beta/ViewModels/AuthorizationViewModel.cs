@@ -2,7 +2,6 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
-using ModernWpf.Controls;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,27 +13,18 @@ namespace beta.ViewModels
     public class AuthorizationViewModel : Base.ViewModel
     {
         private readonly IOAuthService OAuthService;
-        //private readonly ISessionService SessionService;
-
-        private ContentDialog Dialog;
+        private readonly INotificationService NotificationService;
 
         private bool IsAdministrator;
         public AuthorizationViewModel()
         {
-            App.Current.Dispatcher.Invoke(() => Dialog = new()
-            {
-                CloseButtonText = "OK"
-            });
-
             using var identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new(identity);
             IsAdministrator = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
-            //SessionService = App.Services.GetService<ISessionService>();
             OAuthService = App.Services.GetService<IOAuthService>();
+            NotificationService = App.Services.GetService<INotificationService>();
 
-            //SessionService.Authorized += Authorized;
-            //SessionService.StateChanged += SessionService_StateChanged;
             OAuthService.StateChanged += OAuthService_StateChanged;
 
             if (Settings.Default.AutoJoin)
@@ -44,23 +34,12 @@ namespace beta.ViewModels
             }
         }
 
-        //private void SessionService_StateChanged(object sender, SessionState e)
-        //{
-
-        //}
-            
-        //private void Authorized(object sender, bool e)
-        //{
-
-        //}
-
         private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
         {
             IsPendingAuthorization = e.State == Models.Enums.OAuthState.PendingAuthorization;
             if (e.State != Models.Enums.OAuthState.AUTHORIZED & e.State != Models.Enums.OAuthState.PendingAuthorization)
             {
-                Dialog.Content = e;
-                Dialog.ShowAsync();
+                NotificationService.ShowPopupAsync(e);
             }
         }
 

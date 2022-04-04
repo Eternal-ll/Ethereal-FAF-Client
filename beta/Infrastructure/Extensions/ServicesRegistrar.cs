@@ -20,6 +20,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<INoteService, NoteService>()
             .AddSingleton<IDownloadService, DownloadService>()
             .AddSingleton<IIceService, IceService>()
+            .AddSingleton<INotificationService, NotificationService>()
 
             .AddTransient<IApiService, ApiService>()
             ;
