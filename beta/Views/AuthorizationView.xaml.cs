@@ -15,11 +15,15 @@ namespace beta.Views
         public AuthorizationView()
         {
             InitializeComponent();
+
+            Player.MediaOpened += Player_MediaOpened;
+            Player.MediaEnded += OnTrailerEnded;
             Task.Run(() =>
             {
                 var trailer = Tools.GetTrailerFileInfo();
                 Dispatcher.Invoke(() => Player.Source = new(trailer.FullName));
             });
+            Player.Play();
         }
 
         private readonly DoubleAnimation ToZeroOpacity = new()
@@ -59,7 +63,7 @@ namespace beta.Views
         {
             if (IsControlInitialized && (bool)e.NewValue == false)
             {
-                Player.Volume = 0;
+                Player.Close();
             }
             if ((bool)e.NewValue == true)
             {

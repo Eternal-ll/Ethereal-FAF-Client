@@ -36,7 +36,7 @@ namespace beta.ViewModels
 
         private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
         {
-            IsPendingAuthorization = e.State == Models.Enums.OAuthState.PendingAuthorization;
+            IsPendingAuthorization = e.State == Models.Enums.OAuthState.PendingAuthorization || e.State == Models.Enums.OAuthState.AUTHORIZED;
             if (e.State != Models.Enums.OAuthState.AUTHORIZED & e.State != Models.Enums.OAuthState.PendingAuthorization)
             {
                 NotificationService.ShowPopupAsync(e);
@@ -123,15 +123,6 @@ namespace beta.ViewModels
         }
         #endregion
 
-        //#region Password
-        //private string _Password;
-        //public string Password
-        //{
-        //    get => _Password;
-        //    set => Set(ref _Password, value);
-        //}
-        //#endregion
-
         #region LoginCommand
         private ICommand _LoginCommand;
         public ICommand LoginCommand => _LoginCommand ??= new LambdaCommand(OnLoginCommand, CanLoginCommand);
@@ -141,7 +132,7 @@ namespace beta.ViewModels
             if (parameter == null) parameter = string.Empty;
             IsPendingAuthorization = true;
             var password = parameter.ToString();
-            OAuthService.AuthAsync(LoginOrEmail, password);
+            Task.Run(() => OAuthService.AuthAsync(LoginOrEmail, password));
         }
         #endregion
 
@@ -153,7 +144,7 @@ namespace beta.ViewModels
         {
             if (parameter == null) return;
             IsPendingAuthorization = true;
-            OAuthService.AuthByBrowser();
+            Task.Run(() => OAuthService.AuthByBrowser());
         }
         #endregion
 
@@ -171,7 +162,7 @@ namespace beta.ViewModels
         {
             if (disposing)
             {
-
+                OAuthService.StateChanged -= OAuthService_StateChanged;
             }
         }
     }

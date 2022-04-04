@@ -43,8 +43,7 @@
             </Style>
         </Grid.Resources>
         
-        <MediaElement x:Name="Player" LoadedBehavior="Play" MediaEnded="OnTrailerEnded" Stretch="UniformToFill"
-                      MediaOpened="Player_MediaOpened" Opacity="0">
+        <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" Stretch="UniformToFill" Opacity="0">
             <MediaElement.Style>
                 <Style TargetType="MediaElement">
                     <Setter Property="Volume" Value=".1"/>
