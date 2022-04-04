@@ -2,6 +2,8 @@
 using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace beta.ViewModels
@@ -12,51 +14,69 @@ namespace beta.ViewModels
     public class MainViewModel : ViewModel
     {
         private readonly IOAuthService OAuthService;
+        private readonly ISessionService SessionService;
 
         public MainViewModel()
         {
             OAuthService = App.Services.GetService<IOAuthService>();
+            SessionService = App.Services.GetService<ISessionService>();
 
             Left = Settings.Default.Left;
             Top = Settings.Default.Top;
             Height = Settings.Default.Height;
             Width = Settings.Default.Width;
 
-            if (Settings.Default.AutoJoin)
+            var isAutojoin = Settings.Default.AutoJoin;
+
+            isAutojoin = false;
+
+            SessionService.Authorized += OnSessionAuthorizationCompleted;
+
+            //if (isAutojoin)
+            //{
+            //    //Task.Run(async () => await OAuthService.AuthAsync());
+            //    var model = new SessionAuthorizationViewModel();
+            //    model.Completed += OnSessionAuthorizationCompleted;
+            //    ChildViewModel = model;
+            //}
+            //else
+            //{
+            //OAuthService.StateChanged += OnOAuthServiceStateChanged;
+            //}
+
+            Task.Run(() =>
             {
-                //Task.Run(async () => await OAuthService.AuthAsync());
-                var model = new SessionAuthorizationViewModel();
-                model.Completed += OnSessionAuthorizationCompleted;
-                ChildViewModel = model;
-            }
-            else
-            {
+                Thread.Sleep(500);
                 ChildViewModel = new AuthorizationViewModel();
-                OAuthService.StateChanged += OnOAuthServiceStateChanged;
-            }
+                Thread.Sleep(5000);
+                ChildViewModel = new SessionAuthorizationViewModel();
+                Thread.Sleep(5000);
+                ChildViewModel = new SessionAuthorizationViewModel();
+            });
         }
 
         private void OnSessionAuthorizationCompleted(object sender, bool e) => 
             ChildViewModel = e ? new NavigationViewModel() : new AuthorizationViewModel();
 
-        private void OnOAuthServiceStateChanged(object sender, Models.OAuthEventArgs e)
-        {
-            if (e.State == Models.Enums.OAuthState.PendingAuthorization)
-            {
-                var model = new SessionAuthorizationViewModel();
-                model.Completed += OnSessionAuthorizationCompleted;
-            }
-        }
-
         #region ChildViewModel
-        private ViewModel _ChildViewModel;
+        private ViewModel _ChildViewModel = new PlugViewModel();
         /// <summary>
         /// Current UI view model
         /// </summary>
         public ViewModel ChildViewModel
         {
             get => _ChildViewModel;
-            set => Set(ref _ChildViewModel, value);
+            set
+            {
+                if (_ChildViewModel is not null)
+                {
+                    _ChildViewModel.Dispose();
+                }
+                if (Set(ref _ChildViewModel, value))
+                {
+
+                }
+            }
         }
         #endregion
 

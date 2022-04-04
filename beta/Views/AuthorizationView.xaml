@@ -4,10 +4,194 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:beta.ViewModels"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
              d:DataContext="{d:DesignInstance {x:Type vm:AuthorizationViewModel}}"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             IsVisibleChanged="UserControl_IsVisibleChanged">
     <Grid>
-            
+        <Grid.Resources>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+            <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+            <Style TargetType="CheckBox" BasedOn="{StaticResource DefaultCheckBoxStyle}">
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="False">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="LinkButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                <Setter Property="Background" Value="Transparent"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="False">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Transparent"/>
+            <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="Black" Opacity=".3"/>
+            <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="Black" Opacity=".3"/>
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="Black" Opacity=".3"/>
+            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="Black" Opacity=".3"/>
+
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="False">
+                        <Setter Property="Opacity" Value=".7"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        
+        <MediaElement x:Name="Player" LoadedBehavior="Play" MediaEnded="OnTrailerEnded" Stretch="UniformToFill"
+                      MediaOpened="Player_MediaOpened" Opacity="0"
+                      Source="C:\Users\Eternal\source\repos\Ethereal-FAF-Client\beta\bin\Debug\net5.0-windows10.0.18362.0\Resources\Media\Trailer\trailer.mp4">
+            <MediaElement.Style>
+                <Style TargetType="MediaElement">
+                    <Setter Property="Volume" Value=".1"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=VolumeToggleButton, Path=IsChecked}" Value="True">
+                            <Setter Property="Volume" Value="0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MediaElement.Style>
+        </MediaElement>
+        
+        <Grid VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 60 40 0" >
+            <Border CornerRadius="10" >
+                <Border.Background>
+                    <SolidColorBrush Color="Black" Opacity=".6"/>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect ShadowDepth="10" BlurRadius="30" Direction="-90" Opacity=".8"/>
+                </Border.Effect>
+            </Border>
+            <Border Padding="20" CornerRadius="10" Style="{StaticResource ClippedBorder}">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding LoadingInputVisibility}">
+                        <ui:ProgressRing IsActive="True"/>
+                        <TextBlock Text="{Binding State}" Margin="10 0 0 0" Opacity=".5" Width="150" VerticalAlignment="Center"/>
+                        <Button Content="Cancel" Padding="6 2" Command="{Binding CancelAuthorizationCommand}" Style="{StaticResource LinkButtonStyle}"/>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="{Binding InputVisibility}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=HideToggleButton, Path=IsChecked}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <Grid Margin="-20 -20 -20 20">
+                            <Grid.Background>
+                                <SolidColorBrush Color="Black" Opacity=".5"/>
+                            </Grid.Background>
+                            <Path Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}" Stretch="Uniform" Width="140" Margin="0 40"
+                            Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"/>
+                        </Grid>
+                        <TextBox Text="{Binding LoginOrEmail, UpdateSourceTrigger=PropertyChanged}"
+                                 BorderThickness="0" Width="160" ToolTip="Username or e-mail" ui:ControlHelper.PlaceholderText="Username or e-mail"/>
+                        <PasswordBox PasswordChanged="PasswordBox_PasswordChanged" BorderThickness="0" Width="160" ui:ControlHelper.PlaceholderText="Password" Margin="0 10 0 20"/>
+                        <Button x:Name="LoginButton" Content="Log in" HorizontalAlignment="Stretch" Command="{Binding LoginCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Setter Property="ToolTip" Value="Log in by code"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter Property="ToolTip" Value="Fill required fields"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Grid Margin="0 10 0 0">
+                            <Button x:Name="BrowserButton" Content="Log in with browser" HorizontalAlignment="Stretch"
+                                Command="{Binding LoginWithBrowserCommand}" ToolTip="Log in with default browser"/>
+
+                            <Grid ToolTip="Requires administrator privileges" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="-5" Background="Transparent">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="False">
+                                                <Setter Property="Opacity" Value=".5"/>
+                                            </Trigger>
+                                            <DataTrigger Binding="{Binding ElementName=BrowserButton, Path=IsEnabled}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Path Fill="White" Stretch="Uniform" Height="20"
+                                  Data="M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" />
+                            </Grid>
+                        </Grid>
+                        <TextBlock Text="" MaxWidth="150" TextWrapping="Wrap" Margin="0 10 0 0" Foreground="Red">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Separator Opacity=".5" Margin="0 20 0 10"/>
+                        <CheckBox Content="Remember me" IsChecked="{Binding RememberMe}"/>
+                        <Button Content="Register" Style="{StaticResource LinkButtonStyle}" HorizontalAlignment="Stretch"
+                                ToolTip="Register new account on FAForever"
+                                Command="{StaticResource NavigateUriCommand}" CommandParameter="https://faforever.com/account/register"/>
+                        <Button Content="Forgot password" Style="{StaticResource LinkButtonStyle}" HorizontalAlignment="Stretch"
+                                ToolTip="Forgot password? You can reset it on site"
+                                Command="{StaticResource NavigateUriCommand}" CommandParameter="https://faforever.com/account/password/reset"/>
+                    </StackPanel>
+
+                    <ToggleButton x:Name="HideToggleButton" Background="Transparent" Visibility="{Binding InputVisibility}"
+                                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="-18 -14" ToolTip="Hide panel">
+                        <Path Fill="White" Stretch="Uniform">
+                            <Path.Style>
+                                <Style TargetType="Path">
+                                    <Setter Property="Height" Value="16"/>
+                                    <Setter Property="Data" Value="M2,5.27L3.28,4L20,20.72L18.73,22L15.65,18.92C14.5,19.3 13.28,19.5 12,19.5C7,19.5 2.73,16.39 1,12C1.69,10.24 2.79,8.69 4.19,7.46L2,5.27M12,9A3,3 0 0,1 15,12C15,12.35 14.94,12.69 14.83,13L11,9.17C11.31,9.06 11.65,9 12,9M12,4.5C17,4.5 21.27,7.61 23,12C22.18,14.08 20.79,15.88 19,17.19L17.58,15.76C18.94,14.82 20.06,13.54 20.82,12C19.17,8.64 15.76,6.5 12,6.5C10.91,6.5 9.84,6.68 8.84,7L7.3,5.47C8.74,4.85 10.33,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C12.69,17.5 13.37,17.43 14,17.29L11.72,15C10.29,14.85 9.15,13.71 9,12.28L5.6,8.87C4.61,9.72 3.78,10.78 3.18,12Z"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
+                                                    Value="False">
+                                            <Setter Property="Margin" Value="0 0 0 2"/>
+                                            <Setter Property="Height" Value="14"/>
+                                            <Setter Property="Data" Value="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                    </ToggleButton>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20">
+            <ToggleButton x:Name="VolumeToggleButton" Background="Transparent" ToolTip="Turn off volume" Margin="0 0 10 0">
+                <Path Fill="White" Stretch="Uniform" Height="20">
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Data" Value="M3,9H7L12,4V20L7,15H3V9M16.59,12L14,9.41L15.41,8L18,10.59L20.59,8L22,9.41L19.41,12L22,14.59L20.59,16L18,13.41L15.41,16L14,14.59L16.59,12Z"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
+                                         Value="False">
+                                    <Setter Property="Data" Value="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+            </ToggleButton>
+
+            <Button Content="Trailer by Kazbek" Opacity=".7" Background="Transparent" ToolTip="Author of trailer"
+                Command="{StaticResource NavigateUriCommand}" CommandParameter="https://www.youtube.com/watch?v=vSh-5wuwMdk"/>
+        </StackPanel>
     </Grid>
 </UserControl>

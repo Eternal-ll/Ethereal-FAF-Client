@@ -1,7 +1,199 @@
-﻿namespace beta.ViewModels
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services.Interfaces;
+using beta.Properties;
+using Microsoft.Extensions.DependencyInjection;
+using ModernWpf.Controls;
+using System.Security.Principal;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
+
+namespace beta.ViewModels
 {
     public class AuthorizationViewModel : Base.ViewModel
     {
+        private readonly IOAuthService OAuthService;
+        //private readonly ISessionService SessionService;
 
+        private ContentDialog Dialog;
+
+        private bool IsAdministrator;
+        public AuthorizationViewModel()
+        {
+            App.Current.Dispatcher.Invoke(() => Dialog = new()
+            {
+                CloseButtonText = "OK"
+            });
+
+            using var identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new(identity);
+            IsAdministrator = principal.IsInRole(WindowsBuiltInRole.Administrator);
+
+            //SessionService = App.Services.GetService<ISessionService>();
+            OAuthService = App.Services.GetService<IOAuthService>();
+
+            //SessionService.Authorized += Authorized;
+            //SessionService.StateChanged += SessionService_StateChanged;
+            OAuthService.StateChanged += OAuthService_StateChanged;
+
+            if (Settings.Default.AutoJoin)
+            {
+                return;
+                Task.Run(() => OAuthService.AuthAsync());
+            }
+        }
+
+        //private void SessionService_StateChanged(object sender, SessionState e)
+        //{
+
+        //}
+            
+        //private void Authorized(object sender, bool e)
+        //{
+
+        //}
+
+        private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
+        {
+            IsPendingAuthorization = e.State == Models.Enums.OAuthState.PendingAuthorization;
+            if (e.State != Models.Enums.OAuthState.AUTHORIZED & e.State != Models.Enums.OAuthState.PendingAuthorization)
+            {
+                Dialog.Content = e;
+                Dialog.ShowAsync();
+            }
+        }
+
+        #region IsPendingAuthorization
+        private bool _IsPendingAuthorization;
+        public bool IsPendingAuthorization
+        {
+            get => _IsPendingAuthorization;
+            set
+            {
+                if (Set(ref _IsPendingAuthorization, value))
+                {
+                    OnPropertyChanged(nameof(InputVisibility));
+                    OnPropertyChanged(nameof(LoadingInputVisibility));
+
+                    new Thread(() =>
+                    {
+                        while (IsPendingAuthorization)
+                        {
+                            var state = State;
+                            var data = state.Split('.');
+
+                            string points = string.Empty;
+                            switch (data.Length)
+                            {
+                                case 1:
+                                    points = ".";
+                                    break;
+                                case 2:
+                                    points = "..";
+                                    break;
+                                case 3:
+                                    points = "...";
+                                    break;
+                            }
+                            State = data[0] + points;
+                            Thread.Sleep(500);
+                        }
+                    })
+                    {
+                        IsBackground = true
+                    }.Start();
+                }
+            }
+        }
+        #endregion
+
+        public Visibility InputVisibility => !IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility LoadingInputVisibility => IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
+
+        #region State
+        private string _State = "Pending authorization";
+        public string State
+        {
+            get => _State;
+            set => Set(ref _State, value);
+        }
+        #endregion
+
+        #region RememberMe
+        private bool _RememberMe = Settings.Default.AutoJoin;
+        public bool RememberMe
+        {
+            get => _RememberMe;
+            set
+            {
+                if (Set(ref _RememberMe, value))
+                {
+                    Settings.Default.AutoJoin = value;
+                }
+            }
+        }
+        #endregion
+
+        #region LoginOrEmail
+        private string _LoginOrEmail;
+        public string LoginOrEmail
+        {
+            get => _LoginOrEmail;
+            set => Set(ref _LoginOrEmail, value);
+        }
+        #endregion
+
+        //#region Password
+        //private string _Password;
+        //public string Password
+        //{
+        //    get => _Password;
+        //    set => Set(ref _Password, value);
+        //}
+        //#endregion
+
+        #region LoginCommand
+        private ICommand _LoginCommand;
+        public ICommand LoginCommand => _LoginCommand ??= new LambdaCommand(OnLoginCommand, CanLoginCommand);
+        private bool CanLoginCommand(object parameter) => !IsPendingAuthorization && !string.IsNullOrWhiteSpace(LoginOrEmail);
+        private void OnLoginCommand(object parameter)
+        {
+            if (parameter == null) parameter = string.Empty;
+            IsPendingAuthorization = true;
+            var password = parameter.ToString();
+            OAuthService.AuthAsync(LoginOrEmail, password);
+        }
+        #endregion
+
+        #region LoginWithBrowserCommand
+        private ICommand _LoginWithBrowserCommand;
+        public ICommand LoginWithBrowserCommand => _LoginWithBrowserCommand ??= new LambdaCommand(OnLoginWithBrowserCommand, CanLoginWithBrowserCommand);
+        private bool CanLoginWithBrowserCommand(object parameter) => !IsPendingAuthorization && IsAdministrator && !string.IsNullOrWhiteSpace(LoginOrEmail);
+        private void OnLoginWithBrowserCommand(object parameter)
+        {
+            if (parameter == null) return;
+            IsPendingAuthorization = true;
+            OAuthService.AuthByBrowser();
+        }
+        #endregion
+
+        #region CancelAuthorizationCommand
+        private ICommand _CancelAuthorizationCommand;
+        public ICommand CancelAuthorizationCommand => _CancelAuthorizationCommand ??= new LambdaCommand(OnCancelAuthorizationCommand, CanCancelAuthorizationCommand);
+        private bool CanCancelAuthorizationCommand(object parameter) => IsPendingAuthorization;
+        public void OnCancelAuthorizationCommand(object parameter)
+        {
+            IsPendingAuthorization = false;
+        }
+        #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+
+            }
+        }
     }
 }

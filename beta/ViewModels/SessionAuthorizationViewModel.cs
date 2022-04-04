@@ -15,6 +15,7 @@ namespace beta.ViewModels
 
         public SessionAuthorizationViewModel()
         {
+            return;
             OAuthService = App.Services.GetService<IOAuthService>();
             SessionService = App.Services.GetService<ISessionService>();
 

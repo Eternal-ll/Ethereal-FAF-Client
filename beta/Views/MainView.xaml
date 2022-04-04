@@ -30,6 +30,10 @@
             </Setter>
         </Style>
 
+        <DataTemplate DataType="{x:Type vm:PlugViewModel}">
+            <view:PlugView DataContext="{Binding}"/>
+        </DataTemplate>
+        
         <DataTemplate DataType="{x:Type vm:SessionAuthorizationViewModel}">
             <view:SessionAuthorizationView DataContext="{Binding}"/>
         </DataTemplate>
@@ -39,7 +43,6 @@
         <DataTemplate DataType="{x:Type vm:NavigationViewModel}">
             <view:NavigationView/>
         </DataTemplate>
-        
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
         <Grid Visibility="{Binding TitleBarVisibility}" VerticalAlignment="Top">
