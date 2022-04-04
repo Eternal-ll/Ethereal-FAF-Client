@@ -400,13 +400,14 @@
                     </ui:TitleBarButton>
                 </StackPanel>
 
-                <Grid Margin="0 30" Grid.Row="1">
+                <Grid Margin="0 0 0 30" Grid.Row="1">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <!--#region Channel history -->
-                    <ListBox
+                    <ListBox Grid.Row="1"
                         ItemsSource="{Binding SelectedChannel.History}"
                         VirtualizingPanel.IsVirtualizing="True"
                         VirtualizingPanel.VirtualizationMode="Recycling"
@@ -693,18 +694,16 @@
                     </ListBox>
                     <!--#endregion-->
 
-                    <custom:TestControl Grid.Row="1"
+                    <custom:TestControl Grid.Row="2"
                                     x:Name="TestInputControl">
-                    </custom:TestControl>
-                </Grid>
+                </custom:TestControl>
 
                 <TextBlock Text="{Binding SelectedChannel.Topic}"
-                       VerticalAlignment="Top"
+                       VerticalAlignment="Top" Margin="10"
                        TextWrapping="Wrap"
                        Opacity=".5"
-                       Margin="30 10 30 0"
-                           IsHitTestVisible="False"
-                       Grid.Row="1"/>
+                           IsHitTestVisible="False"/>
+            </Grid>
 
                 <Border HorizontalAlignment="Right" VerticalAlignment="Top"
                         Grid.Row="1"
