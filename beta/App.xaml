@@ -4,7 +4,7 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
-             StartupUri="Views/Windows/MainWindow.xaml">
+             StartupUri="Views/Windows/NewWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

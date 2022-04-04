@@ -22,7 +22,7 @@ namespace beta.Views.Windows
             GameLauncherService = App.Services.GetService<IGameSessionService>();
 
             NavigationManager navManager = new(MainFrame, ModalFrame);
-            navManager.Navigate(new AuthView());
+            //navManager.Navigate(new AuthView());
 
             Dialog = new ContentDialog();
 
