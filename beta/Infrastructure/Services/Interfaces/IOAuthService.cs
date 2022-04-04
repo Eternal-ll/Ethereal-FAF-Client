@@ -27,5 +27,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="password"></param>
         public Task AuthAsync(string usernameOrEmail, string password);
         //public void DoAuth(string usernameOrEmail, string password);
+
+        public Task AuthByBrowser();
     }
 }

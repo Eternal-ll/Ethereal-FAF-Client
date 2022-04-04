@@ -6,9 +6,12 @@ using beta.Models.OAuth;
 using beta.Properties;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -163,7 +166,7 @@ namespace beta.Infrastructure.Services
 
             if (_csrf.Length == 0 || challenge.Length == 0)
             {
-                OnStateChanged(new(OAuthState.INVALID, $"CSRF or login_challenge not found in response"));
+                OnStateChanged(new(OAuthState.INVALID, $"CSRF or login_challenge was empty"));
                 Logger.LogWarning("CSRF or login_challenge not found in response");
                 return null;
             }
@@ -200,7 +203,7 @@ namespace beta.Infrastructure.Services
 
             if (consent_challenge.Length == 0)
             {
-                OnStateChanged(new(OAuthState.INVALID, "Wrong user data"));
+                OnStateChanged(new(OAuthState.INVALID, "consent_challenge was empty"));
                 return null;
             }
             #endregion
@@ -273,6 +276,7 @@ namespace beta.Infrastructure.Services
       
         public async Task AuthAsync()
         {
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
             if (string.IsNullOrWhiteSpace(Settings.Default.access_token) || string.IsNullOrWhiteSpace(Settings.Default.refresh_token))
             {
                 OnStateChanged(new(OAuthState.NO_TOKEN, "No token"));
@@ -295,6 +299,7 @@ namespace beta.Infrastructure.Services
 
         public async Task AuthAsync(string usernameOrEmail, string password)
         {
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
             Logger.LogInformation("Starting process of authorization");
 
             var code = await GetOAuthCodeAsync(usernameOrEmail, password);
@@ -308,23 +313,6 @@ namespace beta.Infrastructure.Services
             //    ? (new(OAuthState.AUTHORIZED, "Authorized"))
             //    : (new(OAuthState.INVALID, "Something went wrong. Check internet access to https://hydra.faforever.com/oauth2/token")));
         }
-
-        //public void DoAuth(string usernameOrEmail, string password)
-        //{
-        //    // Поток авторизации чем-то занят и будущем надо будет уведомить пользователя об этом
-        //    if (AuthorizationThread is not null)
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-        //    // создаем поток авторизации и передаем параметры в метод
-        //    AuthorizationThread = new(()=> Auth(usernameOrEmail, password));
-            
-        //    // на самом деле до этого все было относительно костыльно,
-        //    // я создавал поток сразу в AuthView для авторизации
-
-        //    // здесь нужно поднимать какое-нибудь событие, что начинается процесс авторизации
-
-        //}
 
         private void OnStateChanged(OAuthEventArgs e)
         {
@@ -366,6 +354,92 @@ namespace beta.Infrastructure.Services
                 await stream.DisposeAsync();
             }
             return false;
+        }
+
+        public async Task AuthByBrowser()
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                OnStateChanged(new(OAuthState.INVALID, "Not enough priviliges\nStart application with administrator privileges"));
+            }
+            
+
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
+            HttpListener httpListener = new();
+            httpListener.Prefixes.Add($"http://*/");
+            try
+            {
+                httpListener.Start();
+            }
+            catch (Exception ex)
+            {
+                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
+            }
+
+            string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            var url = "https://hydra.faforever.com/oauth2/auth?" +
+                "response_type=code&" +
+                "client_id=faf-python-client&" +
+                $"redirect_uri=http://localhost&" +
+                   "scope=openid+offline+public_profile+lobby&" +
+                "state=" + generatedState;
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true,
+                });
+            }
+            catch(Exception ex)
+            {
+                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
+            }
+
+            while (true)
+            {
+                HttpListenerContext ctx = await httpListener.GetContextAsync();
+                if (ctx.Response is not null)
+                {
+                    if (ctx.Response.StatusCode == 200)
+                    {
+                        //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
+                        var query = ctx.Request.Url.Query;
+
+                        var codeIndex = query.IndexOf("code=");
+
+                        if (codeIndex == -1)
+                        {
+                            OnStateChanged(new(OAuthState.INVALID, $"Cant special code on answer {query}"));
+                            httpListener.Stop();
+                            return;
+                        }
+
+                        var codedata = query[codeIndex..];
+
+                        var delIndex = codedata.IndexOf('&');
+
+                        var code = codedata;
+                        if (delIndex != -1)
+                        {
+                            code = codedata[..delIndex];
+                        }
+
+                        await FetchOAuthDataAsync(code);
+
+                        httpListener.Stop();
+                        break;
+                    }
+                    else
+                    {
+                        OnStateChanged(new(OAuthState.INVALID, $"Status code: {ctx.Response.StatusCode} on redirect from OAuth"));
+                        httpListener.Stop();
+                        break;
+                    }
+                }
+            }
         }
     }
 }
