@@ -12,6 +12,7 @@
                 <ResourceDictionary>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
                     <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
+                    <cmd:NavigateExplorerCommand x:Key="NavigateExplorerCommand"/>
 
 
                     <cmd:JoinGameCommand x:Key="JoinGameCommand"/>

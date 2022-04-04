@@ -227,7 +227,8 @@
                         <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
                 </WrapPanel.Resources>
-                <Button Content="Search" Click="Button_Click"/>
+                <Button Content="Open maps folder" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="Maps"/>
+                <Button Content="Search" Click="Button_Click" Margin="10 0 0 0"/>
                 <!--<CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>-->
 
                 <CheckBox IsChecked="{Binding IsSortEnabled}" Margin="10 0 -14 0" Content="Enable sort"/>
