@@ -49,6 +49,6 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="password">Secure lobby with password</param>
         /// <param name="isRehost">If you are rehosting last game</param>
         /// <returns></returns>
-        public Task HostAsync(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false);
+        public Task HostGame(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false);
     }
 }

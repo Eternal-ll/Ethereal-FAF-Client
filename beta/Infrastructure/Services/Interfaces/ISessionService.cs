@@ -3,8 +3,16 @@ using System;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    public enum SessionState : byte
+    {
+        Disconnected,
+        PendingConnection,
+        Connected,
+    }
     public interface ISessionService
     {
+        public event EventHandler<SessionState> StateChanged;
+
         public event EventHandler<bool> Authorized;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
         public event EventHandler<PlayerInfoMessage[]> PlayersReceived;

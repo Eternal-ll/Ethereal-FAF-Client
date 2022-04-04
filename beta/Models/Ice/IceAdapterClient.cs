@@ -207,17 +207,14 @@ namespace beta.Models.Ice
 
         public void Close()
         {
-            try
-            {
-                if (IceAdapterProcess is not null)
-                {
-                    if (IceAdapterProcess.Process.HasExited) return;
-                    IceAdapterProcess.Process.Kill();
-                    IceAdapterProcess.Process.Close();
-                    IceAdapterProcess.Process.Dispose();
-                }
-            }
-            catch { }
+                Send(IceJsonRpcMethods.Quit());
+                //if (IceAdapterProcess is not null)
+                //{
+                //    if (IceAdapterProcess.Process.HasExited) return;
+                //    IceAdapterProcess.Process.Kill();
+                //    IceAdapterProcess.Process.Close();
+                //    IceAdapterProcess.Process.Dispose();
+                //}
         }
 
         private void ManagedTcpClient_StateChanged(object sender, ManagedTcpClientState e)

@@ -36,6 +36,8 @@ namespace beta.Infrastructure.Services
         private IceAdapterClient IceAdapterClient;
         private readonly List<string> IceMessagesQueue = new();
 
+        private Process ForgedAlliance;
+
         public GameSessionState State => throw new NotImplementedException();
 
         public GameSessionService(
@@ -127,9 +129,7 @@ namespace beta.Infrastructure.Services
             IceAdapterClient.IceMessageReceived += IceAdapterClient_IceMessageReceived;
 
             // these commands will be ququed and passed after established connect
-            Thread.Sleep(5000);
             IceAdapterClient.SetLobbyInitMode("normal");
-            Thread.Sleep(5000);
             IceAdapterClient.PassIceServers(IceService.IceServers);
 
             var me = PlayersService.Me;
@@ -184,7 +184,7 @@ namespace beta.Infrastructure.Services
             //                                                    mean 2139 /deviation 89 /country RU /numgames /clan ZFG /init init_faf.lua /nobugreport /savereplay /gpgnet 127.0.0.1:64399
             // Starting game with args: / mean 2139 / deviation 89 / country RU / numgames / clan ZFG / init  init_faf.lua / nobugreport / gpgnet 127.0.0.1:22122
             var t = args.ToString();
-            Process process = new()
+            ForgedAlliance = new()
             {
                 StartInfo = new()
                 {
@@ -194,12 +194,12 @@ namespace beta.Infrastructure.Services
                 }
             };
 
-            process.Exited += (s, e) =>
+            ForgedAlliance.Exited += (s, e) =>
             {
                 IceAdapterClient.Close();
             };
 
-            process.Start();
+            ForgedAlliance.Start();
         }
 
         private void IceAdapterClient_IceMessageReceived(object sender, string e)
@@ -484,9 +484,13 @@ namespace beta.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public Task HostAsync(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false)
+        public async Task HostGame(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false)
         {
-            throw new NotImplementedException();
+            if (mod != FeaturedMod.FAF)
+            {
+
+                return;
+            }
         }
         private void OnGameFilled(GameInfoMessage e) => GameFilled?.Invoke(this, e);
 

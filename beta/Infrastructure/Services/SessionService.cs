@@ -20,6 +20,7 @@ namespace beta.Infrastructure.Services
     public class SessionService : ISessionService
     {
         #region Events
+        public event EventHandler<SessionState> StateChanged;
         public event EventHandler<bool> Authorized;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
         public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
@@ -269,6 +270,7 @@ namespace beta.Infrastructure.Services
         }
 
         #region Events invokers
+        protected virtual void OnSessionStateChanged(SessionState e) => StateChanged?.Invoke(this, e);
         protected virtual void OnAuthorized(bool e) => Authorized?.Invoke(this, e);
         protected virtual void OnPlayerReceived(PlayerInfoMessage e) => PlayerReceived?.Invoke(this, e);
         protected virtual void OnPlayersReceived(PlayerInfoMessage[] e) => PlayersReceived?.Invoke(this, e);
