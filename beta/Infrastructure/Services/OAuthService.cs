@@ -203,7 +203,7 @@ namespace beta.Infrastructure.Services
 
             if (consent_challenge.Length == 0)
             {
-                OnStateChanged(new(OAuthState.INVALID, "consent_challenge was empty"));
+                OnStateChanged(new(OAuthState.INVALID, "Something went wrong", "Field \"consent_challenge\" was empty"));
                 return null;
             }
             #endregion
@@ -279,7 +279,7 @@ namespace beta.Infrastructure.Services
             OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
             if (string.IsNullOrWhiteSpace(Settings.Default.access_token) || string.IsNullOrWhiteSpace(Settings.Default.refresh_token))
             {
-                OnStateChanged(new(OAuthState.NO_TOKEN, "No token"));
+                OnStateChanged(new(OAuthState.NO_TOKEN, "Something went wrong", "No saved OAuth refresh token"));
                 return;
             }
 
@@ -291,7 +291,7 @@ namespace beta.Infrastructure.Services
                 }
                 else
                 {
-                    OnStateChanged(new(OAuthState.INVALID, "Cant authorize using token"));
+                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", "Cant authorize using token"));
                 }
             }
             else OnStateChanged(new(OAuthState.AUTHORIZED, "Authorized"));
