@@ -33,10 +33,6 @@
         <DataTemplate DataType="{x:Type vm:PlugViewModel}">
             <view:PlugView DataContext="{Binding}"/>
         </DataTemplate>
-        
-        <DataTemplate DataType="{x:Type vm:SessionAuthorizationViewModel}">
-            <view:SessionAuthorizationView DataContext="{Binding}"/>
-        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:AuthorizationViewModel}">
             <view:AuthorizationView DataContext="{Binding}"/>
         </DataTemplate>
