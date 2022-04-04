@@ -12,10 +12,14 @@ namespace beta.Views.Windows
         {
             InitializeComponent();
 
-            Left = Settings.Default.Left;
-            Top = Settings.Default.Top;
-            Height = Settings.Default.Height;
-            Width = Settings.Default.Width;
+            var left = Settings.Default.Left;
+            Left = left < 0 ? 0 : left;
+            var top = Settings.Default.Top;
+            Top = left < 0 ? 0 : left;
+            var height = Settings.Default.Height;
+            Height = left < 0 ? 0 : left;
+            var width = Settings.Default.Width;
+            Width = left < 0 ? 0 : left;
 
             Closing += OnWindowClosing;
         }
@@ -24,8 +28,8 @@ namespace beta.Views.Windows
         {
             Settings.Default.Left = Left;
             Settings.Default.Top = Top;
-            Settings.Default.Height = Height;
-            Settings.Default.Width = Width;
+            Settings.Default.Height = ActualHeight;
+            Settings.Default.Width = ActualWidth;
         }
     }
 }
