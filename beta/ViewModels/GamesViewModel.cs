@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -46,54 +45,75 @@ namespace beta.ViewModels
     public abstract class GamesViewModel : Base.ViewModel
     {
         public abstract GameType GameType { get; }
+        public abstract GameState GameState { get; }
 
         private readonly ISocialService SocialService;
         private readonly IGamesService GamesService;
 
-        private string[] Foes;
-        private string[] Friends;
-
         private readonly object _lock = new();
-        //private Dispatcher Dispatcher => GamesViewSource.Dispatcher;
+        private Dispatcher Dispatcher => GamesViewSource.Dispatcher;
         public GamesViewModel()
         {
             SocialService = App.Services.GetService<ISocialService>();
             GamesService = App.Services.GetService<IGamesService>();
-            //GamesService.NewGameReceived += OnNewGame;
-            //GamesService.GameUpdated += OnGameUpdated;
-            //GamesService.GameRemoved += OnGameRemoved;
-
-            PropertyGroupDescription var = new(nameof(GameInfoMessage.uid));
-
-            //IdleGamesViewSource.GroupDescriptions.Add(var);
-            //LiveGamesViewSource.GroupDescriptions.Add(var);
 
             Games = new();
-            GamesViewSource = new();
-            BindingOperations.EnableCollectionSynchronization(Games, _lock);
-            //return;
+            App.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                GamesViewSource = new();
+                BindingOperations.EnableCollectionSynchronization(Games, _lock);
+                GamesViewSource.Source = Games;
+                GamesViewSource.IsLiveSortingRequested = true;
+                GamesViewSource.Filter += OnGameFilter;
+            }));
 
-            //var games = GamesService.Games;
+            HandleGames(GamesService.Games.ToArray());
 
-            //if (games.Count > 0)
-            //    foreach (var game in games)
-            //    {
-            //        Games.Add(game);
-            //    }
-            //else
-                GamesService.GamesReceived += OnGamesReceived;
-            GamesViewSource.Filter += OnGameFilter;
+            GamesService.NewGameReceived += OnNewGame;
+            GamesService.GamesReceived += OnGamesReceived;
+            GamesService.GameUpdated += OnGameUpdated;
+            GamesService.GameRemoved += OnGameRemoved;
 
-            GamesViewSource.Source = Games;
 
             //Foes = SocialService.GetFoes;
+            //Friends = SocialService.GetFriends;
         }
 
-        public ObservableCollection<GameInfoMessage> Games { get; }
+        public ObservableCollection<GameInfoMessage> Games { get; private set; }
 
         public ICollectionView GamesView => GamesViewSource.View;
 
-        private readonly CollectionViewSource GamesViewSource;
+        private CollectionViewSource GamesViewSource;
+
+        #region Foes
+        private string[] _Foes;
+        public string[] Foes
+        {
+            get => _Foes;
+            set
+            {
+                if (Set(ref _Foes, value) && IsFoesGamesHidden)
+                {
+                    GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        #region Friends
+        private string[] _Friends;
+        public string[] Friends
+        {
+            get => _Friends;
+            set
+            {
+                if (Set(ref _Friends, value) && IsOnlyFriendsGamesVisible)
+                {
+                    GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
 
         #region SelectedGame
         private GameInfoMessage _SelectedGame;
@@ -171,28 +191,6 @@ namespace beta.ViewModels
 
         #endregion
 
-        #region IsLiveGamesOnView
-        private bool _IsLiveGamesOnView;
-        public bool IsLiveGamesOnView
-        {
-            get => _IsLiveGamesOnView;
-            set
-            {
-                if (Set(ref _IsLiveGamesOnView, value))
-                {
-                    if (!string.IsNullOrWhiteSpace(FilterText))
-                    {
-                        _FilterText = null;
-                        OnPropertyChanged(nameof(FilterText));
-                    }
-
-                    GamesView.Refresh();
-
-                }
-            }
-        }
-        #endregion
-
         #region IsFoesGamesHidden
         private bool _IsFoesGamesHidden;
         public bool IsFoesGamesHidden
@@ -234,6 +232,21 @@ namespace beta.ViewModels
         }
         #endregion
 
+        #region IsPrivateGamesHidden
+        private bool _IsPrivateGamesHidden;
+        public bool IsPrivateGamesHidden
+        {
+            get => _IsPrivateGamesHidden;
+            set
+            {
+                if (Set(ref _IsPrivateGamesHidden, value))
+                {
+                    GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
+
         #region IsSortEnabled
         private bool _IsSortEnabled;
         public bool IsSortEnabled
@@ -250,6 +263,7 @@ namespace beta.ViewModels
                     else
                     {
                         GamesViewSource.LiveSortingProperties.Clear();
+                        GamesViewSource.SortDescriptions.Clear();
                     }
                 }
             }
@@ -278,14 +292,16 @@ namespace beta.ViewModels
             get => _SelectedSort;
             set
             {
-                if (value != _SelectedSort)
-                {
+                //if (value != _SelectedSort)
+                //{
                     _SelectedSort = value;
                     OnPropertyChanged(nameof(SelectedSort));
                     OnPropertyChanged(nameof(SortDirection));
 
+                    GamesViewSource.SortDescriptions.Clear();
                     GamesViewSource.LiveSortingProperties.Add(value.PropertyName);
-                }
+                    GamesViewSource.SortDescriptions.Add(value);
+                //}
             }
         }
         #endregion
@@ -391,24 +407,11 @@ namespace beta.ViewModels
         #endregion
 
         #endregion
+
         protected abstract bool FilterGame(GameInfoMessage game);
         private bool CommonFilter(GameInfoMessage game)
         {
-            return true;
-            // TODO not supported
-            if (game.FeaturedMod != FeaturedMod.FAF || game.mapname.StartsWith("neroxis")) return false;
-
-            if (IsLiveGamesOnView)
-            {
-                if (game.State != GameState.Playing)
-                    return false;
-            }
-            else
-            {
-                if (game.State != GameState.Open)
-                    return false;
-            }
-
+            if (IsPrivateGamesHidden && game.password_protected) return false;
 
             if (IsMapsBlacklistEnabled)
             {
@@ -531,11 +534,11 @@ namespace beta.ViewModels
 
         private void OnGameRemoved(object sender, GameInfoMessage game)
         {
-            if (game.GameType != GameType) return;
+            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
 
             //Dispatcher.BeginInvoke(() =>
             //{
-                if (TryGetIndexOfGame(game.uid, out var id))
+            if (TryGetIndexOfGame(game.uid, out var id))
                 {
                     Games.RemoveAt(id);
                 }
@@ -544,22 +547,22 @@ namespace beta.ViewModels
 
         private void OnGameUpdated(object sender, GameInfoMessage game)
         {
-            if (game.GameType != GameType) return;
+            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
 
-            //Dispatcher.BeginInvoke(() =>
-            //{
+            Dispatcher.BeginInvoke(() =>
+            {
                 if (TryGetIndexOfGame(game.uid, out var id))
                 {
                     Games[id] = game;
                 }
-            //});
+            });
         }
 
         private void OnNewGame(object sender, GameInfoMessage game)
         {
-            if (game.GameType != GameType) return;
-            //Dispatcher.BeginInvoke(() =>
-            //{
+            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
+            Dispatcher.BeginInvoke(() =>
+            {
                 if (TryGetIndexOfGame(game.uid, out var id))
                 {
                     Games[id] = game;
@@ -568,30 +571,19 @@ namespace beta.ViewModels
                 {
                     Games.Add(game);
                 }
-            //});
+            });
         }
 
-        private void OnGamesReceived(object sender, GameInfoMessage[] e)
+        private void OnGamesReceived(object sender, GameInfoMessage[] e) => HandleGames(e);
+        private void HandleGames(GameInfoMessage[] e)
         {
-            //Dispatcher.BeginInvoke(() =>
-            //{
-                GamesViewSource.Filter -= OnGameFilter;
-                foreach (var game in e)
-                {
-                    if (game.GameType != GameType) continue;
+            var games = Games;
+            foreach (var game in e)
+            {
+                if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) continue;
 
-                    if (TryGetIndexOfGame(game.uid, out var id))
-                    {
-                        Games[id] = game;
-                    }
-                    else
-                    {
-                        Games.Add(game);
-                    }
-                }
-                GamesViewSource.Filter += OnGameFilter;
-                GamesView.Refresh();
-            //});
+                games.Add(game);
+            }
         }
 
         #region View toggles
@@ -651,10 +643,39 @@ namespace beta.ViewModels
         #endregion
 
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                GamesService.NewGameReceived -= OnNewGame;
+                GamesService.GamesReceived -= OnGamesReceived;
+                GamesService.GameUpdated -= OnGameUpdated;
+                GamesService.GameRemoved -= OnGameRemoved;
+                GamesViewSource.Filter -= OnGameFilter;
+                GamesViewSource.Source = null;
+                BindingOperations.DisableCollectionSynchronization(Games);
+                Games.Clear();
+            }
+            base.Dispose(disposing);
+        }
     }
     public class CustomGamesViewModel : GamesViewModel
     {
         public override GameType GameType { get; } = GameType.Custom;
+
+        public override GameState GameState => GameState.Open;
+
+        protected override bool FilterGame(GameInfoMessage game)
+        {
+            return true;
+        }
+    }
+    public class CustomLiveGamesViewModel : GamesViewModel
+    {
+        public override GameType GameType { get; } = GameType.Custom;
+
+        public override GameState GameState => GameState.Playing;
 
         protected override bool FilterGame(GameInfoMessage game)
         {
@@ -664,6 +685,7 @@ namespace beta.ViewModels
     public class CoopGamesViewModel : GamesViewModel
     {
         public override GameType GameType { get; } = GameType.Coop;
+        public override GameState GameState => GameState.Open;
 
         protected override bool FilterGame(GameInfoMessage game)
         {
@@ -673,6 +695,7 @@ namespace beta.ViewModels
     public class MatchMakerGamesViewModel : GamesViewModel
     {
         public override GameType GameType { get; } = GameType.MatchMaker;
+        public override GameState GameState => GameState.Open;
 
         protected override bool FilterGame(GameInfoMessage game)
         {

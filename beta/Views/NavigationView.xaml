@@ -117,7 +117,7 @@
                     </ui:NavigationViewItem.ContextMenu>
                 </ui:NavigationViewItem>
                 <!--<ui:NavigationViewItemSeparator/>-->
-                <ui:NavigationViewItem Content="Global" Tag="CustomGames" Icon="{StaticResource EathPathIcon}"/>
+                <ui:NavigationViewItem Content="Global" Tag="GlobalGames" Icon="{StaticResource EathPathIcon}"/>
                 <!--<ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>-->
                 <ui:NavigationViewItemSeparator/>
                 <ui:NavigationViewItem Content="Maps vault" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
