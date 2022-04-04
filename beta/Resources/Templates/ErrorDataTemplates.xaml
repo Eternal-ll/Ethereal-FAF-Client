@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:beta.Models">
+
+    <DataTemplate DataType="{x:Type models:OAuthEventArgs}">
+        <StackPanel>
+            <TextBlock Text="{Binding Message, Mode=OneWay}" TextWrapping="Wrap" FontSize="20" Margin="0 0 0 10"/>
+            <TextBlock Text="{Binding State, Mode=OneWay, StringFormat='State: {0}'}"/>
+            <RichTextBox MaxHeight="300">
+                <RichTextBox.Style>
+                    <Style TargetType="RichTextBox" BasedOn="{StaticResource DefaultRichTextBoxStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Trace, Mode=OneWay}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </RichTextBox.Style>
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Text="{Binding Trace, Mode=OneWay}"/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>
