@@ -3,6 +3,7 @@ using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,7 +33,6 @@ namespace beta.Infrastructure.Services
         public ObservableCollection<GameInfoMessage> IdleGames { get; } = new();
         public ObservableCollection<GameInfoMessage> LiveGames { get; } = new();
 
-        public Dictionary<long, GameInfoMessage> GamesDictionary { get; } = new();
         public List<GameInfoMessage> Games { get; } = new();
 
         /// <summary>
@@ -40,12 +40,14 @@ namespace beta.Infrastructure.Services
         /// </summary>
         private readonly List<GameInfoMessage> SuspiciousGames = new();
 
+        private readonly ILogger Logger;
+
         #endregion
 
         public GamesService(
             ISessionService sessionService,
             IPlayersService playerService,
-            IMapsService mapService)
+            IMapsService mapService, ILogger<GamesService> logger)
         {
             SessionService = sessionService;
             PlayersService = playerService;
@@ -53,10 +55,12 @@ namespace beta.Infrastructure.Services
 
             sessionService.GameReceived += OnGameReceived;
             sessionService.GamesReceived += OnGamesReceived;
+            Logger = logger;
         }
 
         private void OnGamesReceived(object sender, GameInfoMessage[] e) => Task.Run(async () =>
         {
+            //Logger.LogInformation($"Received {e.Length} games from lobby-server");
             foreach (var game in e) await HandleGameData(game);
             GamesReceived?.Invoke(this, e);
         });
@@ -157,6 +161,7 @@ namespace beta.Infrastructure.Services
                 case GameState.Playing:
                     break;
                 case GameState.Closed:
+                    Logger.LogInformation($"Game {newGame.uid} / {newGame.FeaturedMod} / {newGame.GameType} / Mods: {newGame.sim_mods.Count} / {newGame.title} by {newGame.host} is closed");
                     HandleOnGameClose(newGame);
                     return;
                 default:
@@ -171,20 +176,26 @@ namespace beta.Infrastructure.Services
 
             if (TryGetGame(newGame.uid, out var game))
             {
-                if (!await UpdateGame(game, newGame)) return;
+                //Logger.LogInformation($"Received updates on game {newGame.uid} by {newGame.host}");
+                await UpdateGame(game, newGame);
 
-                if (games.Remove(game)) OnGameRemoved(game);
+                //if (games.Remove(game)) OnGameRemoved(game);
             }
             else
             {
+                //Logger.LogInformation($"Received new game {newGame.uid} by {newGame.host} from lobby-server");
                 // currently we are not supporting UI notification about new game
                 if (newGame.num_players == 0 || newGame.State == GameState.Closed) return;
 
                 newGame.Map = await MapService.GetGameMap(newGame.mapname);
+
+                newGame.Host = PlayersService.GetPlayer(newGame.host);
+
+                games.Add(newGame);
             }
 
             // TODO remove
-            await OldHandleGameData(newGame);
+            //await OldHandleGameData(newGame);
         }
 
         private async Task OldHandleGameData(GameInfoMessage game)
