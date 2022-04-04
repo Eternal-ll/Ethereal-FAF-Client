@@ -3,10 +3,14 @@
                     xmlns:models="clr-namespace:beta.Models">
 
     <DataTemplate DataType="{x:Type models:OAuthEventArgs}">
+        <DataTemplate.Resources>
+            <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+        </DataTemplate.Resources>
         <StackPanel>
             <TextBlock Text="{Binding Message, Mode=OneWay}" TextWrapping="Wrap" FontSize="20" Margin="0 0 0 10"/>
-            <TextBlock Text="{Binding State, Mode=OneWay, StringFormat='State: {0}'}"/>
-            <RichTextBox MaxHeight="300">
+            <TextBlock Text="{Binding State, Mode=OneWay, StringFormat='OAuth state: {0}'}"/>
+            <RichTextBox MaxHeight="300" MaxWidth="300" BorderThickness="0" IsReadOnly="True" Padding="0"
+                         Margin="0 10 0 0">
                 <RichTextBox.Style>
                     <Style TargetType="RichTextBox" BasedOn="{StaticResource DefaultRichTextBoxStyle}">
                         <Style.Triggers>
