@@ -14,6 +14,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<GameInfoMessage> NewGameReceived;
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
+        public event EventHandler<long> GameRemovedByUid;
 
         /// <summary>
         /// Available idle games for joining

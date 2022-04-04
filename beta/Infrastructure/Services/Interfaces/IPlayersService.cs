@@ -1,6 +1,7 @@
 using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -10,6 +11,8 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IPlayersService : INotifyPropertyChanged
     {
+        public event EventHandler<PlayerInfoMessage> MeReceived;
+
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage Me { get; }
 

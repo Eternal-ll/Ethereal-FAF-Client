@@ -17,7 +17,7 @@ namespace beta.Infrastructure.Services
         public event EventHandler<GameInfoMessage> NewGameReceived;
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
-        public event EventHandler<long> UidGameRemoved;
+        public event EventHandler<long> GameRemovedByUid;
 
         #region Properties
 
@@ -143,7 +143,7 @@ namespace beta.Infrastructure.Services
             }
 
             PlayersService.RemoveGameFromPlayers(playersToClear.ToArray());
-            UidGameRemoved?.Invoke(this, game.uid);
+            GameRemovedByUid?.Invoke(this, game.uid);
             OnGameRemoved(game);
         }
 

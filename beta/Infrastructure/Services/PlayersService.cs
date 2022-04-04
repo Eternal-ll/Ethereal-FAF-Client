@@ -12,6 +12,7 @@ namespace beta.Infrastructure.Services
 {
     public class PlayersService : ViewModel, IPlayersService
     {
+        public event EventHandler<PlayerInfoMessage> MeReceived;
 
         #region Properties
 
@@ -30,6 +31,7 @@ namespace beta.Infrastructure.Services
 
         private readonly Dictionary<int, int> PlayerUIDToId = new();
         private readonly Dictionary<string, int> PlayerLoginToId = new();
+
 
         #endregion
 
@@ -92,6 +94,7 @@ namespace beta.Infrastructure.Services
                 PlayerLoginToId.Add(Me.login.ToLower(), 0);
                 PlayerUIDToId.Add(Me.id, 0);
             }
+            MeReceived?.Invoke(this, Me);
         }
         private void OnNewSocialDataReceived(object sender, SocialData e)
         {

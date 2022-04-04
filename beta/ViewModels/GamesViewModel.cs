@@ -57,30 +57,31 @@ namespace beta.ViewModels
         //private Dispatcher Dispatcher => GamesViewSource.Dispatcher;
         public GamesViewModel()
         {
-            Games = new();
-            GamesViewSource = new();
-            return;
             SocialService = App.Services.GetService<ISocialService>();
             GamesService = App.Services.GetService<IGamesService>();
-            GamesService.NewGameReceived += OnNewGame;
-            GamesService.GameUpdated += OnGameUpdated;
-            GamesService.GameRemoved += OnGameRemoved;
-            BindingOperations.EnableCollectionSynchronization(Games, _lock);
+            //GamesService.NewGameReceived += OnNewGame;
+            //GamesService.GameUpdated += OnGameUpdated;
+            //GamesService.GameRemoved += OnGameRemoved;
 
             PropertyGroupDescription var = new(nameof(GameInfoMessage.uid));
 
             //IdleGamesViewSource.GroupDescriptions.Add(var);
             //LiveGamesViewSource.GroupDescriptions.Add(var);
 
-            var games = GamesService.Games;
+            Games = new();
+            GamesViewSource = new();
+            BindingOperations.EnableCollectionSynchronization(Games, _lock);
+            //return;
 
-            if (games.Count > 0)
-                foreach (var game in games)
-                {
-                    Games.Add(game);
-                }
-            else GamesService.GamesReceived += OnGamesReceived;
-            
+            //var games = GamesService.Games;
+
+            //if (games.Count > 0)
+            //    foreach (var game in games)
+            //    {
+            //        Games.Add(game);
+            //    }
+            //else
+                GamesService.GamesReceived += OnGamesReceived;
             GamesViewSource.Filter += OnGameFilter;
 
             GamesViewSource.Source = Games;

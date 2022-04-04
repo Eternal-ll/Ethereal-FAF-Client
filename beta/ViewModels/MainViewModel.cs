@@ -40,12 +40,19 @@ namespace beta.ViewModels
 
             Task.Run(() =>
             {
-                ChildViewModel = new AuthorizationViewModel();
+                //ChildViewModel = new AuthorizationViewModel();
+                ChildViewModel = new NavigationViewModel();
             });
         }
 
-        private void OnSessionAuthorizationCompleted(object sender, bool e) => 
-            ChildViewModel = e ? new NavigationViewModel() : new AuthorizationViewModel();
+        private void OnSessionAuthorizationCompleted(object sender, bool e)
+        {
+            if (e)
+            {
+                ChildViewModel = new NavigationViewModel();
+                SessionService.Authorized -= OnSessionAuthorizationCompleted;
+            }
+        }
 
         #region ChildViewModel
         private ViewModel _ChildViewModel = new PlugViewModel();

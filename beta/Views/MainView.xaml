@@ -18,10 +18,10 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="control:CrossFadeContentControl">
                         <Grid>
-                            <ContentPresenter x:Name="FirstContentPresenter" Content="{x:Null}"
+                            <ContentPresenter x:Name="FirstContentPresenter"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                            <ContentPresenter x:Name="SecondContentPresenter" Content="{x:Null}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <ContentPresenter x:Name="SecondContentPresenter"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                         </Grid>
@@ -30,14 +30,14 @@
             </Setter>
         </Style>
 
-        <DataTemplate DataType="{x:Type vm:PlugViewModel}">
+        <!--<DataTemplate DataType="{x:Type vm:PlugViewModel}">
             <view:PlugView DataContext="{Binding}"/>
-        </DataTemplate>
+        </DataTemplate>-->
         <DataTemplate DataType="{x:Type vm:AuthorizationViewModel}">
             <view:AuthorizationView DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NavigationViewModel}">
-            <view:NavigationView/>
+            <view:NavigationView DataContext="{Binding}"/>
         </DataTemplate>
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
@@ -75,7 +75,5 @@
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
             Content="{Binding ChildViewModel}"/>
-
-        <TextBlock Text="{Binding ChildViewModel}" VerticalAlignment="Bottom"/>
     </Grid>
 </UserControl>

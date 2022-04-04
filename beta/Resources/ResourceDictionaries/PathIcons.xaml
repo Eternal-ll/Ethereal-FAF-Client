@@ -138,7 +138,11 @@
                              Geometry="{StaticResource CoopIconPathGeometry}"/>
         </DrawingImage.Drawing>
     </DrawingImage>
-    
+
+    <Style TargetType="Path">
+        <Setter Property="Fill" Value="White"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+    </Style>
     
     <!--MainView-->
     <ui:PathIcon x:Key="SwordsPathIcon"
@@ -180,7 +184,5 @@
     <ui:PathIcon x:Key="WarehousePathIcon"  
                              Data="M20 20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9H1l10.327-9.388a1 1 0 0 1 1.346 0L23 11h-3v9zM8.592 13.808l-.991.572 1 1.733.993-.573a3.5 3.5 0 0 0 1.405.811v1.145h2.002V16.35a3.5 3.5 0 0 0 1.405-.81l.992.572L16.4 14.38l-.991-.572a3.504 3.504 0 0 0 0-1.62l.991-.573-1-1.733-.993.573A3.5 3.5 0 0 0 13 9.645V8.5h-2.002v1.144a3.5 3.5 0 0 0-1.405.811l-.992-.573L7.6 11.616l.991.572a3.504 3.504 0 0 0 0 1.62zm3.408.69a1.5 1.5 0 1 1-.002-3.001 1.5 1.5 0 0 1 .002 3z"
                              />
-    <ui:PathIcon x:Key="ModsPathIcon"
-                             Data="M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z"
-                             />
+    <ui:PathIcon x:Key="DownloadsIcon" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
 </ResourceDictionary>

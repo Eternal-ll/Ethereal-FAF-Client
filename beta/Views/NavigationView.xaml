@@ -7,8 +7,7 @@
              xmlns:control="clr-namespace:beta.Resources.Controls"
              xmlns:vm="clr-namespace:beta.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800"
-             x:Name="this">
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.Resources>
             <DataTemplate DataType="{x:Type vm:DownloadViewModel}">
@@ -22,8 +21,8 @@
         <ui:NavigationView x:Name="UINavigationView"
                            IsBackButtonVisible="Collapsed"
                            PaneDisplayMode="Auto"
-                           SelectionChanged="OnNavigationViewSelectionChanged"
                            IsSettingsVisible="False"
+                           SelectionChanged="OnNavigationViewSelectionChanged"
                            CompactPaneLength="50"
                            OpenPaneLength="200"
                            IsTabStop="False">
@@ -117,21 +116,22 @@
                         </ContextMenu>
                     </ui:NavigationViewItem.ContextMenu>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItemSeparator/>
+                <!--<ui:NavigationViewItemSeparator/>-->
                 <ui:NavigationViewItem Content="Global" Tag="CustomGames" Icon="{StaticResource EathPathIcon}"/>
-                <ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>
+                <!--<ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>-->
                 <ui:NavigationViewItemSeparator/>
-                <ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">
+                <ui:NavigationViewItem Content="Maps vault" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
+                <!--<ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">
                     <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="Maps" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
                         <ui:NavigationViewItem Content="Mods" Tag="Mods" Icon="{StaticResource ModsPathIcon}"/>
                     </ui:NavigationViewItem.MenuItems>
-                </ui:NavigationViewItem>
+                </ui:NavigationViewItem>-->
                 <ui:NavigationViewItem Content="Analytics" Tag="Analytics">
                     <ui:NavigationViewItem.Icon>
                         <ui:PathIcon Data="M12,3L2,12H5V20H19V12H22M9,18H7V12H9M13,18H11V10H13M17,18H15V14H17"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Downloads" Tag="Downloads" Icon="{StaticResource DownloadsIcon}"/>
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
@@ -175,34 +175,5 @@
                 </Style>
             </TextBlock.Resources>
         </TextBlock>
-
-        <ui:TitleBarButton Width="NaN" Height="32" VerticalAlignment="Top" HorizontalAlignment="Right"
-                           Margin="0 0 140 0" FontFamily="SegoiUI" FontSize="14">
-            <ui:TitleBarButton.Style>
-                <Style TargetType="ui:TitleBarButton">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Downloads.Count}" Value="0">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ui:TitleBarButton.Style>
-            <ui:FlyoutService.Flyout>
-                <ui:Flyout Placement="BottomEdgeAlignedLeft">
-                    <StackPanel>
-                        <ItemsControl ItemsSource="{Binding Downloads}">
-                            
-                        </ItemsControl>
-                    </StackPanel>
-                </ui:Flyout>
-            </ui:FlyoutService.Flyout>
-            <Border>
-                <StackPanel Orientation="Horizontal" Margin="10 0">
-                    <Path Fill="White" Stretch="Uniform" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
-                    <TextBlock Text="{Binding Downloads.Count}" Margin="4 0 0 0"/>
-                    <ContentControl Content="{Binding Download}" Margin="10 0 0 0"/>
-                </StackPanel>
-            </Border>
-        </ui:TitleBarButton>
     </Grid>
 </UserControl>

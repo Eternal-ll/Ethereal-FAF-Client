@@ -1,161 +1,94 @@
-﻿using beta.Infrastructure.Navigation;
-using beta.Infrastructure.Services.Interfaces;
-using beta.Models.Enums;
-using beta.ViewModels;
-using beta.Views.Modals;
-using Microsoft.Extensions.DependencyInjection;
+﻿using beta.ViewModels;
 using ModernWpf.Controls;
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace beta.Views
 {
     /// <summary>
     /// Interaction logic for NavigationView.xaml
     /// </summary>
-    public partial class NavigationView : INavigationAware, INotifyPropertyChanged
+    public partial class NavigationView : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new(propertyName));
 
-        #region NavigationManager
-
-        private INavigationManager NavigationManager;
-        public void OnViewChanged(INavigationManager navigationManager) => NavigationManager = navigationManager;
-        #endregion
-
-        private readonly IIrcService IrcService;
-        private readonly IDownloadService DownloadService;
-
-        private ContentDialog Dialog;
-
-        public ObservableCollection<DownloadViewModel> Downloads => DownloadService.Downloads;
-        private DownloadViewModel _Download;
-        public DownloadViewModel Download
+        #region ViewModel
+        private NavigationViewModel _ViewModel;
+        public NavigationViewModel ViewModel
         {
-            get => _Download;
+            get => _ViewModel;
             set
             {
-                if (_Download != value)
+                if (!Equals(value, _ViewModel))
                 {
-                    _Download = value;
-                    OnPropertyChanged(nameof(Download));
-                }
-            }
-        }
-
-        #region IrcState
-        private IrcState _IrcState;
-        public IrcState IrcState
-        {
-            get => _IrcState;
-            set
-            {
-                if (!Equals(value, _IrcState))
-                {
-                    _IrcState = value;
-                    OnPropertyChanged(nameof(IrcState));
+                    _ViewModel = value;
+                    OnPropertyChanged(nameof(ViewModel));
                 }
             }
         } 
         #endregion
 
-        #region Ctor
         public NavigationView()
         {
             InitializeComponent();
-            DataContext = this;
 
+            DataContextChanged += NavigationView_DataContextChanged;
             Profile.Content = Properties.Settings.Default.PlayerNick;
+            return;
 
-            DownloadService = App.Services.GetService<IDownloadService>();
-            BindingOperations.EnableCollectionSynchronization(DownloadService.Downloads, new());
-            Downloads.CollectionChanged += (s, e) =>
-            {
-                if (Downloads.Count > 0)
-                {
-                    Download = Downloads[^1];
-                }
-                else
-                {
-                    Download = null;
-                }
-            };
 
-            IrcService = App.Services.GetService<IIrcService>();
-            IrcService.StateChanged += (s, e) => IrcState = e;
 
-            IrcState = IrcService.State;
+            //// TODO rewrite
+            //if (string.IsNullOrWhiteSpace(Properties.Settings.Default.PathToGame))
+            //{
+            //    var steamPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance";
 
-            Pages = new UserControl[]
-            {
-                new HomeView(),
-                new ChatControlView(),
-                //new GlobalView(),
-                new CustomGamesView(),
-                new AnalyticsView(),
-                new SettingsView(),
-                new MapsView()
-            };
+            //    if (!Directory.Exists(steamPath))
+            //    {
+            //        Dialog = new ContentDialog();
 
-            // TODO rewrite
-            if (string.IsNullOrWhiteSpace(Properties.Settings.Default.PathToGame))
-            {
-                var steamPath = @"C:\Program Files (x86)\Steam\SteamApps\Supreme Commander Forged Alliance";
-
-                if (!Directory.Exists(steamPath))
-                {
-                    Dialog = new ContentDialog();
-
-                    Dialog.PreviewKeyDown += (s, e) =>
-                    {
-                        if (e.Key == System.Windows.Input.Key.Escape)
-                        {
-                            e.Handled = true;
-                        }
-                    };
-                    Dialog.Content = new SelectPathToGameView(Dialog);
-                    Dialog.ShowAsync();
-                }
-                else
-                {
-                    // TODO INVOKE SOMETHING AND SHOW TO USER
-                    Properties.Settings.Default.PathToGame = steamPath;
-                }   
-            }
+            //        Dialog.PreviewKeyDown += (s, e) =>
+            //        {
+            //            if (e.Key == System.Windows.Input.Key.Escape)
+            //            {
+            //                e.Handled = true;
+            //            }
+            //        };
+            //        Dialog.Content = new SelectPathToGameView(Dialog);
+            //        Dialog.ShowAsync();
+            //    }
+            //    else
+            //    {
+            //        // TODO INVOKE SOMETHING AND SHOW TO USER
+            //        Properties.Settings.Default.PathToGame = steamPath;
+            //    }   
+            //}
         }
 
-        #endregion
-
-        private readonly UserControl[] Pages;
-
-        private UserControl GetPage(Type type)
+        private void NavigationView_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
-            var enumerator = Pages.GetEnumerator();
-            while (enumerator.MoveNext()) 
+            if (e.NewValue is NavigationViewModel viewModel)
             {
-                var control = (UserControl)enumerator.Current;
-                if (control.GetType() == type)
-                    return control;
+                ViewModel = viewModel;
+                DataContext = this;
             }
-            return null;
         }
 
-        #region OnNavigationViewSelectionChanged
         private void OnNavigationViewSelectionChanged(ModernWpf.Controls.NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             var selectedItem = (NavigationViewItem)args.SelectedItem;
+
             string selectedItemTag = (string)selectedItem.Tag;
 
-            string pageName = "beta.Views." + selectedItemTag + "View";
-            Type pageType = typeof(GlobalView).Assembly.GetType(pageName);
+            if (selectedItemTag is null) return;
 
-            ContentFrame.Content = GetPage(pageType);
+            string pageName = "beta.Views." + selectedItemTag + "View";
+            Type viewType = typeof(GlobalView).Assembly.GetType(pageName);
+
+            var view = Activator.CreateInstance(viewType);
+
+            ContentFrame.Content = view;
         } 
-        #endregion
     }
 }

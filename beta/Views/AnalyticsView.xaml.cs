@@ -9,6 +9,7 @@ namespace beta.Views
     public partial class AnalyticsView : UserControl
     {
         private readonly string injectionScript =
+            "if(injected)return;" + 
                "document.body.style.color='White';" +
                "document.body.style.fontSize='14px';" +
 
@@ -76,31 +77,48 @@ namespace beta.Views
                "document.getElementsByClassName('top-row px-4')[0].style.visibility = 'collapse';" +
                "document.getElementsByClassName('top-row px-4')[0].style.height = 0;" +
 
-               "document.getElementsByClassName('navbar-toggler')[0].style.visibility = 'collapse';"
+               "document.getElementsByClassName('navbar-toggler')[0].style.visibility = 'collapse';" +
+            "if (document.getElementsByClassName('navbar-toggler')[0]) var injected = true;"
                ;
         public AnalyticsView()
         {
             InitializeComponent();
-            WebView.NavigationCompleted += WebView_NavigationCompleted;
+
+            IsVisibleChanged += AnalyticsView_IsVisibleChanged;
+
+            InjectionThread = new(Inject)
+            {
+                IsBackground = true
+            };
+            InjectionThread.Start();
+        }
+        private bool StopInjection;
+        private void Inject()
+        {
+            while (!StopInjection)
+            {
+                WebView.ExecuteScriptAsync(injectionScript);
+                Thread.Sleep(10000);
+            }
         }
 
-        private void WebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        private Thread InjectionThread;
+
+        bool IsControlInitialized = false;
+        private void AnalyticsView_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
-            new Thread(() =>
+            if (IsControlInitialized & !(bool)e.NewValue)
             {
-                Thread.Sleep(10000);
-                while (true)
-                {
-                    Dispatcher.Invoke(() => WebView.ExecuteScriptAsync(injectionScript));
-                    Dispatcher.Invoke(() => WebView.Visibility=System.Windows.Visibility.Visible);
-                    break;
-                    //Thread.Sleep(500);
-                }
-            })
+                WebView.Stop();
+
+                WebView.Dispose();
+                StopInjection = true;
+                InjectionThread = null;
+            }
+            if ((bool)e.NewValue)
             {
-                Name = "Analytics load thread",
-                IsBackground = true
-            }.Start();
+                IsControlInitialized = true;
+            }
         }
     }
 }
