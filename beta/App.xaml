@@ -90,6 +90,9 @@
                 <ResourceDictionary Source="Resources/Styles/BorderStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
+
+
+                <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

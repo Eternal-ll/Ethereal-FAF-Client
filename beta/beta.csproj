@@ -5,9 +5,8 @@
     <TargetFramework>net5.0-windows10.0.18362.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>beta.Program</StartupObject>
-	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-	<PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
-	<UseWindowsForms>True</UseWindowsForms>
+	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	  <PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -657,6 +656,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Images\Emoji\9967-baron-bunny-dance.gif">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Media\Trailer\Trailer.mp4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
