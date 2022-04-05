@@ -16,7 +16,10 @@
     </UserControl.DataContext>-->
     <Grid ShowGridLines="False">
         <Grid.Resources>
-            <Style x:Key="CustomToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Setter Property="VerticalAlignment" Value="Stretch"/>
+            </Style>
+            <Style x:Key="CustomToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                 <Setter Property="Background">
                     <Setter.Value>
                         <SolidColorBrush Color="Gray" Opacity=".4"/>
@@ -189,242 +192,297 @@
             <ContentControl Content="{Binding SelectedGame}"/>
         </Grid>
         
-        <WrapPanel Orientation="Vertical" VerticalAlignment="Top" Grid.ColumnSpan="2">
-            <WrapPanel Margin="10 10 10 0">
+        <WrapPanel Orientation="Vertical" Grid.ColumnSpan="2">
+            <!--<WrapPanel Margin="10 10 10 0">
                 <TextBlock Text="{Binding GamesView.Count, StringFormat='On view: {0}'}"/>
 
                 <TextBlock Text="{Binding Games.Count, StringFormat='Total: {0}'}" Margin="10 0 0 0"/>
-            </WrapPanel>
-            <WrapPanel Margin="10">
-                <Button Padding="8 0" Margin="0 0 10 0" VerticalAlignment="Stretch">
-                    <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
-                    <ui:FlyoutService.Flyout>
-                        <ui:Flyout Placement="BottomEdgeAlignedLeft">
-                            <StackPanel>
-                                <TextBlock Text="Global settings" Margin="0 0 0 4"/>
-                                <CheckBox Content="Hide private games" IsChecked="{Binding IsPrivateGamesHidden}"/>
-                                <CheckBox Content="Hide games with &#10;enforced rating restriction" IsChecked="False"/>
-                                <CheckBox Content="Hide foes games" IsChecked="{Binding IsFoesGamesHidden}"/>
-                                <CheckBox Content="Show friends games" IsChecked="{Binding IsOnlyFriendsGamesVisible}"/>
-                                <CheckBox Content="Enable maps blacklist" IsChecked="{Binding IsMapsBlacklistEnabled}"/>
-                            </StackPanel>
-                        </ui:Flyout>
-                    </ui:FlyoutService.Flyout>
-                </Button>
-                <Button ToolTip="Maps blacklist" VerticalAlignment="Stretch" Margin="0 0 10 0">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsMapsBlacklistEnabled}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    <Path Data="M21 7H3V3H21V7M9.5 11H14.5C14.78 11 15 11.22 15 11.5V12.06C15.87 10.83 17.35 10 19 10C19.34 10 19.68 10.04 20 10.11V8H4V21H13.03C13 20.9 13 20.8 13 20.7V17.2C13 16.24 13.5 15.34 14.2 14.74V14.5C14.2 14 14.32 13.47 14.5 13H9V11.5C9 11.22 9.22 11 9.5 11M23 17.3V20.8C23 21.4 22.4 22 21.7 22H16.2C15.6 22 15 21.4 15 20.7V17.2C15 16.6 15.6 16 16.2 16V14.5C16.2 13.1 17.6 12 19 12S21.8 13.1 21.8 14.5V16C22.4 16 23 16.6 23 17.3M20.5 14.5C20.5 13.7 19.8 13.2 19 13.2S17.5 13.7 17.5 14.5V16H20.5V14.5Z" />
-                    <ui:FlyoutService.Flyout>
-                        <ui:Flyout Placement="BottomEdgeAlignedLeft">
-                            <StackPanel>
-                                <TextBlock Text="Maps blacklist" FontWeight="DemiBold"/>
-                                <TextBlock Text="Hide games with maps&#10;that contains listed keywords"
+            </WrapPanel>-->
+            <ui:TitleBarButton>
+
+                <WrapPanel Margin="10">
+                    <Canvas Height="32"/>
+                    <Button Padding="8 0" Margin="0 0 10 0" VerticalAlignment="Stretch" ToolTip="Settings">
+                        <Path Data="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+                        <ui:FlyoutService.Flyout>
+                            <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                                <StackPanel>
+                                    <TextBlock Text="Global settings" Margin="0 0 0 4"/>
+                                    <CheckBox Content="Hide secured games" IsChecked="{Binding IsPrivateGamesHidden}"/>
+                                    <CheckBox Content="Show games with enforced &#10;rating restriction only" IsChecked="{Binding IsOnlyGamesWithEnforcedRatingVisible}"/>
+                                    <CheckBox Content="Hide foes games" IsChecked="{Binding IsFoesGamesHidden}"/>
+                                    <CheckBox Content="Show friends games" IsChecked="{Binding IsOnlyFriendsGamesVisible}"/>
+                                    <CheckBox Content="Enable maps blacklist" IsChecked="{Binding IsMapsBlacklistEnabled}"/>
+                                </StackPanel>
+                            </ui:Flyout>
+                        </ui:FlyoutService.Flyout>
+                    </Button>
+
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMapsBlacklistEnabled}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Button ToolTip="Maps blacklist" VerticalAlignment="Stretch" Margin="0 0 10 0">
+                            <Path Data="M21 7H3V3H21V7M9.5 11H14.5C14.78 11 15 11.22 15 11.5V12.06C15.87 10.83 17.35 10 19 10C19.34 10 19.68 10.04 20 10.11V8H4V21H13.03C13 20.9 13 20.8 13 20.7V17.2C13 16.24 13.5 15.34 14.2 14.74V14.5C14.2 14 14.32 13.47 14.5 13H9V11.5C9 11.22 9.22 11 9.5 11M23 17.3V20.8C23 21.4 22.4 22 21.7 22H16.2C15.6 22 15 21.4 15 20.7V17.2C15 16.6 15.6 16 16.2 16V14.5C16.2 13.1 17.6 12 19 12S21.8 13.1 21.8 14.5V16C22.4 16 23 16.6 23 17.3M20.5 14.5C20.5 13.7 19.8 13.2 19 13.2S17.5 13.7 17.5 14.5V16H20.5V14.5Z" />
+                            <ui:FlyoutService.Flyout>
+                                <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                                    <StackPanel>
+                                        <TextBlock Text="Maps blacklist" FontWeight="DemiBold"/>
+                                        <TextBlock Text="Hide games with maps&#10;that contains listed keywords"
                                            TextWrapping="Wrap" FontSize="14" Margin="0 4 0 10"
                                            Opacity=".6"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBox ui:ControlHelper.PlaceholderText="Key word"
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox ui:ControlHelper.PlaceholderText="Key word"
                                              BorderThickness="0"
                                              MinWidth="160"
                                              Text="{Binding InputKeyWord, UpdateSourceTrigger=PropertyChanged}">
-                                    </TextBox>
-                                    <Button Content=" + " Command="{Binding AddKeyWordCommand}"/>
-                                </StackPanel>
-                                <ListBox Height="200" Margin="0 20 0 0"
-                                         ItemsSource="{Binding MapsBlackList}">
-                                    <ListBox.Resources>
-                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                            <Setter Property="Padding" Value="10 4 0 4"/>
-                                            <Setter Property="Focusable" Value="False"/>
-                                        </Style>
-                                    </ListBox.Resources>
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid>
-                                                <TextBlock Text="{Binding}" HorizontalAlignment="Left"/>
-                                                <Button Content=" - "
-                                                        Padding="4 0"
-                                                        VerticalAlignment="Center"
-                                                        HorizontalAlignment="Right"
-                                                        CommandParameter="{Binding}"
+                                            </TextBox>
+                                            <ComboBox ItemsSource="{Binding MapFilterDescriptions}" SelectedItem="{Binding SelectedMapFilterDescription}"/>
+                                            <Button Content=" + " Command="{Binding AddKeyWordCommand}" CommandParameter="{Binding InputKeyWord}"/>
+                                        </StackPanel>
+                                        <ListBox Height="200" Margin="0 20 0 0" ItemsSource="{Binding MapsBlackList}">
+                                            <ListBox.Resources>
+                                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                    <Setter Property="Padding" Value="10 4 0 4"/>
+                                                    <Setter Property="Focusable" Value="False"/>
+                                                </Style>
+                                            </ListBox.Resources>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Filter}" Margin="0 0 4 0" FontSize="12" VerticalAlignment="Center" Opacity=".5"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Name, StringFormat='&quot;{0}&quot;'}" HorizontalAlignment="Left"/>
+                                                        <Button Grid.Column="2" Padding="4 0" Margin="4 0" CommandParameter="{Binding}"
                                                         Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
-                                                    Path=DataContext.RemoveKeyWordCommand}"/>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </StackPanel>
-                        </ui:Flyout>
-                    </ui:FlyoutService.Flyout>
-                </Button>
+                                                    Path=DataContext.RemoveKeyWordCommand}">
+                                                            <TextBlock Margin="0 -2 0 0" Text=" - "/>
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+                                    </StackPanel>
+                                </ui:Flyout>
+                            </ui:FlyoutService.Flyout>
+                        </Button>
+                        <Border VerticalAlignment="Top" HorizontalAlignment="Right" Background="Red"
+                            Padding="4 0" CornerRadius="4">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding GamesWithBlockedMap.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Border.ToolTip>
+                                <ToolTip>
+                                    <StackPanel>
+                                        <TextBlock Text="Hidden games with maps:" Margin="0 0 0 4"/>
+                                        <ItemsControl ItemsSource="{Binding GamesWithBlockedMap}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding mapname}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </ToolTip>
+                            </Border.ToolTip>
+                            <Border.RenderTransform>
+                                <TranslateTransform Y="-8" X="-3"/>
+                            </Border.RenderTransform>
+                            <TextBlock Margin="0 -1 0 0" FontSize="12" Text="{Binding GamesWithBlockedMap.Count}"/>
+                        </Border>
+                    </Grid>
 
-                <ToggleButton
-                    VerticalAlignment="Stretch"
-                    Padding="8 0 4 0"
-                    Margin="0 0 10 0"
-                    ui:ControlHelper.CornerRadius="4"
-                    IsChecked="{Binding IsSortEnabled}">
-                    <ToggleButton.Resources>
-                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#222222"/>
-                        <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="#222222"/>
-                        <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#444444"/>
-                        <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#222222"/>
-                    </ToggleButton.Resources>
-                    <Path Stretch="Uniform">
-                        <Path.Style>
-                            <Style TargetType="Path">
-                                <Setter Property="Margin" Value="0 0 5 0"/>
-                                <Setter Property="Fill" Value="White"/>
-                                <Setter Property="Data" Value="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"/>
+                    <ToggleButton Padding="8 0 4 0" Margin="0 0 10 0" ui:ControlHelper.CornerRadius="4" IsChecked="{Binding IsSortEnabled}">
+                        <ToggleButton.Resources>
+                            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#222222"/>
+                            <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="#222222"/>
+                            <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#444444"/>
+                            <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="#222222"/>
+                        </ToggleButton.Resources>
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Setter Property="ToolTip" Value="Enable sort"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="ToolTip" Value="Disable sort"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <Path Stretch="Uniform">
+                            <Path.Style>
+                                <Style TargetType="Path">
+                                    <Setter Property="Margin" Value="0 0 5 0"/>
+                                    <Setter Property="Fill" Value="White"/>
+                                    <Setter Property="Data" Value="M15,19.88C15.04,20.18 14.94,20.5 14.71,20.71C14.32,21.1 13.69,21.1 13.3,20.71L9.29,16.7C9.06,16.47 8.96,16.16 9,15.87V10.75L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3V3H19V3C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L15,10.75V19.88M7.04,5L11,10.06V15.58L13,17.58V10.05L16.96,5H7.04Z"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}, Path=IsChecked}"
                                                  Value="True">
-                                        <Setter Property="Margin" Value="0"/>
-                                        <Setter Property="Fill" Value="LightGreen"/>
-                                        <Setter Property="Data" Value="M12 12V19.88C12.04 20.18 11.94 20.5 11.71 20.71C11.32 21.1 10.69 21.1 10.3 20.71L8.29 18.7C8.06 18.47 7.96 18.16 8 17.87V12H7.97L2.21 4.62C1.87 4.19 1.95 3.56 2.38 3.22C2.57 3.08 2.78 3 3 3H17C17.22 3 17.43 3.08 17.62 3.22C18.05 3.56 18.13 4.19 17.79 4.62L12.03 12H12M17.75 21L15 18L16.16 16.84L17.75 18.43L21.34 14.84L22.5 16.25L17.75 21"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Path.Style>
-                    </Path>
-                </ToggleButton>
+                                            <Setter Property="Margin" Value="0"/>
+                                            <Setter Property="Fill" Value="LightGreen"/>
+                                            <Setter Property="Data" Value="M12 12V19.88C12.04 20.18 11.94 20.5 11.71 20.71C11.32 21.1 10.69 21.1 10.3 20.71L8.29 18.7C8.06 18.47 7.96 18.16 8 17.87V12H7.97L2.21 4.62C1.87 4.19 1.95 3.56 2.38 3.22C2.57 3.08 2.78 3 3 3H17C17.22 3 17.43 3.08 17.62 3.22C18.05 3.56 18.13 4.19 17.79 4.62L12.03 12H12M17.75 21L15 18L16.16 16.84L17.75 18.43L21.34 14.84L22.5 16.25L17.75 21"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                    </ToggleButton>
 
-                <ComboBox
-                    MinWidth="140"  
-                    BorderThickness="0"
-                    ItemsSource="{Binding SortDescriptions}"
-                    SelectedItem="{Binding SelectedSort}"
-                    DisplayMemberPath="PropertyName">
-                    <ComboBox.Resources>
-                        <Style TargetType="ComboBoxItem" BasedOn="{StaticResource DefaultComboBoxItemStyle}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding}" Value="title">
-                                    <Setter Property="Content" Value="by title"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="mapname">
-                                    <Setter Property="Content" Value="by map name"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="max_players">
-                                    <Setter Property="Content" Value="by map slots"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="num_players">
-                                    <Setter Property="Content" Value="by players in game"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="rating_max">
-                                    <Setter Property="Content" Value="by restriction of max rating"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="rating_min">
-                                    <Setter Property="Content" Value="by restriction of min rating"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding}" Value="AverageRating">
-                                    <Setter Property="Content" Value="by average rating in game"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.Resources>
-                    <ComboBox.Style>
-                        <Style BasedOn="{StaticResource DefaultComboBoxStyle}"
-                               TargetType="ComboBox">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSortEnabled}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ComboBox.Style>
-                </ComboBox>
-                <Button
-                    Background="Transparent"
-                    Padding="6 0"
-                    VerticalAlignment="Stretch"
-                    Command="{Binding ChangeSortDirectionCommmand}">
-                    <Path Fill="White">
-                        <Path.Style>
-                            <Style TargetType="Path">
-                                <Setter Property="Data" Value="M19 17H22L18 21L14 17H17V3H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SortDirection}" Value="1">
-                                        <Setter Property="Data" Value="M19 7H22L18 3L14 7H17V21H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                                    <DataTrigger Binding="{Binding IsSortEnabled}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </Path.Style>
-                    </Path>
-                    <Button.Style>
-                        <Style BasedOn="{StaticResource DefaultButtonStyle}"
-                               TargetType="Button">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSortEnabled}" Value="False">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Filter" VerticalAlignment="Center" Margin="10 0"/>
-                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
-                    <TextBlock Text="by" VerticalAlignment="Center" Margin="10 0"/>
-                    <ComboBox SelectedItem="{Binding SelectedFilterDescription}" ItemsSource="{Binding FilterDescriptions}"
-                              DisplayMemberPath="DisplayedProperty"/>
-                </StackPanel>
-                <ToggleButton VerticalAlignment="Stretch" Margin="10 0" IsChecked="{Binding IsGridView}">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <Path Fill="White" Margin="0 0 1 0" Stretch="Uniform" Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <Path Fill="White" Stretch="Uniform" Data="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
-                <ToggleButton IsChecked="{Binding IsExtendedViewEnabled}" VerticalAlignment="Stretch">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
-                            
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <Path Fill="Gray" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content">
-                                        <Setter.Value>
-                                            <Path Fill="LimeGreen" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+                        </StackPanel.Style>
+                        <ComboBox MinWidth="140" ItemsSource="{Binding SortDescriptions}" SelectedItem="{Binding SelectedSort}" 
+                              DisplayMemberPath="PropertyName">
+                            <ComboBox.Resources>
+                                <Style TargetType="ComboBoxItem" BasedOn="{StaticResource DefaultComboBoxItemStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding}" Value="title">
+                                            <Setter Property="Content" Value="by title"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="mapname">
+                                            <Setter Property="Content" Value="by map name"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="max_players">
+                                            <Setter Property="Content" Value="by map slots"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="num_players">
+                                            <Setter Property="Content" Value="by players in game"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="rating_max">
+                                            <Setter Property="Content" Value="by restriction of max rating"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="rating_min">
+                                            <Setter Property="Content" Value="by restriction of min rating"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding}" Value="AverageRating">
+                                            <Setter Property="Content" Value="by average rating in game"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Resources>
+                        </ComboBox>
 
-                <StackPanel Orientation="Horizontal">
-                </StackPanel>
-            </WrapPanel>
+                        <Button Background="Transparent" Margin="0 0 10 0" Padding="6 0" VerticalAlignment="Stretch" Command="{Binding ChangeSortDirectionCommmand}">
+                            <Path Fill="White">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Data" Value="M19 17H22L18 21L14 17H17V3H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SortDirection}" Value="1">
+                                                <Setter Property="Data" Value="M19 7H22L18 3L14 7H17V21H19M2 17H12V19H2M6 5V7H2V5M2 11H9V13H2V11Z"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                        </Button>
+                    </StackPanel>
+
+                    <ToggleButton x:Name="EnableFilterToggleButton">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                                <Setter Property="ToolTip" Value="Show search block"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="ToolTip" Value="Hide search block"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                        <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+                    </ToggleButton>
+
+                    <StackPanel Orientation="Horizontal" Margin="10 0 0 0">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=EnableFilterToggleButton, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Width="200"
+                             ui:ControlHelper.PlaceholderText="Search"/>
+                        <TextBlock Text="by" VerticalAlignment="Center" Margin="10 0"/>
+                        <ComboBox SelectedItem="{Binding SelectedFilterDescription}" SelectedIndex="0"
+                              ItemsSource="{Binding FilterDescriptions}"
+                              DisplayMemberPath="DisplayedProperty"/>
+                    </StackPanel>
+                    <ToggleButton VerticalAlignment="Stretch" Margin="10 0" IsChecked="{Binding IsGridView}" ToolTip="Switch layout between list and grid">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="White" Margin="0 0 1 0" Stretch="Uniform" Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="White" Stretch="Uniform" Data="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <ToggleButton IsChecked="{Binding IsExtendedViewEnabled}" VerticalAlignment="Stretch" ToolTip="Enable aside view for select game">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="Gray" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="LimeGreen" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+
+                    <Button VerticalAlignment="Stretch" Margin="10 0 0 0" ToolTip="Host game">
+                        <Path Data="M6.92,5H5L14,14L15,13.06M19.96,19.12L19.12,19.96C18.73,20.35 18.1,20.35 17.71,19.96L14.59,16.84L11.91,19.5L10.5,18.09L11.92,16.67L3,7.75V3H7.75L16.67,11.92L18.09,10.5L19.5,11.91L16.83,14.58L19.95,17.7C20.35,18.1 20.35,18.73 19.96,19.12Z" />
+                    </Button>
+                </WrapPanel>
+            </ui:TitleBarButton>
         </WrapPanel>
     </Grid>
 </UserControl>

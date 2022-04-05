@@ -24,18 +24,17 @@
         </Grid.Resources>
         <control:CrossFadeContentControl Content="{Binding CurrentCustomGamesViewModel}"
                                          VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="200 4 0 0">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0 0 140 0">
             <StackPanel.Resources>
                 <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
                     <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="VerticalAlignment" Value="Stretch"/>
                     <Setter Property="Padding" Value="6 2"/>
-                </Style>
-                <Style TargetType="ui:TitleBarButton">
-                    <Setter Property="Width" Value="NaN "/>
+                    <Setter Property="ui:ControlHelper.CornerRadius" Value="0"/>
                 </Style>
             </StackPanel.Resources>
             <ui:TitleBarButton>
-                <ToggleButton Content="Idle games" IsChecked="{Binding IsIdleGamesOnView}"/>
+                <ToggleButton Content="Open games" IsChecked="{Binding IsIdleGamesOnView}"/>
             </ui:TitleBarButton>
             <ui:TitleBarButton>
                 <ToggleButton Content="Live games" IsChecked="{Binding IsLiveGamesOnView}"/>

@@ -6,6 +6,7 @@
              xmlns:control="clr-namespace:beta.Resources.Controls"
              xmlns:vm="clr-namespace:beta.ViewModels"
              xmlns:view="clr-namespace:beta.Views"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
              d:DataContext="{d:DesignInstance {x:Type vm:MainViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -13,6 +14,12 @@
         <vm:MainViewModel/>
     </UserControl.DataContext>
     <UserControl.Resources>
+        <Style TargetType="ui:TitleBarButton">
+            <Setter Property="Width" Value="NaN"/>
+            <Setter Property="Height" Value="NaN"/>
+            <Setter Property="PressedBackground" Value="Transparent"/>
+            <Setter Property="HoverBackground" Value="Transparent"/>
+        </Style>
         <Style TargetType="control:CrossFadeContentControl">
             <Setter Property="Template">
                 <Setter.Value>

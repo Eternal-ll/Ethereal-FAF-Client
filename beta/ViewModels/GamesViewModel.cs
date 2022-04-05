@@ -58,6 +58,7 @@ namespace beta.ViewModels
             GamesService = App.Services.GetService<IGamesService>();
 
             Games = new();
+            GamesWithBlockedMap = new();
             App.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 GamesViewSource = new();
@@ -80,6 +81,7 @@ namespace beta.ViewModels
         }
 
         public ObservableCollection<GameInfoMessage> Games { get; private set; }
+        public ObservableCollection<GameInfoMessage> GamesWithBlockedMap { get; private set; }
 
         public ICollectionView GamesView => GamesViewSource.View;
 
@@ -94,7 +96,7 @@ namespace beta.ViewModels
             {
                 if (Set(ref _Foes, value) && IsFoesGamesHidden)
                 {
-                    GamesView.Refresh();
+                    RefreshGameView();
                 }
             }
         }
@@ -109,7 +111,7 @@ namespace beta.ViewModels
             {
                 if (Set(ref _Friends, value) && IsOnlyFriendsGamesVisible)
                 {
-                    GamesView.Refresh();
+                    RefreshGameView();
                 }
             }
         }
@@ -153,7 +155,7 @@ namespace beta.ViewModels
                             break;
                     }
 
-                    GamesView.Refresh();
+                    RefreshGameView();
                 }
             }
         }
@@ -184,7 +186,7 @@ namespace beta.ViewModels
             {
                 if (Set(ref _SelectedFilterDescription, value))
                 {
-                    if (!string.IsNullOrWhiteSpace(FilterText)) GamesView.Refresh();
+                    if (!string.IsNullOrWhiteSpace(FilterText)) RefreshGameView();
                 }
             }
         }
@@ -205,7 +207,7 @@ namespace beta.ViewModels
                         _IsOnlyFriendsGamesVisible = false;
                         OnPropertyChanged(nameof(IsOnlyFriendsGamesVisible));
                     }
-                    if (Foes?.Length > 1) GamesView.Refresh();
+                    if (Foes?.Length > 1) RefreshGameView();
                 }
             }
         }
@@ -226,7 +228,22 @@ namespace beta.ViewModels
                         OnPropertyChanged(nameof(IsFoesGamesHidden));
                     }
 
-                    if (Friends?.Length > 1) GamesView.Refresh();
+                    if (Friends?.Length > 1) RefreshGameView();
+                }
+            }
+        }
+        #endregion
+
+        #region IsGamesWithEnforcedRatingVisible
+        private bool _IsOnlyGamesWithEnforcedRatingVisible;
+        public bool IsOnlyGamesWithEnforcedRatingVisible
+        {
+            get => _IsOnlyGamesWithEnforcedRatingVisible;
+            set
+            {
+                if (Set(ref _IsOnlyGamesWithEnforcedRatingVisible, value))
+                {
+                    RefreshGameView();
                 }
             }
         }
@@ -241,7 +258,7 @@ namespace beta.ViewModels
             {
                 if (Set(ref _IsPrivateGamesHidden, value))
                 {
-                    GamesView.Refresh();
+                    RefreshGameView();
                 }
             }
         }
@@ -337,7 +354,7 @@ namespace beta.ViewModels
                 if (Set(ref _IsMapsBlacklistEnabled, value))
                 {
                     if (MapsBlackList.Count > 0)
-                        GamesView.Refresh();
+                        RefreshGameView();
                 }
             }
         }
@@ -345,7 +362,7 @@ namespace beta.ViewModels
 
         public ObservableCollection<BlockedMapDescription> MapsBlackList { get; } = new();
 
-        public static FilterDescription[] MapFilterDescriptions = new FilterDescription[]
+        public static FilterDescription[] MapFilterDescriptions => new FilterDescription[]
         {
             FilterDescription.Contains,
             FilterDescription.StartsWith,
@@ -377,6 +394,7 @@ namespace beta.ViewModels
         private bool CanAddKeyWordCommand(object parameter) => !string.IsNullOrWhiteSpace(_InputKeyWord);
         public void OnAddKeyWordCommand(object parameter)
         {
+            if (parameter is null) return;
             if (string.IsNullOrWhiteSpace(parameter.ToString())) return;
 
             BlockedMapDescription filter = new(parameter.ToString(), SelectedMapFilterDescription);
@@ -390,7 +408,7 @@ namespace beta.ViewModels
             blocked.Add(filter);
             InputKeyWord = string.Empty;
 
-            if (IsMapsBlacklistEnabled) GamesView.Refresh();
+            if (IsMapsBlacklistEnabled) RefreshGameView();
         }
         #endregion
 
@@ -400,16 +418,24 @@ namespace beta.ViewModels
         public void OnRemoveKeyWordCommand(object parameter)
         {
             if (parameter is BlockedMapDescription filter)
-                if (MapsBlackList.Remove(filter) && IsMapsBlacklistEnabled) GamesView.Refresh();
+                if (MapsBlackList.Remove(filter) && IsMapsBlacklistEnabled) RefreshGameView();
         }
         #endregion
 
         #endregion
 
+        private void RefreshGameView()
+        {
+            GamesWithBlockedMap.Clear();
+            GamesView.Refresh();
+        }
+
         protected abstract bool FilterGame(GameInfoMessage game);
         private bool CommonFilter(GameInfoMessage game)
         {
             if (IsPrivateGamesHidden && game.password_protected) return false;
+
+            if(IsOnlyGamesWithEnforcedRatingVisible && !game.enforce_rating_range) return false;
 
             if (IsMapsBlacklistEnabled)
             {
@@ -418,17 +444,23 @@ namespace beta.ViewModels
                 for (int i = 0; i < blocked.Count; i++)
                     {
                         var filterDesc = blocked[i];
+                        bool isBlocked = false;
                         switch (filterDesc.Filter)
                         {
                             case FilterDescription.Contains:
-                                if (game.mapname.Contains(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                isBlocked = game.MapName.Contains(filterDesc.Name, StringComparison.OrdinalIgnoreCase);
                                 break;
                             case FilterDescription.StartsWith:
-                                if (game.mapname.StartsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                isBlocked = game.MapName.StartsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase);
                                 break;
                             case FilterDescription.EndsWith:
-                                if (game.mapname.EndsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase)) return false;
+                                isBlocked = game.MapName.EndsWith(filterDesc.Name, StringComparison.OrdinalIgnoreCase);
                                 break;
+                        }
+                        if (isBlocked)
+                        {
+                            GamesWithBlockedMap.Add(game);
+                            return false;
                         }
                     }
             }
