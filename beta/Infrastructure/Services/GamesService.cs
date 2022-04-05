@@ -179,6 +179,11 @@ namespace beta.Infrastructure.Services
                 //Logger.LogInformation($"Received updates on game {newGame.uid} by {newGame.host}");
                 await UpdateGame(game, newGame);
 
+                if (game.Host is IPlayer)
+                {
+                    game.Host = PlayersService.GetPlayer(newGame.host);
+                }
+
                 //if (games.Remove(game)) OnGameRemoved(game);
             }
             else
@@ -192,6 +197,7 @@ namespace beta.Infrastructure.Services
                 newGame.Host = PlayersService.GetPlayer(newGame.host);
 
                 games.Add(newGame);
+                OnNewGameReceived(newGame);
             }
 
             // TODO remove

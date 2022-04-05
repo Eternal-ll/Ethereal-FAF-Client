@@ -254,6 +254,7 @@ namespace beta.ViewModels
                 Completed?.Invoke(this, e);
                 IsCompleted = !e.Cancelled;
             }
+            ((DownloadModel)sender).Dispose();
         }
 
         private double total = 0;

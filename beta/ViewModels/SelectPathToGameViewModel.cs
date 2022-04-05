@@ -80,10 +80,7 @@ namespace beta.ViewModels
         private ICommand _ConfirmCommand;
         public ICommand ConfirmCommand => _ConfirmCommand ??= new LambdaCommand(OnConfirmCommand, CanConfirmCommand);
         private bool CanConfirmCommand(object parameter) => IsConfirmed;
-        private void OnConfirmCommand(object parameter)
-        {
-
-        }
+        private void OnConfirmCommand(object parameter) {}
         #endregion
     }
 }

@@ -579,20 +579,20 @@ namespace beta.ViewModels
         {
             if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
 
-            Dispatcher.BeginInvoke(() =>
-            {
+            //Dispatcher.BeginInvoke(() =>
+            //{
                 if (TryGetIndexOfGame(game.uid, out var id))
                 {
                     Games[id] = game;
                 }
-            });
+            //});
         }
 
         private void OnNewGame(object sender, GameInfoMessage game)
         {
             if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
-            Dispatcher.BeginInvoke(() =>
-            {
+            //Dispatcher.BeginInvoke(() =>
+            //{
                 if (TryGetIndexOfGame(game.uid, out var id))
                 {
                     Games[id] = game;
@@ -601,7 +601,7 @@ namespace beta.ViewModels
                 {
                     Games.Add(game);
                 }
-            });
+            //});
         }
 
         private void OnGamesReceived(object sender, GameInfoMessage[] e) => HandleGames(e);
