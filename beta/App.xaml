@@ -94,6 +94,7 @@
 
 
                 <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
+                <ResourceDictionary Source="Resources/Templates/DownloadViewModelDataTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
