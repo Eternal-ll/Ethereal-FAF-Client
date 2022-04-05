@@ -81,6 +81,8 @@
                             <TextBlock Text="Path to patch"/>
                             <TextBox IsReadOnly="True" Text="{Binding PathToPatch}"/>
                             <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToPatch}"/>
+                            <Button Content="Reset bin" Command="{StaticResource ResetPatchCommand}" ToolTip="Returns to default steam state"
+                                    Margin="10 0 0 0"/>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>

@@ -290,7 +290,7 @@ namespace beta.Infrastructure.Services
 
                 // Run task for downloading
                 //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip")));
-                await MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
+                await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
 
                 if (!ConfirmMap(game.Map.OriginalName))
                 {
@@ -621,6 +621,12 @@ namespace beta.Infrastructure.Services
         public void Close()
         {
             IceAdapterClient?.Close();
+        }
+
+        public async Task ResetPatch()
+        {
+            await Task.Run(() => CopyOriginalBin());
+            await NotificationService.ShowPopupAsync("Patch reset completed");
         }
     }
 }

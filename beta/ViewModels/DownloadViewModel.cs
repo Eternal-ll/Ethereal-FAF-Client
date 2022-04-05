@@ -199,7 +199,7 @@ namespace beta.ViewModels
 
         //public async Task Cancel() => CurrentDownloadModel.CancelAsync();
 
-        public Task DownloadAll() => Task.Run(() => DownloadAll(Downloads));
+        public void DownloadAll() => Task.Run(() => DownloadAll(Downloads));
         public async Task DownloadAllAsync() => await DownloadAll(Downloads);
 
         private async Task DownloadAll(DownloadItem[] downloads)

@@ -240,7 +240,7 @@ namespace beta.Infrastructure.Services
         /// https://content.faforever.com/maps/scmp_haz04.v0001.zip
         /// </summary>
         /// <param name="uri"></param>
-        public async Task<DownloadViewModel> Download(Uri uri)
+        public async Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri)
         {
             var commonPath = App.GetPathToFolder(Folder.Common);
             var name = uri.Segments[^1];
@@ -273,6 +273,45 @@ namespace beta.Infrastructure.Services
             //    DownloadCompleted?.Invoke(this, name[..^4]);
             //};
             return model;
+        }
+        public async Task<DownloadViewModel> DownloadsAndExtract(Uri uri)
+        {
+            var commonPath = App.GetPathToFolder(Folder.Common);
+            var name = uri.Segments[^1];
+            DownloadItem dModel = new(commonPath, name, uri.AbsoluteUri);
+            
+            var model = DownloadService.GetDownload(dModel);
+            model.Completed += OnDownloadCompleted;
+
+            model.DownloadAll();
+            
+            return model;
+        }
+
+        private void OnDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            var model = (DownloadViewModel)sender;
+            model.Completed -= OnDownloadCompleted;
+            if (e.Cancelled)
+            {
+                // TODO LOG
+                return;
+            }
+            var name = model.CurrentDownloadItem.FileName;
+
+            var commonPath = App.GetPathToFolder(Folder.Common);
+
+            if (!Directory.Exists(commonPath)) Directory.CreateDirectory(commonPath);
+
+            string zipPath = commonPath + name;
+
+            string extractPath = App.GetPathToFolder(Folder.Maps);
+
+            if (File.Exists(zipPath))
+            {
+                ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+                File.Delete(zipPath);
+            }
         }
 
         public GameMap GetMap(Uri uri, bool attachScenario = true)

@@ -15,7 +15,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public Map GetMap(Uri uri, PreviewType previewType, bool attachScenario = true);
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AttachMapScenario(GameMap map);
-        public Task<DownloadViewModel> Download(Uri uri);
+        public Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri);
 
         public bool IsLegacyMap(string name);
         public LocalMapState CheckLocalMap(string name);

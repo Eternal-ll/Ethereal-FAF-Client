@@ -50,5 +50,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="isRehost">If you are rehosting last game</param>
         /// <returns></returns>
         public Task HostGame(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false);
+
+        public Task ResetPatch();
     }
 }
