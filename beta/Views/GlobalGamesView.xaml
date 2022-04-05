@@ -34,10 +34,10 @@
                 </Style>
             </StackPanel.Resources>
             <ui:TitleBarButton>
-                <ToggleButton Content="Open games" IsChecked="{Binding IsIdleGamesOnView}"/>
+                <ToggleButton Content="Open games" Height="32" IsChecked="{Binding IsIdleGamesOnView}"/>
             </ui:TitleBarButton>
             <ui:TitleBarButton>
-                <ToggleButton Content="Live games" IsChecked="{Binding IsLiveGamesOnView}"/>
+                <ToggleButton Content="Live games" Height="32" IsChecked="{Binding IsLiveGamesOnView}"/>
             </ui:TitleBarButton>
         </StackPanel>
     </Grid>
