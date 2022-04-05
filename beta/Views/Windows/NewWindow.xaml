@@ -9,5 +9,8 @@
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:ThemeManager.RequestedTheme="Dark">
+    <Window.Resources>
+        <SolidColorBrush x:Key="ContentDialogBackground" Color="#FF1b1b1b"/>
+    </Window.Resources>
     <view:MainView x:Name="MainView"/>
 </Window>

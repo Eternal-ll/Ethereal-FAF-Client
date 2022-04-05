@@ -5,7 +5,8 @@
                     xmlns:modals="clr-namespace:beta.Views.Modals"
                     mc:Ignorable="d"
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    xmlns:ui="http://schemas.modernwpf.com/2019">
+                    xmlns:ui="http://schemas.modernwpf.com/2019"
+                    xmlns:view="clr-namespace:beta.Views">
     <DataTemplate DataType="{x:Type vm:DownloadViewModel}">
         <Grid>
             <Grid.RowDefinitions>
@@ -98,5 +99,13 @@
 
     <DataTemplate DataType="{x:Type vm:SelectPathToGameViewModel}">
         <modals:SelectPathToGameView DataContext="{Binding}"/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:HostGameViewModel}">
+        <view:HostGameView DataContext="{Binding}"/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:PassPasswordViewModel}">
+        <modals:PassPasswordView DataContext="{Binding}"/>
     </DataTemplate>
 </ResourceDictionary>
