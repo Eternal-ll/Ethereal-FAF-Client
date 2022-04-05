@@ -141,8 +141,10 @@ namespace beta.Infrastructure.Services
             if (TryGetGame(game.uid, out var foundGame))
             {
                 // optimize from dublicates
-                foreach (var team in foundGame.teams) playersToClear.AddRange(team.Value);
+                foreach (var team in foundGame.teams)
+                    playersToClear.AddRange(team.Value);
                 Games.Remove(foundGame);
+                foundGame.Dispose();
                 foundGame = null;
             }
 
@@ -154,6 +156,24 @@ namespace beta.Infrastructure.Services
 
         private async Task HandleGameData(GameInfoMessage newGame)
         {
+            switch (newGame.FeaturedMod)
+            {
+                case FeaturedMod.FAF:
+                case FeaturedMod.FAFBeta:
+                case FeaturedMod.FAFDevelop:
+                    break;
+                default: return;
+            }
+
+            switch (newGame.GameType)
+            {
+                case GameType.Coop:
+                case GameType.MatchMaker:
+                    return;
+            }
+
+            if (newGame.sim_mods.Count > 0) return;
+
             switch (newGame.State)
             {
                 case GameState.Open:
@@ -161,7 +181,7 @@ namespace beta.Infrastructure.Services
                 case GameState.Playing:
                     break;
                 case GameState.Closed:
-                    Logger.LogInformation($"Game {newGame.uid} / {newGame.FeaturedMod} / {newGame.GameType} / Mods: {newGame.sim_mods.Count} / {newGame.title} by {newGame.host} is closed");
+                    //Logger.LogInformation($"Game {newGame.uid} / {newGame.FeaturedMod} / {newGame.GameType} / Mods: {newGame.sim_mods.Count} / {newGame.title} by {newGame.host} is closed");
                     HandleOnGameClose(newGame);
                     return;
                 default:
@@ -203,143 +223,6 @@ namespace beta.Infrastructure.Services
             // TODO remove
             //await OldHandleGameData(newGame);
         }
-
-        private async Task OldHandleGameData(GameInfoMessage game)
-        {
-            var idleGames = IdleGames;
-            var liveGames = LiveGames;
-            var suspiciousGames = SuspiciousGames;
-            // Update in-game players status
-
-            game.Teams = GetInGameTeams(game);
-
-            #region Checking suspicious games with NO PLAYERS
-
-            for (int i = 0; i < suspiciousGames.Count; i++)
-            {
-                if (suspiciousGames[i].host == game.host)
-                {
-                    if (game.num_players != 0)
-                    {
-                        suspiciousGames.RemoveAt(i);
-                        i++;
-                    }
-                    continue;
-                }
-
-                var difference = DateTime.UtcNow - suspiciousGames[i].CreatedTime.Value;
-
-                if (difference.TotalSeconds > 120)
-                {
-                    if (suspiciousGames[i].num_players == 0)
-                    {
-                        idleGames.Remove(suspiciousGames[i]);
-                        OnGameRemoved(suspiciousGames[i]);
-                    }
-                    suspiciousGames.RemoveAt(i);
-                }
-            }
-            #endregion
-
-            #region Searching matches in list of idle games
-            for (int i = 0; i < idleGames.Count; i++)
-            {
-                var idleGame = idleGames[i];
-                if (idleGame is null)
-                {
-                    IdleGames.RemoveAt(i);
-                    continue;
-                }
-                if (idleGame.host == game.host)
-                {
-                    if (game.launched_at is not null)
-                    {
-                        // game is launched, removing from IdleGames and moving to LiveGames
-                        idleGames.RemoveAt(i);
-                        liveGames.Add(game);
-                        return;
-                    }
-
-                    if (idleGame.mapname != game.mapname)
-                    {
-                        idleGame.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                        attachScenario: true);
-                    }
-
-                    // Updating idle game states
-                    if (!await UpdateGame(idleGame, game))
-                    {
-                        // returns false if num_players == 0, game is died
-                        idleGames.RemoveAt(i);
-
-                        OnGameRemoved(idleGame);
-                    }
-                    else
-                    {
-                        OnGameUpdated(idleGame);
-                    }
-                    return;
-                }
-            }
-            #endregion
-
-            #region Processing if game is live
-            // if game is live
-            if (game.launched_at is not null)
-            {
-                for (int i = 0; i < liveGames.Count; i++)
-                {
-                    var liveGame = liveGames[i];
-                    if (liveGame.host == game.host)
-                    {
-                        // Updating live game states
-                        if (!await UpdateGame(liveGame, game))
-                        {
-                            // returns false if num_players == 0, game is died
-                            liveGames.RemoveAt(i);
-
-                            OnGameRemoved(liveGame);
-                        }
-                        else
-                        {
-                            OnGameUpdated(liveGame);
-                        }
-                        return;
-                    }
-                }
-            }
-            #endregion
-
-            // if we passed this way, that we didnt found matches in LiveGames
-
-            // filling host by player instance
-            //if (game.Host is null)
-            game.Host = PlayersService.GetPlayer(game.host);
-
-            game.Map = MapService.GetMap(new("https://content.faforever.com/maps/previews/small/" + game.mapname + ".png"),
-                attachScenario: true);
-
-            if (game.num_players == 0)
-            {
-                // if game is empty, we adding it to suspicious list and monitoring it during next updates
-                game.CreatedTime = DateTime.UtcNow;
-                SuspiciousGames.Add(game);
-            }
-
-            if (game.launched_at is not null)
-            {
-                liveGames.Add(game);
-                OnNewGameReceived(game);
-                return;
-            }
-
-
-            // finally if nothing matched we adding it to IdleGames
-            idleGames.Add(game);
-
-            OnNewGameReceived(game);
-        }
-
         private void OnGameReceived(object sender, GameInfoMessage e) => Task.Run(() => HandleGameData(e));
 
         public InGameTeam[] GetInGameTeams(GameInfoMessage game)

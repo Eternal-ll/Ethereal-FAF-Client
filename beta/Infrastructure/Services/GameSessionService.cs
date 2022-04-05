@@ -62,7 +62,7 @@ namespace beta.Infrastructure.Services
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
-                IceAdapterClient?.Close();
+                IceAdapterClient.CloseAsync();
             };
 
             IceService.IceServersReceived += IceService_IceServersReceived;
@@ -127,10 +127,11 @@ namespace beta.Infrastructure.Services
 
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
         {
-            IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
+                IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
 
             IceAdapterClient.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
             IceAdapterClient.IceMessageReceived += IceAdapterClient_IceMessageReceived;
+            IceAdapterClient.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
 
             // these commands will be ququed and passed after established connect
             IceAdapterClient.SetLobbyInitMode("normal");
@@ -198,14 +199,31 @@ namespace beta.Infrastructure.Services
                 }
             };
 
-            ForgedAlliance.Exited += (s, e) =>
-            {
-                IceAdapterClient.Close();
-                ForgedAlliance.Close();
-                ForgedAlliance = null;
-            };
-
             ForgedAlliance.Start();
+            Task.Run(async () =>
+            {
+                await ForgedAlliance.WaitForExitAsync();
+                ForgedAlliance.Close();
+                ForgedAlliance.Dispose();
+                ForgedAlliance = null;
+
+                await IceAdapterClient.CloseAsync();
+
+                IceAdapterClient.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
+                IceAdapterClient.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
+                IceAdapterClient.ConnectionToGpgNetServerChanged -= IceAdapterClient_ConnectionToGpgNetServerChanged;
+                IceAdapterClient = null;
+
+                SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+            });
+        }
+
+        private void IceAdapterClient_ConnectionToGpgNetServerChanged(object sender, bool e)
+        {
+            if (!e)
+            {
+
+            }
         }
 
         private void IceAdapterClient_IceMessageReceived(object sender, string e)
@@ -259,11 +277,11 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
-            if (game.FeaturedMod != FeaturedMod.FAF)
-            {
-                await NotificationService.ShowPopupAsync("Unsupported game mode");
-                return;
-            }
+            //if (game.FeaturedMod != FeaturedMod.FAF)
+            //{
+            //    await NotificationService.ShowPopupAsync("Unsupported game mode");
+            //    return;
+            //}
 
             string password = string.Empty;
 
@@ -347,84 +365,8 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation("Map confirmed!");
 
             // Check current patch
-            var dataToDownload = await ConfirmPatch(game.FeaturedMod);
-            if (dataToDownload.Length != 0)
-            {
-                // we have patch files to download
+            if (!await ConfirmPatch(game.FeaturedMod)) return;
 
-                Logger.LogWarning($"Patch {game.FeaturedMod} required to download");
-
-                ContentDialogResult result;
-
-                if (!Settings.Default.AlwaysDownloadPatch)
-                {
-                    result = await NotificationService.ShowDialog("Patch required to download:\n" + game.FeaturedMod, "Download", "Always download", "Cancel");
-
-                    if (result == ContentDialogResult.None)
-                    {
-                        Logger.LogWarning($"Refused to download patch {game.FeaturedMod}");
-                        return;
-                    }
-
-                    if (result == ContentDialogResult.Secondary)
-                    {
-                        Logger.LogWarning("Set to always download patch");
-                        // Always download
-                        Settings.Default.AlwaysDownloadPatch = true;
-                    }
-                }
-                else
-                {
-                    Logger.LogWarning("Auto downloading patch");
-                }
-
-                //TODO We are downloading all files again, not optimized
-
-                // Clear patch files with legacy
-                //CopyOriginalBin();
-
-                // Check for required patch files again
-                //var data = await ConfirmPatch(game.FeaturedMod);
-                var download = DownloadPatchFiles(dataToDownload);
-
-                NotificationService.ShowDownloadDialog(download, "Cancel");
-                //if (!isCompleted)
-                //{
-                //    await NotificationService.ShowPopupAsync("Something went wrong. Patch download didnt complete");
-                //    return;
-                //}
-                await download.DownloadAllAsync();
-
-                if (!download.IsCompleted)
-                {
-                    Logger.LogWarning("Patch download didnt complete");
-                    return;
-                }
-
-                var files = await ConfirmPatch(game.FeaturedMod);
-                if (files.Length != 0)
-                {
-                    var wrong = string.Empty;
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        wrong += files[i].Name;
-                        if (i < files.Length - 1)
-                        {
-                            wrong += ", ";
-                        }
-                    }
-                    await NotificationService.ShowPopupAsync($"Something went wrong. Patch files didn`t match MD5:\n{wrong}");
-                    return;
-                }
-
-
-                // download required files
-                //var model = await DownloadPatchFiles(dataToDownload);
-
-                //model.Completed += OnPatchDownloadCompleted;
-
-                //return;
-            }
             Logger.LogInformation("Patch confirmed");
 
             string command;
@@ -436,29 +378,65 @@ namespace beta.Infrastructure.Services
             SessionService.Send(command);
         }
 
-        private void OnPatchDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        private async Task<bool> ConfirmPatch(FeaturedMod mod)
         {
-            var model = (DownloadViewModel)sender;
-            model.Completed -= OnPatchDownloadCompleted;
-            if (e.Cancelled) return;
+            var dataToDownload = await ConfirmPatchFiles(mod);
+            if (dataToDownload.Length == 0) return true;
 
-            if (LastGame is not null)
+            // we have patch files to download
+
+            Logger.LogWarning($"Patch {mod} required to download");
+
+            ContentDialogResult result;
+
+            if (!Settings.Default.AlwaysDownloadPatch)
             {
-                JoinGame(LastGame);
-            }
-        }
+                result = await NotificationService.ShowDialog("Patch required to download:\n" + mod, "Download", "Always download", "Cancel");
 
-        private void OnRequiredMapDownloadCompleted(object sender, string e)
-        {
-            // Check if this is required map
-            if (LastGame is not null && LastGame.Map.OriginalName == e)
+                if (result == ContentDialogResult.None)
+                {
+                    Logger.LogWarning($"Refused to download patch {mod}");
+                    return false;
+                }
+
+                if (result == ContentDialogResult.Secondary)
+                {
+                    Logger.LogWarning("Set to always download patch");
+                    // Always download
+                    Settings.Default.AlwaysDownloadPatch = true;
+                }
+            }
+            else
             {
-                Logger.LogInformation($"Required map {e} is downloaded");
-                ((IMapsService)sender).DownloadCompleted -= OnRequiredMapDownloadCompleted;
-
-                // launch cycle again
-                JoinGame(LastGame);
+                Logger.LogWarning("Auto downloading patch");
             }
+
+            var download = DownloadPatchFiles(dataToDownload);
+
+            NotificationService.ShowDownloadDialog(download, "Cancel");
+
+            await download.DownloadAllAsync();
+
+            if (!download.IsCompleted)
+            {
+                Logger.LogWarning("Patch download didnt complete");
+                return false;
+            }
+
+            var files = await ConfirmPatchFiles(mod);
+            if (files.Length == 0) return true;
+
+            var wrong = string.Empty;
+            for (int i = 0; i < files.Length; i++)
+            {
+                wrong += files[i].Name;
+                if (i < files.Length - 1)
+                {
+                    wrong += ", ";
+                }
+            }
+            await NotificationService.ShowPopupAsync($"Something went wrong. Patch files didn`t match MD5:\n{wrong}");
+            return false;
         }
 
         private bool ConfirmMap(string name) => MapsService.CheckLocalMap(name) switch
@@ -471,7 +449,7 @@ namespace beta.Infrastructure.Services
             _ => throw new NotImplementedException(),
         };
 
-        private async Task<ApiFeaturedModFileData[]> ConfirmPatch(FeaturedMod featuredMod)
+        private async Task<ApiFeaturedModFileData[]> ConfirmPatchFiles(FeaturedMod featuredMod)
         {
             Logger.LogInformation($"Confirming patch for {featuredMod} game mod");
             WebRequest webRequest = WebRequest.Create($"https://api.faforever.com/featuredMods/{(int)featuredMod}/files/latest");
@@ -522,11 +500,6 @@ namespace beta.Infrastructure.Services
 
         private DownloadViewModel DownloadPatchFiles(ApiFeaturedModFileData[] data)
         {
-            //if (!CopyOriginalBin())
-            //{
-            //    throw new Exception();
-            //}
-
             var localPath = App.GetPathToFolder(Folder.ProgramData);
             var models = new DownloadItem[data.Length];
             for (int i = 0; i < data.Length; i++)
@@ -645,24 +618,15 @@ namespace beta.Infrastructure.Services
             throw new NotImplementedException();
         }
 
-        public async Task HostGame(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false)
-        {
-            if (mod != FeaturedMod.FAF)
-            {
-
-                return;
-            }
-        }
         private void OnGameFilled(GameInfoMessage e) => GameFilled?.Invoke(this, e);
 
-        public void Close()
+        public async Task Close()
         {
-            IceAdapterClient?.Close();
             try
             {
                 if (IceAdapterClient is not null)
                 {
-                    IceAdapterClient.Close();
+                    await IceAdapterClient.CloseAsync();
                 }
             }
             catch (Exception ex)
@@ -675,6 +639,48 @@ namespace beta.Infrastructure.Services
         {
             await Task.Run(() => CopyOriginalBin());
             await NotificationService.ShowPopupAsync("Patch reset completed");
+        }
+
+        public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
+        {
+            if (!await ConfirmPatch(mod)) return;
+
+            //"title":"Welcome",
+            //"featured_mod":"faf",
+            //"visibility":"public",
+            //"mapname":"dualgap_adaptive.v0012",
+            //"rating_min":null,
+            //"rating_max":null,
+            //"password_protected":false,
+            //"enforce_rating_range":false,
+            if (ForgedAlliance is not null)
+            {
+                Logger.LogWarning("Game is already running");
+                return;
+            }
+
+            StringBuilder sb = new("{\"command\":\"game_host\",");
+
+            sb.Append($"\"title\":\"{title}\",");
+            sb.Append($"\"mod\":\"{mod.ToString().ToLower()}\",");
+            sb.Append($"\"mapname\":\"{mapName}\",");
+            sb.Append($"\"visibility\":\"{visibility.ToString().ToLower()}\",");
+            if (minRating.HasValue)
+            {
+                sb.Append($"\"rating_min\":{minRating.Value},");
+            }
+            if (maxRating.HasValue)
+            {
+                sb.Append($"\"rating_max\":{maxRating.Value},");
+            }
+            if (isRatingResctEnforced)
+            {
+                sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
+            }
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                sb.Append($"\"password\":\"{password}\",");
+            }
         }
     }
 }

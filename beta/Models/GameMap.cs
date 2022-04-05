@@ -149,14 +149,29 @@ namespace beta.Models
         public bool IsLegacy { get; set; }
 
         //public bool IsRanked = false;
-            
+
         //public IPlayer Author = null;
 
         //public double AverageRating = 0;
-      /*
-        public Review[] Reviews
+        /*
+          public Review[] Reviews
 
-      */
+        */
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (BitmapImage is not null)
+                {
+                    BitmapImage.StreamSource.Close();
+                    BitmapImage.StreamSource.Dispose();
+                    BitmapImage.StreamSource = null;
+                    BitmapImage = null;
+                }
+                _ImageSource = null;
+            }
+            base.Dispose(disposing);
+        }
     }
 
     public class NeroxisMap : Map

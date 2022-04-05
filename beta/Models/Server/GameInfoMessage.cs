@@ -294,7 +294,9 @@ namespace beta.Models.Server
         //public string command { get; set; }
 
         public GameInfoMessage[] games { get; set; }
-        public string visibility { get; set; }
+        [JsonPropertyName("visibility")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public GameVisibility Visibility { get; set; }
         public bool password_protected { get; set; }
         public long uid { get; set; }
         public string title { get; set; }
@@ -346,10 +348,22 @@ namespace beta.Models.Server
 
         public int max_players { get; set; }
         public double? launched_at { get; set; }
-        public string rating_type { get; set; }
+        [JsonPropertyName("rating_type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public RatingType RatingType { get; set; }
         public double? rating_min { get; set; }
         public double? rating_max { get; set; }
         public bool enforce_rating_range { get; set; }
         public Dictionary<int, string[]> teams { get; set; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Map.Dispose();
+                _Teams = null;
+            }
+            base.Dispose(disposing);
+        }
     }
 }

@@ -552,6 +552,11 @@ namespace beta.ViewModels
             var games = Games;
             for (int i = 0; i < games.Count; i++)
             {
+                if (games[i] is null)
+                {
+                    games.RemoveAt(i);
+                    continue;
+                }
                 if (games[i].uid == uid)
                 {
                     id = i;
@@ -564,12 +569,14 @@ namespace beta.ViewModels
 
         private void OnGameRemoved(object sender, GameInfoMessage game)
         {
-            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
+            if (game.GameType != GameType || game.FeaturedMod != FeaturedMod.FAF) return;
 
             //Dispatcher.BeginInvoke(() =>
             //{
             if (TryGetIndexOfGame(game.uid, out var id))
                 {
+                    var cgame = Games[id];
+                    cgame.Dispose();
                     Games.RemoveAt(id);
                 }
             //});

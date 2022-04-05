@@ -2,6 +2,9 @@
 
 namespace beta.Models.Server.Enums
 {
+    /// <summary>
+    /// featured_mod
+    /// </summary>
     public enum FeaturedMod : byte
     {
         [EnumMember(Value = "FAF")]

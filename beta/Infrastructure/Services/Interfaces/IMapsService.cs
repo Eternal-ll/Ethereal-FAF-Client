@@ -11,7 +11,6 @@ namespace beta.Infrastructure.Services.Interfaces
     public interface IMapsService
     {
         public event EventHandler<string> DownloadCompleted;
-        public GameMap GetMap(Uri uri, bool attachScenario = true);
         public Map GetMap(Uri uri, PreviewType previewType, bool attachScenario = true);
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AttachMapScenario(GameMap map);
@@ -30,5 +29,6 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="name">Raw map name (example adaptive_wonder_open.0004)</param>
         /// <returns>Game map</returns>
         public Task<GameMap> GetGameMap(string name);
+        public Task<GameMap> GetGameMapAsync(string name);
     }
 }

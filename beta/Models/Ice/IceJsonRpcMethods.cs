@@ -45,7 +45,7 @@ namespace beta.Models.Ice
         /// Gracefully shuts down the faf-ice-adapter.
         /// </summary>
         /// <returns></returns>
-        public static string Quit() => $"{{\"method\": \"quit	\", \"params\": [], \"jsonrpc\": \"2.0\"}}";
+        public static string Quit() => $"{{\"method\": \"quit\", \"params\": [], \"jsonrpc\": \"2.0\"}}";
         /// <summary>
         /// Tell the game to create the lobby and host game on Lobby-State.
         /// </summary>

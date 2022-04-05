@@ -34,7 +34,7 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public GameSessionState State { get; }
 
-        public void Close();
+        public Task Close();
 
         public Task JoinGame(GameInfoMessage game);
         public Task Join(GameInfoMessage game);
@@ -49,7 +49,8 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="password">Secure lobby with password</param>
         /// <param name="isRehost">If you are rehosting last game</param>
         /// <returns></returns>
-        public Task HostGame(string title, FeaturedMod mod, string visibility, string mapName, string password = null, bool isRehost = false);
+        public Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating,
+            GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false);
 
         public Task ResetPatch();
     }

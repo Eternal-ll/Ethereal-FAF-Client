@@ -2,7 +2,6 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Debugger;
 using beta.Models.Ice.Base;
-using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,6 +9,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace beta.Models.Ice
 {
@@ -92,13 +92,14 @@ namespace beta.Models.Ice
             {
 
             }
+
             if (ManagedTcpClient.Write(json))
             {
                 AppDebugger.LOGJSONRPC($"Sent:{json.ToJsonFormat()}");
                 return true;
             }
 
-            AppDebugger.LOGJSONRPC($"!!!!!!!!!!!!!!!!\n{json.ToJsonFormat()}");
+            AppDebugger.LOGJSONRPC($"NOT SEN\n{json.ToJsonFormat()}");
             return false;
         }
 
@@ -205,16 +206,18 @@ namespace beta.Models.Ice
 
         }
 
-        public void Close()
+        public async Task CloseAsync()
         {
-                Send(IceJsonRpcMethods.Quit());
-                //if (IceAdapterProcess is not null)
-                //{
-                //    if (IceAdapterProcess.Process.HasExited) return;
-                //    IceAdapterProcess.Process.Kill();
-                //    IceAdapterProcess.Process.Close();
-                //    IceAdapterProcess.Process.Dispose();
-                //}
+            Send(IceJsonRpcMethods.Quit());
+            if (IceAdapterProcess is not null)
+            {
+                await IceAdapterProcess.Process.WaitForExitAsync();
+                if (IceAdapterProcess.Process.HasExited)
+                {
+                    IceAdapterProcess.Process.Close();
+                    IceAdapterProcess.Process.Dispose();
+                }
+            }
         }
 
         private void ManagedTcpClient_StateChanged(object sender, ManagedTcpClientState e)
