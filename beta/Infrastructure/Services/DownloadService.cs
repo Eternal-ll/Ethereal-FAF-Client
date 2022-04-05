@@ -67,7 +67,13 @@ namespace beta.Infrastructure.Services
             model.Completed -= OnDownloadCompleted;
             // TODO Dispose?
             Downloads.Remove(model);
+
+            if (Equals(Latest, model))
+            {
+                Latest = null;
+            }
             OnDownloadEnded(model);
+            model.Dispose();
         }
 
         private void OnNewDownload(DownloadViewModel e) => NewDownload?.Invoke(this, e);
