@@ -28,6 +28,7 @@
                     <cmd:DisconnectFromIrcCommand x:Key="DisconnectFromIrcCommand"/>
                     <cmd:RefreshIrcCommand x:Key="RefreshIrcCommand"/>
                     <cmd:ResetPatchCommand x:Key="ResetPatchCommand"/>
+                    <cmd:SelectPathToGameCommand x:Key="SelectPathToGameCommand"/>
 
                 </ResourceDictionary>
                 <ResourceDictionary>
