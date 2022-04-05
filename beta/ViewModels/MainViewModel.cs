@@ -14,17 +14,20 @@ namespace beta.ViewModels
     {
         private readonly IOAuthService OAuthService;
         private readonly ISessionService SessionService;
+        private readonly INotificationService NotificationService;
 
         public MainViewModel()
         {
             OAuthService = App.Services.GetService<IOAuthService>();
             SessionService = App.Services.GetService<ISessionService>();
+            NotificationService = App.Services.GetService<INotificationService>();
 
             var isAutojoin = Settings.Default.AutoJoin;
 
             isAutojoin = false;
 
             SessionService.Authorized += OnSessionAuthorizationCompleted;
+            SessionService.NotificationReceived += SessionService_NotificationReceived;
 
             //if (isAutojoin)
             //{
@@ -43,6 +46,12 @@ namespace beta.ViewModels
                 ChildViewModel = new AuthorizationViewModel();
                 //ChildViewModel = new NavigationViewModel();
             });
+        }
+
+        private void SessionService_NotificationReceived(object sender, Models.Server.NotificationData e)
+        {
+            if (e.text.Contains("unofficial", System.StringComparison.OrdinalIgnoreCase)) return;
+            NotificationService.ShowPopupAsync(e.text);
         }
 
         private void OnSessionAuthorizationCompleted(object sender, bool e)

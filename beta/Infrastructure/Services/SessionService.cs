@@ -288,7 +288,12 @@ namespace beta.Infrastructure.Services
         #region Server response actions
         private void OnIceUniversalData(string json) => OnIceUniversalDataReceived(JsonSerializer.Deserialize<IceUniversalData>(json));
 
-        private void OnNoticeData(string json) => OnNotificationReceived(JsonSerializer.Deserialize<NotificationData>(json));
+        private void OnNoticeData(string json)
+        {
+            var model = JsonSerializer.Deserialize<NotificationData>(json);
+            Logger.LogInformation($"Notification: {model.text}");
+            OnNotificationReceived(model);
+        }
         private void OnWelcomeData(string json)
         {
             var welcomeMessage = JsonSerializer.Deserialize<WelcomeData>(json);
