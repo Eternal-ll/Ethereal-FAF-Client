@@ -176,10 +176,10 @@ namespace beta.ViewModels
         #endregion
 
         #region SelectedFilterDescription
-        private PropertyFilterDescription _SelectedFilterDescription = FilterDescriptions[0];
+        private PropertyFilterDescription _SelectedFilterDescription;
         public PropertyFilterDescription SelectedFilterDescription
         {
-            get => _SelectedFilterDescription;
+            get => _SelectedFilterDescription ??= FilterDescriptions[0];
             set
             {
                 if (Set(ref _SelectedFilterDescription, value))
@@ -292,16 +292,14 @@ namespace beta.ViewModels
             get => _SelectedSort;
             set
             {
-                //if (value != _SelectedSort)
-                //{
-                    _SelectedSort = value;
-                    OnPropertyChanged(nameof(SelectedSort));
+                if (Set(ref _SelectedSort, value))
+                {
                     OnPropertyChanged(nameof(SortDirection));
 
                     GamesViewSource.SortDescriptions.Clear();
                     GamesViewSource.LiveSortingProperties.Add(value.PropertyName);
                     GamesViewSource.SortDescriptions.Add(value);
-                //}
+                }
             }
         }
         #endregion
