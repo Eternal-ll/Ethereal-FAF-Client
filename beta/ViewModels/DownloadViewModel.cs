@@ -1,4 +1,6 @@
-﻿using beta.Models;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Utils;
+using beta.Models;
 using Downloader;
 using System;
 using System.ComponentModel;
@@ -6,14 +8,14 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using beta.Infrastructure.Utils;
-using System.Net.Http;
+using System.Windows.Input;
 
 namespace beta.ViewModels
 {
     public class DownloadViewModel : Base.ViewModel
     {
         public event EventHandler<AsyncCompletedEventArgs> Completed;
+        public bool IsCompleted { get; private set; }
 
         public DownloadViewModel(string name, params DownloadItem[] downloads) : this(downloads)
         {
@@ -23,8 +25,24 @@ namespace beta.ViewModels
         public DownloadViewModel(params DownloadItem[] downloads)
         {
             Downloads = downloads;
-            Task.Factory.StartNew(async () => _TotalSize = await CalculateTotalSize(downloads).ConfigureAwait(false));
+            //Task.Factory.StartNew(async () => _TotalSize = await CalculateTotalSize(downloads).ConfigureAwait(false));
+            //Task.Run(() => DownloadAll());
         }
+        private bool IsCanceled = false;
+        public void Cancel()
+        {
+            IsCanceled = true;
+            CurrentDownloadModel.CancelAsync();
+            CurrentDownloadModel.Clear();
+            IsCompleted = false;
+        }
+
+        #region CancelCommand
+        private ICommand _CancelCommand;
+        public ICommand CancelCommand => _CancelCommand ??= new LambdaCommand(OnCancelCommand, CanCancelCommand);
+        private void OnCancelCommand(object parameter) => Cancel();
+        private bool CanCancelCommand(object parameter) => true;
+        #endregion
 
         private static DownloadConfiguration GetDownloadConfiguration()
         {
@@ -35,7 +53,7 @@ namespace beta.ViewModels
             return new DownloadConfiguration
             {
                 BufferBlockSize = 8000, // usually, hosts support max to 8000 bytes, default values is 8000
-                ChunkCount = 8, // file parts to download, default value is 1
+                ChunkCount = 1, // file parts to download, default value is 1
                 MaximumBytesPerSecond = 0, //1024 * 1024 * 2, // download speed limited to 2MB/s, default values is zero or unlimited
                 MaxTryAgainOnFailover = int.MaxValue, // the maximum number of times to fail
                 OnTheFlyDownload = false, // caching in-memory or not? default values is true
@@ -84,6 +102,11 @@ namespace beta.ViewModels
         public string TotalSize => _TotalSize.CalcMemoryMensurableUnit();
         #endregion
 
+        #region DownloadedSize
+        private long _DownloadedSize;
+        public string DownloadedSize => _DownloadedSize.CalcMemoryMensurableUnit();
+        #endregion
+
         #region CurrentFileIndex
         private int _CurrentFileIndex;
         public int CurrentFileIndex
@@ -94,10 +117,15 @@ namespace beta.ViewModels
                 if (Set(ref _CurrentFileIndex, value))
                 {
                     OnPropertyChanged(nameof(Name));
+
+                    CurrentDownloadItem = Downloads[value - 1];
+                    OnPropertyChanged(nameof(CurrentDownloadItem));
                 }
             }
         }
         #endregion
+
+        public DownloadItem CurrentDownloadItem { get; private set; }
 
         #region CurrentFileDownloadProgress
         private double _CurrentFileDownloadProgress;
@@ -117,11 +145,38 @@ namespace beta.ViewModels
         }
         #endregion
 
+        #region AveragePerSecond
+        private double _AveragePerSecond;
+        public string AveragePerSecond => _AveragePerSecond.CalcMemoryMensurableUnit();
+        #endregion
+
+        #region PerSecond
+        private double _PerSecond;
+        public string PerSecond => _PerSecond.CalcMemoryMensurableUnit();
+        #endregion
+
+        #region EstimateTime
+        private string _EstimateTime;
+        public string EstimateTime
+        {
+            get => _EstimateTime;
+            set => Set(ref _EstimateTime, value);
+        }
+        #endregion
+
         public int FilesToDownload => Downloads.Length;
+
+
+        #region PauseDownloadCommand
+        //private ICommand _PauseDownloadCommand;
+        //public ICommand PauseDownloadCommand => _PauseDownloadCommand ??= new LambdaCommand(OnPauseDownloadCommand, CanPauseDownloadCommand);
+        //private bool CanPauseDownloadCommand(object parameter) => CurrentDownloadModel.
+        #endregion
+
 
         private DownloadConfiguration CurrentDownloadConfiguration;
 
-        private readonly DownloadItem[] Downloads;
+        public DownloadItem[] Downloads { get; private set; }
 
         private static async Task<long> CalculateTotalSize(DownloadItem[] downloads)
         {
@@ -144,12 +199,14 @@ namespace beta.ViewModels
 
         //public async Task Cancel() => CurrentDownloadModel.CancelAsync();
 
-        public async Task DownloadAll() => await Task.Factory.StartNew(async () => await DownloadAll(Downloads).ConfigureAwait(false)).ConfigureAwait(false);
+        public Task DownloadAll() => Task.Run(() => DownloadAll(Downloads));
+        public async Task DownloadAllAsync() => await DownloadAll(Downloads);
 
         private async Task DownloadAll(DownloadItem[] downloads)
         {
             for (int i = 0; i < downloads.Length; i++)
             {
+                if (IsCanceled) return;
                 CurrentFileIndex = i + 1;
                 // begin download from url
                 DownloadService ds = await DownloadFile(downloads[i]).ConfigureAwait(false);
@@ -167,7 +224,8 @@ namespace beta.ViewModels
             CurrentDownloadModel.DownloadFileCompleted += OnDownloadFileCompleted;
             CurrentDownloadModel.DownloadStarted += OnDownloadStarted;
 
-            File.Delete(downloadItem.FolderPath + downloadItem.FileName);
+            if (File.Exists(downloadItem.FolderPath + downloadItem.FileName))
+                File.Delete(downloadItem.FolderPath + downloadItem.FileName);
 
             if (!string.IsNullOrWhiteSpace(downloadItem.FileName))
             {
@@ -189,21 +247,68 @@ namespace beta.ViewModels
         private void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             CurrentFileDownloadProgress = 0;
+            TotalBytesReceived = ((DownloadModel)sender).Package.ReceivedBytesSize;
             total = DownloadProgress;
             if (CurrentFileIndex == Downloads.Length || e.Cancelled)
             {
                 Completed?.Invoke(this, e);
+                IsCompleted = !e.Cancelled;
             }
         }
 
         private double total = 0;
+        private double TotalBytesReceived = 0;
         private void OnDownloadProgressChanged(object sender, Downloader.DownloadProgressChangedEventArgs e)
         {
-            CurrentFileDownloadProgress = e.ProgressPercentage;
-            DownloadProgress = (total + e.ProgressPercentage) / Downloads.Length;
+            double nonZeroSpeed = e.BytesPerSecondSpeed + 0.0001;
+            int estimateTime = (int)((e.TotalBytesToReceive - e.ReceivedBytesSize) / nonZeroSpeed);
+            bool isMinutes = estimateTime >= 60;
+            string timeLeftUnit = "seconds";
 
-            if (_TotalSize is 0) _TotalSize = e.TotalBytesToReceive;
+            if (isMinutes)
+            {
+                timeLeftUnit = "minutes";
+                estimateTime /= 60;
+            }
+
+            if (estimateTime < 0)
+            {
+                estimateTime = 0;
+                timeLeftUnit = "unknown";
+            }
+            EstimateTime = $"{estimateTime} {timeLeftUnit} left";
+
+            CurrentFileDownloadProgress = e.ProgressPercentage;
+
+            if (e.ProgressPercentage == 0)
+            {
+                DownloadProgress = CurrentFileIndex / Downloads.Length;
+            }
+            else
+            {
+                DownloadProgress = (total + e.ProgressPercentage) / Downloads.Length;
+            }
+
+            _DownloadedSize = e.ReceivedBytesSize;
+
+            _PerSecond = e.BytesPerSecondSpeed;
+            _AveragePerSecond = e.AverageBytesPerSecondSpeed;
+
+            _TotalSize = e.TotalBytesToReceive;
+
             OnPropertyChanged(nameof(TotalSize));
+            OnPropertyChanged(nameof(DownloadedSize));
+            OnPropertyChanged(nameof(PerSecond));
+            OnPropertyChanged(nameof(AveragePerSecond));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+
+            }
+            base.Dispose(disposing);
         }
     }
 }
