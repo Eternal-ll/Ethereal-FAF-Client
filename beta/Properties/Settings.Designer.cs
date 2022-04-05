@@ -177,22 +177,19 @@ namespace beta.Properties {
                 this["Height"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsWindowMaximized
-        {
-            get
-            {
+        public bool IsWindowMaximized {
+            get {
                 return ((bool)(this["IsWindowMaximized"]));
             }
-            set
-            {
+            set {
                 this["IsWindowMaximized"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
@@ -288,6 +285,42 @@ namespace beta.Properties {
             }
             set {
                 this["ConnectIRC"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadMap {
+            get {
+                return ((bool)(this["AlwaysDownloadMap"]));
+            }
+            set {
+                this["AlwaysDownloadMap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadMod {
+            get {
+                return ((bool)(this["AlwaysDownloadMod"]));
+            }
+            set {
+                this["AlwaysDownloadMod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadPatch {
+            get {
+                return ((bool)(this["AlwaysDownloadPatch"]));
+            }
+            set {
+                this["AlwaysDownloadPatch"] = value;
             }
         }
     }
