@@ -10,14 +10,25 @@ namespace beta.ViewModels
     {
         private readonly IPlayersService PlayersService;
         private readonly IIrcService IrcService;
+        private readonly IDownloadService DownloadService;
         public NavigationViewModel()
         {
             PlayersService = App.Services.GetService<IPlayersService>();
             IrcService = App.Services.GetService<IIrcService>();
+            DownloadService = App.Services.GetService<IDownloadService>();
 
             PlayersService.MeReceived += PlayersService_MeReceived;
             IrcService.StateChanged += IrcService_StateChanged;
+            DownloadService.NewDownload += DownloadService_NewDownload;
+            DownloadService.DownloadEnded += DownloadService_DownloadEnded;
         }
+
+        private void DownloadService_DownloadEnded(object sender, DownloadViewModel e)
+        {
+            if (e.Equals(LatestDownloadViewModel)) LatestDownloadViewModel = null;
+        }
+
+        private void DownloadService_NewDownload(object sender, DownloadViewModel e) => LatestDownloadViewModel = e;
 
         private void IrcService_StateChanged(object sender, IrcState e) => IrcState = e;
 
@@ -47,6 +58,15 @@ namespace beta.ViewModels
                 }
             }
         }
+        #endregion
+
+        #region LatestDownloadViewModel
+        private DownloadViewModel _LatestDownloadViewModel;
+        public DownloadViewModel LatestDownloadViewModel
+        {
+            get => _LatestDownloadViewModel;
+            set => Set(ref _LatestDownloadViewModel, value);
+        } 
         #endregion
     }
 }
