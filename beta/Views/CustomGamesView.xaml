@@ -16,6 +16,20 @@
     </UserControl.DataContext>-->
     <Grid ShowGridLines="False">
         <Grid.Resources>
+            <Style x:Key="CustomToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Gray" Opacity=".4"/>
+                    </Setter.Value>
+                </Setter>
+                <Style.Resources>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundPressed" Color="DimGray" Opacity=".3"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="Gray" Opacity=".4"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPointerOver" Color="DimGray" Opacity=".3"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="DimGray" Opacity=".3"/>
+                    <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="DimGray" Opacity=".3"/>
+                </Style.Resources>
+            </Style>
             <Style x:Key="g" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
                 <Setter Property="Margin" Value="0 100 0 0"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
@@ -357,15 +371,57 @@
                 </Button>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Filter" VerticalAlignment="Center" Margin="10 0"/>
-                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
                     <TextBlock Text="by" VerticalAlignment="Center" Margin="10 0"/>
-                    <ComboBox SelectedValue="{Binding SelectedFilterDescription}" ItemsSource="{Binding FilterDescriptions}"
+                    <ComboBox SelectedItem="{Binding SelectedFilterDescription}" ItemsSource="{Binding FilterDescriptions}"
                               DisplayMemberPath="DisplayedProperty"/>
                 </StackPanel>
-                <!--<CheckBox IsChecked="{Binding IsDataGridView}" Content="IsDataGridView "/>-->
-                <CheckBox IsChecked="{Binding IsGridView}" Content="IsGridView " Margin="10 0 0 0"/>
-                <CheckBox IsChecked="{Binding IsExtendedViewEnabled}" Content="IsExtendedViewEnabled "/>
-                
+                <ToggleButton VerticalAlignment="Stretch" Margin="10 0" IsChecked="{Binding IsGridView}">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Margin="0 0 1 0" Stretch="Uniform" Data="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="White" Stretch="Uniform" Data="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <ToggleButton IsChecked="{Binding IsExtendedViewEnabled}" VerticalAlignment="Stretch">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
+                            
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="Gray" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content">
+                                        <Setter.Value>
+                                            <Path Fill="LimeGreen" Data="M13,5H21V19H13V5M3,5H11V7H3V5M3,11V9H11V11H3M3,19V17H11V19H3M3,15V13H11V15H3Z" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+
                 <StackPanel Orientation="Horizontal">
                 </StackPanel>
             </WrapPanel>
