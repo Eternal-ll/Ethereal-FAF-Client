@@ -246,24 +246,32 @@ namespace beta.Infrastructure.Services
             var name = uri.Segments[^1];
             DownloadItem dModel = new(commonPath, name, uri.AbsoluteUri);
 
-            var model = await DownloadService.DownloadAsync(dModel);
-            model.Completed += (s, e) =>
-            {
-                if (e.Cancelled)
-                {
-                    return;
-                }
+            var model = await DownloadService.DownloadAsync(true, dModel);
 
-                string zipPath = commonPath + name;
+            string zipPath = commonPath + name;
 
-                string extractPath = App.GetPathToFolder(Folder.Maps);
+            string extractPath = App.GetPathToFolder(Folder.Maps);
 
-                ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+            ZipFile.ExtractToDirectory(zipPath, extractPath, true);
 
-                File.Delete(zipPath);
+            File.Delete(zipPath);
+            //model.Completed += (s, e) =>
+            //{
+            //    if (e.Cancelled)
+            //    {
+            //        return;
+            //    }
 
-                DownloadCompleted?.Invoke(this, name[..^4]);
-            };
+            //    string zipPath = commonPath + name;
+
+            //    string extractPath = App.GetPathToFolder(Folder.Maps);
+
+            //    ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+
+            //    File.Delete(zipPath);
+
+            //    DownloadCompleted?.Invoke(this, name[..^4]);
+            //};
             return model;
         }
 
