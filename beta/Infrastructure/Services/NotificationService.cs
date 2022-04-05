@@ -71,6 +71,14 @@ namespace beta.Infrastructure.Services
                 ContentDialog.CloseButtonText= "Close";
             }
 
+            if (model is PassPasswordViewModel passwordModel)
+            {
+                ContentDialog.PrimaryButtonCommand = passwordModel.PassPasswordCommand;
+                ContentDialog.PrimaryButtonText = "Pass";
+                ContentDialog.IsPrimaryButtonEnabled = false;
+                ContentDialog.CloseButtonText = "Cancel";
+            }
+
             return await ContentDialog.ShowAsync();
         }
 

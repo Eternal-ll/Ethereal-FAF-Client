@@ -265,6 +265,21 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
+            string password = string.Empty;
+
+            if (game.password_protected)
+            {
+                PassPasswordViewModel model = new();
+                var result = await NotificationService.ShowDialog(model);
+                if (result is ContentDialogResult.None)
+                {
+                    Logger.LogInformation($"User refused to pass password to game {game.uid} by {game.host}");
+                    return;
+                }
+                password = model.Password;
+            }
+
+
             LastGame = game;
 
             // Check mods?
@@ -407,7 +422,13 @@ namespace beta.Infrastructure.Services
             }
             Logger.LogInformation("Patch confirmed");
 
-            //SessionService.Send(ServerCommands.JoinGame(game.uid.ToString()));
+            string command;
+
+            if (game.password_protected)
+                command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
+            else command = ServerCommands.JoinGame(game.uid.ToString());
+            
+            SessionService.Send(command);
         }
 
         private void OnPatchDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
