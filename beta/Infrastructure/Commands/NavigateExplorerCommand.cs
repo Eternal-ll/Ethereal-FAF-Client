@@ -31,7 +31,9 @@ namespace beta.Infrastructure.Commands
                 case "patch":
                     return;
                     break;
-                default: return;
+                default:
+                    args = parameter.ToString();
+                    break;
             }
 
             args = args.Replace("%username%", user);
