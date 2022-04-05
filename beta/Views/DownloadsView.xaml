@@ -10,7 +10,43 @@
     <UserControl.DataContext>
         <vm:DownloadsViewModel/>
     </UserControl.DataContext>
-    <Grid>
-            
-    </Grid>
+    <StackPanel Margin="30">
+        <TextBlock Text="Downloads" FontSize="36" Margin="0 0 0 20"/>
+        <GroupBox Header="Latest download" Content="{Binding Latest}">
+            <GroupBox.Style>
+                <Style TargetType="GroupBox" BasedOn="{StaticResource DefaultGroupBoxStyle}">
+                    <Style.Triggers>
+                        <Trigger Property="Content" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
+        </GroupBox>
+        <GroupBox Header="All downloads">
+            <GroupBox.Style>
+                <Style TargetType="GroupBox" BasedOn="{StaticResource DefaultGroupBoxStyle}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Downloads.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </GroupBox.Style>
+            <ListBox ItemsSource="{Binding Downloads}">
+            </ListBox>
+        </GroupBox>
+        <TextBlock Text="No downloads">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Downloads.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+    </StackPanel>
 </UserControl>
