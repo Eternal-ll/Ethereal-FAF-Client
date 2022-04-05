@@ -1,9 +1,21 @@
-﻿using beta.Properties;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services.Interfaces;
+using beta.Properties;
+using Microsoft.Extensions.DependencyInjection;
+using System.Windows.Input;
 
 namespace beta.ViewModels
 {
     internal class SettingsViewModel : Base.ViewModel
     {
+        private readonly INotificationService NotificationService;
+
+        public SettingsViewModel()
+        {
+            NotificationService = App.Services.GetService<INotificationService>();
+        }
+
+
         #region IsAlwaysDownloadMapEnabled
         private bool _IsAlwaysDownloadMapEnable = Settings.Default.AlwaysDownloadMap;
         public bool IsAlwaysDownloadMapEnabled
@@ -92,6 +104,40 @@ namespace beta.ViewModels
                 }
             }
         }
+        #endregion
+
+        #region PathToGame
+        private string _PathToGame = Settings.Default.PathToGame;
+        public string PathToGame
+        {
+            get => _PathToGame;
+            set
+            {
+                if (Set(ref _PathToGame, value))
+                {
+                    Settings.Default.PathToGame = value;
+                }
+            }
+        }
+        #endregion
+
+        #region Commands
+
+        #region SelectPathToGameCommand
+        private ICommand _SelectPathToGameCommand;
+        public ICommand SelectPathToGameCommand => _SelectPathToGameCommand ??= new LambdaCommand(OnSelectPathToGameCommand);
+        private async void OnSelectPathToGameCommand(object parameter)
+        {
+            var model = new SelectPathToGameViewModel();
+            var result = await NotificationService.ShowDialog(model);
+            if (result is ModernWpf.Controls.ContentDialogResult.None)
+            {
+                return;
+            }
+            PathToGame = model.Path;
+        }
+        #endregion
+
         #endregion
     }
 }
