@@ -1,4 +1,5 @@
-﻿using ModernWpf.Controls;
+﻿using beta.ViewModels;
+using ModernWpf.Controls;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
@@ -22,14 +23,87 @@ namespace beta.Infrastructure.Services
 
         public async Task ShowPopupAsync(string text)
         {
-            ContentDialog.Content = text;
-            await ContentDialog.ShowAsync();
+            ContentDialog.Dispatcher.Invoke(() =>
+            {
+                ContentDialog.PrimaryButtonText = null;
+                ContentDialog.SecondaryButtonText = null;
+                ContentDialog.CloseButtonText = "OK";
+                ContentDialog.Content = text;
+                ContentDialog.ShowAsync();
+            });
         }
 
         public async Task ShowPopupAsync(object model)
         {
+            ContentDialog.Dispatcher.Invoke(() =>
+            {
+                ContentDialog.PrimaryButtonText = null;
+                ContentDialog.SecondaryButtonText = null;
+                ContentDialog.CloseButtonText = "OK";
+                ContentDialog.Content = model;
+                ContentDialog.ShowAsync();
+            });
+        }
+
+        public async Task<ContentDialogResult> ShowDialog(string text)
+        {
+            ContentDialog.Content = text;
+            return await ContentDialog.ShowAsync();
+        }
+
+        public async Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null)
+        {
             ContentDialog.Content = model;
-            await ContentDialog.ShowAsync();
+
+            ContentDialog.PrimaryButtonText = primary;
+            ContentDialog.SecondaryButtonText = secondary;
+            ContentDialog.CloseButtonText = close;
+
+            return await ContentDialog.ShowAsync();
+        }
+
+        public async Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null)
+        {
+            ContentDialog.Content = text;
+
+            ContentDialog.PrimaryButtonText = primary;
+            ContentDialog.SecondaryButtonText = secondary;
+            ContentDialog.CloseButtonText = close;
+
+            return await ContentDialog.ShowAsync();
+        }
+
+        public async Task<bool> ShowDownloadDialog(DownloadViewModel model, string close = null)
+        {
+            model.Completed += Download_Completed;
+
+            ContentDialog.PreviewKeyDown += HideEscapeKey;
+
+            var result = await ShowDialog(model, secondary: close, close: "Hide");
+            
+            ContentDialog.PreviewKeyDown -= HideEscapeKey;
+
+            if (result == ContentDialogResult.None)
+            {
+                return model.IsCompleted;
+            }
+
+            model.Cancel();
+            return false;
+        }
+
+        private void HideEscapeKey(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Escape)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void Download_Completed(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            ((DownloadViewModel)sender).Completed -= Download_Completed;
+            ContentDialog.Dispatcher.Invoke(() => ContentDialog.Hide());
         }
     }
 }
