@@ -316,7 +316,12 @@ namespace beta.Infrastructure.Services
 
                 // Run task for downloading
                 //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip")));
-                await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
+
+                if (!model.IsCompleted)
+                {
+                    return;
+                }
 
                 if (!ConfirmMap(game.Map.OriginalName))
                 {
