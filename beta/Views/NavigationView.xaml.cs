@@ -83,6 +83,12 @@ namespace beta.Views
 
             if (selectedItemTag is null) return;
 
+            if (selectedItemTag == "Logout")
+            {
+                // TODO
+                return;
+            }
+
             string pageName = "beta.Views." + selectedItemTag + "View";
             Type viewType = typeof(GlobalView).Assembly.GetType(pageName);
 
