@@ -1,12 +1,90 @@
 ﻿<UserControl x:Class="beta.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:beta.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:beta.ViewModels"
+             d:DataContext="{d:DesignInstance {x:Type vm:SettingsViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    <UserControl.DataContext>
+        <vm:SettingsViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <Style x:Key="StackPanelFieldStyle" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+            <Setter Property="Margin" Value="0 10"/>
+            <Style.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+                <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                    <Setter Property="MinWidth" Value="300"/>
+                    <Setter Property="MaxWidth" Value="500"/>
+                    <Setter Property="TextWrapping" Value="Wrap"/>
+                    <Setter Property="Margin" Value="10 0"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+        <Style TargetType="GroupBox" BasedOn="{StaticResource DefaultGroupBoxStyle}">
+            <Setter Property="Padding" Value="0"/>
+            <!--<Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontSize="24"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="Black" Opacity=".1"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+
+            </Style.Triggers>-->
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer>
+        <Grid Margin="30" HorizontalAlignment="Left">
+            <!--<Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>-->
+            <StackPanel>
+                <TextBlock Text="Settings" FontSize="36" Margin="0 0 0 20"/>
+                <!--<Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>-->
+                <GroupBox Header="Downloads">
+                    <StackPanel>
+                        <CheckBox IsChecked="{Binding IsAlwaysDownloadMapEnabled}" Content="Always download map"/>
+                        <CheckBox IsChecked="{Binding IsAlwaysDownloadModEnabled}" Content="Always download mod"/>
+                        <CheckBox IsChecked="{Binding IsAlwaysDownloadPatchEnabled}" Content="Always download patch"/>
+                        <StackPanel Style="{StaticResource StackPanelFieldStyle}">
+                            <TextBlock Text="Path to maps"/>
+                            <TextBox IsReadOnly="True" Text="{Binding PathToMaps}"/>
+                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMaps}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource StackPanelFieldStyle}">
+                            <TextBlock Text="Path to mods"/>
+                            <TextBox IsReadOnly="True" Text="{Binding PathToMods}"/>
+                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMods}"/>
+                        </StackPanel>
+                        <StackPanel Style="{StaticResource StackPanelFieldStyle}">
+                            <TextBlock Text="Path to patch"/>
+                            <TextBox IsReadOnly="True" Text="{Binding PathToPatch}"/>
+                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToPatch}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
