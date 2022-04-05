@@ -233,7 +233,7 @@ namespace beta.ViewModels
             }
         }
         #endregion
-
+            
         #region IsGamesWithEnforcedRatingVisible
         private bool _IsOnlyGamesWithEnforcedRatingVisible;
         public bool IsOnlyGamesWithEnforcedRatingVisible
@@ -342,10 +342,10 @@ namespace beta.ViewModels
         public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
         #endregion
 
-        #region Maps black list area
+    #region Maps black list area
 
         #region IsMapsBlacklistEnabled
-        private bool _IsMapsBlacklistEnabled; // TODO default value
+        private bool _IsMapsBlacklistEnabled = true; // TODO default value
         public bool IsMapsBlacklistEnabled
         {
             get => _IsMapsBlacklistEnabled;
