@@ -6,14 +6,19 @@ namespace beta.Infrastructure.Services
 {
     internal class NotificationService : Interfaces.INotificationService
     {
-        private ContentDialog ContentDialog;
+        public ContentDialog ContentDialog { get; private set; }
         public NotificationService()
         {
             App.Current.Dispatcher.Invoke(() => ContentDialog = new()
             {
                 CloseButtonText = "OK"
             });
+            ContentDialog.Opened += ContentDialog_Opened;
             ContentDialog.Closed += ContentDialog_Closed;
+        }
+
+        private void ContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+        {
         }
 
         private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
@@ -58,6 +63,13 @@ namespace beta.Infrastructure.Services
             ContentDialog.PrimaryButtonText = primary;
             ContentDialog.SecondaryButtonText = secondary;
             ContentDialog.CloseButtonText = close;
+
+            if (model is SelectPathToGameViewModel pathModel)
+            {
+                ContentDialog.PrimaryButtonCommand = pathModel.ConfirmCommand;
+                ContentDialog.PrimaryButtonText = "Save";
+                ContentDialog.CloseButtonText= "Close";
+            }
 
             return await ContentDialog.ShowAsync();
         }

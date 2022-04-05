@@ -236,6 +236,17 @@ namespace beta.Infrastructure.Services
         {
             Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
 
+            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            {
+                var model = new SelectPathToGameViewModel();
+                var result = await NotificationService.ShowDialog(model);
+                if (result is ContentDialogResult.None)
+                {
+                    return;
+                }
+                Settings.Default.PathToGame = model.Path;
+            }
+
             if (ForgedAlliance is not null)
             {
                 await NotificationService.ShowPopupAsync("Game already is running");
@@ -621,6 +632,17 @@ namespace beta.Infrastructure.Services
         public void Close()
         {
             IceAdapterClient?.Close();
+            try
+            {
+                if (IceAdapterClient is not null)
+                {
+                    IceAdapterClient.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.ShowPopupAsync(new ErrorEventArgs(ex));
+            }
         }
 
         public async Task ResetPatch()

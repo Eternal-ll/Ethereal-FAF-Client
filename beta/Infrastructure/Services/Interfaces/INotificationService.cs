@@ -6,6 +6,7 @@ namespace beta.Infrastructure.Services.Interfaces
 {
     internal interface INotificationService
     {
+        public ContentDialog ContentDialog { get; }
         public Task ShowPopupAsync(string text);
         public Task ShowPopupAsync(object model);
         public Task<ContentDialogResult> ShowDialog(string text);
