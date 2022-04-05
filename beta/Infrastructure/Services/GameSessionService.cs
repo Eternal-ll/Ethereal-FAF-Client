@@ -6,8 +6,10 @@ using beta.Models.Ice;
 using beta.Models.Server;
 using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
+using beta.Properties;
 using beta.ViewModels;
 using Microsoft.Extensions.Logging;
+using ModernWpf.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -58,7 +60,7 @@ namespace beta.Infrastructure.Services
             SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
             SessionService.IceUniversalDataReceived += SessionService_IceUniversalDataReceived;
 
-            beta.App.Current.Exit += (s, e) =>
+            System.Windows.Application.Current.Exit += (s, e) =>
             {
                 IceAdapterClient?.Close();
             };
@@ -125,7 +127,7 @@ namespace beta.Infrastructure.Services
 
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
         {
-            IceAdapterClient = new(Properties.Settings.Default.PlayerId.ToString(), Properties.Settings.Default.PlayerNick);
+            IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
 
             IceAdapterClient.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
             IceAdapterClient.IceMessageReceived += IceAdapterClient_IceMessageReceived;
@@ -199,6 +201,8 @@ namespace beta.Infrastructure.Services
             ForgedAlliance.Exited += (s, e) =>
             {
                 IceAdapterClient.Close();
+                ForgedAlliance.Close();
+                ForgedAlliance = null;
             };
 
             ForgedAlliance.Start();
@@ -232,6 +236,12 @@ namespace beta.Infrastructure.Services
         {
             Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
 
+            if (ForgedAlliance is not null)
+            {
+                await NotificationService.ShowPopupAsync("Game already is running");
+                return;
+            }
+
             if (game.mapname.StartsWith("neroxis"))
             {
                 await NotificationService.ShowPopupAsync("Unsupported map");
@@ -253,13 +263,55 @@ namespace beta.Infrastructure.Services
             if (!ConfirmMap(game.Map.OriginalName))
             {
                 Logger.LogWarning("Map {1} required to download", game.Map.OriginalName);
-                // Run task for downloading
-                await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip")));
 
-                // because it is .zip file, we cant just wait till model itself complete to download.
-                // we have to wait the service to complete unzip process;
-                MapsService.DownloadCompleted += OnRequiredMapDownloadCompleted;
-                return;
+                ContentDialogResult result;
+
+                if (!Settings.Default.AlwaysDownloadMap)
+                {
+                    result = await NotificationService.ShowDialog("Map required to download:\n" + game.mapname, "Download", "Always download", "Cancel");
+
+                    if (result == ContentDialogResult.None)
+                    {
+                        Logger.LogWarning($"Refused to download map {game.Map.OriginalName}");
+                        return;
+                    }
+
+                    if (result == ContentDialogResult.Secondary)
+                    {
+                        Logger.LogWarning("Set to always download map");
+                        // Always download
+                        Settings.Default.AlwaysDownloadMap = true;
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning("Auto downloading map");
+                }
+
+                // Run task for downloading
+                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip")));
+                await MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
+
+                if (!ConfirmMap(game.Map.OriginalName))
+                {
+                    await NotificationService.ShowPopupAsync("Something went wrong on downloading map, try again");
+                    return;
+                }
+
+                //result = await NotificationService.ShowDialog(model, close: "Hide", secondary: "Cancel");
+
+                    //if (result == ContentDialogResult.Secondary)
+                    //{
+
+                    //    Logger.LogWarning($"Cancelled downloading of map {game.mapname}");
+                    //    model.Cancel();
+                    //    model.Dispose();
+                    //    return;
+                    //}
+
+                    // because it is .zip file, we cant just wait till model itself complete to download.
+                    // we have to wait the service to complete unzip process;
+                    //MapsService.DownloadCompleted += OnRequiredMapDownloadCompleted;
             }
             Logger.LogInformation("Map confirmed!");
 
@@ -269,6 +321,32 @@ namespace beta.Infrastructure.Services
             {
                 // we have patch files to download
 
+                Logger.LogWarning($"Patch {game.FeaturedMod} required to download");
+
+                ContentDialogResult result;
+
+                if (!Settings.Default.AlwaysDownloadPatch)
+                {
+                    result = await NotificationService.ShowDialog("Patch required to download:\n" + game.FeaturedMod, "Download", "Always download", "Cancel");
+
+                    if (result == ContentDialogResult.None)
+                    {
+                        Logger.LogWarning($"Refused to download patch {game.FeaturedMod}");
+                        return;
+                    }
+
+                    if (result == ContentDialogResult.Secondary)
+                    {
+                        Logger.LogWarning("Set to always download patch");
+                        // Always download
+                        Settings.Default.AlwaysDownloadPatch = true;
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning("Auto downloading patch");
+                }
+
                 //TODO We are downloading all files again, not optimized
 
                 // Clear patch files with legacy
@@ -276,17 +354,49 @@ namespace beta.Infrastructure.Services
 
                 // Check for required patch files again
                 //var data = await ConfirmPatch(game.FeaturedMod);
+                var download = DownloadPatchFiles(dataToDownload);
+
+                NotificationService.ShowDownloadDialog(download, "Cancel");
+                //if (!isCompleted)
+                //{
+                //    await NotificationService.ShowPopupAsync("Something went wrong. Patch download didnt complete");
+                //    return;
+                //}
+                await download.DownloadAllAsync();
+
+                if (!download.IsCompleted)
+                {
+                    Logger.LogWarning("Patch download didnt complete");
+                    return;
+                }
+
+                var files = await ConfirmPatch(game.FeaturedMod);
+                if (files.Length != 0)
+                {
+                    var wrong = string.Empty;
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        wrong += files[i].Name;
+                        if (i < files.Length - 1)
+                        {
+                            wrong += ", ";
+                        }
+                    }
+                    await NotificationService.ShowPopupAsync($"Something went wrong. Patch files didn`t match MD5:\n{wrong}");
+                    return;
+                }
+
 
                 // download required files
-                var model = await DownloadPatchFiles(dataToDownload);
+                //var model = await DownloadPatchFiles(dataToDownload);
 
-                model.Completed += OnPatchDownloadCompleted;
+                //model.Completed += OnPatchDownloadCompleted;
 
-                return;
+                //return;
             }
             Logger.LogInformation("Patch confirmed");
 
-            SessionService.Send(ServerCommands.JoinGame(game.uid.ToString()));
+            //SessionService.Send(ServerCommands.JoinGame(game.uid.ToString()));
         }
 
         private void OnPatchDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
@@ -373,7 +483,7 @@ namespace beta.Infrastructure.Services
             return data.ToArray();
         }
 
-        private async Task<DownloadViewModel> DownloadPatchFiles(ApiFeaturedModFileData[] data)
+        private DownloadViewModel DownloadPatchFiles(ApiFeaturedModFileData[] data)
         {
             //if (!CopyOriginalBin())
             //{
@@ -389,7 +499,7 @@ namespace beta.Infrastructure.Services
                 models[i] = new(localPath + item.Group + "\\", item.Name, item.Url.AbsoluteUri);
             }
 
-            return await DownloadService.DownloadAsync(models);
+            return DownloadService.GetDownload(models);
         }
 
         /// <summary>
@@ -424,7 +534,7 @@ namespace beta.Infrastructure.Services
         private bool CopyOriginalBin()
         {
             Logger.LogInformation("Copying original game files from Bin folder...");
-            var pathToGame = Properties.Settings.Default.PathToGame;
+            var pathToGame = Settings.Default.PathToGame;
 
             if (pathToGame is null)
             {
