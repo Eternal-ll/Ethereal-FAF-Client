@@ -13,13 +13,14 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
 {
-    public class MapsService : IMapsService
+    internal class MapsService : IMapsService
     {
         public event EventHandler<string> DownloadCompleted;
 
         private readonly ICacheService CacheService;
         private readonly IApiService ApiService;
         private readonly IDownloadService DownloadService;
+        private readonly INotificationService NotificationService;
 
         private readonly List<string> LocalMaps = new();
         private readonly Dictionary<string, GameMap> CachedMaps = new();
@@ -28,7 +29,7 @@ namespace beta.Infrastructure.Services
         public string[] GetLocalMaps() => LocalMaps.ToArray();
 
         private string PathToLegacyMaps => Settings.Default.PathToGame is not null ? Settings.Default.PathToGame + @"\maps\" : null;
-        public MapsService(ICacheService cacheService, IApiService apiService, IDownloadService downloadService)
+        public MapsService(ICacheService cacheService, IApiService apiService, IDownloadService downloadService, INotificationService notificationService)
         {
             CacheService = cacheService;
             ApiService = apiService;
@@ -52,6 +53,7 @@ namespace beta.Infrastructure.Services
             LocalWatcher.Created += OnNewLocalMap;
             LocalWatcher.Deleted += OnDeletingLocalMap;
             DownloadService = downloadService;
+            NotificationService = notificationService;
         }
 
         public LocalMapState CheckLocalMap(string name)
@@ -246,7 +248,16 @@ namespace beta.Infrastructure.Services
             var name = uri.Segments[^1];
             DownloadItem dModel = new(commonPath, name, uri.AbsoluteUri);
 
-            var model = await DownloadService.DownloadAsync(true, dModel);
+            var model = DownloadService.GetDownload(dModel);
+
+            NotificationService.ShowDownloadDialog(model);
+
+            await model.DownloadAllAsync();
+
+            if (!model.IsCompleted)
+            {
+                return model;
+            }
 
             string zipPath = commonPath + name;
 
