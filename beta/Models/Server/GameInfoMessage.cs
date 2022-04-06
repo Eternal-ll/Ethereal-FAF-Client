@@ -360,7 +360,7 @@ namespace beta.Models.Server
         {
             if (disposing)
             {
-                Map.Dispose();
+                Map?.Dispose();
                 _Teams = null;
             }
             base.Dispose(disposing);
