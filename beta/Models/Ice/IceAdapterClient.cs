@@ -159,7 +159,8 @@ namespace beta.Models.Ice
                     case "onGpgNetMessageReceived":
                         var data = args.Split(',');
                         var command = data[0][2..^1];
-                        var param = data[1][..^1];
+                        var param = string.Join(',', data[1..]);
+                        param = param[..^1];
                         GpgNetMessageReceived?.Invoke(this, new(command, param));
                         break;
                     case "onIceMsg":
