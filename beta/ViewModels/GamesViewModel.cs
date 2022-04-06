@@ -556,7 +556,7 @@ namespace beta.ViewModels
                 {
                     games.RemoveAt(i);
                     continue;
-                }
+                }   
                 if (games[i].uid == uid)
                 {
                     id = i;
@@ -571,44 +571,39 @@ namespace beta.ViewModels
         {
             if (game.GameType != GameType || game.FeaturedMod != FeaturedMod.FAF) return;
 
-            //Dispatcher.BeginInvoke(() =>
-            //{
-            if (TryGetIndexOfGame(game.uid, out var id))
+            for (int i = 0; i < Games.Count; i++)
+            {
+                var cgame = Games[i];
+                if (cgame.uid == game.uid)
                 {
-                    var cgame = Games[id];
                     cgame.Dispose();
-                    Games.RemoveAt(id);
+                    Games.RemoveAt(i);
                 }
-            //});
+            }
         }
 
         private void OnGameUpdated(object sender, GameInfoMessage game)
         {
             if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
 
-            //Dispatcher.BeginInvoke(() =>
-            //{
-                if (TryGetIndexOfGame(game.uid, out var id))
-                {
-                    Games[id] = game;
-                }
-            //});
+            if (TryGetIndexOfGame(game.uid, out var id))
+            {
+                Games[id] = game;
+            }
         }
 
         private void OnNewGame(object sender, GameInfoMessage game)
         {
             if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
-            //Dispatcher.BeginInvoke(() =>
-            //{
-                if (TryGetIndexOfGame(game.uid, out var id))
-                {
-                    Games[id] = game;
-                }
-                else
-                {
-                    Games.Add(game);
-                }
-            //});
+            
+            if (TryGetIndexOfGame(game.uid, out var id))
+            {
+                Games[id] = game;
+            }
+            else
+            {
+                Games.Add(game);
+            }
         }
 
         private void OnGamesReceived(object sender, GameInfoMessage[] e) => HandleGames(e);
@@ -649,26 +644,11 @@ namespace beta.ViewModels
             {
                 if (Set(ref _IsGridView, value))
                 {
-                    //IsListView = !value;
+
                 }
             }
         }
         #endregion
-
-        //#region IsListView
-        //private bool _IsListView;
-        //public bool IsListView
-        //{
-        //    get => _IsListView;
-        //    set
-        //    {
-        //        if (Set(ref _IsListView, value))
-        //        {
-        //            IsGridView = !value;
-        //        }
-        //    }
-        //}
-        //#endregion
 
         #region IsExtendedViewEnabled
         private bool _IsExtendedViewEnabled;

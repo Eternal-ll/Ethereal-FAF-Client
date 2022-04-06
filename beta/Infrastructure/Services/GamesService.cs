@@ -62,7 +62,6 @@ namespace beta.Infrastructure.Services
         {
             //Logger.LogInformation($"Received {e.Length} games from lobby-server");
             foreach (var game in e) await HandleGameData(game);
-            GamesReceived?.Invoke(this, e);
         });
 
         private bool TryGetGame(long uid, out GameInfoMessage game)
@@ -124,7 +123,7 @@ namespace beta.Infrastructure.Services
                 orig.map_file_path = newData.map_file_path;
                 orig.max_players = newData.max_players;
 
-                orig.Map = await MapService.GetGameMap(newData.mapname);
+                //orig.Map = await MapService.GetGameMap(newData.mapname);
 
                 // should be updates latest, because it triggers UI updates for other map related fields
                 orig.mapname = newData.mapname;
@@ -181,7 +180,6 @@ namespace beta.Infrastructure.Services
                 case GameState.Playing:
                     break;
                 case GameState.Closed:
-                    //Logger.LogInformation($"Game {newGame.uid} / {newGame.FeaturedMod} / {newGame.GameType} / Mods: {newGame.sim_mods.Count} / {newGame.title} by {newGame.host} is closed");
                     HandleOnGameClose(newGame);
                     return;
                 default:
@@ -204,7 +202,7 @@ namespace beta.Infrastructure.Services
                     game.Host = PlayersService.GetPlayer(newGame.host);
                 }
 
-                //if (games.Remove(game)) OnGameRemoved(game);
+                OnGameUpdated(game);
             }
             else
             {
@@ -219,9 +217,6 @@ namespace beta.Infrastructure.Services
                 games.Add(newGame);
                 OnNewGameReceived(newGame);
             }
-
-            // TODO remove
-            //await OldHandleGameData(newGame);
         }
         private void OnGameReceived(object sender, GameInfoMessage e) => Task.Run(() => HandleGameData(e));
 
@@ -274,8 +269,6 @@ namespace beta.Infrastructure.Services
         {
             throw new NotImplementedException();
         }
-
-
 
         private void OnNewGameReceived(GameInfoMessage game) => NewGameReceived?.Invoke(this, game);
         private void OnGameUpdated(GameInfoMessage game) => GameUpdated?.Invoke(this, game);

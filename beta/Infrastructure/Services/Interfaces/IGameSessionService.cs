@@ -34,6 +34,8 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public GameSessionState State { get; }
 
+        public bool GameIsRunning { get; }
+
         public Task Close();
 
         public Task JoinGame(GameInfoMessage game);
@@ -50,7 +52,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <param name="isRehost">If you are rehosting last game</param>
         /// <returns></returns>
         public Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating,
-            GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false);
+            GameVisibility visibility = GameVisibility.Public, bool isRatingResctEnforced = false, string password = null, bool isRehost = false);
 
         public Task ResetPatch();
     }

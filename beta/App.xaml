@@ -29,7 +29,8 @@
                     <cmd:RefreshIrcCommand x:Key="RefreshIrcCommand"/>
                     <cmd:ResetPatchCommand x:Key="ResetPatchCommand"/>
                     <cmd:SelectPathToGameCommand x:Key="SelectPathToGameCommand"/>
-
+                    <cmd:HostGameCommand x:Key="HostGameCommand"/>
+                    <cmd:LaunchOfflineGameCommand x:Key="LaunchOfflineGameCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>

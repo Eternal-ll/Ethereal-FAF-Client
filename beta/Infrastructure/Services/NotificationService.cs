@@ -29,11 +29,11 @@ namespace beta.Infrastructure.Services
         public async Task ShowPopupAsync(string text)
         {
             await WaitForComplete();
-            ContentDialog.PrimaryButtonText = null;
-            ContentDialog.SecondaryButtonText = null;
-            ContentDialog.CloseButtonText = "OK";
             ContentDialog.Dispatcher.Invoke(() =>
             {
+                ContentDialog.PrimaryButtonText = null;
+                ContentDialog.SecondaryButtonText = null;
+                ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = text;
             });
             await ContentDialog.ShowAsync();
@@ -42,11 +42,11 @@ namespace beta.Infrastructure.Services
         public async Task ShowPopupAsync(object model)
         {
             await WaitForComplete();
-            ContentDialog.PrimaryButtonText = null;
-            ContentDialog.SecondaryButtonText = null;
-            ContentDialog.CloseButtonText = "OK";
             ContentDialog.Dispatcher.Invoke(() =>
             {
+                ContentDialog.PrimaryButtonText = null;
+                ContentDialog.SecondaryButtonText = null;
+                ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = model;
             });
             await ContentDialog.ShowAsync();
@@ -79,6 +79,11 @@ namespace beta.Infrastructure.Services
                     ContentDialog.PrimaryButtonCommand = passwordModel.PassPasswordCommand;
                     ContentDialog.PrimaryButtonText = "Pass";
                     ContentDialog.IsPrimaryButtonEnabled = false;
+                    ContentDialog.CloseButtonText = "Cancel";
+                    break;
+                case HostGameViewModel hostVM:
+                    ContentDialog.PrimaryButtonCommand = hostVM.HostGameCommand;
+                    ContentDialog.PrimaryButtonText = "Host";
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
             }

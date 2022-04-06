@@ -41,6 +41,8 @@ namespace beta.Infrastructure.Services
 
         private Process ForgedAlliance;
 
+        public bool GameIsRunning => ForgedAlliance is not null;
+
         public GameSessionState State => throw new NotImplementedException();
 
         public GameSessionService(
@@ -374,8 +376,8 @@ namespace beta.Infrastructure.Services
             if (game.password_protected)
                 command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
             else command = ServerCommands.JoinGame(game.uid.ToString());
-            
-            //SessionService.Send(command);
+
+            SessionService.Send(command);
         }
 
         private async Task<bool> ConfirmPatch(FeaturedMod mod)
@@ -643,6 +645,24 @@ namespace beta.Infrastructure.Services
 
         public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
         {
+            if (ForgedAlliance is not null)
+            {
+                await NotificationService.ShowPopupAsync("Game is running");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                await NotificationService.ShowPopupAsync("Title not selected");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(mapName))
+            {
+                await NotificationService.ShowPopupAsync("Map not selected");
+                return;
+            }
+
             if (!await ConfirmPatch(mod)) return;
 
             //"title":"Welcome",
@@ -653,34 +673,36 @@ namespace beta.Infrastructure.Services
             //"rating_max":null,
             //"password_protected":false,
             //"enforce_rating_range":false,
-            if (ForgedAlliance is not null)
-            {
-                Logger.LogWarning("Game is already running");
-                return;
-            }
 
-            StringBuilder sb = new("{\"command\":\"game_host\",");
+            StringBuilder sb = new();
+            sb.Append("{\"command\":\"game_host\",");
 
             sb.Append($"\"title\":\"{title}\",");
             sb.Append($"\"mod\":\"{mod.ToString().ToLower()}\",");
             sb.Append($"\"mapname\":\"{mapName}\",");
             sb.Append($"\"visibility\":\"{visibility.ToString().ToLower()}\",");
-            if (minRating.HasValue)
-            {
-                sb.Append($"\"rating_min\":{minRating.Value},");
-            }
-            if (maxRating.HasValue)
-            {
-                sb.Append($"\"rating_max\":{maxRating.Value},");
-            }
-            if (isRatingResctEnforced)
+
+            if (isRatingResctEnforced && (minRating.HasValue || maxRating.HasValue))
             {
                 sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
+                if (minRating.HasValue)
+                {
+                    sb.Append($"\"rating_min\":{minRating.Value},");
+                }
+                if (maxRating.HasValue)
+                {
+                    sb.Append($"\"rating_max\":{maxRating.Value},");
+                }
             }
+
             if (!string.IsNullOrWhiteSpace(password))
             {
                 sb.Append($"\"password\":\"{password}\",");
             }
+            sb[^1] = '}';
+            var command = sb.ToString();
+
+            SessionService.Send(command);
         }
     }
 }

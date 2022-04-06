@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:view="clr-namespace:beta.Views"
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -11,6 +12,7 @@
         ui:ThemeManager.RequestedTheme="Dark">
     <Window.Resources>
         <SolidColorBrush x:Key="ContentDialogBackground" Color="#FF1b1b1b"/>
+        <sys:Double x:Key="ContentDialogMaxWidth">1000</sys:Double>
     </Window.Resources>
     <view:MainView x:Name="MainView"/>
 </Window>
