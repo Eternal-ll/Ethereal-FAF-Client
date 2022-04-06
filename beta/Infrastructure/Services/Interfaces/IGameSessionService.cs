@@ -39,7 +39,6 @@ namespace beta.Infrastructure.Services.Interfaces
         public Task Close();
 
         public Task JoinGame(GameInfoMessage game);
-        public Task Join(GameInfoMessage game);
 
         /// <summary>
         /// Sends command to lobby-server for hosting game

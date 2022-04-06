@@ -15,7 +15,7 @@ namespace beta.Infrastructure.Services
                 CloseButtonText = "OK"
             });
         }
-        private async Task WaitForComplete()
+        private void WaitForComplete()
         {
             if (ContentDialog.IsVisible)
             {
@@ -28,7 +28,7 @@ namespace beta.Infrastructure.Services
 
         public async Task ShowPopupAsync(string text)
         {
-            await WaitForComplete();
+            WaitForComplete();
             ContentDialog.Dispatcher.Invoke(() =>
             {
                 ContentDialog.PrimaryButtonText = null;
@@ -41,7 +41,7 @@ namespace beta.Infrastructure.Services
 
         public async Task ShowPopupAsync(object model)
         {
-            await WaitForComplete();
+            WaitForComplete();
             ContentDialog.Dispatcher.Invoke(() =>
             {
                 ContentDialog.PrimaryButtonText = null;
@@ -54,14 +54,14 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text)
         {
-            await WaitForComplete();
+            WaitForComplete();
             ContentDialog.Content = text;
             return await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null)
         {
-            await WaitForComplete();
+            WaitForComplete();
             ContentDialog.Content = model;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -93,7 +93,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null)
         {
-            await WaitForComplete();
+            WaitForComplete();
             ContentDialog.Content = text;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -105,7 +105,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<bool> ShowDownloadDialog(DownloadViewModel model, string close = null)
         {
-            await WaitForComplete();
+            WaitForComplete();
             model.Completed += Download_Completed;
 
             ContentDialog.PreviewKeyDown += HideEscapeKey;

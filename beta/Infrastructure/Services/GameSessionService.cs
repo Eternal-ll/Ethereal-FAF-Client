@@ -600,6 +600,7 @@ namespace beta.Infrastructure.Services
             "text": "Bad password (it's case sensitive)."
              */
         }
+
         public void RestoreGame(int uid)
         {
             /* SEND
@@ -612,12 +613,6 @@ namespace beta.Infrastructure.Services
             "style": "info",
             "text": "The game you were connected to does no longer exist"
             */
-        }
-
-
-        public Task Join(GameInfoMessage game)
-        {
-            throw new NotImplementedException();
         }
 
         private void OnGameFilled(GameInfoMessage e) => GameFilled?.Invoke(this, e);
@@ -633,7 +628,7 @@ namespace beta.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                NotificationService.ShowPopupAsync(new ErrorEventArgs(ex));
+                await NotificationService.ShowPopupAsync(new ErrorEventArgs(ex));
             }
         }
 

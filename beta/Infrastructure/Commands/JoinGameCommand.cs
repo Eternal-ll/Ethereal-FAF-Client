@@ -15,11 +15,6 @@ namespace beta.Infrastructure.Commands
         {
             if (parameter is GameInfoMessage game)
                 GameLauncherService.JoinGame(game);
-            //Task.Run(async () => await GameLauncherService.JoinGame(game));
-            //new Thread(() => GameLauncherService.JoinGame(game))
-            //{
-            //    Name = "Game launcher thread"
-            //}.Start();
         }
     }
 }
