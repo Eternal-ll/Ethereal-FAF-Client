@@ -1,5 +1,6 @@
 ﻿using beta.ViewModels;
 using ModernWpf.Controls;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
@@ -13,70 +14,73 @@ namespace beta.Infrastructure.Services
             {
                 CloseButtonText = "OK"
             });
-            ContentDialog.Opened += ContentDialog_Opened;
-            ContentDialog.Closed += ContentDialog_Closed;
         }
-
-        private void ContentDialog_Opened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+        private async Task WaitForComplete()
         {
-        }
-
-        private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
-        {
-            sender.Content = null;
+            if (ContentDialog.IsVisible)
+            {
+                while (true)
+                {
+                    Thread.Sleep(100);
+                }
+            }
         }
 
         public async Task ShowPopupAsync(string text)
         {
+            await WaitForComplete();
+            ContentDialog.PrimaryButtonText = null;
+            ContentDialog.SecondaryButtonText = null;
+            ContentDialog.CloseButtonText = "OK";
             ContentDialog.Dispatcher.Invoke(() =>
             {
-                ContentDialog.PrimaryButtonText = null;
-                ContentDialog.SecondaryButtonText = null;
-                ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = text;
-                ContentDialog.ShowAsync();
             });
+            await ContentDialog.ShowAsync();
         }
 
         public async Task ShowPopupAsync(object model)
         {
+            await WaitForComplete();
+            ContentDialog.PrimaryButtonText = null;
+            ContentDialog.SecondaryButtonText = null;
+            ContentDialog.CloseButtonText = "OK";
             ContentDialog.Dispatcher.Invoke(() =>
             {
-                ContentDialog.PrimaryButtonText = null;
-                ContentDialog.SecondaryButtonText = null;
-                ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = model;
-                ContentDialog.ShowAsync();
             });
+            await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(string text)
         {
+            await WaitForComplete();
             ContentDialog.Content = text;
             return await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null)
         {
+            await WaitForComplete();
             ContentDialog.Content = model;
 
             ContentDialog.PrimaryButtonText = primary;
             ContentDialog.SecondaryButtonText = secondary;
             ContentDialog.CloseButtonText = close;
 
-            if (model is SelectPathToGameViewModel pathModel)
+            switch (model)
             {
-                ContentDialog.PrimaryButtonCommand = pathModel.ConfirmCommand;
-                ContentDialog.PrimaryButtonText = "Save";
-                ContentDialog.CloseButtonText= "Close";
-            }
-
-            if (model is PassPasswordViewModel passwordModel)
-            {
-                ContentDialog.PrimaryButtonCommand = passwordModel.PassPasswordCommand;
-                ContentDialog.PrimaryButtonText = "Pass";
-                ContentDialog.IsPrimaryButtonEnabled = false;
-                ContentDialog.CloseButtonText = "Cancel";
+                case SelectPathToGameViewModel pathModel:
+                    ContentDialog.PrimaryButtonCommand = pathModel.ConfirmCommand;
+                    ContentDialog.PrimaryButtonText = "Save";
+                    ContentDialog.CloseButtonText = "Close";
+                    break;
+                case PassPasswordViewModel passwordModel:
+                    ContentDialog.PrimaryButtonCommand = passwordModel.PassPasswordCommand;
+                    ContentDialog.PrimaryButtonText = "Pass";
+                    ContentDialog.IsPrimaryButtonEnabled = false;
+                    ContentDialog.CloseButtonText = "Cancel";
+                    break;
             }
 
             return await ContentDialog.ShowAsync();
@@ -84,6 +88,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null)
         {
+            await WaitForComplete();
             ContentDialog.Content = text;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -95,6 +100,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<bool> ShowDownloadDialog(DownloadViewModel model, string close = null)
         {
+            await WaitForComplete();
             model.Completed += Download_Completed;
 
             ContentDialog.PreviewKeyDown += HideEscapeKey;
