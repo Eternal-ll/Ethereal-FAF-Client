@@ -304,9 +304,9 @@ namespace beta.Infrastructure.Services
             // ...
 
             // Check map
-            if (!ConfirmMap(game.Map.OriginalName))
+            if (!ConfirmMap(game.mapname))
             {
-                Logger.LogWarning("Map {1} required to download", game.Map.OriginalName);
+                Logger.LogWarning("Map {1} required to download", game.mapname);
 
                 ContentDialogResult result;
 
@@ -316,7 +316,7 @@ namespace beta.Infrastructure.Services
 
                     if (result == ContentDialogResult.None)
                     {
-                        Logger.LogWarning($"Refused to download map {game.Map.OriginalName}");
+                        Logger.LogWarning($"Refused to download map {game.mapname}");
                         return;
                     }
 
@@ -333,15 +333,15 @@ namespace beta.Infrastructure.Services
                 }
 
                 // Run task for downloading
-                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip")));
-                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.Map.OriginalName}.zip"));
+                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.mapname}.zip")));
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.mapname}.zip"));
 
                 if (!model.IsCompleted)
                 {
                     return;
                 }
 
-                if (!ConfirmMap(game.Map.OriginalName))
+                if (!ConfirmMap(game.mapname))
                 {
                     await NotificationService.ShowPopupAsync("Something went wrong on downloading map, try again");
                     return;
@@ -375,7 +375,7 @@ namespace beta.Infrastructure.Services
                 command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
             else command = ServerCommands.JoinGame(game.uid.ToString());
             
-            SessionService.Send(command);
+            //SessionService.Send(command);
         }
 
         private async Task<bool> ConfirmPatch(FeaturedMod mod)
