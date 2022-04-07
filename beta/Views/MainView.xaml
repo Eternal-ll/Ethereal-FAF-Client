@@ -73,6 +73,12 @@
         <DataTemplate DataType="{x:Type vm:DownloadsViewModel}">
             <view:DownloadsView DataContext="{Binding}"/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ChatPreviewViewModel}">
+            <view:ChatPreviewView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ChatViewModel}">
+            <view:ChatView/>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
         <Grid Visibility="{Binding TitleBarVisibility}" VerticalAlignment="Top">

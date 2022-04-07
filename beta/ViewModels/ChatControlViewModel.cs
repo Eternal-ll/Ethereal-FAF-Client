@@ -17,20 +17,37 @@ namespace beta.ViewModels
 
             IrcService.StateChanged += OnIrcStateChanged;
         }
+        private ChatPreviewViewModel ChatPreviewViewModel;
+        private ChatViewModel ChatViewModel;
 
         #region IsConnected
         private bool _IsConnected;
         public  bool IsConnected
         {
-            get
+            get => _IsConnected;
+            set
             {
-                if (_IsConnected)
+                if (Set(ref _IsConnected, value))
                 {
-
                 }
-                return _IsConnected; ;
+                if (value)
+                {
+                    CurrentViewModel = ChatViewModel ??= new();
+                }
+                else
+                {
+                    CurrentViewModel = ChatPreviewViewModel ??= new();
+                }
             }
-            set => Set(ref _IsConnected, value);
+        }
+        #endregion
+
+        #region CurrentViewModel
+        private ViewModel _CurrentViewModel;
+        public ViewModel CurrentViewModel
+        {
+            get => _CurrentViewModel;
+            set => Set(ref _CurrentViewModel, value);
         }
         #endregion
 
