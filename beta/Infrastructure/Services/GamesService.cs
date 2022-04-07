@@ -123,7 +123,7 @@ namespace beta.Infrastructure.Services
                 orig.map_file_path = newData.map_file_path;
                 orig.max_players = newData.max_players;
 
-                //orig.Map = await MapService.GetGameMap(newData.mapname);
+                orig.Map = await MapService.GetGameMap(newData.mapname);
 
                 // should be updates latest, because it triggers UI updates for other map related fields
                 orig.mapname = newData.mapname;

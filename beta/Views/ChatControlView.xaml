@@ -8,9 +8,9 @@
              xmlns:vm="clr-namespace:beta.ViewModels"
              xmlns:v="clr-namespace:beta.Views"
              d:DataContext="{d:DesignInstance {x:Type vm:ChatControlViewModel}}">
-    <UserControl.DataContext>
+    <!--<UserControl.DataContext>
         <vm:ChatControlViewModel/>
-    </UserControl.DataContext>
+    </UserControl.DataContext>-->
     <ContentControl>
         <ContentControl.Style>
             <Style TargetType="ContentControl">

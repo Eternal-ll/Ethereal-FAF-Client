@@ -21,6 +21,8 @@
             <Setter Property="HoverBackground" Value="Transparent"/>
         </Style>
         <Style TargetType="control:CrossFadeContentControl">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="control:CrossFadeContentControl">
@@ -45,6 +47,31 @@
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:NavigationViewModel}">
             <view:NavigationView DataContext="{Binding}"/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:GlobalGamesViewModel}">
+            <view:GlobalGamesView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ChatControlViewModel}">
+            <view:ChatControlView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
+            <view:ProfileView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:MapsVaultViewModel}">
+            <view:MapsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <view:SettingsView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HomeViewModel}">
+            <view:HomeView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:AnalyticsViewModel}">
+            <view:AnalyticsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DownloadsViewModel}">
+            <view:DownloadsView DataContext="{Binding}"/>
         </DataTemplate>
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
@@ -78,9 +105,6 @@
                            Text="Ethereal FAF client" FontWeight="SemiBold"/>
             </StackPanel>
         </Grid>
-        <control:CrossFadeContentControl
-            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-            Content="{Binding ChildViewModel}"/>
+        <control:CrossFadeContentControl Content="{Binding ChildViewModel}"/>
     </Grid>
 </UserControl>
