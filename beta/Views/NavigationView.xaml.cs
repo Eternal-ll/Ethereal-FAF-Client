@@ -1,7 +1,9 @@
 ﻿using beta.ViewModels;
 using ModernWpf.Controls;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace beta.Views
 {
@@ -74,6 +76,14 @@ namespace beta.Views
                 DataContext = this;
             }
         }
+        private readonly Dictionary<Type, UserControl> Pages = new()
+        {
+            { typeof(ChatControlView), null},
+            { typeof(GlobalGamesView), null },
+            { typeof(ProfileView), null },
+            { typeof(SettingsView), null },
+            { typeof(MapsView), null },
+        };
 
         private void OnNavigationViewSelectionChanged(ModernWpf.Controls.NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
@@ -92,7 +102,26 @@ namespace beta.Views
             string pageName = "beta.Views." + selectedItemTag + "View";
             Type viewType = typeof(GlobalView).Assembly.GetType(pageName);
 
-            var view = Activator.CreateInstance(viewType);
+            UserControl view = null;
+
+            if (Pages.TryGetValue(viewType, out var viewg))
+            {
+                if (viewg is null)
+                {
+                    view = (UserControl)Activator.CreateInstance(viewType);
+                    Pages[viewType] = view;
+                }
+                else
+                {
+                    view = viewg;
+                }
+            }
+            else
+            {
+                view = (UserControl)Activator.CreateInstance(viewType);
+            }
+
+            //var view = Activator.CreateInstance(viewType);
 
             ContentFrame.Content = view;
         } 
