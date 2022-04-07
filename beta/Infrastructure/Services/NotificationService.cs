@@ -1,4 +1,6 @@
-﻿using beta.ViewModels;
+﻿using beta.Infrastructure.Services.Interfaces;
+using beta.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,61 +9,70 @@ namespace beta.Infrastructure.Services
 {
     internal class NotificationService : Interfaces.INotificationService
     {
+        //private readonly IGameSessionService GameSessionService;
+
         public ContentDialog ContentDialog { get; private set; }
         public NotificationService()
         {
+            //GameSessionService = App.Services.GetService<IGameSessionService>();
+
             App.Current.Dispatcher.Invoke(() => ContentDialog = new()
             {
                 CloseButtonText = "OK"
             });
         }
-        private async Task WaitForComplete()
+        private void WaitForComplete()
         {
-            if (ContentDialog.IsVisible)
+            while (ContentDialog.IsVisible)
             {
-                while (true)
-                {
-                    Thread.Sleep(100);
-                }
+                Thread.Sleep(100);
             }
         }
 
         public async Task ShowPopupAsync(string text)
         {
-            await WaitForComplete();
-            ContentDialog.Dispatcher.Invoke(() =>
+            //WaitForComplete();
+            await ContentDialog.Dispatcher.Invoke(async () =>
             {
                 ContentDialog.PrimaryButtonText = null;
                 ContentDialog.SecondaryButtonText = null;
                 ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = text;
+                await ContentDialog.ShowAsync();
             });
-            await ContentDialog.ShowAsync();
+        }
+        public void ShowPopup(string text)
+        {
+            ContentDialog = new();
+            ContentDialog.CloseButtonText = "OK";
+            ContentDialog.Content = text;
+            ContentDialog.ShowAsync();
         }
 
         public async Task ShowPopupAsync(object model)
         {
-            await WaitForComplete();
+            //WaitForComplete();
             ContentDialog.Dispatcher.Invoke(() =>
             {
+                ContentDialog = new();
                 ContentDialog.PrimaryButtonText = null;
                 ContentDialog.SecondaryButtonText = null;
                 ContentDialog.CloseButtonText = "OK";
                 ContentDialog.Content = model;
+                ContentDialog.ShowAsync();
             });
-            await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(string text)
         {
-            await WaitForComplete();
+            ContentDialog = new();
             ContentDialog.Content = text;
             return await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null)
         {
-            await WaitForComplete();
+            ContentDialog = new();
             ContentDialog.Content = model;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -82,7 +93,7 @@ namespace beta.Infrastructure.Services
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
                 case HostGameViewModel hostVM:
-                    ContentDialog.PrimaryButtonCommand = hostVM.HostGameCommand;
+                    //ContentDialog.PrimaryButtonCommand = hostVM.HostGameCommand;
                     ContentDialog.PrimaryButtonText = "Host";
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
@@ -93,7 +104,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null)
         {
-            await WaitForComplete();
+            ContentDialog = new();
             ContentDialog.Content = text;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -105,7 +116,6 @@ namespace beta.Infrastructure.Services
 
         public async Task<bool> ShowDownloadDialog(DownloadViewModel model, string close = null)
         {
-            await WaitForComplete();
             model.Completed += Download_Completed;
 
             ContentDialog.PreviewKeyDown += HideEscapeKey;

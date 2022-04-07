@@ -6,6 +6,7 @@ using beta.Models.Server.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -167,10 +168,10 @@ namespace beta.ViewModels
         #region HostGameCommand
         private ICommand _HostGameCommand;
         public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand);
-        private void OnHostGameCommand(object parameter)
+        private async void OnHostGameCommand(object parameter)
         {
             string title = string.IsNullOrWhiteSpace(Title) ? "Ethereal lobby" : Title;
-            GameSessionService.HostGame(title, FeaturedMod, SelectedMapName, MinAllowedRating, MaxAllowedRating,
+            await GameSessionService.HostGame(title, FeaturedMod, SelectedMapName, MinAllowedRating, MaxAllowedRating,
                 IsFriendsOnly ? GameVisibility.Friends : GameVisibility.Public, IsRatingRestrictionEnabled, Password);
         }
         #endregion

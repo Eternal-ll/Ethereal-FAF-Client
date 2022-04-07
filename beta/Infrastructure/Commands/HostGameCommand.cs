@@ -22,7 +22,12 @@ namespace beta.Infrastructure.Commands
                 await NotificationService.ShowPopupAsync("Game is running");
                 return;
             }
-            await NotificationService.ShowDialog(new HostGameViewModel());
+            var model = new HostGameViewModel();
+            var result = await NotificationService.ShowDialog(model);
+            if (result == ModernWpf.Controls.ContentDialogResult.Primary)
+            {
+                model.HostGameCommand.Execute(null);
+            }
         }
     }
 }
