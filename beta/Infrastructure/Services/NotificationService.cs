@@ -31,8 +31,8 @@ namespace beta.Infrastructure.Services
 
         public async Task ShowPopupAsync(string text)
         {
-            //WaitForComplete();
-            await ContentDialog.Dispatcher.Invoke(async () =>
+            await WaitForComplete();
+            ContentDialog.Dispatcher.Invoke(() =>
             {
                 ContentDialog.PrimaryButtonText = null;
                 ContentDialog.SecondaryButtonText = null;
@@ -51,7 +51,7 @@ namespace beta.Infrastructure.Services
 
         public async Task ShowPopupAsync(object model)
         {
-            //WaitForComplete();
+            await WaitForComplete();
             ContentDialog.Dispatcher.Invoke(() =>
             {
                 ContentDialog = new();
@@ -65,14 +65,14 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text)
         {
-            ContentDialog = new();
+            await WaitForComplete();
             ContentDialog.Content = text;
             return await ContentDialog.ShowAsync();
         }
 
         public async Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null)
         {
-            ContentDialog = new();
+            await WaitForComplete();
             ContentDialog.Content = model;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -104,7 +104,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null)
         {
-            ContentDialog = new();
+            await WaitForComplete();
             ContentDialog.Content = text;
 
             ContentDialog.PrimaryButtonText = primary;
@@ -116,6 +116,7 @@ namespace beta.Infrastructure.Services
 
         public async Task<bool> ShowDownloadDialog(DownloadViewModel model, string close = null)
         {
+            await WaitForComplete();
             model.Completed += Download_Completed;
 
             ContentDialog.PreviewKeyDown += HideEscapeKey;

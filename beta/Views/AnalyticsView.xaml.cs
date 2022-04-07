@@ -109,9 +109,17 @@ namespace beta.Views
         {
             if (IsControlInitialized & !(bool)e.NewValue)
             {
-                WebView.Stop();
+                try
+                {
 
-                WebView.Dispose();
+                    WebView.Stop();
+
+                    WebView.Dispose();
+                }
+                catch
+                {
+
+                }
                 StopInjection = true;
                 InjectionThread = null;
             }

@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Enums;
+using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,21 +17,43 @@ namespace beta.ViewModels
             UpdateState();
 
             IrcService.StateChanged += OnIrcStateChanged;
+
+            if (Settings.Default.ConnectIRC && !IsConnected)
+            {
+                IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+            }
         }
+        private ChatPreviewViewModel ChatPreviewViewModel;
+        private ChatViewModel ChatViewModel;
 
         #region IsConnected
         private bool _IsConnected;
         public  bool IsConnected
         {
-            get
+            get => _IsConnected;
+            set
             {
-                if (_IsConnected)
+                if (Set(ref _IsConnected, value))
                 {
-
                 }
-                return _IsConnected; ;
+                if (value)
+                {
+                    CurrentViewModel = ChatViewModel ??= new();
+                }
+                else
+                {
+                    CurrentViewModel = ChatPreviewViewModel ??= new();
+                }
             }
-            set => Set(ref _IsConnected, value);
+        }
+        #endregion
+
+        #region CurrentViewModel
+        private ViewModel _CurrentViewModel;
+        public ViewModel CurrentViewModel
+        {
+            get => _CurrentViewModel;
+            set => Set(ref _CurrentViewModel, value);
         }
         #endregion
 

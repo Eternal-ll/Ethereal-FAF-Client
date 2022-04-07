@@ -89,6 +89,21 @@ namespace beta.ViewModels
         public Visibility InputVisibility => !IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
         public Visibility LoadingInputVisibility => IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
 
+        #region IsTrailerSoundsOn
+        private bool _IsTrailerSoundsOn = Settings.Default.IsTrailerSoundsOn;
+        public bool IsTrailerSoundsOn
+        {
+            get => _IsTrailerSoundsOn;
+            set
+            {
+                if (Set(ref _IsTrailerSoundsOn, value))
+                {
+                    Settings.Default.IsTrailerSoundsOn = value;
+                }
+            }
+        }
+        #endregion
+
         #region State
         private string _State = "Pending authorization";
         public string State

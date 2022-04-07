@@ -113,6 +113,9 @@
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
+                <GroupBox Header="IRC chat">
+                    <CheckBox IsChecked="{Binding IsAlwaysConnectToIRC}" Content="Always connect to IRC chat"/>
+                </GroupBox>
             </StackPanel>
         </Grid>
     </ScrollViewer>

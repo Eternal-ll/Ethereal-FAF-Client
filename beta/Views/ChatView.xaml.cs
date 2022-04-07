@@ -307,6 +307,8 @@ namespace beta.Views
                 players.Add(GetChatPlayer(users[i]));
             }
 
+            TestInputControl.SelectedChannel = SelectedChannel;
+
             //OnPropertyChanged(nameof(SelectedChannelPlayersView));
             //SelectedChannelPlayersView.Refresh();
             //using var defer = View.DeferRefresh();
@@ -348,7 +350,7 @@ namespace beta.Views
         private void OnChannelMessageReceived(object sender, IrcChannelMessage e)
         {
             var channel = GetChannel(e.Channel);
-            channel.History.Add(e);
+            Dispatcher.Invoke(() => channel.History.Add(e));
         }
 
         private void OnChannelTopicChangedBy(object sender, IrcChannelTopicChangedBy e)

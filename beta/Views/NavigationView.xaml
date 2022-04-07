@@ -6,68 +6,20 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:control="clr-namespace:beta.Resources.Controls"
              xmlns:vm="clr-namespace:beta.ViewModels"
+             d:DataContext="{d:DesignInstance {x:Type vm:NavigationViewModel}}"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid.Resources>
-            <DataTemplate DataType="{x:Type vm:DownloadViewModel}">
-                <Border Padding="0" Margin="4 -2" Background="Transparent">
-                    <StackPanel Orientation="Horizontal">
-                        <ui:ProgressRing IsActive="True"/>
-                        <Button Command="{Binding CancelCommand}" Background="Transparent">
-                            <Path  Margin="0 2 0 0" Fill="Gray" Height="10"
-                                   Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>   
-                        </Button>
-                    </StackPanel>
-                    <Border.ToolTip>
-                        <ToolTip>
-                            <StackPanel>
-                                <TextBlock Text="Latest download"/>
-                                <TextBlock Text="{Binding CurrentDownloadItem.FileName, StringFormat='Current file: {0}'}"/>
-                                <TextBlock>
-                                    <Run Text="{Binding CurrentFileIndex}"/>
-                                    <Run Text="/"/>
-                                    <Run Text="{Binding Downloads.Length, Mode=OneWay}"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </ToolTip>
-                    </Border.ToolTip>
-                </Border>
-            </DataTemplate>
-        </Grid.Resources>
-        <ui:NavigationView x:Name="UINavigationView"
-                           IsBackButtonVisible="Collapsed"
-                           PaneDisplayMode="Auto"
-                           IsSettingsVisible="False"
+        <ui:NavigationView x:Name="UINavigationView" IsBackButtonVisible="Collapsed"
+                           PaneDisplayMode="Auto" IsSettingsVisible="False"
                            SelectionChanged="OnNavigationViewSelectionChanged"
-                           CompactPaneLength="50"
-                           OpenPaneLength="200"
-                           IsTabStop="False">
+                           HorizontalContentAlignment="Stretch"
+                           VerticalContentAlignment="Stretch"
+                           CompactPaneLength="50" OpenPaneLength="200" IsTabStop="False">
             <ui:NavigationView.Resources>
                 <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="#FF1F1F1F"/>
                 <SolidColorBrush x:Key="FlyoutPresenterBackground" Color="#FF1F1F1F"/>
                 <SolidColorBrush x:Key="FlyoutBorderThemeBrush" Color="#FF1F1F1F"/>
-
-                <Style TargetType="control:CrossFadeContentControl">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="control:CrossFadeContentControl">
-                                <Grid>
-                                    <ContentPresenter
-                                        x:Name="FirstContentPresenter"
-                                        Content="{x:Null}"
-                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                                    <ContentPresenter
-                                        x:Name="SecondContentPresenter"
-                                        Content="{x:Null}"
-                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
-                                </Grid>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
             </ui:NavigationView.Resources>
 
             <ui:NavigationView.MenuItems>
@@ -80,10 +32,10 @@
                                 <Style TargetType="Run">
                                     <Setter Property="Foreground" Value="Orange"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="0">
+                                        <DataTrigger Binding="{Binding IrcState}" Value="0">
                                             <Setter Property="Foreground" Value="Red"/>
                                         </DataTrigger>
-                                        <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="7">
+                                        <DataTrigger Binding="{Binding IrcState}" Value="7">
                                             <Setter Property="Foreground" Value="LightGreen"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -94,13 +46,13 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="ToolTip" Value="Connecting to IRC"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="0">
+                                    <DataTrigger Binding="{Binding IrcState}" Value="0">
                                         <Setter Property="ToolTip" Value="IRC disconnected"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="7">
+                                    <DataTrigger Binding="{Binding IrcState}" Value="7">
                                         <Setter Property="ToolTip" Value="Authorized in IRC"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="8">
+                                    <DataTrigger Binding="{Binding IrcState}" Value="8">
                                         <Setter Property="ToolTip" Value="Throttled: too much reconnects"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -109,7 +61,7 @@
                     </TextBlock>
                     <ui:NavigationViewItem.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="{Binding ViewModel.IrcState}"/>
+                            <MenuItem Header="{Binding IrcState}"/>
                             <MenuItem Padding="10 2">
                                 <MenuItem.Style>
                                     <Style TargetType="MenuItem">
@@ -117,11 +69,11 @@
                                         <Setter Property="Command" Value="{StaticResource ConnectToIrcCommand}"/>
                                         <Setter Property="Header" Value="Connect to IRC"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="2">
+                                            <DataTrigger Binding="{Binding IrcState}" Value="2">
                                                 <Setter Property="IsEnabled" Value="False"/>
                                                 <Setter Property="Header" Value="Connecting"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding ViewModel.IrcState}" Value="7">
+                                            <DataTrigger Binding="{Binding IrcState}" Value="7">
                                                 <Setter Property="Command" Value="{StaticResource DisconnectFromIrcCommand}"/>
                                                 <Setter Property="Header" Value="Disconnect from IRC"/>
                                             </DataTrigger>
@@ -137,7 +89,7 @@
                 <ui:NavigationViewItem Content="Global" Tag="GlobalGames" Icon="{StaticResource EathPathIcon}"/>
                 <!--<ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>-->
                 <ui:NavigationViewItemSeparator/>
-                <ui:NavigationViewItem Content="Maps vault" Tag="Maps" Icon="{StaticResource MapsPathIcon}"/>
+                <ui:NavigationViewItem Content="Maps vault" Tag="MapsVault" Icon="{StaticResource MapsPathIcon}"/>
                 <!--<ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem Content="Mods" Tag="Mods" Icon="{StaticResource ModsPathIcon}"/>
@@ -151,25 +103,22 @@
                 <ui:NavigationViewItem Tag="Downloads" Icon="{StaticResource DownloadsIcon}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Downloads"/>
-                        <ContentControl HorizontalAlignment="Right" Content="{Binding ViewModel.LatestDownloadViewModel}">
-                            <!--<ContentControl.RenderTransform>
+                        <ContentControl HorizontalAlignment="Right" Content="{Binding LatestDownloadViewModel}">
+                            <ContentControl.RenderTransform>
                                 <TranslateTransform Y="-10"/>
-                            </ContentControl.RenderTransform>-->
+                            </ContentControl.RenderTransform>
                         </ContentControl>
                     </StackPanel>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem x:Name="Profile" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
+                <ui:NavigationViewItem Content="{Binding Login}" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
                 <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
                 <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
             </ui:NavigationView.FooterMenuItems>
 
-            <control:CrossFadeContentControl x:Name="ContentFrame"
-                                             Margin="0 -32 0 0"
-                                             HorizontalContentAlignment="Stretch"
-                                             VerticalContentAlignment="Stretch"/>
+            <control:CrossFadeContentControl Content="{Binding SelectedViewModel}" Margin="0 -32 0 0"/>
             <ui:NavigationView.Background>
                 <SolidColorBrush Color="Black" Opacity=".4"/>
             </ui:NavigationView.Background>
