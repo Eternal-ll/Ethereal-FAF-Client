@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Enums;
+using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
@@ -25,6 +26,21 @@ namespace beta.ViewModels
         }
 
         #region Properties
+
+        #region IsAlwaysConnectToIRC
+        private bool _IsAlwaysConnectToIRC = Settings.Default.ConnectIRC;
+        public bool IsAlwaysConnectToIRC
+        {
+            get => _IsAlwaysConnectToIRC;
+            set
+            {
+                if (Set(ref _IsAlwaysConnectToIRC, value))
+                {
+                    Settings.Default.ConnectIRC = value;
+                }
+            }
+        }
+        #endregion
 
         #region FilterText
         private string _FilterText = string.Empty;

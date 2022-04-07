@@ -15,6 +15,7 @@ namespace beta.ViewModels
             NotificationService = App.Services.GetService<INotificationService>();
         }
 
+        #region Downloads
 
         #region IsAlwaysDownloadMapEnabled
         private bool _IsAlwaysDownloadMapEnable = Settings.Default.AlwaysDownloadMap;
@@ -119,6 +120,26 @@ namespace beta.ViewModels
                 }
             }
         }
+        #endregion 
+        #endregion
+
+        #region IRC chat
+
+        #region IsAlwaysConnectToIRC
+        private bool _IsAlwaysConnectToIRC = Settings.Default.ConnectIRC;
+        public bool IsAlwaysConnectToIRC
+        {
+            get => _IsAlwaysConnectToIRC;
+            set
+            {
+                if (Set(ref _IsAlwaysConnectToIRC, value))
+                {
+                    Settings.Default.ConnectIRC = value;
+                }
+            }
+        }
+        #endregion
+
         #endregion
 
         #region Commands
