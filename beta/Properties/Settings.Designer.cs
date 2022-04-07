@@ -323,5 +323,17 @@ namespace beta.Properties {
                 this["AlwaysDownloadPatch"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsTrailerSoundsOn {
+            get {
+                return ((bool)(this["IsTrailerSoundsOn"]));
+            }
+            set {
+                this["IsTrailerSoundsOn"] = value;
+            }
+        }
     }
 }

@@ -48,7 +48,7 @@
                 <Style TargetType="MediaElement">
                     <Setter Property="Volume" Value=".1"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=VolumeToggleButton, Path=IsChecked}" Value="True">
+                        <DataTrigger Binding="{Binding IsTrailerSoundsOn}" Value="True">
                             <Setter Property="Volume" Value="0"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -182,7 +182,7 @@
         </Grid>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20">
-            <ToggleButton x:Name="VolumeToggleButton" Background="Transparent" Margin="0 0 10 0">
+            <ToggleButton IsChecked="{Binding IsTrailerSoundsOn}" Background="Transparent" Margin="0 0 10 0">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="ToolTip" Value="Turn off volume"/>
