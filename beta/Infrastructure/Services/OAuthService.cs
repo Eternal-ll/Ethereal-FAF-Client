@@ -412,7 +412,7 @@ namespace beta.Infrastructure.Services
 
                         if (codeIndex == -1)
                         {
-                            OnStateChanged(new(OAuthState.INVALID, $"Cant special code on answer {query}"));
+                            OnStateChanged(new(OAuthState.INVALID, $"Cant find special code in answer {query}"));
                             httpListener.Stop();
                             return;
                         }
