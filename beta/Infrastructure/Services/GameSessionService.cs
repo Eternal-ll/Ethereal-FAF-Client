@@ -64,7 +64,7 @@ namespace beta.Infrastructure.Services
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
-                IceAdapterClient.CloseAsync();
+                IceAdapterClient?.CloseAsync();
             };
 
             IceService.IceServersReceived += IceService_IceServersReceived;
