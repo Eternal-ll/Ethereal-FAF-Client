@@ -73,5 +73,36 @@ namespace beta.Views
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e) => 
             LoginButton.CommandParameter = ((PasswordBox)sender).Password;
+
+        private void OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                e.Handled = true;
+                if (sender is TextBox input)
+                {
+                    if (input.Text.Length == 0) return;
+
+                    if (string.IsNullOrWhiteSpace(PasswordBox.Password))
+                    {
+                        PasswordBox.Focus();
+                        return;
+                    }
+                    
+                }
+                else if (sender is PasswordBox pass)
+                {
+                    if (pass.Password.Length == 0) return;
+
+                    if (string.IsNullOrWhiteSpace(LoginBox.Text))
+                    {
+                        LoginBox.Focus();
+                        return;
+                    }
+                }
+
+                LoginButton.Command.Execute(LoginButton.CommandParameter);
+            }
+        }
     }
 }
