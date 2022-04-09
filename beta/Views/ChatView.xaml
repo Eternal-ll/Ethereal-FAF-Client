@@ -151,6 +151,11 @@
             <!--#region Player DataTemplate on list -->
             <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                 <Grid ShowGridLines="False" Margin="10 0 0 0">
+                    <Grid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Open profile" Command="{StaticResource ShowProfileCommand}" CommandParameter="{Binding}"/>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="20"/>

@@ -115,6 +115,38 @@ namespace beta.Models.API
         #endregion
     }
 
+    public class ApiPlayerData : ApiUniversalWithRelations2
+    {
+        public string Login => Attributes["login"];
+        public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
+        public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
+        public string UserAgent => Attributes["userAgent"];
+
+        public ApiUniversalArrayRelationship ClanMemberShip => Relations["clanMembership"];
+        public ApiUniversalArrayRelationship Avatars => Relations["avatarAssignments"];
+        public ApiUniversalArrayRelationship Names => Relations["names"];
+        public ApiUniversalArrayRelationship Bans => Relations["avatarAssignments"];
+    }
+    public class ApiAvatarAssignment : ApiUniversalWithRelations2
+    {
+        public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
+        public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
+        public DateTime? ExpiresAt => DateTime.TryParse(Attributes["expiresAt"], out var res) ? res : null;
+        public bool IsSelected => bool.Parse(Attributes["selected"]);
+    }
+
+    public class ApiUniversalResult<T> where T : class, new()
+    {
+        [JsonPropertyName("data")]
+        public T Data { get; set; }
+    }
+
+    public class ApiAvatarAssignmentsResult : ApiUniversalResult<ApiAvatarAssignment>
+    {
+        [JsonPropertyName("included")]
+        public ApiUniversalWithAttributes[] Included { get; set; }
+    }
+
     public class ApiFeaturedModFileResults
     {
         [JsonPropertyName("data")]

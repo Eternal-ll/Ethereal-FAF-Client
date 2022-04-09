@@ -15,6 +15,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
         public event EventHandler<long> GameRemovedByUid;
+        public event EventHandler<string[]> PlayersLeftFromGame;
 
         /// <summary>
         /// Available idle games for joining

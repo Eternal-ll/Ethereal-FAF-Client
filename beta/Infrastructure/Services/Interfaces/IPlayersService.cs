@@ -12,6 +12,8 @@ namespace beta.Infrastructure.Services.Interfaces
     public interface IPlayersService : INotifyPropertyChanged
     {
         public event EventHandler<PlayerInfoMessage> MeReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
 
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage Me { get; }

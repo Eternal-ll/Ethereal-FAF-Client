@@ -11,8 +11,14 @@
         mapReviewsSummary,
         mapStatistics,
 
-        player,
+        featuredModFile,
 
-        featuredModFile
+        player,
+        clanMembership,
+        avatar,
+        avatarAssignment,
+        nameRecord,
+        globalRating,
+        ladder1v1Rating
     }
 }

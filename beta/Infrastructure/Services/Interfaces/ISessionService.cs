@@ -33,7 +33,6 @@ namespace beta.Infrastructure.Services.Interfaces
         public void Connect();
         public void Authorize();
         public void Ping();
-        public string GenerateUID(string session);
 
         /// <summary>
         /// JSON Format

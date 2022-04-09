@@ -19,6 +19,7 @@ namespace beta.Infrastructure.Services
         public event EventHandler<GameInfoMessage> GameUpdated;
         public event EventHandler<GameInfoMessage> GameRemoved;
         public event EventHandler<long> GameRemovedByUid;
+        public event EventHandler<string[]> PlayersLeftFromGame;
 
         #region Properties
 

@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
@@ -107,7 +108,7 @@ namespace beta.Infrastructure.Services
             Client = new(threadName: "TCP Lobby Client", port: 8002);
             Client.DataReceived += OnDataReceived;
         }
-        public string GenerateUID(string session)
+        public async Task<string> GenerateUID(string session)
         {
             Logger.LogInformation($"Generating UID for session: {session}");
 
@@ -147,7 +148,7 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation($"faf-uid.exe process is closed");
             return result;
         }
-        public void Authorize()
+        public async void Authorize()
         {
             Logger.LogInformation($"Starting authorization process to lobby server");
 
@@ -203,7 +204,7 @@ namespace beta.Infrastructure.Services
 
             string session = GetSession();
             string accessToken = Settings.Default.access_token;
-            string generatedUID = GenerateUID(session);
+            string generatedUID = await GenerateUID(session);
 
 
             string authJson = ServerCommands.PassAuthentication(accessToken, generatedUID, session);

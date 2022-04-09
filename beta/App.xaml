@@ -31,6 +31,7 @@
                     <cmd:SelectPathToGameCommand x:Key="SelectPathToGameCommand"/>
                     <cmd:HostGameCommand x:Key="HostGameCommand"/>
                     <cmd:LaunchOfflineGameCommand x:Key="LaunchOfflineGameCommand"/>
+                    <cmd:ShowProfileCommand x:Key="ShowProfileCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
@@ -98,6 +99,7 @@
 
                 <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/DownloadViewModelDataTemplates.xaml"/>
+                <ResourceDictionary Source="Resources/Templates/ProfileDataTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

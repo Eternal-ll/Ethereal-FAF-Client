@@ -1,7 +1,9 @@
-﻿using beta.Infrastructure.Extensions;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Debugger;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;

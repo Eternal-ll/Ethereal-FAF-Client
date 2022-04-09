@@ -13,6 +13,8 @@ namespace beta.Infrastructure.Services
     public class PlayersService : ViewModel, IPlayersService
     {
         public event EventHandler<PlayerInfoMessage> MeReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
 
         #region Properties
 

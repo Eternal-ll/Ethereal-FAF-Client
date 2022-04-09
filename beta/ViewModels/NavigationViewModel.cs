@@ -99,7 +99,12 @@ namespace beta.ViewModels
                     {
                         if (cachedViewModel is null)
                         {
-                            viewModel = (ViewModel)Activator.CreateInstance(viewType);
+                            object[] args = null;
+                            if (viewType == typeof(ProfileViewModel))
+                            {
+                                args = new object[] { Me.id };
+                            }
+                            viewModel = (ViewModel)Activator.CreateInstance(viewType, args);
                             ViewModels[viewType] = viewModel;
                         }
                         else
