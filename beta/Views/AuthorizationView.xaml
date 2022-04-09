@@ -90,6 +90,18 @@
                             </Grid.Background>
                             <Path Fill="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}" Stretch="Uniform" Width="140" Margin="0 40"
                             Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"/>
+                            <TextBlock Text="by Eternal-" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" ToolTip="Discord: Eternal#0324">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Opacity" Value=".2"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value=".7"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
                         </Grid>
                         <TextBox x:Name="LoginBox" PreviewKeyDown="OnPreviewKeyDown" Text="{Binding LoginOrEmail, UpdateSourceTrigger=PropertyChanged}"
                                  BorderThickness="0" Width="160" ToolTip="Username or e-mail" ui:ControlHelper.PlaceholderText="Username or e-mail"/>
