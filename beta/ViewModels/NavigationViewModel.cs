@@ -2,7 +2,6 @@
 using beta.Models.Enums;
 using beta.Models.Server;
 using beta.ViewModels.Base;
-using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -11,6 +10,8 @@ namespace beta.ViewModels
 {
     public class NavigationViewModel : ViewModel
     {
+        public event EventHandler LogoutRequested;
+
         private readonly IPlayersService PlayersService;
         private readonly IIrcService IrcService;
         private readonly IDownloadService DownloadService;
@@ -88,6 +89,7 @@ namespace beta.ViewModels
                 {
                     if (value == "Logout")
                     {
+                        LogoutRequested?.Invoke(this, null);
                         // TODO
                         return;
                     }

@@ -2,6 +2,7 @@
 using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -79,9 +80,29 @@ namespace beta.ViewModels
                 }
                 if (Set(ref _ChildViewModel, value))
                 {
-
+                    if (value is not null)
+                    {
+                        switch (value)
+                        {
+                            case NavigationViewModel nav:
+                                nav.LogoutRequested += OnLogoutRequested;
+                                break;
+                        }
+                    }
                 }
             }
+        }
+
+        private void OnLogoutRequested(object sender, EventArgs e)
+        {
+            Settings.Default.PlayerId = 0;
+            Settings.Default.PlayerNick = null;
+            Settings.Default.access_token = null;
+            Settings.Default.refresh_token = null;
+            Settings.Default.id_token = null;
+            Settings.Default.AutoJoin = false;
+            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location[..^3] + "exe");
+            Application.Current.Shutdown();
         }
         #endregion
 
