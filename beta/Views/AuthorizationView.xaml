@@ -37,7 +37,7 @@
             <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="False">
-                        <Setter Property="Opacity" Value=".7"/>
+                        <Setter Property="Opacity" Value=".4"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
