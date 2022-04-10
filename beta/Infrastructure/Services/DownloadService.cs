@@ -56,7 +56,7 @@ namespace beta.Infrastructure.Services
 
             model.Completed += OnDownloadCompleted;
 
-            await model.DownloadAll().ConfigureAwait(isAwaiting);
+            model.DownloadAll();
             AddDownloadViewModel(model);
             return model;
         }
