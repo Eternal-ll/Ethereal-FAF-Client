@@ -23,7 +23,7 @@ namespace beta.ViewModels
 
             if (Settings.Default.AutoJoin)
             {
-                //Task.Run(() => OAuthService.AuthAsync());
+                Task.Run(() => OAuthService.AuthAsync());
             }
         }
 

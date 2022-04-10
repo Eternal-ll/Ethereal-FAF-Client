@@ -70,6 +70,122 @@
         </Grid>
     </DataTemplate>
 
+    <Style x:Key="TeamsItemsStyle" TargetType="ItemsControl">
+        <Style.Resources>
+            <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                <Grid d:DataContext="{d:DesignInstance {x:Type sModels:PlayerInfoMessage}}"
+                                  ShowGridLines="False">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="48"/>
+                        <ColumnDefinition MinWidth="40"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding Flag}" Height="16" Width="16"/>
+                    <TextBlock Margin="4 0 0 0" Grid.Column="1" Text="{Binding login}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                        <Setter Property="Foreground" Value="LimeGreen"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RelationShip}" Value="2">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0 -4 -8 0"
+                                           Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="Red"/>
+                                <Style.Triggers>
+                                    <Trigger Property="Text" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </Trigger>
+                                    <Trigger Property="Text" Value="↑">
+                                        <Setter Property="Foreground" Value="Lime"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Image Visibility="Visible" Margin="8 0 0 0" Stretch="Uniform"
+                           Width="40" Height="20" HorizontalAlignment="Left" Grid.Column="2"
+                                       Style="{StaticResource AvatarImageStyle}"/>
+                    <TextBlock Margin="10 0 0 0" Grid.Column="3" HorizontalAlignment="Right"
+                                           Text="{Binding ratings[global].DisplayedRating}"/>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                <Grid d:DataContext="{d:DesignInstance {x:Type models:UnknownPlayer}}"
+                                  ShowGridLines="False">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition MinWidth="40"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="?"/>
+                    <TextBlock Margin="4 0 0 0" Grid.Column="1" Text="{Binding login}"/>
+                    <TextBlock Text="?" Grid.Column="2"/>
+                </Grid>
+            </DataTemplate>
+        </Style.Resources>
+        <Setter Property="ItemsSource" Value="{Binding Teams}"/>
+        <Setter Property="ItemTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="-8 0 -8 10">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="Black" Opacity=".2"/>
+                            </StackPanel.Background>
+                            <TextBlock Margin="8 4 0 4" Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding Players.Length}" Margin="3 0 0 0" Opacity=".5" FontSize="12"/>
+                            <TextBlock Margin="10 0 8 1"
+                                               Padding="18 0 0 0"
+                                               FontSize="12"
+                                               VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text">
+                                            <Setter.Value>
+                                                <MultiBinding StringFormat="{}{0} / {1} avg.">
+                                                    <Binding Path="SumRating"/>
+                                                    <Binding Path="AverageRating"/>
+                                                </MultiBinding>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Players.Length, Converter={StaticResource MoreThanConverter}, ConverterParameter=1}"
+                                                         Value="False">
+                                                <Setter Property="Text" Value="{Binding SumRating}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                                <TextBlock.Background>
+                                    <DrawingBrush Stretch="Uniform" AlignmentX="Left">
+                                        <DrawingBrush.Drawing>
+                                            <GeometryDrawing Brush="White" Geometry="M3,22V8H7V22H3M10,22V2H14V22H10M17,22V14H21V22H17Z"/>
+                                        </DrawingBrush.Drawing>
+                                        <DrawingBrush.RelativeTransform>
+                                            <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                        </DrawingBrush.RelativeTransform>
+                                    </DrawingBrush>
+                                </TextBlock.Background>
+                            </TextBlock>
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding Players}" Margin="0 0 0 10"/>
+                    </StackPanel>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <DataTemplate x:Key="PlayerCardDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
         <StackPanel MaxWidth="200" Margin="0 0 0 10">
             <StackPanel.Style>
@@ -618,11 +734,11 @@
                                                                 <RowDefinition/>
                                                             </Grid.RowDefinitions>
                                                             <StackPanel>
-                                                                <Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>
+                                                                <ContentControl Content="{Binding Game.Map}"/>
                                                                 <TextBlock DataContext="{Binding Game}"
                                                                                            Margin="0 10 0 0">
                                                                                            <!--Style="{StaticResource PlayersTextBlockStyle}">-->
-                                                                                    <Run Style="{StaticResource NumPlayersRunStyle}"/>
+                                                                                    <Run Text="{Binding num_players}"/>
                                                                                     <Run Text="/" FontSize="12"/>
                                                                                     <Run Text="{Binding max_players}"/>
                                                                 </TextBlock>
