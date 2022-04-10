@@ -14,18 +14,18 @@
         <defaultAssemblyRequest permissionSetReference="Custom" />
       </applicationRequestMinimum>
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-        <!--
-          UAC Manifest Options
-          If you want to change the Windows User Account Control level replace the
-          requestedExecutionLevel node with one of the following.
+        <!-- UAC Manifest Options
+             If you want to change the Windows User Account Control level replace the 
+             requestedExecutionLevel node with one of the following.
 
         <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
         <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
         <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
 
-         If you want to utilize File and Registry Virtualization for backward
-         compatibility then delete the requestedExecutionLevel node.
-    -->
+            Specifying requestedExecutionLevel element will disable file and registry virtualization. 
+            Remove this element if your application requires this virtualization for backwards
+            compatibility.
+        -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
     </security>
@@ -72,22 +72,22 @@
       <dsig:DigestValue>1PJ4IiczNNtRjVXdWdnryfObsMF77m7fYHsdX0bFrDY=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="Ethereal FAF Client.dll" size="43703808">
+  <file name="Ethereal FAF Client.dll" size="43707392">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>fNRLrcsWsIbiB25gMlTqe8DgNWlvinTudGsVRtm/wFI=</dsig:DigestValue>
+      <dsig:DigestValue>fTdbPc44BSTukMh7U5njc6B5JM2G8LA4zj86qLhwHg0=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="Ethereal FAF Client.exe" size="131584">
+  <file name="Ethereal FAF Client.exe" size="135168">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>bqn7lHwhFQckjRVondeR4Uv53Y9cE45U6fEt0cCGQG8=</dsig:DigestValue>
+      <dsig:DigestValue>9rz1/IwZgNndcQMiCYRJ17gBfHqZi1fo8ChvNeAnI7k=</dsig:DigestValue>
     </hash>
   </file>
   <file name="Ethereal FAF Client.runtimeconfig.json" size="260">
@@ -432,4 +432,21 @@
       <dsig:DigestValue>AImGX7kJFxbfbmHw1lqhGYqo4Bb4KsI2ADPbloRl2LA=</dsig:DigestValue>
     </hash>
   </file>
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- A list of the Windows versions that this application has been tested on
+           and is designed to work with. Uncomment the appropriate elements
+           and Windows will automatically select the most compatible environment. -->
+      <!-- Windows Vista -->
+      <!--<supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}" />-->
+      <!-- Windows 7 -->
+      <!--<supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}" />-->
+      <!-- Windows 8 -->
+      <!--<supportedOS Id="{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}" />-->
+      <!-- Windows 8.1 -->
+      <!--<supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}" />-->
+      <!-- Windows 10 -->
+      <!--<supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />-->
+    </application>
+  </compatibility>
 </asmv1:assembly>

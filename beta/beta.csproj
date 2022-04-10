@@ -10,6 +10,7 @@
 	  <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
 	  <PlatformTarget>AnyCPU</PlatformTarget>
 	  <AssemblyName>Ethereal FAF Client</AssemblyName>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
