@@ -362,7 +362,8 @@ namespace beta.Infrastructure.Services
             WindowsPrincipal principal = new WindowsPrincipal(identity);
             if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
-                OnStateChanged(new(OAuthState.INVALID, "Not enough priviliges\nStart application with administrator privileges"));
+                OnStateChanged(new(OAuthState.INVALID, "Error", "Not enough priviliges\nStart application with administrator privileges"));
+                return;
             }
             
 
