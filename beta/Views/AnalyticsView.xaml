@@ -22,8 +22,8 @@
             ui:ControlHelper.CornerRadius="6"/>
         
         <ui:ProgressRing Height="100" Width="100" HorizontalAlignment="Center" VerticalAlignment="Center" IsActive="True"/>
-        <wv2:WebView2 Source="https://kazbek.github.io" x:Name="WebView"
+        <!--<wv2:WebView2 Source="https://kazbek.github.io" x:Name="WebView"
                       Margin="0 60 0 0"
-                      Visibility="Collapsed"/>
+                      Visibility="Collapsed"/>-->
     </Grid>
 </UserControl>
