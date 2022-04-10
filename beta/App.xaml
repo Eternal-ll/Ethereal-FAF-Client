@@ -91,11 +91,10 @@
 
                 <ResourceDictionary Source="Resources/Templates/PlayerDataTemplates.xaml"/>
 
+                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/ContentControlStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/BorderStyles.xaml"/>
-                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
-
 
                 <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/DownloadViewModelDataTemplates.xaml"/>
