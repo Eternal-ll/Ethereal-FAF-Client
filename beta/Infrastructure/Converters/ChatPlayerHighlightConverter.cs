@@ -11,7 +11,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return false;
+            if (value is null) return false;
             var textBlock = (TextBlock)value;
             var inlines = textBlock.Inlines;
 
@@ -43,7 +43,7 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return false;
+            if (value is null) return false;
             var textBlock = (TextBlock)value;
             var inlines = textBlock.Inlines;
 
@@ -53,7 +53,7 @@ namespace beta.Infrastructure.Converters
                 var inline = enumrator.Current;
                 if (inline is InlineUIContainer ui)
                 {
-                    if (!(ui.Child is Image or GifImage))
+                    if (ui.Child is not (Image or GifImage))
                     {
                         return false;
                     }

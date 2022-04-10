@@ -1,24 +1,38 @@
-﻿using beta.Models;
-using beta.Models.Server;
+﻿using beta.Models.Server;
 using System;
-using System.Net;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    public enum SessionState : byte
+    {
+        Disconnected,
+        PendingConnection,
+        Connected,
+    }
     public interface ISessionService
     {
-        public event EventHandler<EventArgs<bool>> Authorized;
+        public event EventHandler<SessionState> StateChanged;
 
-        public event EventHandler<EventArgs<SocialMessage>> SocialInfo;
-        public event EventHandler<EventArgs<PlayerInfoMessage>> NewPlayer;
-        public event EventHandler<EventArgs<GameInfoMessage>> NewGame;
+        public event EventHandler<bool> Authorized;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<GameInfoMessage> GameReceived;
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
 
-        public ManagedTcpClient TcpClient { get; }
+        public event EventHandler<SocialData> SocialDataReceived;
+        public event EventHandler<WelcomeData> WelcomeDataReceived;
+        public event EventHandler<NotificationData> NotificationReceived;
+        //public event EventHandler<QueueData> QueueDataReceived;
+        public event EventHandler<MatchMakerData> MatchMakerDataReceived;
+        public event EventHandler<GameLaunchData> GameLaunchDataReceived;
+        public event EventHandler<IceServersData> IceServersDataReceived;
+        public event EventHandler<IceUniversalData> IceUniversalDataReceived;
 
-        public void Connect(IPEndPoint ip);
-        public void AskSession();
+        public bool IsAuthorized { get; }
+
+        public void Connect();
         public void Authorize();
-        public string GenerateUID(string session);
+        public void Ping();
 
         /// <summary>
         /// JSON Format

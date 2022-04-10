@@ -21,13 +21,11 @@ namespace beta.Resources.Controls
         {
             if (!string.IsNullOrEmpty(GifSource))
             {
-                Uri uri = new("pack://application:,,," + GifSource);
+                Uri uri = GifSource.StartsWith("http") ? new(GifSource) : new("pack://application:,,," + GifSource);
                 if (GifSource[1] == ':')
                     uri = new Uri(GifSource, UriKind.Absolute);
                 GifBitmapDecoder = new GifBitmapDecoder(uri, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-
             }
-
             _animation = new Int32Animation(0, GifBitmapDecoder.Frames.Count - 1, new Duration(new TimeSpan(0, 0, 0, GifBitmapDecoder.Frames.Count / 10, (int)((GifBitmapDecoder.Frames.Count / 10.0 - GifBitmapDecoder.Frames.Count / 10) * 1000))));
             _animation.RepeatBehavior = RepeatBehavior.Forever;
             Source = GifBitmapDecoder.Frames[0];

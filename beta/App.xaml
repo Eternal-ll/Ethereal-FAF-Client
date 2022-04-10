@@ -4,7 +4,7 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
-             StartupUri="Views/Windows/MainWindow.xaml">
+             StartupUri="Views/Windows/NewWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -12,21 +12,31 @@
                 <ResourceDictionary>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
                     <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
+                    <cmd:NavigateExplorerCommand x:Key="NavigateExplorerCommand"/>
 
-                        
+
+                    <cmd:JoinGameCommand x:Key="JoinGameCommand"/>
+
+
                     <cmd:AddFriendCommand x:Key="AddFriendCommand"/>
                     <cmd:AddFoeCommand x:Key="AddFoeCommand"/>
                     
                     <cmd:RemoveFriendCommand x:Key="RemoveFriendCommand"/>
                     <cmd:RemoveFoeCommand x:Key="RemoveFoeCommand"/>
-                
+
+                    <cmd:ConnectToIrcCommand x:Key="ConnectToIrcCommand"/>
+                    <cmd:DisconnectFromIrcCommand x:Key="DisconnectFromIrcCommand"/>
+                    <cmd:RefreshIrcCommand x:Key="RefreshIrcCommand"/>
+                    <cmd:ResetPatchCommand x:Key="ResetPatchCommand"/>
+                    <cmd:SelectPathToGameCommand x:Key="SelectPathToGameCommand"/>
+                    <cmd:HostGameCommand x:Key="HostGameCommand"/>
+                    <cmd:LaunchOfflineGameCommand x:Key="LaunchOfflineGameCommand"/>
+                    <cmd:ShowProfileCommand x:Key="ShowProfileCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
-                    <converter:RatingConverter x:Key="RatingConverter"/>
-                    <converter:GetInGameTeamsConverter x:Key="GetInGameTeamsConverter"/>
-                    
+
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
 
@@ -38,20 +48,15 @@
 
                     <!--Chat converters-->
                     <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
-                    
+
                     <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
                     <converter:CheckIfEmojiOnlyConverter x:Key="CheckIfEmojiOnlyConverter"/>
 
                     <converter:TextConverter x:Key="TextConverter"/>
 
                     <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
-                    <converter:GameModConverter x:Key="GameModConverter"/>
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
-                    <converter:TextLongerThanConverter x:Key="TextLongerThanConverter"/>
-                    <converter:UriToCachedImageConverter x:Key="UriToCachedImageConverter"/>
                 </ResourceDictionary>
-
-                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
 
                 <ui:ThemeResources RequestedTheme="Dark">
                     <ui:ThemeResources.ThemeDictionaries>
@@ -75,8 +80,25 @@
                 </ui:ThemeResources>
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
+
+
+                <ResourceDictionary Source="Resources/Styles/ListBoxItemStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ListBoxStyles.xaml"/>
+
+
+
                 <ResourceDictionary Source="Resources/ResourceDictionaries/PathIcons.xaml"/>
+
+                <ResourceDictionary Source="Resources/Templates/PlayerDataTemplates.xaml"/>
+
+                <ResourceDictionary Source="Resources/Styles/PlayerCardStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ContentControlStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/BorderStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/LobbyContainerTemplate.xaml"/>
+
+                <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
+                <ResourceDictionary Source="Resources/Templates/DownloadViewModelDataTemplates.xaml"/>
+                <ResourceDictionary Source="Resources/Templates/ProfileDataTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

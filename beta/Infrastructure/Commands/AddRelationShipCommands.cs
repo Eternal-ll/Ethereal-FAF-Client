@@ -12,7 +12,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.AddRelationShip(id);
+                SocialService.AddFriend(id);
         }
     }
     internal class RemoveFriendCommand : Command
@@ -23,7 +23,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.RemoveRelationShip(id);
+                SocialService.RemoveFriend(id);
         }
     }
 
@@ -35,7 +35,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.AddRelationShip(id, Models.Server.PlayerRelationShip.Foe);
+                SocialService.AddFoe(id);
         }
     }
     internal class RemoveFoeCommand : Command
@@ -46,7 +46,7 @@ namespace beta.Infrastructure.Commands
         public override void Execute(object parameter)
         {
             if (int.TryParse(parameter.ToString(), out int id))
-                SocialService.RemoveRelationShip(id, Models.Server.PlayerRelationShip.Foe);
+                SocialService.RemoveFoe(id);
         }
     }
 }

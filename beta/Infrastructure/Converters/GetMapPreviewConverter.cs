@@ -9,16 +9,16 @@ namespace beta.Infrastructure.Converters
 {
     public class GetMapPreviewConverter : IValueConverter
     {
-        private readonly IMapService MapService;
+        private readonly IMapsService MapService;
 
         public GetMapPreviewConverter()
         {
-            MapService = App.Services.GetService<IMapService>();
+            MapService = App.Services.GetService<IMapsService>();
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var t = MapService.GetMap(new Uri("https://content.faforever.com/maps/previews/large/" + (string)value + ".png"), Folder.MapsLargePreviews);
+            var t = MapService.GetMapPreview(new Uri("https://content.faforever.com/maps/previews/large/" + (string)value + ".png"), Folder.MapsLargePreviews);
             return t;
         }
 

@@ -1,86 +1,26 @@
 ﻿using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
-    public enum GameState
-    {
-        None = 0,
-
-        Open = 1,
-        Playing = 2,
-        Closed = 3,
-
-        Host = 4,
-        PrivateHost = 5,
-
-        PrivateOpen = 6,
-        PrivateClosed = 7,
-        PrivatePlaying = 8,
-
-        Playing5 = 9,
-        PrivatePlaying5 = 10
-    }
-
-    public class PlayerAvatar
-    {
-        public Uri url { get; set; }
-        
-        public string tooltip { get; set; }
-    }
-
-    public struct PlayerAlias
-    {
-        public string name { get; set; }
-        public DateTime changeTime;
-    }
-
-    public enum PlayerState
-    {
-        IDLE = 1,
-        PLAYING = 2,
-        HOSTING = 3,
-        JOINING = 4,
-        SEARCHING_LADDER = 5,
-        STARTING_AUTOMATCH = 6,
-    }
-    public interface IPlayer
-    {
-        public string login { get; set; }
-    }
-    public class UnknownPlayer : IPlayer
-    {
-        public string login { get; set; }
-    }
-    
     public static class PlayerInfoExtensions
     {
         public static PlayerInfoMessage Update(this PlayerInfoMessage orig, PlayerInfoMessage newP)
         {
             orig.login = newP.login;
-            orig.avatar = newP.avatar;
+
+            // updates from AvatarService.UpdatePlayerAvatarAsync
+            //orig.Avatar = newP.Avatar;
 
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
             return orig;
         }
-    }
-
-    public enum PlayerRelationShip
-    {
-        Foe = -1,
-        None = 0,
-        Friend = 1
-    }
-
-    public class PlayerNote
-    {
-        public Color Color { get; set; }
-        public string Text { get; set; }
     }
 
     public class PlayerInfoMessage : ViewModel, IServerMessage, IPlayer
@@ -108,31 +48,15 @@ namespace beta.Models.Server
         #endregion
 
         #region GameStatusImage
-        private object _GameStatusImage;
         public object GameStatusImage => GameState switch
         {
-            GameState.None => null,
             GameState.Open => App.Current.Resources["PlayerGameStatus.open"],
             GameState.Playing => App.Current.Resources["PlayerGameStatus.playing"],
-            GameState.Closed => null,
             GameState.Host => App.Current.Resources["PlayerGameStatus.host"],
-            GameState.PrivateHost => null,
-            GameState.PrivateOpen => null,
-            GameState.PrivateClosed => null,
-            GameState.PrivatePlaying => null,
             GameState.Playing5 => App.Current.Resources["PlayerGameStatus.playing5"],
-            GameState.PrivatePlaying5 => null,
-            _ => null
+            GameState.None => null,
+            _=> null
         };
-        #endregion
-
-        #region Note
-        private string _Note;
-        public string Note
-        {
-            get => _Note;
-            set => Set(ref _Note, value);
-        }
         #endregion
 
         #region Game
@@ -144,12 +68,12 @@ namespace beta.Models.Server
             {
                 if (Set(ref _Game, value))
                 {
-                    if (value == null)
+                    if (value is null)
                     {
                         GameState = GameState.None;
                         return;
                     }
-                    if (value.launched_at != null)
+                    if (value.launched_at is not null)
                     {
                         var timeDifference = DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(value.launched_at.Value);
                         GameState = timeDifference.TotalSeconds < 300 ? GameState.Playing5 : GameState.Playing;
@@ -162,22 +86,14 @@ namespace beta.Models.Server
         }
         #endregion
 
-        #region Avatar
-        private BitmapImage _Avatar;
-        public BitmapImage Avatar
-        {
-            get => _Avatar;
-            set => Set(ref _Avatar, value);
-        }
-        #endregion
-
         // SOCIAL
         #region Note
-        private PlayerNote _PlayerNote;
-        public PlayerNote PlayerNote
+        //TODO
+        private PlayerNoteVM _Note = new();
+        public PlayerNoteVM Note
         {
-            get => _PlayerNote;
-            set=>Set(ref _PlayerNote, value);
+            get => _Note;
+            set => Set(ref _Note, value);
         }
         #endregion
 
@@ -201,6 +117,8 @@ namespace beta.Models.Server
             set => Set(ref _RelationShip, value);
         }
         #endregion
+
+        public string LoginWithClan => clan == null ? login : $"[{clan}] {login}";
 
         public DateTime? Updated { get; set; }
 
@@ -231,12 +149,12 @@ namespace beta.Models.Server
             {
                 if (value != _ratings)
                 {
-                    if (_ratings != null)
+                    if (_ratings is not null)
                         foreach (var item in value)
                         {
                             if (_ratings.TryGetValue(item.Key, out Rating rating))
                             {
-                                if (rating == null) continue;
+                                if (rating is null) continue;
                                 rating.RatingDifference[0] += item.Value.rating[0] - rating.rating[0];
                                 rating.RatingDifference[1] += item.Value.rating[1] - rating.rating[1];
                                 rating.GamesDifference++;
@@ -254,11 +172,20 @@ namespace beta.Models.Server
                     OnPropertyChanged(nameof(ratings));
                 }
             }
-        } 
+        }
         #endregion
 
-        public PlayerAvatar avatar { get; set; }
-        public PlayerAlias[] names { get; set; }
+        // TODO RENAME to PlayerAvatarData?
+
+        #region Avatar
+        private PlayerAvatar _Avatar;
+        [JsonPropertyName("avatar")]
+        public PlayerAvatar Avatar
+        {
+            get => _Avatar;
+            set => Set(ref _Avatar, value);
+        } 
+        #endregion
 
         public PlayerInfoMessage[] players { get; set; }
     }

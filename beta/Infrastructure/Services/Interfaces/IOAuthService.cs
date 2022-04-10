@@ -1,24 +1,33 @@
-﻿using System;
+﻿using beta.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    /// <summary>
+    /// OAuth2 service
+    /// </summary>
     public interface IOAuthService
     {
-        public event EventHandler<EventArgs<OAuthStates>> Result;
-        public void FetchOAuthToken(string code);
-        public void RefreshOAuthToken(string refresh_token);
-        public void Auth();
-        public void Auth(string access_token);
-        public void Auth(string usernameOrEmail, string password);
-    }
+        /// <summary>
+        /// Service state
+        /// </summary>
+        public event EventHandler<OAuthEventArgs> StateChanged;
+        
+        //public void FetchOAuthToken(string code);
+        
+        public Task<bool> RefreshOAuthTokenAsync(string refresh_token);
+        
+        public Task AuthAsync();
+        
+        /// <summary>
+        /// Аутентификация с помощью схемы OAuth2 с использованием логина (почты) и пароля
+        /// </summary>
+        /// <param name="usernameOrEmail"></param>
+        /// <param name="password"></param>
+        public Task AuthAsync(string usernameOrEmail, string password);
+        //public void DoAuth(string usernameOrEmail, string password);
 
-    public enum OAuthStates
-    {
-        EMPTY_FIELDS = -4,
-        NO_CONNECTION = -3,
-        NO_TOKEN = -2,
-        INVALID = -1,
-        TIMED_OUT = 0,
-        AUTHORIZED = 1,
+        public Task AuthByBrowser();
     }
 }

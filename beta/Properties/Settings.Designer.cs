@@ -85,18 +85,6 @@ namespace beta.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string session {
-            get {
-                return ((string)(this["session"]));
-            }
-            set {
-                this["session"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string irc_password {
             get {
                 return ((string)(this["irc_password"]));
@@ -187,6 +175,164 @@ namespace beta.Properties {
             }
             set {
                 this["Height"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsWindowMaximized {
+            get {
+                return ((bool)(this["IsWindowMaximized"]));
+            }
+            set {
+                this["IsWindowMaximized"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsMapsBlacklistEnabled {
+            get {
+                return ((bool)(this["IsMapsBlacklistEnabled"]));
+            }
+            set {
+                this["IsMapsBlacklistEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsFoesGamesHidden {
+            get {
+                return ((bool)(this["IsFoesGamesHidden"]));
+            }
+            set {
+                this["IsFoesGamesHidden"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsGamesSortEnabled {
+            get {
+                return ((bool)(this["IsGamesSortEnabled"]));
+            }
+            set {
+                this["IsGamesSortEnabled"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsPrivateGamesHidden {
+            get {
+                return ((bool)(this["IsPrivateGamesHidden"]));
+            }
+            set {
+                this["IsPrivateGamesHidden"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\%username%\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged" +
+            " Alliance\\Maps\\")]
+        public string PathToMaps {
+            get {
+                return ((string)(this["PathToMaps"]));
+            }
+            set {
+                this["PathToMaps"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\%username%\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged" +
+            " Alliance\\Mods\\")]
+        public string PathToMods {
+            get {
+                return ((string)(this["PathToMods"]));
+            }
+            set {
+                this["PathToMods"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PathToGame {
+            get {
+                return ((string)(this["PathToGame"]));
+            }
+            set {
+                this["PathToGame"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ConnectIRC {
+            get {
+                return ((bool)(this["ConnectIRC"]));
+            }
+            set {
+                this["ConnectIRC"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadMap {
+            get {
+                return ((bool)(this["AlwaysDownloadMap"]));
+            }
+            set {
+                this["AlwaysDownloadMap"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadMod {
+            get {
+                return ((bool)(this["AlwaysDownloadMod"]));
+            }
+            set {
+                this["AlwaysDownloadMod"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AlwaysDownloadPatch {
+            get {
+                return ((bool)(this["AlwaysDownloadPatch"]));
+            }
+            set {
+                this["AlwaysDownloadPatch"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsTrailerSoundsOn {
+            get {
+                return ((bool)(this["IsTrailerSoundsOn"]));
+            }
+            set {
+                this["IsTrailerSoundsOn"] = value;
             }
         }
     }

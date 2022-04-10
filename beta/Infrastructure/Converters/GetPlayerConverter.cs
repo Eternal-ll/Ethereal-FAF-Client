@@ -25,7 +25,7 @@ namespace beta.Infrastructure.Converters
         /// <returns></returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return null;
+            if (value is null) return null;
 
             var playerName = string.Empty;
 
@@ -33,14 +33,32 @@ namespace beta.Infrastructure.Converters
                 return value;
 
             if (value is ChannelMessage channelMessage)
-                if (channelMessage.From != null)
+                if (channelMessage.From is not null)
                     playerName = channelMessage.From;
                 else return null;
 
             if (value is string player)
                 playerName = player;
 
-            return PlayersService.GetPlayer(playerName);
+            bool isChatMod = playerName.StartsWith('@');
+
+            if (isChatMod)
+            {
+                playerName = playerName.Substring(1);
+            }
+
+            var playerInstance = PlayersService.GetPlayer(playerName);
+            if (playerInstance is null)
+            {
+                return new UnknownPlayer()
+                {
+                    login = playerName,
+                    IsChatModerator = isChatMod
+                };
+            }
+            playerInstance.IsChatModerator = isChatMod;
+
+            return playerInstance;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

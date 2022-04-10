@@ -1,7 +1,6 @@
 ﻿using beta.ViewModels.Base;
 using System;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace beta.Models
@@ -18,7 +17,7 @@ namespace beta.Models
         {
             get
             {
-                if (_BitmapImage == null)
+                if (_BitmapImage is null)
                 {
                     _BitmapImage = new BitmapImage(MediaUri, new(System.Net.Cache.RequestCacheLevel.NoCacheNoStore));
                     _BitmapImage.DownloadCompleted += (s, e) => OnPropertyChanged(nameof(ImageVisibility));

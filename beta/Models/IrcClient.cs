@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using beta.Models.Debugger;
 
 namespace beta.Models
 {
@@ -15,16 +15,10 @@ namespace beta.Models
     {
         #region Variables
         private string _server = "";
-
         private int _port = 6667;
-
         private string _ServerPass = "";
-
         private string _nick = "Test";
-
         private string _altNick = "";
-
-        private bool _consoleOutput = false;
 
         // private TcpClient used to talk to the server
         private TcpClient TcpClient;
@@ -35,27 +29,12 @@ namespace beta.Models
         // private ssl stream used to read/write from/to
         private SslStream ssl;
 
-        // global variable used to read input from the client
-        private string inputLine;
-
-        // stream reader to read from the network stream
-        private StreamReader reader;
-
-        // stream writer to write to the stream
-        private StreamWriter writer;
-
         // AsyncOperation used to handle cross-thread wonderness
         private AsyncOperation op;
 
         #endregion
 
-        #region Constructors
-
-        /// <summary>
-        /// IrcClient used to connect to an IRC Server (default port: 6667) (default ssl: false)
-        /// </summary>
-        /// <param name="Server">IRC Server</param>
-        public IrcClient(string Server) : this(Server, 6667) { }
+        #region Constructor
 
         /// <summary>
         /// IrcClient used to connect to an IRC Server
@@ -71,15 +50,6 @@ namespace beta.Models
         #endregion
 
         #region Properties
-        /// <summary>
-        /// Returns the Server address used
-        /// </summary>
-        public string Server => _server;
-
-        /// <summary>
-        /// Returns the Port used
-        /// </summary>
-        public int Port => _port;
 
         /// <summary>
         /// Returns the password used to auth to the server
@@ -105,14 +75,6 @@ namespace beta.Models
             get => _altNick;
             set => _altNick = value;
         }
-        /// <summary>
-        /// Output RAW IRC data to console
-        /// </summary>
-        public bool ConsoleOutput
-        {
-            get => _consoleOutput;
-            set => _consoleOutput = value;
-        }
 
         /// <summary>
         /// Returns true if the client is connected.
@@ -122,6 +84,8 @@ namespace beta.Models
         #endregion
 
         #region Events
+
+        public event EventHandler<ChannelMessageEventArgs> TopicReceived;
 
         public event EventHandler<StringEventArgs> Pinged = delegate { };
         public event EventHandler<UpdateUsersEventArgs> UpdateUsers = delegate { };
@@ -199,12 +163,11 @@ namespace beta.Models
         /// </summary>
         public void Connect()
         {
-            Thread t = new Thread(DoConnect)
+            new Thread(DoConnect)
             {
-                Name="IRC TCP Client",
+                Name = "IRC TCP Client",
                 IsBackground = true
-            };
-            t.Start();
+            }.Start();
         }
         public static bool ValidateServerCertificate(object sender, X509Certificate certificate,
             X509Chain chain, SslPolicyErrors sslPolicyErrors)
@@ -215,15 +178,12 @@ namespace beta.Models
         {
             try
             {
-                TcpClient = new TcpClient("irc.faforever.com", _port);
+                TcpClient = new TcpClient("lobby.faforever.com", _port);
 
                 stream = TcpClient.GetStream();
-                ssl = new SslStream(stream, false, ValidateServerCertificate, null);
-                //SslStream.AuthenticateAsClient("irc.faforever.com");
-                //ssl = new SslStream(stream, false);
-                ssl.AuthenticateAsClient("irc.faforever.com");
-                //reader = new StreamReader(ssl);
-                //writer = new StreamWriter(ssl);
+                //ssl = new SslStream(stream, false, ValidateServerCertificate, null);
+
+                //ssl.AuthenticateAsClient("lobby.faforever.com");
 
                 if (!string.IsNullOrEmpty(_ServerPass))
                     Send("PASS " + _ServerPass);
@@ -247,7 +207,7 @@ namespace beta.Models
         /// </summary>
         public void Disconnect()
         {
-            if (TcpClient != null)
+            if (TcpClient is not null)
             {
                 if (TcpClient.Connected)
                 {
@@ -262,7 +222,7 @@ namespace beta.Models
         /// <param name="channel">Channel to join</param>
         public void JoinChannel(string channel)
         {
-            if (TcpClient != null && TcpClient.Connected)
+            if (TcpClient is not null && TcpClient.Connected)
             {
                 Send("JOIN " + channel);
             }
@@ -306,9 +266,8 @@ namespace beta.Models
         public void Dispose()
         {
             stream.Dispose();
-            ssl.Dispose();
-            //writer.Dispose();
-            //reader.Dispose();
+            TcpClient.Dispose();
+            //ssl.Dispose();
         }
         #endregion
 
@@ -320,11 +279,10 @@ namespace beta.Models
         /// Listens for messages from the server
         /// </summary>
         /// 
-        private readonly StringBuilder builder = new();
         private void Listen()
         {
-            //if (TcpClient == null) return;
-            //if (TcpClient.Connected == false) return;
+            //if (TcpClient is null) return;
+            //if (TcpClient.Connected is false) return;
 
             var c = TcpClient;
 
@@ -335,13 +293,12 @@ namespace beta.Models
             while (bytesAvailable > 0 && c.Connected)
             {
                 byte[] nextByte = new byte[1];
-                ssl.Read(nextByte, 0, 1);
-
-                //bytesReceived.AddRange(nextByte);
+                stream.Read(nextByte, 0, 1);
 
                 //              == \n
                 if (nextByte[0] == 10)
                 {
+                    StringBuilder builder = new();
                     ParseData(builder.Clear()
                         .Append(StringEncoder.GetChars(_queuedMsg.ToArray()))
                         .ToString());
@@ -351,22 +308,6 @@ namespace beta.Models
             }
 
         }
-        //private void Listen()
-        //{
-
-        //    while ((inputLine = reader.ReadLine()) != null)
-        //    {
-        //        try
-        //        {
-        //            ParseData(inputLine);
-        //            if (_consoleOutput) Console.Write(inputLine);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            Fire_ExceptionThrown(ex);
-        //        }
-        //    }//end while
-        //}
 
         /// <summary>
         /// Parses data sent from the server
@@ -374,6 +315,7 @@ namespace beta.Models
         /// <param name="data">message from the server</param>
         private void ParseData(string data)
         {
+            AppDebugger.LOGIRC(data);
             // split the data into parts
             string[] ircData = data.Split(' ');
 
@@ -387,31 +329,87 @@ namespace beta.Models
                     Send("PONG " + ircData[1].Replace(":", string.Empty));
                     return;
                 }
-
             }
 
             // re-act according to the IRC Commands
             switch (ircCommand)
             {
+                //https://modern.ircdocs.horse/#names-message
                 case "001": // server welcome message, after this we can join
                     Fire_Connected();
                     return;
                     Send("MODE " + _nick + " +B");
                     Fire_Connected();    //TODO: this might not work
                     break;
+                case "332": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
+                    //  "<client> <channel> :<topic>"
+
+                    break;
+                case "333": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
+                    //  "<client> <channel> <nick> <setat>"
+                    break;
                 case "353": // member list
                     {
-                        var channel = ircData[4];
-                        var userList = JoinArray(ircData, 5).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        StringBuilder sb = new();
+                        bool isChannel = false;
+                        string channel = string.Empty;
+                        for (int i = 1; i < data.Length; i++)
+                        {
+                            var letter = data[i];
 
-                        Fire_UpdateUsers(new UpdateUsersEventArgs(channel, userList));
+                            if (sb.Length > 0)
+                            {
+                                if (isChannel && letter == ' ')
+                                {
+                                    channel = sb.ToString();
+                                    sb.Clear();
+                                    isChannel = false;
+                                    continue;
+                                }
+
+                                if (letter == '\r')
+                                {
+                                    // remove ':' and " \r"
+                                    sb.Remove(0, 1).Remove(sb.Length - 1, 1);
+                                    break;
+                                }
+
+                                sb.Append(letter);
+                                continue;
+                            }
+
+                            if (letter == ':' || letter == '#')
+                            {
+                                sb.Append(letter);
+                                if (letter == '#')
+                                {
+                                    isChannel = true;
+                                }
+                            }
+                        }
+
+                        var users = sb.ToString().Split();
+                        sb.Clear();
+                        Fire_UpdateUsers(new UpdateUsersEventArgs(channel, users));
                     }
+                    break;
+
+                case "432": //Nickname is unavailable: Being held for registered user
+
+                    //SendMessage("NickServ", Nick);
+                    //SendMessage("NickServ", "identify" + ServerPass);
+                    var rnd = new Random();
+                    var rndomNick = Nick + rnd.Next(0, 9) + rnd.Next(0, 9) + rnd.Next(0, 9);
+                    Send("NICK " + rndomNick);
+                    _nick = rndomNick;
                     break;
                 case "433":
                     var takenNick = ircData[3];
 
                     // notify user
                     Fire_NickTaken(takenNick);
+                    //SendMessage("NickServ", Nick);
+                    //SendMessage("NickServ", "identify" + ServerPass);
 
                     // try alt nick if it's the first time 
                     if (takenNick == _altNick)
@@ -424,15 +422,49 @@ namespace beta.Models
                     }
                     else
                     {
-                        Send("NICK " + _altNick);
-                        Send("USER " + _altNick + " 0 * :" + _altNick);
-                        _nick = _altNick;
+                        var rand = new Random();
+                        var randomNick = "Guest" + rand.Next(0, 9) + rand.Next(0, 9) + rand.Next(0, 9);
+                        Send("NICK " + randomNick);
+                        Send("USER " + randomNick + " 0 * :" + randomNick);
+                        _nick = randomNick;
                     }
                     break;
                 case "JOIN": // someone joined
                     {
-                        var channel = ircData[2];
-                        var user = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
+                        //:ThurnisHaley!396062@Clk-10163F26.hsd1.ma.comcast.net JOIN :#aeolus
+                        StringBuilder sb = new();
+
+                        string user = null;
+                        string channel = null;
+                        int i = 1;
+                        while (i < data.Length)
+                        {
+                            var letter = data[i];
+
+                            if (letter == '!')
+                            {
+                                user = sb.ToString();
+                                sb.Clear();
+                                break;
+                            }
+
+                            sb.Append(letter);
+                            i++;
+                        }
+                        while (i < data.Length)
+                        {
+                            var letter = data[i];
+
+                            if (letter == '\r')
+                            {
+                                sb.Remove(0, 1);
+                                channel = sb.ToString();
+                                break;
+                            }
+
+                            if (letter == ':' || sb.Length > 0) sb.Append(letter);
+                            i++;
+                        }
                         Fire_UserJoined(new UserJoinedEventArgs(channel, user));
                     }
                     break;
@@ -536,28 +568,9 @@ namespace beta.Models
         {
             return StripMessage(string.Join(" ", strArray, startIndex, strArray.Length - startIndex));
         }
-        public void Write(byte[] data)
-        {
-            //if (_client == null) { throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)"); }
-            ssl.Write(data, 0, data.Length);
-        }
+        private void Write(byte[] data) => stream.Write(data, 0, data.Length);
 
-        public void Write(string data)
-        {
-            if (data == null) { return; }
-            Write(StringEncoder.GetBytes(data));
-        }
-        /// <summary>
-        /// Send message to server
-        /// </summary>
-        /// <param name="message">Message to send</param>
-        private void Send(string message)
-        {
-            Write(message + " \r\n");
-            return;
-            writer.WriteLine(message);
-            writer.Flush();
-        }
+        private void Send(string message) => Write(StringEncoder.GetBytes(message + '\r'));
         #endregion
     }
 

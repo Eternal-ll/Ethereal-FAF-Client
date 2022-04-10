@@ -9,7 +9,7 @@ namespace beta.Infrastructure.Commands
 
         public override void Execute(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
 
             Clipboard.SetText(parameter.ToString());
         }

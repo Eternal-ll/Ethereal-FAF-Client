@@ -2,7 +2,7 @@
 
 namespace beta.Models
 {
-    public struct ChannelMessage
+    public class ChannelMessage
     {
         public string From { get; set; }
         public string Message { get; set; }

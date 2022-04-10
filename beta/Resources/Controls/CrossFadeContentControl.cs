@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -9,7 +10,7 @@ namespace beta.Resources.Controls
 {
     [TemplatePart(Name = FirstTemplatePartName, Type = typeof(ContentPresenter))]
     [TemplatePart(Name = SecondTemplatePartName, Type = typeof(ContentPresenter))]
-    public class CrossFadeContentControl : ContentControl
+    public class CrossFadeContentControl : ContentControl, INotifyPropertyChanged
     {
         #region Constants and Statics
         /// <summary>
@@ -81,6 +82,8 @@ namespace beta.Resources.Controls
                 typeof(CrossFadeContentControl),
                 new PropertyMetadata(true));
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public bool IsCrossFadeEnabled
         {
             get => (bool)GetValue(IsCrossFadeEnabledProperty);
@@ -122,7 +125,7 @@ namespace beta.Resources.Controls
             _oldContentPresenter = _firstContentPresenter;
             _useFirstAsNew = true;
 
-            if (Content != null)
+            if (Content is not null)
             {
                 OnContentChanged(null, Content);
             }
@@ -139,41 +142,41 @@ namespace beta.Resources.Controls
         {
             base.OnContentChanged(oldContent, newContent);
 
-            if (_pendingTransition != null)
+            if (_pendingTransition is not null)
             {
                 _pendingTransition.Abort();
                 _pendingTransition = null;
             }
 
-            if (_fadeOutAnimation != null)
+            if (_fadeOutAnimation is not null)
             {
                 _fadeOutAnimation.Completed -= OnFadeOutAnimationCompleted;
                 _fadeOutAnimation = null;
             }
 
-            UIElement oldElement = oldContent as UIElement;
+            //UIElement oldElement = oldContent as UIElement;
 
             // Require the appropriate template parts plus a new element to
             // transition to.
-            if (_firstContentPresenter == null || _secondContentPresenter == null || newContent is not UIElement newElement)
+            if (_firstContentPresenter is null || _secondContentPresenter is null)// || newContent is not UIElement newElement)
             {
                 return;
             }
 
-            if (oldElement != null)
-            {
+            //if (oldElement is not null)
+            //{
                 FlipPresenters();
-            }
+            //}
 
-            bool useTransition = oldElement != null && Animates;
+            bool useTransition = oldContent is not null && Animates;//oldElement is not null && Animates;
 
             _newContentPresenter.Opacity = useTransition ? 0 : 1;
             _newContentPresenter.Visibility = Visibility.Visible;
-            _newContentPresenter.Content = newElement;
+            _newContentPresenter.Content = newContent;//newElement;
 
             _oldContentPresenter.Opacity = 1;
             _oldContentPresenter.Visibility = useTransition ? Visibility.Visible : Visibility.Collapsed;
-            _oldContentPresenter.Content = useTransition ? oldElement : null;
+            _oldContentPresenter.Content = useTransition ? oldContent : null;//oldElement : null;
 
             if (useTransition)
             {
@@ -194,10 +197,10 @@ namespace beta.Resources.Controls
 
         private void OnFadeOutAnimationCompleted(object sender, EventArgs e)
         {
-            if (_oldContentPresenter != null)
+            if (_oldContentPresenter is not null)
             {
                 _oldContentPresenter.Visibility = Visibility.Collapsed;
-                _oldContentPresenter.Content = null;
+                Dispatcher.BeginInvoke(() => _oldContentPresenter.Content = null);
             }
 
             _fadeOutAnimation = null;

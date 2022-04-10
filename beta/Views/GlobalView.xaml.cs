@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
+using beta.Models.Server.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -52,26 +53,6 @@ namespace beta.Views
         }
         #endregion
 
-        #region IsPrivateGamesHidden
-
-        private bool _IsPrivateGamesHidden;
-
-        public bool IsPrivateGamesHidden
-        {
-            get => _IsPrivateGamesHidden;
-            set
-            {
-                if (_IsPrivateGamesHidden != value)
-                {
-                    _IsPrivateGamesHidden = value;
-
-                    View.Refresh();
-                    OnPropertyChanged(nameof(IsPrivateGamesHidden));
-                }
-            }
-        }
-        #endregion
-
         #region CollectionViewSource / View
         private readonly CollectionViewSource CollectionViewSource = new();
         public ICollectionView View => CollectionViewSource.View;
@@ -86,16 +67,9 @@ namespace beta.Views
             var lobby = (GameInfoMessage)e.Item;
             e.Accepted = false;
 
-            if (lobby.game_type != "custom" || lobby.featured_mod != "faf" || lobby.sim_mods.Count > 0)
+            if (lobby.GameType != GameType.Custom || lobby.FeaturedMod != FeaturedMod.FAF || lobby.sim_mods.Count > 0)
                 return;
 
-            //var mapName = lobby.MapName;
-            //if (mapName.Contains("gap") || mapName.Contains("crater") || mapName.Contains("astro") ||
-            //    mapName.Contains("pass"))
-            //    return;
-
-            //if (lobby.num_players == 0)
-            //    return;
             if (_IsMapsBlacklistEnabled && MapsBlackList.Count > 0)
             {
                 var items = MapsBlackList;
@@ -104,7 +78,7 @@ namespace beta.Views
                         return;
             }
 
-            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == Models.Server.PlayerRelationShip.Foe)
+            if (_IsFoesGamesHidden && lobby.Host?.RelationShip == PlayerRelationShip.Foe)
                 return;
 
             if (_IsPrivateGamesHidden && lobby.password_protected)
@@ -142,33 +116,6 @@ namespace beta.Views
         public ScrollViewer IdleGamesScrollViewer { get; }
         #endregion
 
-        #region IsSortEnabled
-        private bool _IsSortEnabled;
-        public bool IsSortEnabled
-        {
-            get => _IsSortEnabled;
-            set
-            {
-                if (_IsSortEnabled != value)
-                {
-                    _IsSortEnabled = value;
-
-                    //View.Refresh();
-                    OnPropertyChanged(nameof(IsSortEnabled));
-
-                    if (!value)
-                    {
-                        View.SortDescriptions.Clear();
-                    }
-                    if (value && View.SortDescriptions.Count == 0)
-                    {
-                        SelectedSort = SortDescriptions[0];
-                    }
-                }
-            }
-        }
-        #endregion
-
         #region Sort properties
 
         public SortDescription[] SortDescriptions => new SortDescription[]
@@ -196,6 +143,9 @@ namespace beta.Views
                     _SelectedSort = value;
                     PropertyChanged?.Invoke(this, new(nameof(SelectedSort)));
                     PropertyChanged?.Invoke(this, new(nameof(SortDirection)));
+
+                    CollectionViewSource.LiveSortingProperties.Clear();
+                    CollectionViewSource.LiveSortingProperties.Add(value.PropertyName);
                     //SortDirection = ListSortDirection.Ascending;
                     View.SortDescriptions.Clear();
                     View.SortDescriptions.Add(value);
@@ -270,8 +220,56 @@ namespace beta.Views
 
         #endregion
 
+        #region IsPrivateGamesHidden
+
+        private bool _IsPrivateGamesHidden = Settings.Default.IsPrivateGamesHidden;
+
+        public bool IsPrivateGamesHidden
+        {
+            get => _IsPrivateGamesHidden;
+            set
+            {
+                if (_IsPrivateGamesHidden != value)
+                {
+                    _IsPrivateGamesHidden = value;
+
+                    View.Refresh();
+                    OnPropertyChanged(nameof(IsPrivateGamesHidden));
+                }
+            }
+        }
+        #endregion
+
+        #region IsSortEnabled
+        private bool _IsSortEnabled = Settings.Default.IsGamesSortEnabled;
+        public bool IsSortEnabled
+        {
+            get => _IsSortEnabled;
+            set
+            {
+                if (_IsSortEnabled != value)
+                {
+                    _IsSortEnabled = value;
+
+                    //View.Refresh();
+                    OnPropertyChanged(nameof(IsSortEnabled));
+
+                    if (!value)
+                    {
+                        CollectionViewSource.LiveSortingProperties.Clear();
+                        View.SortDescriptions.Clear();
+                    }
+                    if (value && View.SortDescriptions.Count == 0)
+                    {
+                        SelectedSort = SortDescriptions[0];
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region IsFoesGamesHidden
-        private bool _IsFoesGamesHidden;
+        private bool _IsFoesGamesHidden = Settings.Default.IsFoesGamesHidden;
         public bool IsFoesGamesHidden
         {
             get => _IsFoesGamesHidden;
@@ -285,12 +283,8 @@ namespace beta.Views
         }
         #endregion
 
-        #region MapsBlackList
-
-        public ObservableCollection<string> MapsBlackList { get; set; } = new();
-
         #region IsMapsBlacklistEnabled
-        private bool _IsMapsBlacklistEnabled;
+        private bool _IsMapsBlacklistEnabled = Settings.Default.IsMapsBlacklistEnabled;
         public bool IsMapsBlacklistEnabled
         {
             get => _IsMapsBlacklistEnabled;
@@ -304,6 +298,10 @@ namespace beta.Views
             }
         }
         #endregion
+
+        #region MapsBlackList
+
+        public ObservableCollection<string> MapsBlackList { get; set; } = new();
 
         #region InputKeyWord
         private string _InputKeyWord = string.Empty;
@@ -329,13 +327,12 @@ namespace beta.Views
         }
         #endregion
 
-
         #region RemoveKeyWordCommand
         private ICommand _RemoveKeyWordCommand;
         public ICommand RemoveKeyWordCommand => _RemoveKeyWordCommand;
         public void OnRemoveKeyWordCommand(object parameter)
         {
-            if (parameter == null) return;
+            if (parameter is null) return;
             MapsBlackList.Remove(parameter.ToString());
 
             if (_IsMapsBlacklistEnabled)
@@ -348,7 +345,7 @@ namespace beta.Views
         public static object NewItemPlaceholder => CollectionView.NewItemPlaceholder;
         public ObservableCollection<GameInfoMessage> LiveGames => GamesServices.LiveGames;
 
-        private readonly IGamesServices GamesServices;
+        private readonly IGamesService GamesServices;
         private readonly object _lock = new();
 
         #endregion
@@ -367,11 +364,12 @@ namespace beta.Views
 
             IdleGamesScrollViewer = Tools.FindChild<ScrollViewer>(IdleGames);
 
-            GamesServices = App.Services.GetRequiredService<IGamesServices>();
+            GamesServices = App.Services.GetRequiredService<IGamesService>();
 
             //var grouping = new PropertyGroupDescription(nameof(GameInfoMessage.featured_mod));
             CollectionViewSource.Filter += LobbiesViewSourceFilter;
             //CollectionViewSource.GroupDescriptions.Add(grouping);
+            CollectionViewSource.IsLiveSortingRequested = true;
 
             BindingOperations.EnableCollectionSynchronization(GamesServices.IdleGames, _lock);
             BindingOperations.EnableCollectionSynchronization(GamesServices.LiveGames, _lock);

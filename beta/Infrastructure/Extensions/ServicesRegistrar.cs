@@ -10,12 +10,19 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IOAuthService, OAuthService>()
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<IPlayersService, PlayersService>()
-            .AddSingleton<IGamesServices, GamesServices>()
-            .AddSingleton<IIrcService, IrcService>()
+            .AddSingleton<IGamesService, GamesService>()
             .AddSingleton<IAvatarService, AvatarService>()
-            .AddSingleton<IMapService, MapService>()
+            .AddSingleton<IMapsService, MapsService>()
             .AddSingleton<ISocialService, SocialService>()
             .AddSingleton<ICacheService, CacheService>()
+            .AddSingleton<IGameSessionService, GameSessionService>()
+            .AddSingleton<IIrcService, IrcService>()
+            .AddSingleton<INoteService, NoteService>()
+            .AddSingleton<IDownloadService, DownloadService>()
+            .AddSingleton<IIceService, IceService>()
+            .AddSingleton<INotificationService, NotificationService>()
+
+            .AddTransient<IApiService, ApiService>()
             ;
     }
 }

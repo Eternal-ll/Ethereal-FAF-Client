@@ -1,135 +1,235 @@
-﻿using System;
+﻿using beta.Infrastructure.Extensions;
+using beta.Models.Server.Enums;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
 namespace beta.Models
 {
-    public enum TcpClientState
+    public enum ManagedTcpClientState : byte
     {
-        TimedOut = -2,
-        Disconnected = -1,
-        Connected = 1
+        Disconnected,
+        TimedOut,
+        CantConnect,
+        PendingConnection,
+        Connected
     }
 
     public class ManagedTcpClient : IDisposable
     {
         #region Events
         public event EventHandler<string> DataReceived;
-        public event EventHandler<TcpClientState> StateChanged; 
+        public event EventHandler<ManagedTcpClientState> StateChanged;
+        #endregion
+
+        #region CTOR
+        public ManagedTcpClient()
+        {
+
+        }
+
+        /// <summary>
+        /// Using non SSL port by default
+        /// </summary>
+        /// <param name="host"></param>
+        /// <param name="port"></param>
+        public ManagedTcpClient(string host = "lobby.faforever.com", int port = 6667)
+        {
+            Host = host;
+            Port = port;
+            TcpThread = new(DoConnect);
+            TcpThread.Start();
+        }
+        public ManagedTcpClient(string threadName, string host = "lobby.faforever.com", int port = 6667)
+            : this(host, port) => ThreadName = threadName;
         #endregion
 
         #region Properties
 
-        private readonly Encoding StringEncoder = Encoding.UTF8;
-        private readonly List<byte> QueueCache = new();
-
-        private Thread ListenThread;
-
-        public TcpClient TcpClient { get; private set; }
-
-        /// <summary>
-        /// Delimeter for incoming data. Default is '\n'
-        /// </summary>
-        public byte Delimiter { get; set; }
-        public char CharDelimeter
-        {
-            get => Convert.ToChar(Delimiter);
-            set => Delimiter = Convert.ToByte(value);
-        }
-
+        #region Public
         public bool IsListening { get; set; }
-
-        public int ReadLoopIntervalMs { get; set; }
-
         /// <summary>
-        /// Call the thread as you want
+        /// 10ms by default
         /// </summary>
+        public int ReadLoopIntervalMs { get; set; } = 10;
         public string ThreadName { get; set; } = "TCP Client";
         #endregion
 
-        public ManagedTcpClient()
-        {
-            ReadLoopIntervalMs = 10;
-            Delimiter = 10;
-        }
-        /// <summary>
-        /// Connects to lobby server. Default IP: 116.202.155.226 PORT: 8002
-        /// </summary>
-        /// <param name="hostNameOrIpAddress"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public ManagedTcpClient Connect(string hostNameOrIpAddress = "lobby.faforever.com", int port = 8002)
-        {
-            TcpClient = new TcpClient(AddressFamily.InterNetwork);
+        #region Private
 
+        private readonly Encoding StringEncoder = Encoding.UTF8;
+        private readonly List<byte> ByteCache = new();
+
+        public TcpClient TcpClient;
+        public int Port;
+        public string Host;
+
+        private NetworkStream Stream;
+        private Thread TcpThread;
+        #endregion
+
+        #endregion
+
+        #region Methods
+
+        #region Public
+        /// <summary>
+        /// Connect to the IRC server
+        /// </summary>
+        public void Connect()
+        {
+            OnStateChanged(ManagedTcpClientState.PendingConnection);
+            TcpThread = new(DoConnect)
+            {
+                Name = ThreadName,
+                IsBackground = true,
+            };
+            TcpThread.Start();
+        }
+        public bool Write(byte[] data)
+        {
+            if (TcpClient is null)
+            {
+                //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+            }
+            else if (!TcpClient.Connected)
+            {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                return false;
+            }
+            if (Stream is not null)
+            {
+                Stream.Write(data, 0, data.Length);
+                return true;
+            }
+            return false;
+        }
+
+        public bool Write(string data) => Write(StringEncoder.GetBytes(data + '\n'));
+
+        public string WriteLineAndGetReply(string data, ServerCommand command, TimeSpan timeout)
+        {
+            string reply = string.Empty;
+
+            DataReceived += (s, e) =>
+            {
+                // parsing first row
+                // "command": "....",
+                if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
+                    if (repylCommand == command)
+                        reply = e;
+                DataReceived -= (s, e) => { };
+            };
+
+            Write(data);
+
+            Stopwatch sw = new();
+            sw.Start();
+
+            while (reply.Length == 0 && sw.Elapsed < timeout)
+                Thread.Sleep(10);
+
+            return reply;
+        }
+        public string WriteLineAndGetReply(byte[] data, ServerCommand command, TimeSpan timeout)
+        {
+            string reply = string.Empty;
+
+            DataReceived += (s, e) =>
+            {
+                // parsing first row
+                // "command": "....",
+                if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
+                    if (repylCommand == command)
+                        reply = e;
+                DataReceived -= (s, e) => { };
+            };
+
+            Write(data);
+
+            Stopwatch sw = new();
+            sw.Start();
+
+            while (reply.Length == 0 && sw.Elapsed < timeout)
+                Thread.Sleep(10);
+
+            return reply;
+        }
+        #endregion
+
+        private void DoConnect()
+        {
+            OnStateChanged(ManagedTcpClientState.PendingConnection);
             try
             {
-                TcpClient.Connect(hostNameOrIpAddress, port);
+                TcpClient = new(Host, Port);
+
+                Stream = TcpClient.GetStream();
+                OnStateChanged(ManagedTcpClientState.Connected);
+
+                try
+                {
+                    while (!IsListening)
+                    {
+                        RunLoopStep();
+
+                        Thread.Sleep(ReadLoopIntervalMs);
+                    }
+                }
+                catch(SocketException ex)
+                {
+
+                }
             }
-            catch (Exception e)
+            catch (SocketException e)
             {
-                TcpClient.Dispose();
-                TcpClient = null;
-                OnStateChanged(TcpClientState.TimedOut);
-                //throw new Exception(nameof(ManagedTcpClient), e);
+                OnStateChanged(ManagedTcpClientState.CantConnect);
+                TcpThread = null;
             }
             finally
             {
-                StartListenThread();
-                OnStateChanged(TcpClientState.Connected);
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                if (TcpClient is not null)
+                {
+                    //Stream.Dispose();
+                    TcpClient.Close();
+                }
+                TcpThread = null;
             }
-            return this;
-        }
-        public ManagedTcpClient Disconnect()
-        {
-            if (TcpClient == null) { return this; }
-            TcpClient.Close();
-            TcpClient = null;
-            return this;
         }
 
+        #region Private
         private void StartListenThread()
         {
-            if (ListenThread != null) { return; }
+            if (TcpThread is not null) { return; }
 
-            ListenThread = new Thread(ListenerLoop)
+            TcpThread = new Thread(ListenerLoop)
             {
                 Name = ThreadName,
                 IsBackground = true
             };
 
-            ListenThread.Start();
+            TcpThread.Start();
         }
         private void ListenerLoop(object state)
         {
-            //try
-            //{
-                while (!IsListening)
-                {
-                    RunLoopStep();
+            while (!IsListening)
+            {
+                RunLoopStep();
 
-                    Thread.Sleep(ReadLoopIntervalMs);
-                }
-            //}
-            //catch (Exception e)
-            //{
-            //    TcpClient.Dispose();
-            //    TcpClient = null;
-            //    OnStateChanged(TcpClientState.TimedOut);
-            //}
-            //finally
-            //{
-            //    ListenThread = null;
-            //}
+                Thread.Sleep(ReadLoopIntervalMs);
+            }
         }
+
         private void RunLoopStep()
         {
-            if (TcpClient == null) return;
-            if (TcpClient.Connected == false) return;
-
             var c = TcpClient;
+
+            if (c is null) return;
+            if (!c.Connected) return;
 
             int bytesAvailable = c.Available;
             if (bytesAvailable == 0)
@@ -137,107 +237,37 @@ namespace beta.Models
                 Thread.Sleep(10);
                 return;
             }
-            while (bytesAvailable > 0)
+            var cacheSB = ByteCache;
+            while (bytesAvailable > 0 && c.Connected)
             {
                 byte[] nextByte = new byte[1];
                 c.Client.Receive(nextByte, 0, 1, SocketFlags.None);
 
-                //              == \n
-                if (nextByte[0] == Delimiter)
+                // \r = 13
+                // \n = 10
+                if (nextByte[0] == 10)
                 {
-                    OnDataReceived(QueueCache);
-                    QueueCache.Clear();
+                    OnDataReceived(StringEncoder.GetString(cacheSB.ToArray()));
+                    cacheSB.Clear();
                 }
-                else QueueCache.Add(nextByte[0]);
+                else cacheSB.Add(nextByte[0]);
             }
         }
 
+        private void OnStateChanged(ManagedTcpClientState state) => StateChanged?.Invoke(this, state);
+        private void OnDataReceived(string data) => DataReceived?.Invoke(this, data);
 
-        #region Write
-        public void Write(byte[] data)
-        {
-            if (TcpClient == null)
-            {
-                throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
-            }
-            TcpClient.GetStream().Write(data, 0, data.Length);
-        }
-
-        public void Write(string data)
-        {
-            if (data == null) { return; }
-            Write(StringEncoder.GetBytes(data));
-        } 
         #endregion
 
-        public void WriteLine(string data)
-        {
-            if (data.Length == 0) return;
 
-            if (data[^1] != '\n')
-                Write(data + '\n');
-            else Write(data);
-        }
+        #endregion
 
-        //public Message WriteLineAndGetReply(string data, TimeSpan timeout)
-        //{
-        //    Message mReply = null;
-        //    //DataReceived += (s, e) => { mReply = e; };
-        //    WriteLine(data);
-
-        //    Stopwatch sw = new Stopwatch();
-        //    sw.Start();
-
-        //    while (mReply == null && sw.Elapsed < timeout)
-        //    {
-        //        Thread.Sleep(10);
-        //    }
-
-        //    return mReply;
-        //}
-
-        private void OnStateChanged(TcpClientState state) => StateChanged?.Invoke(this, state);
-        private void OnDataReceived(List<byte> msg) => DataReceived?.Invoke(this, StringEncoder.GetString(msg.ToArray()));
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-                IsListening = true;
-                if (TcpClient != null)
-                {
-                    TcpClient.Close();
-                    TcpClient = null;
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~SimpleTcpClient() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
+        #region Dispose
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            IsListening = true;
+            TcpClient.Close();
+            OnStateChanged(ManagedTcpClientState.Disconnected);
         }
         #endregion
     }

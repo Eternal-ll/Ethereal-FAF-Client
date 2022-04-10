@@ -1,19 +1,20 @@
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Enums;
 using beta.Models.Server;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public enum ComparisonMethod
-    {
-        STARTS_WITH = 0,
-        CONTAINS = 1
-    }
     public class PlayersService : ViewModel, IPlayersService
     {
+        public event EventHandler<PlayerInfoMessage> MeReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
 
         #region Properties
 
@@ -21,6 +22,7 @@ namespace beta.Infrastructure.Services
 
         private readonly ISessionService SessionService;
         private readonly IAvatarService AvatarService;
+        private readonly INoteService NoteService;
 
         #endregion
 
@@ -32,10 +34,11 @@ namespace beta.Infrastructure.Services
         private readonly Dictionary<int, int> PlayerUIDToId = new();
         private readonly Dictionary<string, int> PlayerLoginToId = new();
 
+
         #endregion
 
-        private int[] FriendsIds { get; set; }
-        private int[] FoesIds { get; set; }
+        private List<int> FriendsIds { get; set; } = new();
+        private List<int> FoesIds { get; set; } = new();
 
         #endregion
 
@@ -43,29 +46,69 @@ namespace beta.Infrastructure.Services
 
         public PlayersService(
             ISessionService sessionService,
-            IAvatarService avatarService)
+            IAvatarService avatarService,
+            INoteService noteService)
         {
             SessionService = sessionService;
             AvatarService = avatarService;
+            NoteService = noteService;
 
-            sessionService.NewPlayer += OnNewPlayer;
-            sessionService.SocialInfo += OnNewSocialInfo;
+            sessionService.PlayerReceived += OnPlayerReceived;
+            sessionService.SocialDataReceived += OnNewSocialDataReceived;
+            sessionService.WelcomeDataReceived += OnWelcomeDataReceived;
+            sessionService.PlayersReceived += OnPlayersReceived;
+
+            System.Windows.Application.Current.Exit += (s, e) =>
+            {
+                var players = Players;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    var player = players[i];
+                    if (player.Note.Text?.Trim().Length > 0)
+                    {
+                        NoteService.Set(player.login, player.Note.Text);
+                    }
+                }
+                NoteService.Save();
+            };
         }
+
+        private void OnPlayersReceived(object sender, PlayerInfoMessage[] e) => Task.Run(async () =>
+        {
+            foreach (var player in e) await HandlePlayerData(player);
+        });
+
 
         #endregion
 
-        #region Event listeners
-        private void OnNewSocialInfo(object sender, EventArgs<SocialMessage> e)
-        {
-            FriendsIds = e.Arg.friends;
-            FoesIds = e.Arg.foes;
+        public PlayerInfoMessage Me { get; private set; }
 
-            var friendsIds = e.Arg.friends;
-            var foesIds = e.Arg.foes;
+        #region Event listeners
+        private void OnWelcomeDataReceived(object sender, WelcomeData e)
+        {
+            Me = e.me;
+            Me.RelationShip = PlayerRelationShip.Me;
+
+            // TODO
+            if (Players.Count == 0)
+            {
+                Players.Add(Me);
+                PlayerLoginToId.Add(Me.login.ToLower(), 0);
+                PlayerUIDToId.Add(Me.id, 0);
+            }
+            MeReceived?.Invoke(this, Me);
+        }
+        private void OnNewSocialDataReceived(object sender, SocialData e)
+        {
+            FriendsIds = e.friends;
+            FoesIds = e.foes;
+
+            var friendsIds = e.friends;
+            var foesIds = e.foes;
 
             // TODO REWRITE?
-            if (friendsIds != null && friendsIds.Length > 0)
-                for (int i = 0; i < friendsIds.Length; i++)
+            if (friendsIds is not null && friendsIds.Count > 0)
+                for (int i = 0; i < friendsIds.Count; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
                         var player = Players[id];
@@ -76,8 +119,8 @@ namespace beta.Infrastructure.Services
                         }
                     }
 
-            if (foesIds != null && foesIds.Length > 0)
-                for (int i = 0; i < foesIds.Length; i++)
+            if (foesIds is not null && foesIds.Count > 0)
+                for (int i = 0; i < foesIds.Count; i++)
                     if (PlayerUIDToId.TryGetValue(friendsIds[i], out var id))
                     {
                         var player = Players[id];
@@ -88,33 +131,43 @@ namespace beta.Infrastructure.Services
                         }
                     }
         }
-        private void OnNewPlayer(object sender, EventArgs<PlayerInfoMessage> e)
+        private async Task HandlePlayerData(PlayerInfoMessage player)
         {
-            var player = e.Arg;
             var players = _Players;
+            #region Add note about player
 
-            // TODO REWRITE?
-            #region Matching friends & foes
+            if (NoteService.TryGet(player.login, out var note))
+            {
+                player.Note.Text = note;
+            }
+
+            #endregion
+
+            #region Matching clanmates & friends & foes
 
             var friendsIds = FriendsIds;
             var foesIds = FoesIds;
+            var me = Me;
 
-            // TODO REWRITE?
-            if (friendsIds != null && friendsIds.Length > 0)
-                for (int i = 0; i < friendsIds.Length; i++)
-                    if (friendsIds[i] == player.id)
-                    {
-                        player.RelationShip = PlayerRelationShip.Friend;
-                        break;
-                    }
-
-            if (foesIds != null && foesIds.Length > 0)
-                for (int i = 0; i < foesIds.Length; i++)
-                    if (foesIds[i] == player.id)
-                    {
-                        player.RelationShip = PlayerRelationShip.Foe;
-                        break;
-                    }
+            if (player.id != me.id)
+            {
+                if (IsClanMate(player.clan))
+                {
+                    player.RelationShip = PlayerRelationShip.Clan;
+                }
+                else if (IsFriend(player.id))
+                {
+                    player.RelationShip = PlayerRelationShip.Friend;
+                }
+                else if (IsFoe(player.id))
+                {
+                    player.RelationShip = PlayerRelationShip.Foe;
+                }
+            }
+            else
+            {
+                player.RelationShip = PlayerRelationShip.Me;
+            }
 
             #endregion
 
@@ -122,53 +175,45 @@ namespace beta.Infrastructure.Services
             {
                 var matchedPlayer = players[id];
 
-                // If avatar is changed
-                if (matchedPlayer.avatar != null)
-                {
-                    if (player.avatar != null)
-                    {
-                        if (player.avatar.url.Segments[^1] != matchedPlayer.avatar.url.Segments[^1])
-                            // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                            System.Windows.Application.Current.Dispatcher.Invoke(() => matchedPlayer.Avatar = AvatarService.GetAvatar(player.avatar.url),
-                            System.Windows.Threading.DispatcherPriority.Background);
-                    }
-                    else player.Avatar = null;
-                }
+                await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar);
+                //await Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(matchedPlayer, player.Avatar));
 
                 matchedPlayer.Update(player);
             }
             else
             {
                 int count = players.Count;
-
-                // Check for avatar
-                if (player.avatar != null)
-                {
-                    // TODO FIX ME Thread access error. BitmapImage should be created in UI thread
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => player.Avatar = AvatarService.GetAvatar(player.avatar.url),
-                    System.Windows.Threading.DispatcherPriority.Background);
-                }
+                await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar);
+                //Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar));
 
                 players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);
                 PlayerUIDToId.Add(player.id, count);
             }
         }
+        private void OnPlayerReceived(object sender, PlayerInfoMessage player) => Task.Run(() => HandlePlayerData(player));
 
         #endregion
 
 
         public PlayerInfoMessage GetPlayer(string login)
         {
-            login = login.ToLower();
-            if (login.Length <= 0 || login.Trim().Length <= 0) return null;
+            if (string.IsNullOrEmpty(login)) return null;
 
-            if (PlayerLoginToId.TryGetValue(login, out var id))
+            if (PlayerLoginToId.TryGetValue(login.ToLower(), out var id))
             {
                 return Players[id];
             }
 
             return null;
+        }
+
+        public bool TryGetPlayer(string login, out PlayerInfoMessage player)
+        {
+            player = GetPlayer(login);
+            if (string.IsNullOrWhiteSpace(login)) return false;
+
+            return player is not null;
         }
 
         public PlayerInfoMessage GetPlayer(int uid)
@@ -210,6 +255,117 @@ namespace beta.Infrastructure.Services
                                 yield return enumerator.Current;
                             else { }
                         else yield return enumerator.Current;
+        }
+
+        private bool IsClanMate(string clan) => Equals(Me.clan, clan);
+        public bool IsClanMate(PlayerInfoMessage player) => IsClanMate(player.clan);//player.clan != null ? IsClanMate(player.clan) : false;
+
+        private bool IsFriend(int id)
+        {
+            var friends = FriendsIds;
+            if (friends.Count == 0) return false;
+
+            for (int i = 0; i < friends.Count; i++)
+            {
+                if (friends[i] == id) return true;
+            }
+            return false;
+        }
+        public bool IsFriend(PlayerInfoMessage player) => IsFriend(player.id);
+
+        private bool IsFoe(int id)
+        {
+            var foes = FoesIds;
+            if (foes.Count == 0) return false;
+
+            for (int i = 0; i < foes.Count; i++)
+            {
+                if (foes[i] == id) return true;
+            }
+            return false;
+        }
+        public bool IsFoe(PlayerInfoMessage player) => IsFoe(player.id);
+
+        public bool TryGetPlayer(int id, out PlayerInfoMessage player)
+        {
+            player = GetPlayer(id);
+            return player is not null;
+        }
+
+        public bool AddGameToPlayer(string login, GameInfoMessage game)
+        {
+            if (string.IsNullOrWhiteSpace(login)) return false;
+            if (game is null) return false;
+
+            if (TryGetPlayer(login, out var player))
+            {
+                if (player.Game is not null)
+                {
+                    // TODO log if this happens
+                }
+                player.Game = game;
+                return true;
+            }
+            return false;
+        }
+
+        public bool AddGameToPlayers(string[] logins, GameInfoMessage game)
+        {
+            if (logins is null || logins.Length == 0) return false;
+            if (game is null) return false;
+
+            bool done = true;
+            foreach (string login in logins)
+            {
+                if (!AddGameToPlayer(login, game))
+                {
+                    done = false;
+                }
+            }
+            return done;
+        }
+
+        public bool RemoveGameFromPlayer(string login, long? uid = null)
+        {
+            if (string.IsNullOrWhiteSpace(login)) return false;
+
+            if (TryGetPlayer(login, out var player))
+            {
+                if (player.Game is null)
+                {
+                    // TODO log if this happens
+                }
+
+                if (uid.HasValue)
+                {
+                    if (player.Game.uid != uid.Value)
+                    {
+                        // TODO log if this happens
+                    }
+                    player.Game = null;
+                }
+                else
+                {
+                    player.Game = null;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public bool RemoveGameFromPlayers(string[] logins, long? uid = null)
+        {
+            if (logins is null || logins.Length == 0) return false;
+
+            bool done = true;
+            foreach (string login in logins)
+            {
+                if (!RemoveGameFromPlayer(login, uid))
+                {
+                    done = false;
+                }
+            }
+            return done;
         }
     }
 }

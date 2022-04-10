@@ -1,37 +1,49 @@
 ﻿using beta.Infrastructure.Navigation;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
-using ModernWpf;
+using Microsoft.Extensions.DependencyInjection;
+using ModernWpf.Controls;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace beta.Views.Windows
 {
+
     public partial class MainWindow : Window
     {
+        private readonly ISessionService SessionService;
+        private readonly IGameSessionService GameLauncherService;
+
+        private ContentDialog Dialog;
         public MainWindow()
         {
             InitializeComponent();
-            Settings.Default.PropertyChanged += OnSettingChange;
-            
-            var navManager = new NavigationManager(MainFrame, ModalFrame);
 
-            navManager.Navigate(new AuthView());
+            SessionService = App.Services.GetService<ISessionService>();
+            GameLauncherService = App.Services.GetService<IGameSessionService>();
 
-            Closing += OnMainWindowClosing;
-            //var t = new ContentDialog();
-            //t.PreviewKeyDown += (s, e) =>
-            //{
-            //    if (e.Key == System.Windows.Input.Key.Escape)
-            //    {
-            //        e.Handled = true;
-            //    }
-            //};
+            NavigationManager navManager = new(MainFrame, ModalFrame);
+            //navManager.Navigate(new AuthView());
+
+            Dialog = new ContentDialog();
+
+            Dialog.PreviewKeyDown += (s, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Escape)
+                {
+                    e.Handled = true;
+                }
+            };
 
             Left = Settings.Default.Left;
             Top = Settings.Default.Top;
 
             Width = Settings.Default.Width;
             Height = Settings.Default.Height;
+
+            Closing += OnMainWindowClosing;
+
+            //SessionService.TcpClient.StateChanged += SessionService_StateChanged;
+            //GameLauncherService.PatchUpdateRequired += OnPatchUpdateRequired;
         }
 
         private void OnMainWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -43,37 +55,7 @@ namespace beta.Views.Windows
             Settings.Default.Height = Height;
 
             Closing -= OnMainWindowClosing;
+            Application.Current.Shutdown();
         }
-
-        private void ToggleAppThemeHandler(object sender, RoutedEventArgs e)
-        {
-            ClearValue(ThemeManager.RequestedThemeProperty);
-
-            Application.Current.Dispatcher.BeginInvoke(() =>
-            {
-                var tm = ThemeManager.Current;
-                if (tm.ActualApplicationTheme == ApplicationTheme.Dark)
-                {
-                    tm.ApplicationTheme = ApplicationTheme.Light;
-                }
-                else
-                {
-                    tm.ApplicationTheme = ApplicationTheme.Dark;
-                }
-            });
-        }
-
-        private void ToggleWindowThemeHandler(object sender, RoutedEventArgs e)
-        {
-            if (ThemeManager.GetActualTheme(this) == ElementTheme.Light)
-            {
-                ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
-            }
-            else
-            {
-                ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
-            }
-        }
-        private void OnSettingChange(object sender, System.ComponentModel.PropertyChangedEventArgs e) => ((Settings)sender).Save();
     }
 }

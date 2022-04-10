@@ -1,6 +1,9 @@
-﻿using beta.Infrastructure.Extensions;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Extensions;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
-using beta.Views.Windows;
+using beta.Models.Debugger;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -10,6 +13,7 @@ using System.Windows;
 
 namespace beta
 {
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -24,27 +28,31 @@ namespace beta
         {
             return folder switch
             {
+                Folder.Game => beta.Properties.Settings.Default.PathToGame,
+
+                // Mods & Maps
+                Folder.Maps => Environment.ExpandEnvironmentVariables(beta.Properties.Settings.Default.PathToMaps),
+                Folder.Mods => Environment.ExpandEnvironmentVariables(beta.Properties.Settings.Default.PathToMods),
+
                 // CACHE
                 Folder.MapsSmallPreviews => CurrentDirectory + "\\cache\\previews\\small\\",
                 Folder.MapsLargePreviews => CurrentDirectory + "\\cache\\previews\\large\\",
-                Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 Folder.PlayerAvatars => CurrentDirectory + "\\cache\\players\\avatars\\",
+
+                Folder.Emoji => CurrentDirectory + "\\Resources\\Images\\Emoji",
                 
+                // PATCH
+                Folder.ProgramData => "C:\\ProgramData\\FAForever\\",
+
                 Folder.Common => CurrentDirectory + "\\cache\\common\\",
 
                 _ => throw new ArgumentOutOfRangeException(nameof(folder), folder, null)
             };
         }
 
-#if DEBUG
-        public readonly static ServerDebugWindow DebugWindow = new();
-#endif
-
         protected override async void OnStartup(StartupEventArgs e)
         {
-#if DEBUG
-            DebugWindow.Show();
-#endif
+            AppDebugger.Init();
 
             IsDesignMode = false;
 
@@ -67,9 +75,14 @@ namespace beta
 
             var host = Hosting;
 
+            var gameSession = Services.GetService<IGameSessionService>();
+            gameSession.Close();
+
             await host.StopAsync().ConfigureAwait(false);
             host.Dispose();
             _Hosting = null;
+
+            Environment.Exit(-1);
         }
 
         public static void ConfigureServices(HostBuilderContext host, IServiceCollection services) => services

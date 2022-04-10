@@ -1,23 +1,14 @@
 ﻿using beta.Models.Server.Base;
+using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Media;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
-    public enum LobbyState
-    {
-        Broken = -1,
-        Init = 0,
-        New = 1,
-        Unknown = 2,
-        Old = 3,
-        Launched = 4
-    }
-
-    public enum PreviewType
+    public enum PreviewType : byte
     {
         Normal = 0,
         Coop = 1,
@@ -39,7 +30,7 @@ namespace beta.Models.Server
         {
             get
             {
-                if (Players == null || Players.Length == 0) return 0;
+                if (Players is null || Players.Length == 0) return 0;
                 int sum = 0;
                 for (int i = 0; i < Players.Length; i++)
                     if (Players[i] is PlayerInfoMessage player)
@@ -73,6 +64,12 @@ namespace beta.Models.Server
 
     public static class GameInfoExtensions
     {
+        /// <summary>
+        /// Returns false if game is end
+        /// </summary>
+        /// <param name="orig"></param>
+        /// <param name="newInfo"></param>
+        /// <returns></returns>
         public static bool Update(this GameInfoMessage orig, GameInfoMessage newInfo)
         {
             if (orig.num_players > newInfo.num_players && newInfo.num_players == 0)
@@ -127,6 +124,7 @@ namespace beta.Models.Server
                 
             orig.sim_mods = newInfo.sim_mods;
 
+            //orig.Map = newInfo.Map;
 
             //Map update
             if (orig.mapname != newInfo.mapname)
@@ -148,29 +146,33 @@ namespace beta.Models.Server
 
         #region Custom properties
 
+        #region Map
+        private GameMap _Map;
+        public GameMap Map
+        {
+            get => _Map;
+            set
+            {
+                if (Set(ref _Map, value))
+                {
+                    OnPropertyChanged(nameof(Map.NewPreview));
+                }
+            }
+        }
+        #endregion
+
         #region PreviewType // On fly
         public PreviewType PreviewType
         {
             get
             {
-                if (game_type == "coop")
+                if (GameType == GameType.Coop)
                     return PreviewType.Coop;
-                if (mapname.Substring(0, 7) == "neroxis")
+                if (mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase))
                     return PreviewType.Neroxis;
                 return PreviewType.Normal;
             }
         }
-        #endregion
-
-        #region MapPreview
-        public ImageSource MapPreviewSource;
-        public ImageSource MapPreview => PreviewType switch
-        {
-            PreviewType.Normal => MapPreviewSource,
-            PreviewType.Coop => App.Current.Resources["CoopIcon"] as ImageSource,
-            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"] as ImageSource,
-            _ => App.Current.Resources["QuestionIcon"] as ImageSource
-        };
         #endregion
 
         #region Teams
@@ -195,7 +197,7 @@ namespace beta.Models.Server
         {
             get
             {
-                if (_Teams == null || _Teams.Length == 0) return 0;
+                if (_Teams is null || _Teams.Length == 0) return 0;
                 int sum = 0;
                 for (int i = 0; i < _Teams.Length; i++)
                     sum += _Teams[i].AverageRating;
@@ -230,21 +232,27 @@ namespace beta.Models.Server
         {
             get
             {
-                string formattedMapName = string.Empty;
-                for (int i = 0; i < _mapname.Length; i++)
+                //switch (Map)
+                //{
+                //    case GameMap gameMap:
+                if (Map?.Name is not null) return Map.Name;
+                else
                 {
-                    if (_mapname[i] == '_')
+                    var parts = _mapname.Split('.')[0].Split('_');
+                    for (int i = 0; i < parts.Length; i++)
                     {
-                        formattedMapName += ' ';
-                        formattedMapName += char.ToUpper(_mapname[i + 1]);
-                        i++;
+                        if (parts[i].Length == 0) continue;
+                        parts[i] = char.ToUpper(parts[i][0]) + parts[i][1..];
                     }
-                    else if (_mapname[i] == '.')
-                        break;
-                    else if (i == 0) formattedMapName += char.ToUpper(_mapname[i]);
-                    else formattedMapName += _mapname[i];
+                    return string.Join(' ', parts);
                 }
-                return formattedMapName;
+                //    case NeroxisMap neroxisMap:
+                //        return neroxisMap.Name;
+                //        case CoopMap coopMap:
+                //        return "Coop : " + _mapname;
+                //    default:
+                //        return "Unknown: " + _mapname;
+                //}
             }
         }
 
@@ -266,7 +274,8 @@ namespace beta.Models.Server
                     {
                         var version = _mapname.Substring(i + 2);
                         if (version.Length <= 4)
-                            mapVersion = Convert.ToInt32(version).ToString();
+                            if (int.TryParse(version, out var res))
+                                mapVersion = res.ToString();
                         break;
                     }
                 }
@@ -285,13 +294,27 @@ namespace beta.Models.Server
         //public string command { get; set; }
 
         public GameInfoMessage[] games { get; set; }
-        public string visibility { get; set; }
+        [JsonPropertyName("visibility")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public GameVisibility Visibility { get; set; }
         public bool password_protected { get; set; }
         public long uid { get; set; }
         public string title { get; set; }
-        public string state { get; set; }
-        public string game_type { get; set; }
-        public string featured_mod { get; set; }
+
+        [JsonPropertyName("state")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        //Open / Playing / Closed
+        //TODO Cant converter "closed" to enum
+        public GameState State { get; set; }
+
+        [JsonPropertyName("game_type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public GameType GameType { get; set; }
+
+        [JsonPropertyName("featured_mod")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public FeaturedMod FeaturedMod { get; set; }
+
         public Dictionary<string, string> sim_mods { get; set; }
 
         #region mapname
@@ -305,7 +328,6 @@ namespace beta.Models.Server
                 {
                     OnPropertyChanged(nameof(MapVersion));
                     OnPropertyChanged(nameof(MapName));
-                    OnPropertyChanged(nameof(MapPreview));
                     OnPropertyChanged(nameof(max_players));
                 }
             }
@@ -326,10 +348,22 @@ namespace beta.Models.Server
 
         public int max_players { get; set; }
         public double? launched_at { get; set; }
-        public string rating_type { get; set; }
+        [JsonPropertyName("rating_type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public RatingType RatingType { get; set; }
         public double? rating_min { get; set; }
         public double? rating_max { get; set; }
         public bool enforce_rating_range { get; set; }
         public Dictionary<int, string[]> teams { get; set; }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Map?.Dispose();
+                _Teams = null;
+            }
+            base.Dispose(disposing);
+        }
     }
 }

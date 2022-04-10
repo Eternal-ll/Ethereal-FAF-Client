@@ -1,255 +1,255 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <BitmapImage x:Key="Flag.EARTH" UriSource="../Images/flags/earth.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AD" UriSource="../Images/flags/ad.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AE" UriSource="../Images/flags/ae.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AF" UriSource="../Images/flags/af.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AG" UriSource="../Images/flags/ag.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AI" UriSource="../Images/flags/ai.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AL" UriSource="../Images/flags/al.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AM" UriSource="../Images/flags/am.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AN" UriSource="../Images/flags/an.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AO" UriSource="../Images/flags/ao.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AP" UriSource="../Images/flags/ap.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AQ" UriSource="../Images/flags/aq.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AR" UriSource="../Images/flags/ar.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AS" UriSource="../Images/flags/as.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AT" UriSource="../Images/flags/at.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AU" UriSource="../Images/flags/au.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AW" UriSource="../Images/flags/aw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AK" UriSource="../Images/flags/ax.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.AZ" UriSource="../Images/flags/az.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BA" UriSource="../Images/flags/ba.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BB" UriSource="../Images/flags/bb.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BD" UriSource="../Images/flags/bd.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BE" UriSource="../Images/flags/be.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BF" UriSource="../Images/flags/bf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BG" UriSource="../Images/flags/bg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BH" UriSource="../Images/flags/bh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BI" UriSource="../Images/flags/bi.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BJ" UriSource="../Images/flags/bj.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BL" UriSource="../Images/flags/bl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BM" UriSource="../Images/flags/bm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BN" UriSource="../Images/flags/bn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BO" UriSource="../Images/flags/bo.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BR" UriSource="../Images/flags/br.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BS" UriSource="../Images/flags/bs.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BT" UriSource="../Images/flags/bt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BV" UriSource="../Images/flags/bv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BW" UriSource="../Images/flags/bw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BY" UriSource="../Images/flags/by.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.BZ" UriSource="../Images/flags/bz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CA" UriSource="../Images/flags/ca.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CC" UriSource="../Images/flags/cc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CD" UriSource="../Images/flags/cd.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CF" UriSource="../Images/flags/cf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CG" UriSource="../Images/flags/cg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CH" UriSource="../Images/flags/ch.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CI" UriSource="../Images/flags/ci.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CK" UriSource="../Images/flags/ck.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CL" UriSource="../Images/flags/cl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CM" UriSource="../Images/flags/cm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CN" UriSource="../Images/flags/cn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CO" UriSource="../Images/flags/co.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CR" UriSource="../Images/flags/cr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CU" UriSource="../Images/flags/cu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CV" UriSource="../Images/flags/cv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CW" UriSource="../Images/flags/cw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CX" UriSource="../Images/flags/cx.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CY" UriSource="../Images/flags/cy.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.CZ" UriSource="../Images/flags/cz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DE" UriSource="../Images/flags/de.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DJ" UriSource="../Images/flags/dj.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DK" UriSource="../Images/flags/dk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DM" UriSource="../Images/flags/dm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DO" UriSource="../Images/flags/do.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.DZ" UriSource="../Images/flags/dz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.EC" UriSource="../Images/flags/ec.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.EE" UriSource="../Images/flags/ee.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.EG" UriSource="../Images/flags/eg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.EH" UriSource="../Images/flags/eh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ER" UriSource="../Images/flags/er.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ES" UriSource="../Images/flags/es.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ET" UriSource="../Images/flags/et.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.EU" UriSource="../Images/flags/eu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FI" UriSource="../Images/flags/fi.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FJ" UriSource="../Images/flags/fj.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FK" UriSource="../Images/flags/fk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FM" UriSource="../Images/flags/fm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FO" UriSource="../Images/flags/fo.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.FR" UriSource="../Images/flags/fr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GA" UriSource="../Images/flags/ga.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GB" UriSource="../Images/flags/gb.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GD" UriSource="../Images/flags/gd.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GE" UriSource="../Images/flags/ge.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GF" UriSource="../Images/flags/gf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GG" UriSource="../Images/flags/gg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GH" UriSource="../Images/flags/gh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GI" UriSource="../Images/flags/gi.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GL" UriSource="../Images/flags/gl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GM" UriSource="../Images/flags/gm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GN" UriSource="../Images/flags/gn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GP" UriSource="../Images/flags/gp.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GQ" UriSource="../Images/flags/gq.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GR" UriSource="../Images/flags/gr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GS" UriSource="../Images/flags/gs.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GT" UriSource="../Images/flags/gt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GU" UriSource="../Images/flags/gu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GW" UriSource="../Images/flags/gw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.GY" UriSource="../Images/flags/gy.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HK" UriSource="../Images/flags/hk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HM" UriSource="../Images/flags/hm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HN" UriSource="../Images/flags/hn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HR" UriSource="../Images/flags/hr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HT" UriSource="../Images/flags/ht.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.HU" UriSource="../Images/flags/hu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ID" UriSource="../Images/flags/id.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IE" UriSource="../Images/flags/ie.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IL" UriSource="../Images/flags/il.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IM" UriSource="../Images/flags/im.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IN" UriSource="../Images/flags/in.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IO" UriSource="../Images/flags/io.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IQ" UriSource="../Images/flags/iq.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IR" UriSource="../Images/flags/ir.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IS" UriSource="../Images/flags/is.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.IT" UriSource="../Images/flags/it.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.JE" UriSource="../Images/flags/je.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.JM" UriSource="../Images/flags/jm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.JO" UriSource="../Images/flags/jo.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.JP" UriSource="../Images/flags/jp.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KE" UriSource="../Images/flags/ke.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KG" UriSource="../Images/flags/kg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KH" UriSource="../Images/flags/kh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KI" UriSource="../Images/flags/ki.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KM" UriSource="../Images/flags/km.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KN" UriSource="../Images/flags/kn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KP" UriSource="../Images/flags/kp.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KR" UriSource="../Images/flags/kr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KW" UriSource="../Images/flags/kw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KY" UriSource="../Images/flags/ky.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.KZ" UriSource="../Images/flags/kz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LA" UriSource="../Images/flags/la.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LB" UriSource="../Images/flags/lb.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LC" UriSource="../Images/flags/lc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LI" UriSource="../Images/flags/li.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LK" UriSource="../Images/flags/lk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LR" UriSource="../Images/flags/lr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LS" UriSource="../Images/flags/ls.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LT" UriSource="../Images/flags/lt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LU" UriSource="../Images/flags/lu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LV" UriSource="../Images/flags/lv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.LY" UriSource="../Images/flags/ly.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MA" UriSource="../Images/flags/ma.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MC" UriSource="../Images/flags/mc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MD" UriSource="../Images/flags/md.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ME" UriSource="../Images/flags/me.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MF" UriSource="../Images/flags/mf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MG" UriSource="../Images/flags/mg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MH" UriSource="../Images/flags/mh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MK" UriSource="../Images/flags/mk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ML" UriSource="../Images/flags/ml.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MM" UriSource="../Images/flags/mm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MN" UriSource="../Images/flags/mn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MO" UriSource="../Images/flags/mo.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MP" UriSource="../Images/flags/mp.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MQ" UriSource="../Images/flags/mq.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MR" UriSource="../Images/flags/mr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MS" UriSource="../Images/flags/ms.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MT" UriSource="../Images/flags/mt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MU" UriSource="../Images/flags/mu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MV" UriSource="../Images/flags/mv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MW" UriSource="../Images/flags/mw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MX" UriSource="../Images/flags/mx.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MY" UriSource="../Images/flags/my.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.MZ" UriSource="../Images/flags/mz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NA" UriSource="../Images/flags/na.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NC" UriSource="../Images/flags/nc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NE" UriSource="../Images/flags/ne.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NF" UriSource="../Images/flags/nf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NG" UriSource="../Images/flags/ng.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NI" UriSource="../Images/flags/ni.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NL" UriSource="../Images/flags/nl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NO" UriSource="../Images/flags/no.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NP" UriSource="../Images/flags/np.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NR" UriSource="../Images/flags/nr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NU" UriSource="../Images/flags/nu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.NZ" UriSource="../Images/flags/nz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.OM" UriSource="../Images/flags/om.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PA" UriSource="../Images/flags/pa.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PE" UriSource="../Images/flags/pe.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PF" UriSource="../Images/flags/pf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PG" UriSource="../Images/flags/pg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PH" UriSource="../Images/flags/ph.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PK" UriSource="../Images/flags/pk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PL" UriSource="../Images/flags/pl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PM" UriSource="../Images/flags/pm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PN" UriSource="../Images/flags/pn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PR" UriSource="../Images/flags/pr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PS" UriSource="../Images/flags/ps.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PT" UriSource="../Images/flags/pt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PW" UriSource="../Images/flags/pw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.PY" UriSource="../Images/flags/py.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.QA" UriSource="../Images/flags/qa.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.RE" UriSource="../Images/flags/re.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.RO" UriSource="../Images/flags/ro.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.RS" UriSource="../Images/flags/rs.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.RU" UriSource="../Images/flags/ru.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.RW" UriSource="../Images/flags/rw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SA" UriSource="../Images/flags/sa.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SB" UriSource="../Images/flags/sb.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SC" UriSource="../Images/flags/sc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SD" UriSource="../Images/flags/sd.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SE" UriSource="../Images/flags/se.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SG" UriSource="../Images/flags/sg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SH" UriSource="../Images/flags/sh.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SI" UriSource="../Images/flags/si.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SJ" UriSource="../Images/flags/sj.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SK" UriSource="../Images/flags/sk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SL" UriSource="../Images/flags/sl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SM" UriSource="../Images/flags/sm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SN" UriSource="../Images/flags/sn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SO" UriSource="../Images/flags/so.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SR" UriSource="../Images/flags/sr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SS" UriSource="../Images/flags/ss.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ST" UriSource="../Images/flags/st.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SV" UriSource="../Images/flags/sv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SW" UriSource="../Images/flags/sw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SY" UriSource="../Images/flags/sy.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.SZ" UriSource="../Images/flags/sz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TC" UriSource="../Images/flags/tc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TD" UriSource="../Images/flags/td.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TF" UriSource="../Images/flags/tf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TG" UriSource="../Images/flags/tg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TH" UriSource="../Images/flags/th.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TJ" UriSource="../Images/flags/tj.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TK" UriSource="../Images/flags/tk.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TL" UriSource="../Images/flags/tl.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TM" UriSource="../Images/flags/tm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TN" UriSource="../Images/flags/tn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TO" UriSource="../Images/flags/to.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TR" UriSource="../Images/flags/tr.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TT" UriSource="../Images/flags/tt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TV" UriSource="../Images/flags/tv.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TW" UriSource="../Images/flags/tw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.TZ" UriSource="../Images/flags/tz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.UA" UriSource="../Images/flags/ua.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.UG" UriSource="../Images/flags/ug.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.UM" UriSource="../Images/flags/um.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.US" UriSource="../Images/flags/us.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.UY" UriSource="../Images/flags/uy.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.UZ" UriSource="../Images/flags/uz.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VA" UriSource="../Images/flags/va.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VC" UriSource="../Images/flags/vc.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VE" UriSource="../Images/flags/ve.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VH" UriSource="../Images/flags/vg.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VI" UriSource="../Images/flags/vi.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VN" UriSource="../Images/flags/vn.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.VU" UriSource="../Images/flags/vu.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.WF" UriSource="../Images/flags/wf.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.WS" UriSource="../Images/flags/ws.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.YE" UriSource="../Images/flags/ye.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.YT" UriSource="../Images/flags/yt.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ZA" UriSource="../Images/flags/za.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ZM" UriSource="../Images/flags/zm.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
-    <BitmapImage x:Key="Flag.ZW" UriSource="../Images/flags/zw.png" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EARTH" UriSource="../Images/flags/earth.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AD" UriSource="../Images/flags/ad.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AE" UriSource="../Images/flags/ae.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AF" UriSource="../Images/flags/af.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AG" UriSource="../Images/flags/ag.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AI" UriSource="../Images/flags/ai.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AL" UriSource="../Images/flags/al.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AM" UriSource="../Images/flags/am.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AN" UriSource="../Images/flags/an.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AO" UriSource="../Images/flags/ao.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AP" UriSource="../Images/flags/ap.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AQ" UriSource="../Images/flags/aq.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AR" UriSource="../Images/flags/ar.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AS" UriSource="../Images/flags/as.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AT" UriSource="../Images/flags/at.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AU" UriSource="../Images/flags/au.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AW" UriSource="../Images/flags/aw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AK" UriSource="../Images/flags/ax.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.AZ" UriSource="../Images/flags/az.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BA" UriSource="../Images/flags/ba.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BB" UriSource="../Images/flags/bb.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BD" UriSource="../Images/flags/bd.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BE" UriSource="../Images/flags/be.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BF" UriSource="../Images/flags/bf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BG" UriSource="../Images/flags/bg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BH" UriSource="../Images/flags/bh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BI" UriSource="../Images/flags/bi.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BJ" UriSource="../Images/flags/bj.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BL" UriSource="../Images/flags/bl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BM" UriSource="../Images/flags/bm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BN" UriSource="../Images/flags/bn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BO" UriSource="../Images/flags/bo.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BR" UriSource="../Images/flags/br.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BS" UriSource="../Images/flags/bs.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BT" UriSource="../Images/flags/bt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BV" UriSource="../Images/flags/bv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BW" UriSource="../Images/flags/bw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BY" UriSource="../Images/flags/by.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.BZ" UriSource="../Images/flags/bz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CA" UriSource="../Images/flags/ca.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CC" UriSource="../Images/flags/cc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CD" UriSource="../Images/flags/cd.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CF" UriSource="../Images/flags/cf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CG" UriSource="../Images/flags/cg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CH" UriSource="../Images/flags/ch.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CI" UriSource="../Images/flags/ci.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CK" UriSource="../Images/flags/ck.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CL" UriSource="../Images/flags/cl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CM" UriSource="../Images/flags/cm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CN" UriSource="../Images/flags/cn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CO" UriSource="../Images/flags/co.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CR" UriSource="../Images/flags/cr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CU" UriSource="../Images/flags/cu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CV" UriSource="../Images/flags/cv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CW" UriSource="../Images/flags/cw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CX" UriSource="../Images/flags/cx.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CY" UriSource="../Images/flags/cy.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.CZ" UriSource="../Images/flags/cz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DE" UriSource="../Images/flags/de.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DJ" UriSource="../Images/flags/dj.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DK" UriSource="../Images/flags/dk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DM" UriSource="../Images/flags/dm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DO" UriSource="../Images/flags/do.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.DZ" UriSource="../Images/flags/dz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EC" UriSource="../Images/flags/ec.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EE" UriSource="../Images/flags/ee.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EG" UriSource="../Images/flags/eg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EH" UriSource="../Images/flags/eh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ER" UriSource="../Images/flags/er.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ES" UriSource="../Images/flags/es.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ET" UriSource="../Images/flags/et.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.EU" UriSource="../Images/flags/eu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FI" UriSource="../Images/flags/fi.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FJ" UriSource="../Images/flags/fj.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FK" UriSource="../Images/flags/fk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FM" UriSource="../Images/flags/fm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FO" UriSource="../Images/flags/fo.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.FR" UriSource="../Images/flags/fr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GA" UriSource="../Images/flags/ga.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GB" UriSource="../Images/flags/gb.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GD" UriSource="../Images/flags/gd.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GE" UriSource="../Images/flags/ge.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GF" UriSource="../Images/flags/gf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GG" UriSource="../Images/flags/gg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GH" UriSource="../Images/flags/gh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GI" UriSource="../Images/flags/gi.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GL" UriSource="../Images/flags/gl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GM" UriSource="../Images/flags/gm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GN" UriSource="../Images/flags/gn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GP" UriSource="../Images/flags/gp.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GQ" UriSource="../Images/flags/gq.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GR" UriSource="../Images/flags/gr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GS" UriSource="../Images/flags/gs.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GT" UriSource="../Images/flags/gt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GU" UriSource="../Images/flags/gu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GW" UriSource="../Images/flags/gw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.GY" UriSource="../Images/flags/gy.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HK" UriSource="../Images/flags/hk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HM" UriSource="../Images/flags/hm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HN" UriSource="../Images/flags/hn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HR" UriSource="../Images/flags/hr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HT" UriSource="../Images/flags/ht.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.HU" UriSource="../Images/flags/hu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ID" UriSource="../Images/flags/id.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IE" UriSource="../Images/flags/ie.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IL" UriSource="../Images/flags/il.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IM" UriSource="../Images/flags/im.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IN" UriSource="../Images/flags/in.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IO" UriSource="../Images/flags/io.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IQ" UriSource="../Images/flags/iq.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IR" UriSource="../Images/flags/ir.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IS" UriSource="../Images/flags/is.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.IT" UriSource="../Images/flags/it.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.JE" UriSource="../Images/flags/je.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.JM" UriSource="../Images/flags/jm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.JO" UriSource="../Images/flags/jo.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.JP" UriSource="../Images/flags/jp.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KE" UriSource="../Images/flags/ke.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KG" UriSource="../Images/flags/kg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KH" UriSource="../Images/flags/kh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KI" UriSource="../Images/flags/ki.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KM" UriSource="../Images/flags/km.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KN" UriSource="../Images/flags/kn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KP" UriSource="../Images/flags/kp.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KR" UriSource="../Images/flags/kr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KW" UriSource="../Images/flags/kw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KY" UriSource="../Images/flags/ky.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.KZ" UriSource="../Images/flags/kz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LA" UriSource="../Images/flags/la.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LB" UriSource="../Images/flags/lb.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LC" UriSource="../Images/flags/lc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LI" UriSource="../Images/flags/li.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LK" UriSource="../Images/flags/lk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LR" UriSource="../Images/flags/lr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LS" UriSource="../Images/flags/ls.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LT" UriSource="../Images/flags/lt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LU" UriSource="../Images/flags/lu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LV" UriSource="../Images/flags/lv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.LY" UriSource="../Images/flags/ly.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MA" UriSource="../Images/flags/ma.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MC" UriSource="../Images/flags/mc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MD" UriSource="../Images/flags/md.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ME" UriSource="../Images/flags/me.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MF" UriSource="../Images/flags/mf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MG" UriSource="../Images/flags/mg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MH" UriSource="../Images/flags/mh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MK" UriSource="../Images/flags/mk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ML" UriSource="../Images/flags/ml.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MM" UriSource="../Images/flags/mm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MN" UriSource="../Images/flags/mn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MO" UriSource="../Images/flags/mo.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MP" UriSource="../Images/flags/mp.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MQ" UriSource="../Images/flags/mq.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MR" UriSource="../Images/flags/mr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MS" UriSource="../Images/flags/ms.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MT" UriSource="../Images/flags/mt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MU" UriSource="../Images/flags/mu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MV" UriSource="../Images/flags/mv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MW" UriSource="../Images/flags/mw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MX" UriSource="../Images/flags/mx.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MY" UriSource="../Images/flags/my.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.MZ" UriSource="../Images/flags/mz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NA" UriSource="../Images/flags/na.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NC" UriSource="../Images/flags/nc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NE" UriSource="../Images/flags/ne.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NF" UriSource="../Images/flags/nf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NG" UriSource="../Images/flags/ng.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NI" UriSource="../Images/flags/ni.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NL" UriSource="../Images/flags/nl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NO" UriSource="../Images/flags/no.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NP" UriSource="../Images/flags/np.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NR" UriSource="../Images/flags/nr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NU" UriSource="../Images/flags/nu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.NZ" UriSource="../Images/flags/nz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.OM" UriSource="../Images/flags/om.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PA" UriSource="../Images/flags/pa.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PE" UriSource="../Images/flags/pe.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PF" UriSource="../Images/flags/pf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PG" UriSource="../Images/flags/pg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PH" UriSource="../Images/flags/ph.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PK" UriSource="../Images/flags/pk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PL" UriSource="../Images/flags/pl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PM" UriSource="../Images/flags/pm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PN" UriSource="../Images/flags/pn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PR" UriSource="../Images/flags/pr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PS" UriSource="../Images/flags/ps.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PT" UriSource="../Images/flags/pt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PW" UriSource="../Images/flags/pw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.PY" UriSource="../Images/flags/py.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.QA" UriSource="../Images/flags/qa.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.RE" UriSource="../Images/flags/re.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.RO" UriSource="../Images/flags/ro.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.RS" UriSource="../Images/flags/rs.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.RU" UriSource="../Images/flags/ru.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.RW" UriSource="../Images/flags/rw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SA" UriSource="../Images/flags/sa.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SB" UriSource="../Images/flags/sb.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SC" UriSource="../Images/flags/sc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SD" UriSource="../Images/flags/sd.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SE" UriSource="../Images/flags/se.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SG" UriSource="../Images/flags/sg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SH" UriSource="../Images/flags/sh.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SI" UriSource="../Images/flags/si.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SJ" UriSource="../Images/flags/sj.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SK" UriSource="../Images/flags/sk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SL" UriSource="../Images/flags/sl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SM" UriSource="../Images/flags/sm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SN" UriSource="../Images/flags/sn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SO" UriSource="../Images/flags/so.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SR" UriSource="../Images/flags/sr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SS" UriSource="../Images/flags/ss.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ST" UriSource="../Images/flags/st.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SV" UriSource="../Images/flags/sv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SW" UriSource="../Images/flags/sw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SY" UriSource="../Images/flags/sy.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.SZ" UriSource="../Images/flags/sz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TC" UriSource="../Images/flags/tc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TD" UriSource="../Images/flags/td.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TF" UriSource="../Images/flags/tf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TG" UriSource="../Images/flags/tg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TH" UriSource="../Images/flags/th.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TJ" UriSource="../Images/flags/tj.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TK" UriSource="../Images/flags/tk.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TL" UriSource="../Images/flags/tl.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TM" UriSource="../Images/flags/tm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TN" UriSource="../Images/flags/tn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TO" UriSource="../Images/flags/to.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TR" UriSource="../Images/flags/tr.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TT" UriSource="../Images/flags/tt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TV" UriSource="../Images/flags/tv.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TW" UriSource="../Images/flags/tw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.TZ" UriSource="../Images/flags/tz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.UA" UriSource="../Images/flags/ua.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.UG" UriSource="../Images/flags/ug.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.UM" UriSource="../Images/flags/um.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.US" UriSource="../Images/flags/us.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.UY" UriSource="../Images/flags/uy.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.UZ" UriSource="../Images/flags/uz.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VA" UriSource="../Images/flags/va.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VC" UriSource="../Images/flags/vc.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VE" UriSource="../Images/flags/ve.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VH" UriSource="../Images/flags/vg.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VI" UriSource="../Images/flags/vi.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VN" UriSource="../Images/flags/vn.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.VU" UriSource="../Images/flags/vu.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.WF" UriSource="../Images/flags/wf.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.WS" UriSource="../Images/flags/ws.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.YE" UriSource="../Images/flags/ye.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.YT" UriSource="../Images/flags/yt.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ZA" UriSource="../Images/flags/za.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ZM" UriSource="../Images/flags/zm.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
+    <BitmapImage x:Key="Flag.ZW" UriSource="../Images/flags/zw.png" CacheOption="OnDemand" DecodePixelHeight="16" DecodePixelWidth="16"/>
 </ResourceDictionary>

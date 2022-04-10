@@ -1,7 +1,17 @@
-﻿using System;
+﻿
+using System;
 
-namespace beta.Models.Server
+namespace beta.Models
 {
+    public enum RatingChange : byte
+    {
+        None,
+        Up,
+        Down
+    }
+    /// <summary>
+    /// Used by PlayerInfoMessage. 
+    /// </summary>
     public class Rating
     {
         public double[] rating { get; set; }
@@ -16,7 +26,7 @@ namespace beta.Models.Server
         public int GamesDifference { get; set; }
         #endregion
 
-        #region Filling from converter
+        #region On fly
 
         #region DisplayedRating
         private int? _DisplayedRating; // TODO
@@ -24,6 +34,8 @@ namespace beta.Models.Server
         #endregion
 
         public int DisplayedRatingDifference => GamesDifference == 0 ? 0 : Convert.ToInt32(RatingDifference[0] - 3 * RatingDifference[1]);
+
+        public RatingChange RatingChange => DisplayedRatingDifference == 0 ? RatingChange.None : DisplayedRatingDifference > 0 ? RatingChange.Up : RatingChange.Down;
 
         public string DisplayedDifferenceArrow
         {

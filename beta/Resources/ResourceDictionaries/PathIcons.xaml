@@ -8,6 +8,9 @@
     <BitmapImage x:Key="PlayerGameStatus.playing5" UriSource="../Images/PlayerGameStatus/playing5.png"/>
     <BitmapImage x:Key="PlayerGameStatus.unknown" UriSource="../Images/PlayerGameStatus/unknown.png"/>
 
+    <BitmapImage x:Key="MassResourceImage" DecodePixelWidth="32" DecodePixelHeight="32" UriSource="../Images/MapResources/mass_strategic.png"/>
+    <BitmapImage x:Key="HydroCarbonResourceImage" DecodePixelWidth="32" DecodePixelHeight="32" UriSource="../Images/MapResources/hydrocarbon_strategic.png"/>
+
     <PathGeometry x:Key="MapGenIconPathGeometry"
                   PresentationOptions:Freeze="True"
                   Figures="M27.8,66.8L4.4,55C2,53.7,0,50.5,0,47.8V21c0-2.8,2-4,4.4-2.8l23.5,11.9c2.4,1.2,4.4,4.4,4.4,7.2v26.7
@@ -124,7 +127,8 @@
                   PresentationOptions:Freeze="True">
         <DrawingImage.Drawing>
             <GeometryDrawing Brush="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
-                             Geometry="{StaticResource MapGenIconPathGeometry}"/>
+                             Geometry="{StaticResource MapGenIconPathGeometry}"
+                  PresentationOptions:Freeze="True"/>
         </DrawingImage.Drawing>
     </DrawingImage>
     <DrawingImage x:Key="CoopIcon"
@@ -134,7 +138,11 @@
                              Geometry="{StaticResource CoopIconPathGeometry}"/>
         </DrawingImage.Drawing>
     </DrawingImage>
-    
+
+    <Style TargetType="Path">
+        <Setter Property="Fill" Value="White"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+    </Style>
     
     <!--MainView-->
     <ui:PathIcon x:Key="SwordsPathIcon"
@@ -146,9 +154,9 @@
     <ui:PathIcon x:Key="ProfilePathIcon"
                              Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7.07,18.28C7.5,17.38 10.12,16.5 12,16.5C13.88,16.5 16.5,17.38 16.93,18.28C15.57,19.36 13.86,20 12,20C10.14,20 8.43,19.36 7.07,18.28M18.36,16.83C16.93,15.09 13.46,14.5 12,14.5C10.54,14.5 7.07,15.09 5.64,16.83C4.62,15.5 4,13.82 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,13.82 19.38,15.5 18.36,16.83M12,6C10.06,6 8.5,7.56 8.5,9.5C8.5,11.44 10.06,13 12,13C13.94,13 15.5,11.44 15.5,9.5C15.5,7.56 13.94,6 12,6M12,11A1.5,1.5 0 0,1 10.5,9.5A1.5,1.5 0 0,1 12,8A1.5,1.5 0 0,1 13.5,9.5A1.5,1.5 0 0,1 12,11Z"
                              />
-    <!--<ui:PathIcon x:Key="ExitPathIcon"
+    <ui:PathIcon x:Key="ExitPathIcon"
                              Data="M19,3H5C3.89,3 3,3.89 3,5V9H5V5H19V19H5V15H3V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M10.08,15.58L11.5,17L16.5,12L11.5,7L10.08,8.41L12.67,11H3V13H12.67L10.08,15.58Z"
-                             />-->
+                             />
     <ui:PathIcon x:Key="ChatPathIcon"
                              Width="28"
                              Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z"
@@ -176,7 +184,5 @@
     <ui:PathIcon x:Key="WarehousePathIcon"  
                              Data="M20 20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9H1l10.327-9.388a1 1 0 0 1 1.346 0L23 11h-3v9zM8.592 13.808l-.991.572 1 1.733.993-.573a3.5 3.5 0 0 0 1.405.811v1.145h2.002V16.35a3.5 3.5 0 0 0 1.405-.81l.992.572L16.4 14.38l-.991-.572a3.504 3.504 0 0 0 0-1.62l.991-.573-1-1.733-.993.573A3.5 3.5 0 0 0 13 9.645V8.5h-2.002v1.144a3.5 3.5 0 0 0-1.405.811l-.992-.573L7.6 11.616l.991.572a3.504 3.504 0 0 0 0 1.62zm3.408.69a1.5 1.5 0 1 1-.002-3.001 1.5 1.5 0 0 1 .002 3z"
                              />
-    <ui:PathIcon x:Key="ModsPathIcon"
-                             Data="M21.71 20.29L20.29 21.71A1 1 0 0 1 18.88 21.71L7 9.85A3.81 3.81 0 0 1 6 10A4 4 0 0 1 2.22 4.7L4.76 7.24L5.29 6.71L6.71 5.29L7.24 4.76L4.7 2.22A4 4 0 0 1 10 6A3.81 3.81 0 0 1 9.85 7L21.71 18.88A1 1 0 0 1 21.71 20.29M2.29 18.88A1 1 0 0 0 2.29 20.29L3.71 21.71A1 1 0 0 0 5.12 21.71L10.59 16.25L7.76 13.42M20 2L16 4V6L13.83 8.17L15.83 10.17L18 8H20L22 4Z"
-                             />
+    <ui:PathIcon x:Key="DownloadsIcon" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
 </ResourceDictionary>

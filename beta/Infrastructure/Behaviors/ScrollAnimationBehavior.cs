@@ -12,12 +12,12 @@ namespace beta.Infrastructure.Behaviors
     {
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
-            if (depObj != null)
+            if (depObj is not null)
             {
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child != null && child is T)
+                    if (child is T)
                     {
                         yield return (T)child;
                     }
@@ -110,12 +110,7 @@ namespace beta.Infrastructure.Behaviors
 
         private static void OnVerticalOffsetChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
         {
-            ScrollViewer scrollViewer = target as ScrollViewer;
-
-            if (scrollViewer != null)
-            {
-                scrollViewer.ScrollToVerticalOffset((double)e.NewValue);
-            }
+            (target as ScrollViewer)?.ScrollToVerticalOffset((double)e.NewValue);
         }
 
         #endregion
@@ -146,15 +141,13 @@ namespace beta.Infrastructure.Behaviors
         {
             var target = sender;
 
-            if (target != null && target is ScrollViewer)
+            if (target is ScrollViewer scroller)
             {
-                ScrollViewer scroller = target as ScrollViewer;
                 scroller.Loaded += new RoutedEventHandler(scrollerLoaded);
             }
 
-            if (target != null && target is ListBox) 
+            if (target is ListBox listbox)
             {
-                ListBox listbox = target as ListBox;
                 listbox.Loaded += new RoutedEventHandler(listboxLoaded);
             }
         }
@@ -210,9 +203,7 @@ namespace beta.Infrastructure.Behaviors
 
         private static void UpdateScrollPosition(object sender)
         {
-            ListBox listbox = sender as ListBox;
-
-            if (listbox != null)
+            if (sender is ListBox listbox)
             {
                 double scrollTo = 0;
 
@@ -220,7 +211,7 @@ namespace beta.Infrastructure.Behaviors
                 {
                     ListBoxItem tempItem = listbox.ItemContainerGenerator.ContainerFromItem(listbox.Items[i]) as ListBoxItem;
 
-                    if (tempItem != null)
+                    if (tempItem is not null)
                     {
                         scrollTo += tempItem.ActualHeight;
                     }
@@ -234,7 +225,7 @@ namespace beta.Infrastructure.Behaviors
 
         #region SetEventHandlersForScrollViewer Helper
 
-        private static void SetEventHandlersForScrollViewer(ScrollViewer scroller) 
+        private static void SetEventHandlersForScrollViewer(ScrollViewer scroller)
         {
             scroller.PreviewMouseWheel += new MouseWheelEventHandler(ScrollViewerPreviewMouseWheel);
             scroller.PreviewKeyDown += new KeyEventHandler(ScrollViewerPreviewKeyDown);

@@ -8,9 +8,9 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return "!Null";
+            if (value is null) return "!Null";
             var text = value.ToString();
-            return text.Length == 0 ? "!Empty" : text;
+            return text.Length == 0 ? ' ' : text;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
