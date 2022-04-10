@@ -18,7 +18,7 @@
     <!--<UserControl.DataContext>
         <vm:ChatViewModel/>
     </UserControl.DataContext>-->
-    <Grid x:Name="GlobalGrid" ShowGridLines="True">
+    <Grid x:Name="GlobalGrid" ShowGridLines="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
@@ -407,7 +407,7 @@
                     </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid Margin="0 0 0 4" ShowGridLines="True">
+                                <Grid Margin="0 0 0 4" ShowGridLines="False">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="2*"/>
@@ -503,18 +503,19 @@
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                         <!--<Setter Property="Opacity" Value=".4"/>-->
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}}, Path=Children[0].Content}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </StackPanel>
-                                <!--<StackPanel Grid.Column="2">-->
-                                        <TextBlock Background="Transparent" VerticalAlignment="Center"
+                                <TextBlock Background="Transparent" VerticalAlignment="Center"
                                         Grid.Column="1" Grid.Row="1" Opacity=".8" Margin="0 2"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
                                         TextWrapping="Wrap"/>
-                                 <!--</StackPanel>-->
-                                    <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Margin="0">
+                                <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Margin="0">
                                         <Canvas.Style>
                                             <Style TargetType="Canvas">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -766,7 +767,6 @@
             <!--#region Channel users -->
             <ListBox Grid.Row="2"
                      MinWidth="300"
-                     ItemTemplate="{StaticResource ListPlayerDataTemplate}"
                     ItemsSource="{Binding SelectedChannelPlayersView}"
                         SelectedItem="{Binding SelectedUser}"
                     Background="Transparent"

@@ -4,65 +4,6 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:sModels="clr-namespace:beta.Models.Server"
                     mc:Ignorable="d">
-    <ContextMenu x:Key="UniversalPlayerContextMenu"
-                 d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
-
-        <!--#region Social ADD / REMOVE from FRIENDS/FOES -->
-        <MenuItem CommandParameter="{Binding id}">
-            <MenuItem.Style>
-                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
-                            <Setter Property="Command" Value="{StaticResource AddFriendCommand}"/>
-                            <Setter Property="Header" Value="Add to friends"/>
-                            <Setter Property="Icon">
-                                <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M4,7V10H1V12H4V15H6V12H9V10H6V7H4M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding RelationShip}" Value="1">
-                            <Setter Property="Command" Value="{StaticResource RemoveFriendCommand}"/>
-                            <Setter Property="Header" Value="Remove from friends"/>
-                            <Setter Property="Icon">
-                                <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-
-                        <DataTrigger Binding="{Binding RelationShip}" Value="-1">
-                            <Setter Property="Command" Value="{StaticResource RemoveFriendCommand}"/>
-                            <Setter Property="Header" Value="Remove from foes"/>
-                            <Setter Property="Icon">
-                                <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </MenuItem.Style>
-        </MenuItem>
-        <MenuItem Command="{StaticResource AddFoeCommand}"
-                                              CommandParameter="{Binding id}"
-                                              Header="Add to foes">
-            <MenuItem.Icon>
-                <Path Fill="White" Stretch="Uniform" Data="M17 21L18.8 22.8C19.3 23.3 20 22.9 20 22.3V18L22.8 14.6C23.3 13.9 22.8 13 22 13H15C14.2 13 13.7 14 14.2 14.6L17 18V21M15 20H2V17C2 14.3 7.3 13 10 13C10.6 13 11.3 13.1 12.1 13.2C11.9 13.8 12 14.5 12.2 15.1C11.5 15 10.7 14.9 10 14.9C7 14.9 3.9 16.4 3.9 17V18.1H14.5L15 18.7V20M10 12C12.2 12 14 10.2 14 8S12.2 4 10 4 6 5.8 6 8 7.8 12 10 12M10 6C11.1 6 12 6.9 12 8S11.1 10 10 10 8 9.1 8 8 8.9 6 10 6Z" />
-            </MenuItem.Icon>
-            <MenuItem.Style>
-                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </MenuItem.Style>
-        </MenuItem>
-        <!--#endregion-->
-    </ContextMenu>
 
     <Style TargetType="Run" x:Key="RatingDifferenceRunStyle">
         <Setter Property="Text" Value="↓"/>

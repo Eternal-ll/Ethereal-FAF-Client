@@ -416,7 +416,6 @@ namespace beta.Views
         {
             try
             {
-
                 if (TryGetChannel(e.Channel, out IrcChannelVM channel))
                 {
                     if (!channel.Users.Contains(e.User))

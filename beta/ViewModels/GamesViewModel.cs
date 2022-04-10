@@ -48,6 +48,7 @@ namespace beta.ViewModels
         public abstract GameState GameState { get; }
 
         private readonly ISocialService SocialService;
+        private readonly ISessionService SessionService;
         private readonly IGamesService GamesService;
 
         private readonly object _lock = new();
@@ -55,6 +56,7 @@ namespace beta.ViewModels
         public GamesViewModel()
         {
             SocialService = App.Services.GetService<ISocialService>();
+            SessionService = App.Services.GetService<ISessionService>();
             GamesService = App.Services.GetService<IGamesService>();
 
             Games = new();
