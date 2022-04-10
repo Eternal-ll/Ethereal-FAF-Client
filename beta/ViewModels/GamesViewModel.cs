@@ -342,7 +342,7 @@ namespace beta.ViewModels
         public void OnChangeSortDirectionCommmand(object parameter) => SortDirection = ListSortDirection.Ascending;
         #endregion
 
-    #region Maps black list area
+        #region Maps black list area
 
         #region IsMapsBlacklistEnabled
         private bool _IsMapsBlacklistEnabled = true; // TODO default value
@@ -423,7 +423,6 @@ namespace beta.ViewModels
         #endregion
 
         #endregion
-
         private void RefreshGameView()
         {
             GamesWithBlockedMap.Clear();
@@ -538,14 +537,69 @@ namespace beta.ViewModels
 
             return FilterGame(game);
         }
+        private void OnGameFilter(object sender, FilterEventArgs e) => 
+            e.Accepted = CommonFilter((GameInfoMessage)e.Item);
 
-        private void OnGameFilter(object sender, FilterEventArgs e)
+        #region View toggles
+
+        #region IsDataGridView
+        private bool _IsDataGridView;
+        public bool IsDataGridView
         {
-            var game = (GameInfoMessage)e.Item;
-            //e.Accepted = false;
-            //if (game.State != GameState.Open) return;
-            e.Accepted = CommonFilter(game);
+            get => _IsDataGridView;
+            set
+            {
+                if (Set(ref _IsDataGridView, value))
+                {
+
+                }
+            }
         }
+        #endregion
+
+        #region IsGridView
+        private bool _IsGridView = true;
+        public bool IsGridView
+        {
+            get => _IsGridView;
+            set
+            {
+                if (Set(ref _IsGridView, value))
+                {
+
+                }
+            }
+        }
+        #endregion
+
+        #region IsExtendedViewEnabled
+        private bool _IsExtendedViewEnabled;
+        public bool IsExtendedViewEnabled
+        {
+            get => _IsExtendedViewEnabled;
+            set => Set(ref _IsExtendedViewEnabled, value);
+        }
+        #endregion
+
+        #endregion
+
+        #region Commands
+
+        #region RefreshCommand
+        private ICommand _RefreshCommand;
+        public ICommand RefreshCommand => _RefreshCommand ??= new LambdaCommand(OnRefreshCommand);
+        private void OnRefreshCommand(object parameter)
+        {
+            //BindingOperations.EnableCollectionSynchronization(Games, _lock);
+            GamesViewSource.Source = null;
+            Games.Clear();
+            HandleGames(GamesService.Games.ToArray());
+            GamesViewSource.Source = Games;
+            OnPropertyChanged(nameof(GamesView));
+        }
+        #endregion
+
+        #endregion
 
         private bool TryGetIndexOfGame(long uid, out int id)
         {
@@ -617,49 +671,6 @@ namespace beta.ViewModels
                 games.Add(game);
             }
         }
-
-        #region View toggles
-
-        #region IsDataGridView
-        private bool _IsDataGridView;
-        public bool IsDataGridView
-        {
-            get => _IsDataGridView;
-            set
-            {
-                if (Set(ref _IsDataGridView, value))
-                {
-
-                }
-            }
-        }
-        #endregion
-
-        #region IsGridView
-        private bool _IsGridView = true;
-        public bool IsGridView
-        {
-            get => _IsGridView;
-            set
-            {
-                if (Set(ref _IsGridView, value))
-                {
-
-                }
-            }
-        }
-        #endregion
-
-        #region IsExtendedViewEnabled
-        private bool _IsExtendedViewEnabled;
-        public bool IsExtendedViewEnabled
-        {
-            get => _IsExtendedViewEnabled;
-            set => Set(ref _IsExtendedViewEnabled, value);
-        }
-        #endregion
-
-        #endregion
 
         protected override void Dispose(bool disposing)
         {
