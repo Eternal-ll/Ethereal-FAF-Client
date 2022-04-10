@@ -97,7 +97,7 @@ namespace beta.Views
         {
             while (!StopInjection)
             {
-                WebView.ExecuteScriptAsync(injectionScript);
+                //WebView.ExecuteScriptAsync(injectionScript);
                 Thread.Sleep(10000);
             }
         }
@@ -112,9 +112,9 @@ namespace beta.Views
                 try
                 {
 
-                    WebView.Stop();
+                    //WebView.Stop();
 
-                    WebView.Dispose();
+                    //WebView.Dispose();
                 }
                 catch
                 {
