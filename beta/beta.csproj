@@ -7,6 +7,7 @@
     <StartupObject>beta.Program</StartupObject>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  <PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
+	  <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
