@@ -18,7 +18,7 @@
     <!--<UserControl.DataContext>
         <vm:ChatViewModel/>
     </UserControl.DataContext>-->
-    <Grid x:Name="GlobalGrid">
+    <Grid x:Name="GlobalGrid" ShowGridLines="True">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
@@ -155,135 +155,6 @@
                     </Setter.Value>
                 </Setter>
             </Style>
-
-            <!--#region Player DataTemplate on list -->
-            <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
-                <Grid ShowGridLines="False" Margin="10 0 0 0">
-                    <Grid.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Open profile" Command="{StaticResource ShowProfileCommand}" CommandParameter="{Binding}"/>
-                        </ContextMenu>
-                    </Grid.ContextMenu>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Image Stretch="Uniform" Height="20" Style="{StaticResource AvatarImageStyle}"/>
-
-                    <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" Margin="4 0 0 0"/>
-
-                    <TextBlock Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left" Text="{Binding LoginWithClan}">
-                        <TextBlock.ToolTip>
-                            <ToolTip>
-                                <ItemsControl ItemsSource="{Binding ratings}" ItemTemplate="{StaticResource PlayerRatingsDataTemplate}"/>
-                            </ToolTip>
-                        </TextBlock.ToolTip>
-                    </TextBlock>
-
-                    <ContentControl Grid.Column="2" Grid.Row="1"
-                                            Margin="-16 0 0 0">
-                        <ContentControl.Style>
-                            <Style TargetType="ContentControl">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}" Value="False">
-                                        <Setter Property="Content">
-                                            <Setter.Value>
-                                                <StackPanel Margin="0 0 0 4"
-                                                                    Orientation="Horizontal">
-                                                    <TextBlock Opacity=".5"
-                                                                       FontSize="12"
-                                                                       HorizontalAlignment="Left">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="Playing on"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Game.launched_at}" Value="{x:Null}">
-                                                                        <Setter Property="Text" Value="On"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding GameState}" Value="Host">
-                                                                        <Setter Property="Text" Value="Hosting"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                    <TextBlock Margin="4 0 0 0" FontSize="12" Text="{Binding Game.MapName}"
-                                                                       MaxWidth="160">
-                                                        <TextBlock.ToolTip>
-                                                            <ToolTip>
-                                                                <Grid ShowGridLines="False">
-                                                                    <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                        <ColumnDefinition/>
-                                                                    </Grid.ColumnDefinitions>
-                                                                    <Grid.RowDefinitions>
-                                                                        <RowDefinition/>
-                                                                        <RowDefinition/>
-                                                                    </Grid.RowDefinitions>
-                                                                    <StackPanel>
-                                                                        <Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>
-                                                                        <TextBlock DataContext="{Binding Game}" Margin="0 10 0 0" Style="{StaticResource PlayersTextBlockStyle}">
-                                                                            <Run Style="{StaticResource NumPlayersRunStyle}"/>
-                                                                            <Run Text="/" FontSize="12"/>
-                                                                            <Run Text="{Binding max_players}"/>
-                                                                        </TextBlock>
-                                                                    </StackPanel>
-                                                                    <ItemsControl Grid.Column="1" Margin="10 0 0 0" DataContext="{Binding Game}" 
-                                                                                  Style="{StaticResource TeamsItemsStyle}"/>
-                                                                </Grid>
-                                                            </ToolTip>
-                                                        </TextBlock.ToolTip>
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Opacity" Value=".5"/>
-                                                                        <Style.Triggers>
-                                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                                <Setter Property="Opacity" Value="1"/>
-                                                                            </Trigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                </StackPanel>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ContentControl.Style>
-                    </ContentControl>
-
-                    <Image Margin="10 -10 10 -10" Height="40" Width="40" Stretch="Uniform"
-                           Grid.Column="3" Grid.RowSpan="2">
-                        <Image.Style>
-                            <Style TargetType="Image">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Setter Property="Source" Value="{Binding Game.Map.SmallPreview}"/>
-                                <Setter Property="ToolTip">
-                                    <Setter.Value>
-                                        <ToolTip>
-                                            <ContentControl Content="{Binding Game}"/>
-                                        </ToolTip>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
-                                                Path=IsChatMapPreviewEnabled}" Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Image.Style>
-                    </Image>
-                </Grid>
-            </DataTemplate>
-            <!--#endregion-->
 
             <Style x:Key="BorderStyle" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
                 <Setter Property="Effect">
@@ -956,7 +827,7 @@
         </Grid>
         <!--#endregion-->
 
-        <GridSplitter
+        <!--<GridSplitter
             Grid.Column="1"
             Width="2"
             Panel.ZIndex="1"
@@ -982,6 +853,6 @@
                     </Style.Triggers>
                 </Style>
             </GridSplitter.Style>
-        </GridSplitter>
+        </GridSplitter>-->
     </Grid>
 </UserControl>

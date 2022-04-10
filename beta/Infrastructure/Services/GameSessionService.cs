@@ -158,8 +158,12 @@ namespace beta.Infrastructure.Services
                 args.Append(' ');
             }
 
-            args.Append("/numgames ");
-            //args.Append();
+            if (me.ratings.TryGetValue("global", out var rating))
+            {
+                args.Append("/numgames ");
+                args.Append(rating.DisplayedRating);
+                args.Append(' ');
+            }
 
             if (me.clan is not null)
             {

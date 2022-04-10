@@ -2,7 +2,6 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,13 +14,8 @@ namespace beta.ViewModels
         private readonly IOAuthService OAuthService;
         private readonly INotificationService NotificationService;
 
-        private bool IsAdministrator;
         public AuthorizationViewModel()
         {
-            using var identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new(identity);
-            IsAdministrator = principal.IsInRole(WindowsBuiltInRole.Administrator);
-
             OAuthService = App.Services.GetService<IOAuthService>();
             NotificationService = App.Services.GetService<INotificationService>();
 
@@ -29,7 +23,7 @@ namespace beta.ViewModels
 
             if (Settings.Default.AutoJoin)
             {
-                Task.Run(() => OAuthService.AuthAsync());
+                //Task.Run(() => OAuthService.AuthAsync());
             }
         }
 
@@ -153,10 +147,9 @@ namespace beta.ViewModels
         #region LoginWithBrowserCommand
         private ICommand _LoginWithBrowserCommand;
         public ICommand LoginWithBrowserCommand => _LoginWithBrowserCommand ??= new LambdaCommand(OnLoginWithBrowserCommand, CanLoginWithBrowserCommand);
-        private bool CanLoginWithBrowserCommand(object parameter) => !IsPendingAuthorization && IsAdministrator && !string.IsNullOrWhiteSpace(LoginOrEmail);
+        private bool CanLoginWithBrowserCommand(object parameter) => !IsPendingAuthorization;
         private void OnLoginWithBrowserCommand(object parameter)
         {
-            if (parameter == null) return;
             IsPendingAuthorization = true;
             Task.Run(() => OAuthService.AuthByBrowser());
         }

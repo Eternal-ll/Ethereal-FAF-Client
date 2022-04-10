@@ -8,6 +8,7 @@ using beta.Models.IRC;
 using beta.Properties;
 using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -85,7 +86,7 @@ namespace beta.Views
 
         private readonly ObservableCollection<IPlayer> SelectedChannelPlayers = new();
 
-        private readonly CollectionViewSource SelectedChannelPlayersViewSource = new();
+        private CollectionViewSource SelectedChannelPlayersViewSource = new();
         public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
 
         #region FilterText
@@ -293,25 +294,35 @@ namespace beta.Views
         }
         private void UpdateSelectedChannelUsers()
         {
-            var players = SelectedChannelPlayers;
-
-            // TODO Check for duplicates someday... I saw two players on visual users list
-            players.Clear();
-
-            if (SelectedChannel is null) return;
-
-            var users = SelectedChannel.Users;
-
-            for (int i = 0; i < users.Count; i++)
+            try
             {
-                players.Add(GetChatPlayer(users[i]));
+                var players = SelectedChannelPlayers;
+
+                //Dispatcher.Invoke(() => SelectedChannelPlayersViewSource = null);
+
+                players.Clear();
+
+                if (SelectedChannel is null) return;
+
+                var users = SelectedChannel.Users;
+
+                for (int i = 0; i < users.Count; i++)
+                {
+                    players.Add(GetChatPlayer(users[i]));
+                }
+
+                //Dispatcher.Invoke(() => SelectedChannelPlayersViewSource = new()
+                //{
+                //    Source = players
+                //});
+                OnPropertyChanged(nameof(SelectedChannelPlayersView));
+
+                TestInputControl.SelectedChannel = SelectedChannel;
             }
+            catch (Exception ex)
+            {
 
-            TestInputControl.SelectedChannel = SelectedChannel;
-
-            //OnPropertyChanged(nameof(SelectedChannelPlayersView));
-            //SelectedChannelPlayersView.Refresh();
-            //using var defer = View.DeferRefresh();
+            }
         }
         private bool TryGetChannel(string channelName, out IrcChannelVM channel)
         {

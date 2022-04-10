@@ -97,6 +97,7 @@ namespace beta.ViewModels
                     string pageName = "beta.ViewModels." + value + "ViewModel";
                     Type viewType = typeof(ViewModel).Assembly.GetType(pageName);
                     ViewModel viewModel = null;
+
                     if (ViewModels.TryGetValue(viewType, out var cachedViewModel))
                     {
                         if (cachedViewModel is null)
@@ -117,6 +118,7 @@ namespace beta.ViewModels
                     else
                     {
                         viewModel = (ViewModel)Activator.CreateInstance(viewType);
+                        ViewModels.Add(viewType, viewModel);
                     }
                     SelectedViewModel = viewModel;
                 }
