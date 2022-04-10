@@ -557,7 +557,7 @@
         </StackPanel>
     </DataTemplate>
 
-    <DataTemplate x:Key="ListPlayerDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
+    <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
         <Grid ShowGridLines="False" Margin="10 0 0 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
@@ -578,7 +578,7 @@
                        Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
                        ToolTip="{StaticResource RatingsToolTip}"/>
 
-            <!--<ContentControl Grid.Column="2" Grid.Row="1" Margin="-16 0 0 0">
+            <ContentControl Grid.Column="2" Grid.Row="1" Margin="-16 0 0 0">
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
                         <Style.Triggers>
@@ -618,17 +618,16 @@
                                                                 <RowDefinition/>
                                                             </Grid.RowDefinitions>
                                                             <StackPanel>
-                                                                --><!--<Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>--><!--
+                                                                <Border DataContext="{Binding Game}" Style="{StaticResource MapPreviewBorderStyle}"/>
                                                                 <TextBlock DataContext="{Binding Game}"
                                                                                            Margin="0 10 0 0">
-                                                                                           --><!--Style="{StaticResource PlayersTextBlockStyle}">--><!--
+                                                                                           <!--Style="{StaticResource PlayersTextBlockStyle}">-->
                                                                                     <Run Style="{StaticResource NumPlayersRunStyle}"/>
                                                                                     <Run Text="/" FontSize="12"/>
                                                                                     <Run Text="{Binding max_players}"/>
                                                                 </TextBlock>
                                                             </StackPanel>
-                                                            <ItemsControl Grid.Column="1"
-                                                                                          Margin="10 0 0 0"
+                                                            <ItemsControl Grid.Column="1" Margin="10 0 0 0"
                                                                                           DataContext="{Binding Game}"
                                                                                           Style="{StaticResource TeamsItemsStyle}"/>
                                                         </Grid>
@@ -652,7 +651,7 @@
                         </Style.Triggers>
                     </Style>
                 </ContentControl.Style>
-            </ContentControl>-->
+            </ContentControl>
 
             <ContentControl Height="40" Width="40" Content="{Binding Game.Map}" Grid.Column="3" Grid.RowSpan="2">
                 <ContentControl.Style>

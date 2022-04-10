@@ -58,8 +58,7 @@
 
         <ListBox ItemsSource="{Binding OnlinePlayersView}" Grid.Row="2" Margin="0 30 0 0"
                  VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
-                 ItemTemplate="{StaticResource ListPlayerDataTemplate}">
+                 VirtualizingPanel.VirtualizationMode="Recycling">
             <ListBox.Resources>
                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlayerListBoxItemStyle}"/>
             </ListBox.Resources>

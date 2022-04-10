@@ -32,7 +32,7 @@ namespace beta.Infrastructure.Converters
     // TODO: Move to Service!!! This logic should be in some ChatService
     internal class TextConverter : IValueConverter
     {
-        private readonly IList<IEmojiCache> Cache = new List<IEmojiCache>()
+        private readonly List<IEmojiCache> Cache = new List<IEmojiCache>()
         {
             new BitmapEmojiCache()
             {

@@ -350,6 +350,24 @@ namespace beta.Views
         private void OnChannelMessageReceived(object sender, IrcChannelMessage e)
         {
             var channel = GetChannel(e.Channel);
+            if (channel.History.Count > 1)
+            {
+                int size = channel.History.Count - 1;
+
+                while (channel.History[size] is IrcChannelMessage old)
+                {
+                    if (old.From is null)
+                    {
+                        size--;
+                        continue;
+                    }
+                    if (old.From == e.From)
+                    {
+                        e = new IrcChannelMessage(e.Channel, null, e.Text);
+                        break;
+                    }
+                }
+            }
             Dispatcher.Invoke(() => channel.History.Add(e));
         }
 
@@ -385,21 +403,29 @@ namespace beta.Views
         }
         private void OnChannelUserJoin(object sender, IrcUserJoin e)
         {
-            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+            try
             {
-                if (!channel.Users.Contains(e.User))
-                {
-                    channel.Users.Add(e.User);
 
-                    if (channel.Name.Equals(SelectedChannel?.Name))
+                if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+                {
+                    if (!channel.Users.Contains(e.User))
                     {
-                        SelectedChannelPlayers.Add(GetChatPlayer(e.User));
+                        channel.Users.Add(e.User);
+
+                        if (channel.Name.Equals(SelectedChannel?.Name))
+                        {
+                            SelectedChannelPlayers.Add(GetChatPlayer(e.User));
+                        }
                     }
                 }
+                else
+                {
+                    // todo
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // todo
+
             }
         }
         private void OnChannelUsersReceived(object sender, IrcChannelUsers e)

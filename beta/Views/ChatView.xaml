@@ -28,6 +28,14 @@
                 <Setter Property="Padding" Value="0 4"/>
                 <Setter Property="Margin" Value="0 0 20 0"/>
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="False">
+                        <Setter Property="Opacity" Value=".8"/>
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Opacity" Value="1"/>
+                    </Trigger>
+                </Style.Triggers>
             </Style>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
 
@@ -466,10 +474,10 @@
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                 <Setter Property="VerticalContentAlignment" Value="Center"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
-                                        <Setter Property="Margin" Value="0 6 0 0"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
+                                <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
+                                    <Setter Property="Margin" Value="0 6 0 0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                             </Style>
                             <Style TargetType="Image">
                                 <Setter Property="MaxHeight" Value="24"/>
@@ -521,124 +529,121 @@
                                         <Setter Property="Foreground" Value="Orange"/>
                                     </Trigger>
                                 </Style.Triggers>
-                            </Style>
-                        </ListBox.Resources>
+                        </Style>
+                        <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+
+                        </DataTemplate>
+                    </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid Margin="0 0 0 4" ShowGridLines="False">
+                                <Grid Margin="0 0 0 4" ShowGridLines="True">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="54"/>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="2*"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
-                                    <ContentControl Content="{Binding From, Converter={StaticResource GetPlayerConverter}}"
-                                                    Height="20"
-                                                    Margin="10 1 0 0"
-                                                    VerticalAlignment="Top"
-                                                    HorizontalAlignment="Left">
+
+                                <TextBlock Grid.Column="0" HorizontalAlignment="Right" Margin="0 0 6 0" Padding="0" VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Opacity" Value=".4"/>
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Setter Property="Text" Value="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                            Path=IsMouseOver}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                    <!--<Setter Property="Opacity" Value=".4"/>-->
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding From}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <ContentControl Content="{Binding From, Converter={StaticResource GetPlayerConverter}}" HorizontalAlignment="Left">
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
+                                                                     Value="False">
+                                                        <Setter Property="Opacity" Value=".7"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
                                         <ContentControl.Resources>
                                             <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
-                                                <Image Style="{StaticResource AvatarImageStyle}"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Style="{StaticResource AvatarImageStyle}" Width="40" Margin="0 0 4 0"/>
+                                                    <Image Source="{Binding Flag}" Height="18" Width="18"/>
+                                                    <Button Background="Transparent" FontWeight="DemiBold" Margin="0 0 0 0">
+                                                        <TextBlock Text="{Binding login}"/>
+                                                        <Button.Style>
+                                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                                <!--<Setter Property="Content" Value="{Binding From}"/>-->
+                                                                <Setter Property="Padding" Value="6 0 6 2"/>
+                                                                <Setter Property="Margin" Value="-8 0 0 0"/>
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter Property="Foreground" Value="Orange"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Button.Style>
+                                                    </Button>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                                                <TextBlock Text="{Binding login}" Margin="0 0 4 0" Opacity=".7"/>
                                             </DataTemplate>
                                         </ContentControl.Resources>
                                     </ContentControl>
-                                    <TextBlock Grid.Column="0" HorizontalAlignment="Right" Margin="0 0 6 0" Padding="0" VerticalAlignment="Center">
+
+                                    <TextBlock Margin="0" Padding="0" VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Opacity" Value=".4"/>
                                                 <Setter Property="FontSize" Value="12"/>
                                                 <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Setter Property="Text" Value="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
+                                                <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
                                                 <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding From}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                                             Path=IsMouseOver}" Value="True">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                         <!--<Setter Property="Opacity" Value=".4"/>-->
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <StackPanel Grid.Column="2">
-                                        <StackPanel Grid.Column="2" Orientation="Horizontal">
-                                            <StackPanel.Style>
-                                                <Style TargetType="StackPanel">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding From}"
-                                                                 Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </StackPanel.Style>
-
-                                            <ContentControl Grid.Column="1" Content="{Binding From, Converter={StaticResource GetPlayerConverter}}"
-                                                    Width="18" Height="18"
-                                                    Margin="0 3 4 0"
-                                                    VerticalAlignment="Top"
-                                                    HorizontalAlignment="Left">
-                                                <ContentControl.Resources>
-                                                    <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
-                                                        <Image Source="{Binding Flag}"/>
-                                                    </DataTemplate>
-                                                </ContentControl.Resources>
-                                            </ContentControl>
-                                            <Button Background="Transparent" FontWeight="DemiBold">
-                                                <TextBlock Text="{Binding From}"/>
-                                                <Button.Style>
-                                                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                        <!--<Setter Property="Content" Value="{Binding From}"/>-->
-                                                        <Setter Property="Padding" Value="6 0 6 2"/>
-                                                        <Setter Property="Margin" Value="-8 0 0 0"/>
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                <Setter Property="Foreground" Value="Orange"/>
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
-                                            </Button>
-                                            <TextBlock Margin="0" Padding="0" VerticalAlignment="Center">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Opacity" Value=".4"/>
-                                                        <Setter Property="FontSize" Value="12"/>
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding From}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
-                                                            Path=IsMouseOver}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                <!--<Setter Property="Opacity" Value=".4"/>-->
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </StackPanel>
-                                        <TextBlock
-                                        Background="Transparent"
-                                        VerticalAlignment="Center"
-                                        Grid.Column="2"
-                                        Grid.Row="1"
-                                        Opacity=".8"
-                                            Margin="0 2"
+                                </StackPanel>
+                                <!--<StackPanel Grid.Column="2">-->
+                                        <TextBlock Background="Transparent" VerticalAlignment="Center"
+                                        Grid.Column="1" Grid.Row="1" Opacity=".8" Margin="0 2"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
                                         TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <Canvas
-                                        IsHitTestVisible="False"
-                                        Grid.ColumnSpan="3"
-                                        Margin="0">
+                                 <!--</StackPanel>-->
+                                    <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Margin="0">
                                         <Canvas.Style>
                                             <Style TargetType="Canvas">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
@@ -655,11 +660,8 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Canvas.Style>
-                                        <Canvas
-                                            IsHitTestVisible="False"
-                                            Background="Orange"
-                                            Width="2"
-                                            Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas}}, Path=ActualHeight}"/>
+                                        <Canvas IsHitTestVisible="False" Background="Orange" Width="2"
+                                                Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas}}, Path=ActualHeight}"/>
                                     </Canvas>
                                     <Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
                                             Margin="0 -10 32 0">
@@ -892,6 +894,8 @@
 
             <!--#region Channel users -->
             <ListBox Grid.Row="2"
+                     MinWidth="300"
+                     ItemTemplate="{StaticResource ListPlayerDataTemplate}"
                     ItemsSource="{Binding SelectedChannelPlayersView}"
                         SelectedItem="{Binding SelectedUser}"
                     Background="Transparent"

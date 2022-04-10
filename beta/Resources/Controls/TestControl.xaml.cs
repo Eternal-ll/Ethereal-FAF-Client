@@ -212,7 +212,26 @@ namespace beta.Resources.Controls
                 if (CurrentText.Trim().Length > 0)
                 {
                     if (SelectedChannel is null) return;
-                    SelectedChannel.History.Add(new IrcChannelMessage(SelectedChannel.Name, Properties.Settings.Default.PlayerNick, CurrentText));
+                    var nick = Properties.Settings.Default.PlayerNick;
+                    if (SelectedChannel.History.Count > 1)
+                    {
+                        int size = SelectedChannel.History.Count - 1;
+
+                        while (SelectedChannel.History[size] is IrcChannelMessage old)
+                        {
+                            if (old.From is null)
+                            {
+                                size--;
+                                continue;
+                            }
+                            if (old.From == nick)
+                            {
+                                nick = null;
+                                break;
+                            }
+                        }
+                    }
+                    SelectedChannel.History.Add(new IrcChannelMessage(SelectedChannel.Name, nick, CurrentText));
                     IrcService.SendMessage(SelectedChannel.Name, CurrentText);
                 }
                 CurrentText = string.Empty;
