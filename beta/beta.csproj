@@ -7,6 +7,9 @@
     <StartupObject>beta.Program</StartupObject>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  <PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
+	  <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	  <AssemblyName>Ethereal FAF Client</AssemblyName>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -277,6 +280,10 @@
     <None Remove="Resources\Images\Random\2.jpg" />
     <None Remove="Resources\Images\Random\hilly plateau 6v6.small.png" />
     <None Remove="Resources\Images\Random\Namalsk_1.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
