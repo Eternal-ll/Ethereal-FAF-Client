@@ -298,6 +298,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="21.2.5" />
     <PackageReference Include="Downloader" Version="2.3.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
