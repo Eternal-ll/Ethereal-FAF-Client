@@ -59,8 +59,8 @@ namespace beta.Infrastructure.Services
 
             PngBitmapEncoder encoder = new();
             encoder.Frames.Add(BitmapFrame.Create(image));
-
-            using FileStream filestream = new(image.BaseUri.AbsolutePath, FileMode.Create);
+            var path = image.BaseUri.AbsolutePath.Replace("%2520", " ");
+            using FileStream filestream = new(path, FileMode.Create);
             encoder.Save(filestream);
             image.Freeze();
         }
