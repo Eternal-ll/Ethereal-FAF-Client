@@ -32,6 +32,7 @@
                     <cmd:HostGameCommand x:Key="HostGameCommand"/>
                     <cmd:LaunchOfflineGameCommand x:Key="LaunchOfflineGameCommand"/>
                     <cmd:ShowProfileCommand x:Key="ShowProfileCommand"/>
+                    <cmd:ExportCommand x:Key="ExportCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>

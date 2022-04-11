@@ -228,7 +228,8 @@
                     </Style>
                 </WrapPanel.Resources>
                 <Button Content="Open maps folder" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="Maps"/>
-                <Button Content="Search" Click="Button_Click" Margin="10 0 0 0"/>
+                <Button Content="Search" Click="Button_Click" Margin="10 0"/>
+                <Button Content="Export maps" Command="{StaticResource ExportCommand}" CommandParameter="{Binding LastData}"/>
                 <!--<CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>-->
 
                 <CheckBox IsChecked="{Binding IsSortEnabled}" Margin="10 0 -14 0" Content="Enable sort"/>

@@ -22,6 +22,9 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IIceService, IceService>()
             .AddSingleton<INotificationService, NotificationService>()
 
+
+            .AddSingleton<IExportService, ExportService>()
+
             .AddTransient<IApiService, ApiService>()
             ;
     }

@@ -802,6 +802,7 @@ namespace beta.Views
             Status = ApiState.PendingRequest;
             RequestThread.Start();
         }
+        public ApiMapData[] LastData { get; set; }
         private void Request()
         {
             var query = CurrentQuery;
@@ -886,6 +887,9 @@ namespace beta.Views
                         });
                     }
                 }
+
+                LastData = data.Data;
+                OnPropertyChanged(nameof(LastData));
                 if (IsOnlyLocalMaps)
                 {
                     if (data.Data.Length > 0)
