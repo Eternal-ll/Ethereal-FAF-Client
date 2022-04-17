@@ -20,6 +20,7 @@ namespace beta.Infrastructure.Services
         public event EventHandler<GameInfoMessage> GameRemoved;
         public event EventHandler<long> GameRemovedByUid;
         public event EventHandler<string[]> PlayersLeftFromGame;
+        public event EventHandler<KeyValuePair<GameInfoMessage, string[]>> PlayersJoinedToGame;
 
         #region Properties
 
@@ -114,6 +115,7 @@ namespace beta.Infrastructure.Services
                 .Except(origPlayers)
                 .ToArray(), orig);
 
+
             orig.Teams = newData.Teams;
 
 
@@ -129,6 +131,10 @@ namespace beta.Infrastructure.Services
                 // should be updates latest, because it triggers UI updates for other map related fields
                 orig.mapname = newData.mapname;
             }
+
+            //PlayersJoinedToGame?.Invoke(this, new(orig, newPlayers
+            //    .Except(origPlayers)
+            //    .ToArray()));
 
             return true;
         }
@@ -149,6 +155,7 @@ namespace beta.Infrastructure.Services
             }
 
             PlayersService.RemoveGameFromPlayers(playersToClear.ToArray());
+            //PlayersLeftFromGame?.Invoke(this, playersToClear.ToArray());
             GameRemovedByUid?.Invoke(this, game.uid);
             OnGameRemoved(game);
         }

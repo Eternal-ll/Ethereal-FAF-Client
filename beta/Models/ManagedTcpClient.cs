@@ -89,19 +89,28 @@ namespace beta.Models
             };
             TcpThread.Start();
         }
+        private bool IsDisconnected = false;
         public bool Write(byte[] data)
         {
-            if (TcpClient is null)
+            if (!IsDisconnected)
             {
-                //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+                if (TcpClient is null)
+                {
+                    IsDisconnected = true;
+                    OnStateChanged(ManagedTcpClientState.Disconnected);
+                    return false;
+                    //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
+                }
+                else if (!TcpClient.Connected)
+                {
+                    IsDisconnected = true;
+                    OnStateChanged(ManagedTcpClientState.Disconnected);
+                    return false;
+                }
             }
-            else if (!TcpClient.Connected)
+            if (Stream is not null && !IsDisposed)
             {
-                OnStateChanged(ManagedTcpClientState.Disconnected);
-                return false;
-            }
-            if (Stream is not null)
-            {
+                IsDisconnected = false;
                 Stream.Write(data, 0, data.Length);
                 return true;
             }
@@ -263,11 +272,14 @@ namespace beta.Models
         #endregion
 
         #region Dispose
+        private bool IsDisposed = false;
         public void Dispose()
         {
+            if (IsDisposed) return;
             IsListening = true;
             TcpClient.Close();
             OnStateChanged(ManagedTcpClientState.Disconnected);
+            IsDisposed = true;
         }
         #endregion
     }

@@ -7,6 +7,7 @@ namespace beta.Models.IRC
         public string Channel { get; }
         public string From { get; }
         public bool HasMention { get; }
+        public bool IsSame { get; set; }
         public IrcChannelMessage(string channel, string from, string text) : base(text)
         {
             Channel = channel;

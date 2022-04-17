@@ -5,6 +5,7 @@ using beta.Models.Enums;
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
@@ -68,6 +69,8 @@ namespace beta.Infrastructure.Services
         private string Nick;
         private string Password;
 
+        public List<string> Channels { get; private set; } = new();
+
         #region State
         private IrcState _State;
         public IrcState State
@@ -98,6 +101,10 @@ namespace beta.Infrastructure.Services
 
         public void Authorize(string nickname, string password)
         {
+            if (State == IrcState.Connected || State == IrcState.PendingConnection || State == IrcState.PendingAuthorization)
+            {
+                return;
+            }
             Nick = nickname;
             Password = password;
             Connect(null, 0);
@@ -145,7 +152,11 @@ namespace beta.Infrastructure.Services
 
         public void Join(string channel, string key = null) => Send(IrcCommands.Join(channel, key));
 
-        public void Leave(string channel) => Send(IrcCommands.Leave(channel));
+        public void Leave(string channel)
+        {
+            Channels.Remove(channel);
+            Send(IrcCommands.Leave(channel));
+        }
 
         public void Leave(string[] channels)
         {
@@ -203,7 +214,8 @@ namespace beta.Infrastructure.Services
             //Send(IrcCommands.Message("#aeolus", "Check check"));
             //Send(IrcCommands.Join("#test"));
             //Send(IrcCommands.Nickname(Nick + "1"));
-            Send(IrcCommands.Nickname("Eternal-"));
+            //Send(IrcCommands.Nickname("Eternal-"));
+            Send("NAMES #aeolus");
             //Send("INVITE MarcSpector #aeolus1");
             //Send(IrcCommands.Leave("#aeolus1"));
             //Send(IrcCommands.Join("#aeolus2", "test")); 
@@ -212,6 +224,8 @@ namespace beta.Infrastructure.Services
             //Send("KICK #aeolus1 Eternal-");
             //Send(IrcCommands.List());
         }
+
+        public void GetChannelUsers(string channel) => Send(IrcCommands.Names(channel));
 
         private void ManagedTcpClient_DataReceived(object sender, string data)
         {
@@ -273,6 +287,7 @@ namespace beta.Infrastructure.Services
                     OnChannelTopicUpdated(new(ircData[3], sb.ToString()));
 
                     AppDebugger.LOGIRC($"Channel: {ircData[3]} topic: {sb}");
+                    if (!Channels.Contains(ircData[3])) Channels.Add(ircData[3]);
 
                     break;
                 case "333": // Sent to a client to let them know who set the topic (<nick>) and when they set it (<setat> is a unix timestamp). Sent after RPL_TOPIC.

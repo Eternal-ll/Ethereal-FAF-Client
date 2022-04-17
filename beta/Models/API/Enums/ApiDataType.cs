@@ -19,6 +19,9 @@
         avatarAssignment,
         nameRecord,
         globalRating,
-        ladder1v1Rating
+        ladder1v1Rating,
+
+        gamePlayerStats,
+
     }
 }

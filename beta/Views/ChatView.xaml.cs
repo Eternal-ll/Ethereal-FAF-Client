@@ -1,5 +1,4 @@
-﻿using beta.Infrastructure;
-using beta.Infrastructure.Commands;
+﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Converters;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
@@ -84,7 +83,7 @@ namespace beta.Views
         }
         #endregion
 
-        private readonly ObservableCollection<IPlayer> SelectedChannelPlayers = new();
+        private ObservableCollection<IPlayer> SelectedChannelPlayers = new();
 
         private CollectionViewSource SelectedChannelPlayersViewSource = new();
         public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
@@ -155,7 +154,16 @@ namespace beta.Views
             IrcService.ChannedMessageReceived += OnChannelMessageReceived;
             #endregion
 
-            TestInputControl.LeaveRequired += (s, e) => OnLeaveFromChannelCommand(SelectedChannel.Name);
+            if (IrcService.State == IrcState.Authorized)
+            {
+                for (int i = 0; i < IrcService.Channels.Count; i++)
+                {
+                    GetChannel(IrcService.Channels[i]);
+                    IrcService.GetChannelUsers(IrcService.Channels[i]);
+                }
+            }
+
+            TestInputControl.LeaveRequired += (s, e) => OnLeaveFromChannelCommand(SelectedChannel?.Name);
 
             App.Current.MainWindow.Closing += MainWindow_Closing;
 
@@ -207,7 +215,12 @@ namespace beta.Views
         #region UpdateUsersCommand
         private ICommand _RefreshUserListCommand;
         public ICommand RefreshUserListCommand => _RefreshUserListCommand;
-        private void OnRefreshUserListCommand(object parameter) => UpdateSelectedChannelUsers();
+        private void OnRefreshUserListCommand(object parameter)
+        {
+            if (SelectedChannel is null) return;
+            SelectedChannelPlayers.Clear();
+            IrcService.GetChannelUsers(SelectedChannel.Name);
+        }
         #endregion
 
         #region HideSelectedUserCommand
@@ -233,8 +246,12 @@ namespace beta.Views
 
                         if (SelectedChannel.Name == channel.Name)
                         {
-                            SelectedChannelPlayers.Remove(GetChatPlayer(user));
-                            SelectedChannelPlayers.Add(GetChatPlayer(e.To));
+                            //TODO FIX
+                            Dispatcher.Invoke(() =>
+                            {
+                                SelectedChannelPlayers.Remove(GetChatPlayer(user));
+                                SelectedChannelPlayers.Add(GetChatPlayer(e.To));
+                            });
                         }
 
                         break;
@@ -296,9 +313,10 @@ namespace beta.Views
         {
             try
             {
-                var players = SelectedChannelPlayers;
+                var players = new ObservableCollection<IPlayer>();
 
-                //Dispatcher.Invoke(() => SelectedChannelPlayersViewSource = null);
+                //Dispatcher.Invoke(() => SelectedChannelPlayersViewSource.Source = Array.Empty<IPLayer>());
+                //OnPropertyChanged(nameof(SelectedChannelPlayersView));
 
                 players.Clear();
 
@@ -306,15 +324,32 @@ namespace beta.Views
 
                 var users = SelectedChannel.Users;
 
+                //for (int i = 0; i < players.Count; i++)
+                //{
+                //    var found = false;
+                //    for (int j = 0; j < users.Count; j++)
+                //    {
+                //        if (players[i].login.ToLower() == users[j].ToLower())
+                //        {
+                //            found = true;
+                //            users.RemoveAt(j);
+                //            break;
+                //        }
+                //    }
+                //    if (!found) players.RemoveAt(i);
+                //}
+
                 for (int i = 0; i < users.Count; i++)
                 {
                     players.Add(GetChatPlayer(users[i]));
                 }
 
-                //Dispatcher.Invoke(() => SelectedChannelPlayersViewSource = new()
+                //for (int i = 0; i < users.Count; i++)
                 //{
-                //    Source = players
-                //});
+                //    players.Add(GetChatPlayer(users[i]));
+                //}
+                SelectedChannelPlayers = players;
+                Dispatcher.Invoke(() => SelectedChannelPlayersViewSource.Source = SelectedChannelPlayers);
                 OnPropertyChanged(nameof(SelectedChannelPlayersView));
 
                 TestInputControl.SelectedChannel = SelectedChannel;
@@ -365,18 +400,9 @@ namespace beta.Views
             {
                 int size = channel.History.Count - 1;
 
-                while (channel.History[size] is IrcChannelMessage old)
+                if (channel.History[size] is IrcChannelMessage old)
                 {
-                    if (old.From is null)
-                    {
-                        size--;
-                        continue;
-                    }
-                    if (old.From == e.From)
-                    {
-                        e = new IrcChannelMessage(e.Channel, null, e.Text);
-                        break;
-                    }
+                    e.IsSame = old.From == e.From;
                 }
             }
             Dispatcher.Invoke(() => channel.History.Add(e));
@@ -398,39 +424,27 @@ namespace beta.Views
 
         private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
-            if (TryGetChannel(e.Channel, out IrcChannelVM channel))
-            {
-                channel.Users.Remove(e.User);
+            var channel = GetChannel(e.Channel);
+            channel.Users.Remove(e.User);
 
-                if (channel.Name.Equals(SelectedChannel.Name))
-                {
-                    SelectedChannelPlayers.Remove(GetChatPlayer(e.User));
-                }
-            }
-            else
+            if (channel.Name.Equals(SelectedChannel.Name))
             {
-                // todo
+                SelectedChannelPlayers.Remove(GetChatPlayer(e.User));
             }
         }
         private void OnChannelUserJoin(object sender, IrcUserJoin e)
         {
             try
             {
-                if (TryGetChannel(e.Channel, out IrcChannelVM channel))
+                var channel = GetChannel(e.Channel);
+                if (!channel.Users.Contains(e.User))
                 {
-                    if (!channel.Users.Contains(e.User))
-                    {
-                        channel.Users.Add(e.User);
+                    channel.Users.Add(e.User);
 
-                        if (channel.Name.Equals(SelectedChannel?.Name))
-                        {
-                            SelectedChannelPlayers.Add(GetChatPlayer(e.User));
-                        }
+                    if (channel.Name.Equals(SelectedChannel?.Name))
+                    {
+                        SelectedChannelPlayers.Add(GetChatPlayer(e.User));
                     }
-                }
-                else
-                {
-                    // todo
                 }
             }
             catch (Exception ex)
@@ -450,7 +464,8 @@ namespace beta.Views
 
             for (int i = 0; i < e.Users.Length; i++)
             {
-                channel.Users.Add(e.Users[i]);
+                if (!channel.Users.Contains(e.Users[i]))
+                    channel.Users.Add(e.Users[i]);
             }
             if (SelectedChannel is null)
             {

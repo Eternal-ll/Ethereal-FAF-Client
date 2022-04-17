@@ -20,7 +20,7 @@ namespace beta.ViewModels
 
             IrcService.StateChanged += OnIrcStateChanged;
 
-            //BindingOperations.EnableCollectionSynchronization(PlayersService.Players, new object());
+            BindingOperations.EnableCollectionSynchronization(PlayersService.Players, new object());
             OnlinePlayersViewSource.Filter += PlayersFilter;
             OnlinePlayersViewSource.Source = PlayersService.Players;
         }

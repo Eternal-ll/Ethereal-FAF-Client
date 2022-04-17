@@ -1,25 +1,40 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:beta.ViewModels"
-                    xmlns:ui="http://schemas.modernwpf.com/2019">
+                    xmlns:ui="http://schemas.modernwpf.com/2019"
+                    xmlns:oxy="http://oxyplot.org/wpf">
+    <Style x:Key="ProfileBorderStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Margin" Value="10"/>
+        <Setter Property="Background" Value="{StaticResource BackgroundHalfBlack}"/>
+    </Style>
+    
+    <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock">
+        <Setter Property="Opacity" Value=".7"/>
+    </Style>
+
+    <Style x:Key="RefreshButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="Content" Value="Refresh"/>
+        <Setter Property="Command" Value="{Binding RefreshCommand}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="Opacity" Value=".4"/>
+        <Setter Property="Padding" Value=" 4 0 4 2"/>
+    </Style>
+    
     <DataTemplate DataType="{x:Type vm:AvatarsViewModel}">
-        <Border Background="{StaticResource BackgroundHalfBlack}" Padding="10 4 10 10" CornerRadius="6" Margin="0 10">
+        <Border Style="{StaticResource ProfileBorderStyle}" Padding="10 4 10 10">
             <Border>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                <Grid ShowGridLines="False">
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="Avatars" Margin="0 0 0 10" Opacity=".7" VerticalAlignment="Center"/>
-                    <Button Content="Refresh" Command="{Binding RefreshCommand}" Background="Transparent"
-                            HorizontalAlignment="Right"
-                            Opacity=".4" Grid.Column="1" Padding="4 0 4 2" Margin="0 4 0 10"/>
+                    <Button Style="{StaticResource RefreshButtonStyle}"/>
                     <ListBox ItemsSource="{Binding Avatars}" SelectedItem="{Binding SelectedAvatar}" HorizontalAlignment="Left"
-                             Grid.Row="1" Grid.ColumnSpan="2" Background="Transparent">
+                             Grid.Row="1" Background="Transparent">
                         <ListBox.Style>
                             <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
                                 <Style.Triggers>
@@ -44,11 +59,11 @@
                                 </Style.Triggers>
                             </Style>
                         </ListBox.Resources>
-                        <!--<ListBox.ItemsPanel>
+                        <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
                             </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>-->
+                        </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -79,7 +94,6 @@
                                             </ToolTip>
                                         </Image.ToolTip>
                                     </Image>
-                                    <TextBlock Margin="10 0 0 0" Text="{Binding AssignedAt, StringFormat='Assigned at {0}'}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -89,27 +103,317 @@
             </Border>
         </Border>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ApiRatingsViewModel}">
+        <Border Style="{StaticResource ProfileBorderStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <!--<Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>-->
+
+                <TextBlock Text="Rating charts" Margin="0 0 0 10" Opacity=".7" VerticalAlignment="Center"/>
+                <Button Style="{StaticResource RefreshButtonStyle}"/>
+
+                <ListBox Grid.Row="1" Grid.RowSpan="1" ItemsSource="{Binding RatingTypes}"
+                         SelectedItem="{Binding SelectedRatingType}"
+                         Background="Transparent" SelectedIndex="0">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                            <Setter Property="Content" Value="{Binding Key}"/>
+                            <Setter Property="Padding" Value="6 4"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="global">
+                                    <Setter Property="Content" Value="Global"/>
+                                    <Setter Property="ToolTip" Value="Custom games"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="ladder_1v1">
+                                    <Setter Property="Content" Value="1 vs 1"/>
+                                    <Setter Property="ToolTip" Value="Ladder 1 vs 1"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="tmm_2v2">
+                                    <Setter Property="Content" Value="2 vs 2"/>
+                                    <Setter Property="ToolTip" Value="TMM 2 vs 2"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="tmm_4v4_full_share">
+                                    <Setter Property="Content" Value="4 vs 4 FS"/>
+                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 full share"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding}" Value="tmm_4v4_share_until_death">
+                                    <Setter Property="Content" Value="4 vs 4 SUD"/>
+                                    <Setter Property="ToolTip" Value="TMM 4 vs 4 share until death"/>
+                                </DataTrigger>
+                                <Trigger Property="IsSelected" Value="False">
+                                    <Setter Property="Opacity" Value=".7"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value=".9"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+
+                <ContentControl Grid.Row="2" Grid.ColumnSpan="2">
+
+                    <oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
+                        <oxy:Plot.DefaultTrackerTemplate>
+                            <ControlTemplate>
+                                <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
+                                                Background="Black">
+                                    <!--<oxy:TrackerControl.Background>
+                                    <LinearGradientBrush EndPoint="0,1">
+                                        <GradientStop Color="#f0e0e0ff" />
+                                        <GradientStop Offset="1" Color="#f0ffffff" />
+                                    </LinearGradientBrush>
+                                </oxy:TrackerControl.Background>-->
+                                    <oxy:TrackerControl.Content>
+                                        <TextBlock Text="{Binding Position}" Margin="7" />
+                                    </oxy:TrackerControl.Content>
+                                </oxy:TrackerControl>
+                            </ControlTemplate>
+                        </oxy:Plot.DefaultTrackerTemplate>
+                        <oxy:Plot.Axes>
+                            <oxy:LinearAxis Position="Left" Title="Rating"/>
+                            <oxy:DateTimeAxis Position="Bottom"/>
+                        </oxy:Plot.Axes>
+                        <oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding SelectedRatingData}"
+                                DataFieldX="ScoreDateTime" DataFieldY="RatingAfter"
+                                     MarkerType="Circle" LabelMargin="0" MarkerSize="2"
+                                    MarkerFill="Black" CanTrackerInterpolatePoints="False"/>
+                    </oxy:Plot>
+                </ContentControl>
+                <!--<oxy:PlotView Grid.Row="2" Grid.RowSpan="2" Model="{Binding PlotModel}"
+                              Background="Transparent"
+                              VirtualizingPanel.IsVirtualizing="True">
+                    <oxy:PlotView.Style>
+                        <Style TargetType="oxy:PlotView">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPendingRequest}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </oxy:PlotView.Style>
+                </oxy:PlotView>-->
+                <ui:ProgressRing Grid.Row="2" IsActive="{Binding IsPendingRequest}"/>
+            </Grid>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ApiNameRecordsViewModel}">
+        <Border Style="{StaticResource ProfileBorderStyle}">
+            <Grid ShowGridLines="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Aliases" Margin="0 0 0 10" Opacity=".7" VerticalAlignment="Center"/>
+                <Button Style="{StaticResource RefreshButtonStyle}"/>
+                <Expander Grid.Row="1" Margin="0 4 0 0">
+                    <Expander.Style>
+                        <Style TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
+                            <Setter Property="Header">
+                                <Setter.Value>
+                                    <TextBlock FontSize="12">
+                                        <Run>
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Setter Property="Text" Value="Show"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}}, Path=IsExpanded}"
+                                                                     Value="True">
+                                                            <Setter Property="Text" Value="Hide"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                        <Run Text="{Binding Records.Count, StringFormat='{}{0} records', Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsExpanded" Value="False">
+                                    <Setter Property="Opacity" Value=".7"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="1"/>
+                                </Trigger>
+                                <DataTrigger Binding="{Binding IsPendingRequest}" Value="True">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Expander.Style>
+                    <ScrollViewer MaxHeight="200" Margin="0 0 -8 0">
+                        <ItemsControl ItemsSource="{Binding Records}" Margin="0 0 10 0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="False">
+                                                        <Setter Property="Opacity" Value=".7"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding ChangedAt,StringFormat='{}{0:dd.MM.yyyy}'}" Grid.Column="1" Margin="10 0 0 0"
+                                               FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <TextBlock.ToolTip>
+                                                <ToolTip>
+                                                    <TextBlock Text="{Binding ChangedAt, StringFormat='Changed at {0}'}"/>
+                                                </ToolTip>
+                                            </TextBlock.ToolTip>
+                                    </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Expander>
+                <ui:ProgressRing Grid.Row="1" IsActive="{Binding IsPendingRequest}"/>
+            </Grid>
+        </Border>
+    </DataTemplate>
+    
     <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
-        <Grid>
+        <Grid Margin="-10" ShowGridLines="False">
+            <!--<Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <StackPanel>
-                <Border>
-                    <StackPanel DataContext="{Binding Player}">
-                        <StackPanel Orientation="Horizontal">
-                            <Image Style="{StaticResource FlagImageStyle}"/>
-                            <Image Style="{StaticResource AvatarImageStyle}" Margin="10 0"/>
-                            <TextBlock Text="{Binding LoginWithClan}"/>
+            </Grid.ColumnDefinitions>-->
+
+            <TextBlock Text="Hide (Esc)" ToolTip="Click Escape button on keyboard" Opacity=".5" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 0 10 0"/>
+
+            <TabControl Grid.Column="1" Grid.ColumnSpan="2" Width="700" Height="400" Background="Transparent">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
+                        <Setter Property="FontSize" Value="14"/>
+                    </Style>
+                </TabControl.Resources>
+                <TabItem Width="{Binding ElementName=TitleBlock, Path=ActualWidth}" IsHitTestVisible="False"/>
+                <TabItem Width="20" IsHitTestVisible="False"/>
+                <TabItem Header="Main" IsSelected="True">
+                    <Grid ShowGridLines="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Border Style="{StaticResource ProfileBorderStyle}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Style="{StaticResource HeaderTextBlockStyle}" Text="Note"/>
+                                    <TextBox Text="{Binding Player.Note.Text}" MaxLength="{Binding Player.Note.MaxLength}"
+                                             FontSize="13" Width="190" HorizontalAlignment="Left" TextWrapping="Wrap"
+                                     Grid.Row="1" BorderThickness="0" Padding="2"
+                                     ui:ControlHelper.PlaceholderText="Write note...">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="False">
+                                                        <Setter Property="Opacity" Value=".7"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsFocused" Value="False">
+                                                        <Setter Property="Background" Value="Transparent"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsFocused" Value="True">
+                                                        <Setter Property="BorderThickness" Value="0"/>
+                                                        <Setter Property="Opacity" Value="1"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource ProfileBorderStyle}">
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="30"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Ratings" Opacity=".7"/>
+                                        <TextBlock Text="R" ToolTip="Rating" Opacity=".7" Grid.Column="1"/>
+                                        <TextBlock Text="G" ToolTip="Games" Opacity=".7"  Grid.Column="2"/>
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{Binding Player.ratings}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ShowGridLines="False">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="40"/>
+                                                        <ColumnDefinition Width="30"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Key}" Margin="0 0 10 0" ToolTip="{Binding Key}"/>
+                                                    <TextBlock Text="{Binding Value.DisplayedRating}" Grid.Column="1"/>
+                                                    <TextBlock Text="{Binding Value.number_of_games}" Grid.Column="2"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <ContentControl Content="{Binding AvatarsViewModel}" IsTabStop="False"/>
+                            <ContentControl Content="{Binding ApiNameRecordsViewModel}" IsTabStop="False"/>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Rating charts" Content="{Binding ApiRatingsViewModel}">
+                    <TabItem.Style>
+                        <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="Content" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TabItem.Style>
+                </TabItem>
+            </TabControl>
+            
+            <Border x:Name="TitleBlock" Style="{StaticResource ProfileBorderStyle}" Margin="10 0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <StackPanel DataContext="{Binding Player}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Style="{StaticResource FlagImageStyle}"/>
+                        <Image Style="{StaticResource AvatarImageStyle}" Margin="10 0"/>
+                        <TextBlock Text="{Binding LoginWithClan}"/>
                     </StackPanel>
-                </Border>
-                <ContentControl Content="{Binding AvatarsViewModel}" IsTabStop="False">
-                    
-                </ContentControl>
-            </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

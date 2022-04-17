@@ -8,8 +8,14 @@ using System.Windows.Media.Imaging;
 
 namespace beta.ViewModels
 {
-    public abstract class ApiPlayerViewModel : Base.ViewModel
+    public abstract class ApiViewModel : Base.ViewModel
     {
+        protected bool IsRefreshing = false;
+
+        public int PlayerId { get; private set; }
+
+        public ApiViewModel(int playerId) => PlayerId = playerId;
+
         #region IsPendingRequest
         private bool _IsPendingRequest;
         public bool IsPendingRequest
@@ -19,13 +25,27 @@ namespace beta.ViewModels
         }
         #endregion
 
-        public abstract void RunRequest();
+        public async Task DoRequestAsync()
+        {
+            IsPendingRequest = true;
+            await RequestTask();
+            IsPendingRequest = false;
+            if (IsRefreshing) IsRefreshing = false;
+        }
+
+        public void RunRequest() => Task.Run(() => DoRequestAsync());
+
+        protected abstract Task RequestTask();
 
         #region RefreshCommand
         private ICommand _RefreshCommand;
         public ICommand RefreshCommand => _RefreshCommand ??= new LambdaCommand(OnRefreshCommand, CanRefreshCommand);
         private bool CanRefreshCommand(object parameter) => !IsPendingRequest;
-        private void OnRefreshCommand(object parameter) => RunRequest(); 
+        protected virtual void OnRefreshCommand(object parameter)
+        {
+            IsRefreshing = true;
+            RunRequest();
+        } 
         #endregion
     }
     internal class AvatarModel
@@ -53,15 +73,15 @@ namespace beta.ViewModels
         public string Filename { get; set; }
         public DateTime AssignedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public DateTime? ExpiresAT { get; set; }
+        public DateTime? ExpiresAt { get; set; }
         public bool IsSelected { get; set; }
     }
-    internal class AvatarsViewModel : ApiPlayerViewModel
+    internal class AvatarsViewModel : ApiViewModel
     {
         public EventHandler<AvatarModel> AvatarChanged;
         public int[] AvatarsIds { get; private set; }
 
-        public AvatarsViewModel(params int[] avatarsIds)
+        public AvatarsViewModel(int playerId, params int[] avatarsIds) : base(playerId)
         {
             AvatarsIds = avatarsIds;
             RunRequest();
@@ -91,16 +111,7 @@ namespace beta.ViewModels
         }
         #endregion
 
-        public override void RunRequest()
-        {
-            Task.Run(async () =>
-            {
-                IsPendingRequest = true;
-                await Request();
-                IsPendingRequest = false;
-            });
-        }
-        private async Task Request()
+        protected override async Task RequestTask()
         {
             var ids = AvatarsIds;
             var avatars = new AvatarModel[ids.Length];
@@ -114,7 +125,7 @@ namespace beta.ViewModels
                 {
                     AssignedAt = result1.Data.CreateTime,
                     UpdatedAt = result1.Data.UpdateTime,
-                    ExpiresAT = result1.Data.ExpiresAt,
+                    ExpiresAt = result1.Data.ExpiresAt,
                     IsSelected = result1.Data.IsSelected
                 };
                 var avatarId = result1.Data.Relations["avatar"].Data[0].Id;

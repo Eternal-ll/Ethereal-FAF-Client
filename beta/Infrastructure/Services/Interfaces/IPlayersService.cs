@@ -15,6 +15,10 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
 
+        public event EventHandler<PlayerInfoMessage> PlayerUpdated;
+        
+        public PlayerInfoMessage[] CachedPlayers { get; }
+
         public ObservableCollection<PlayerInfoMessage> Players { get; }
         public PlayerInfoMessage Me { get; }
 

@@ -2,6 +2,7 @@
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
@@ -10,6 +11,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public void Test();
 
         public IrcState State { get; set; }
+        public List<string> Channels { get; }
 
         #region Events
         public event EventHandler<IrcState> StateChanged;
@@ -73,6 +75,7 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public void Join(string channel, string key = null);
         public void SetTopic(string channel, string topic = null);
+        public void GetChannelUsers(string channel);
 
         public void SendMessage(string channelOrUser, string message);
         public void SendInvite(string user, string channel);

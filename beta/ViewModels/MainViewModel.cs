@@ -92,18 +92,6 @@ namespace beta.ViewModels
                 }
             }
         }
-
-        private void OnLogoutRequested(object sender, EventArgs e)
-        {
-            Settings.Default.PlayerId = 0;
-            Settings.Default.PlayerNick = null;
-            Settings.Default.access_token = null;
-            Settings.Default.refresh_token = null;
-            Settings.Default.id_token = null;
-            Settings.Default.AutoJoin = false;
-            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location[..^3] + "exe");
-            Application.Current.Shutdown();
-        }
         #endregion
 
         #region Window Properties
@@ -118,5 +106,22 @@ namespace beta.ViewModels
         #endregion
 
         #endregion
+
+        private void OnLogoutRequested(object sender, EventArgs e)
+        {
+            Settings.Default.PlayerId = 0;
+            Settings.Default.PlayerNick = null;
+            Settings.Default.access_token = null;
+            Settings.Default.refresh_token = null;
+            Settings.Default.id_token = null;
+            Settings.Default.AutoJoin = false;
+            Restart();
+        }
+
+        private void Restart()
+        {
+            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location[..^3] + "exe");
+            Application.Current.Shutdown();
+        }
     }
 }

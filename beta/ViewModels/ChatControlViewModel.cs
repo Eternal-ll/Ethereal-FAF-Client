@@ -23,8 +23,8 @@ namespace beta.ViewModels
                 IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
             }
         }
-        private ChatPreviewViewModel ChatPreviewViewModel;
-        private ChatViewModel ChatViewModel;
+        //private ChatPreviewViewModel ChatPreviewViewModel;
+        //private ChatViewModel ChatViewModel;
 
         #region IsConnected
         private bool _IsConnected;
@@ -35,21 +35,21 @@ namespace beta.ViewModels
             {
                 if (Set(ref _IsConnected, value))
                 {
-                }
-                if (value)
-                {
-                    CurrentViewModel = ChatViewModel ??= new();
-                }
-                else
-                {
-                    CurrentViewModel = ChatPreviewViewModel ??= new();
+                    if (value)
+                    {
+                        CurrentViewModel = new ChatViewModel();
+                    }
+                    else
+                    {
+                        CurrentViewModel = new ChatPreviewViewModel();
+                    }
                 }
             }
         }
         #endregion
 
         #region CurrentViewModel
-        private ViewModel _CurrentViewModel;
+        private ViewModel _CurrentViewModel = new ChatPreviewViewModel();
         public ViewModel CurrentViewModel
         {
             get => _CurrentViewModel;

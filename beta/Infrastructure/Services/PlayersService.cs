@@ -3,6 +3,7 @@ using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,32 +16,35 @@ namespace beta.Infrastructure.Services
         public event EventHandler<PlayerInfoMessage> MeReceived;
         public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerUpdated;
 
         #region Properties
 
         #region Services
 
         private readonly ISessionService SessionService;
+        private readonly IGamesService GamesService;
         private readonly IAvatarService AvatarService;
         private readonly INoteService NoteService;
 
         #endregion
 
         #region Players
-
-        public readonly ObservableCollection<PlayerInfoMessage> _Players = new();
-        public ObservableCollection<PlayerInfoMessage> Players => _Players;
+        public ObservableCollection<PlayerInfoMessage> Players { get; } = new();
 
         private readonly Dictionary<int, int> PlayerUIDToId = new();
         private readonly Dictionary<string, int> PlayerLoginToId = new();
-
+        //private readonly List<PlayerInfoMessage> _Players = new();
 
         #endregion
 
         private List<int> FriendsIds { get; set; } = new();
         private List<int> FoesIds { get; set; } = new();
-
+        
+        public PlayerInfoMessage[] CachedPlayers => throw new NotImplementedException();
         #endregion
+
+        public PlayerInfoMessage Me { get; private set; }
 
         #region Ctor
 
@@ -52,6 +56,9 @@ namespace beta.Infrastructure.Services
             SessionService = sessionService;
             AvatarService = avatarService;
             NoteService = noteService;
+
+            //GamesService = App.Services.GetService<IGamesService>();
+            //GamesService.PlayersLeftFromGame += GamesService_PlayersLeftFromGame;
 
             sessionService.PlayerReceived += OnPlayerReceived;
             sessionService.SocialDataReceived += OnNewSocialDataReceived;
@@ -73,6 +80,22 @@ namespace beta.Infrastructure.Services
             };
         }
 
+        private void GamesService_PlayersLeftFromGame(object sender, string[] e)
+        {
+            for (int i = 0; i < e.Length; i++)
+            {
+                if (TryGetPlayer(e[i], out var player))
+                {
+                    player.Game = null;
+                    OnPlayerUpdated(player);
+                }
+                else
+                {
+                    // TODO LOG
+                }
+            }
+        }
+
         private void OnPlayersReceived(object sender, PlayerInfoMessage[] e) => Task.Run(async () =>
         {
             foreach (var player in e) await HandlePlayerData(player);
@@ -80,8 +103,6 @@ namespace beta.Infrastructure.Services
 
 
         #endregion
-
-        public PlayerInfoMessage Me { get; private set; }
 
         #region Event listeners
         private void OnWelcomeDataReceived(object sender, WelcomeData e)
@@ -133,7 +154,7 @@ namespace beta.Infrastructure.Services
         }
         private async Task HandlePlayerData(PlayerInfoMessage player)
         {
-            var players = _Players;
+            var players = Players;
             #region Add note about player
 
             if (NoteService.TryGet(player.login, out var note))
@@ -187,6 +208,7 @@ namespace beta.Infrastructure.Services
                 //Task.Run(async () => await AvatarService.UpdatePlayerAvatarAsync(player, player.Avatar));
 
                 players.Add(player);
+                //_Players.Add(player);
                 PlayerLoginToId.Add(player.login.ToLower(), count);
                 PlayerUIDToId.Add(player.id, count);
             }
@@ -195,13 +217,17 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-
         public PlayerInfoMessage GetPlayer(string login)
         {
             if (string.IsNullOrEmpty(login)) return null;
 
             if (PlayerLoginToId.TryGetValue(login.ToLower(), out var id))
             {
+                // TODO VULNERABLE PLACE WITH NO PLAYERS
+                if (Players.Count < id)
+                {
+                    return null;
+                }
                 return Players[id];
             }
 
@@ -230,7 +256,7 @@ namespace beta.Infrastructure.Services
         public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH,
             PlayerRelationShip? relationShip = null)
         {
-            var enumerator = _Players.GetEnumerator();
+            var enumerator = Players.GetEnumerator();
 
             if (string.IsNullOrWhiteSpace(filter))
                 while (enumerator.MoveNext())
@@ -257,7 +283,7 @@ namespace beta.Infrastructure.Services
                         else yield return enumerator.Current;
         }
 
-        private bool IsClanMate(string clan) => Equals(Me.clan, clan);
+        private bool IsClanMate(string clan) => Me.clan != null && Me.clan == clan;
         public bool IsClanMate(PlayerInfoMessage player) => IsClanMate(player.clan);//player.clan != null ? IsClanMate(player.clan) : false;
 
         private bool IsFriend(int id)
@@ -367,5 +393,11 @@ namespace beta.Infrastructure.Services
             }
             return done;
         }
+
+        protected virtual void OnPlayerUpdated(PlayerInfoMessage e) => PlayerUpdated?.Invoke(this, e);
+        protected virtual void OnPlayerReceived(PlayerInfoMessage e) => PlayerReceived?.Invoke(this, e);
+        
+        //protected virtual void OnPlayersUpdated(PlayerInfoMessage[] e) => 
+        //protected virtual void OnPlayersReceived(PlayerInfoMessagep[] e) =>
     }
 }

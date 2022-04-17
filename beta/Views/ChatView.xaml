@@ -407,7 +407,7 @@
                     </ListBox.Resources>
                         <ListBox.ItemTemplate>
                             <ItemContainerTemplate>
-                                <Grid Margin="0 0 0 4" ShowGridLines="False">
+                                <Grid Margin="10 0 0 4" ShowGridLines="False">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="2*"/>
@@ -455,6 +455,9 @@
                                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
                                                                      Value="False">
                                                         <Setter Property="Opacity" Value=".7"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -766,7 +769,7 @@
 
             <!--#region Channel users -->
             <ListBox Grid.Row="2"
-                     MinWidth="300"
+                     MinWidth="400"
                     ItemsSource="{Binding SelectedChannelPlayersView}"
                         SelectedItem="{Binding SelectedUser}"
                     Background="Transparent"

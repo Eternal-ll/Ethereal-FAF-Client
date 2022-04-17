@@ -13,7 +13,7 @@
         ui:ThemeManager.RequestedTheme="Dark">
     <Window.Resources>
         <SolidColorBrush x:Key="ContentDialogBackground" Color="#FF1b1b1b"/>
-        <sys:Double x:Key="ContentDialogMaxWidth">1000</sys:Double>
+        <sys:Double x:Key="ContentDialogMaxWidth">1300</sys:Double>
     </Window.Resources>
     <view:MainView x:Name="MainView"/>
 </Window>

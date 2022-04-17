@@ -955,12 +955,22 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button
-                    Style="{StaticResource LobbyContainerBtnStyle}"
-                    Command="{StaticResource JoinGameCommand}"
-                    CommandParameter="{Binding}"
-                    HorizontalAlignment="Left"
-                    Content="Join"/>
+                <Button CommandParameter="{Binding}"
+                    HorizontalAlignment="Left">
+                    <Button.Style>
+                        <Style BasedOn="{StaticResource LobbyContainerBtnStyle}" TargetType="Button">
+                            <Setter Property="Command" Value="{StaticResource JoinGameCommand}"/>
+                            <Setter Property="Content" Value="Join"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding State}" Value="2">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Content" Value="Watch (Not implemented yet)"/>
+                                    <Setter Property="ToolTip" Value="Not implemented yet"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <!--<Button
                     Background="Transparent"
                     Grid.Column="2"

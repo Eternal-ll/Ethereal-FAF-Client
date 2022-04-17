@@ -745,7 +745,7 @@
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
-        <Grid ShowGridLines="False" Margin="10 0 0 0" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
+        <Grid ShowGridLines="False" Background="Transparent" Margin="10 0 0 0" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"/>
                 <ColumnDefinition Width="20"/>

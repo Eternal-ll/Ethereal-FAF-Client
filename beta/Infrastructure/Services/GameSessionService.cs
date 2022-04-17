@@ -241,11 +241,11 @@ namespace beta.Infrastructure.Services
             }
             else
             {
-                if (e.Contains("\"candidate\"", StringComparison.OrdinalIgnoreCase))
-                {
-                    IceMessagesQueue.Clear();
-                }
-                IceMessagesQueue.Add(e);
+                //if (e.Contains("\"candidate\"", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    IceMessagesQueue.Clear();
+                //}
+                //IceMessagesQueue.Add(e);
             }
         }
 

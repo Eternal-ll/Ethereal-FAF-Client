@@ -150,5 +150,11 @@ namespace beta.Models.IRC
         /// <param name="minimumUsers"></param>
         /// <returns></returns>
         internal static string List(int minimumUsers = 2) => "LIST >" + minimumUsers;
+        /// <summary>
+        /// Get users of specific channel
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <returns></returns>
+        internal static string Names(string channel) => "NAMES " + (channel.StartsWith('#') ? channel : '#' + channel);
     }
 }

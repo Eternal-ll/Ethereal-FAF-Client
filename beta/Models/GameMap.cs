@@ -51,7 +51,10 @@ namespace beta.Models
         {
             get
             {
-                if (ImageSource is null) return null;
+                if (ImageSource is null)
+                {
+                    return App.Current.Resources["QuestionIcon"] as ImageSource;
+                }
                 if (ImageSource.Length == 0)
                 {
                     return App.Current.Resources["QuestionIcon"] as ImageSource;

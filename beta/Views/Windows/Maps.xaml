@@ -230,6 +230,7 @@
                     </Style>
                 </WrapPanel.Resources>
                 <Button Content="Search" Click="Button_Click"/>
+                <Button Content="Export maps" Command="{StaticResource ExportCommand}" CommandParameter="{Binding LastData}"/>
                 <!--<CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>-->
 
                 <CheckBox IsChecked="{Binding IsSortEnabled}" Margin="10 0 -14 0" Content="Enable sort"/>

@@ -70,7 +70,7 @@
                     <StackPanel Orientation="Horizontal" Visibility="{Binding LoadingInputVisibility}">
                         <ui:ProgressRing IsActive="True"/>
                         <TextBlock Text="{Binding State}" Margin="10 0 0 0" Opacity=".5" Width="150" VerticalAlignment="Center"/>
-                        <Button Content="Cancel" Padding="6 2" Command="{Binding CancelAuthorizationCommand}" Style="{StaticResource LinkButtonStyle}"/>
+                        <!--<Button Content="Cancel" Padding="6 2" Command="{Binding CancelAuthorizationCommand}" Style="{StaticResource LinkButtonStyle}"/>-->
                     </StackPanel>
 
                     <StackPanel>

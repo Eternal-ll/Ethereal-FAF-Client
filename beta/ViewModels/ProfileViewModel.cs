@@ -1,9 +1,9 @@
 ﻿using beta.Models.API;
 using beta.Models.Server;
+using beta.Models.Server.Enums;
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -32,7 +32,18 @@ namespace beta.ViewModels
             {
                 throw;
             }
-            return null;
+        }
+        public static async Task<T> Request(string requestUrl)
+        {
+            try
+            {
+                var result = await JsonSerializer.DeserializeAsync<T>(await HttpClient.GetStreamAsync(requestUrl));
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 
@@ -55,6 +66,24 @@ namespace beta.ViewModels
         }
         #endregion
 
+        #region ApiRatingsViewModel
+        private ApiRatingsViewModel _ApiRatingsViewModel;
+        public ApiRatingsViewModel ApiRatingsViewModel
+        {
+            get => _ApiRatingsViewModel;
+            set => Set(ref _ApiRatingsViewModel, value);
+        }
+        #endregion
+
+        #region ApiNameRecordsViewModel
+        private ApiNameRecordsViewModel _ApiNameRecordsViewModel;
+        public ApiNameRecordsViewModel ApiNameRecordsViewModel
+        {
+            get => _ApiNameRecordsViewModel;
+            set => Set(ref _ApiNameRecordsViewModel, value);
+        }
+        #endregion
+
         #region ApiPlayerData
         private ApiPlayerData _ApiPlayerData;
         public ApiPlayerData ApiPlayerData
@@ -68,9 +97,13 @@ namespace beta.ViewModels
                     {
                         if (value.Avatars is not null && value.Avatars.Data.Count > 0)
                         {
-                            AvatarsViewModel = new(value.Avatars.Data
+                            AvatarsViewModel = new(Player.id, value.Avatars.Data
                                 .Select(x=>x.Id)
                                 .ToArray());
+                        }
+                        if (value.Names is not null && value.Names.Data.Count > 0)
+                        {
+                            ApiNameRecordsViewModel = new(Player.id);
                         }
                     }
                 }
@@ -84,6 +117,13 @@ namespace beta.ViewModels
             {
                 var result = await ApiRequest<ApiUniversalResult<ApiPlayerData>>.RequestWithId("https://api.faforever.com/data/player/", Player.id);
                 ApiPlayerData = result.Data;
+
+                List<RatingType> ratings = new();
+                foreach (var rating in Player.ratings.Keys)
+                {
+                    ratings.Add(Enum.Parse<RatingType>(rating, true));
+                }
+                ApiRatingsViewModel = new ApiRatingsViewModel(Player.id, ratings.ToArray());
             }
             catch (Exception ex)
             {

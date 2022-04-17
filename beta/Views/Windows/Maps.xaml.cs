@@ -751,6 +751,8 @@ namespace beta.Views.Windows
             RequestThread.Start();
 
         }
+
+        public ApiMapData[] LastData { get; private set; }
         private void Request()
         {
             var query = CurrentQuery;
@@ -835,7 +837,10 @@ namespace beta.Views.Windows
                             map.MapLargePreview = App.Current.Resources["QuestionIcon"] as ImageSource;
                         });
                     }
+
                 }
+                LastData = data.Data;
+                OnPropertyChanged(nameof(LastData));
 
                 Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
                 AvailablePagesCount = data.Meta.Page.AvaiablePagesCount;
@@ -904,7 +909,6 @@ namespace beta.Views.Windows
 
         private void OnShowBigPreviewCommand(object parameter) => BigPreviewVisibility = Visibility.Visible;
         #endregion
-
 
         #endregion
 

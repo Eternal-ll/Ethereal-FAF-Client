@@ -58,6 +58,13 @@ namespace beta.Infrastructure.Services
                 {
                     _IsAuthorized = value;
                     OnAuthorized(value);
+                    if (value)
+                    {
+                        if (Settings.Default.ConnectIRC)
+                        {
+                            //IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+                        }
+                    }
                 }
             }
         }
@@ -314,7 +321,7 @@ namespace beta.Infrastructure.Services
 
             if (Settings.Default.ConnectIRC)
             {
-                //IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+                IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
             }
 
             //if (!IsAuthorized) IsAuthorized = true;

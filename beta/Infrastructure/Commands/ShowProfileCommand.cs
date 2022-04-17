@@ -43,6 +43,8 @@ namespace beta.Infrastructure.Commands
         private void Dialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
         {
             sender.Closed -= Dialog_Closed;
+            ((ProfileViewModel)Dialog.Content).Dispose();
+            Dialog.Content = null;
             Dialog = null;
         }
 

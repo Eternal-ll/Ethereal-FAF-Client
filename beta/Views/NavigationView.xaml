@@ -103,11 +103,11 @@
                 <ui:NavigationViewItem Tag="Downloads" Icon="{StaticResource DownloadsIcon}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Downloads"/>
-                        <ContentControl HorizontalAlignment="Right" Content="{Binding LatestDownloadViewModel}">
+                        <!--<ContentControl HorizontalAlignment="Right" Content="{Binding LatestDownloadViewModel}">
                             <ContentControl.RenderTransform>
                                 <TranslateTransform Y="-10"/>
                             </ContentControl.RenderTransform>
-                        </ContentControl>
+                        </ContentControl>-->
                     </StackPanel>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
