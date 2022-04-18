@@ -8,41 +8,5 @@
         mc:Ignorable="d"
         ShowInTaskbar="False"
         Title="ProfileWindow" Height="450" Width="800">
-    <Window.Resources>
-        <DataTemplate DataType="{x:Type vm:AvatarsViewModel}">
-            <Border>
-                <StackPanel>
-                    <TextBlock Text="Avatars"/>
-                    <ListBox ItemsSource="{Binding Avatars}" SelectedItem="{Binding SelectedAvatar}" HorizontalAlignment="Left">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Image Stretch="None">
-                                    <Image.Source>
-                                        <BitmapImage DecodePixelHeight="20" DecodePixelWidth="40"
-                                                     UriSource="{Binding Url}"/>
-                                    </Image.Source>
-                                </Image>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <ContentControl Content="{Binding SelectedAvatar}">
-                        
-                    </ContentControl>
-                </StackPanel>
-            </Border>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
-            <Grid>
-                <ContentControl Content="{Binding AvatarsViewModel}"/>
-            </Grid>
-        </DataTemplate>
-    </Window.Resources>
-    <ContentControl Content="{Binding}">
-        
-    </ContentControl>
+    <ContentControl Content="{Binding}"/>
 </Window>

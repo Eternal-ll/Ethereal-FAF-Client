@@ -299,11 +299,11 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.RichEdit.Core" Version="21.2.5" />
     <PackageReference Include="Downloader" Version="2.3.3" />
+    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>

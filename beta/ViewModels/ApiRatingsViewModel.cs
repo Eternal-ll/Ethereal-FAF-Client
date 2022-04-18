@@ -1,8 +1,5 @@
 ﻿using beta.Models.API;
 using beta.Models.Server.Enums;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -43,14 +40,14 @@ namespace beta.ViewModels
         }
         #endregion
 
-        #region PlotModel
-        private PlotModel _PlotModel;
-        public PlotModel PlotModel
-        {
-            get => _PlotModel;
-            set => Set(ref _PlotModel, value);
-        }
-        #endregion
+        //#region PlotModel
+        //private PlotModel _PlotModel;
+        //public PlotModel PlotModel
+        //{
+        //    get => _PlotModel;
+        //    set => Set(ref _PlotModel, value);
+        //}
+        //#endregion
 
         public ApiGamePlayerStats[] SelectedRatingData => Data[SelectedRatingType];
 
@@ -96,43 +93,7 @@ namespace beta.ViewModels
             Data[SelectedRatingType] = data.ToArray();
             OnPropertyChanged(nameof(SelectedRatingData));
 
-            PlotModel model = new();
-            LineSeries series = new()
-            {
-                ItemsSource = data,
-                DataFieldX = "ScoreDateTime",
-                DataFieldY = "RatingAfter",
-                //Color = OxyColor.Parse("#4CAF50"),
-                //MarkerSize = 1,
-                //MarkerFill = OxyColor.Parse("#FFFFFFFF"),
-                //MarkerStroke = OxyColor.Parse("#4CAF50"),
-                //MarkerStrokeThickness = 1.5,
-                SelectionMode = SelectionMode.Single,
-                //LineJoin = LineJoin.Round,
-                CanTrackerInterpolatePoints = false,
-                //MarkerType = MarkerType.Diamond,
-                //StrokeThickness = 1,
-            };
-            model.Series.Add(series);
-
-            var dateTimeAxis = new DateTimeAxis
-            {
-                Title = "Date",
-                Position = AxisPosition.Bottom,
-                IntervalType = DateTimeIntervalType.Days,
-                IntervalLength = 50,
-            };
-            model.Axes.Add(dateTimeAxis);
-
-            var valueAxis = new LinearAxis
-            {
-                Title = "Rating",
-                Position = AxisPosition.Left,
-                Minimum = data[0].RatingBefore,
-                Maximum = data[^1].RatingAfter,
-            };
-            model.Axes.Add(valueAxis);
-            PlotModel = model;
+            
         }
     }
 }

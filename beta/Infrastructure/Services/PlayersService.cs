@@ -3,7 +3,6 @@ using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

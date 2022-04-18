@@ -164,35 +164,33 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
 
-                <ContentControl Grid.Row="2" Grid.ColumnSpan="2">
 
-                    <oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
-                        <oxy:Plot.DefaultTrackerTemplate>
-                            <ControlTemplate>
-                                <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
+                <!--<oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
+                    <oxy:Plot.DefaultTrackerTemplate>
+                        <ControlTemplate>
+                            <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
                                                 Background="Black">
-                                    <!--<oxy:TrackerControl.Background>
+                                --><!--<oxy:TrackerControl.Background>
                                     <LinearGradientBrush EndPoint="0,1">
                                         <GradientStop Color="#f0e0e0ff" />
                                         <GradientStop Offset="1" Color="#f0ffffff" />
                                     </LinearGradientBrush>
-                                </oxy:TrackerControl.Background>-->
-                                    <oxy:TrackerControl.Content>
-                                        <TextBlock Text="{Binding Position}" Margin="7" />
-                                    </oxy:TrackerControl.Content>
-                                </oxy:TrackerControl>
-                            </ControlTemplate>
-                        </oxy:Plot.DefaultTrackerTemplate>
-                        <oxy:Plot.Axes>
-                            <oxy:LinearAxis Position="Left" Title="Rating"/>
-                            <oxy:DateTimeAxis Position="Bottom"/>
-                        </oxy:Plot.Axes>
-                        <oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding SelectedRatingData}"
+                                </oxy:TrackerControl.Background>--><!--
+                                <oxy:TrackerControl.Content>
+                                    <TextBlock Text="{Binding Position}" Margin="7" />
+                                </oxy:TrackerControl.Content>
+                            </oxy:TrackerControl>
+                        </ControlTemplate>
+                    </oxy:Plot.DefaultTrackerTemplate>
+                    <oxy:Plot.Axes>
+                        <oxy:LinearAxis Position="Left" Title="Rating"/>
+                        <oxy:DateTimeAxis Position="Bottom"/>
+                    </oxy:Plot.Axes>
+                    <oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding SelectedRatingData}"
                                 DataFieldX="ScoreDateTime" DataFieldY="RatingAfter"
                                      MarkerType="Circle" LabelMargin="0" MarkerSize="2"
                                     MarkerFill="Black" CanTrackerInterpolatePoints="False"/>
-                    </oxy:Plot>
-                </ContentControl>
+                </oxy:Plot>-->
                 <!--<oxy:PlotView Grid.Row="2" Grid.RowSpan="2" Model="{Binding PlotModel}"
                               Background="Transparent"
                               VirtualizingPanel.IsVirtualizing="True">
@@ -392,7 +390,7 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Rating charts" Content="{Binding ApiRatingsViewModel}">
+                <TabItem Header="Rating charts">
                     <TabItem.Style>
                         <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
                             <Style.Triggers>
@@ -402,6 +400,7 @@
                             </Style.Triggers>
                         </Style>
                     </TabItem.Style>
+
                 </TabItem>
             </TabControl>
             
@@ -414,6 +413,37 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
+            <oxy:PlotView Width="1000" Height="500" Model="{Binding ApiRatingsViewModel.PlotModel}"
+                              Background="Transparent"
+                              VirtualizingPanel.IsVirtualizing="True">
+            </oxy:PlotView>
+            <!--<oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
+                    <oxy:Plot.DefaultTrackerTemplate>
+                        <ControlTemplate>
+                            <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
+                                                Background="Gray">
+                                
+            --><!--<oxy:TrackerControl.Background>
+                                    <LinearGradientBrush EndPoint="0,1">
+                                        <GradientStop Color="#f0e0e0ff" />
+                                        <GradientStop Offset="1" Color="#f0ffffff" />
+                                    </LinearGradientBrush>
+                                </oxy:TrackerControl.Background>--><!--
+            
+                                <oxy:TrackerControl.Content>
+                                    <TextBlock Text="{Binding Position}" Margin="7" />
+                                </oxy:TrackerControl.Content>
+                            </oxy:TrackerControl>
+                        </ControlTemplate>
+                    </oxy:Plot.DefaultTrackerTemplate>
+                    <oxy:Plot.Axes>
+                        <oxy:LinearAxis Position="Left" Title="Rating"/>
+                        <oxy:DateTimeAxis Position="Bottom"/>
+                    </oxy:Plot.Axes>
+                <oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding ApiRatingsViewModel.SelectedRatingData}"
+                                DataFieldX="ScoreDateTime" DataFieldY="RatingAfter"
+                                    MarkerFill="Black" CanTrackerInterpolatePoints="False"/>
+                </oxy:Plot>-->
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
