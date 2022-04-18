@@ -1,11 +1,10 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services
@@ -101,8 +100,12 @@ namespace beta.Infrastructure.Services
             }
         }
 
+        private readonly ConcurrentDictionary<Uri, byte[]> Cache = new();
+
         public async Task<byte[]> GetBitmapSource(Uri uri, Folder folder)
         {
+            if (Cache.TryGetValue(uri, out var cache)) return cache;
+
             var cacheFolder = App.GetPathToFolder(folder);
             // TODO do we need this check so often?
             if (!Directory.Exists(cacheFolder))
@@ -112,27 +115,27 @@ namespace beta.Infrastructure.Services
 
             if (File.Exists(localFilePath))
             {
-                return await File.ReadAllBytesAsync(localFilePath);
+                return Cache.GetOrAdd(uri, await File.ReadAllBytesAsync(localFilePath));
             }
             else
             {
-                byte[] data = null;
                 try
                 {
                     WebRequest request = WebRequest.Create(uri);
                     using var response = await request.GetResponseAsync();
                     using MemoryStream ms = new();
                     await response.GetResponseStream().CopyToAsync(ms);
-                    data = ms.ToArray();
+                    var data = ms.ToArray();
 
                     using FileStream filestream = new(localFilePath, FileMode.Create);
                     await filestream.WriteAsync(data);
+                    return Cache.GetOrAdd(uri, data);
                 }
                 catch(Exception ex)
                 {
-                    data = Array.Empty<byte>();
+                    return Array.Empty<byte>();
                 }
-                return data;
+                return null;
             }
         }
     }
