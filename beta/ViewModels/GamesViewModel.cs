@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,8 @@ namespace beta.ViewModels
         private readonly ISocialService SocialService;
         private readonly ISessionService SessionService;
         private readonly IGamesService GamesService;
+        private readonly IPlayersService PlayersService;
+        private readonly IMapsService MapsService;
 
         private readonly object _lock = new();
         private Dispatcher Dispatcher => GamesViewSource.Dispatcher;
@@ -58,6 +61,8 @@ namespace beta.ViewModels
             SocialService = App.Services.GetService<ISocialService>();
             SessionService = App.Services.GetService<ISessionService>();
             GamesService = App.Services.GetService<IGamesService>();
+            PlayersService = App.Services.GetService<IPlayersService>();
+            MapsService = App.Services.GetService<IMapsService>();
 
             Games = new();
             GamesWithBlockedMap = new();
@@ -73,9 +78,9 @@ namespace beta.ViewModels
             HandleGames(GamesService.Games.ToArray());
 
             GamesService.NewGameReceived += OnNewGame;
-            GamesService.GamesReceived += OnGamesReceived;
             GamesService.GameUpdated += OnGameUpdated;
             GamesService.GameRemoved += OnGameRemoved;
+            GamesService.GameLaunched += OnGameLaunched;
 
 
             //Foes = SocialService.GetFoes;
@@ -623,52 +628,108 @@ namespace beta.ViewModels
             return false;
         }
 
+        private bool IsNotRequiredGame(GameInfoMessage game) => game.State != GameState && game.GameType != GameType && game.FeaturedMod != FeaturedMod.FAF;
+
+        private void OnGameLaunched(object sender, GameInfoMessage e)
+        {
+            if (e.GameType != GameType && e.FeaturedMod != FeaturedMod.FAF) return;
+
+            for (int i = 0; i < Games.Count; i++)
+            {
+                var cgame = Games[i];
+                if (cgame.uid == e.uid)
+                {
+                    Games.RemoveAt(i);
+                }
+            }
+        }
+
         private void OnGameRemoved(object sender, GameInfoMessage game)
         {
-            if (game.GameType != GameType || game.FeaturedMod != FeaturedMod.FAF) return;
+            if (IsNotRequiredGame(game)) return;
 
             for (int i = 0; i < Games.Count; i++)
             {
                 var cgame = Games[i];
                 if (cgame.uid == game.uid)
                 {
-                    cgame.Dispose();
                     Games.RemoveAt(i);
                 }
             }
         }
 
-        private void OnGameUpdated(object sender, GameInfoMessage game)
+        private IPlayer GetPlayer(string login)
         {
-            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
-
-            if (TryGetIndexOfGame(game.uid, out var id))
+            IPlayer player = PlayersService.GetPlayer(login);
+            if (player is null)
             {
-                Games[id] = game;
+                player = new UnknownPlayer()
+                {
+                    login = login
+                };
             }
+            return player;
         }
 
-        private void OnNewGame(object sender, GameInfoMessage game)
+        public void AddInGameTeams(GameInfoMessage game)
         {
-            if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) return;
-            
+            InGameTeam[] teams = new InGameTeam[game.teams.Count];
+
+            int j = 0;
+
+            foreach (var valuePair in game.teams)
+            {
+                var players = new IPlayer[valuePair.Value.Length];
+
+                for (int i = 0; i < valuePair.Value.Length; i++)
+                {
+                    players[i] = GetPlayer(valuePair.Value[i]);
+                }
+
+                teams[j] = new(valuePair.Key, players);
+                j++;
+            }
+
+            game.Teams = teams;
+        }
+
+        private async void HandleGameData(GameInfoMessage game)
+        {
+            // TODO
+            // 1. Optimize filling of in game teams
+            // 2. Fill host once, or re-fill if host instance is UnknownPlayer
+
+            AddInGameTeams(game);
+            game.Host = GetPlayer(game.host);
+
             if (TryGetIndexOfGame(game.uid, out var id))
             {
                 Games[id] = game;
             }
             else
             {
+                game.Map = await MapsService.GetGameMap(game.mapname);
                 Games.Add(game);
             }
         }
 
-        private void OnGamesReceived(object sender, GameInfoMessage[] e) => HandleGames(e);
+        private void OnGameUpdated(object sender, GameInfoMessage game)
+        {
+            if (IsNotRequiredGame(game)) return;
+            HandleGameData(game);
+        }
+
+        private void OnNewGame(object sender, GameInfoMessage game)
+        {
+            if (IsNotRequiredGame(game)) return;
+            HandleGameData(game);
+        }
         private void HandleGames(GameInfoMessage[] e)
         {
             var games = Games;
             foreach (var game in e)
             {
-                if (game.GameType != GameType || game.State != GameState || game.FeaturedMod != FeaturedMod.FAF) continue;
+                if (IsNotRequiredGame(game)) continue;
 
                 games.Add(game);
             }
@@ -679,7 +740,6 @@ namespace beta.ViewModels
             if (disposing)
             {
                 GamesService.NewGameReceived -= OnNewGame;
-                GamesService.GamesReceived -= OnGamesReceived;
                 GamesService.GameUpdated -= OnGameUpdated;
                 GamesService.GameRemoved -= OnGameRemoved;
                 GamesViewSource.Filter -= OnGameFilter;

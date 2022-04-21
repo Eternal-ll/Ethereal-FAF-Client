@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
@@ -15,7 +17,7 @@ namespace beta.Models.Server
         Neroxis = 2
     }
 
-    public struct InGameTeam
+    public class InGameTeam
     {
         public string Name => Number switch
         {
@@ -55,7 +57,7 @@ namespace beta.Models.Server
             }
         }
 
-        public InGameTeam(int number, IPlayer[] players) : this()
+        public InGameTeam(int number, IPlayer[] players)
         {
             Number = number;
             Players = players;
@@ -155,6 +157,7 @@ namespace beta.Models.Server
             {
                 if (Set(ref _Map, value))
                 {
+                    MapUpdated = false;
                     OnPropertyChanged(nameof(Map.NewPreview));
                 }
             }
@@ -285,9 +288,12 @@ namespace beta.Models.Server
         }
         #endregion
 
+        public bool ReplayLessThanFiveMinutes => !launched_at.HasValue || (DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(launched_at.Value))
+                    .TotalSeconds > 300;
+
         public DateTime? CreatedTime { get; set; }
 
-        public PlayerInfoMessage Host { get; set; }
+        public IPlayer Host { get; set; }
 
         #endregion
 
@@ -316,23 +322,70 @@ namespace beta.Models.Server
         public FeaturedMod FeaturedMod { get; set; }
 
         public Dictionary<string, string> sim_mods { get; set; }
-
+        
+        #region MapUpdated  
+        private bool _MapUpdated;
+        public bool MapUpdated
+        {
+            get => _MapUpdated;
+            set
+            {
+                if (Set(ref _MapUpdated, value))
+                {
+                    if (value)
+                    {
+                        OnPropertyChanged(nameof(MapVersion));
+                        OnPropertyChanged(nameof(MapName));
+                        OnPropertyChanged(nameof(max_players));
+                    }
+                }
+            }
+        } 
+        #endregion
+         
         #region mapname
         private string _mapname;
         public string mapname
         {
             get => _mapname;
-            set
-            {
-                if (Set(ref _mapname, value))
-                {
-                    OnPropertyChanged(nameof(MapVersion));
-                    OnPropertyChanged(nameof(MapName));
-                    OnPropertyChanged(nameof(max_players));
-                }
-            }
+            set => MapUpdated = Set(ref _mapname, value);
         }
         #endregion
+
+
+
+        private ImageSource _AvatarImage;
+        public ImageSource AvatarImage
+        {
+            get
+            {
+                if (_AvatarImage is null)
+                {
+                    if (mapname.StartsWith("neroxis"))
+                    {
+                        _AvatarImage = App.Current.Resources["MapGenIcon"] as ImageSource;
+                    }
+                    else
+                    {
+                        var img = new BitmapImage();
+                        img.BeginInit();
+                        img.DecodePixelWidth = 100;
+                        img.DecodePixelHeight = 100;
+                        img.CacheOption = BitmapCacheOption.OnLoad;
+                        img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                        img.UriSource = new($"https://content.faforever.com/maps/previews/small/{mapname}.png");
+                        img.EndInit();
+                        img.DownloadFailed += (s, e) =>
+                        {
+                            _AvatarImage = App.Current.Resources["QuestionIcon"] as ImageSource;
+                            OnPropertyChanged(nameof(AvatarImage));
+                        };
+                        _AvatarImage = img;
+                    }
+                }
+                return _AvatarImage;
+            }
+        }
 
         public string map_file_path { get; set; }
         public string host { get; set; }

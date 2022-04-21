@@ -37,7 +37,7 @@ namespace beta.Models
         #endregion
 
         #region Text
-        private string _Text;
+        private string _Text = string.Empty;
         /// <summary>
         /// Note text
         /// </summary>

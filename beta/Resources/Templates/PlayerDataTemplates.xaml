@@ -12,15 +12,136 @@
 
         <MenuItem Header="Show profile" Command="{StaticResource ShowProfileCommand}" CommandParameter="{Binding}">
             <MenuItem.Icon>
-                <Path/>
+                <Path Data="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H9.18C9.6,1.84 10.7,1 12,1C13.3,1 14.4,1.84 14.82,3H19M12,3A1,1 0 0,0 11,4A1,1 0 0,0 12,5A1,1 0 0,0 13,4A1,1 0 0,0 12,3M7,7V5H5V19H19V5H17V7H7M12,9A2,2 0 0,1 14,11A2,2 0 0,1 12,13A2,2 0 0,1 10,11A2,2 0 0,1 12,9M8,17V16C8,14.9 9.79,14 12,14C14.21,14 16,14.9 16,16V17H8Z" />
             </MenuItem.Icon>
         </MenuItem>
 
-        <MenuItem Header="Join game" Command="{StaticResource JoinGameCommand}" CommandParameter="{Binding Game}">
+        <MenuItem>
+            <MenuItem.Style>
+                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
+                    <Setter Property="Header" Value="Send message"/>
+                    <Setter Property="Icon">
+                        <Setter.Value>
+                            <Path Data="M18 14H20V17H23V19H20V22H18V19H15V17H18V14M12 3C17.5 3 22 6.58 22 11C22 11.58 21.92 12.14 21.78 12.68C20.95 12.25 20 12 19 12C15.69 12 13 14.69 13 18L13.08 18.95L12 19C10.76 19 9.57 18.82 8.47 18.5C5.55 21 2 21 2 21C4.33 18.67 4.7 17.1 4.75 16.5C3.05 15.07 2 13.14 2 11C2 6.58 6.5 3 12 3Z" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+        </MenuItem>
+
+        <MenuItem>
+            <MenuItem.Style>
+                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
+                    <Setter Property="Header" Value="Invite to party"/>
+                    <Setter Property="Icon">
+                        <Setter.Value>
+                            <Path Data="M11 14H9C9 9.03 13.03 5 18 5V7C14.13 7 11 10.13 11 14M18 11V9C15.24 9 13 11.24 13 14H15C15 12.34 16.34 11 18 11M7 4C7 2.89 6.11 2 5 2S3 2.89 3 4 3.89 6 5 6 7 5.11 7 4M11.45 4.5H9.45C9.21 5.92 8 7 6.5 7H3.5C2.67 7 2 7.67 2 8.5V11H8V8.74C9.86 8.15 11.25 6.5 11.45 4.5M19 17C20.11 17 21 16.11 21 15S20.11 13 19 13 17 13.89 17 15 17.89 17 19 17M20.5 18H17.5C16 18 14.79 16.92 14.55 15.5H12.55C12.75 17.5 14.14 19.15 16 19.74V22H22V19.5C22 18.67 21.33 18 20.5 18Z" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Game, Converter={StaticResource IsNullConverter}}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+        </MenuItem>
+
+        <MenuItem CommandParameter="{Binding Game}">
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Game}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Game.State}" Value="1">
+                            <Setter Property="Header" Value="Join to game"/>
+                            <Setter Property="Command" Value="{StaticResource JoinGameCommand}"/>
+                            <Setter Property="Icon">
+                                <Setter.Value>
+                                    <Path Data="M21.4 7.5C22.2 8.3 22.2 9.6 21.4 10.3L18.6 13.1L10.8 5.3L13.6 2.5C14.4 1.7 15.7 1.7 16.4 2.5L18.2 4.3L21.2 1.3L22.6 2.7L19.6 5.7L21.4 7.5M15.6 13.3L14.2 11.9L11.4 14.7L9.3 12.6L12.1 9.8L10.7 8.4L7.9 11.2L6.4 9.8L3.6 12.6C2.8 13.4 2.8 14.7 3.6 15.4L5.4 17.2L1.4 21.2L2.8 22.6L6.8 18.6L8.6 20.4C9.4 21.2 10.7 21.2 11.4 20.4L14.2 17.6L12.8 16.2L15.6 13.3Z" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Game.State}" Value="2">
+                            <Setter Property="Header" Value="Watch replay"/>
+                            <Setter Property="Command" Value="{StaticResource WatchGameCommand}"/>
+                            <Setter Property="Icon">
+                                <Setter.Value>
+                                    <Path Data="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Header">
+                                <Setter.Value>
+                                    <Grid>
+                                        <TextBlock Text="Watch replay" Foreground="Gray"/>
+                                        <Border HorizontalAlignment="Right" Background="#111111"
+                                                Padding="2 0 4 1" CornerRadius="6">
+                                            <TextBlock Text="&lt;5 min" FontSize="12" Foreground="Red" FontWeight="DemiBold"/>
+                                            <Border.RenderTransform>
+                                                <TranslateTransform Y="-10" X="10"/>
+                                            </Border.RenderTransform>
+                                        </Border>
+                                    </Grid>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Icon">
+                                <Setter.Value>
+                                    <Path Fill="Gray" Data="M22.54 16.88L20.41 19L22.54 21.12L21.12 22.54L19 20.41L16.88 22.54L15.47 21.12L17.59 19L15.47 16.88L16.88 15.47L19 17.59L21.12 15.47L22.54 16.88M12 9C10.34 9 9 10.34 9 12S10.34 15 12 15 15 13.66 15 12 13.66 9 12 9M12 17C9.24 17 7 14.76 7 12S9.24 7 12 7 17 9.24 17 12C17 12.5 16.9 13 16.77 13.43C17.46 13.16 18.21 13 19 13C20.12 13 21.17 13.32 22.07 13.85C22.43 13.27 22.74 12.65 23 12C21.27 7.61 17 4.5 12 4.5S2.73 7.61 1 12C2.73 16.39 7 19.5 12 19.5C12.35 19.5 12.69 19.5 13.03 19.45C13 19.3 13 19.15 13 19C13 18.21 13.16 17.46 13.43 16.77C13 16.9 12.5 17 12 17Z" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+        </MenuItem>
+        
+        <MenuItem ToolTip="{Binding Note.Text}">
+            <MenuItem.Style>
+                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
+                    <Setter Property="Header" Value="Edit note"/>
+                    <Setter Property="Icon">
+                        <Setter.Value>
+                            <Path Data="M21.7,13.35L20.7,14.35L18.65,12.3L19.65,11.3C19.86,11.09 20.21,11.09 20.42,11.3L21.7,12.58C21.91,12.79 21.91,13.14 21.7,13.35M12,18.94L18.06,12.88L20.11,14.93L14.06,21H12V18.94M12,14C7.58,14 4,15.79 4,18V20H10V18.11L14,14.11C13.34,14.03 12.67,14 12,14M12,4A4,4 0 0,0 8,8A4,4 0 0,0 12,12A4,4 0 0,0 16,8A4,4 0 0,0 12,4Z" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Note.Text}" Value="{x:Null}">
+                            <Setter Property="Header" Value="Add note"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Note.Text}" Value="">
+                            <Setter Property="Header" Value="Add note"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+        </MenuItem>
+
+        <MenuItem>
+            <MenuItem.Style>
+                <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
+                    <Setter Property="Header" Value="Add to favorites"/>
+                    <Setter Property="Foreground" Value="Yellow"/>
+                    <Setter Property="Icon">
+                        <Setter.Value>
+                            <Path Fill="Yellow" Data="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,13.28L7.45,14.77L6.8,11.96L9,10.08L6.11,9.83L5,7.19L3.87,9.83L1,10.08L3.18,11.96L2.5,14.77L5,13.28Z" />
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -33,47 +154,67 @@
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                        <DataTrigger Binding="{Binding RelationShip}" Value="3">
                             <Setter Property="Command" Value="{StaticResource AddFriendCommand}"/>
                             <Setter Property="Header" Value="Add to friends"/>
+                            <Setter Property="Foreground" Value="LightGreen"/>
                             <Setter Property="Icon">
                                 <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M4,7V10H1V12H4V15H6V12H9V10H6V7H4M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
+                                    <Path Fill="LightGreen" Data="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" />
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding RelationShip}" Value="1">
                             <Setter Property="Command" Value="{StaticResource RemoveFriendCommand}"/>
-                            <Setter Property="Header" Value="Remove from friends"/>
+                            <Setter Property="Header">
+                                <Setter.Value>
+                                    <TextBlock FontSize="14">
+                                        <Run Text="Remove from" Foreground="Gray"/>
+                                        <Run Text="friends" Foreground="LightGreen"/>
+                                    </TextBlock>
+                                </Setter.Value>
+                            </Setter>
+                            <!--<Setter Property="Foreground" Value="Gray"/>-->
                             <Setter Property="Icon">
                                 <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
+                                    <Path Fill="Gray" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
 
-                        <DataTrigger Binding="{Binding RelationShip}" Value="-1">
+                        <DataTrigger Binding="{Binding RelationShip}" Value="4">
                             <Setter Property="Command" Value="{StaticResource RemoveFriendCommand}"/>
-                            <Setter Property="Header" Value="Remove from foes"/>
-                            <Setter Property="Icon">
+                            <Setter Property="Header">
                                 <Setter.Value>
-                                    <Path Fill="White" Stretch="Uniform" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
+                                    <TextBlock FontSize="14">
+                                        <Run Text="Remove from" Foreground="Gray"/>
+                                        <Run Text="friends" Foreground="Red"/>
+                                    </TextBlock>
                                 </Setter.Value>
                             </Setter>
+                            <!--<Setter Property="Foreground" Value="Gray"/>-->
+                            <Setter Property="Icon">
+                                <Setter.Value>
+                                    <Path Fill="Gray" Data="M15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4M15,5.9C16.16,5.9 17.1,6.84 17.1,8C17.1,9.16 16.16,10.1 15,10.1A2.1,2.1 0 0,1 12.9,8A2.1,2.1 0 0,1 15,5.9M1,10V12H9V10H1M15,13C12.33,13 7,14.33 7,17V20H23V17C23,14.33 17.67,13 15,13M15,14.9C17.97,14.9 21.1,16.36 21.1,17V18.1H8.9V17C8.9,16.36 12,14.9 15,14.9Z" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </MenuItem.Style>
         </MenuItem>
-        <MenuItem Command="{StaticResource AddFoeCommand}" CommandParameter="{Binding id}" Header="Add to foes">
+        <MenuItem Command="{StaticResource AddFoeCommand}" CommandParameter="{Binding id}" Header="Add to foes" Foreground="Red">
             <MenuItem.Icon>
-                <Path Fill="White" Stretch="Uniform" Data="M17 21L18.8 22.8C19.3 23.3 20 22.9 20 22.3V18L22.8 14.6C23.3 13.9 22.8 13 22 13H15C14.2 13 13.7 14 14.2 14.6L17 18V21M15 20H2V17C2 14.3 7.3 13 10 13C10.6 13 11.3 13.1 12.1 13.2C11.9 13.8 12 14.5 12.2 15.1C11.5 15 10.7 14.9 10 14.9C7 14.9 3.9 16.4 3.9 17V18.1H14.5L15 18.7V20M10 12C12.2 12 14 10.2 14 8S12.2 4 10 4 6 5.8 6 8 7.8 12 10 12M10 6C11.1 6 12 6.9 12 8S11.1 10 10 10 8 9.1 8 8 8.9 6 10 6Z" />
+                <Path Fill="Red" Data="M17 21L18.8 22.8C19.3 23.3 20 22.9 20 22.3V18L22.8 14.6C23.3 13.9 22.8 13 22 13H15C14.2 13 13.7 14 14.2 14.6L17 18V21M15 20H2V17C2 14.3 7.3 13 10 13C10.6 13 11.3 13.1 12.1 13.2C11.9 13.8 12 14.5 12.2 15.1C11.5 15 10.7 14.9 10 14.9C7 14.9 3.9 16.4 3.9 17V18.1H14.5L15 18.7V20M10 12C12.2 12 14 10.2 14 8S12.2 4 10 4 6 5.8 6 8 7.8 12 10 12M10 6C11.1 6 12 6.9 12 8S11.1 10 10 10 8 9.1 8 8 8.9 6 10 6Z" />
             </MenuItem.Icon>
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding RelationShip}" Value="0">
+                        <DataTrigger Binding="{Binding RelationShip}" Value="3">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -94,8 +235,8 @@
         <Setter Property="Height" Value="20"/>
         <Setter Property="Visibility" Value="Collapsed"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Avatar, Converter={StaticResource IsNullConverter}}" Value="False">
-                <Setter Property="Source" Value="{Binding Avatar.Preview}"/>
+            <DataTrigger Binding="{Binding AvatarImage, Converter={StaticResource IsNullConverter}}" Value="False">
+                <Setter Property="Source" Value="{Binding AvatarImage}"/>
                 <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
                 <Setter Property="Visibility" Value="Visible"/>
             </DataTrigger>
@@ -763,7 +904,23 @@
 
             <TextBlock Text="{Binding LoginWithClan}"
                        Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
-                       ToolTip="{StaticResource RatingsToolTip}"/>
+                       ToolTip="{StaticResource RatingsToolTip}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                <Setter Property="Foreground" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <ContentControl Grid.Column="2" Grid.Row="1" Margin="-16 0 0 0">
                 <ContentControl.Style>

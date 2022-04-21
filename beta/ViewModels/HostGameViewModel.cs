@@ -26,7 +26,7 @@ namespace beta.ViewModels
             PlayersService = App.Services.GetService<IPlayersService>();
             GameSessionService = App.Services.GetService<IGameSessionService>();
 
-            Me = PlayersService.Me;
+            Me = PlayersService.Self;
 
             LocalMapsName = MapsService.GetLocalMaps();
             MapsViewSource.Source = LocalMapsName;

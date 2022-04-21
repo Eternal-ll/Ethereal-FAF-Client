@@ -77,7 +77,10 @@
             <view:ChatPreviewView DataContext="{Binding}"/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ChatViewModel}">
-            <view:ChatView/>
+            <view:ChatView DataContext="{Binding}"/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ChatConnectingViewModel}">
+            <view:ChatConnectingView DataContext="{Binding}"/>
         </DataTemplate>
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">

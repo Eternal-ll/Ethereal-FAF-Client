@@ -12,7 +12,7 @@ namespace beta.Models.IRC
         {
             Channel = channel;
             From = from;
-            // Is it worth it? XD
+            // TODO Is it worth it? XD
             HasMention = text.Contains(Properties.Settings.Default.PlayerNick, StringComparison.OrdinalIgnoreCase);
         }
     }
@@ -24,9 +24,9 @@ namespace beta.Models.IRC
         public IrcPrivateMessage(string from, string text) : base(text) => From = from;
     }
 
-    public class ServerNotifyMessage : Base.IrcMessage
+    public class IrcNotificationMessage : Base.IrcMessage
     {
-        public ServerNotifyMessage(string text) : base(text) { }
+        public IrcNotificationMessage(string text) : base(text) { }
     }
 
     public class IrcUserJoin

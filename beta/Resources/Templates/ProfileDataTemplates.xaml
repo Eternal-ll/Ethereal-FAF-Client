@@ -254,7 +254,7 @@
                             </Style.Triggers>
                         </Style>
                     </Expander.Style>
-                    <ScrollViewer MaxHeight="200" Margin="0 0 -8 0">
+                    <ScrollViewer MaxHeight="200" Margin="0 0 -8 -10">
                         <ItemsControl ItemsSource="{Binding Records}" Margin="0 0 10 0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -272,7 +272,7 @@
                                             <ColumnDefinition/>
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"/>
                                         <TextBlock Text="{Binding ChangedAt,StringFormat='{}{0:dd.MM.yyyy}'}" Grid.Column="1" Margin="10 0 0 0"
                                                FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right">
                                             <TextBlock.ToolTip>
@@ -330,7 +330,7 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <TextBlock Style="{StaticResource HeaderTextBlockStyle}" Text="Note"/>
-                                    <TextBox Text="{Binding Player.Note.Text}" MaxLength="{Binding Player.Note.MaxLength}"
+                                    <TextBox Text="{Binding Player.Note.Text, UpdateSourceTrigger=PropertyChanged}" MaxLength="{Binding Player.Note.MaxLength}"
                                              FontSize="13" Width="190" HorizontalAlignment="Left" TextWrapping="Wrap"
                                      Grid.Row="1" BorderThickness="0" Padding="2"
                                      ui:ControlHelper.PlaceholderText="Write note...">
@@ -413,10 +413,10 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <oxy:PlotView Width="1000" Height="500" Model="{Binding ApiRatingsViewModel.PlotModel}"
+            <!--<oxy:PlotView Width="1000" Height="500" Model="{Binding ApiRatingsViewModel.PlotModel}"
                               Background="Transparent"
                               VirtualizingPanel.IsVirtualizing="True">
-            </oxy:PlotView>
+            </oxy:PlotView>-->
             <!--<oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
                     <oxy:Plot.DefaultTrackerTemplate>
                         <ControlTemplate>

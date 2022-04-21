@@ -51,6 +51,7 @@ namespace beta.Models
         {
             get
             {
+                if (IsPreviewLoading) return null;
                 if (ImageSource is null)
                 {
                     return App.Current.Resources["QuestionIcon"] as ImageSource;
@@ -168,7 +169,6 @@ namespace beta.Models
                 {
                     BitmapImage.StreamSource.Close();
                     BitmapImage.StreamSource.Dispose();
-                    BitmapImage.StreamSource = null;
                     BitmapImage = null;
                 }
                 _ImageSource = null;

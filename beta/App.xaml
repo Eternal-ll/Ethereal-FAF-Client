@@ -16,6 +16,7 @@
 
 
                     <cmd:JoinGameCommand x:Key="JoinGameCommand"/>
+                    <cmd:WatchGameCommand x:Key="WatchGameCommand"/>
 
 
                     <cmd:AddFriendCommand x:Key="AddFriendCommand"/>
@@ -85,6 +86,7 @@
 
                 <ResourceDictionary Source="Resources/Styles/ListBoxItemStyles.xaml"/>
                 <ResourceDictionary Source="Resources/Styles/ListBoxStyles.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/ButtonStyes.xaml"/>
 
 
 

@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace beta.Infrastructure.Commands
 {
@@ -9,7 +10,29 @@ namespace beta.Infrastructure.Commands
     {
         private readonly IGameSessionService GameLauncherService;
         public JoinGameCommand() => GameLauncherService = App.Services.GetService<IGameSessionService>();
-        public override bool CanExecute(object parameter) => true;
+        public override bool CanExecute(object parameter)
+        {
+            if (parameter is GameInfoMessage game)
+                return game.State == Models.Server.Enums.GameState.Open;
+            return false;
+        }
+
+        public override void Execute(object parameter)
+        {
+            if (parameter is GameInfoMessage game)
+                GameLauncherService.JoinGame(game);
+        }
+    }
+    internal class WatchGameCommand : Command
+    {
+        private readonly IGameSessionService GameLauncherService;
+        public WatchGameCommand() => GameLauncherService = App.Services.GetService<IGameSessionService>();
+        public override bool CanExecute(object parameter)
+        {
+            if (parameter is GameInfoMessage game)
+                return game.State == Models.Server.Enums.GameState.Playing && game.ReplayLessThanFiveMinutes;
+            return false;
+        }
 
         public override void Execute(object parameter)
         {

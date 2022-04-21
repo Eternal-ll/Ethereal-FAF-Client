@@ -2,10 +2,12 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.IRC;
+using beta.Models.IRC.Base;
 using beta.Models.IRC.Enums;
 using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -89,7 +91,8 @@ namespace beta.Resources.Controls
         }
         #endregion
 
-        public EventHandler LeaveRequired;
+        public event EventHandler LeaveRequired;
+        public event EventHandler<IrcMessage> SentMessage;
 
         private void OnLeaveRequired() => LeaveRequired?.Invoke(this, null);
 
@@ -97,7 +100,7 @@ namespace beta.Resources.Controls
 
         #region Chat properties
 
-        public ObservableCollection<string> Users { get; set; }
+        public string[] Users { get; set; }
         private IrcChannelVM _SelectedChannel;
         public IrcChannelVM SelectedChannel
         {
@@ -108,17 +111,19 @@ namespace beta.Resources.Controls
                 {
                     if (value is not null)
                     {
-                        Users = value.Users;
+                        Users = value.Users.ToArray();
                     }
                     else
                     {
-                        Users.Clear();
+                        Users = Array.Empty<string>();
                     }
                 }
             }
         }
 
         #endregion
+
+        public void UpdateUsers(string[] users) => Users = users;
 
         public TestControl()
         {
@@ -231,7 +236,6 @@ namespace beta.Resources.Controls
                             }
                         }
                     }
-                    SelectedChannel.History.Add(new IrcChannelMessage(SelectedChannel.Name, nick, CurrentText));
                     IrcService.SendMessage(SelectedChannel.Name, CurrentText);
                 }
                 CurrentText = string.Empty;
@@ -513,9 +517,9 @@ namespace beta.Resources.Controls
                 SuggestedPlayers.Clear();
 
                 if (Users is not null)
-                    for (int i = 0; i < Users.Count; i++)
+                    for (int i = 0; i < Users.Length; i++)
                     {
-                        if (Users[i].StartsWith(completionText))
+                        if (Users[i].StartsWith(completionText, StringComparison.OrdinalIgnoreCase))
                             SuggestedPlayers.Add(Users[i]);
                     }
 

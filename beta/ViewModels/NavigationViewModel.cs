@@ -21,12 +21,22 @@ namespace beta.ViewModels
             IrcService = App.Services.GetService<IIrcService>();
             DownloadService = App.Services.GetService<IDownloadService>();
 
-            PlayersService.MeReceived += PlayersService_MeReceived;
+            PlayersService.SelfReceived += PlayersService_MeReceived;
             IrcService.StateChanged += IrcService_StateChanged;
             DownloadService.NewDownload += DownloadService_NewDownload;
             DownloadService.DownloadEnded += DownloadService_DownloadEnded;
 
             Login = Properties.Settings.Default.PlayerNick;
+
+            ViewModels = new()
+            {
+                //{ typeof(HomeViewModel), new HomeViewModel() },
+                { typeof(ChatControlViewModel), new ChatControlViewModel() },
+                { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
+                //{ typeof(MapsVaultViewModel), new MapsVaultViewModel() },
+                { typeof(SettingsViewModel), new SettingsViewModel() },
+                //{ typeof(ProfileViewModel), new ProfileViewModel(PlayersService.Self) }
+            };
         }
 
         #region Me
@@ -74,7 +84,7 @@ namespace beta.ViewModels
         #endregion
 
         #region Views
-        private readonly Dictionary<Type, ViewModel> ViewModels = new();
+        private readonly Dictionary<Type, ViewModel> ViewModels;
         #endregion
 
         #region CurrentViewTag
@@ -103,10 +113,10 @@ namespace beta.ViewModels
                         if (cachedViewModel is null)
                         {
                             object[] args = null;
-                            if (viewType == typeof(ProfileViewModel))
-                            {
-                                args = new object[] { Me.id };
-                            }
+                            //if (viewType == typeof(ProfileViewModel))
+                            //{
+                            //    args = new object[] { Me.id };
+                            //}
                             viewModel = (ViewModel)Activator.CreateInstance(viewType, args);
                             ViewModels[viewType] = viewModel;
                         }

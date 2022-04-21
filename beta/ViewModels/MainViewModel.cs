@@ -28,6 +28,7 @@ namespace beta.ViewModels
             isAutojoin = false;
 
             SessionService.Authorized += OnSessionAuthorizationCompleted;
+            SessionService.StateChanged += SessionService_StateChanged;
             SessionService.NotificationReceived += SessionService_NotificationReceived;
 
             //if (isAutojoin)
@@ -49,6 +50,14 @@ namespace beta.ViewModels
             });
         }
 
+        private void SessionService_StateChanged(object sender, SessionState e)
+        {
+            if (e == SessionState.Disconnected)
+            {
+                SessionService.Authorized += OnSessionAuthorizationCompleted;
+            }
+        }
+
         private void SessionService_NotificationReceived(object sender, Models.Server.NotificationData e)
         {
             if (e.text.Contains("unofficial", System.StringComparison.OrdinalIgnoreCase)) return;
@@ -59,7 +68,7 @@ namespace beta.ViewModels
         {
             if (e)
             {
-                ChildViewModel = new NavigationViewModel();
+                App.Current.Dispatcher.Invoke(() => ChildViewModel = new NavigationViewModel());
                 SessionService.Authorized -= OnSessionAuthorizationCompleted;
             }
         }

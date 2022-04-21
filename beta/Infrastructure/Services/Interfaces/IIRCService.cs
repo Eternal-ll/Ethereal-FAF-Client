@@ -63,6 +63,8 @@ namespace beta.Infrastructure.Services.Interfaces
         /// </summary>
         public event EventHandler<IrcChannelUsers> ChannelUsersReceived;
 
+        public event EventHandler<IrcNotificationMessage> NotificationMessageReceived; 
+
         #endregion
 
         #region Methods

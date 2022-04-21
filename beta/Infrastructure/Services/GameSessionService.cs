@@ -139,7 +139,7 @@ namespace beta.Infrastructure.Services
             IceAdapterClient.SetLobbyInitMode("normal");
             IceAdapterClient.PassIceServers(IceService.IceServers);
 
-            var me = PlayersService.Me;
+            var me = PlayersService.Self;
 
             StringBuilder args = new();
 

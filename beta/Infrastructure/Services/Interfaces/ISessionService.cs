@@ -1,5 +1,7 @@
 ﻿using beta.Models.Server;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
@@ -29,9 +31,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
 
         public bool IsAuthorized { get; }
-
-        public void Connect();
-        public void Authorize();
+        public Task AuthorizeAsync(string accessToken, CancellationToken token);
         public void Ping();
 
         /// <summary>

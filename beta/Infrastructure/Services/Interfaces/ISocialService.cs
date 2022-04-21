@@ -2,7 +2,6 @@
 using beta.Models.Server.Enums;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
@@ -11,19 +10,20 @@ namespace beta.Infrastructure.Services.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<string> AddedFriend;
+        public event EventHandler<int> AddedFriend;
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<string> AddedFoe;
+        public event EventHandler<int> AddedFoe;
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<string> RemovedFriend;
+        public event EventHandler<int> RemovedFriend;
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<string> RemovedFoe;
+        public event EventHandler<int> RemovedFoe;
+        public event EventHandler<KeyValuePair<int, PlayerRelationShip>> PlayerdRelationshipChanged;
 
         public string[] Friends { get; }
         public string[] Foes { get; }

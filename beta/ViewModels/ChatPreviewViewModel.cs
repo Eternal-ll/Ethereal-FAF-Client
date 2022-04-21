@@ -1,31 +1,23 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
 using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.ComponentModel;
-using System.Windows.Data;
 
 namespace beta.ViewModels
 {
     public class ChatPreviewViewModel : Base.ViewModel
     {
         private readonly IIrcService IrcService;
-        private readonly IPlayersService PlayersService;
         public ChatPreviewViewModel()
         {
             IrcService = App.Services.GetService<IIrcService>();
-            PlayersService = App.Services.GetService<IPlayersService>();
 
             IrcService.StateChanged += OnIrcStateChanged;
-
-            BindingOperations.EnableCollectionSynchronization(PlayersService.Players, new object());
-            OnlinePlayersViewSource.Filter += PlayersFilter;
-            OnlinePlayersViewSource.Source = PlayersService.Players;
         }
 
         #region Properties
+
+        public PlayersViewModel PlayersViewModel { get; } = new();
 
         #region IsAlwaysConnectToIRC
         private bool _IsAlwaysConnectToIRC = Settings.Default.ConnectIRC;
@@ -40,26 +32,6 @@ namespace beta.ViewModels
                 }
             }
         }
-        #endregion
-
-        #region FilterText
-        private string _FilterText = string.Empty;
-        public string FilterText
-        {
-            get => _FilterText;
-            set
-            {
-                if (Set(ref _FilterText, value))
-                {
-                    OnlinePlayersView.Refresh();
-                }
-            }
-        }
-        #endregion
-
-        #region Online players
-        private readonly CollectionViewSource OnlinePlayersViewSource = new();
-        public ICollectionView OnlinePlayersView => OnlinePlayersViewSource.View;
         #endregion
 
         public bool IsRequestConnectBtnEnabled => !PendingConnectionToIRC;
@@ -81,18 +53,16 @@ namespace beta.ViewModels
 
         #endregion
 
-        private void PlayersFilter(object sender, FilterEventArgs e)
-        {
-            e.Accepted = true;
-            var filter = FilterText;
-            if (string.IsNullOrWhiteSpace(filter)) return;
-
-            var player = (IPlayer)e.Item;
-            e.Accepted = player.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase);
-
-        }
-
         private void OnIrcStateChanged(object sender, IrcState e) =>
             PendingConnectionToIRC = e != IrcState.Disconnected;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                PlayersViewModel.Dispose();
+                IrcService.StateChanged -= OnIrcStateChanged;
+            }
+        }
     }
 }

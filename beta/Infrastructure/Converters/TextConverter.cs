@@ -7,32 +7,34 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Converters
 {
-    public interface IEmojiCache
+    public abstract class EmojiCache
     {
         public string Name { get; set; }
+        public Uri PathToFile { get; set; }
     }
-    public struct GIFEmojiCache : IEmojiCache
+    public class GIFEmojiCache : EmojiCache
     {
-        public string Name { get; set; }
         public GifBitmapDecoder GifBitmapDecoder;
     }
-    public struct BitmapEmojiCache : IEmojiCache
+    public class BitmapEmojiCache : EmojiCache
     {
-        public string Name { get; set; }
         public ImageSource ImageSource;
     }
     // TODO: Move to Service!!! This logic should be in some ChatService
     internal class TextConverter : IValueConverter
     {
-        private readonly List<IEmojiCache> Cache = new List<IEmojiCache>()
+        private readonly List<EmojiCache> Cache = new()
         {
             new BitmapEmojiCache()
             {
@@ -128,16 +130,16 @@ namespace beta.Infrastructure.Converters
                         sb.Remove(0, 1);
                     if (sb.ToString().Equals(emoji, StringComparison.OrdinalIgnoreCase))
                     {
-
-                        IEmojiCache cache;
+                        EmojiCache cache;
                         Image image;
                         if (extension.ToString() == "gif")
                         {
+                            Uri url = new(file, UriKind.Absolute);
                             GIFEmojiCache emojiCache = new()
                             {
                                 Name = emoji,
-                                GifBitmapDecoder = new GifBitmapDecoder(
-                                    new Uri(file, UriKind.Absolute),
+                                PathToFile = url,
+                                GifBitmapDecoder = new GifBitmapDecoder(url,
                                 BitmapCreateOptions.PreservePixelFormat,
                                 BitmapCacheOption.Default),
                             };
@@ -150,12 +152,17 @@ namespace beta.Infrastructure.Converters
                         }
                         else
                         {
-                            var source = new BitmapImage(new Uri(file));
-                            source.DecodePixelHeight = 34;
+                            Uri url = new(file, UriKind.Absolute);
+                            BitmapImage source = new();
+                            source.BeginInit();
+                            source.UriSource = url;
+                            source.CacheOption = BitmapCacheOption.OnLoad;
+                            source.EndInit();
                             source.Freeze();
                             BitmapEmojiCache emojiCache = new()
                             {
                                 Name = emoji,
+                                PathToFile = url,
                                 ImageSource = source,
                             };
 
@@ -187,136 +194,103 @@ namespace beta.Infrastructure.Converters
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not string text) return null;
-            IList<Inline> Inlines = new List<Inline>();
+            return ParseText(text);
+        }
 
-            StringBuilder textBuilder = new();
+        private Inline[] ParseText(string text)
+        {
+            List<Inline> inlines = new();
 
-            StringBuilder sb = new();
+            bool isOnlyUIContainers = false;
+            bool isOnlyImages = false;
 
-            var len = text.Length;
+            string[] words = text.Split();
 
-            bool anyText = false;
-
-            for (int i = 0; i < len; i++)
+            Run run = null;
+            InlineUIContainer inlineUIContainer = null;
+            bool isText = false;
+            for (int i = 0; i < words.Length; i++)
             {
-                var letter = text[i];
-                if (letter == ':')
+                var word = words[i];
+                if (!isText)
                 {
-                    sb.Append(letter);
-                    Char innerL = '0';
-                    while (innerL != ':' && i < len - 1)
+                    if (run is not null)
                     {
-                        i++;
-                        innerL = text[i];
-
-                        if (innerL == ' ')
+                        if (i == 0 && run.Text.Trim().Length == 0) continue;
+                        if (i > 0)
                         {
-                            textBuilder.Append(sb);
-                            sb.Clear();
-                            break;
+                            run.Text = run.Text.Insert(0, " ");
                         }
-                        sb.Append(innerL);
+                        inlines.Add(run);
                     }
-                    if (sb.Length <= 2)
-                    {
-                        textBuilder.Append(sb);
-                        sb.Clear();
-                    }
-                    if (textBuilder.Length > 0)
-                    {
-                        Inlines.Add(new Run()
-                        {
-                            Text = textBuilder.ToString()
-                        });
-                        textBuilder.Clear();
-                        anyText = true;
-                    }
-
-                    if (sb.Length > 2)
-                    {
-                        Inlines.Add(GetEmoji(sb.ToString()));
-                        sb.Clear();
-                    }
+                    run = new();
                 }
-                else if (letter == '@')
+                if (inlineUIContainer is not null)
                 {
-                    sb.Append(letter);
-                    Char innerL = '0';
-                    while (innerL != ' ' && i < len - 1)
-                    {
-                        i++;
-                        innerL = text[i];
-                        if (innerL == '@')
-                        {
-                            i--;
-                            break;
-                        }
-                        sb.Append(innerL);
-                    }
-
-                    if (sb.Length <= 2)
-                    {
-                        textBuilder.Append(sb);
-                        sb.Clear();
-                    }
-
-                    if (textBuilder.Length > 0)
-                    {
-                        Inlines.Add(new Run()
-                        {
-                            Text = textBuilder.ToString()
-                        });
-                        textBuilder.Clear();
-                        anyText = true;
-                    }
-
-                    if (sb.Length > 2)
-                    {
-                        var login = sb.ToString().Substring(1).Replace(" ", "");
-                        var player = PlayersService.GetPlayer(login);
-                        if (player is not null)
-                        {
-                            Inlines.Add(new InlineUIContainer()
-                            {
-                                Child = new Button()
-                                {
-                                    DataContext = player
-                                }
-                            });
-                            anyText = true;
-                        }
-                        else
-                        {
-                            Inlines.Add(new Run()
-                            {
-                                Text = sb.ToString()
-                            });
-                            anyText = true;
-                        }
-                        sb.Clear();
-                    }
+                    inlines.Add(inlineUIContainer);
+                    inlineUIContainer = null;
                 }
-                else textBuilder.Append(letter);
+                // Is URL
+                if ((word.StartsWith("https:") || word.StartsWith("http")) && Uri.IsWellFormedUriString(word, UriKind.Absolute)
+                    && Uri.TryCreate(word, UriKind.Absolute, out var url))
+                {
+                    //TODO Add regex for images/GIFs
+                    inlineUIContainer = new InlineUIContainer(new Button()
+                    {
+                        Content = word,
+                        Command = App.Current.Resources.MergedDictionaries[2]["NavigateUriCommand"] as ICommand,
+                        CommandParameter = url,
+                        Style = App.Current.Resources["ButtonLinkStyle"] as Style
+                    });
+                    isText = false;
+                    continue;
+                }
+                // Is local directory
+                if (Regex.IsMatch(word, @"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$"))
+                {
+                    inlineUIContainer = new InlineUIContainer(new Button()
+                    {
+                        Content = word,
+                        Command = App.Current.Resources.MergedDictionaries[2]["NavigateExplorerCommand"] as ICommand,
+                        CommandParameter = word,
+                        Style = App.Current.Resources["ButtonExplorerStyle"] as Style
+                    });
+                    isText = false;
+                    continue;
+                }
+                // Is player
+                if (word.Length > 4)
+                if (PlayersService.TryGetPlayer(word, out var player))
+                {
+                    inlineUIContainer = new InlineUIContainer(new Button()
+                    {
+                        Content = player,
+                        Style = App.Current.Resources["ButtonPlayerStyle"] as Style
+                    });
+                    isText = false;
+                    continue;
+                }
+                // Is emoji
+                if (Regex.IsMatch(word, @"\:.*?\:"))
+                {
+                    inlineUIContainer = GetEmoji(text);
+                    isText = false;
+                    continue;
+                }
+                isText = true;
+                run.Text += word + " ";
             }
 
-            if (textBuilder.Length > 0)
+            if (run is not null)
             {
-                Inlines.Add(new Run()
-                {
-                    Text = textBuilder.ToString()
-                });
-                textBuilder.Clear();
-                anyText = true;
+                inlines.Add(run);
             }
-            if (!anyText)
-                for (int i = 0; i < Inlines.Count; i++)
-                {
-                    var inline = (InlineUIContainer)Inlines[i];
-                    var image = (Image)inline.Child;
-                    image.MaxHeight = 34;
-                    image.Margin = new(2, 4, 2, -4);
-                }
-            return Inlines;
+            if (inlineUIContainer is not null)
+            {
+                inlines.Add(inlineUIContainer);
+            }
+
+            return inlines.ToArray();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

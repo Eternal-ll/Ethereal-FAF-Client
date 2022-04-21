@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
@@ -34,6 +35,28 @@ namespace beta.Models.Server
         public ImageSource Flag => _Flag ??= App.Current.Resources["Flag." + country] as ImageSource;
         #endregion
 
+        private BitmapImage _AvatarImage;
+        public ImageSource AvatarImage
+        {
+            get
+            {
+                if (Avatar is null) return null;
+                if (_AvatarImage is null)
+                {
+                    var img = new BitmapImage();
+                    img.BeginInit();
+                    img.DecodePixelWidth = 40;
+                    img.DecodePixelHeight = 20;
+                    img.CacheOption = BitmapCacheOption.OnLoad;
+                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                    img.UriSource = Avatar.Url;
+                    img.EndInit();
+                    _AvatarImage = img;
+                }
+                return _AvatarImage;
+            }
+        }
+
         #region GameState
         private GameState _GameState;
         public GameState GameState
@@ -57,6 +80,15 @@ namespace beta.Models.Server
             GameState.None => null,
             _=> null
         };
+        #endregion
+
+        #region IsFavourite
+        private bool _IsFavourite;
+        public bool IsFavourite
+        {
+            get => _IsFavourite;
+            set => Set(ref _IsFavourite, value);
+        }
         #endregion
 
         #region Game
@@ -89,7 +121,7 @@ namespace beta.Models.Server
         // SOCIAL
         #region Note
         //TODO
-        private PlayerNoteVM _Note = new();
+        private PlayerNoteVM _Note;
         public PlayerNoteVM Note
         {
             get => _Note;
@@ -107,6 +139,15 @@ namespace beta.Models.Server
         }
         #endregion
 
+        #region IsClanmate
+        private bool _IsClanmate;
+        public bool IsClanmate
+        {
+            get => _IsClanmate;
+            set => Set(ref _IsClanmate, value);
+        }
+        #endregion
+
         // SOCIAL
         // CHAT PROPERTIES FOR SORTING
         #region RelationShip
@@ -118,9 +159,20 @@ namespace beta.Models.Server
         }
         #endregion
 
+        #region IrcName
+        private string _IrcName;
+        public string IrcName
+        {
+            get => _IrcName;
+            set => Set(ref _IrcName, value);
+        }
+        #endregion
+
+
+
         public string LoginWithClan => clan == null ? login : $"[{clan}] {login}";
 
-        public DateTime? Updated { get; set; }
+        public DateTime Updated { get; set; }
 
         #endregion
 

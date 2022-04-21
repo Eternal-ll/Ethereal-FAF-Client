@@ -1,7 +1,21 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:models="clr-namespace:beta.Models">
-
+                    xmlns:models="clr-namespace:beta.Models"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <DataTemplate DataType="{x:Type models:ExceptionWrapper}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding Exception.InnerException.Message, Mode=OneWay}" FontSize="20" Margin="0 10 0 20" MaxWidth="400" TextWrapping="Wrap"/>
+            <TextBox Grid.Row="1" BorderBrush="Transparent" BorderThickness="0" IsReadOnly="True"
+                     MaxWidth="400"
+                     TextWrapping="Wrap"
+                     Text="{Binding Exception.InnerException, Mode=OneWay}"/>
+        </Grid>
+    </DataTemplate>
     <DataTemplate DataType="{x:Type models:OAuthEventArgs}">
         <DataTemplate.Resources>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>

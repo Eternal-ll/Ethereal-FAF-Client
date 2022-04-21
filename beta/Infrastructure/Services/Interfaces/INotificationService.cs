@@ -1,5 +1,6 @@
 ﻿using beta.ViewModels;
 using ModernWpf.Controls;
+using System;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
@@ -9,6 +10,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public ContentDialog ContentDialog { get; }
         public Task ShowPopupAsync(string text);
         public Task ShowPopupAsync(object model);
+
+        public Task ShowExceptionAsync(Exception ex);
         public Task<ContentDialogResult> ShowDialog(string text);
         public Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null);
         public Task<ContentDialogResult> ShowDialog(object model, string primary = null, string secondary = null, string close = null);

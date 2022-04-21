@@ -14,11 +14,12 @@ using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    public static class OAuthExtension
+    internal static class OAuthExtension
     {
         public static ByteArrayContent GetQueryByteArrayContent(string text)
         {
@@ -96,79 +97,112 @@ namespace beta.Infrastructure.Services
 
         #endregion
 
-        private async Task<Stream> SafeRequest(string requestUri) => await SafeRequest(requestUri, null);
-        private async Task<Stream> SafeRequest(string requestUri, ByteArrayContent data = null)
+        private TokenBearer TokenBearer;
+
+        public void SetToken(string accessToken, string refreshToken, string idToken, double expiresIn) => TokenBearer = new()
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            IdToken = idToken,
+            ExpiresIn = expiresIn,
+        };
+
+        private async Task<Stream> SafeRequest(string requestUri, IProgress<string> progress = null) => await SafeRequest(requestUri, null, progress);
+        private async Task<Stream> SafeRequest(string requestUri, ByteArrayContent data = null, IProgress<string> progress = null)
         {
             Logger.LogInformation($"POST {requestUri}, data: \n{data?.ReadAsStringAsync().Result}");
-            try
-            {
+            //try
+            //{
                 if (data is not null)
                     return await (await HttpClient.PostAsync(requestUri, data)).Content.ReadAsStreamAsync();
                 return await HttpClient.GetStreamAsync(requestUri);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.Message, e.StackTrace);
-                if (e is HttpRequestException || e is AggregateException)
-                {
-                    OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
-                }
-                else
-                {
-                    OnStateChanged(new(OAuthState.INVALID, $"Something went wrong on {requestUri} endpoint", e.StackTrace));
-                }
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    Logger.LogError(e.Message, e.StackTrace);
+            //    if (e is HttpRequestException || e is AggregateException)
+            //    {
+            //        OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
+            //    }
+            //    else
+            //    {
+            //        OnStateChanged(new(OAuthState.INVALID, $"Something went wrong on {requestUri} endpoint", e.StackTrace));
+            //    }
+            //    throw e;
+            //}
 
-            return null;
+            //return null;
         }
 
-        private async Task<string> GetOAuthCodeAsync(string usernameOrEmail, string password)
+        private async Task<string> GetOAuthCodeAsync(string usernameOrEmail, string password, IProgress<string> progress = null)
         {
+            progress?.Report("Checking passed authorization data");
             Logger.LogInformation("Getting OAuth code by username or e-mail and password");
-            if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrWhiteSpace(password))
+            
+            if (string.IsNullOrWhiteSpace(usernameOrEmail) && string.IsNullOrWhiteSpace(password))
             {
                 Logger.LogWarning("Given usernameOrEmail and password is empty");
-                OnStateChanged(new(OAuthState.EMPTY_FIELDS, "Fill required fields"));
-                return null;
+                throw new ArgumentNullException(nameof(usernameOrEmail), "Given username or e-mail and password is empty");
+            }
+            if (string.IsNullOrWhiteSpace(usernameOrEmail))
+            {
+                throw new ArgumentNullException(nameof(usernameOrEmail), "Given username or e-mail is empty");
+            }
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentNullException(nameof(password), "Given password is empty");
             }
 
-            Logger.LogInformation("Generating unique uid to compare with result");
-
+            Logger.LogInformation("Generating unique uid for user");
+            progress?.Report("Generating unique uid for user");
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            progress?.Report($"Unique uid: {generatedState[..4]}XXXX{generatedState[..^4]}");
 
             Logger.LogInformation(@generatedState);
 
             #region GET hydra.faforever.com/oauth2/auth
+            progress?.Report("GET hydra faforever com/oauth2/auth");
+            var url = @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState;
+            var stream = await SafeRequest(url, progress);
 
-            var stream = await SafeRequest(@"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState);
+            _ = stream ?? throw new ArgumentNullException(nameof(stream), $"Stream is null on {url}");
 
-            if (stream is null) return null;
-
+            progress?.Report("Data received");
             StreamReader streamReader = new(stream);
             //var data = streamReader.ReadToEnd();
             string line;
 
-            string _csrf = string.Empty;
-            string challenge = string.Empty;
+            string _csrf = null;
+            string challenge = null;
 
-            Logger.LogInformation("Parsing data to get _csrf and login_challenge");
+            Logger.LogInformation("Parsing data to get _csrf and challenge");
 
+            progress?.Report("Parsing result to get \"_csrf\" and \"challenge\"");
             while ((line = streamReader.ReadLine()) is not null)
-                if (_csrf.Length != 0 && challenge.Length != 0)
+                if (_csrf is not null && challenge is not null)
                     break; 
                 else if (line.Contains("_csrf"))
+                {
                     _csrf = GetHiddenValue(line);
+                    progress?.Report("\"_csrf\" is found, looking for \"challenge\"");
+                }
                 else if (line.Contains("challenge"))
+                {   
                     challenge = GetHiddenValue(line);
+                    progress?.Report("\"challenge\" is found");
+                }
 
             streamReader.Dispose();
             await stream.DisposeAsync();
 
-            if (_csrf.Length == 0 || challenge.Length == 0)
+            if (_csrf is null && challenge is null)
             {
-                OnStateChanged(new(OAuthState.INVALID, $"CSRF or login_challenge was empty"));
-                Logger.LogWarning("CSRF or login_challenge not found in response");
-                return null;
+                throw new ArgumentNullException($"{nameof(_csrf)} and {nameof(challenge)}", $"\"_crsf\" and \"challenge\" not found on result of {url}");
+            }
+            else
+            {
+                _ = _csrf ?? throw new ArgumentNullException(nameof(_csrf), $"\"_crsf\" not found on result of {url}");
+                _ = challenge ?? throw new ArgumentNullException(nameof(challenge), $"\"challenge\" not found on result of {url}");
             }
 
             #endregion
@@ -176,34 +210,42 @@ namespace beta.Infrastructure.Services
             #region POST user.faforever.com/oauth2/login
             StringBuilder builder = new();
 
+            progress?.Report("Processing authorization on user faforever com/oauth2/login");
             stream = await SafeRequest("https://user.faforever.com/oauth2/login", builder
                 .Append("_csrf=").Append(_csrf)
                 .Append("&challenge=").Append(challenge)
                 .Append("&usernameOrEmail=").Append(usernameOrEmail)
-                .Append("&password=").Append(password).GetQueryByteArrayContent());
+                .Append("&password=").Append(password)
+                .GetQueryByteArrayContent());
 
             if (stream is null) return null;
 
+            progress?.Report("Data received");
             streamReader = new StreamReader(stream);
 
-            string consent_challenge = string.Empty;
+            string consent_challenge = null;
 
             Logger.LogInformation("Parsing data to get consent_challenge");
 
+            progress?.Report("Parsing data to get \"challenge\"");
             while ((line = streamReader.ReadLine()) is not null)
-                if (consent_challenge.Length != 0)
+                if (consent_challenge is not null)
                     break;
-                else if (line.Contains("challenge")) 
+                else if (line.Contains("challenge"))
+                {
+                    progress?.Report("\"challenge\" is found");
                     consent_challenge = GetHiddenValue(line);
+                }
 
             streamReader.Dispose();
             await stream.DisposeAsync();
 
             Logger.LogInformation(nameof(consent_challenge) + " - " + consent_challenge);
 
-            if (consent_challenge.Length == 0)
+            _ = consent_challenge ?? throw new ArgumentNullException(nameof(challenge), "\"challenge\" not found on user.faforever.com/oauth2/login. Your authorization data maybe uncorrect");
+            if (consent_challenge is null)
             {
-                OnStateChanged(new(OAuthState.INVALID, "Something went wrong", "Field \"consent_challenge\" was empty"));
+                //OnStateChanged(new(OAuthState.INVALID, "Something went wrong", "Field \"consent_challenge\" was empty"));
                 return null;
             }
             #endregion
@@ -215,6 +257,7 @@ namespace beta.Infrastructure.Services
             Uri callback = null;
             try
             {
+                progress?.Report("Pending request for OAuth code");
                 callback = HttpClient.PostAsync("https://user.faforever.com/oauth2/consent", builder.Clear()
                         .Append("_csrf=").Append(_csrf)
                         .Append("&action=permit&")
@@ -227,91 +270,80 @@ namespace beta.Infrastructure.Services
                 Logger.LogWarning($"Something went wrong on POST user.faforever.com/oauth2/consent");
                 if (e is HttpRequestException || e is AggregateException)
                 {
-                    OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
+                    //OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
+                    throw new Exception("Error on https://user.faforever.com/oauth2/consent. Check your internet");
                 }
                 else
                 {
-                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
+                    throw new Exception("Error on https://user.faforever.com/oauth2/consent.");
+                    //OnStateChanged(new(OAuthState.INVALID, "Something went wrong", e.StackTrace));
                 }
             }
 
+            _ = callback ?? throw new ArgumentNullException(nameof(callback), "Check your \"login\" or \"e-mail\" and \"password\"");
             if (callback is null) return null;
-            
+
+            progress?.Report("Parsing callback for OAuth code");
             string code = callback.Query[6..callback.Query.IndexOf("&scope", StringComparison.Ordinal)];
 
 
             Logger.LogInformation("code - " + code);
-
-            //Debug.WriteLine(nameof(code) + " - " + code);
-            //Debug.WriteLine(nameof(state) + " - " + state);
+            progress?.Report("OAuth code found");
             #endregion
 
             return code;
         }
-        //private async Task<bool> FetchOAuthTokenAsync(string code)
-        //{
-        //    Logger.LogInformation("Fetching OAuth token by code");
 
-        //    if (code is null) return false;
-
-        //    return await FetchOAuthDataAsync(code);
-        //}
-
-        public async Task<bool> RefreshOAuthTokenAsync(string refresh_token)
+        public async Task<TokenBearer> RefreshOAuthTokenAsync(string refresh_token)
         {
             Logger.LogInformation("Refreshing OAuth token");
 
             return await FetchOAuthDataAsync(refresh_token, true);
         }
-        private async Task<bool> FetchOAuthDataAsync(string data, bool isRefreshToken = false)
+        private async Task<TokenBearer> FetchOAuthDataAsync(string data, bool isRefreshToken = false, IProgress<string> progress = null)
         {
+            if (data is null) return null;
+
+            if (isRefreshToken)
+            {
+                progress?.Report("Fetching OAuth access token by refresh token");
+            }
+            else
+            {
+                progress?.Report("Fetching OAuth access token by user data");
+            }
             string type = isRefreshToken ? "grant_type=refresh_token&refresh_token=" : "grant_type=authorization_code&code=";
             type += data;
 
             var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",
                 OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=faf-python-client&redirect_uri=http://localhost"));
 
-            return await TryParseTokenBearerAsync(stream);
+            return await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
         }
       
-        public async Task AuthAsync()
+        public async Task<TokenBearer> AuthAsync(IProgress<string> progress)
         {
-            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
-            if (string.IsNullOrWhiteSpace(Settings.Default.access_token) || string.IsNullOrWhiteSpace(Settings.Default.refresh_token))
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization using saved token"));
+            if (TokenBearer is null)
             {
-                OnStateChanged(new(OAuthState.NO_TOKEN, "Something went wrong", "No saved OAuth refresh token"));
-                return;
+                return null;
             }
 
-            if ((Settings.Default.expires_in - DateTime.UtcNow).TotalSeconds < 10)
+            if ((TokenBearer.ExpiresAt - DateTime.UtcNow).TotalSeconds < 10)
             {
-                if (await RefreshOAuthTokenAsync(Settings.Default.refresh_token))
-                {
-
-                }
-                else
-                {
-                    OnStateChanged(new(OAuthState.INVALID, "Something went wrong", "Cant authorize using token"));
-                }
+                return await RefreshOAuthTokenAsync(Settings.Default.refresh_token);
             }
-            else OnStateChanged(new(OAuthState.AUTHORIZED, "Authorized"));
+
+            return TokenBearer;
         }
 
-        public async Task AuthAsync(string usernameOrEmail, string password)
+        public async Task<TokenBearer> AuthAsync(string usernameOrEmail, string password, CancellationToken? token, IProgress<string> progress = null)
         {
-            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
-            Logger.LogInformation("Starting process of authorization");
-
-            var code = await GetOAuthCodeAsync(usernameOrEmail, password);
-            if (code is null)
-            {
-                // TODO: invoke some error events?
-                return;
-            }
-            await FetchOAuthDataAsync(code);
-            //OnStateChanged(await FetchOAuthTokenAsync(code)
-            //    ? (new(OAuthState.AUTHORIZED, "Authorized"))
-            //    : (new(OAuthState.INVALID, "Something went wrong. Check internet access to https://hydra.faforever.com/oauth2/token")));
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization using user credentials"));
+            progress?.Report("Pending OAuth autorization by parsing");
+            var code = await GetOAuthCodeAsync(usernameOrEmail, password, progress);
+            var tokenBearer = await FetchOAuthDataAsync(code, false, progress);
+            return tokenBearer;
         }
 
         private void OnStateChanged(OAuthEventArgs e)
@@ -326,58 +358,22 @@ namespace beta.Infrastructure.Services
             return pos == -1 ? null : line[pos..^3];
         }
 
-        private async Task<bool> TryParseTokenBearerAsync(Stream stream)
+        public async Task<TokenBearer> AuthByBrowser(CancellationToken token, IProgress<string> progress = null)
         {
-            if (stream is null) return false;
-
-            try
-            {
-                var data = await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
-                await stream.DisposeAsync();
-
-                if (data.AccessToken is null)
-                {
-                    throw new Exception();
-                }
-
-                Settings.Default.access_token = data.AccessToken;
-                Settings.Default.expires_in = data.ExpiresAt;
-                Settings.Default.id_token = data.IdToken;
-                Settings.Default.refresh_token = data.RefreshToken;
-                OnStateChanged(new(OAuthState.AUTHORIZED,""));
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"{ex.Message}\n{ex.StackTrace}");
-                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
-                await stream.DisposeAsync();
-            }
-            return false;
-        }
-
-        public async Task AuthByBrowser()
-        {
+            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization using browser callbacks"));
+            progress?.Report("Checking user privileges");
             using var identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            WindowsPrincipal principal = new (identity);
             if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
             {
-                OnStateChanged(new(OAuthState.INVALID, "Error", "Not enough priviliges\nStart application with administrator privileges"));
-                return;
+                throw new NotSupportedException("Not enough priviliges to start local HTTP listener. Start application with administrator privileges");
             }
-            
 
-            OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization"));
+            progress?.Report("Starting HTTP listener");
             HttpListener httpListener = new();
             httpListener.Prefixes.Add($"http://*/");
-            try
-            {
-                httpListener.Start();
-            }
-            catch (Exception ex)
-            {
-                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
-            }
+            httpListener.Start();
+            progress?.Report("HTTP listener started");
 
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
             var url = "https://hydra.faforever.com/oauth2/auth?" +
@@ -386,61 +382,67 @@ namespace beta.Infrastructure.Services
                 $"redirect_uri=http://localhost&" +
                    "scope=openid+offline+public_profile+lobby&" +
                 "state=" + generatedState;
-            try
+
+            progress?.Report("Opening OAuth form");
+            Process.Start(new ProcessStartInfo
             {
-                Process.Start(new ProcessStartInfo
+                FileName = url,
+                UseShellExecute = true,
+            });
+
+            progress?.Report("Waiting for callback from FAForever");
+
+            HttpListenerContext ctx = null;
+            await Task.Run(() =>
+            {
+                var task = httpListener.GetContextAsync();
+                try
                 {
-                    FileName = url,
-                    UseShellExecute = true,
-                });
-            }
-            catch(Exception ex)
-            {
-                OnStateChanged(new(OAuthState.INVALID, ex.Message, ex.StackTrace));
-            }
+                    task.Wait(token);
+                    if (task.IsCompleted) ctx = task.Result;
+                }
+                catch { }
+                httpListener.Stop();
+            });
 
-            while (true)
+            if (token.IsCancellationRequested)
             {
-                HttpListenerContext ctx = await httpListener.GetContextAsync();
-                if (ctx.Response is not null)
+                return null;
+            }
+            if (ctx.Response is not null)
+            {
+                progress?.Report("Fetching OAuth token");
+                if (ctx.Response.StatusCode == 200)
                 {
-                    if (ctx.Response.StatusCode == 200)
+                    //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
+                    var query = ctx.Request.Url.Query;
+
+                    var codeIndex = query.IndexOf("code=");
+
+                    if (codeIndex == -1)
                     {
-                        //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
-                        var query = ctx.Request.Url.Query;
-
-                        var codeIndex = query.IndexOf("code=");
-
-                        if (codeIndex == -1)
-                        {
-                            OnStateChanged(new(OAuthState.INVALID, $"Cant find special code in answer {query}"));
-                            httpListener.Stop();
-                            return;
-                        }
-
-                        var codedata = query[codeIndex..];
-
-                        var delIndex = codedata.IndexOf('&');
-
-                        var code = codedata;
-                        if (delIndex != -1)
-                        {
-                            code = codedata[..delIndex];
-                        }
-
-                        await FetchOAuthDataAsync(code);
-
+                        OnStateChanged(new(OAuthState.INVALID, $"Cant find special code in answer {query}"));
                         httpListener.Stop();
-                        break;
+                        throw new ArgumentNullException(nameof(ctx.Response), $"Cant find special code in answer {query}");  
                     }
-                    else
+
+                    var codedata = query[codeIndex..];
+
+                    var delIndex = codedata.IndexOf('&');
+
+                    var code = codedata;
+                    if (delIndex != -1)
                     {
-                        OnStateChanged(new(OAuthState.INVALID, $"Status code: {ctx.Response.StatusCode} on redirect from OAuth"));
-                        httpListener.Stop();
-                        break;
+                        code = codedata[..delIndex];
                     }
+                    return await FetchOAuthDataAsync(code);
+                }
+                else
+                {
+                    OnStateChanged(new(OAuthState.INVALID, $"Status code: {ctx.Response.StatusCode} on redirect from OAuth"));
                 }
             }
+            return null;
         }
     }
 }

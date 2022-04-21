@@ -60,6 +60,11 @@ namespace beta.Infrastructure.Services
         /// </summary>
         public event EventHandler<IrcChannelUsers> ChannelUsersReceived;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public event EventHandler<IrcNotificationMessage> NotificationMessageReceived;
+
         #endregion
 
         #region Properties
@@ -169,7 +174,14 @@ namespace beta.Infrastructure.Services
 
         public void Quit(string reason = null) => Send(IrcCommands.Quit(reason));
 
-        public void SendMessage(string channelOrUser, string message) => Send(IrcCommands.Message(channelOrUser, message));
+        public void SendMessage(string channelOrUser, string message)
+        {
+            Send(IrcCommands.Message(channelOrUser, message));
+            if (channelOrUser.StartsWith('#'))
+            {
+                OnChannelMessage(new(channelOrUser, Nick, message));
+            }
+        }
 
         public void SetTopic(string channel, string topic = null) => Send(IrcCommands.Topic(channel, topic));
 
@@ -205,6 +217,8 @@ namespace beta.Infrastructure.Services
             AppDebugger.LOGIRC($"You sent: {message}");
         }
 
+        private readonly Dictionary<string, List<string>> ChannelUsers = new();
+
         public void Test()
         {
             //Send(IrcCommands.Leave("#aeolus"));
@@ -215,7 +229,9 @@ namespace beta.Infrastructure.Services
             //Send(IrcCommands.Join("#test"));
             //Send(IrcCommands.Nickname(Nick + "1"));
             //Send(IrcCommands.Nickname("Eternal-"));
-            Send("NAMES #aeolus");
+            //Send("NAMES #aeolus");
+            //Send("OPER Eternal- Qzwxec12#");
+            Send("MODE #test2 +o MarcSpector");
             //Send("INVITE MarcSpector #aeolus1");
             //Send(IrcCommands.Leave("#aeolus1"));
             //Send(IrcCommands.Join("#aeolus2", "test")); 
@@ -226,6 +242,16 @@ namespace beta.Infrastructure.Services
         }
 
         public void GetChannelUsers(string channel) => Send(IrcCommands.Names(channel));
+
+        Timer timer = null;
+        TimerCallback tm = null;
+
+        void ChangeNickName(object obj)
+        {
+            Send(IrcCommands.Nickname(Properties.Settings.Default.PlayerNick));
+            timer?.Dispose();
+            timer = null;
+        }
 
         private void ManagedTcpClient_DataReceived(object sender, string data)
         {
@@ -265,9 +291,7 @@ namespace beta.Infrastructure.Services
                     Join("#aeolus");
                     break;
                 case "321": // start of list of 322
-
                     AppDebugger.LOGIRC($"Start of available channels");
-
                     break;
                 case "322": // channel information after 321
                     AppDebugger.LOGIRC($"Channel: {ircData[3]}, users: {ircData[4]}");
@@ -297,38 +321,72 @@ namespace beta.Infrastructure.Services
                     AppDebugger.LOGIRC($"Topic in channel: {ircData[3]} set by: {ircData[4]} at: {DateTime.UnixEpoch.AddSeconds(double.Parse(ircData[5]))}");
 
                     break;
-                case "353": // channel users
+                case "MODE": // MODE was set
                     {
-                        //:irc.faforever.com 353 Eter   nal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
-                        var channel = ircData[4];
-                        var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
-                        OnChannelUsersReceived(new(channel, users));
+                        //:Eternal-1 MODE Eternal-1 :+iwx
 
-                        //AppDebugger.LOGIRC($"channel: {channel} users count: {users.Length}");
-                        AppDebugger.LOGIRC($"channel: {channel} users: {string.Join(", ", users)}");
+                        //var channel = ircData[2];
+                        //if (channel != Nick)
+                        //{
+                        //    string from;
+                        //    if (ircData[0].Contains("!"))
+                        //        from = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
+                        //    else
+                        //        from = ircData[0].Substring(1);
 
+                        //    var to = ircData[4];
+                        //    var mode = ircData[3];
+                        //    //Fire_ChannelModeSet(new ModeSetEventArgs(channel, from, to, mode));
+                        //}
+
+                        // TODO: event for userMode's
+
+                        AppDebugger.LOGIRC($"{data}");
                     }
+                    break;
+                case "353": // channel users after MODE
+                    
+                    //:irc.faforever.com 353 Eternal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
+                    string channel = ircData[4];
+                    var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
+                    //OnChannelUsersReceived(new(channel, users));
+
+                    //AppDebugger.LOGIRC($"channel: {channel} users count: {users.Length}");
+                    AppDebugger.LOGIRC($"channel: {channel} users: {string.Join(", ", users)}");
+
+                    if (ChannelUsers.ContainsKey(channel))
+                    {
+                        ChannelUsers[channel].AddRange(users);
+                    }
+                    else
+                    {
+                        ChannelUsers.Add(channel, new(users));
+                    }
+
+                    
+                    break;
+                case "366":
+                    //:irc.faforever.com 366 Eternal- #test :End of /NAMES list.
+                    channel = ircData[3];
+                    OnChannelUsersReceived(new(channel, ChannelUsers[channel].ToArray()));
+                    AppDebugger.LOGIRC($"End of user lists: {channel} users: {ChannelUsers[channel].Count}");
                     break;
 
                 case "433":
 
                     break;//Nickname is unavailable: Being held for registered user
                 case "432":
-                    Send(IrcCommands.Nickname(Nick + 1));
-                    Timer timer = null;
-                    TimerCallback tm = new(ChangeNickName);
-                    timer = new Timer(tm, null, 10000, 10000);
-
-                    void ChangeNickName(object obj)
+                    Send(IrcCommands.Nickname(Nick + '`'));
+                    if (timer is null)
                     {
-                        Send(IrcCommands.Nickname(Properties.Settings.Default.PlayerNick));
-                        timer.Dispose();
-                    };
+                        if (tm is null) tm = new(ChangeNickName);
+                        timer = new Timer(tm, null, 10000, 10000);
+                    }
                     break;
                 case "JOIN": // someone joined
                     {
                         //:ThurnisHaley!396062@Clk-10163F26.hsd1.ma.comcast.net JOIN :#aeolus
-                        string channel = ircData[2][1..^1];
+                        channel = ircData[2][1..^1];
 
                         OnUserJoined(new(channel, from));
 
@@ -357,30 +415,6 @@ namespace beta.Infrastructure.Services
                     }
                     OnChannelTopicUpdated(new(ircData[2], sb.ToString()));
 
-                    break;
-                case "MODE": // MODE was set
-                    {
-                        //:Eternal-1 MODE Eternal-1 :+iwx
-
-                        //var channel = ircData[2];
-                        //if (channel != Nick)
-                        //{
-                        //    string from;
-                        //    if (ircData[0].Contains("!"))
-                        //        from = ircData[0].Substring(1, ircData[0].IndexOf("!", StringComparison.Ordinal) - 1);
-                        //    else
-                        //        from = ircData[0].Substring(1);
-
-                        //    var to = ircData[4];
-                        //    var mode = ircData[3];
-                        //    //Fire_ChannelModeSet(new ModeSetEventArgs(channel, from, to, mode));
-                        //}
-
-                        // TODO: event for userMode's
-
-                        AppDebugger.LOGIRC($"{data}");
-
-                    }
                     break;
                 case "NICK": // someone changed their nick
                     var to = data[(data.LastIndexOf(':') + 1)..^1];
@@ -449,7 +483,7 @@ namespace beta.Infrastructure.Services
                     break;
                 case "PART":
                     {
-                        OnUserLeft(new(ircData[2], from));
+                        OnUserLeft(new(ircData[2].TrimEnd(), from.Trim()));
 
                         AppDebugger.LOGIRC($"user: {from} left from {ircData[2]}");
 
@@ -485,6 +519,7 @@ namespace beta.Infrastructure.Services
             /<Command> <params> <params>
 
              */
+            var data = text.Split();
             switch (command)
             {
                 case IrcUserCommand.INVITE:
@@ -512,6 +547,9 @@ namespace beta.Infrastructure.Services
                     SetTopic(channel, newTopic);
                     break;
                 case IrcUserCommand.PART:
+                    channel = data[1];
+                    if (!channel.StartsWith('#')) channel = "#" + channel;
+                    ChannelUsers.Remove(channel);
                     Leave(channel);
                     break;
                 default:
@@ -524,17 +562,19 @@ namespace beta.Infrastructure.Services
         private void OnUserConnected(string user) => UserConnected?.Invoke(this, user);
         private void OnUserDisconnected(string user) => UserDisconnected?.Invoke(this, user);
 
-        private void OnUserJoined(IrcUserJoin data) => UserJoined?.Invoke(this, data);
-        private void OnUserLeft(IrcUserLeft data) => UserLeft?.Invoke(this, data);
+        private void OnUserJoined(IrcUserJoin e) => UserJoined?.Invoke(this, e);
+        private void OnUserLeft(IrcUserLeft e) => UserLeft?.Invoke(this, e);
 
-        private void OnUserChangedName(IrcUserChangedName data) => UserChangedName?.Invoke(this, data);
+        private void OnUserChangedName(IrcUserChangedName e) => UserChangedName?.Invoke(this, e);
 
-        private void OnPrivateMessage(IrcPrivateMessage data) => PrivateMessageReceived?.Invoke(this, data);
-        private void OnChannelMessage(IrcChannelMessage data) => ChannedMessageReceived?.Invoke(this, data);
+        private void OnPrivateMessage(IrcPrivateMessage e) => PrivateMessageReceived?.Invoke(this, e);
+        private void OnChannelMessage(IrcChannelMessage e) => ChannedMessageReceived?.Invoke(this, e);
 
-        private void OnChannelTopicUpdated(IrcChannelTopicUpdated data) => ChannelTopicUpdated?.Invoke(this, data);
-        private void OnChannelTopicChangedBy(IrcChannelTopicChangedBy data) => ChannelTopicChangedBy?.Invoke(this, data);
-        private void OnChannelUsersReceived(IrcChannelUsers data) => ChannelUsersReceived?.Invoke(this, data);
+        private void OnChannelTopicUpdated(IrcChannelTopicUpdated e) => ChannelTopicUpdated?.Invoke(this, e);
+        private void OnChannelTopicChangedBy(IrcChannelTopicChangedBy e) => ChannelTopicChangedBy?.Invoke(this, e);
+        private void OnChannelUsersReceived(IrcChannelUsers e) => ChannelUsersReceived?.Invoke(this, e);
+
+        private void OnNotificationMessageReceived(IrcNotificationMessage e) => NotificationMessageReceived?.Invoke(this, e);
 
         #endregion
 

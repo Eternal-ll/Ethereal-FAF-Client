@@ -71,8 +71,12 @@ namespace beta.Views
             }
         }
 
-        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e) => 
-            LoginButton.CommandParameter = ((PasswordBox)sender).Password;
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            var input = (PasswordBox)sender;
+            LoginButton.CommandParameter = input.Password;
+            LoginButton.IsEnabled = !string.IsNullOrWhiteSpace(input.Password);
+        }
 
         private void OnPreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {

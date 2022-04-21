@@ -92,8 +92,6 @@ namespace beta.ViewModels
             }
             Data[SelectedRatingType] = data.ToArray();
             OnPropertyChanged(nameof(SelectedRatingData));
-
-            
         }
     }
 }

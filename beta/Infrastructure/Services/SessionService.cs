@@ -62,7 +62,7 @@ namespace beta.Infrastructure.Services
                     {
                         if (Settings.Default.ConnectIRC)
                         {
-                            //IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+                            IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
                         }
                     }
                 }
@@ -110,11 +110,6 @@ namespace beta.Infrastructure.Services
             #endregion
         }
         #endregion
-        public void Connect()
-        {
-            Client = new(threadName: "TCP Lobby Client", port: 8002);
-            Client.DataReceived += OnDataReceived;
-        }
         public async Task<string> GenerateUID(string session)
         {
             Logger.LogInformation($"Generating UID for session: {session}");
@@ -124,8 +119,6 @@ namespace beta.Infrastructure.Services
                 Logger.LogWarning("Passed session value is empty");
                 return null;
             }
-
-            string result = null;
 
             Logger.LogInformation("Getting path to faf-uid.exe");
 
@@ -145,96 +138,48 @@ namespace beta.Infrastructure.Services
             process.Start();
 
             Logger.LogInformation("Starting process of faf-uid.exe");
-            while (!process.StandardOutput.EndOfStream)
-            {
-                var line = process.StandardOutput.ReadLine();
-                Logger.LogInformation($"Output line: {line}");
-                result += line;
-            }
+
+            string result = await process.StandardOutput.ReadLineAsync();
+            Logger.LogInformation($"Output line: {result}");
+
             process.Close();
             Logger.LogInformation($"faf-uid.exe process is closed");
             return result;
         }
-        public async void Authorize()
+        public async Task AuthorizeAsync(string accessToken, CancellationToken token)
         {
             Logger.LogInformation($"Starting authorization process to lobby server");
-
-            // TODO Fix
-            if (Client is null)
+            Client = new()
             {
-                Client = new(port: 8002)
-                {
-                    ThreadName = "TCP Lobby Server"
-                };
-                Client.DataReceived += OnDataReceived;
-                // TODO Requires some better logic maybe
-                ManagedTcpClientState state = ManagedTcpClientState.Disconnected;
-                Client.StateChanged += (s, e) =>
-                {
-                    state = e;
-                    if (e == ManagedTcpClientState.CantConnect || e == ManagedTcpClientState.TimedOut)
-                    {
-                        // TODO Raise events
-                        //OnAuthorization(false);
-                        IsAuthorized = false;
-                        return;
-                    }
-                };
-                while (state != ManagedTcpClientState.Connected)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-            else
-            {
-                if (Client.TcpClient is null)
-                {
-                    ManagedTcpClientState state = ManagedTcpClientState.Disconnected;
-                    Client.StateChanged += (s, e) =>
-                    {
-                        state = e;
-                        if (e == ManagedTcpClientState.CantConnect || e == ManagedTcpClientState.TimedOut)
-                        {
-                            // TODO Raise events
-                            //OnAuthorization(false);
-                            IsAuthorized = false;
-                            return;
-                        }
-                    };
-                    while (state != ManagedTcpClientState.Connected)
-                    {
-                        Thread.Sleep(10);
-                    }
-                    Client.Connect();
-                }
-            }
+                Host = "lobby.faforever.com",
+                Port = 8002,
+                ThreadName = "TCP Lobby Server"
+            };
+            Client.DataReceived += OnDataReceived;
+            
+            var reply = (await Client.ConnectAndGetReplyAsync("{\"command\": \"ask_session\", \"version\": \"0.20.1+12-g2d1fa7ef.git\", \"user_agent\": \"faf-client\"}\n",
+                "session")).Split('\"');
 
-            string session = GetSession();
-            string accessToken = Settings.Default.access_token;
+            //:1058334349}
+            string session = reply[^1][1..reply[^1].IndexOf('}')];
+
             string generatedUID = await GenerateUID(session);
-
-
             string authJson = ServerCommands.PassAuthentication(accessToken, generatedUID, session);
 
             Logger.LogInformation($"Sending data for authentication to lobby-server...");
-
-            Client.Write(authJson);
+            await Client.WriteAsync(authJson);
         }
-        public string GetSession()
+        public async Task<string> GetSession()
         {
-            /*WRITE
+            /* WRITE
             {
                 "command": "ask_session",
                 "version": "0.20.1+12-g2d1fa7ef.git",
                 "user_agent": "faf-client"
             }*/
 
-            // just a joke
-            var response = Client.WriteLineAndGetReply(new byte[] {123, 34, 99, 111, 109, 109, 97, 110, 100, 34, 58, 34, 97, 115, 107, 95, 115, 101, 115, 115, 105, 111,
-                110, 34, 44, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 34, 48, 46, 50, 48, 46, 49, 92, 117, 48, 48,
-                50, 66, 49, 50, 45, 103, 50, 100, 49, 102, 97, 55, 101, 102, 46, 103, 105, 116, 34, 44, 34, 117, 115,
-                101, 114, 95, 97, 103, 101, 110, 116, 34, 58, 34, 102, 97, 102, 45, 99, 108, 105, 101, 110, 116, 34,
-                125, 10}, ServerCommand.session, new(0, 0, 10));
+            var response = await Client.WriteLineAndGetReply(
+                "{\"command\": \"ask_session\", \"version\": \"0.20.1+12-g2d1fa7ef.git\", \"user_agent\": \"faf-client\"}", ServerCommand.session);
 
             return response.GetRequiredJsonRowValue(2);
         }
@@ -254,8 +199,8 @@ namespace beta.Infrastructure.Services
 
         private void OnAuthResult(object sender, OAuthEventArgs e)
         {
-            if (e.State == OAuthState.AUTHORIZED)
-                Authorize();
+            //if (e.State == OAuthState.AUTHORIZED)
+            //    Task.Run(() => Authorize());
         }
 
         private void OnDataReceived(object sender, string json)

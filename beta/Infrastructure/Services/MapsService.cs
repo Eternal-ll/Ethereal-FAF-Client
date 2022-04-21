@@ -339,15 +339,6 @@ namespace beta.Infrastructure.Services
 
         private GameMap GameMap(string name)
         {
-            //if (string.IsNullOrEmpty(name)) return null;
-
-            var cachedMaps = CachedMaps;
-            for (int i = 0; i < cachedMaps.Count; i++)
-            {
-                var cached = cachedMaps[i];
-                if (cached.OriginalName == name) return cached;
-            }
-
             var isLegacy = IsLegacyMap(name);
 
             GameMap gameMap = new(name)
@@ -365,20 +356,33 @@ namespace beta.Infrastructure.Services
         }
         public async Task<GameMap> GetGameMap(string name)
         {
+            var cachedMaps = CachedMaps;
+            for (int i = 0; i < cachedMaps.Count; i++)
+            {
+                var cached = cachedMaps[i];
+                if (cached.OriginalName == name) return cached;
+            }
             var gameMap = GameMap(name);
 
             if (name.StartsWith("neroxis")) return gameMap;
 
             Uri uri = new($"https://content.faforever.com/maps/previews/small/{name}.png");
 
-            Task.Run(async () =>
-            {
-                gameMap.ImageSource = await CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews);
-                if (gameMap.IsLegacy)
+            //Task.Run(async () =>
+            //{
+            Task.Run(() =>
+            CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews)
+                .ContinueWith(task =>
                 {
-                    gameMap.Scenario = GetMapScenario(name, true);
-                }
-            });
+                    gameMap.ImageSource = task.Result;
+                })
+            );
+            //gameMap.ImageSource = await CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews).ConfigureAwait(false);
+            if (gameMap.IsLegacy)
+            {
+                gameMap.Scenario = GetMapScenario(name, true);
+            }
+            //});
 
             CachedMaps.Add(gameMap);
             return gameMap;

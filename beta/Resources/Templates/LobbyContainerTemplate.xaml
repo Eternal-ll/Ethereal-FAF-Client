@@ -306,7 +306,8 @@
                         </Style.Triggers>
                     </Style>
                 </WrapPanel.Resources>
-                <Border Background="Orange"
+                <!--Лишняя информация (C) Sid-->
+                <!--<Border Background="Orange"
                         CornerRadius="4"
                         Padding="6 4"
                         ToolTip="Original SC:Forged Alliance map">
@@ -323,7 +324,7 @@
                           Height="14"
                           Stretch="Uniform"
                           Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
-                </Border>
+                </Border>-->
                 <Border Background="{StaticResource BackgroundHalfBlack}"
                         CornerRadius="4"
                         Padding="8 4"
@@ -443,21 +444,21 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>-->
-                            
-                    <Path Fill="LightGreen"
+
+                    <!--Лишняя информация (C) Sid-->
+                    <!--<Path Fill="LightGreen"
                               ToolTip="Original game map"
                               Data="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z">
                         <Path.Style>
                             <Style TargetType="Path">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <!--<Style.Triggers>
+                                --><!--<Style.Triggers>
                                         <DataTrigger Binding="{Binding Map.IsLegacy}" Value="True">
                                             <Setter Property="Visibility" Value="Visible"/>
                                         </DataTrigger>
-                                    </Style.Triggers>-->
+                                    </Style.Triggers>--><!--
                             </Style>
                         </Path.Style>
-                    </Path>
+                    </Path>-->
 
                     <Border
                         CornerRadius="4"
@@ -521,8 +522,9 @@
                         </Button>
                     </Border>
 
-                            
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+
+                    <!--Лишняя информация (C) Sid-->
+                    <!--<Border HorizontalAlignment="Right" VerticalAlignment="Top"
                             Margin="0 0 4 0"
                             Padding="4 8 4 4"
                             CornerRadius="0 0 4 4"
@@ -552,8 +554,8 @@
                               Height="14"
                               Stretch="Uniform"
                               Data="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" />
-                        <!--<TextBlock Text="O" Foreground="Black"/>-->
-                    </Border>
+                        --><!--<TextBlock Text="O" Foreground="Black"/>--><!--
+                    </Border>-->
 
                     <!--UNUSED. FOR FUTURE. CREATE / DELETE map-->
                     <Border
@@ -644,8 +646,11 @@
                 Grid.Column="1"
                 Grid.Row="1"
                 Background="Transparent">
-                <StackPanel Orientation="Horizontal" ToolTip="Host"
-                            Margin="10 0 0 0">
+
+                <!--<ContentControl Content="{Binding Host}"/>-->
+                <!--<StackPanel Orientation="Horizontal" ToolTip="Host"
+                            Margin="10 0 0 0"
+                            Visibility="Collapsed">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Style.Triggers>
@@ -666,12 +671,12 @@
                         Margin="0 0 0 1"
                         Stretch="Uniform"
                         VerticalAlignment="Center"/>
-                    <!--<Path
+                    --><!--<Path
                         Height="14"
                         Margin="0 0 0 1"
                         Stretch="Uniform"
                         VerticalAlignment="Center"
-                        Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>-->
+                        Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>--><!--
                     <Image
                         Source="{Binding Host.Flag}"
                         Stretch="Uniform"
@@ -735,7 +740,7 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Trigger>
-                                    <!--<EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    --><!--<EventTrigger RoutedEvent="Binding.TargetUpdated">
                                         <EventTrigger.Actions>
                                             <BeginStoryboard>
                                                 <Storyboard>
@@ -747,7 +752,7 @@
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger.Actions>
-                                    </EventTrigger>-->
+                                    </EventTrigger>--><!--
                                     <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
                                                  Value="0">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -765,7 +770,7 @@
                         DataContext="{Binding Host}"
                         Style="{StaticResource AvatarImageStyle}">
                     </Image>
-                </StackPanel>
+                </StackPanel>-->
 
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="-8 0">
@@ -965,6 +970,11 @@
                                 <DataTrigger Binding="{Binding State}" Value="2">
                                     <Setter Property="IsEnabled" Value="False"/>
                                     <Setter Property="Content" Value="Watch (Not implemented yet)"/>
+                                    <Setter Property="ToolTip" Value="Not implemented yet"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding sim_mods.Count, Converter={StaticResource MoreThanConverter}}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Content" Value="Mods not supported"/>
                                     <Setter Property="ToolTip" Value="Not implemented yet"/>
                                 </DataTrigger>
                             </Style.Triggers>

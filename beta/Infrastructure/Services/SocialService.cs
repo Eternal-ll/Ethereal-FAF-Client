@@ -21,13 +21,13 @@ namespace beta.Infrastructure.Services
         - Modifying the currently selected avatar
         */
 
-        public event EventHandler<string> AddedFriend;
-        public event EventHandler<string> AddedFoe;
-        public event EventHandler<string> RemovedFriend;
-        public event EventHandler<string> RemovedFoe;
+        public event EventHandler<int> AddedFriend;
+        public event EventHandler<int> AddedFoe;
+        public event EventHandler<int> RemovedFriend;
+        public event EventHandler<int> RemovedFoe;
+        public event EventHandler<KeyValuePair<int, PlayerRelationShip>> PlayerdRelationshipChanged;
 
         private readonly ISessionService SessionService;
-        private readonly IPlayersService PlayersService;
 
         public SocialData SocialMessage { get; set; }
 
@@ -36,59 +36,50 @@ namespace beta.Infrastructure.Services
         public string[] Foes => throw new NotImplementedException();
 
         public SocialService(
-            ISessionService sessionService,
-            IPlayersService playersService)
+            ISessionService sessionService)
         {
             SessionService = sessionService;
-            PlayersService = playersService;
         }
 
         #region Methods
-        public void AddFriend(int id) => SendCommand(ServerCommands.AddFriend(id.ToString()), id, PlayerRelationShip.Friend);
-        public void AddFoe(int id) => SendCommand(ServerCommands.AddFoe(id.ToString()), id, PlayerRelationShip.Foe);
-        public void RemoveFriend(int id) => SendCommand(ServerCommands.RemoveFriend(id.ToString()), id, PlayerRelationShip.Friend, true);
-        public void RemoveFoe(int id) => SendCommand(ServerCommands.RemoveFoe(id.ToString()), id, PlayerRelationShip.Foe, true);
+        public void AddFriend(int id) => SendCommand(ServerCommands.AddFriend(id), id, PlayerRelationShip.Friend);
+        public void AddFoe(int id) => SendCommand(ServerCommands.AddFoe(id), id, PlayerRelationShip.Foe);
+        public void RemoveFriend(int id) => SendCommand(ServerCommands.RemoveFriend(id), id, PlayerRelationShip.Friend, true);
+        public void RemoveFoe(int id) => SendCommand(ServerCommands.RemoveFoe(id), id, PlayerRelationShip.Foe, true);
 
         private void SendCommand(string command, int id, PlayerRelationShip relation, bool isRemoving = false)
         {
-            var player = PlayersService.GetPlayer(id);
-            if (player is not null)
-            {
-                if (isRemoving)
-                    relation = PlayerRelationShip.None;
-                
-                player.RelationShip = relation;
-            }
-
             SessionService.Send(command);
+            switch (relation)
+            {
+                case PlayerRelationShip.Friend:
+                    if (isRemoving)
+                    {
+                        relation = PlayerRelationShip.None;
+                        RemovedFriend?.Invoke(this, id);
+                    }
+                    else AddedFriend?.Invoke(this, id);
+                    break;
+                case PlayerRelationShip.Foe:
+                    if (isRemoving)
+                    {
+                        relation = PlayerRelationShip.None;
+                        RemovedFoe?.Invoke(this, id);
+                    }
+                    else AddedFoe?.Invoke(this, id);
+                    break;
+            }
+            PlayerdRelationshipChanged?.Invoke(this, new(id, relation));
         }
 
         public List<PlayerInfoMessage> GetFriends()
         {
-            var friendsIds = SocialMessage.friends;
-            List<PlayerInfoMessage> friends = new();
-            for (int i = 0; i < friendsIds.Count; i++)
-            {
-                if (PlayersService.TryGetPlayer(friendsIds[i], out var player))
-                {
-                    friends.Add(player);
-                }
-            }
-            return friends;
+            throw new NotImplementedException();
         }
 
         public List<PlayerInfoMessage> GetFoes()
         {
-            var foesIds = SocialMessage.friends;
-            List<PlayerInfoMessage> foes = new();
-            for (int i = 0; i < foesIds.Count; i++)
-            {
-                if (PlayersService.TryGetPlayer(foesIds[i], out var player))
-                {
-                    foes.Add(player);
-                }
-            }
-            return foes;
+            throw new NotImplementedException();
         }
         #endregion
     }

@@ -23,11 +23,11 @@ namespace beta.Infrastructure.Commands
                 return;
             }
             var model = new HostGameViewModel();
-            var result = await NotificationService.ShowDialog(model);
-            if (result == ModernWpf.Controls.ContentDialogResult.Primary)
-            {
-                model.HostGameCommand.Execute(null);
-            }
+            await NotificationService.ShowDialog(model);
+            //if (result == ModernWpf.Controls.ContentDialogResult.Primary)
+            //{
+            //    model.HostGameCommand.Execute(null);
+            //}
         }
     }
 }

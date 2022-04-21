@@ -14,17 +14,16 @@ namespace beta.ViewModels
         {
             IrcService = App.Services.GetService<IIrcService>();
 
-            UpdateState();
-
-            IrcService.StateChanged += OnIrcStateChanged;
-
-            if (Settings.Default.ConnectIRC && !IsConnected)
+            if (Settings.Default.ConnectIRC)
             {
-                IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password);
+
             }
+            else
+            {
+                CurrentViewModel = new ChatPreviewViewModel();
+            }
+            IrcService.StateChanged += OnIrcStateChanged;
         }
-        //private ChatPreviewViewModel ChatPreviewViewModel;
-        //private ChatViewModel ChatViewModel;
 
         #region IsConnected
         private bool _IsConnected;
@@ -35,30 +34,51 @@ namespace beta.ViewModels
             {
                 if (Set(ref _IsConnected, value))
                 {
-                    if (value)
+                    App.Current.Dispatcher.Invoke(() =>
                     {
-                        CurrentViewModel = new ChatViewModel();
-                    }
-                    else
-                    {
-                        CurrentViewModel = new ChatPreviewViewModel();
-                    }
+                        if (value)
+                        {
+                            CurrentViewModel = new ChatViewModel();
+                        }
+                        else
+                        {
+                            CurrentViewModel = new ChatPreviewViewModel();
+                        }
+                    });
                 }
             }
         }
         #endregion
 
         #region CurrentViewModel
-        private ViewModel _CurrentViewModel = new ChatPreviewViewModel();
+        private ViewModel _CurrentViewModel;
         public ViewModel CurrentViewModel
         {
             get => _CurrentViewModel;
-            set => Set(ref _CurrentViewModel, value);
+            set
+            {
+                if (_CurrentViewModel is not null)
+                {
+                    _CurrentViewModel.Dispose();
+                }
+                if (Set(ref _CurrentViewModel, value))
+                {
+
+                }
+            }
         }
         #endregion
 
         private void UpdateState() => IsConnected = IrcService.State == IrcState.Authorized;
 
-        private void OnIrcStateChanged(object sender, IrcState e) => UpdateState();
+        private void OnIrcStateChanged(object sender, IrcState e)
+        {
+            if (e == IrcState.PendingConnection || e == IrcState.PendingAuthorization)
+            {
+                CurrentViewModel = new ChatConnectingViewModel();
+                return;
+            }
+            UpdateState();
+        }
     }
 }

@@ -17,16 +17,19 @@ namespace beta.Infrastructure.Converters
                 if (player.IsChatModerator)
                     return "Moderators";
 
+                if (player.IsClanmate)
+                    return "Clan";
+
                 return player.RelationShip switch
                 {
                     PlayerRelationShip.Me => "Me",
                     PlayerRelationShip.Friend => "Friends",
                     PlayerRelationShip.None => "Players",
                     PlayerRelationShip.Foe => "Foes",
-                    PlayerRelationShip.Clan => "Clan"
+                    //PlayerRelationShip.Clan => "Clan"
                 };
             }
-            else return "IRC users";
+            return "IRC users";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

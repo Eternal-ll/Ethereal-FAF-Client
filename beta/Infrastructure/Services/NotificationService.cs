@@ -1,7 +1,10 @@
-﻿using beta.ViewModels;
+﻿using beta.Models;
+using beta.ViewModels;
 using ModernWpf.Controls;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace beta.Infrastructure.Services
 {
@@ -91,7 +94,7 @@ namespace beta.Infrastructure.Services
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
                 case HostGameViewModel hostVM:
-                    //ContentDialog.PrimaryButtonCommand = hostVM.HostGameCommand;
+                    ContentDialog.PrimaryButtonCommand = hostVM.HostGameCommand;
                     ContentDialog.PrimaryButtonText = "Host";
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
@@ -144,6 +147,20 @@ namespace beta.Infrastructure.Services
         {
             ((DownloadViewModel)sender).Completed -= Download_Completed;
             ContentDialog.Dispatcher.Invoke(() => ContentDialog.Hide());
+        }
+
+        public async Task ShowExceptionAsync(Exception ex)
+        {
+            await App.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                ContentDialog = new();
+                ContentDialog.Content = new ExceptionWrapper(ex);
+                ContentDialog.CloseButtonText = "Close";
+                ContentDialog.PrimaryButtonText = "Copy trace";
+                ContentDialog.PrimaryButtonCommand = App.Current.Resources["CopyCommand"] as ICommand;
+                ContentDialog.PrimaryButtonCommandParameter = ex.InnerException.ToString();
+                await ContentDialog.ShowAsync();
+            });
         }
     }
 }

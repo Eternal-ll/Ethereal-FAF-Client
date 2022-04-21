@@ -49,12 +49,24 @@ namespace beta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.DateTime expires_in {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double ExpiresIn {
             get {
-                return ((global::System.DateTime)(this["expires_in"]));
+                return ((double)(this["ExpiresIn"]));
             }
             set {
-                this["expires_in"] = value;
+                this["ExpiresIn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime ExpiresAt {
+            get {
+                return ((global::System.DateTime)(this["ExpiresAt"]));
+            }
+            set {
+                this["ExpiresAt"] = value;
             }
         }
         
@@ -278,7 +290,7 @@ namespace beta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ConnectIRC {
             get {
                 return ((bool)(this["ConnectIRC"]));

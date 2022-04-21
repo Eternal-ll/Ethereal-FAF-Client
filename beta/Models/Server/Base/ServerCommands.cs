@@ -53,25 +53,25 @@ namespace beta.Models.Server.Base
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string AddFriend(string id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
+        public static string AddFriend(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
         /// <summary>
         /// Remove from friends
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string RemoveFriend(string id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
+        public static string RemoveFriend(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
         /// <summary>
         /// Add to foes
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string AddFoe(string id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
+        public static string AddFoe(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
         /// <summary>
         /// Remove from foes
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string RemoveFoe(string id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
+        public static string RemoveFoe(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
 
         /// <summary>
         /// Requests MatchMaker info

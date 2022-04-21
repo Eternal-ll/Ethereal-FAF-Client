@@ -1,16 +1,17 @@
 ﻿using beta.ViewModels.Base;
-using System.Threading.Tasks;
 
 namespace beta.ViewModels
 {
     internal class GlobalGamesViewModel : ViewModel
     {
-        private CustomGamesViewModel CustomGamesViewModel;
-        private CustomLiveGamesViewModel CustomLiveGamesViewModel;
+        private readonly CustomGamesViewModel CustomGamesViewModel;
+        private readonly CustomLiveGamesViewModel CustomLiveGamesViewModel;
 
         public GlobalGamesViewModel()
         {
-            Task.Run(() => IsIdleGamesOnView = true);
+            CustomGamesViewModel = new();
+            CustomLiveGamesViewModel = new();
+            IsIdleGamesOnView = true;
         }
 
         #region CurrentCustomGamesViewModel
@@ -18,13 +19,7 @@ namespace beta.ViewModels
         public ViewModel CurrentCustomGamesViewModel
         {
             get => _CurrentCustomGamesViewModel;
-            set
-            {
-                if (Set(ref _CurrentCustomGamesViewModel, value))
-                {
-
-                }
-            }
+            set => Set(ref _CurrentCustomGamesViewModel, value);
         }
         #endregion
 
@@ -41,8 +36,8 @@ namespace beta.ViewModels
                     if (value)
                     {
                         _IsIdleGamesOnView = false;
+                        CurrentCustomGamesViewModel = CustomLiveGamesViewModel;
                         OnPropertyChanged(nameof(IsIdleGamesOnView));
-                        CurrentCustomGamesViewModel = CustomLiveGamesViewModel ??= new();
                     }
                 }
             }
@@ -61,8 +56,8 @@ namespace beta.ViewModels
                     if (value)
                     {
                         _IsLiveGamesOnView = false;
+                        CurrentCustomGamesViewModel = CustomGamesViewModel;
                         OnPropertyChanged(nameof(IsLiveGamesOnView));
-                        CurrentCustomGamesViewModel = CustomGamesViewModel ??= new();
                     }
                 }
             }
@@ -75,8 +70,8 @@ namespace beta.ViewModels
             {
                 CustomLiveGamesViewModel?.Dispose();
                 CustomGamesViewModel?.Dispose();
-                CustomLiveGamesViewModel = null;
-                CustomGamesViewModel = null;
+                CustomLiveGamesViewModel.Dispose();
+                CustomGamesViewModel.Dispose();
             }
             base.Dispose(disposing);
         }

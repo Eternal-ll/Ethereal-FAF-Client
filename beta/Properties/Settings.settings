@@ -8,7 +8,10 @@
     <Setting Name="access_token" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="expires_in" Type="System.DateTime" Scope="User">
+    <Setting Name="ExpiresIn" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="ExpiresAt" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="refresh_token" Type="System.String" Scope="User">
@@ -66,7 +69,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ConnectIRC" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="AlwaysDownloadMap" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>

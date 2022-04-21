@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace beta.Models
 {
@@ -75,6 +76,11 @@ namespace beta.Models
 
         #region Methods
 
+        public async Task ConnectAndAuthorize()
+        {
+            TcpClient = new();
+        }
+
         #region Public
         /// <summary>
         /// Connect to the IRC server
@@ -92,54 +98,62 @@ namespace beta.Models
         private bool IsDisconnected = false;
         public bool Write(byte[] data)
         {
-            if (!IsDisconnected)
-            {
-                if (TcpClient is null)
-                {
-                    IsDisconnected = true;
-                    OnStateChanged(ManagedTcpClientState.Disconnected);
-                    return false;
-                    //throw new Exception("Cannot send data to a null TcpClient (check to see if Connect was called)");
-                }
-                else if (!TcpClient.Connected)
-                {
-                    IsDisconnected = true;
-                    OnStateChanged(ManagedTcpClientState.Disconnected);
-                    return false;
-                }
-            }
-            if (Stream is not null && !IsDisposed)
+            try
             {
                 IsDisconnected = false;
+                if (Stream is null)
+                {
+                    OnStateChanged(ManagedTcpClientState.Disconnected);
+                    return false;
+                }
                 Stream.Write(data, 0, data.Length);
                 return true;
             }
-            return false;
+            catch (Exception ex)
+            {
+                IsDisconnected = true;
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                return false;
+            }
         }
 
         public bool Write(string data) => Write(StringEncoder.GetBytes(data + '\n'));
+        public async Task WriteAsync(string data)
+        {
+            if (data[^1] != '\n') data += '\n';
+            await Stream.WriteAsync(StringEncoder.GetBytes(data));
+        }
 
-        public string WriteLineAndGetReply(string data, ServerCommand command, TimeSpan timeout)
+        public async Task WaitResponse()
+        {
+            await Stream.ReadAsync(null);
+        }
+
+        public async Task<string> WriteLineAndGetReply(string data, ServerCommand command)
         {
             string reply = string.Empty;
 
-            DataReceived += (s, e) =>
+            //DataReceived += (s, e) =>
+            //{
+            //    // parsing first row
+            //    // "command": "....",
+            //    if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
+            //        if (repylCommand == command)
+            //            reply = e;
+            //    DataReceived -= (s, e) => { };
+            //};
+
+            await WriteAsync(data);
+            byte[] buffer = new byte[16284];
+            while (TcpClient.Connected)
             {
-                // parsing first row
-                // "command": "....",
-                if (Enum.TryParse<ServerCommand>(e.GetRequiredJsonRowValue(), out var repylCommand))
-                    if (repylCommand == command)
-                        reply = e;
-                DataReceived -= (s, e) => { };
-            };
-
-            Write(data);
-
-            Stopwatch sw = new();
-            sw.Start();
-
-            while (reply.Length == 0 && sw.Elapsed < timeout)
-                Thread.Sleep(10);
+                await Stream.ReadAsync(buffer);
+                reply = StringEncoder.GetString(buffer);
+                if (Enum.TryParse<ServerCommand>(reply.GetRequiredJsonRowValue(), out var replyCommand) && replyCommand == command)
+                {
+                    break;
+                }
+            }
 
             return reply;
         }
@@ -169,6 +183,69 @@ namespace beta.Models
         }
         #endregion
 
+        public async Task ConnectAsync(CancellationToken token)
+        {
+            if (TcpClient is not null)
+            {
+                TcpClient.Close();
+            }
+            TcpClient = new();
+            await TcpClient.ConnectAsync(Host, Port, token);
+            Stream = TcpClient.GetStream();
+            TcpThread = new(DoListen)
+            {
+                Name = ThreadName,
+                IsBackground = true,
+            };
+            TcpThread.Start();
+        }
+        public async Task<string> ConnectAndGetReplyAsync(string data, string contains)
+        {
+            if (TcpClient is not null)
+            {
+                TcpClient.Close();
+            }
+            TcpClient = new();
+            await TcpClient.ConnectAsync(Host, Port);
+            Stream = TcpClient.GetStream();
+            await Stream.WriteAsync(StringEncoder.GetBytes(data));
+            byte[] buffer = new byte[16284];
+            var reply = string.Empty;
+            while (!reply.Contains(contains))
+            {
+                if (Stream.DataAvailable)
+                {
+                    buffer = new byte[16284];
+                    await Stream.ReadAsync(buffer);
+                    reply = StringEncoder.GetString(buffer);
+                }
+            }
+            TcpThread = new(DoListen)
+            {
+                Name = ThreadName,
+                IsBackground = true,
+            };
+            TcpThread.Start();
+            return reply;
+        }
+
+        private void DoListen()
+        {
+            try
+            {
+                while (!IsListening)
+                {
+                    RunLoopStep();
+
+                    Thread.Sleep(ReadLoopIntervalMs);
+                }
+            }
+            catch (SocketException ex)
+            {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+            }
+        }
+
         private void DoConnect()
         {
             OnStateChanged(ManagedTcpClientState.PendingConnection);
@@ -179,19 +256,7 @@ namespace beta.Models
                 Stream = TcpClient.GetStream();
                 OnStateChanged(ManagedTcpClientState.Connected);
 
-                try
-                {
-                    while (!IsListening)
-                    {
-                        RunLoopStep();
-
-                        Thread.Sleep(ReadLoopIntervalMs);
-                    }
-                }
-                catch(SocketException ex)
-                {
-
-                }
+                DoListen();
             }
             catch (SocketException e)
             {
@@ -278,6 +343,7 @@ namespace beta.Models
             if (IsDisposed) return;
             IsListening = true;
             TcpClient.Close();
+            TcpClient.Dispose();
             OnStateChanged(ManagedTcpClientState.Disconnected);
             IsDisposed = true;
         }

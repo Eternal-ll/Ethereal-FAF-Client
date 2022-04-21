@@ -2,10 +2,11 @@
 {
     public enum PlayerRelationShip : byte
     {
-        None = 0,
+        Me = 0,
         Friend = 1,
-        Foe = 2,
-        Clan = 3,
-        Me = 4
+        Clan = 2,
+        None = 3,
+        Foe = 4,
+        IRC
     }
 }
