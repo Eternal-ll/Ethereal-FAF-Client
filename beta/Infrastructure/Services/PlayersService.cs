@@ -41,6 +41,8 @@ namespace beta.Infrastructure.Services
         private readonly INoteService NoteService;
         private readonly IIrcService IrcService;
 
+        private readonly IFavouritesService FavoritesService;
+
         private readonly ILogger Logger;
 
         #endregion
@@ -69,6 +71,7 @@ namespace beta.Infrastructure.Services
             IGamesService gamesService,
             ISocialService socialService,
             IIrcService ircService,
+            IFavouritesService favoritesService,
             ILogger<PlayersService> logger)
         {
             SessionService = sessionService;
@@ -76,6 +79,7 @@ namespace beta.Infrastructure.Services
             GamesService = gamesService;
             SocialService = socialService;
             IrcService = ircService;
+            FavoritesService = favoritesService;
             Logger = logger;
 
             sessionService.PlayerReceived += OnPlayerReceived;
@@ -104,6 +108,27 @@ namespace beta.Infrastructure.Services
                 }
                 NoteService.Save();
             };
+
+            favoritesService.FavouriteAdded += FavoritesService_FavouriteAdded;
+            favoritesService.FavouriteRemoved += FavoritesService_FavouriteRemoved;
+        }
+
+        private void FavoritesService_FavouriteRemoved(object sender, int e)
+        {
+            if (TryGetPlayer(e, out var player))
+            {
+                player.IsFavourite = false;
+                OnPlayerUpdated(player);
+            }
+        }
+
+        private void FavoritesService_FavouriteAdded(object sender, int e)
+        {
+            if (TryGetPlayer(e, out var player))
+            {
+                player.IsFavourite = true;
+                OnPlayerUpdated(player);
+            }
         }
 
         private void GamesService_NewGameReceived(object sender, GameInfoMessage e)
@@ -144,6 +169,7 @@ namespace beta.Infrastructure.Services
             if (TryGetPlayer(e, out var player))
             {
                 Players.Remove(player);
+
                 PlayerLeft?.Invoke(this, player);
                 Logger.LogWarning("User disconnected");
             }

@@ -25,6 +25,9 @@
                     <cmd:RemoveFriendCommand x:Key="RemoveFriendCommand"/>
                     <cmd:RemoveFoeCommand x:Key="RemoveFoeCommand"/>
 
+                    <cmd:AddFavouriteCommand x:Key="AddFavouriteCommand"/>
+                    <cmd:RemoveFavouriteCommand x:Key="RemoveFavouriteCommand"/>
+
                     <cmd:ConnectToIrcCommand x:Key="ConnectToIrcCommand"/>
                     <cmd:DisconnectFromIrcCommand x:Key="DisconnectFromIrcCommand"/>
                     <cmd:RefreshIrcCommand x:Key="RefreshIrcCommand"/>
