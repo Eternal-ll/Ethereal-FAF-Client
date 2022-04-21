@@ -20,6 +20,9 @@ namespace beta.Infrastructure.Converters
                 if (player.IsClanmate)
                     return "Clan";
 
+                if (player.IsFavourite)
+                    return "Favourites";
+
                 return player.RelationShip switch
                 {
                     PlayerRelationShip.Me => "Me",

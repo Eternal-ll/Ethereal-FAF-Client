@@ -32,6 +32,7 @@ namespace beta.ViewModels
 
             PropertyGroupDescription groupDescription = new(null, new ChatUserGroupConverter());
             groupDescription.GroupNames.Add("Me");
+            groupDescription.GroupNames.Add("Favourites");
             groupDescription.GroupNames.Add("Moderators");
             groupDescription.GroupNames.Add("Friends");
             groupDescription.GroupNames.Add("Clan");
