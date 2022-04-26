@@ -43,6 +43,7 @@ namespace beta.Views.Windows
                 Settings.Default.Width = Width;
                 Settings.Default.IsWindowMaximized = false;
             }
+            App.Current.Shutdown();
         }
     }
 }
