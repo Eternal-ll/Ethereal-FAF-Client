@@ -329,7 +329,7 @@ namespace beta.Infrastructure.Services
                 return null;
             }
 
-            if ((TokenBearer.ExpiresAt - DateTime.UtcNow).TotalSeconds < 10)
+            if ((TokenBearer.ExpiresAt - DateTime.Now).TotalSeconds < 10)
             {
                 return await RefreshOAuthTokenAsync(Settings.Default.refresh_token);
             }
