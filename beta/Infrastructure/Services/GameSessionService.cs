@@ -129,7 +129,15 @@ namespace beta.Infrastructure.Services
 
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
         {
+            try
+            {
+
                 IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
+            }
+            catch
+            {
+                NotificationService.ShowPopupAsync("Cant launch ice adapter. Check java8sdk install");
+            }
 
             IceAdapterClient.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
             IceAdapterClient.IceMessageReceived += IceAdapterClient_IceMessageReceived;
