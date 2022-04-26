@@ -18,7 +18,7 @@ namespace beta
     public partial class App
     {
         public static IServiceProvider Services => Hosting.Services;
-        public static bool IsDesignMode { get; private set; } = true;
+        public static bool IsDesignMode { get; private set; } = false;
         private static IHost _Hosting;
         public static IHost Hosting => _Hosting ??= Program.CreateHostBuilder(Environment.GetCommandLineArgs()).Build();
 
@@ -61,6 +61,15 @@ namespace beta
             string emojisCache = GetPathToFolder(Folder.Emoji);
             if (Directory.Exists(emojisCache))
                 Directory.CreateDirectory(emojisCache);
+            emojisCache = GetPathToFolder(Folder.Common);
+            if (Directory.Exists(emojisCache))
+                Directory.CreateDirectory(emojisCache);
+            //emojisCache = GetPathToFolder(Folder.Maps);
+            //if (Directory.Exists(emojisCache))
+            //    Directory.CreateDirectory(emojisCache);
+            //emojisCache = GetPathToFolder(Folder.Mods);
+            //if (Directory.Exists(emojisCache))
+            //    Directory.CreateDirectory(emojisCache);
 
             var host = Hosting;
 
