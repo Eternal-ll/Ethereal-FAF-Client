@@ -31,14 +31,21 @@ namespace beta.Infrastructure.Services
 
         public SocialData SocialMessage { get; set; }
 
-        public string[] Friends => throw new NotImplementedException();
+        public List<int> Friends { get; private set; }
 
-        public string[] Foes => throw new NotImplementedException();
+        public List<int> Foes { get; private set; }
 
-        public SocialService(
-            ISessionService sessionService)
+        public SocialService(ISessionService sessionService)
         {
             SessionService = sessionService;
+
+            sessionService.SocialDataReceived += SessionService_SocialDataReceived;
+        }
+
+        private void SessionService_SocialDataReceived(object sender, SocialData e)
+        {
+            Friends = new(e.friends);
+            Foes = new(e.foes);
         }
 
         #region Methods
@@ -56,17 +63,27 @@ namespace beta.Infrastructure.Services
                     if (isRemoving)
                     {
                         relation = PlayerRelationShip.None;
+                        Friends.Remove(id);
                         RemovedFriend?.Invoke(this, id);
                     }
-                    else AddedFriend?.Invoke(this, id);
+                    else
+                    {
+                        Friends.Add(id);
+                        AddedFriend?.Invoke(this, id);
+                    }
                     break;
                 case PlayerRelationShip.Foe:
                     if (isRemoving)
                     {
                         relation = PlayerRelationShip.None;
+                        Foes.Remove(id);
                         RemovedFoe?.Invoke(this, id);
                     }
-                    else AddedFoe?.Invoke(this, id);
+                    else
+                    {
+                        Foes.Add(id);
+                        AddedFoe?.Invoke(this, id);
+                    }
                     break;
             }
             PlayerdRelationshipChanged?.Invoke(this, new(id, relation));

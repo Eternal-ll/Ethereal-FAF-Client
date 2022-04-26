@@ -21,6 +21,7 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IDownloadService, DownloadService>()
             .AddSingleton<IIceService, IceService>()
             .AddSingleton<INotificationService, NotificationService>()
+            .AddSingleton<IFavouritesService, FavouritesService>()
 
 
             .AddSingleton<IExportService, ExportService>()

@@ -3,6 +3,7 @@ using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
@@ -145,6 +146,7 @@ namespace beta.Models.Server
     public class GameInfoMessage: ViewModel, IServerMessage
     {
         public ServerCommand Command { get; set; }
+        public GameInfoMessage[] games { get; set; }
 
         #region Custom properties
 
@@ -157,7 +159,6 @@ namespace beta.Models.Server
             {
                 if (Set(ref _Map, value))
                 {
-                    MapUpdated = false;
                     OnPropertyChanged(nameof(Map.NewPreview));
                 }
             }
@@ -190,6 +191,35 @@ namespace beta.Models.Server
                 {
                     if (old != AverageRating)
                         OnPropertyChanged(nameof(AverageRating));
+
+                    var foesCount = 0;
+                    var friendsCount = 0;
+                    var clanmatesCount = 0;
+                    if (value is not null)
+                    {
+                        for (int i = 0; i < value.Length; i++)
+                        {
+                            var team = value[i];
+                            for (int j = 0; j < team.Players.Length; j++)
+                            {
+                                var iPlayer = team.Players[j];
+                                if (iPlayer is not PlayerInfoMessage player) continue;
+
+                                if (player.IsClanmate)
+                                    clanmatesCount++;
+                                if (player.RelationShip == PlayerRelationShip.Friend)
+                                {
+                                    friendsCount++;
+                                    continue;
+                                }
+                                if (player.RelationShip == PlayerRelationShip.Foe)
+                                    foesCount++;
+                            }
+                        }
+                    }
+                    Foes = foesCount;
+                    Friends = friendsCount;
+                    Clanmates = clanmatesCount;
                 }
             }
         }
@@ -288,6 +318,46 @@ namespace beta.Models.Server
         }
         #endregion
 
+        #region Duration
+        private TimeSpan _Duration;
+        public TimeSpan Duration
+        {
+            get => _Duration;
+            set => Set(ref _Duration, value);
+        }
+        #endregion
+
+        #region Relationsships
+
+        #region Foes
+        private int _Foes;
+        public int Foes
+        {
+            get => _Foes;
+            set => Set(ref _Foes, value);
+        }
+        #endregion
+
+        #region Friends
+        private int _Friends;
+        public int Friends
+        {
+            get => _Friends;
+            set => Set(ref _Friends, value);
+        }
+        #endregion
+
+        #region Clanmates
+        private int _Clanmates;
+        public int Clanmates
+        {
+            get => _Clanmates;
+            set => Set(ref _Clanmates, value);
+        }
+        #endregion
+
+        #endregion
+
         public bool ReplayLessThanFiveMinutes => !launched_at.HasValue || (DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(launched_at.Value))
                     .TotalSeconds > 300;
 
@@ -299,19 +369,43 @@ namespace beta.Models.Server
 
         //public string command { get; set; }
 
-        public GameInfoMessage[] games { get; set; }
         [JsonPropertyName("visibility")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameVisibility Visibility { get; set; }
         public bool password_protected { get; set; }
         public long uid { get; set; }
-        public string title { get; set; }
 
+        #region title
+        private string _title;
+        public string title
+        {
+            get => _title;
+            set => Set(ref _title, value);
+        }
+        #endregion
+
+        public GameState OldState { get; set; }
+
+        #region State
+        private GameState _State;
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         //Open / Playing / Closed
         //TODO Cant converter "closed" to enum
-        public GameState State { get; set; }
+        public GameState State
+        {
+            get => _State;
+            set
+            {
+                var oldState = _State;
+                if (Set(ref _State, value))
+                {
+                    OldState = oldState;
+                    OnPropertyChanged(nameof(OldState));
+                }
+            }
+        } 
+        #endregion
 
         [JsonPropertyName("game_type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -321,25 +415,12 @@ namespace beta.Models.Server
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public FeaturedMod FeaturedMod { get; set; }
 
-        public Dictionary<string, string> sim_mods { get; set; }
-        
-        #region MapUpdated  
-        private bool _MapUpdated;
-        public bool MapUpdated
+        #region sim_mods
+        private Dictionary<string, string> _sim_mods;
+        public Dictionary<string, string> sim_mods
         {
-            get => _MapUpdated;
-            set
-            {
-                if (Set(ref _MapUpdated, value))
-                {
-                    if (value)
-                    {
-                        OnPropertyChanged(nameof(MapVersion));
-                        OnPropertyChanged(nameof(MapName));
-                        OnPropertyChanged(nameof(max_players));
-                    }
-                }
-            }
+            get => _sim_mods;
+            set => Set(ref _sim_mods, value);
         } 
         #endregion
          
@@ -348,12 +429,22 @@ namespace beta.Models.Server
         public string mapname
         {
             get => _mapname;
-            set => MapUpdated = Set(ref _mapname, value);
+            set
+            {
+                if (Set(ref _mapname, value))
+                {
+                    OnPropertyChanged(nameof(MapVersion));
+                    OnPropertyChanged(nameof(MapName));
+                    OnPropertyChanged(nameof(max_players));
+                    _AvatarImage = null;
+                    OnPropertyChanged(nameof(AvatarImage));
+                }
+            }
         }
         #endregion
 
 
-
+        #region AvatarImage
         private ImageSource _AvatarImage;
         public ImageSource AvatarImage
         {
@@ -371,23 +462,36 @@ namespace beta.Models.Server
                         img.BeginInit();
                         img.DecodePixelWidth = 100;
                         img.DecodePixelHeight = 100;
-                        img.CacheOption = BitmapCacheOption.OnLoad;
+                        img.CacheOption = BitmapCacheOption.OnDemand;
                         img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
                         img.UriSource = new($"https://content.faforever.com/maps/previews/small/{mapname}.png");
                         img.EndInit();
-                        img.DownloadFailed += (s, e) =>
-                        {
-                            _AvatarImage = App.Current.Resources["QuestionIcon"] as ImageSource;
-                            OnPropertyChanged(nameof(AvatarImage));
-                        };
+                        //img.DownloadFailed += (s, e) =>
+                        //{
+                        //    _AvatarImage = App.Current.Resources["QuestionIcon"] as ImageSource;
+                        //    OnPropertyChanged(nameof(AvatarImage));
+                        //};
+                        //img.DownloadCompleted += (s, e) =>
+                        //{
+                        //    ((BitmapImage)s).Freeze();
+                        //};
                         _AvatarImage = img;
                     }
                 }
                 return _AvatarImage;
             }
-        }
+        } 
+        #endregion
 
-        public string map_file_path { get; set; }
+        #region map_file_path
+        private string _map_file_path;
+        public string map_file_path
+        {
+            get => _map_file_path;
+            set => Set(ref _map_file_path, value);
+        } 
+        #endregion
+
         public string host { get; set; }
 
         #region num_players
@@ -396,10 +500,18 @@ namespace beta.Models.Server
         {
             get => _num_players;
             set => Set(ref _num_players, value);
+        }
+        #endregion
+
+        #region max_players
+        private int _max_players;
+        public int max_players
+        {
+            get => _max_players;
+            set => Set(ref _max_players, value);
         } 
         #endregion
 
-        public int max_players { get; set; }
         public double? launched_at { get; set; }
         [JsonPropertyName("rating_type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -407,7 +519,43 @@ namespace beta.Models.Server
         public double? rating_min { get; set; }
         public double? rating_max { get; set; }
         public bool enforce_rating_range { get; set; }
-        public Dictionary<int, string[]> teams { get; set; }
+
+        #region teams
+        private Dictionary<int, string[]> _teams;
+        public Dictionary<int, string[]> teams
+        {
+            get => _teams;
+            set
+            {
+                if (Set(ref _teams, value))
+                {
+                    if (value is not null)
+                    {
+                        if (value.Count == 0)
+                        {
+                            Players = Array.Empty<string>();
+                            return;
+                        }
+                        List<string> players = new();
+                        foreach (var teammates in value.Values)
+                        {
+                            for (int i = 0; i < teammates.Length; i++)
+                            {
+                                players.Add(teammates[i]);
+                            }
+                        }
+                        Players = players.ToArray();
+                    }
+                    else
+                    {
+                        Players = null;
+                    }
+                }
+            }
+        } 
+        #endregion
+
+        public string[] Players { get; set; }
 
         protected override void Dispose(bool disposing)
         {

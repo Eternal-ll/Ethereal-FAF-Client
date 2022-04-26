@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Server;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
@@ -101,6 +102,8 @@ namespace beta.Infrastructure.Services
         }
 
         private readonly ConcurrentDictionary<Uri, byte[]> Cache = new();
+
+        public async Task SetMapSource(GameMap game, Uri uri, Folder folder) => game.ImageSource = await GetBitmapSource(uri, folder);
 
         public async Task<byte[]> GetBitmapSource(Uri uri, Folder folder)
         {

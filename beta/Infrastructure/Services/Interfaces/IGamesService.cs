@@ -9,13 +9,36 @@ namespace beta.Infrastructure.Services.Interfaces
     /// </summary>
     public interface IGamesService
     {
+        /// <summary>
+        /// New game of any instances received
+        /// </summary>
         public event EventHandler<GameInfoMessage> NewGameReceived;
+        /// <summary>
+        /// Any game of any instances updated
+        /// </summary>
         public event EventHandler<GameInfoMessage> GameUpdated;
-        public event EventHandler<GameInfoMessage> GameRemoved;
-        public event EventHandler<GameInfoMessage> GameLaunched;
-        public event EventHandler<long> GameRemovedByUid;
+        //public event EventHandler<GameInfoMessage> GameRemoved;
 
+        /// <summary>
+        /// Idle lobby launched
+        /// </summary>
+        public event EventHandler<GameInfoMessage> GameLaunched;
+        /// <summary>
+        /// Active match is end, everyone is left
+        /// </summary>
+        public event EventHandler<GameInfoMessage> GameEnd;
+        /// <summary>
+        /// Host left from idle lobby
+        /// </summary>
+        public event EventHandler<GameInfoMessage> GameClosed;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler<string[]> PlayersLeftFromGame;
+        /// <summary>
+        /// 
+        /// </summary>
         public event EventHandler<KeyValuePair<GameInfoMessage, string[]>> PlayersJoinedToGame;
 
         public List<GameInfoMessage> Games { get; }

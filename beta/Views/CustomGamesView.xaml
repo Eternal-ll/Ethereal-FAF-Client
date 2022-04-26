@@ -33,62 +33,29 @@
                     <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="DimGray" Opacity=".3"/>
                 </Style.Resources>
             </Style>
-            <Style x:Key="g" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
-                <Setter Property="Margin" Value="0 100 0 0"/>
-                <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
-                <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
-                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
-                <Setter Property="ItemTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="{Binding title, StringFormat='title: {0}'}"/>
-                                <TextBlock Text="{Binding uid, StringFormat='uid: {0}'}"/>
-                                <TextBlock Text="{Binding State, StringFormat='State: {0}'}"/>
-                                <TextBlock Text="{Binding GameType, StringFormat='GameType: {0}'}"/>
-                                <TextBlock Text="{Binding FeaturedMod, StringFormat='FeaturedMod: {0}'}"/>
-                                <TextBlock Text="{Binding mapname, StringFormat='mapname: {0}'}"/>
-                                <TextBlock Text="{Binding sim_mods.Count, StringFormat='sim_mods: {0}'}"/>
-                                <ItemsControl ItemsSource="{Binding teams}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <WrapPanel>
-                                                <TextBlock Text="{Binding Key, StringFormat='Team {0}'}"/>
-                                                <ItemsControl ItemsSource="{Binding Value}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding}" Margin="4 0 0 0"/>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <WrapPanel/>
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                </ItemsControl>
-                                            </WrapPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
 
             <Style TargetType="UniformGrid">
                 <Setter Property="VerticalAlignment" Value="Top"/>
                 <Setter Property="Width" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}}, Path=ActualWidth}"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
-                <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
+                <!--<Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>-->
                 <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
-                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                <!--<Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>-->
+                <!--<Setter Property="ScrollViewer.CanContentScroll" Value="True"/>-->
             </Style>
 
             <Style x:Key="CustomGamesListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+                <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                <!--<Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>-->
+                <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
+                <!--<Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>-->
+                <!--<Setter Property="ScrollViewer.CanContentScroll" Value="True"/>-->
+                <Setter Property="Visibility" Value="Collapsed"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsDataGridView}" Value="True">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                    <DataTrigger Binding="{Binding IsDataGridView}" Value="False">
+                        <Setter Property="ItemsSource" Value="{Binding GamesView}"/>
+                        <Setter Property="SelectedValue" Value="{Binding SelectedGame}"/>
+                        <Setter Property="Visibility" Value="Visible"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding IsGridView}" Value="True">
                         <Setter Property="ItemsPanel">
@@ -100,12 +67,14 @@
                                         </i:Interaction.Behaviors>
                                         <!--<UniformGrid.Style>
                                             <Style TargetType="UniformGrid">
-                                                --><!--<Setter Property="Columns" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"/>-->
-                                                <!--<Style.Triggers>
+                                                -->
+                                        <!--<Setter Property="Columns" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"/>-->
+                                        <!--<Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsListView}" Value="True">
                                                         <Setter Property="Columns" Value="1"/>
                                                     </DataTrigger>
-                                                </Style.Triggers>--><!--
+                                                </Style.Triggers>-->
+                                        <!--
                                             </Style>
                                         </UniformGrid.Style>-->
                                     </UniformGrid>
@@ -117,17 +86,25 @@
             </Style>
             
             <Style x:Key="CustomGamesDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource DefaultDataGridStyle}">
+                <Setter Property="Visibility" Value="Collapsed"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
                 <Setter Property="VirtualizingPanel.IsVirtualizingWhenGrouping" Value="True"/>
                 <Setter Property="VirtualizingPanel.IsContainerVirtualizable" Value="True"/>
-                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                <!--<Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>-->
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding IsDataGridView}" Value="False">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                    <DataTrigger Binding="{Binding IsDataGridView}" Value="True">
+                        <Setter Property="ItemsSource" Value="{Binding GamesView}"/>
+                        <Setter Property="SelectedValue" Value="{Binding SelectedGame}"/>
+                        <Setter Property="Visibility" Value="Visible"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
 
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource DefaultDataGridRowStyle}">
+                <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
+            </Style>
+ 
             <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                 <!--<Setter Property="MinWidth" Value="300"/>-->
                 <Setter Property="Margin" Value="0"/>
@@ -162,21 +139,52 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Row="1">
-            <ListBox ItemsSource="{Binding GamesView}" SelectedValue="{Binding SelectedGame}" Style="{StaticResource CustomGamesListBoxStyle}"/>
-            <!--<DataGrid ItemsSource="{Binding GamesView}" SelectedValue="{Binding SelectedGame}" Style="{StaticResource CustomGamesDataGridStyle}"
-                      SelectionMode="Single" IsReadOnly="True">
+            <ListBox Style="{StaticResource CustomGamesListBoxStyle}">
+                <ListBox.Resources>
+                    <Style x:Key="BorderListBoxNotifyStyle" TargetType="Border" BasedOn="{StaticResource BorderNotifyStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="False">
+                                <Setter Property="Opacity" Value=".7"/>
+                                <!--<Setter Property="Background" Value="Transparent"/>-->
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Resources>
+            </ListBox>
+            <DataGrid Style="{StaticResource CustomGamesDataGridStyle}"
+                      SelectionMode="Single" IsReadOnly="True" HeadersVisibility="Column" AutoGenerateColumns="False">
+                <DataGrid.AlternatingRowBackground>
+                    <SolidColorBrush Color="Gray" Opacity=".05"/>
+                </DataGrid.AlternatingRowBackground>
+                <DataGrid.Resources>
+                    <Style x:Key="BorderListBoxNotifyStyle" TargetType="Border" BasedOn="{StaticResource BorderNotifyStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsMouseOver}" Value="False">
+                                <Setter Property="Opacity" Value=".7"/>
+                                <!--<Setter Property="Background" Value="Transparent"/>-->
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Map" Width="Auto">
+                    <DataGridTemplateColumn Header="Game">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ContentControl Content="{Binding Map}" Height="50" Width="50" ToolTip="{Binding mapname}"/>
+                                <ContentControl Content="{Binding}"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Host" Binding="{Binding host}" MaxWidth="200"/>
-                    <DataGridCheckBoxColumn Binding="{Binding password_protected, Mode=OneWay}"/>
+                    <DataGridTextColumn Header="Players" Binding="{Binding num_players}"/>
+                    <DataGridTextColumn Header="Slots" Binding="{Binding max_players}"/>
+                    <DataGridCheckBoxColumn Header="Private" Binding="{Binding password_protected, Mode=OneWay}"/>
+                    <DataGridTextColumn Header="Average rating" Binding="{Binding AverageRating}"/>
+                    <DataGridTextColumn Header="Max rating" Binding="{Binding rating_max}"/>
+                    <DataGridTextColumn Header="Min rating" Binding="{Binding rating_min}"/>
+                    <DataGridCheckBoxColumn Header="Enforce rating range" Binding="{Binding enforce_rating_range}"/>
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"/>
+
                 </DataGrid.Columns>
-            </DataGrid>-->
+            </DataGrid>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="1">
@@ -199,7 +207,6 @@
                 <TextBlock Text="{Binding Games.Count, StringFormat='Total: {0}'}" Margin="10 0 0 0"/>
             </WrapPanel>-->
             <ui:TitleBarButton>
-
                 <WrapPanel Margin="10">
                     <Canvas Height="32"/>
                     <Button Padding="8 0" Margin="0 0 10 0" VerticalAlignment="Stretch" ToolTip="Settings">
@@ -305,7 +312,7 @@
                             <Border.RenderTransform>
                                 <TranslateTransform Y="-8" X="-3"/>
                             </Border.RenderTransform>
-                            <TextBlock Margin="0 -1 0 0" FontSize="12" Text="{Binding GamesWithBlockedMap.Count}"/>
+                            <TextBlock Margin="0 0 0 0" FontFamily="SegouUI" FontSize="12" Text="{Binding GamesWithBlockedMap.Count}"/>
                         </Border>
                     </Grid>
 
@@ -451,6 +458,32 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Trigger>
+                                    <DataTrigger Binding="{Binding IsDataGridView}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False"/>
+                                        <Setter Property="Opacity" Value=".5"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <ToggleButton VerticalAlignment="Stretch" Margin="0 0 10 0" IsChecked="{Binding IsDataGridView}" ToolTip="Switch layout between list and datagrid">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton" BasedOn="{StaticResource CustomToggleButton}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="False">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="Gray" Stretch="Uniform" Data="M10,4V8H14V4H10M16,4V8H20V4H16M16,10V14H20V10H16M16,16V20H20V16H16M14,20V16H10V20H14M8,20V16H4V20H8M8,14V10H4V14H8M8,8V4H4V8H8M10,14H14V10H10V14M4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1 20,22H4C2.92,22 2,21.1 2,20V4A2,2 0 0,1 4,2Z" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <Path Fill="White" Stretch="Uniform" Data="M10,4V8H14V4H10M16,4V8H20V4H16M16,10V14H20V10H16M16,16V20H20V16H16M14,20V16H10V20H14M8,20V16H4V20H8M8,14V10H4V14H8M8,8V4H4V8H8M10,14H14V10H10V14M4,2H20A2,2 0 0,1 22,4V20A2,2 0 0,1 20,22H4C2.92,22 2,21.1 2,20V4A2,2 0 0,1 4,2Z" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </ToggleButton.Style>
@@ -480,6 +513,20 @@
 
                     <Button VerticalAlignment="Stretch" Margin="10 0 0 0" ToolTip="Host game" Command="{StaticResource HostGameCommand}">
                         <Path Data="M6.92,5H5L14,14L15,13.06M19.96,19.12L19.12,19.96C18.73,20.35 18.1,20.35 17.71,19.96L14.59,16.84L11.91,19.5L10.5,18.09L11.92,16.67L3,7.75V3H7.75L16.67,11.92L18.09,10.5L19.5,11.91L16.83,14.58L19.95,17.7C20.35,18.1 20.35,18.73 19.96,19.12Z" />
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding GameType}" Value="0"/>
+                                            <Condition Binding="{Binding GameState}" Value="1"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                     </Button>
                     <Button VerticalAlignment="Stretch" Margin="10 0 0 0" ToolTip="Refresh" Command="{Binding RefreshCommand}">
                         <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>

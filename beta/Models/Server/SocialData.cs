@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
@@ -8,8 +7,8 @@ namespace beta.Models.Server
         [JsonPropertyName("autojoin")]
         public string[] autojoin { get; set; }
         public string[] channels { get; set; }
-        public List<int> friends { get; set; }
-        public List<int> foes { get; set; }
+        public int[] friends { get; set; }
+        public int[] foes { get; set; }
         public int power { get; set; }
     }
 }

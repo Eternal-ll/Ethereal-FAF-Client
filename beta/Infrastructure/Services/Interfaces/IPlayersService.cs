@@ -33,7 +33,7 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public PlayerInfoMessage[] CachedPlayers { get; }
 
-        public List<PlayerInfoMessage> Players { get; }
+        public PlayerInfoMessage[] Players { get; }
         public PlayerInfoMessage Self { get; }
 
         public PlayerInfoMessage GetPlayer(string idOrLogin);

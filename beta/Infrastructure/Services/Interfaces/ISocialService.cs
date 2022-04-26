@@ -25,8 +25,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<int> RemovedFoe;
         public event EventHandler<KeyValuePair<int, PlayerRelationShip>> PlayerdRelationshipChanged;
 
-        public string[] Friends { get; }
-        public string[] Foes { get; }
+        public List<int> Friends { get; }
+        public List<int> Foes { get; }
 
         public SocialData SocialMessage { get; set; }
 
@@ -34,8 +34,5 @@ namespace beta.Infrastructure.Services.Interfaces
         public void AddFoe(int id);
         public void RemoveFriend(int id);
         public void RemoveFoe(int id);
-
-        public List<PlayerInfoMessage> GetFriends();
-        public List<PlayerInfoMessage> GetFoes();
     }
 }

@@ -10,6 +10,8 @@
 
         Host = 4,
 
-        Playing5 = 9
+        Playing5 = 9,
+
+        Launched = 5,
     }
 }

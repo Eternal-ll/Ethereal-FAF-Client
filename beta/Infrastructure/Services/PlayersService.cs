@@ -5,6 +5,7 @@ using beta.Models.Server.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace beta.Infrastructure.Services
 {
@@ -36,7 +37,7 @@ namespace beta.Infrastructure.Services
 
         #region Services
         private readonly ISessionService SessionService;
-        private readonly IGamesService GamesService;
+        //private readonly IGamesService GamesService;
         private readonly ISocialService SocialService;
         private readonly INoteService NoteService;
         private readonly IIrcService IrcService;
@@ -48,7 +49,8 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region Players
-        public List<PlayerInfoMessage> Players { get; } = new();
+        public System.Collections.Concurrent.ConcurrentDictionary<int, PlayerInfoMessage> PlayersDic { get; } = new();
+        public PlayerInfoMessage[] Players => PlayersDic.Select(x => x.Value).ToArray();
         //private readonly Dictionary<int, int> PlayerUIDToId = new();
         //private readonly Dictionary<string, int> PlayerLoginToId = new();
         //private List<PlayerInfoMessage> PlayersLogins { get; } = new();
@@ -68,7 +70,7 @@ namespace beta.Infrastructure.Services
         public PlayersService(
             ISessionService sessionService,
             INoteService noteService,
-            IGamesService gamesService,
+            //IGamesService gamesService,
             ISocialService socialService,
             IIrcService ircService,
             IFavouritesService favoritesService,
@@ -76,7 +78,7 @@ namespace beta.Infrastructure.Services
         {
             SessionService = sessionService;
             NoteService = noteService;
-            GamesService = gamesService;
+            //GamesService = gamesService;
             SocialService = socialService;
             IrcService = ircService;
             FavoritesService = favoritesService;
@@ -86,9 +88,9 @@ namespace beta.Infrastructure.Services
             sessionService.WelcomeDataReceived += OnWelcomeDataReceived;
             sessionService.PlayersReceived += OnPlayersReceived;
 
-            gamesService.PlayersJoinedToGame += GamesService_PlayersJoinedToGame;
-            gamesService.PlayersLeftFromGame += GamesService_PlayersLeftFromGame;
-            GamesService.NewGameReceived += GamesService_NewGameReceived;
+            //gamesService.PlayersJoinedToGame += GamesService_PlayersJoinedToGame;
+            //gamesService.PlayersLeftFromGame += GamesService_PlayersLeftFromGame;
+            //GamesService.NewGameReceived += GamesService_NewGameReceived;
 
             socialService.PlayerdRelationshipChanged += SocialService_PlayerdRelationshipChanged;
 
@@ -97,15 +99,15 @@ namespace beta.Infrastructure.Services
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
-                var players = Players;
-                for (int i = 0; i < players.Count; i++)
-                {
-                    var player = players[i];
-                    if (player.Note.Text?.Trim().Length > 0)
-                    {
-                        NoteService.Set(player.login, player.Note.Text);
-                    }
-                }
+                var players = PlayersDic;
+                //for (int i = 0; i < players.Count; i++)
+                //{
+                //    var player = players[i];
+                //    if (player.Note?.Text?.Trim().Length > 0)
+                //    {
+                //        NoteService.Set(player.login, player.Note.Text);
+                //    }
+                //}
                 NoteService.Save();
             };
 
@@ -131,34 +133,36 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        private void GamesService_NewGameReceived(object sender, GameInfoMessage e)
-        {
-            foreach (var team in e.teams)
-                foreach (var login in team.Value)
-                {
-                    if (TryGetPlayer(login, out var player))
-                    {
-                        player.Game = e;
-                        OnPlayerUpdated(player);
-                    }
-                    else
-                    {
-                        Logger.LogWarning($"New game received, but player not found");
-                    }
-                }
-        }
+        //private void GamesService_NewGameReceived(object sender, GameInfoMessage e)
+        //{
+        //    foreach (var team in e.teams)
+        //        foreach (var login in team.Value)
+        //        {
+        //            if (TryGetPlayer(login, out var player))
+        //            {
+        //                player.Game = e;
+        //                OnPlayerUpdated(player);
+        //            }
+        //            else
+        //            {
+        //                Logger.LogWarning($"New game received, but player not found");
+        //            }
+        //        }
+        //}
 
         private void IrcService_UserLeft(object sender, Models.IRC.IrcUserLeft e)
         {
+            // TODO
+            return;
             if (e.Channel == "#aeolus")
             {
                 var players = Players;
-                for (int i = 0; i < players.Count; i++)
+                for (int i = 0; i < players.Length; i++)
                 {
                     if (players[i].login.Equals(e.User, StringComparison.OrdinalIgnoreCase))
                     {
                         PlayerLeft?.Invoke(this, players[i]);
-                        players.RemoveAt(i);
+                        PlayersDic.Remove(players[i].id, out var removed);
                     }
                 }
             }
@@ -166,9 +170,10 @@ namespace beta.Infrastructure.Services
 
         private void IrcService_UserDisconnected(object sender, string e)
         {
+            return;
             if (TryGetPlayer(e, out var player))
             {
-                Players.Remove(player);
+                PlayersDic.Remove(player.id, out var removed);
 
                 PlayerLeft?.Invoke(this, player);
                 Logger.LogWarning("User disconnected");
@@ -194,39 +199,39 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        private void GamesService_PlayersJoinedToGame(object sender, KeyValuePair<GameInfoMessage, string[]> e)
-        {
-            for (int i = 0; i < e.Value.Length; i++)
-            {
-                if (TryGetPlayer(e.Value[i], out var player))
-                {
-                    player.Game = e.Key;
-                    OnPlayerUpdated(player);
-                    //Logger.LogInformation($"Player {player.login} joined to game and updated");
-                }
-                else
-                {
-                    Logger.LogWarning($"Player {e.Value[i]} joined to game and not updated");
-                }
-            }
-        }
+        //private void GamesService_PlayersJoinedToGame(object sender, KeyValuePair<GameInfoMessage, string[]> e)
+        //{
+        //    for (int i = 0; i < e.Value.Length; i++)
+        //    {
+        //        if (TryGetPlayer(e.Value[i], out var player))
+        //        {
+        //            player.Game = e.Key;
+        //            OnPlayerUpdated(player);
+        //            //Logger.LogInformation($"Player {player.login} joined to game and updated");
+        //        }
+        //        else
+        //        {
+        //            Logger.LogWarning($"Player {e.Value[i]} joined to game and not updated");
+        //        }
+        //    }
+        //}
 
-        private void GamesService_PlayersLeftFromGame(object sender, string[] e)
-        {
-            for (int i = 0; i < e.Length; i++)
-            {
-                if (TryGetPlayer(e[i], out var player))
-                {
-                    player.Game = null;
-                    OnPlayerUpdated(player);
-                    //Logger.LogInformation($"Player {player.login} left from game and updated");
-                }
-                else
-                {
-                    Logger.LogWarning($"Player {e[i]} left from game and not updated");
-                }
-            }
-        }
+        //private void GamesService_PlayersLeftFromGame(object sender, string[] e)
+        //{
+        //    for (int i = 0; i < e.Length; i++)
+        //    {
+        //        if (TryGetPlayer(e[i], out var player))
+        //        {
+        //            player.Game = null;
+        //            OnPlayerUpdated(player);
+        //            //Logger.LogInformation($"Player {player.login} left from game and updated");
+        //        }
+        //        else
+        //        {
+        //            Logger.LogWarning($"Player {e[i]} left from game and not updated");
+        //        }
+        //    }
+        //}
         #endregion
 
         #region Event listeners
@@ -242,27 +247,18 @@ namespace beta.Infrastructure.Services
 
         private void OnWelcomeDataReceived(object sender, WelcomeData e)
         {
+            Logger.LogInformation("Self player instance received");
             e.me.RelationShip = PlayerRelationShip.Me;
             Self = e.me;
-            Players.Add(e.me);
+            PlayersDic.TryAdd(e.me.id, e.me);
             PlayerReceived?.Invoke(this, e.me);
-            Logger.LogInformation("Self player instance received");
             SelfReceived?.Invoke(this, e.me);
         }
 
         private void HandlePlayerRelationship(PlayerInfoMessage player)
         {
-            if (player.id == Self.id)
-            {
-                player.RelationShip = PlayerRelationShip.Me;
-                Self = player;
-                return;
-            }
-            if (IsClanMate(player.clan))
-            {
-                //player.RelationShip = PlayerRelationShip.Clan;
-                player.IsClanmate = true;
-            }
+            player.IsClanmate = IsClanMate(player.clan);
+            
             player.RelationShip =
                 IsFriend(player.id) ? PlayerRelationShip.Friend :
                 IsFoe(player.id) ? PlayerRelationShip.Foe :
@@ -273,10 +269,16 @@ namespace beta.Infrastructure.Services
             //TODO Workaround, because server sends two times self player instance.IDK why
             if (player.id == Self.id)
             {
+                Logger.LogWarning($"Self received, but didnt passed");
                 return;
             }
+
             HandlePlayerRelationship(player);
-            Players.Add(player);
+
+            if(!PlayersDic.TryAdd(player.id, player))
+            {
+                Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}");
+            }
         }
 
         private void HandlePlayerData(PlayerInfoMessage player)
@@ -291,7 +293,7 @@ namespace beta.Infrastructure.Services
 
             #endregion
 
-            if (TryGetPlayer(player.id, out var matchedPlayer))
+            if (PlayersDic.TryGetValue(player.id, out var matchedPlayer))
             {
                 matchedPlayer.login = player.login;
                 matchedPlayer.ratings = player.ratings;
@@ -309,12 +311,18 @@ namespace beta.Infrastructure.Services
 
         public PlayerInfoMessage GetPlayer(string idOrLogin)
         {
-            var players = Players;
             int? id = int.TryParse(idOrLogin, out var res) ? res : null;
-            for (int i = 0; i < players.Count; i++)
+            if (id.HasValue)
+            {
+                PlayerInfoMessage player = null;
+                PlayersDic.TryGetValue(id.Value, out player);
+                return player;
+            }
+            var players = Players;
+            for (int i = 0; i < players.Length; i++)
             {
                 var player = players[i];
-                if ((id.HasValue && id.Value == player.id) || player.login == idOrLogin)
+                if (player.login == idOrLogin)
                 {
                     return player;
                 }
@@ -324,10 +332,10 @@ namespace beta.Infrastructure.Services
 
         public bool TryGetPlayer(int id, out PlayerInfoMessage player)
         {
-            player = GetPlayer(id.ToString());
+            PlayersDic.TryGetValue(id, out player);
             if (player is null)
             {
-                Logger.LogWarning($"Player not found: id {id}, players ({Players.Count})");
+                Logger.LogWarning($"Player not found: id {id}, players ({PlayersDic.Count})");
             }
             return player is not null;
         }
@@ -340,7 +348,7 @@ namespace beta.Infrastructure.Services
             player = GetPlayer(login);
             if (player is null)
             {
-                Logger.LogWarning($"Player not found: login {login}, players ({Players.Count})");
+                Logger.LogWarning($"Player not found: login {login}, players ({PlayersDic.Count})");
             }
             return player is not null;
         }
@@ -348,31 +356,32 @@ namespace beta.Infrastructure.Services
         public IEnumerable<PlayerInfoMessage> GetPlayers(string filter = null, ComparisonMethod method = ComparisonMethod.STARTS_WITH,
             PlayerRelationShip? relationShip = null)
         {
-            var enumerator = Players.GetEnumerator();
+            var players = Players;
+            return null;
 
-            if (string.IsNullOrWhiteSpace(filter))
-                while (enumerator.MoveNext())
-                    if (relationShip.HasValue)
-                        if (relationShip.Value == enumerator.Current.RelationShip)
-                            yield return enumerator.Current;
-                        else { }
-                    else yield return enumerator.Current;
-            else
-                while (enumerator.MoveNext())
-                    if (method == ComparisonMethod.STARTS_WITH)
-                        if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-                            if (relationShip.HasValue)
-                                if (relationShip.Value == enumerator.Current.RelationShip)
-                                    yield return enumerator.Current;
-                                else { }
-                            else yield return enumerator.Current;
-                        else { }
-                    else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-                        if (relationShip.HasValue)
-                            if (relationShip.Value == enumerator.Current.RelationShip)
-                                yield return enumerator.Current;
-                            else { }
-                        else yield return enumerator.Current;
+            //if (string.IsNullOrWhiteSpace(filter))
+            //    while (enumerator.MoveNext())
+            //        if (relationShip.HasValue)
+            //            if (relationShip.Value == enumerator.Current.RelationShip)
+            //                yield return enumerator.Current;
+            //            else { }
+            //        else yield return enumerator.Current;
+            //else
+            //    while (enumerator.MoveNext())
+            //        if (method == ComparisonMethod.STARTS_WITH)
+            //            if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
+            //                if (relationShip.HasValue)
+            //                    if (relationShip.Value == enumerator.Current.RelationShip)
+            //                        yield return enumerator.Current;
+            //                    else { }
+            //                else yield return enumerator.Current;
+            //            else { }
+            //        else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            //            if (relationShip.HasValue)
+            //                if (relationShip.Value == enumerator.Current.RelationShip)
+            //                    yield return enumerator.Current;
+            //                else { }
+            //            else yield return enumerator.Current;
         }
 
         private bool IsClanMate(string clan) => Self.clan != null && Self.clan == clan;

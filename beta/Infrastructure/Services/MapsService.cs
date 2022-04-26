@@ -5,6 +5,7 @@ using beta.Models.Server;
 using beta.Properties;
 using beta.ViewModels;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -25,6 +26,7 @@ namespace beta.Infrastructure.Services
         private readonly List<string> LocalMaps = new();
         //private readonly Dictionary<string, GameMap> CachedMaps = new();
         private readonly List<GameMap> CachedMaps = new();
+        private readonly ConcurrentDictionary<string, GameMap> Maps = new();
         private readonly FileSystemWatcher LocalWatcher;
 
         public string[] GetLocalMaps() => LocalMaps.ToArray();
@@ -356,12 +358,13 @@ namespace beta.Infrastructure.Services
         }
         public async Task<GameMap> GetGameMap(string name)
         {
-            var cachedMaps = CachedMaps;
-            for (int i = 0; i < cachedMaps.Count; i++)
-            {
-                var cached = cachedMaps[i];
-                if (cached.OriginalName == name) return cached;
-            }
+            if (Maps.TryGetValue(name, out var cache)) return cache;
+            //var cachedMaps = CachedMaps;
+            //for (int i = 0; i < cachedMaps.Count; i++)
+            //{
+            //    var cached = cachedMaps[i];
+            //    if (cached.OriginalName == name) return cached;
+            //}
             var gameMap = GameMap(name);
 
             if (name.StartsWith("neroxis")) return gameMap;
@@ -370,21 +373,21 @@ namespace beta.Infrastructure.Services
 
             //Task.Run(async () =>
             //{
-            Task.Run(() =>
-            CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews)
-                .ContinueWith(task =>
-                {
-                    gameMap.ImageSource = task.Result;
-                })
-            );
-            //gameMap.ImageSource = await CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews).ConfigureAwait(false);
+            //_ = Task.Run(() =>
+            //  CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews)
+            //      .ContinueWith(task =>
+            //      {
+            //          gameMap.ImageSource = task.Result;
+            //      })
+            //);
+            await CacheService.SetMapSource(gameMap, uri, Folder.MapsSmallPreviews).ConfigureAwait(false);
             if (gameMap.IsLegacy)
             {
                 gameMap.Scenario = GetMapScenario(name, true);
             }
             //});
 
-            CachedMaps.Add(gameMap);
+            Maps.TryAdd(name, gameMap);
             return gameMap;
         }
         public async Task<GameMap> GetGameMapAsync(string name)

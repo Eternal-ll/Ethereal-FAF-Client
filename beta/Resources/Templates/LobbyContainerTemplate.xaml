@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sModels="clr-namespace:beta.Models.Server"
+                    xmlns:vm="clr-namespace:beta.ViewModels"
                     xmlns:models="clr-namespace:beta.Models"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     mc:Ignorable="d"
@@ -212,13 +213,13 @@
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Width" Value="70"/>
         <Setter Property="Height" Value="70"/>
-        <!--<Setter Property="Background">
+        <Setter Property="Background">
             <Setter.Value>
                 <ImageBrush Stretch="Uniform"
-                            ImageSource="{Binding Map.NewPreview}">
+                            ImageSource="{Binding AvatarImage}">
                 </ImageBrush>
             </Setter.Value>
-        </Setter>-->
+        </Setter>
         <Style.Triggers>
             <DataTrigger Binding="{Binding PreviewType}" Value="0">
                 <Setter Property="Width" Value="100"/>
@@ -268,6 +269,8 @@
     </ui:Flyout>
 
     <SolidColorBrush Color="Black" Opacity=".5" x:Key="BackgroundHalfBlack"/>
+    
+    
     
     <ui:Flyout x:Key="MapDetailedFlyout" Placement="Bottom">
         <Grid>
@@ -382,6 +385,62 @@
         </Grid>
     </ui:Flyout>
 
+    <Storyboard x:Key="OpacityAnimation">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" AutoReverse="True"
+                                         Duration="0:0:.4" RepeatBehavior="0:0:12"/>
+    </Storyboard>
+
+    <Style x:Key="BorderNotifyStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10 2"/>
+        <Setter Property="Opacity" Value="0"/>
+        <Setter Property="Visibility" Value="Collapsed"/>
+        <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
+        <Style.Triggers>
+            <!--<MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding OldState}" Value="0"/>
+                    <Condition Binding="{Binding num_players}" Value="1"/>
+                    <Condition Binding="{Binding State}" Value="1"/>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter Property="BorderBrush" Value="LightSkyBlue"/>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger.Setters>
+                <MultiDataTrigger.EnterActions>
+                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimation}"/>
+                </MultiDataTrigger.EnterActions>
+            </MultiDataTrigger>-->
+            <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type vm:GamesViewModel}}, Path=IsDataGridView}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>-->
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding State}" Value="5"/>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger.Setters>
+                <MultiDataTrigger.EnterActions>
+                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimation}"/>
+                </MultiDataTrigger.EnterActions>
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding State}" Value="2"/>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter Property="Padding" Value="4 2"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <!--<Setter Property="Background" Value="Transparent"/>-->
+                    <Setter Property="Opacity" Value="1"/>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger.Setters>
+            </MultiDataTrigger>
+        </Style.Triggers>
+    </Style>
+
     <DataTemplate DataType="{x:Type sModels:GameInfoMessage}">
         <Grid
             Focusable="False"
@@ -389,6 +448,20 @@
             Background="Transparent"
             HorizontalAlignment="Stretch"
             d:DataContext="{d:DesignInstance {x:Type sModels:GameInfoMessage}}">
+            <Grid.ToolTip>
+                <ToolTip>
+                    <ItemsControl ItemsSource="{Binding teams}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Value.Count, StringFormat='Count: {0}'}"/>
+                                    <ItemsControl ItemsSource="{Binding Value}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ToolTip>
+            </Grid.ToolTip>
             <Grid.Resources>
                 <SolidColorBrush x:Key="Bg" Color="Black" Opacity=".5"/>
             </Grid.Resources>
@@ -434,7 +507,7 @@
                     ToolTip="{Binding mapname}"
                     Margin="4">
                 <Grid>
-                    <ContentControl Content="{Binding Map}" ToolTip="{Binding mapname}"/>
+                    <!--<ContentControl Content="{Binding Map}" ToolTip="{Binding mapname}"/>-->
                     <!--<Grid.Style>
                         <Style TargetType="Grid">
                             <Style.Triggers>
@@ -648,9 +721,8 @@
                 Background="Transparent">
 
                 <!--<ContentControl Content="{Binding Host}"/>-->
-                <!--<StackPanel Orientation="Horizontal" ToolTip="Host"
-                            Margin="10 0 0 0"
-                            Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" ToolTip="Host"
+                            Margin="10 0 0 0">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Style.Triggers>
@@ -671,12 +743,12 @@
                         Margin="0 0 0 1"
                         Stretch="Uniform"
                         VerticalAlignment="Center"/>
-                    --><!--<Path
+                    <!--<Path
                         Height="14"
                         Margin="0 0 0 1"
                         Stretch="Uniform"
                         VerticalAlignment="Center"
-                        Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>--><!--
+                        Fill="White" Data="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5M19 19C19 19.6 18.6 20 18 20H6C5.4 20 5 19.6 5 19V18H19V19Z"/>-->
                     <Image
                         Source="{Binding Host.Flag}"
                         Stretch="Uniform"
@@ -740,7 +812,7 @@
                                             </Setter.Value>
                                         </Setter>
                                     </Trigger>
-                                    --><!--<EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
                                         <EventTrigger.Actions>
                                             <BeginStoryboard>
                                                 <Storyboard>
@@ -752,7 +824,7 @@
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger.Actions>
-                                    </EventTrigger>--><!--
+                                    </EventTrigger>
                                     <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
                                                  Value="0">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -770,7 +842,7 @@
                         DataContext="{Binding Host}"
                         Style="{StaticResource AvatarImageStyle}">
                     </Image>
-                </StackPanel>-->
+                </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Margin="-8 0">
@@ -906,11 +978,12 @@
                 </TextBlock>
 
                 <TextBlock
-                    Margin="8 6 0 0"
+                    Margin="8 6 8 0"
                     Padding="24 0 0 0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding MapName}"/>
+                            <Setter Property="ToolTip" Value="{Binding MapName}"/>
                             <Setter Property="Background">
                                 <Setter.Value>
                                     <ImageBrush
@@ -927,11 +1000,71 @@
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
+
+                                <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                    <EventTrigger.Actions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation
+                                                        Storyboard.TargetProperty="Opacity"
+                                                        To="0" From="1"
+                                                        Duration="0:0:0.2"
+                                                        AutoReverse="True"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </EventTrigger.Actions>
+                                </EventTrigger>
                                 <DataTrigger Binding="{Binding PreviewType}"
                                              Value="Neroxis">
                                     <Setter Property="Text" Value="{x:Null}"/>
                                     <Setter Property="Visibility" Value="Collapsed"/>
                                     <Setter Property="Background" Value="{x:Null}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock
+                    Margin="8 6 0 0"
+                    Padding="24 0 0 0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding sim_mods.Count}"/>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <ImageBrush
+                                        Stretch="Uniform"
+                                        AlignmentX="Left">
+                                        <ImageBrush.Transform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                            </TransformGroup>
+                                        </ImageBrush.Transform>
+                                        <ImageBrush.ImageSource>
+                                            <DrawingImage>
+                                                <DrawingImage.Drawing>
+                                                    <GeometryDrawing Brush="White" Geometry="M13.78 15.3L19.78 21.3L21.89 19.14L15.89 13.14L13.78 15.3M17.5 10.1C17.11 10.1 16.69 10.05 16.36 9.91L4.97 21.25L2.86 19.14L10.27 11.74L8.5 9.96L7.78 10.66L6.33 9.25V12.11L5.63 12.81L2.11 9.25L2.81 8.55H5.62L4.22 7.14L7.78 3.58C8.95 2.41 10.83 2.41 12 3.58L9.89 5.74L11.3 7.14L10.59 7.85L12.38 9.63L14.2 7.75C14.06 7.42 14 7 14 6.63C14 4.66 15.56 3.11 17.5 3.11C18.09 3.11 18.61 3.25 19.08 3.53L16.41 6.2L17.91 7.7L20.58 5.03C20.86 5.5 21 6 21 6.63C21 8.55 19.45 10.1 17.5 10.1Z"/>
+                                                </DrawingImage.Drawing>
+                                            </DrawingImage>
+                                        </ImageBrush.ImageSource>
+                                    </ImageBrush>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="ToolTip">
+                                <Setter.Value>
+                                    <ToolTip>
+                                        <StackPanel>
+                                            <ItemsControl ItemsSource="{Binding sim_mods}"/>
+                                        </StackPanel>
+                                    </ToolTip>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding sim_mods.Count}" Value="0">
+                                    <Setter Property="Text" Value="{x:Null}"/>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Setter Property="Background" Value="{x:Null}"/>
+                                    <Setter Property="ToolTip" Value="{x:Null}"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -969,7 +1102,7 @@
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding State}" Value="2">
                                     <Setter Property="IsEnabled" Value="False"/>
-                                    <Setter Property="Content" Value="Watch (Not implemented yet)"/>
+                                    <Setter Property="Content" Value="Watch"/>
                                     <Setter Property="ToolTip" Value="Not implemented yet"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding sim_mods.Count, Converter={StaticResource MoreThanConverter}}" Value="True">
@@ -1011,33 +1144,45 @@
             <Border Grid.Row="1" Grid.Column="1"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
-                    Margin="0 0 10 0"
+                    Margin="0 4 4 0"
                     BorderThickness="1"
-                    BorderBrush="LightSkyBlue"
                     CornerRadius="4"
-                    Padding="10 2">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Opacity" Value="0"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding num_players}" Value="0">
-                                <DataTrigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetProperty="Opacity"
-                                                From="0" To="1" AutoReverse="True"
-                                                Duration="0:0:.4"
-                                                RepeatBehavior="0:0:12"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </DataTrigger.EnterActions>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <TextBlock Text="New"/>
+                    Style="{DynamicResource BorderListBoxNotifyStyle}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="4" Height="4" Fill="Red" Margin="4 0 6 0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State}" Value="2">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State}" Value="1">
+                                        <Setter Property="Text" Value="New"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="5">
+                                        <Setter Property="Text" Value="Launched"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="2">
+                                        <Setter Property="Text" Value="{Binding Duration, StringFormat='{}{0:hh\\:mm\\:ss}'}"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
             </Border>
+            <TextBlock Text="{Binding State}" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

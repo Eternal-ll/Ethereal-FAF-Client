@@ -1,10 +1,12 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Threading;
 
 namespace beta.Infrastructure.Services
 {
@@ -12,20 +14,25 @@ namespace beta.Infrastructure.Services
     {
         public event EventHandler<GameInfoMessage> NewGameReceived;
         public event EventHandler<GameInfoMessage> GameUpdated;
-        public event EventHandler<GameInfoMessage> GameRemoved;
+        //public event EventHandler<GameInfoMessage> GameRemoved;
+
         public event EventHandler<GameInfoMessage> GameLaunched;
-        public event EventHandler<long> GameRemovedByUid;
+        public event EventHandler<GameInfoMessage> GameEnd;
+        public event EventHandler<GameInfoMessage> GameClosed;
+
         public event EventHandler<string[]> PlayersLeftFromGame;
         public event EventHandler<KeyValuePair<GameInfoMessage, string[]>> PlayersJoinedToGame;
 
         private readonly ISessionService SessionService;
+        private readonly IPlayersService PlayersService;
         private readonly ILogger Logger;
         
         public List<GameInfoMessage> Games { get; }
 
-        public GamesService(ISessionService sessionService, ILogger<GamesService> logger)
+        public GamesService(ISessionService sessionService, ILogger<GamesService> logger, IPlayersService playersService)
         {
             SessionService = sessionService;
+            PlayersService = playersService;
             Logger = logger;
 
             Games = new();
@@ -34,7 +41,27 @@ namespace beta.Infrastructure.Services
             sessionService.GamesReceived += OnGamesReceived;
 
             sessionService.StateChanged += SessionService_StateChanged;
+
+            DispatcherTimer = new(DispatcherPriority.Background, App.Current.Dispatcher)
+            {
+                Interval = new TimeSpan(0, 0, 1)
+            };
+            DispatcherTimer.Tick += DispatcherTimer_Tick;
         }
+
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            var games = Games;
+            var now = DateTime.UtcNow;
+            for (int i = 0; i < games.Count; i++)
+            {
+                var game = games[i];
+                if (game.launched_at is null) continue;
+                game.Duration = now - DateTime.UnixEpoch.AddSeconds(game.launched_at.Value);
+            }
+        }
+
+        private DispatcherTimer DispatcherTimer;
 
         private void SessionService_StateChanged(object sender, SessionState e)
         {
@@ -49,6 +76,7 @@ namespace beta.Infrastructure.Services
         {
             //Logger.LogInformation($"Received {e.Length} games from lobby-server");
             foreach (var game in e) HandleGameData(game);
+            DispatcherTimer.Start();
         }
 
         private bool TryGetGame(long uid, out GameInfoMessage game)
@@ -76,13 +104,39 @@ namespace beta.Infrastructure.Services
                 // optimize from dublicates
                 foreach (var team in foundGame.teams)
                     playersToClear.AddRange(team.Value);
-                Games.Remove(foundGame);
-                foundGame.Dispose();
-                foundGame = null;
+                //Games.Remove(foundGame);
+                //foundGame.Dispose();
+                //foundGame = null;
             }
             PlayersLeftFromGame?.Invoke(this, playersToClear.ToArray());
-            GameRemovedByUid?.Invoke(this, game.uid);
-            OnGameRemoved(game);
+            OnGameEnd(game);
+        }
+
+        private void HandleTeams(GameInfoMessage game)
+        {
+            InGameTeam[] teams = new InGameTeam[game.teams.Count];
+
+            int j = 0;
+
+            foreach (var valuePair in game.teams)
+            {
+                var players = new IPlayer[valuePair.Value.Length];
+
+                for (int i = 0; i < valuePair.Value.Length; i++)
+                {
+                    var player = PlayersService.GetPlayer(valuePair.Value[i]);
+                    players[i] = player;
+                    if (player is null)
+                    {
+                        Logger.LogWarning($"Player not found {valuePair.Value[i]}");
+                    }
+                }
+
+                teams[j] = new(valuePair.Key, players);
+                j++;
+            }
+
+            game.Teams = teams;
         }
 
         private void HandleGameData(GameInfoMessage newGame)
@@ -103,86 +157,133 @@ namespace beta.Infrastructure.Services
                     return;
             }
 
-            switch (newGame.State)
-            {
-                case GameState.Open:
-                    break;
-                case GameState.Playing:
-                    break;
-                case GameState.Closed:
-                    HandleOnGameClose(newGame);
-                    return;
-                default:
-                    // LOG
-                    return;
-            }
+            //if (newGame.sim_mods.Count > 0) return;
+            if (newGame.FeaturedMod != FeaturedMod.FAF) return;
 
             var games = Games;
 
             if (TryGetGame(newGame.uid, out var game))
             {
+                if (newGame.State == GameState.Closed)
+                {
+                    if (game.State == GameState.Playing)
+                    {
+                        // game is end
+                        OnGameEnd(game);
+                    }
+                    else
+                    {
+                        // host closed game
+                        OnGameClosed(game);
+                    }
+                    return;
+                }
+
                 //Logger.LogInformation($"Updating game {newGame.uid} by {newGame.host}");
                 var oldState = game.State;
-
+                    
                 // for visual UI notification, that players amount is changed
-                game.PlayersCountChanged = game.num_players - newGame.num_players;
+                game.PlayersCountChanged = newGame.num_players - game.num_players;
 
                 game.title = newGame.title;
                 game.num_players = newGame.num_players;
 
-                // players update area
-                List<string> originalPlayers = new();
-                foreach (var team in game.teams) originalPlayers.AddRange(team.Value);
-
-                List<string> newPlayers = new();
-                foreach (var team in newGame.teams) newPlayers.AddRange(team.Value);
-
-                var left = originalPlayers
-                    .Except(newPlayers)
+                var left = game.Players
+                    .Except(newGame.Players)
                     .ToArray();
 
                 if (left.Length > 0)
                 {
                     PlayersLeftFromGame?.Invoke(this, left);
                     //Logger.LogInformation($"Left from game {newGame.uid} by {newGame.host}: {string.Join(',', left)}");
+                    for (int i = 0; i < left.Length; i++)
+                    {
+                        var leftPlayer = PlayersService.GetPlayer(left[i]);
+                        if (leftPlayer is null)
+                        {
+                            Logger.LogError("Player that left from game not found");
+                        }
+                        else
+                        {
+                            leftPlayer.Game = null;
+                        }
+                    }
                 }
 
-                var joined = newPlayers
-                    .Except(originalPlayers)
+                var joined = newGame.Players
+                    .Except(game.Players)
                     .ToArray();
 
                 if (joined.Length > 0)
                 {
                     PlayersJoinedToGame?.Invoke(this, new(newGame, joined));
                     //Logger.LogInformation($"Joined to game {newGame.uid} by {newGame.host}: {string.Join(',', joined)}");
+                    for (int i = 0; i < joined.Length; i++)
+                    {
+                        var joinedPlayer = PlayersService.GetPlayer(joined[i]);
+                        if (joinedPlayer is null)
+                        {
+                            Logger.LogError("Player that joined to game not found");
+                        }
+                        else
+                        {
+                            joinedPlayer.Game = game;
+                        }
+                    }
+                }
+
+                // TODO OPtimize
+                //if (game.PlayersCountChanged != 0)
+                //{
+                //    HandleTeams(game);
+                //}
+                game.teams = newGame.teams;
+                HandleTeams(game);
+
+                if (game.Host is null)
+                {
+                    game.Host = PlayersService.GetPlayer(game.host);
                 }
 
                 // map area update
                 game.map_file_path = newGame.map_file_path;
                 game.max_players = newGame.max_players;
-                //newGame.Map = await MapService.GetGameMap(game.mapname);
-                // should be updates latest, because it triggers UI updates for other map related fields
                 game.mapname = newGame.mapname;
 
+                game.sim_mods = newGame.sim_mods;
 
                 game.State = newGame.State;
+                game.launched_at = newGame.launched_at;
                 
-                OnGameUpdated(game);
-
-                if (game.State != oldState && game.State == GameState.Playing)
+                if (game.State == GameState.Playing && oldState == GameState.Open)
                 {
+                    // game launched
                     GameLaunched?.Invoke(this, game);
+                }
+                else
+                {
+                    OnGameUpdated(game);
                 }
             }
             else
             {
                 //Logger.LogInformation($"Received new game {newGame.uid} by {newGame.host}");
                 // currently we are not supporting UI notification about new game
-                if (newGame.num_players == 0)
+                //if (newGame.num_players == 0)
+                //{
+                //    //Logger.LogInformation($"Empty game {newGame.uid} by {newGame.host}: didnt pass");
+                //    return;
+                //}
+
+                
+
+                if (newGame.State == GameState.Closed)
                 {
-                    Logger.LogInformation($"Game didnt pass {newGame.uid} by {newGame.host}: pp ({newGame.num_players}) / state ({newGame.State})");
+                    //Logger.LogInformation($"Closed game {newGame.uid} by {newGame.host}: didnt pass");
                     return;
                 }
+                newGame.Host = PlayersService.GetPlayer(newGame.host);
+                HandleTeams(newGame);
                 games.Add(newGame);
                 OnNewGameReceived(newGame);
             }
@@ -190,7 +291,9 @@ namespace beta.Infrastructure.Services
         private void OnGameReceived(object sender, GameInfoMessage e) => HandleGameData(e);
         private void OnNewGameReceived(GameInfoMessage game) => NewGameReceived?.Invoke(this, game);
         private void OnGameUpdated(GameInfoMessage game) => GameUpdated?.Invoke(this, game);
-        private void OnGameRemoved(GameInfoMessage game) => GameRemoved?.Invoke(this, game);
+        private void OnGameEnd(GameInfoMessage game) => GameEnd?.Invoke(this, game);
+        private void OnGameClosed(GameInfoMessage game) => GameClosed?.Invoke(this, game);
+        private void OnGameLaunched(GameInfoMessage game) => GameLaunched?.Invoke(this, game);
 
     }
 
