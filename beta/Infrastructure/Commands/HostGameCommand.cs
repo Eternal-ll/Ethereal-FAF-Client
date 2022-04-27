@@ -19,7 +19,7 @@ namespace beta.Infrastructure.Commands
         {
             if (GameSessionService.GameIsRunning)
             {
-                await NotificationService.ShowPopupAsync("Game is running");
+                NotificationService.Notify("Game is running");
                 return;
             }
             var model = new HostGameViewModel();

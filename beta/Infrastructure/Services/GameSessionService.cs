@@ -647,7 +647,7 @@ namespace beta.Infrastructure.Services
         public async Task ResetPatch()
         {
             await Task.Run(() => CopyOriginalBin());
-            await NotificationService.ShowPopupAsync("Patch reset completed");
+            NotificationService.Notify("Patch reset completed");
         }
 
         public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)

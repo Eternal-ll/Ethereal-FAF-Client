@@ -11,6 +11,9 @@ namespace beta.Infrastructure.Services.Interfaces
         public Task ShowPopupAsync(string text);
         public Task ShowPopupAsync(object model);
 
+        public void Notify(string text);
+        public void Notify(object model);
+
         public Task ShowExceptionAsync(Exception ex);
         public Task<ContentDialogResult> ShowDialog(string text);
         public Task<ContentDialogResult> ShowDialog(string text, string primary = null, string secondary = null, string close = null);

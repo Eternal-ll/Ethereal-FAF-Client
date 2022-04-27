@@ -1,6 +1,7 @@
 ﻿using beta.Models;
 using beta.ViewModels;
 using ModernWpf.Controls;
+using Notification.Wpf;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,11 +12,14 @@ namespace beta.Infrastructure.Services
     internal class NotificationService : Interfaces.INotificationService
     {
         //private readonly IGameSessionService GameSessionService;
+        private readonly NotificationManager NotificationManager;
 
         public ContentDialog ContentDialog { get; private set; }
         public NotificationService()
         {
             //GameSessionService = App.Services.GetService<IGameSessionService>();
+
+            NotificationManager = new();
 
             App.Current.Dispatcher.Invoke(() => ContentDialog = new()
             {
@@ -162,5 +166,9 @@ namespace beta.Infrastructure.Services
                 await ContentDialog.ShowAsync();
             });
         }
+
+        public void Notify(string text) => NotificationManager.Show(text);
+
+        public void Notify(object model) => NotificationManager.Show(model);
     }
 }

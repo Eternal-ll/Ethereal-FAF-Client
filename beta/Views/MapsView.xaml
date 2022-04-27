@@ -178,7 +178,7 @@
                         <ToggleButton Content="Width"/>
                         <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
                             Path=Children[1]}"/>-->
-                        <ListBox x:Name="WidthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Multiple" ItemStringFormat='0 km'
+                        <ListBox x:Name="WidthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'
                                  VerticalAlignment="Stretch">
                             <ListBox.Style>
                                 <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
@@ -193,7 +193,7 @@
                             </ListBox.Style>
                         </ListBox>
                         <ToggleButton Content="Height"/>
-                        <ListBox x:Name="HeightsList" ItemsSource="{Binding MapSizes}" SelectionMode="Multiple" ItemStringFormat='0 km'>
+                        <ListBox x:Name="HeightsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'>
                             <ListBox.Style>
                                 <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
                                     <Style.Triggers>
@@ -227,10 +227,7 @@
                         <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
                 </WrapPanel.Resources>
-                <Button Content="Open maps folder" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="Maps"/>
-                <Button Content="Search" Click="Button_Click" Margin="10 0"/>
-                <Button Content="Export maps" Command="{StaticResource ExportCommand}" CommandParameter="{Binding LastData}"/>
-                <!--<CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>-->
+                <Button Content="Search" Click="Button_Click" /><!--<CheckBox IsChecked="{Binding IsAdvancedModEnabled}" Margin="10 0 0 0" Content="Enable advanced search mode"/>-->
 
                 <CheckBox IsChecked="{Binding IsSortEnabled}" Margin="10 0 -14 0" Content="Enable sort"/>
                 <StackPanel Orientation="Horizontal" Visibility="{Binding SortPanelVisibility, Mode=OneWay}">
@@ -368,8 +365,7 @@
                     <ToggleButton IsChecked="{Binding IsExtendedViewEnabled}"
                                   Padding="14 14 14 12"
                                   Background="Transparent"
-                                  VerticalAlignment="Top"
-                                  Margin="0 0 6 0">
+                                  VerticalAlignment="Top">
                         <ToggleButton.Style>
                             <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
                                 <Style.Triggers>
@@ -391,6 +387,25 @@
                             </Style>
                         </ToggleButton.Style>
                     </ToggleButton>
+                    <Separator Margin="4 0">
+                        <Separator.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Separator.LayoutTransform>
+                    </Separator>
+
+                    <Button Command="{StaticResource NavigateExplorerCommand}" CommandParameter="Maps">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Open folder"/>
+                            <Path Style="{StaticResource PathFolderDataStyle}"/>
+                        </StackPanel>
+                    </Button>
+                    <Separator Margin="4 0">
+                        <Separator.LayoutTransform>
+                            <RotateTransform Angle="90"/>
+                        </Separator.LayoutTransform>
+                    </Separator>
+                    <Button Content="Export maps" ToolTip="Exports loaded maps to .docx file" Command="{StaticResource ExportCommand}" CommandParameter="{Binding LastData}"/>
+
                 </WrapPanel>
             </WrapPanel>
             <StackPanel Orientation="Horizontal" Margin="10 4 10 10">
