@@ -10,6 +10,7 @@
 	  <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
 	  <PlatformTarget>AnyCPU</PlatformTarget>
 	  <AssemblyName>Ethereal FAF Client</AssemblyName>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -304,6 +305,7 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ModernWpfUI" Version="0.9.4" />
+    <PackageReference Include="Notifications.Wpf" Version="0.1.1" />
   </ItemGroup>
 
   <ItemGroup>
