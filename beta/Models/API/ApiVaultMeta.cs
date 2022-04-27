@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace beta.Models.API
 {
@@ -32,8 +33,47 @@ namespace beta.Models.API
         #region Custom properties
         public bool IsLegacyMap { get; set; }
         public LocalMapState LocalState { get; set; }
-        public ImageSource MapSmallPreview { get; set; }
-        public ImageSource MapLargePreview { get; set; }
+
+        private BitmapImage _MapSmallPreview;
+        public ImageSource MapSmallPreview
+        {
+            get
+            {
+                if (_MapSmallPreview is null)
+                {
+                    var img = new BitmapImage();
+                    img.BeginInit();
+                    img.DecodePixelWidth = 100;
+                    img.DecodePixelHeight = 100;
+                    img.CacheOption = BitmapCacheOption.OnDemand;
+                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                    img.UriSource = new(ThumbnailUrlSmall);
+                    img.EndInit();
+                    _MapSmallPreview = img;
+                }
+                return _MapSmallPreview;
+            }
+        }
+        private ImageSource _MapLargePreview;
+        public ImageSource MapLargePreview
+        {
+            get
+            {
+                if (_MapLargePreview is null)
+                {
+                    var img = new BitmapImage();
+                    img.BeginInit();
+                    img.DecodePixelWidth = 100;
+                    img.DecodePixelHeight = 100;
+                    img.CacheOption = BitmapCacheOption.OnDemand;
+                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                    img.UriSource = new(ThumbnailUrlLarge);
+                    img.EndInit();
+                    _MapLargePreview = img;
+                }
+                return _MapLargePreview;
+            }
+        }
 
         public Dictionary<string, string> AuthorData { get; set; }
         #region Author data getters
