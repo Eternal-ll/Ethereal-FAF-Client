@@ -863,29 +863,6 @@ namespace beta.Views
 
                     // Check if legacy map
                     map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
-
-                    if (map.ThumbnailUrlSmall is not null)
-                    {
-                        // small map preview
-                        Dispatcher.Invoke(() => map.MapSmallPreview = CacheService.GetImage(new(map.ThumbnailUrlSmall), Models.Folder.MapsSmallPreviews),
-                            System.Windows.Threading.DispatcherPriority.Background);
-                    }
-
-                    if (map.ThumbnailUrlLarge is not null)
-                    {
-                        // small big preview
-                        Dispatcher.Invoke(() => map.MapLargePreview = CacheService.GetImage(new(map.ThumbnailUrlLarge), Models.Folder.MapsLargePreviews),
-                            System.Windows.Threading.DispatcherPriority.Background);
-                    }
-
-                    if (map.ThumbnailUrlLarge is null && map.ThumbnailUrlSmall is null)
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            map.MapSmallPreview = App.Current.Resources["QuestionIcon"] as ImageSource;
-                            map.MapLargePreview = App.Current.Resources["QuestionIcon"] as ImageSource;
-                        });
-                    }
                 }
 
                 LastData = data.Data;
