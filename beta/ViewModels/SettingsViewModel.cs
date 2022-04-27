@@ -15,6 +15,21 @@ namespace beta.ViewModels
             NotificationService = App.Services.GetService<INotificationService>();
         }
 
+        #region Authorization
+        private bool _IsAutoJoin = Settings.Default.AutoJoin;
+        public bool IsAutoJoin
+        {
+            get => _IsAutoJoin;
+            set
+            {
+                if (Set(ref _IsAutoJoin, value))
+                {
+                    Settings.Default.AutoJoin = value;
+                }
+            }
+        }
+        #endregion
+
         #region Downloads
 
         #region IsAlwaysDownloadMapEnabled

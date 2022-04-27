@@ -28,6 +28,7 @@
         </Style>
         <Style TargetType="GroupBox" BasedOn="{StaticResource DefaultGroupBoxStyle}">
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0 10 0 0"/>
             <!--<Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HeaderTemplate">
                 <Setter.Value>
@@ -44,6 +45,13 @@
             <Style.Triggers>
 
             </Style.Triggers>-->
+        </Style>
+        <Style x:Key="ExploreBtnStyle" TargetType="Button">
+            <Setter Property="Content">
+                <Setter.Value>
+                    <Path Style="{StaticResource PathFolderDataStyle}"/>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     <ScrollViewer>
@@ -62,9 +70,16 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>-->
+                <GroupBox Header="Autorization">
+                    <CheckBox IsChecked="{Binding IsAutoJoin}">
+                        <TextBlock>
+                            <Run Text="Remember me"/>
+                            <Run Text=" * auto autorization" FontSize="12" BaselineAlignment="Top" Foreground="Gray"/>
+                        </TextBlock>
+                    </CheckBox>
+                </GroupBox>
                 <GroupBox Header="Downloads">
-                    <StackPanel>
-                        <Grid>
+                    <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
@@ -88,27 +103,38 @@
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadPatchEnabled}" Content="Always show download window"/>
                             </StackPanel>
                         </Grid>
+                </GroupBox>
+                <GroupBox Header="Folders">
+                    <StackPanel>
                         <StackPanel Style="{StaticResource StackPanelFieldStyle}">
                             <TextBlock Text="Path to maps"/>
-                            <TextBox IsReadOnly="True" Text="{Binding PathToMaps}"/>
-                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMaps}"/>
+                            <TextBox IsEnabled="False" Text="{Binding PathToMaps}"/>
+                            <Button Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMaps}">
+                                <Path Style="{StaticResource PathFolderDataStyle}"/>
+                            </Button>
                         </StackPanel>
                         <StackPanel Style="{StaticResource StackPanelFieldStyle}">
                             <TextBlock Text="Path to mods"/>
-                            <TextBox IsReadOnly="True" Text="{Binding PathToMods}"/>
-                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMods}"/>
+                            <TextBox IsEnabled="False" Text="{Binding PathToMods}"/>
+                            <Button Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToMods}">
+                                <Path Style="{StaticResource PathFolderDataStyle}"/>
+                            </Button>
                         </StackPanel>
                         <StackPanel Style="{StaticResource StackPanelFieldStyle}">
                             <TextBlock Text="Path to patch"/>
-                            <TextBox IsReadOnly="True" Text="{Binding PathToPatch}"/>
-                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToPatch}"/>
+                            <TextBox IsEnabled="False" Text="{Binding PathToPatch}"/>
+                            <Button Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToPatch}">
+                                <Path Style="{StaticResource PathFolderDataStyle}"/>
+                            </Button>
                             <Button Content="Reset bin" Command="{StaticResource ResetPatchCommand}" ToolTip="Returns to default steam state"
                                     Margin="10 0 0 0"/>
                         </StackPanel>
                         <StackPanel Style="{StaticResource StackPanelFieldStyle}">
                             <TextBlock Text="Path to game"/>
                             <TextBox IsReadOnly="True" Text="{Binding PathToGame}"/>
-                            <Button Content="Open" Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToGame}"/>
+                            <Button Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding PathToGame}">
+                                <Path Style="{StaticResource PathFolderDataStyle}"/>
+                            </Button>
                             <Button Content="Select" Command="{Binding SelectPathToGameCommand}" Margin="10 0 0 0"/>
                         </StackPanel>
                     </StackPanel>
