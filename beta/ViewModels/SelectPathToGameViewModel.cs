@@ -4,6 +4,7 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System.IO;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace beta.ViewModels
@@ -81,6 +82,20 @@ namespace beta.ViewModels
         public ICommand ConfirmCommand => _ConfirmCommand ??= new LambdaCommand(OnConfirmCommand, CanConfirmCommand);
         private bool CanConfirmCommand(object parameter) => IsConfirmed;
         private void OnConfirmCommand(object parameter) {}
+        #endregion
+
+        #region OpenFolderBrowserDialogCommand
+        private ICommand _OpenFolderBrowserDialogCommand;
+        public ICommand OpenFolderBrowserDialogCommand => _OpenFolderBrowserDialogCommand ??= new LambdaCommand(OnOpenFolderBrowserDialogCommand);
+        private void OnOpenFolderBrowserDialogCommand(object parameter)
+        {
+            using var fbd = new FolderBrowserDialog();
+            DialogResult result = fbd.ShowDialog();
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+            {
+                Path = fbd.SelectedPath;
+            }
+        }
         #endregion
     }
 }

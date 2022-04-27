@@ -23,11 +23,17 @@
             </TextBlock.Style>
         </TextBlock>
         <TextBlock>
-            <Run Text="Paste directory with Supreme Command: Forged Alliance"/>
+            <Run Text="Select or paste directory with Supreme Command: Forged Alliance"/>
             <LineBreak/>
             <Run Text='Example: "C:\Supreme Commander Forged Alliance"' FontSize="12" Foreground="Gray"/>
         </TextBlock>
-        <TextBox Margin="0 10 0 0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"/>
-        
+        <Grid Margin="0 10 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Content="Select" Grid.Column="1" Margin="10 0 0 0" Command="{Binding OpenFolderBrowserDialogCommand}"/>
+        </Grid>
     </StackPanel>
 </UserControl>
