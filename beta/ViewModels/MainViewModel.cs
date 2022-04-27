@@ -3,7 +3,6 @@ using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace beta.ViewModels
@@ -23,44 +22,23 @@ namespace beta.ViewModels
             SessionService = App.Services.GetService<ISessionService>();
             NotificationService = App.Services.GetService<INotificationService>();
 
-            var isAutojoin = Settings.Default.AutoJoin;
-
-            isAutojoin = false;
-
             SessionService.Authorized += OnSessionAuthorizationCompleted;
-            SessionService.StateChanged += SessionService_StateChanged;
             SessionService.NotificationReceived += SessionService_NotificationReceived;
 
-            //if (isAutojoin)
-            //{
-            //    //Task.Run(async () => await OAuthService.AuthAsync());
-            //    var model = new SessionAuthorizationViewModel();
-            //    model.Completed += OnSessionAuthorizationCompleted;
-            //    ChildViewModel = model;
-            //}
-            //else
-            //{
-            //OAuthService.StateChanged += OnOAuthServiceStateChanged;
-            //}
-
-            Task.Run(() =>
-            {
-                ChildViewModel = new AuthorizationViewModel();
-                //ChildViewModel = new NavigationViewModel();
-            });
+            ChildViewModel = new AuthorizationViewModel();
         }
 
-        private void SessionService_StateChanged(object sender, SessionState e)
+        private async void SessionService_StateChanged(object sender, SessionState e)
         {
             if (e == SessionState.Disconnected)
             {
-                SessionService.Authorized += OnSessionAuthorizationCompleted;
+                //await NotificationService.ShowDialog(new ReConnectionViewModel());
             }
         }
 
         private void SessionService_NotificationReceived(object sender, Models.Server.NotificationData e)
         {
-            if (e.text.Contains("unofficial", System.StringComparison.OrdinalIgnoreCase)) return;
+            if (e.text.Contains("unofficial", StringComparison.OrdinalIgnoreCase)) return;
             NotificationService.ShowPopupAsync(e.text);
         }
 
@@ -70,6 +48,7 @@ namespace beta.ViewModels
             {
                 App.Current.Dispatcher.Invoke(() => ChildViewModel = new NavigationViewModel());
                 SessionService.Authorized -= OnSessionAuthorizationCompleted;
+                SessionService.StateChanged += SessionService_StateChanged;
             }
         }
 
