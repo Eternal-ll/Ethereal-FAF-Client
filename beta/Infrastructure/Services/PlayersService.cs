@@ -16,21 +16,6 @@ namespace beta.Infrastructure.Services
         public event EventHandler<PlayerInfoMessage> PlayerUpdated;
         public event EventHandler<PlayerInfoMessage> PlayerLeft;
 
-        public event EventHandler<PlayerInfoMessage> FriendConnected;
-        public event EventHandler<PlayerInfoMessage> FoeConnected;
-        public event EventHandler<PlayerInfoMessage> ClanmateConnected;
-
-        public event EventHandler<PlayerInfoMessage> FriendJoinedToGame;
-        public event EventHandler<PlayerInfoMessage> FriendLeftFromGame;
-        public event EventHandler<PlayerInfoMessage> FriendFinishedGame;
-
-        public event EventHandler<PlayerInfoMessage> FoeJoinedToGame;
-        public event EventHandler<PlayerInfoMessage> FoeLeftFromGame;
-        public event EventHandler<PlayerInfoMessage> FoeFinishedGame;
-
-        public event EventHandler<PlayerInfoMessage> ClanmateJoinedToGame;
-        public event EventHandler<PlayerInfoMessage> ClanmateLeftFromGame;
-        public event EventHandler<PlayerInfoMessage> ClanmateFinishedGame;
         public event EventHandler<PlayerInfoMessage> SelfReceived;
 
         #region Properties
@@ -494,19 +479,6 @@ namespace beta.Infrastructure.Services
         {
             AddNewPlayer(e);
             PlayerReceived?.Invoke(this, e);
-
-            switch (e.RelationShip)
-            {
-                case PlayerRelationShip.Friend:
-                    FriendConnected?.Invoke(this, e);
-                    break;
-                case PlayerRelationShip.Foe:
-                    FoeConnected?.Invoke(this, e);
-                    break;
-                case PlayerRelationShip.Clan:
-                    ClanmateConnected?.Invoke(this, e);
-                    break;
-            }
         }
 
         //protected virtual void OnPlayersUpdated(PlayerInfoMessage[] e) => 
