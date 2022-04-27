@@ -130,7 +130,7 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem Visibility="Collapsed">
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Setter Property="Header" Value="Add to favorites"/>
