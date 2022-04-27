@@ -23,6 +23,10 @@ namespace beta.Infrastructure.Services
         public event EventHandler<string[]> PlayersLeftFromGame;
         public event EventHandler<KeyValuePair<GameInfoMessage, string[]>> PlayersJoinedToGame;
 
+        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersJoinedGame;
+        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersLeftGame;
+        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersFinishedGame;
+
         private readonly ISessionService SessionService;
         private readonly IPlayersService PlayersService;
         private readonly ILogger Logger;
@@ -188,8 +192,8 @@ namespace beta.Infrastructure.Services
                 game.title = newGame.title;
                 game.num_players = newGame.num_players;
 
-                var left = game.Players
-                    .Except(newGame.Players)
+                var left = game.PlayersLogins
+                    .Except(newGame.PlayersLogins)
                     .ToArray();
 
                 if (left.Length > 0)
@@ -210,8 +214,8 @@ namespace beta.Infrastructure.Services
                     }
                 }
 
-                var joined = newGame.Players
-                    .Except(game.Players)
+                var joined = newGame.PlayersLogins
+                    .Except(game.PlayersLogins)
                     .ToArray();
 
                 if (joined.Length > 0)

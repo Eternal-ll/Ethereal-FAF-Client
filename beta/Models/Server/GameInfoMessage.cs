@@ -192,11 +192,13 @@ namespace beta.Models.Server
                     if (old != AverageRating)
                         OnPropertyChanged(nameof(AverageRating));
 
-                    var foesCount = 0;
+                    var favouritesCount = 0;
                     var friendsCount = 0;
                     var clanmatesCount = 0;
+                    var foesCount = 0;
                     if (value is not null)
                     {
+                        List<PlayerInfoMessage> players = new();
                         for (int i = 0; i < value.Length; i++)
                         {
                             var team = value[i];
@@ -205,23 +207,38 @@ namespace beta.Models.Server
                                 var iPlayer = team.Players[j];
                                 if (iPlayer is not PlayerInfoMessage player) continue;
 
+                                if (player.IsFavourite)
+                                    favouritesCount++;
                                 if (player.IsClanmate)
                                     clanmatesCount++;
                                 if (player.RelationShip == PlayerRelationShip.Friend)
-                                {
                                     friendsCount++;
-                                    continue;
-                                }
                                 if (player.RelationShip == PlayerRelationShip.Foe)
                                     foesCount++;
+                                players.Add(player);
                             }
                         }
+                        Players = players.ToArray();
                     }
-                    Foes = foesCount;
+                    else
+                    {
+                        Players = null;
+                    }
+                    Favourites = favouritesCount;
                     Friends = friendsCount;
                     Clanmates = clanmatesCount;
+                    Foes = foesCount;
                 }
             }
+        }
+        #endregion
+
+        #region Players
+        private PlayerInfoMessage[] _Players;
+        public PlayerInfoMessage[] Players
+        {
+            get => _Players;
+            set => Set(ref _Players, value);
         }
         #endregion
 
@@ -329,12 +346,12 @@ namespace beta.Models.Server
 
         #region Relationsships
 
-        #region Foes
-        private int _Foes;
-        public int Foes
+        #region Favourites
+        private int _Favourites;
+        public int Favourites
         {
-            get => _Foes;
-            set => Set(ref _Foes, value);
+            get => _Favourites;
+            set => Set(ref _Favourites, value);
         }
         #endregion
 
@@ -353,6 +370,15 @@ namespace beta.Models.Server
         {
             get => _Clanmates;
             set => Set(ref _Clanmates, value);
+        }
+        #endregion
+
+        #region Foes
+        private int _Foes;
+        public int Foes
+        {
+            get => _Foes;
+            set => Set(ref _Foes, value);
         }
         #endregion
 
@@ -533,7 +559,7 @@ namespace beta.Models.Server
                     {
                         if (value.Count == 0)
                         {
-                            Players = Array.Empty<string>();
+                            PlayersLogins = Array.Empty<string>();
                             return;
                         }
                         List<string> players = new();
@@ -544,18 +570,18 @@ namespace beta.Models.Server
                                 players.Add(teammates[i]);
                             }
                         }
-                        Players = players.ToArray();
+                        PlayersLogins = players.ToArray();
                     }
                     else
                     {
-                        Players = null;
+                        PlayersLogins = null;
                     }
                 }
             }
         } 
         #endregion
 
-        public string[] Players { get; set; }
+        public string[] PlayersLogins { get; set; }
 
         protected override void Dispose(bool disposing)
         {
