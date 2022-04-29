@@ -18,6 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
     <None Remove="Resources\Images\flags\ad.png" />
     <None Remove="Resources\Images\flags\ae.png" />
     <None Remove="Resources\Images\flags\af.png" />
@@ -288,6 +291,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
     <Resource Include="Resources\Images\MapResources\hydrocarbon_strategic.png" />
     <Resource Include="Resources\Images\MapResources\mass_strategic.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
