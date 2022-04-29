@@ -4,6 +4,7 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
+             xmlns:helper="clr-namespace:beta.Infrastructure.Helpers"
              StartupUri="Views/Windows/NewWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -44,6 +45,8 @@
 
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
+
+                    <converter:ToBitmapImageConverter x:Key="ToBitmapImageConverter"/>
 
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
                     <converter:TransparentColorConverter x:Key="TransparentColorConverter"/>
@@ -105,6 +108,11 @@
                 <ResourceDictionary Source="Resources/Templates/ErrorDataTemplates.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/DownloadViewModelDataTemplates.xaml"/>
                 <ResourceDictionary Source="Resources/Templates/ProfileDataTemplates.xaml"/>
+                <ResourceDictionary>
+                    <Style TargetType="ScrollViewer" BasedOn="{StaticResource {x:Type ScrollViewer}}">
+                        <Setter Property="helper:ScrollViewerHelper.FixMouseWheel" Value="True" />
+                    </Style>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -30,7 +30,7 @@ namespace beta.ViewModels
 
             ViewModels = new()
             {
-                //{ typeof(HomeViewModel), new HomeViewModel() },
+                { typeof(HomeViewModel), new HomeViewModel() },
                 { typeof(ChatControlViewModel), new ChatControlViewModel() },
                 { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
                 //{ typeof(MapsVaultViewModel), new MapsVaultViewModel() },

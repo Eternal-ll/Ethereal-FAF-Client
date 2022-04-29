@@ -4,6 +4,9 @@ using System.Windows.Data;
 
 namespace beta.Infrastructure.Converters
 {
+    /// <summary>
+    /// Using low UI element Glyps for perfomance
+    /// </summary>
     public class ToGlyphsTextConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

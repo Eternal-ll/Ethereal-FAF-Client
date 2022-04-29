@@ -775,16 +775,16 @@ namespace beta.Views.Windows
                     // it is complicated...
                     if (data.Included is not null)
                     {
-                        if (map.Relations.Author?.Data is not null)
+                        if (map.Relations["author"].Data is not null)
                         {
-                            var authorId = map.Relations.Author.Data.Id;
+                            var authorId = map.Relations["author"].Data[0].Id;
                             if (AuthorIdToLogin.TryGetValue(authorId, out var login))
                             {
                                 map.AuthorLogin = login;
                             }
                             else
                             {
-                                map.AuthorData = data.GetAttributesFromIncluded(ApiDataType.player, map.Relations.Author.Data.Id);
+                                map.AuthorData = data.GetAttributesFromIncluded(ApiDataType.player, map.Relations["author"].Data[0].Id);
 
                                 if (!AuthorIdToLogin.ContainsKey(authorId))
                                 {
@@ -793,18 +793,14 @@ namespace beta.Views.Windows
                             }
                         }
 
-                        if (map.Relations.LatestVersion?.Data is not null)
+                        if (map.Relations["latestVersion"].Data is not null)
                         {
-                            map.MapData = data.GetAttributesFromIncluded(ApiDataType.mapVersion, map.Relations.LatestVersion.Data.Id);
+                            map.MapData = data.GetAttributesFromIncluded(ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
                         }
 
-                        if (map.Relations.ReviewsSummary?.Data is not null)
+                        if (map.Relations["reviewsSummary"].Data is not null)
                         {
-                            map.ReviewsSummaryData = data.GetAttributesFromIncluded(ApiDataType.mapReviewsSummary, map.Relations.ReviewsSummary.Data.Id);
-                            if (map.ReviewsSummaryData is not null)
-                            {
-
-                            }
+                            map.ReviewsSummaryData = data.GetAttributesFromIncluded(ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id);
                         }
                     }
                     #endregion

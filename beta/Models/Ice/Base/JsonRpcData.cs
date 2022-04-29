@@ -1,28 +1,13 @@
-﻿using beta.Models.Server;
-using System.Text;
-using System.Text.Json;
+﻿using beta.Infrastructure.Converters.JSON;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.Ice.Base
 {
-    public abstract class JsonRpc
-    {
-        public string jsonrpc { get; } = "2.0";
-    }
-    public abstract class JsonRpcMethod : JsonRpc
-    {
-        public abstract string method { get; set; }
-    }
     public class JsonRpcData : JsonRpc
     {
         public string result { get; set; }
         public JsonRpcErrorData error { get; set; }
         public int id { get; set; }
-    }
-    public class JsonRpcErrorData
-    {
-        public int code { get; set; }
-        public string message { get; set; }
     }
     public class JsonRpcInvalidData : JsonRpc
     {

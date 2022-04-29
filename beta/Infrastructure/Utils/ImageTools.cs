@@ -1,11 +1,45 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Utils
 {
     internal static class ImageTools
     {
+        public static BitmapImage InitializeLazyBitmapImage(string url, int? decodeWidth = null, int? decodeHeight = null) =>
+            InitializeLazyBitmapImage(new Uri(url), decodeWidth, decodeHeight);
+        public static BitmapImage InitializeLazyBitmapImage(Uri url, int? decodeWidth = null, int? decodeHeight = null)
+        {
+            BitmapImage img = null;
+            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
+            {
+                img = new BitmapImage();
+                img.BeginInit();
+                if (decodeWidth.HasValue) img.DecodePixelWidth = decodeWidth.Value;
+                if (decodeHeight.HasValue) img.DecodePixelHeight = decodeHeight.Value;
+                img.CacheOption = BitmapCacheOption.OnDemand;
+                img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                img.UriSource = url;
+                img.EndInit();
+            }
+            else
+            {
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    img = new BitmapImage();
+                    img.BeginInit();
+                    if (decodeWidth.HasValue) img.DecodePixelWidth = decodeWidth.Value;
+                    if (decodeHeight.HasValue) img.DecodePixelHeight = decodeHeight.Value;
+                    img.CacheOption = BitmapCacheOption.OnDemand;
+                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+                    img.UriSource = url;
+                    img.EndInit();
+                });
+            }
+            return img;
+        }
+
         // RenderTargetBitmap --> BitmapImage
         public static BitmapImage ConvertRenderTargetBitmapToBitmapImage(RenderTargetBitmap wbm)
         {

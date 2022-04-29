@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Debugger;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -53,6 +54,21 @@ namespace beta
             AppDebugger.Init();
 
             IsDesignMode = false;
+
+            //new Window()
+            //{
+            //    Content = new ProfileViewModel(new()
+            //    {
+            //        id = 165,
+            //        ratings = new()
+            //        {
+            //            { "global", new() { rating = new double[] { 10, 1 } } },
+            //            { "ladder_1v1", new() { rating = new double[] { 10, 1 } } },
+            //            { "tmm_2v2", new() { rating = new double[] { 10, 1 } } },
+            //            { "tmm_4v4_share_until_death", new() { rating = new double[] { 10, 1 } } },
+            //        }
+            //    })
+            //}.Show();
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);
             if (Directory.Exists(mapPreviews))

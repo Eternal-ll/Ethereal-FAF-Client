@@ -1,6 +1,10 @@
 ﻿using beta.Models.API;
 using beta.Models.Server.Enums;
+using LiveCharts;
+using LiveCharts.Defaults;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace beta.ViewModels
@@ -8,11 +12,20 @@ namespace beta.ViewModels
     /// <summary>
     /// 
     /// </summary>
-    internal class ApiRatingsViewModel : ApiViewModel
+    internal class ApiRatingsViewModel : ApiPlayerViewModel
     {
         public RatingType[] RatingTypes { get; private set; }
 
         private readonly Dictionary<RatingType, ApiGamePlayerStats[]> Data = new();
+
+
+
+        private static string ConvertTicksToDateTimeString(double value)
+          => new DateTime((long)value).ToString();
+
+        public ChartValues<ObservablePoint> SeriesValues { get; private set; }
+        public Func<double, string> LabelFormatter => ConvertTicksToDateTimeString;
+
 
         public ApiRatingsViewModel(int playerId, params RatingType[] ratingTypes) : base(playerId)
         {
@@ -92,6 +105,14 @@ namespace beta.ViewModels
             }
             Data[SelectedRatingType] = data.ToArray();
             OnPropertyChanged(nameof(SelectedRatingData));
+            var series = new ChartValues<ObservablePoint>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                series.Add(new(data[i].ScoreDateTime.Ticks, data[i].RatingAfter));
+            }
+            SeriesValues = series;
+            OnPropertyChanged(nameof(SeriesValues));
+
         }
     }
 }

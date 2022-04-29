@@ -470,7 +470,7 @@ namespace beta.Infrastructure.Services
 
             using WebResponse response = await webRequest.GetResponseAsync();
             
-            var result = await JsonSerializer.DeserializeAsync<ApiFeaturedModFileResults>(response.GetResponseStream());
+            var result = await JsonSerializer.DeserializeAsync<ApiUniversalResult<ApiFeaturedModFileData[]>>(response.GetResponseStream());
 
             var localPath = App.GetPathToFolder(Folder.ProgramData);
             Logger.LogInformation($"Using {Folder.ProgramData}");

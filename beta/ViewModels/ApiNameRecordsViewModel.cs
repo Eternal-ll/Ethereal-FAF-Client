@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace beta.ViewModels
 {
-    internal class ApiNameRecordsViewModel : ApiViewModel
+    internal class ApiNameRecordsViewModel : ApiPlayerViewModel
     {
         public ApiNameRecordsViewModel(int playerId) : base(playerId) 
         {

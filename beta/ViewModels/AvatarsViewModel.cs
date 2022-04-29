@@ -12,18 +12,22 @@ namespace beta.ViewModels
     {
         protected bool IsRefreshing = false;
 
-        public int PlayerId { get; private set; }
-
-        public ApiViewModel(int playerId) => PlayerId = playerId;
-
         #region IsPendingRequest
         private bool _IsPendingRequest;
         public bool IsPendingRequest
         {
             get => _IsPendingRequest;
-            set => Set(ref _IsPendingRequest, value);
+            set
+            {
+                if (Set(ref _IsPendingRequest, value))
+                {
+                    OnPropertyChanged(nameof(IsInputEnabled));
+                }
+            }
         }
         #endregion
+
+        public bool IsInputEnabled => !IsPendingRequest;
 
         public async Task DoRequestAsync()
         {
@@ -45,8 +49,14 @@ namespace beta.ViewModels
         {
             IsRefreshing = true;
             RunRequest();
-        } 
+        }
         #endregion
+    }
+    public abstract class ApiPlayerViewModel : ApiViewModel
+    {
+        public int PlayerId { get; private set; }
+
+        public ApiPlayerViewModel(int playerId) => PlayerId = playerId;
     }
     internal class AvatarModel
     {
@@ -76,7 +86,7 @@ namespace beta.ViewModels
         public DateTime? ExpiresAt { get; set; }
         public bool IsSelected { get; set; }
     }
-    internal class AvatarsViewModel : ApiViewModel
+    internal class AvatarsViewModel : ApiPlayerViewModel
     {
         public EventHandler<AvatarModel> AvatarChanged;
         public int[] AvatarsIds { get; private set; }

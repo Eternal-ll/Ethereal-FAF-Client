@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace beta.Models.Debugger
 {
+    /// <summary>
+    /// Custom debugger for developers
+    /// </summary>
     class AppDebugger
     {
         private static ServerDebugWindow DebugWindow;
@@ -22,6 +25,7 @@ namespace beta.Models.Debugger
 
         [Conditional("DEBUG")]
         public static void LOGICE(string data) => DebugWindow.LOGICE(data);
+
         [Conditional("DEBUG")]
         public static void LOGJSONRPC(string data) => DebugWindow.LOGJSONRPC(data);
     }

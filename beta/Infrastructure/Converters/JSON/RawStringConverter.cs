@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.Ice.Base
+namespace beta.Infrastructure.Converters.JSON
 {
     public class RawStringConverter : JsonConverter<string>
     {

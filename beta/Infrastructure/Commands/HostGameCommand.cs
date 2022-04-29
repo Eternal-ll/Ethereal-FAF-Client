@@ -1,6 +1,8 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.ViewModels;
+using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace beta.Infrastructure.Commands
 {
@@ -8,6 +10,7 @@ namespace beta.Infrastructure.Commands
     {
         private readonly IGameSessionService GameSessionService;
         private readonly INotificationService NotificationService;
+        private Window Window;
         public HostGameCommand()
         {
             GameSessionService = App.Services.GetService<IGameSessionService>();
@@ -15,7 +18,7 @@ namespace beta.Infrastructure.Commands
         }
         public override bool CanExecute(object parameter) => true;
 
-        public override async void Execute(object parameter)
+        public override void Execute(object parameter)
         {
             if (GameSessionService.GameIsRunning)
             {
@@ -23,11 +26,16 @@ namespace beta.Infrastructure.Commands
                 return;
             }
             var model = new HostGameViewModel();
-            await NotificationService.ShowDialog(model);
-            //if (result == ModernWpf.Controls.ContentDialogResult.Primary)
-            //{
-            //    model.HostGameCommand.Execute(null);
-            //}
+            Window = new();
+            Window.Content = model;
+            Window.Closed += Window_Closed;
+            Window.ShowDialog();
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            Window.Closed -= Window_Closed;
+            Window = null;
         }
     }
 }

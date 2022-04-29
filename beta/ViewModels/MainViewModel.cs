@@ -25,7 +25,8 @@ namespace beta.ViewModels
             SessionService.Authorized += OnSessionAuthorizationCompleted;
             SessionService.NotificationReceived += SessionService_NotificationReceived;
 
-            ChildViewModel = new AuthorizationViewModel();
+            //ChildViewModel = new AuthorizationViewModel();
+            ChildViewModel = new NavigationViewModel();
         }
 
         private async void SessionService_StateChanged(object sender, SessionState e)

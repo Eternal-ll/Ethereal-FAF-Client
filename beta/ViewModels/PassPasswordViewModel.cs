@@ -6,6 +6,9 @@ using System.Windows.Input;
 
 namespace beta.ViewModels
 {
+    /// <summary>
+    /// Dialog view model for passing password to the game
+    /// </summary>
     internal class PassPasswordViewModel : Base.ViewModel
     {
         private readonly ContentDialog ContentDialog;

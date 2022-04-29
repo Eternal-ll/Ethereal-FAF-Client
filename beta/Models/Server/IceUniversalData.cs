@@ -1,4 +1,4 @@
-﻿using beta.Models.Ice.Base;
+﻿using beta.Infrastructure.Converters.JSON;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.Server

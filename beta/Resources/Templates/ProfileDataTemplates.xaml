@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:beta.ViewModels"
                     xmlns:ui="http://schemas.modernwpf.com/2019"
-                    xmlns:oxy="http://oxyplot.org/wpf">
+                    xmlns:liveCharts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf">
     <Style x:Key="ProfileBorderStyle" TargetType="Border">
         <Setter Property="Padding" Value="10"/>
         <Setter Property="CornerRadius" Value="6"/>
@@ -164,7 +164,18 @@
                     </ListBox.ItemContainerStyle>
                 </ListBox>
 
+                <Grid Grid.Row="2" Grid.ColumnSpan="2">
+                    <liveCharts:CartesianChart Hoverable="False" DataTooltip="{x:Null}"  DisableAnimations="True" Zoom="Xy">
+                        <liveCharts:CartesianChart.Series>
+                            <liveCharts:LineSeries Values="{Binding SeriesValues}" PointGeometry="{x:Null}"
+                      Fill="LightBlue" />
+                        </liveCharts:CartesianChart.Series>
 
+                        <liveCharts:CartesianChart.AxisX>
+                            <liveCharts:Axis LabelFormatter="{Binding LabelFormatter}" />
+                        </liveCharts:CartesianChart.AxisX>
+                    </liveCharts:CartesianChart>
+                </Grid>
                 <!--<oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
                     <oxy:Plot.DefaultTrackerTemplate>
                         <ControlTemplate>
@@ -390,7 +401,7 @@
                         </StackPanel>
                     </Grid>
                 </TabItem>
-                <TabItem Header="Rating charts">
+                <TabItem Header="Rating charts" Content="{Binding ApiRatingsViewModel}" Visibility="Collapsed">
                     <TabItem.Style>
                         <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
                             <Style.Triggers>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using beta.Infrastructure.Converters.JSON;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.API.Base
