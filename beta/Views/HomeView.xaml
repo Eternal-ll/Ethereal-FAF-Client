@@ -155,18 +155,9 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
-                        <Button Content="Visit" VerticalAlignment="Bottom" Margin="0 20 0 0" Padding="10 0 10 1"
-                                    CommandParameter="{Binding SourceLink}"
-                                    Command="{StaticResource NavigateUriCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource ButtonLinkStyle}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SourceLink}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                        <Button Content="Visit" VerticalAlignment="Bottom" Margin="0 20 0 0"
+                                CommandParameter="{Binding SourceLink}" Style="{StaticResource ButtonLinkStyle}"
+                                Command="{StaticResource NavigateUriCommand}" ToolTip="{Binding SourceLink}">
                         </Button>
                     </Grid>
                 </Grid>
@@ -723,15 +714,15 @@
                                                     <TextBlock Text="Topic"/>
                                                     <Separator/>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="1" Margin="20 0" Width="60">
+                                                <StackPanel Grid.Column="1" Margin="20 0" Width="40">
                                                     <TextBlock Text="Posts"/>
                                                     <Separator/>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="2" Width="60">
+                                                <StackPanel Grid.Column="2" Width="40">
                                                     <TextBlock Text="Views"/>
                                                     <Separator/>
                                                 </StackPanel>
-                                                <StackPanel Grid.Column="4" Margin="20 0" Width="280">
+                                                <StackPanel Grid.Column="4" Margin="20 0" Width="200">
                                                     <TextBlock Text="Last post"/>
                                                     <Separator/>
                                                 </StackPanel>
@@ -792,19 +783,41 @@
                                                                         <Image Source="{Binding Author.UserPictureUrl, Converter={StaticResource ToBitmapImageConverter}}"/>
                                                                     </Grid>
                                                                 </Border>
-
-                                                                <TextBlock Text="{Binding title}" Grid.Column="1" Margin="10 4 0 0" FontWeight="Bold"
-                                                                           ToolTip="{Binding SourceUrl}"/>
+                                                                <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Top" Margin="10 0 0 0">
+                                                                    <Button Background="Transparent" ui:ControlHelper.CornerRadius="4"
+                                                                            Padding="4 2" Margin="0 4 0 0"
+                                                                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding CategoryURL}">
+                                                                        <Button.ToolTip>
+                                                                            <ToolTip>
+                                                                                <TextBlock>
+                                                                                    <Run Text="{Binding CategoryName, Mode=OneWay}"/>
+                                                                                    <Run Text="{Binding CategoryURL, Mode=OneWay}" Foreground="LimeGreen" FontSize="12"/>
+                                                                                </TextBlock>
+                                                                            </ToolTip>
+                                                                        </Button.ToolTip>
+                                                                        <Button.Style >
+                                                                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                                                                <Style.Triggers>
+                                                                                    <Trigger Property="IsMouseOver" Value="False">
+                                                                                        <Setter Property="Opacity" Value=".7"/>
+                                                                                    </Trigger>
+                                                                                </Style.Triggers>
+                                                                            </Style>
+                                                                        </Button.Style>
+                                                                        <TextBlock  Text="{Binding CategoryIcon}" Padding="0" FontSize="12" FontFamily="{StaticResource FontAwesomeSolidFree}" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                                                                    </Button>
+                                                                    <Button Margin="4 -6 0 0" Padding="2 1" ToolTip="{Binding SourceUrl}"
+                                                                            Style="{StaticResource ButtonLinkStyle}" Opacity="1" Content="{Binding title}"
+                                                                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding SourceUrl}">
+                                                                        
+                                                                    </Button>
+                                                                </StackPanel>
                                                                 <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="10 0 0 4" VerticalAlignment="Bottom">
                                                                     <Button Style="{StaticResource ButtonLinkStyle}" Content="{Binding Author.UserName}"
                                                                             Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding Author.UserUrl}"
                                                                             ToolTip="{Binding Author.UserUrl}" Margin="0 0 0 2"/>
                                                                     <TextBlock Text="{Binding timestampISO}" Opacity=".5" FontSize="12" VerticalAlignment="Bottom" Margin="0 0 0 -1"/>
                                                                 </StackPanel>
-                                                                <Button Style="{StaticResource ButtonLinkStyle}" Content="Visit"
-                                                                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding Author.UserUrl}"
-                                                                            ToolTip="{Binding Author.UserUrl}" Margin="0 0 0 4"
-                                                                        Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
                                                                 <!--<Button Grid.Column="1" ToolTip="{Binding SourceUrl}" Content="Visit"
                                                                         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 0 4"
                                                                         Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding SourceUrl}">
@@ -822,15 +835,36 @@
 
 
                                                             </Grid>
-                                                            <StackPanel Visibility="Collapsed">
-                                                                <TextBlock Text="Topic"/>
-                                                                <Separator/>
-                                                            </StackPanel>
-                                                            <StackPanel Grid.Column="1" Margin="20 8" Width="60">
+
+                                                            <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                                    Padding="6 2" CornerRadius="4"
+                                                                    Background="{StaticResource BackgroundHalfBlack}">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="TextBlock.FontSize" Value="12"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding upvotes}" Value="0">
+                                                                                <Setter Property="Opacity" Value=".3"/>
+                                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock DataContext="{Binding upvotes}" Text="{Binding StringFormat='+{0}'}" Foreground="LimeGreen"
+                                                                               ToolTip="Up votes"/>
+                                                                    <TextBlock DataContext="{Binding downvotes}" 
+                                                                               Visibility="Collapsed"
+                                                                               Text="{Binding StringFormat=' -{0}'}" Foreground="Red"
+                                                                               ToolTip="Down votes"/>
+                                                                </StackPanel>
+                                                            </Border>
+
+                                                            <StackPanel Grid.Column="1" Margin="20 8" Width="40">
                                                                 <TextBlock Text="{Binding postcount}"
                                                                            HorizontalAlignment="Center"/>
                                                             </StackPanel>
-                                                            <StackPanel Grid.Column="2" Width="60" Margin="0 8 0 0" >
+                                                            <StackPanel Grid.Column="2" Width="40" Margin="0 8 0 0" >
                                                                 <TextBlock Text="{Binding viewcount}"
                                                                            HorizontalAlignment="Center"/>
                                                             </StackPanel>
@@ -847,7 +881,7 @@
                                                                 </ContentControl.Style>
                                                                 <ContentControl.ContentTemplate>
                                                                     <DataTemplate>
-                                                                        <StackPanel Margin="20 0 0 0" Width="280" VerticalAlignment="Top"
+                                                                        <StackPanel Margin="20 0 0 0" Width="200" VerticalAlignment="Top"
                                                                         Orientation="Horizontal" HorizontalAlignment="Stretch">
                                                                             <Border CornerRadius="6" Height="32" Width="32" ToolTip="{Binding Author.UserName}" HorizontalAlignment="Left">
                                                                                 <Border.Style>
@@ -877,17 +911,18 @@
 
                                                                             <StackPanel Margin="4 -4 0 0">
                                                                                 <Button Style="{StaticResource ButtonLinkStyle}" Content="{Binding Author.UserName}"
-                                                                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding Author.UserUrl}"/>
+                                                                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding Author.UserUrl}"
+                                                                                        ToolTip="{Binding Author.UserUrl}"/>
                                                                                 <TextBlock Text="{Binding timestampISO}" FontSize="12" Opacity=".5" Margin="4 4 0 0"/>
                                                                             </StackPanel>
                                                                             <Path Margin="10 0 0 0" ToolTip="{Binding content}" Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z">
                                                                                 <Path.Style>
                                                                                     <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                                                                         <Style.Triggers>
-                                                                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
+                                                                                            <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
                                                                                              Value="False">
                                                                                                 <Setter Property="Opacity" Value=".3"/>
-                                                                                            </DataTrigger>
+                                                                                            </DataTrigger>-->
                                                                                             <DataTrigger Binding="{Binding content}" Value="{x:Null}">
                                                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                                                             </DataTrigger>
