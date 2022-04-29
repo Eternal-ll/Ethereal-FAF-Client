@@ -9,6 +9,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/ResourceDictionaries/FontsDictionary.xaml"/>
+
                 <ResourceDictionary Source="Resources/ResourceDictionaries/Flags.xaml"/>
                 <ResourceDictionary>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
