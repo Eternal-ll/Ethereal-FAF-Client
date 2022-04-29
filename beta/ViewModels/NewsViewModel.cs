@@ -117,7 +117,8 @@ namespace beta.ViewModels
             OnPropertyChanged(nameof(SidebarLeft));
 
             // X-Wp-Totalpages
-            TotalPages = int.Parse(response.Headers[10]);
+            var data = response.Headers.GetValues("X-Wp-Totalpages");
+            TotalPages = data.Length > 0 ? int.Parse(data[0]) : 0;
 
             Posts = posts.ToArray();
             OnPropertyChanged(nameof(Posts));
