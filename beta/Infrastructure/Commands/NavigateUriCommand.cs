@@ -6,7 +6,7 @@ namespace beta.Infrastructure.Commands
 {
     internal class NavigateUriCommand : Command
     {
-        public override bool CanExecute(object parameter) => true;
+        public override bool CanExecute(object parameter) => parameter is not null;
 
         public override void Execute(object parameter)
         {
