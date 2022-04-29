@@ -13,6 +13,9 @@
 
                 <ResourceDictionary Source="Resources/ResourceDictionaries/Flags.xaml"/>
                 <ResourceDictionary>
+                    <cmd:RestartCommand x:Key="RestartCommand"/>
+                    <cmd:LogoutCommand x:Key="LogoutCommand"/>
+
                     <cmd:CopyCommand x:Key="CopyCommand"/>
                     <cmd:NavigateUriCommand x:Key="NavigateUriCommand"/>
                     <cmd:NavigateExplorerCommand x:Key="NavigateExplorerCommand"/>

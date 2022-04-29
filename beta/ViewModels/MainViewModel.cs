@@ -104,13 +104,7 @@ namespace beta.ViewModels
             Settings.Default.refresh_token = null;
             Settings.Default.id_token = null;
             Settings.Default.AutoJoin = false;
-            Restart();
-        }
-
-        private void Restart()
-        {
-            System.Diagnostics.Process.Start(Application.ResourceAssembly.Location[..^3] + "exe");
-            Application.Current.Shutdown();
+            App.Restart();
         }
     }
 }

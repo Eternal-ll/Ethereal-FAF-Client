@@ -19,9 +19,16 @@ namespace beta
     public partial class App
     {
         public static IServiceProvider Services => Hosting.Services;
+        
         public static bool IsDesignMode { get; private set; } = false;
         private static IHost _Hosting;
         public static IHost Hosting => _Hosting ??= Program.CreateHostBuilder(Environment.GetCommandLineArgs()).Build();
+
+        public static void Restart()
+        {
+            System.Diagnostics.Process.Start(ResourceAssembly.Location[..^3] + "exe");
+            Current.Shutdown();
+        }
 
         public static string GetPathToFolder(Folder folder)
         {
