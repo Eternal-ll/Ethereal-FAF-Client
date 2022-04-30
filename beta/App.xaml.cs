@@ -2,7 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Debugger;
-using beta.ViewModels;
+using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -29,6 +29,8 @@ namespace beta
             System.Diagnostics.Process.Start(ResourceAssembly.Location[..^3] + "exe");
             Current.Shutdown();
         }
+
+        public static NewWindow Window;
 
         public static string GetPathToFolder(Folder folder)
         {
@@ -59,7 +61,6 @@ namespace beta
         protected override async void OnStartup(StartupEventArgs e)
         {
             AppDebugger.Init();
-
             IsDesignMode = false;
 
             //new Window()
@@ -76,6 +77,8 @@ namespace beta
             //        }
             //    })
             //}.Show();
+            Window = new NewWindow();
+            Window.Show();
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);
             if (Directory.Exists(mapPreviews))
