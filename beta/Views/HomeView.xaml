@@ -7,7 +7,7 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:model="clr-namespace:beta.Models"
              xmlns:apiNews="clr-namespace:beta.Models.API.News"
-             xmlns:vm="clr-namespace:beta.ViewModels"
+             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:controls="clr-namespace:beta.Resources.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:HomeViewModel}">
@@ -53,8 +53,8 @@
             </Grid>
 
             <ContentControl Content="{Binding NewsViewModel}" Grid.Row="2" Margin="20 60 20 0">
-                <ContentControl.ContentTemplate>
-                    <DataTemplate>
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:NewsViewModel}">
                         <Grid IsHitTestVisible="False" Opacity=".7">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
@@ -72,101 +72,95 @@
                             <Image Source="{Binding SidebarRight, Converter={StaticResource ToBitmapImageConverter}}" Margin="20 0" Grid.Column="2" VerticalAlignment="Top"/>
                         </Grid>
                     </DataTemplate>
-                </ContentControl.ContentTemplate>
+                </ContentControl.Resources>
             </ContentControl>
 
-            <Border HorizontalAlignment="Left" Margin="30 30 0 150"
-                    VerticalAlignment="Stretch"
-                    Background="{StaticResource NavigationViewDefaultPaneBackground}"
-                    CornerRadius="10">
-                <Border.Style>
-                    <Style TargetType="Border" BasedOn="{StaticResource SpecialBorder}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ElementName=ListBox, Path=SelectedItem}" Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>    
-                </Border.Style>
-                <Grid DataContext="{Binding ElementName=ListBox, Path=SelectedItem, UpdateSourceTrigger=PropertyChanged}" ShowGridLines="False">
-                    <Grid.Clip>
-                        <MultiBinding Converter="{StaticResource BorderClipConverter}">
-                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
-                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
-                            <Binding Path="CornerRadius" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
-                        </MultiBinding>
-                    </Grid.Clip>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="{Binding Title.Text}"
+            <controls:CrossFadeContentControl Content="{Binding NewsViewModel.SelectedPost}">
+                <controls:CrossFadeContentControl.Resources>
+                    <DataTemplate DataType="{x:Type apiNews:PostModel}">
+                        <Border HorizontalAlignment="Left" Margin="30 30 0 150"
+                                VerticalAlignment="Stretch"
+                                Background="{StaticResource NavigationViewDefaultPaneBackground}"
+                                Style="{StaticResource SpecialBorder}"
+                                CornerRadius="10">
+                            <Grid ShowGridLines="False">
+                                <Grid.Clip>
+                                    <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                                        <Binding Path="CornerRadius" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                                    </MultiBinding>
+                                </Grid.Clip>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="{Binding Title.Text}"
                                    Margin="0 0 -20 20"
                                    Padding="20 20 20 20"
                                    FontSize="16"
                                    Grid.ColumnSpan="2"
                                    TextWrapping="Wrap" FontWeight="DemiBold">
-                        <TextBlock.Background>
-                            <SolidColorBrush Color="Black" Opacity=".5"/>
-                        </TextBlock.Background>
-                    </TextBlock>
-                    <ToggleButton Grid.Column="1" Content="Hide" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                Margin="0 20 10 0"
-                                Padding="10 0 10 1"
-                                      x:Name="HideSelectedToggle"
-                                Background="Transparent">
-                        <ToggleButton.Style>
-                            <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
-                                <Setter Property="Opacity" Value=".4"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Opacity" Value=".8"/>
-                                    </Trigger>
-                                    <DataTrigger Binding="{Binding ElementName=ListBox, Path=SelectedItem}" Value="{x:Null}">
-                                        <Setter Property="IsChecked" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ToggleButton.Style>
-                    </ToggleButton>
-                    <Border VerticalAlignment="Top"
+                                    <TextBlock.Background>
+                                        <SolidColorBrush Color="Black" Opacity=".5"/>
+                                    </TextBlock.Background>
+                                </TextBlock>
+                                <Button Grid.Column="1" Content="Hide" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Margin="0 20 10 0" Padding="10 0 10 1" Background="Transparent"
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:HomeView}}, Path=DataContext.NewsViewModel.HideSelectedPostCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                            <Setter Property="Opacity" Value=".4"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Opacity" Value=".8"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Border VerticalAlignment="Top"
                                 HorizontalAlignment="Stretch"
                                 CornerRadius="10"
                                 Style="{StaticResource ClippedBorder}"
                                 Grid.Row="1"
                                 Margin="20 0 0 20">
-                        <Image Source="{Binding Image}"
+                                    <Image Source="{Binding Image}"
                                    Stretch="Uniform"
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Stretch"/>
-                    </Border>
-                    <Grid
+                                </Border>
+                                <Grid
                             Margin="20 0 20 20"
                             Grid.Column="1"
                             Grid.Row="1"
                             MaxWidth="200"
                             HorizontalAlignment="Stretch">
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
-                        <Button Content="Visit" VerticalAlignment="Bottom" Margin="0 20 0 0"
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
+                                    <Button Content="Visit" VerticalAlignment="Bottom" Margin="0 20 0 0"
                                 CommandParameter="{Binding SourceLink}" Style="{StaticResource ButtonLinkStyle}"
                                 Command="{StaticResource NavigateUriCommand}" ToolTip="{Binding SourceLink}">
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Border>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </controls:CrossFadeContentControl.Resources>
+            </controls:CrossFadeContentControl>
+
 
             <!--<ContentControl Content="{Binding NewsViewModel}"  Margin="30 -140 30 20" Grid.Row="1">
                 <ContentControl.ContentTemplate>
                     <DataTemplate>-->
-            <Border Height="320" Margin="30 -140 30 14" Grid.Row="1">
+            <Border Margin="30 -140 30 14" Grid.Row="1">
                 <Border.Style>
                     <Style TargetType="Border" BasedOn="{StaticResource SpecialBorder}">
                         <!--<Setter Property="Opacity" Value=".4"/>
@@ -187,7 +181,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 10 10 0">
                         <Button Command="{Binding NewsViewModel.RefreshCommand}" VerticalAlignment="Top" Margin="0 4 0 0" ToolTip="Refresh"
-                                Background="Transparent">
+                                Background="Transparent" IsEnabled="{Binding NewsViewModel.IsInputEnabled}">
                             <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
                         </Button>
                         <TextBlock Text="Per page" VerticalAlignment="Top" FontWeight="DemiBold" FontSize="16" Margin="10 4 10 0"/>
@@ -199,19 +193,16 @@
                                                       IsEnabled="{Binding NewsViewModel.IsInputEnabled}"/>
                     </StackPanel>
                     <ui:ProgressRing IsActive="{Binding NewsViewModel.IsPendingRequest}" Grid.Row="1"/>
-                    <ListBox x:Name="ListBox" VerticalAlignment="Bottom" Grid.Row="1"
-                    Background="Transparent"
+                    <ListBox SelectedValue="{Binding NewsViewModel.SelectedPost}" VerticalAlignment="Bottom" Grid.Row="1"
+                    Background="Transparent"    
                         Margin="10"
-                    ItemsSource="{Binding NewsViewModel.Posts}"
+                    ItemsSource="{Binding NewsViewModel.Posts}" MaxHeight="280"
                     ui:ScrollViewerHelper.AutoHideScrollBars="False">
                         <ListBox.Style>
                             <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=HideSelectedToggle, Path=IsChecked}" Value="True">
-                                        <Setter Property="SelectedItem" Value="{x:Null}"/>
-                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding NewsViewModel.IsPendingRequest}" Value="True">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Hidden"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -223,13 +214,13 @@
                             <Style BasedOn="{StaticResource DefaultListBoxItemStyle}"
                         TargetType="ListBoxItem">
                                 <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Margin" Value="10 10 10 30"/>
+                                <Setter Property="Margin" Value="10 10 0 10"/>
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="False">
-                                        <Setter Property="Opacity" Value=".5"/>
+                                        <Setter Property="Opacity" Value=".7"/>
                                     </Trigger>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter Property="Opacity" Value="1"/>
@@ -656,7 +647,8 @@
                                             <TextBlock Text="{Binding ApiForumRecentResult.topicCount, StringFormat='Topics: {0}'}" FontSize="12" VerticalAlignment="Top" Margin="10 10 0 0"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                            <Button Command="{Binding RefreshCommand}" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Refresh">
+                                            <Button Command="{Binding RefreshCommand}" VerticalAlignment="Top" Margin="0 4 10 0" ToolTip="Refresh"
+                                                    IsEnabled="{Binding IsInputEnabled}">
                                                 <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
                                             </Button>
                                             <Border Style="{StaticResource ClippedBorder}" CornerRadius="4" Height="34" VerticalAlignment="Top">
@@ -727,7 +719,7 @@
                                                     <Separator/>
                                                 </StackPanel>
                                             </Grid>
-                                            <ListBox ItemsSource="{Binding ApiForumRecentResult.topics}" Height="400"
+                                            <ListBox ItemsSource="{Binding ApiForumRecentResult.topics}" MaxHeight="400"
                                                  Background="Transparent" Padding="0 0 20 0">
                                                 <ListBox.Style>
                                                     <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">

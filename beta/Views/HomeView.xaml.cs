@@ -9,10 +9,5 @@
         {
             InitializeComponent();
         }
-
-        private void ListBox_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
-        {
-
-        }
     }
 }

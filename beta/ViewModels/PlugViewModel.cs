@@ -1,4 +1,7 @@
-﻿namespace beta.ViewModels
+﻿using beta.Models.API.News;
+
+namespace beta.ViewModels
 {
-    internal class PlugViewModel : Base.ViewModel{}
+    internal class PlugViewModel : Base.ViewModel, IPostModel
+    { }
 }

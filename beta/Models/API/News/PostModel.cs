@@ -5,7 +5,11 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Models.API.News
 {
-    public class PostModel
+    public interface IPostModel
+    {
+
+    }
+    public class PostModel : IPostModel
     {
         [JsonPropertyName("title")]
         public Rendered Title { get; set; }
@@ -23,7 +27,7 @@ namespace beta.Models.API.News
         {
             get
             {
-                if (_Image is null && Embedded.Media.Length > 0)
+                if (_Image is null && Embedded.Media is not null && Embedded.Media.Length > 0)
                 {
                     _Image = ImageTools.InitializeLazyBitmapImage(Embedded.Media[0].ImageUrl);
                 }

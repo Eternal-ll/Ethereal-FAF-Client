@@ -1,4 +1,5 @@
-﻿using beta.Models.API.News;
+﻿using beta.Infrastructure.Commands;
+using beta.Models.API.News;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace beta.ViewModels
 {
@@ -36,6 +38,15 @@ namespace beta.ViewModels
         }
         #endregion
 
+        #region SelectedPost
+        private IPostModel _SelectedPost = new PlugViewModel();
+        public IPostModel SelectedPost
+        {
+            get => _SelectedPost;
+            set => Set(ref _SelectedPost, value);
+        }
+        #endregion
+
         #region TotalPages
         private int _TotalPages;
         public int TotalPages
@@ -50,6 +61,7 @@ namespace beta.ViewModels
             }
         }
         #endregion
+
 
         public int[] Pages => Enumerable.Range(1, TotalPages).ToArray();
 
@@ -87,7 +99,7 @@ namespace beta.ViewModels
             SidebarLeft = null;
             SidebarMid = null;
 
-            var query = BuildQuery();
+            var query = BuildQuery();   
             WebRequest request = WebRequest.Create(Url + query);
             var response = await request.GetResponseAsync();
             var posts = await JsonSerializer.DeserializeAsync<List<PostModel>>(response.GetResponseStream());
@@ -123,5 +135,11 @@ namespace beta.ViewModels
             Posts = posts.ToArray();
             OnPropertyChanged(nameof(Posts));
         }
+        #region HideSelectedPostCommand
+        private ICommand _HideSelectedPostCommand;
+        public ICommand HideSelectedPostCommand => _HideSelectedPostCommand ??= new LambdaCommand(OnHideSelectedPostCommand, CanHideSelectedPostCommand);
+        private bool CanHideSelectedPostCommand(object parameter) => SelectedPost is not null;
+        private void OnHideSelectedPostCommand(object parameter) => SelectedPost = new PlugViewModel();
+        #endregion
     }
 }
