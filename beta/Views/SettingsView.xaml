@@ -87,10 +87,10 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel>
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadMapEnabled}" Content="Always download map"/>
-                                <CheckBox IsChecked="{Binding IsAlwaysDownloadModEnabled}" Content="Always download mod"/>
+                                <CheckBox IsChecked="{Binding IsAlwaysDownloadModEnabled}" Content="Always download featured mod"/>
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadPatchEnabled}" Content="Always download patch"/>
                             </StackPanel>
-                            <Separator Grid.Column="1" Margin="20 4" >
+                            <!--<Separator Grid.Column="1" Margin="20 4" >
                                 <Separator.LayoutTransform>
                                     <RotateTransform Angle="90"/>
                                 </Separator.LayoutTransform>
@@ -101,7 +101,7 @@
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadMapEnabled}" Content="Always show download window"/>
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadModEnabled}" Content="Always show download window"/>
                                 <CheckBox IsChecked="{Binding IsAlwaysDownloadPatchEnabled}" Content="Always show download window"/>
-                            </StackPanel>
+                            </StackPanel>-->
                         </Grid>
                 </GroupBox>
                 <GroupBox Header="Folders">
