@@ -32,7 +32,7 @@ namespace beta.Models.Server.Base
         /// <param name="gamePort">Port for Ice?</param>
         /// <returns></returns>
         public static string JoinGame(string uid, string password, string gamePort = "0") =>
-            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort}, \"password\": {password}}}";
+            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort} {(!string.IsNullOrWhiteSpace(password) ? $"\"password\":{password}" : "")}}}";
 
         /// <summary>
         /// JSON command for hosting game
