@@ -21,7 +21,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace beta.Views
 {
@@ -48,6 +47,8 @@ namespace beta.Views
             return true;
         }
         #endregion
+
+        public event EventHandler<ApiMapData> MapSelected;
 
         private readonly IMapsService MapsService;
         private readonly ICacheService CacheService;
@@ -414,7 +415,15 @@ namespace beta.Views
         public ApiMapData SelectedMap
         {
             get => _SelectedMap;
-            set => Set(ref _SelectedMap, value);
+            set
+            {
+                if (Set(ref _SelectedMap, value))
+                {
+                    if (value is not null && value.IsHidden.Value)
+                        value = null;
+                    MapSelected?.Invoke(this, value);
+                }
+            }
         }
         #endregion
 

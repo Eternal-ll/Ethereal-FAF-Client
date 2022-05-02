@@ -1,8 +1,8 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.ViewModels;
-using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
+using System.Windows.Media;
 
 namespace beta.Infrastructure.Commands
 {
@@ -27,8 +27,10 @@ namespace beta.Infrastructure.Commands
             }
             var model = new HostGameViewModel();
             Window = new();
+            Window.Background = (Brush)App.Current.Resources["NavigationViewDefaultPaneBackground"];
             Window.Content = model;
             Window.Closed += Window_Closed;
+            model.Finished += (s, e) => Window.Close();
             Window.ShowDialog();
         }
 

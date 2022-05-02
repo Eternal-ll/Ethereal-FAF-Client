@@ -1,12 +1,14 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.API;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
+using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -14,17 +16,20 @@ namespace beta.ViewModels
 {
     internal class HostGameViewModel : Base.ViewModel
     {
+        public event EventHandler Finished;
         public PlayerInfoMessage Me { get; private set; }
 
         private readonly IMapsService MapsService;
         private readonly IPlayersService PlayersService;
         private readonly IGameSessionService GameSessionService;
+        private readonly INotificationService NotificationService;
 
         public HostGameViewModel()
         {
             MapsService=App.Services.GetService<IMapsService>();
             PlayersService = App.Services.GetService<IPlayersService>();
             GameSessionService = App.Services.GetService<IGameSessionService>();
+            NotificationService = App.Services.GetService<INotificationService>();
 
             Me = PlayersService.Self;
 
@@ -32,6 +37,8 @@ namespace beta.ViewModels
             MapsViewSource.Source = LocalMapsName;
 
             MapsViewSource.Filter += MapsViewSource_Filter;
+            Maps = new();
+            Maps.MapSelected += (s, e) => SelectedMap = e;
         }
 
         private void MapsViewSource_Filter(object sender, FilterEventArgs e)
@@ -39,6 +46,8 @@ namespace beta.ViewModels
             if (string.IsNullOrWhiteSpace(MapFilterText)) return;
             e.Accepted = e.Item.ToString().Contains(MapFilterText, System.StringComparison.OrdinalIgnoreCase);
         }
+
+        public MapsView Maps { get; set; }
 
         #region Title
         private string _Title;
@@ -130,8 +139,8 @@ namespace beta.ViewModels
             {
                 if (Set(ref _SelectedMapName, value))
                 {
-                    if (value is null) SelectedGameMap = null;
-                    else SelectedGameMap = MapsService.GetGameMap(value).Result;
+                    //if (value is null) SelectedGameMap = null;
+                    //else SelectedGameMap = MapsService.GetGameMap(value).Result;
                 }
             }
         }
@@ -165,13 +174,30 @@ namespace beta.ViewModels
         private readonly CollectionViewSource MapsViewSource = new();
         public ICollectionView MapsView => MapsViewSource.View;
 
+        #region SelectedMap
+        private ApiMapData _SelectedMap;
+        public ApiMapData SelectedMap
+        {
+            get => _SelectedMap;
+            set => Set(ref _SelectedMap, value);
+        }
+        #endregion
+
         #region HostGameCommand
         private ICommand _HostGameCommand;
-        public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand);
+        public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
+        private bool CanHostGameCommand(object parameter) => SelectedMap is not null;
         private async void OnHostGameCommand(object parameter)
         {
+            if (SelectedMap is null)
+            {
+                await NotificationService.ShowPopupAsync("Map is not selected");
+                return;
+            }
+            Finished?.Invoke(this, null);
+
             string title = string.IsNullOrWhiteSpace(Title) ? "Ethereal lobby" : Title;
-            await GameSessionService.HostGame(title, FeaturedMod, SelectedMapName, MinAllowedRating, MaxAllowedRating,
+            await GameSessionService.HostGame(title, FeaturedMod, SelectedMap.FolderName, MinAllowedRating, MaxAllowedRating,
                 IsFriendsOnly ? GameVisibility.Friends : GameVisibility.Public, IsRatingRestrictionEnabled, Password);
         }
         #endregion
