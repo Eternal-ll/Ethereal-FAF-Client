@@ -75,7 +75,7 @@ namespace beta.ViewModels
         {
             if (e == IrcState.PendingConnection || e == IrcState.PendingAuthorization)
             {
-                CurrentViewModel = new ChatConnectingViewModel();
+                //CurrentViewModel = new ChatConnectingViewModel();
                 return;
             }
             UpdateState();

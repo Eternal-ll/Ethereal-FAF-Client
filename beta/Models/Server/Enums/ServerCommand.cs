@@ -3,6 +3,10 @@
     public enum ServerCommand : byte
     {
         /// <summary>
+        /// Authentification failse.
+        /// </summary>
+        authentication_failed,
+        /// <summary>
         /// Incoming notification
         /// </summary>
         notice,

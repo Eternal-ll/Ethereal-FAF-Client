@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="beta.Views.Modals.ConnectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:beta.Views.Modals"
+             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:ui="http://schemas.modernwpf.com/2019"
+             d:DataContext="{d:DesignInstance {x:Type vm:ConnectionViewModel}}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Lobby connectivity dialog" Margin="0 0 0 20" FontSize="16" FontWeight="DemiBold"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="1">
+            <ui:ProgressRing IsActive="{Binding IsPendingAuthorization, Mode=OneWay}"/>
+            <TextBlock Text="{Binding ProgressText}" Margin="10 0 0 0"/>
+        </StackPanel>
+        <ContentControl Content="{Binding Exception}" Grid.Row="1"/>
+        <StackPanel Grid.Row="3">
+            <CheckBox IsChecked="{Binding IsOAuthRequested}" Content="Use OAuth 2.0" Margin="0 10"
+                      ToolTip="If token expired, you must update token before connecting to lobby"/>
+            <StackPanel Orientation="Horizontal">
+                <Button Grid.Row="2" Content="Connect" HorizontalAlignment="Center" Command="{Binding ConnectCommand}"
+                ToolTip="Connect to lobby server"/>
+                <Button Content="Restart client" Command="{Binding RestartClientCommand}" Grid.Column="1" HorizontalAlignment="Center"
+                    ToolTip="Restarts UI client with ability to reconnect to the game" Margin="10 0" />
+                <Button Content="Restart" Command="{Binding RestartCommand}" Grid.Column="2" Margin="0 0 10 0"
+                    ToolTip="Restarts application without ability to reconnect to the game" HorizontalAlignment="Right"/>
+                <Button Content="Logout" Command="{Binding LogoutCommand}" Grid.Column="3" HorizontalAlignment="Right"
+                    ToolTip="Logouts from account and restarts application"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

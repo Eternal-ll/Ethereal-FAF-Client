@@ -28,6 +28,7 @@ namespace beta.Infrastructure.Commands
                 //Owner = App.Current.MainWindow,
                 Content = new ProfileViewModel(model)
             };
+            Dialog.CloseButtonText = "Close";
             Dialog.Closed += Dialog_Closed;
             Dialog.ShowAsync();
 

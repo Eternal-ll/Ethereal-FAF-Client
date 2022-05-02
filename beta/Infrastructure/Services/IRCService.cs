@@ -120,12 +120,21 @@ namespace beta.Infrastructure.Services
             switch (e)
             {
                 case ManagedTcpClientState.Disconnected: State = IrcState.Disconnected;
+                    State = IrcState.Disconnected;
+
+                    foreach (var item in ChannelUsers)
+                    {
+                        item.Value.Clear();
+                    }
                     break;
                 case ManagedTcpClientState.TimedOut: State = IrcState.TimedOut;
+                    State = IrcState.TimedOut;
                     break;
                 case ManagedTcpClientState.CantConnect: State = IrcState.CantConnect;
+                    State = IrcState.CantConnect;
                     break;
                 case ManagedTcpClientState.PendingConnection: State = IrcState.PendingConnection;
+                    State = IrcState.PendingConnection;
                     break;
                 case ManagedTcpClientState.Connected:
                     var client = (ManagedTcpClient)sender;
@@ -151,8 +160,14 @@ namespace beta.Infrastructure.Services
                 ManagedTcpClient = null;
             }
 
-            ManagedTcpClient = new(threadName: "IRC TCP Client");
+            ManagedTcpClient = new()
+            {
+                ThreadName = "IRC TCP",
+                Host = "lobby.faforever.com",
+                Port = 6667
+            };
             ManagedTcpClient.StateChanged += TcpClientStateChanged;
+            ManagedTcpClient.Connect();
         }
 
         public void Join(string channel, string key = null) => Send(IrcCommands.Join(channel, key));
@@ -160,6 +175,7 @@ namespace beta.Infrastructure.Services
         public void Leave(string channel)
         {
             Channels.Remove(channel);
+            ChannelUsers.Remove(channel);
             Send(IrcCommands.Leave(channel));
         }
 
@@ -288,7 +304,11 @@ namespace beta.Infrastructure.Services
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
                     State = IrcState.Authorized;
                     AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
-                    Join("#aeolus");
+                    if (Channels.Count == 0) Join("#aeolus");
+                    for (int i = 0; i < Channels.Count; i++)
+                    {
+                        Join(Channels[i]);
+                    }
                     break;
                 case "321": // start of list of 322
                     AppDebugger.LOGIRC($"Start of available channels");
@@ -540,6 +560,10 @@ namespace beta.Infrastructure.Services
                 case IrcUserCommand.PRIVMSG:
                     break;
                 case IrcUserCommand.QUIT:
+                    foreach (var item in ChannelUsers)
+                    {
+                        item.Value.Clear();
+                    }
                     Quit();
                     break;
                 case IrcUserCommand.TOPIC:

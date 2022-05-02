@@ -35,35 +35,62 @@
             <CheckBox IsChecked="{Binding IsAlwaysConnectToIRC}" Content="Always connect" Margin="0 10 0 0"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1">
-            <TextBlock Text="{Binding PlayersViewModel.PlayersView.SourceCollection.Count, StringFormat='Online: {0} players'}" Margin="0 10"/>
-            <TextBox Text="{Binding PlayersViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1"
-                 ui:ControlHelper.PlaceholderText="Search players"/>
-            <TextBlock Text="{Binding PlayersViewModel.PlayersView.Count, StringFormat='Found: {0} players'}" Opacity=".5" Margin="10 4 0 -24">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding PlayersViewModel.PlayersView.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding PlayersViewModel.FilterText}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </StackPanel>
 
-        <ListBox ItemsSource="{Binding PlayersViewModel.PlayersView}" Grid.Row="2" Margin="0 30 0 0"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling">
-            <ListBox.Resources>
-                <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlayerListBoxItemStyle}">
-                    <Setter Property="Focusable" Value="False"/>
-                </Style>
-            </ListBox.Resources>
-        </ListBox>
+        <ContentControl Content="{Binding PlayersViewModel}" VerticalAlignment="Top" Grid.Row="1">
+            <ContentControl.ContentTemplate>
+                <DataTemplate DataType="{x:Type vm:PlayersViewModel}">
+                    <Border Background="{StaticResource BackgroundHalfBlack}" Margin="0 10 0 0"
+                                    CornerRadius="10" Padding="10">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Margin="0 0 10 0" MinHeight="0"
+                                                     Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                     ui:ControlHelper.PlaceholderText="Search" BorderThickness="0">
+                                </TextBox>
+                                <StackPanel Orientation="Horizontal" Grid.Column="1" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding FilterText}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <Path Fill="Orange" Height="10" Data="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z" />
+                                        <TextBlock Text="{Binding PlayersView.Count}" Margin="4 0"/>
+                                    </StackPanel>
+                                    <TextBlock>
+                                                    <Run Text="&#8226;" Foreground="LimeGreen"/>
+                                                    <Run Text="{Binding Players.Count, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                            <ListBox ItemsSource="{Binding PlayersView}" SelectedValue="{Binding SelectedPlayer}"
+                                                 Grid.Row="2" Margin="0 10 0 0"
+                                                 MaxHeight="400" Background="Transparent" VirtualizingPanel.IsVirtualizing="True"
+                                                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                                <ListBox.GroupStyle>
+                                    <GroupStyle/>
+                                </ListBox.GroupStyle>
+                                <ListBox.Resources>
+                                    <Style TargetType="GroupItem" BasedOn="{StaticResource PlayersGroupStyle}"/>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlayerListBoxItemStyle}">
+                                        <!--<Setter Property="Focusable" Value="False"/>-->
+                                    </Style>
+                                </ListBox.Resources>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
 
         <TextBlock Text="No results" Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity=".5">
             <TextBlock.Style>

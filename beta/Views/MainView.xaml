@@ -55,9 +55,9 @@
         <DataTemplate DataType="{x:Type vm:ChatControlViewModel}">
             <view:ChatControlView DataContext="{Binding}"/>
         </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:ProfileViewModel}">
+        <!--<DataTemplate DataType="{x:Type vm:ProfileViewModel}">
             <view:ProfileView DataContext="{Binding}"/>
-        </DataTemplate>
+        </DataTemplate>-->
         <DataTemplate DataType="{x:Type vm:MapsVaultViewModel}">
             <view:MapsView/>
         </DataTemplate>

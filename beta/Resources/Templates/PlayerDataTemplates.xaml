@@ -16,7 +16,7 @@
             </MenuItem.Icon>
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem Visibility="Collapsed">
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Setter Property="Header" Value="Send message"/>
@@ -34,7 +34,7 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem Visibility="Collapsed">
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Setter Property="Header" Value="Invite to party"/>
@@ -109,7 +109,7 @@
             </MenuItem.Style>
         </MenuItem>
         
-        <MenuItem ToolTip="{Binding Note.Text}">
+        <MenuItem ToolTip="{Binding Note.Text}" Visibility="Collapsed">
             <MenuItem.Style>
                 <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                     <Setter Property="Header" Value="Edit note"/>
@@ -974,18 +974,11 @@
                                                                 <RowDefinition/>
                                                             </Grid.RowDefinitions>
                                                             <StackPanel>
-                                                                <ContentControl Content="{Binding Game.Map}"/>
-                                                                <TextBlock DataContext="{Binding Game}"
-                                                                                           Margin="0 10 0 0">
-                                                                                           <!--Style="{StaticResource PlayersTextBlockStyle}">-->
-                                                                                    <Run Text="{Binding num_players}"/>
-                                                                                    <Run Text="/" FontSize="12"/>
-                                                                                    <Run Text="{Binding max_players}"/>
-                                                                </TextBlock>
-                                                            </StackPanel>
-                                                            <ItemsControl Grid.Column="1" Margin="10 0 0 0"
+                                                                <ContentControl Content="{Binding Game}"/>
+                                                                <ItemsControl Grid.Column="1" Margin="10 0"
                                                                                           DataContext="{Binding Game}"
                                                                                           Style="{StaticResource TeamsItemsStyle}"/>
+                                                            </StackPanel>
                                                         </Grid>
                                                     </ToolTip>
                                                 </TextBlock.ToolTip>

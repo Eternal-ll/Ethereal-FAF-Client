@@ -1,5 +1,6 @@
 ﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
+using beta.Properties;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,18 @@ namespace beta.Models.Server
             orig.ratings = newP.ratings;
             orig.Updated = DateTime.Now;
             return orig;
+        }
+        public static void FillTest(this PlayerInfoMessage player)
+        {
+            player.login = Settings.Default.PlayerNick;
+            player.id = int.Parse(Settings.Default.PlayerId.ToString());
+            player.ratings = new()
+            {
+                { "global", new() { rating = new double[] { 9999, 1 } } },
+                { "ladder_1v1", new() { rating = new double[] { 9999, 1 } } },
+                { "tmm_2v2", new() { rating = new double[] { 9999, 1 } } },
+                { "tmm_4v4_share_until_death", new() { rating = new double[] { 9999, 1 } } },
+            };
         }
     }
 

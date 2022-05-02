@@ -60,6 +60,15 @@ namespace beta.ViewModels
         private readonly CollectionViewSource PlayersCollectionViewSource;
         public ICollectionView PlayersView => PlayersCollectionViewSource.View;
 
+        #region SelectedPlayer
+        private IPlayer _SelectedPlayer;
+        public IPlayer SelectedPlayer
+        {
+            get => _SelectedPlayer;
+            set => Set(ref _SelectedPlayer, value);
+        }
+        #endregion
+
         private void PlayersService_PlayersReceived(object sender, PlayerInfoMessage[] e)
         {
             for (int i = 0; i < e.Length; i++)

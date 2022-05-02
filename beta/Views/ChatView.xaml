@@ -65,124 +65,7 @@
                                     Style="{StaticResource PlayerCardContentControlStyle}"/>
             </ui:Flyout>
 
-
-            <Style TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
-                <Setter Property="IsExpanded" Value="True"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Name}" Value="Foes">
-                        <Setter Property="IsExpanded" Value="False"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Name}" Value="IRC users">
-                        <Setter Property="IsExpanded" Value="False"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Name}" Value="Players">
-                        <Setter Property="IsExpanded" Value="False"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Items.Count}" Value="0">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Setter Property="Height" Value="50"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-            <Style TargetType="GroupItem" BasedOn="{StaticResource DefaultGroupItemStyle}">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate>
-                            <Expander
-                                Margin="10 0"
-                                Padding="0 4"
-                                FontSize="16"
-                                VirtualizingPanel.IsVirtualizing="True">
-                                <Expander.Header>
-                                    <StackPanel Orientation="Horizontal">
-                                        <StackPanel.Style>
-                                            <Style TargetType="StackPanel">
-                                                <Setter Property="TextElement.FontSize" Value="14"/>
-                                                <Setter Property="FrameworkElement.Opacity" Value=".8"/>
-                                                <Style.Triggers>
-                                                    <!--TODO BINDINGs ERRORs-->
-                                                    <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
-                                                                Path=IsMouseOver, Mode=OneWay}" Value="true">
-                                                        <Setter Property="FrameworkElement.Opacity" Value=".5"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
-                                                                Path=IsPressed, Mode=OneWay}" Value="true">
-                                                        <Setter Property="FrameworkElement.Opacity" Value=".3"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}},
-                                                                Path=IsChecked, Mode=OneWay}" Value="False">
-                                                        <Setter Property="FrameworkElement.Opacity" Value=".3"/>
-                                                    </DataTrigger>-->
-                                                </Style.Triggers>
-                                            </Style>
-                                        </StackPanel.Style>
-                                        <Path Stretch="Uniform"
-                                                      Width="20"
-                                                      Fill="White">
-                                            <Path.Style>
-                                                <Style TargetType="Path">
-                                                    <Setter Property="Height" Value="16"/>
-                                                    <Setter Property="Margin" Value="20 0 0 0"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Me">
-                                                            <Setter Property="Height" Value="14"/>
-                                                            <Setter Property="Data" Value="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Moderators">
-                                                            <Setter Property="Height" Value="18"/>
-                                                            <Setter Property="Margin" Value="20 0 0 2"/>
-                                                            <Setter Property="Data" Value="M16 14.5C16 15.6 15.7 18 13.8 20.8L13 16L13.9 14.1C13.3 14.1 12.7 14 12 14S10.7 14.1 10.1 14.1L11 16L10.2 20.8C8.3 18.1 8 15.6 8 14.5C5.6 15.2 4 16.5 4 18V22H20V18C20 16.5 18.4 15.2 16 14.5M6 4.5C6 3.1 8.7 2 12 2S18 3.1 18 4.5C18 4.9 17.8 5.2 17.5 5.5C16.6 4.6 14.5 4 12 4S7.4 4.6 6.5 5.5C6.2 5.2 6 4.9 6 4.5M15.9 7.4C16 7.6 16 7.8 16 8C16 10.2 14.2 12 12 12S8 10.2 8 8C8 7.8 8 7.6 8.1 7.4C9.1 7.8 10.5 8 12 8S14.9 7.8 15.9 7.4M16.6 6.1C15.5 6.6 13.9 7 12 7S8.5 6.6 7.4 6.1C8.1 5.5 9.8 5 12 5S15.9 5.5 16.6 6.1Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Friends">
-                                                            <Setter Property="Data" Value="M15,14C12.3,14 7,15.3 7,18V20H23V18C23,15.3 17.7,14 15,14M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12M5,15L4.4,14.5C2.4,12.6 1,11.4 1,9.9C1,8.7 2,7.7 3.2,7.7C3.9,7.7 4.6,8 5,8.5C5.4,8 6.1,7.7 6.8,7.7C8,7.7 9,8.6 9,9.9C9,11.4 7.6,12.6 5.6,14.5L5,15Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Clan">
-                                                            <Setter Property="Height" Value="18"/>
-                                                            <Setter Property="Data" Value="M12 1L21 5V11C21 16.5 17.2 21.7 12 23C6.8 21.7 3 16.5 3 11V5L12 1M12 3.2L5 6.3V11.2C5 15.5 8.2 20 12 21C15.8 20 19 15.5 19 11.2V6.3L12 3.2M12 5.5L14 7.1L13 13H15V15H13V18H11V15H9V13H11L10 7.1L12 5.5Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Players">
-                                                            <Setter Property="Data" Value="M16 17V19H2V17S2 13 9 13 16 17 16 17M12.5 7.5A3.5 3.5 0 1 0 9 11A3.5 3.5 0 0 0 12.5 7.5M15.94 13A5.32 5.32 0 0 1 18 17V19H22V17S22 13.37 15.94 13M15 4A3.39 3.39 0 0 0 13.07 4.59A5 5 0 0 1 13.07 10.41A3.39 3.39 0 0 0 15 11A3.5 3.5 0 0 0 15 4Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="IRC users">
-                                                            <Setter Property="Data" Value="M9,5A4,4 0 0,1 13,9A4,4 0 0,1 9,13A4,4 0 0,1 5,9A4,4 0 0,1 9,5M9,15C11.67,15 17,16.34 17,19V21H1V19C1,16.34 6.33,15 9,15M16.76,5.36C18.78,7.56 18.78,10.61 16.76,12.63L15.08,10.94C15.92,9.76 15.92,8.23 15.08,7.05L16.76,5.36M20.07,2C24,6.05 23.97,12.11 20.07,16L18.44,14.37C21.21,11.19 21.21,6.65 18.44,3.63L20.07,2Z"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Name}" Value="Foes">
-                                                            <Setter Property="Margin" Value="20 0 0 -1"/>
-                                                            <Setter Property="Data" Value="M10 4C12.2 4 14 5.8 14 8S12.2 12 10 12 6 10.2 6 8 7.8 4 10 4M17 21L18.8 22.8C19.3 23.3 20 22.9 20 22.3V18L22.8 14.6C23.3 13.9 22.8 13 22 13H15C14.2 13 13.7 14 14.2 14.6L17 18V21M15 18.7L12.7 15.9C12.3 15.4 12.1 14.8 12.1 14.2C11.4 14 10.7 14 10 14C5.6 14 2 15.8 2 18V20H15V18.7Z"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                        <TextBlock>
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Name}" Value="Clan"/>
-                                                                <Condition Binding="{Binding Items.Count, Converter={StaticResource MoreThanConverter}, ConverterParameter=1}"
-                                                                           Value="True"/>
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Margin" Value="4 0 0 0"/>
-                                                            <Setter Property="Text" Value="{Binding Items[0].clan, StringFormat='[{0}]'}"/>
-                                                        </MultiDataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Name}" Margin="4 0 0 0"/>
-                                        <TextBlock Text="{Binding Items.Count, Mode=OneWay}" FontSize="12" Margin="4 0 0 0"
-                                                   Opacity=".6"/>
-                                    </StackPanel>
-                                </Expander.Header>
-                                <ItemsPresenter Margin="-10 0" VirtualizingPanel.IsVirtualizing="True"/>
-
-                            </Expander>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            <Style TargetType="GroupItem" BasedOn="{StaticResource PlayersGroupStyle}"/>
 
             <Style x:Key="BorderStyle" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
                 <Setter Property="Effect">
@@ -238,12 +121,12 @@
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <TextBlock Text="{Binding Name}" HorizontalAlignment="Left"/>
-                                            <Button HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Left"/>
+                                        <Button HorizontalAlignment="Right" VerticalAlignment="Center"
                                                     Padding="4 2 4 4"
                                                     Margin="0 1 0 0"        
                                                     Background="Transparent"
-                                                    Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type vm:ChatViewModel}}, Path=LeaveFromChannelCommand}"
+                                                    Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},Path=DataContext.LeaveFromChannelCommand}"
                                                     CommandParameter="{Binding Name}">
                                                 <Path  Margin="0 2 0 0" Fill="Gray" Height="10"
                                                   Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z">
@@ -282,12 +165,10 @@
                                         Orientation="Vertical"
                                         Margin="-6">
                                         <TextBox x:Name="JoinChannelInput" BorderThickness="0" MinWidth="100"
-                                            ui:ControlHelper.CornerRadius="4"
+                                            ui:ControlHelper.CornerRadius="4" Text="{Binding NewChannelText, UpdateSourceTrigger=PropertyChanged}"
                                             ui:ControlHelper.PlaceholderText="Channel">
                                             <TextBox.InputBindings>
-                                                <KeyBinding Key="Enter" Command="{Binding JoinChannelCommand}"
-                                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type TextBox}},
-                                                    Path=Text}"/>
+                                                <KeyBinding Key="Enter" Command="{Binding JoinChannelCommand}"/>
                                             </TextBox.InputBindings>
                                         </TextBox>
                                             <TextBlock
@@ -295,8 +176,7 @@
                                             Opacity=".5"
                                             Text='Press Enter to join'
                                             FontSize="12"/>
-                                        <Button Content="Join" Command="{Binding JoinChannelCommand}"
-                                                CommandParameter="{Binding ElementName=JoinChannelInput, Path=Text}"/>
+                                        <Button Content="Join" Command="{Binding JoinChannelCommand}"/>
                                     </StackPanel>
                                     </ui:Flyout>
                                 </ui:FlyoutService.Flyout>
@@ -454,23 +334,27 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
 
-                                <ContentControl Content="{Binding From, Converter={StaticResource GetPlayerConverter}}"
-                                                Grid.Column="1" HorizontalAlignment="Left">
-                                    <ContentControl.Style>
-                                        <Style TargetType="ContentControl">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
+                                <StackPanel Orientation="Horizontal" Grid.Column="1">
+                                    <ContentControl Content="{Binding From, Converter={StaticResource GetPlayerConverter}}"
+                                                Grid.Column="0" HorizontalAlignment="Left" Grid.ColumnSpan="2" Margin="-16 0 0 0">
+                                        <ContentControl.RenderTransform>
+                                            <TranslateTransform X="-40"/>
+                                        </ContentControl.RenderTransform>
+                                        <ContentControl.Style>
+                                            <Style TargetType="ContentControl">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
                                                                      Value="False">
-                                                    <Setter Property="Opacity" Value=".7"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsSame}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </ContentControl.Style>
-                                    <ContentControl.Resources>
-                                        <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
+                                                        <Setter Property="Opacity" Value=".7"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ContentControl.Style>
+                                        <ContentControl.Resources>
+                                            <!--<DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                                             <StackPanel Orientation="Horizontal">
                                                 <Image Style="{StaticResource AvatarImageStyle}" Width="40" Margin="-40 0 4 0"/>
                                                 <Image Source="{Binding Flag}" Height="18" Width="18"/>
@@ -478,7 +362,9 @@
                                                     <TextBlock Text="{Binding login}"/>
                                                     <Button.Style>
                                                         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                            <!--<Setter Property="Content" Value="{Binding From}"/>-->
+                                                            -->
+                                            <!--<Setter Property="Content" Value="{Binding From}"/>-->
+                                            <!--
                                                             <Setter Property="Padding" Value="6 0 6 2"/>
                                                             <Setter Property="Margin" Value="-8 0 0 0"/>
                                                             <Style.Triggers>
@@ -490,22 +376,44 @@
                                                     </Button.Style>
                                                 </Button>
                                             </StackPanel>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="{x:Type models:UnknownPlayer}">
-                                            <TextBlock Text="{Binding login}" Margin="0 0 4 0" Opacity=".7"/>
-                                        </DataTemplate>
-                                    </ContentControl.Resources>
-                                </ContentControl>
+                                        </DataTemplate>-->
+                                            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                                                <TextBlock Text="{Binding login}" Margin="56 0 4 0" Opacity=".7"/>
+                                            </DataTemplate>
+                                        </ContentControl.Resources>
+                                    </ContentControl>
+                                    <TextBlock  Margin="-34 0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <!--<Setter Property="Grid.Column" Value="2"/>-->
+                                                <Setter Property="Opacity" Value=".4"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                                <Setter Property="Margin" Value="0 6 0 0"/>
+                                                <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                            Path=IsMouseOver}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
 
-
-                                <TextBlock VerticalAlignment="Center">
+                                <TextBlock VerticalAlignment="Center" >
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <Setter Property="Grid.Column" Value="2"/>
+                                            <!--<Setter Property="Grid.Column" Value="2"/>-->
                                             <Setter Property="Opacity" Value=".4"/>
                                             <Setter Property="FontSize" Value="12"/>
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                            <Setter Property="Margin" Value="0 6 0 0"/>
+                                            <!--<Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>-->
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                                             Path=IsMouseOver}" Value="True">
@@ -520,10 +428,27 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
+
                                 <TextBlock Background="Transparent" VerticalAlignment="Center"
-                                        Grid.Column="1" Grid.Row="1" Opacity=".8" Margin="0 2 0 2"
+                                        Grid.Column="1" Grid.Row="1" Opacity=".8"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
-                                        TextWrapping="Wrap"/>
+                                        TextWrapping="Wrap">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" >
+                                            <Setter Property="Margin" Value="0 2 0 2"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                    <Setter Property="Margin" Value="0 0 0 0"/>
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <TranslateTransform Y="2"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                                 <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Grid.RowSpan="2" Margin="0">
                                     <Canvas.Style>
                                         <Style TargetType="Canvas">
@@ -615,12 +540,26 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <TextBlock
-            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-            Text="{Binding SelectedChannelPlayersView.Count, StringFormat='Chat users: {0} players', UpdateSourceTrigger=PropertyChanged}"
-            FontWeight="DemiBold"
-            Padding="0 6 0  0"
-            Margin="18 0 0 0"/>
+
+            <StackPanel Orientation="Horizontal" Margin="18 0 0 0" VerticalAlignment="Center">
+                <TextBlock>
+                    <Run Text="&#8226;" Foreground="LimeGreen"/>
+                    <Run Text="{Binding SelectedChannelPlayers.Count, Mode=OneWay}"/>
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding FilterText}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <Path Fill="Orange" Height="10" Data="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z" />
+                    <TextBlock Text="{Binding SelectedChannelPlayersView.Count}" Margin="4 0"/>
+                </StackPanel>
+            </StackPanel>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -688,7 +627,7 @@
                                     BlurRadius="30"/>
                                 </Border.Effect>
                                 <StackPanel MinWidth="140">
-                                    <TextBlock Text="Filter players" FontWeight="DemiBold" />
+                                    <!--<TextBlock Text="Filter players" FontWeight="DemiBold" />
                                     <Separator Opacity=".5" Margin="0 6 0 10"/>
                                     <ComboBox
                                     FontSize="13"
@@ -719,8 +658,8 @@
 
                                     <TextBlock Text="Chat options" FontWeight="DemiBold" Margin="0 20 0 0"/>
                                     <Separator Opacity=".5" Margin="0 6 0 10"/>
-                                    <!--<CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>-->
-                                    <CheckBox Content="Enable game preview" IsChecked="False"/>
+                                    --><!--<CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>--><!--
+                                    <CheckBox Content="Enable game preview" IsChecked="False"/>-->
                                     <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2" Margin="0 10 0 0"/>
                                 </StackPanel>
                             </Border>
@@ -748,8 +687,7 @@
                     VirtualizingPanel.IsVirtualizing="True"
                      ItemContainerStyle="{StaticResource PlayerListBoxItemStyle}">
                 <ListBox.GroupStyle>
-                    <GroupStyle>
-                    </GroupStyle>
+                    <GroupStyle/>
                 </ListBox.GroupStyle>
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:UnknownPlayer}">

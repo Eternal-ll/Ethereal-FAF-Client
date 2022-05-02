@@ -4,17 +4,43 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
     <DataTemplate DataType="{x:Type models:ExceptionWrapper}">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="{Binding Exception.InnerException.Message, Mode=OneWay}" FontSize="20" Margin="0 10 0 20" MaxWidth="400" TextWrapping="Wrap"/>
-            <TextBox Grid.Row="1" BorderBrush="Transparent" BorderThickness="0" IsReadOnly="True"
+        <ContentControl>
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="Content" Value="{Binding Exception.InnerException, Mode=OneWay}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Exception.InnerException, Mode=OneWay}" Value="{x:Null}">
+                            <Setter Property="Content" Value="{Binding Exception, Mode=OneWay}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+            <ContentControl.ContentTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{Binding Message, Mode=OneWay}" FontSize="20" Margin="0 10 0 20" MaxWidth="400" TextWrapping="Wrap"/>
+                        <TextBox Grid.Row="1" BorderBrush="Transparent" BorderThickness="0" IsReadOnly="True"
                      MaxWidth="400"
-                     TextWrapping="Wrap"
-                     Text="{Binding Exception.InnerException, Mode=OneWay}"/>
-        </Grid>
+                     TextWrapping="Wrap">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                                    <Setter Property="Text" Value="{Binding Mode=OneWay}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Mode=OneWay}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="Stack trace is empty..."/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+                </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
     </DataTemplate>
     <DataTemplate DataType="{x:Type models:OAuthEventArgs}">
         <DataTemplate.Resources>

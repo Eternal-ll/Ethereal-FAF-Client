@@ -20,7 +20,8 @@
         <Style.Resources>
             <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                 <Grid d:DataContext="{d:DesignInstance {x:Type sModels:PlayerInfoMessage}}"
-                                  ShowGridLines="False">
+                                  ShowGridLines="False"
+                      ContextMenu="{StaticResource UniversalPlayerContextMenu}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="16"/>
                         <ColumnDefinition Width="Auto"/>
@@ -397,10 +398,10 @@
         <Setter Property="Visibility" Value="Collapsed"/>
         <Setter Property="Background" Value="{DynamicResource NavigationViewDefaultPaneBackground}"/>
         <Style.Triggers>
-            <!--<MultiDataTrigger>
+            <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding OldState}" Value="0"/>
-                    <Condition Binding="{Binding num_players}" Value="1"/>
+                    <Condition Binding="{Binding num_players}" Value="0"/>
                     <Condition Binding="{Binding State}" Value="1"/>
                 </MultiDataTrigger.Conditions>
                 <MultiDataTrigger.Setters>
@@ -410,13 +411,25 @@
                 <MultiDataTrigger.EnterActions>
                     <BeginStoryboard Storyboard="{StaticResource OpacityAnimation}"/>
                 </MultiDataTrigger.EnterActions>
-            </MultiDataTrigger>-->
+            </MultiDataTrigger>
             <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type vm:GamesViewModel}}, Path=IsDataGridView}" Value="True">
                 <Setter Property="Visibility" Value="Collapsed"/>
             </DataTrigger>-->
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding State}" Value="5"/>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger.Setters>
+                <MultiDataTrigger.EnterActions>
+                    <BeginStoryboard Storyboard="{StaticResource OpacityAnimation}"/>
+                </MultiDataTrigger.EnterActions>
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding State}" Value="3"/>
                 </MultiDataTrigger.Conditions>
                 <MultiDataTrigger.Setters>
                     <Setter Property="BorderBrush" Value="Red"/>
@@ -448,7 +461,7 @@
             Background="Transparent"
             HorizontalAlignment="Stretch"
             d:DataContext="{d:DesignInstance {x:Type sModels:GameInfoMessage}}">
-            <Grid.ToolTip>
+            <!--<Grid.ToolTip>
                 <ToolTip>
                     <ItemsControl ItemsSource="{Binding teams}">
                         <ItemsControl.ItemTemplate>
@@ -461,7 +474,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ToolTip>
-            </Grid.ToolTip>
+            </Grid.ToolTip>-->
             <Grid.Resources>
                 <SolidColorBrush x:Key="Bg" Color="Black" Opacity=".5"/>
             </Grid.Resources>
@@ -1024,52 +1037,64 @@
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
-                <TextBlock
-                    Margin="8 6 0 0"
-                    Padding="24 0 0 0">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{Binding sim_mods.Count}"/>
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <ImageBrush
+                <StackPanel Orientation="Horizontal"  Margin="8 6 6 0" VerticalAlignment="Center">
+                    <TextBlock Padding="24 0 0 0" Margin="0 0 8 0" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="{Binding sim_mods.Count}"/>
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <ImageBrush
                                         Stretch="Uniform"
                                         AlignmentX="Left">
-                                        <ImageBrush.Transform>
-                                            <TransformGroup>
-                                                <ScaleTransform ScaleX=".9" ScaleY=".9"/>
-                                            </TransformGroup>
-                                        </ImageBrush.Transform>
-                                        <ImageBrush.ImageSource>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <GeometryDrawing Brush="White" Geometry="M13.78 15.3L19.78 21.3L21.89 19.14L15.89 13.14L13.78 15.3M17.5 10.1C17.11 10.1 16.69 10.05 16.36 9.91L4.97 21.25L2.86 19.14L10.27 11.74L8.5 9.96L7.78 10.66L6.33 9.25V12.11L5.63 12.81L2.11 9.25L2.81 8.55H5.62L4.22 7.14L7.78 3.58C8.95 2.41 10.83 2.41 12 3.58L9.89 5.74L11.3 7.14L10.59 7.85L12.38 9.63L14.2 7.75C14.06 7.42 14 7 14 6.63C14 4.66 15.56 3.11 17.5 3.11C18.09 3.11 18.61 3.25 19.08 3.53L16.41 6.2L17.91 7.7L20.58 5.03C20.86 5.5 21 6 21 6.63C21 8.55 19.45 10.1 17.5 10.1Z"/>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </ImageBrush.ImageSource>
-                                    </ImageBrush>
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="ToolTip">
-                                <Setter.Value>
-                                    <ToolTip>
-                                        <StackPanel>
-                                            <ItemsControl ItemsSource="{Binding sim_mods}"/>
-                                        </StackPanel>
-                                    </ToolTip>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding sim_mods.Count}" Value="0">
-                                    <Setter Property="Text" Value="{x:Null}"/>
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Setter Property="Background" Value="{x:Null}"/>
-                                    <Setter Property="ToolTip" Value="{x:Null}"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                                            <ImageBrush.Transform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX=".9" ScaleY=".9"/>
+                                                </TransformGroup>
+                                            </ImageBrush.Transform>
+                                            <ImageBrush.ImageSource>
+                                                <DrawingImage>
+                                                    <DrawingImage.Drawing>
+                                                        <GeometryDrawing Brush="White" Geometry="M13.78 15.3L19.78 21.3L21.89 19.14L15.89 13.14L13.78 15.3M17.5 10.1C17.11 10.1 16.69 10.05 16.36 9.91L4.97 21.25L2.86 19.14L10.27 11.74L8.5 9.96L7.78 10.66L6.33 9.25V12.11L5.63 12.81L2.11 9.25L2.81 8.55H5.62L4.22 7.14L7.78 3.58C8.95 2.41 10.83 2.41 12 3.58L9.89 5.74L11.3 7.14L10.59 7.85L12.38 9.63L14.2 7.75C14.06 7.42 14 7 14 6.63C14 4.66 15.56 3.11 17.5 3.11C18.09 3.11 18.61 3.25 19.08 3.53L16.41 6.2L17.91 7.7L20.58 5.03C20.86 5.5 21 6 21 6.63C21 8.55 19.45 10.1 17.5 10.1Z"/>
+                                                    </DrawingImage.Drawing>
+                                                </DrawingImage>
+                                            </ImageBrush.ImageSource>
+                                        </ImageBrush>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip>
+                                            <StackPanel>
+                                                <ItemsControl ItemsSource="{Binding sim_mods}"/>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding sim_mods.Count}" Value="0">
+                                        <Setter Property="Text" Value="{x:Null}"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Background" Value="{x:Null}"/>
+                                        <Setter Property="ToolTip" Value="{x:Null}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Border BorderBrush="Red" BorderThickness="1" Padding="6 1" CornerRadius="4">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding FeaturedMod}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding FeaturedMod}" Foreground="Red" FontWeight="DemiBold"/>
+                    </Border>
+                </StackPanel>
             </StackPanel>
             <Grid
                 Grid.Column="1"
@@ -1099,16 +1124,28 @@
                         <Style BasedOn="{StaticResource LobbyContainerBtnStyle}" TargetType="Button">
                             <Setter Property="Command" Value="{StaticResource JoinGameCommand}"/>
                             <Setter Property="Content" Value="Join"/>
+                            <Setter Property="IsEnabled" Value="False"/>
                             <Style.Triggers>
+                                <DataTrigger Binding="{Binding State}" Value="1">
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding State}" Value="2">
-                                    <Setter Property="IsEnabled" Value="False"/>
-                                    <Setter Property="Content" Value="Watch"/>
-                                    <Setter Property="ToolTip" Value="Not implemented yet"/>
+                                    <Setter Property="Content" Value="Not supported"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding State}" Value="3">
+                                    <Setter Property="Content" Value="You cant join"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding State}" Value="5">
+                                    <Setter Property="Content" Value="You cant join"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding sim_mods.Count, Converter={StaticResource MoreThanConverter}}" Value="True">
                                     <Setter Property="IsEnabled" Value="False"/>
                                     <Setter Property="Content" Value="Mods not supported"/>
                                     <Setter Property="ToolTip" Value="Not implemented yet"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsNeroxisMap}" Value="True">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Content" Value="Not supported"/>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -1165,8 +1202,11 @@
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding State}" Value="1">
+                                    <DataTrigger Binding="{Binding num_players}" Value="0">
                                         <Setter Property="Text" Value="New"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="3">
+                                        <Setter Property="Text" Value="Closed"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding State}" Value="5">
                                         <Setter Property="Text" Value="Launched"/>

@@ -13,19 +13,30 @@ namespace beta.Infrastructure.Services
     {
         //private readonly IGameSessionService GameSessionService;
         private readonly NotificationManager NotificationManager;
+        private delegate void SpecialDelegate();
+        
+        private SpecialDelegate HideDelegate;
 
         public ContentDialog ContentDialog { get; private set; }
         public NotificationService()
         {
             //GameSessionService = App.Services.GetService<IGameSessionService>();
-
             NotificationManager = new();
 
-            App.Current.Dispatcher.Invoke(() => ContentDialog = new()
+            App.Current.Dispatcher.Invoke(() =>
             {
-                CloseButtonText = "OK"
+                HideDelegate = Hide;
+                ContentDialog = new()
+                {
+                    CloseButtonText = "OK"
+                };
             });
         }
+        private void Hide()
+        {
+            ContentDialog.Dispatcher.Invoke(() => ContentDialog.Hide());
+        }
+
         private void WaitForComplete()
         {
             while (ContentDialog.IsVisible)
@@ -94,7 +105,6 @@ namespace beta.Infrastructure.Services
                 case PassPasswordViewModel passwordModel:
                     ContentDialog.PrimaryButtonCommand = passwordModel.PassPasswordCommand;
                     ContentDialog.PrimaryButtonText = "Pass";
-                    ContentDialog.IsPrimaryButtonEnabled = false;
                     ContentDialog.CloseButtonText = "Cancel";
                     break;
                 case HostGameViewModel hostVM:
@@ -162,7 +172,7 @@ namespace beta.Infrastructure.Services
                 ContentDialog.CloseButtonText = "Close";
                 ContentDialog.PrimaryButtonText = "Copy trace";
                 ContentDialog.PrimaryButtonCommand = App.Current.Resources["CopyCommand"] as ICommand;
-                ContentDialog.PrimaryButtonCommandParameter = ex.InnerException.ToString();
+                ContentDialog.PrimaryButtonCommandParameter = ex.ToString();
                 await ContentDialog.ShowAsync();
             });
         }
@@ -170,5 +180,20 @@ namespace beta.Infrastructure.Services
         public void Notify(string text) => NotificationManager.Show(text);
 
         public void Notify(object model) => NotificationManager.Show(model);
+
+        public async Task ShowConnectionDialog(ConnectionViewModel model)
+        {
+            ContentDialog.Hide();
+
+            ContentDialog = new();
+            ContentDialog.Content = model;
+            model.Authorized += (s, e) => HideDelegate();
+
+            ContentDialog.PreviewKeyDown += HideEscapeKey;
+
+            await ContentDialog.ShowAsync();
+
+            ContentDialog.PreviewKeyDown -= HideEscapeKey;
+        }
     }
 }

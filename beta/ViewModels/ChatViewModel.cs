@@ -44,8 +44,17 @@ namespace beta.ViewModels
             {
                 if (Set(ref _SelectedChannel, value))
                 {
-                    UpdateSelectedChannelUsers();
-                    UpdateSelectedChannelHistory();
+                    FilterText = string.Empty;
+                    if (value is not null)
+                    {
+                        UpdateSelectedChannelUsers();
+                        UpdateSelectedChannelHistory();
+                    }
+                    else
+                    {
+                        SelectedChannelPlayers.Clear();
+                        SelectedChannelHistory.Clear();
+                    }
                     TestInputControl.SelectedChannel = value;
                 }
             }
@@ -126,6 +135,33 @@ namespace beta.ViewModels
                 ircService.Channels.ForEach(channel => ircService.GetChannelUsers(channel));
         }
 
+
+        #region FilterText
+        private string _FilterText = string.Empty;
+        public string FilterText
+        {
+            get => _FilterText;
+            set
+            {
+                if (Set(ref _FilterText, value))
+                {
+                    SelectedChannelPlayersView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+
+
+        #region NewChannelText
+        private string _NewChannelText = string.Empty;
+        public string NewChannelText
+        {
+            get => _NewChannelText;
+            set => Set(ref _NewChannelText, value);
+        }
+        #endregion
+
         #region Commands
 
         #region LeaveFromChannelCommand
@@ -145,7 +181,7 @@ namespace beta.ViewModels
                     channels.RemoveAt(i);
                     if (SelectedChannel is not null && SelectedChannel.Name == channel)
                     {
-                        if (i > 0) SelectedChannel = channels[0];
+
                     }
                 }
             }
@@ -167,13 +203,14 @@ namespace beta.ViewModels
         #region JoinChannelCommand
         private ICommand _JoinChannelCommand;
         public ICommand JoinChannelCommand => _JoinChannelCommand ??= new LambdaCommand(OnJoinChannelCommand, CanJoinChannelCommand);
-        private bool CanJoinChannelCommand(object parameter) => !string.IsNullOrWhiteSpace(parameter.ToString());
+        private bool CanJoinChannelCommand(object parameter) => !string.IsNullOrWhiteSpace(NewChannelText);
         private void OnJoinChannelCommand(object parameter)
         {
-            var channel = parameter.ToString();
+            var channel = NewChannelText;
             if (string.IsNullOrWhiteSpace(channel)) return;
             if (!channel.StartsWith('#')) channel = "#" + channel;
             IrcService.Join(channel);
+            NewChannelText = string.Empty;
         }
         #endregion
 
@@ -351,12 +388,36 @@ namespace beta.ViewModels
 
         private void OnStateChanged(object sender, IrcState e)
         {
-            //throw new NotImplementedException();
+            if (e == IrcState.Authorized)
+            {
+                for (int i = 0; i < Channels.Count; i++)
+                {
+                    IrcService.Join(Channels[i].Name);
+                }
+            }
+            else if (e != IrcState.Connected)
+            {
+                for (int i = 0; i < Channels.Count; i++)
+                {
+                    Channels[i].Users.Clear();
+                    SelectedChannelPlayers.Clear();
+                }
+            }
         }
 
         private void PlayersFilter(object sender, FilterEventArgs e)
         {
-            //throw new NotImplementedException();
+            var player = (IPlayer)e.Item;
+
+            if (FilterText.Length == 0) return;
+
+            e.Accepted = player.login.StartsWith(FilterText, System.StringComparison.OrdinalIgnoreCase);
+
+            if (player.RelationShip.ToString().Equals(FilterText, System.StringComparison.OrdinalIgnoreCase))
+            {
+                e.Accepted = true;
+                return;
+            }
         }
     }
 }

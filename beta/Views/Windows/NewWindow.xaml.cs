@@ -24,6 +24,7 @@ namespace beta.Views.Windows
 
             Closing += OnWindowClosing;
         }
+        public bool ShutdownApplication { get; set; } = true;
 
         private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -43,6 +44,7 @@ namespace beta.Views.Windows
                 Settings.Default.Width = Width;
                 Settings.Default.IsWindowMaximized = false;
             }
+            if (!ShutdownApplication) return;
             App.Current.Shutdown();
         }
     }

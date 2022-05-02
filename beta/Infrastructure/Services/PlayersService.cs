@@ -72,6 +72,7 @@ namespace beta.Infrastructure.Services
             sessionService.PlayerReceived += OnPlayerReceived;
             sessionService.WelcomeDataReceived += OnWelcomeDataReceived;
             sessionService.PlayersReceived += OnPlayersReceived;
+            sessionService.StateChanged += SessionService_StateChanged;
 
             //gamesService.PlayersJoinedToGame += GamesService_PlayersJoinedToGame;
             //gamesService.PlayersLeftFromGame += GamesService_PlayersLeftFromGame;
@@ -98,6 +99,14 @@ namespace beta.Infrastructure.Services
 
             favoritesService.FavouriteAdded += FavoritesService_FavouriteAdded;
             favoritesService.FavouriteRemoved += FavoritesService_FavouriteRemoved;
+        }
+
+        private void SessionService_StateChanged(object sender, SessionState e)
+        {
+            if (e == SessionState.Disconnected)
+            {
+                PlayersDic.Clear();
+            }
         }
 
         private void FavoritesService_FavouriteRemoved(object sender, int e)
@@ -262,7 +271,19 @@ namespace beta.Infrastructure.Services
 
             if(!PlayersDic.TryAdd(player.id, player))
             {
-                Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}");
+                if(PlayersDic.TryGetValue(player.id, out var matchedPlayer))
+                {
+                    Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}, updated instead");
+                    matchedPlayer.login = player.login;
+                    matchedPlayer.ratings = player.ratings;
+                    matchedPlayer.Updated = DateTime.UtcNow;
+
+                    OnPlayerUpdated(matchedPlayer);
+                }
+                else
+                {
+                    Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}, but update didnt work");
+                }
             }
         }
 
@@ -303,11 +324,12 @@ namespace beta.Infrastructure.Services
                 PlayersDic.TryGetValue(id.Value, out player);
                 return player;
             }
+            idOrLogin = idOrLogin.ToLower();
             var players = Players;
             for (int i = 0; i < players.Length; i++)
             {
                 var player = players[i];
-                if (player.login == idOrLogin)
+                if (player.login.ToLower() == idOrLogin)
                 {
                     return player;
                 }

@@ -12,5 +12,10 @@ namespace beta.Views
 
         private void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e) =>
             ((HostGameViewModel)DataContext).Password = ((PasswordBox)sender).Password;
+
+        private void MapsView_MapSelected(object sender, string e)
+        {
+
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace beta.Views.Windows
@@ -45,7 +46,6 @@ namespace beta.Views.Windows
                 IceJsonRPC.AppendText(data + '\n');
             });
         }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             IrcService.Test();

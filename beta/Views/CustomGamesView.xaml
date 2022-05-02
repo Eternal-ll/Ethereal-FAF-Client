@@ -8,6 +8,7 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:vm="clr-namespace:beta.ViewModels"
+             xmlns:models="clr-namespace:beta.Models.Server"
              d:DataContext="{d:DesignInstance {x:Type vm:CustomGamesViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -197,7 +198,30 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-            <ContentControl Content="{Binding SelectedGame}"/>
+            <ScrollViewer>
+                <StackPanel>
+                    <ContentControl Content="{Binding SelectedGame}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type models:GameInfoMessage}">
+                                <StackPanel Width="240" Margin="20 10">
+                                    <TextBlock Text="{Binding title}" FontSize="16" FontWeight="DemiBold" Margin="0 0 0 20"/>
+                                    <Border Style="{StaticResource MapPreviewBorderStyle}" Width="200" Height="200"/>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0 20">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding MapName, StringFormat='Map: {0}'}"/>
+                                            <TextBlock Text="{Binding MapVersion, StringFormat='Version: {0}'}"/>
+                                            <TextBlock Text="{Binding max_players, StringFormat='Slots: {0}'}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <ItemsControl Style="{StaticResource TeamsItemsStyle}"/>
+                                    <TextBlock Text="{Binding Friends}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
         
         <WrapPanel Orientation="Vertical" Grid.ColumnSpan="2">

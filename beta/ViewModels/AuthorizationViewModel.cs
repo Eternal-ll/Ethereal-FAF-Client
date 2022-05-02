@@ -29,6 +29,7 @@ namespace beta.ViewModels
         {
             OAuthService = App.Services.GetService<IOAuthService>();
             SessionService = App.Services.GetService<ISessionService>();
+            SessionService.AuthentificationFailed += SessionService_AuthentificationFailed;
             NotificationService = App.Services.GetService<INotificationService>();
 
             OAuthService.StateChanged += OAuthService_StateChanged;
@@ -46,6 +47,11 @@ namespace beta.ViewModels
 
                 Task.Run(() => AuthorizeAsync());
             }
+        }
+
+        private void SessionService_AuthentificationFailed(object sender, Models.Server.AuthentificationFailedData e)
+        {
+            IsPendingAuthorization = false;
         }
 
         private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
@@ -188,6 +194,7 @@ namespace beta.ViewModels
                         if (task.IsFaulted)
                         {
                             await NotificationService.ShowExceptionAsync(task.Exception);
+                            IsPendingAuthorization = false;
                         }
                         else if (task.IsCompleted || task.IsCompletedSuccessfully)
                         {

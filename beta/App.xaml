@@ -49,6 +49,7 @@
 
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
+                    <converter:HTMLConverter x:Key="HTMLConverter"/>
 
                     <converter:ToBitmapImageConverter x:Key="ToBitmapImageConverter"/>
 

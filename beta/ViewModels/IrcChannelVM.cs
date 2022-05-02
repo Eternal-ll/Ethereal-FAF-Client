@@ -56,11 +56,10 @@ namespace beta.ViewModels
         {
             if (msg is IrcChannelMessage userMsg)
             {
-                userMsg.IsSame = History.Count > 0 &&
-                    History[^1] is IrcChannelMessage lastMsg &&
+                userMsg.IsSame = History.Count > 1 &&
+                    History[^2] is IrcChannelMessage lastMsg &&
                     lastMsg.From == userMsg.From;
             }
-
             History.Add(msg);
             return msg;
         }

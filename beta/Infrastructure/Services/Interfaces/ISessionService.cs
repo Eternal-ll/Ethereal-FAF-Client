@@ -10,6 +10,7 @@ namespace beta.Infrastructure.Services.Interfaces
         Disconnected,
         PendingConnection,
         Connected,
+        AuthentificationFailed
     }
     public interface ISessionService
     {
@@ -21,6 +22,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<GameInfoMessage> GameReceived;
         public event EventHandler<GameInfoMessage[]> GamesReceived;
 
+        public event EventHandler<AuthentificationFailedData> AuthentificationFailed;
         public event EventHandler<SocialData> SocialDataReceived;
         public event EventHandler<WelcomeData> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
@@ -38,5 +40,6 @@ namespace beta.Infrastructure.Services.Interfaces
         /// JSON Format
         /// </summary>
         public void Send(string command);
+        public Task SendAsync(string command);
     }
 }

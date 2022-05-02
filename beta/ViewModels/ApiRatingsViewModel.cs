@@ -76,16 +76,15 @@ namespace beta.ViewModels
             var pages = result.Meta.Page.AvaiablePagesCount;
             var index = 0;
             int last = 0;
+            DateTime lastDate = DateTime.Now;
             for (int j = 0; j < result.Data.Length; j++)
             {
-                var difference = result.Data[j].RatingAfter - last;
-                last = result.Data[j].RatingAfter;
+                var item = result.Data[j];
+                var difference = item.RatingAfter - last;
+                last = item.RatingAfter;
                 index++;
-                if ((difference > 400 || difference < -400) || j == 0)
-                {
-                    continue;
-                }
-                data.Add(result.Data[j]);
+
+                data.Add(item);
                 
             }
             for (int i = 2; i <= pages; i++)
@@ -96,10 +95,6 @@ namespace beta.ViewModels
                     var difference = result.Data[j].RatingAfter - last;
                     last = result.Data[j].RatingAfter;
                     index++;
-                    if ((difference > 400 || difference < -400) || j == 0)
-                    {
-                        continue;
-                    }
                     data.Add(result.Data[j]);
                 }
             }

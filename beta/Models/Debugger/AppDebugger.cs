@@ -1,8 +1,17 @@
 ﻿using beta.Views.Windows;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace beta.Models.Debugger
 {
+    public enum LogType
+    {
+        Default,
+        Lobby,
+        IRC,
+        IceAdapter,
+        Game
+    }
     /// <summary>
     /// Custom debugger for developers
     /// </summary>
@@ -28,5 +37,11 @@ namespace beta.Models.Debugger
 
         [Conditional("DEBUG")]
         public static void LOGJSONRPC(string data) => DebugWindow.LOGJSONRPC(data);
+        
+        [Conditional("DEBUG")]
+        public static void LOG(string data)
+        {
+
+        }
     }
 }

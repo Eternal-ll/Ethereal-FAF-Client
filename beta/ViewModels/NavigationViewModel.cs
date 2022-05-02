@@ -1,6 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Enums;
 using beta.Models.Server;
+using beta.Properties;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -27,7 +28,7 @@ namespace beta.ViewModels
             DownloadService.DownloadEnded += DownloadService_DownloadEnded;
 
             Login = Properties.Settings.Default.PlayerNick;
-
+            
             ViewModels = new()
             {
                 { typeof(HomeViewModel), new HomeViewModel() },
@@ -35,13 +36,13 @@ namespace beta.ViewModels
                 { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
                 //{ typeof(MapsVaultViewModel), new MapsVaultViewModel() },
                 { typeof(SettingsViewModel), new SettingsViewModel() },
-                //{ typeof(ProfileViewModel), new ProfileViewModel(PlayersService.Self) }
+                //{ typeof(ProfileViewModel), new ProfileViewModel(player) }
             };
         }
 
         #region Me
         private PlayerInfoMessage _Me;
-        private PlayerInfoMessage Me
+        public PlayerInfoMessage Me
         {
             get => _Me;
             set => Set(ref _Me, value);
@@ -112,12 +113,20 @@ namespace beta.ViewModels
                     {
                         if (cachedViewModel is null)
                         {
-                            object[] args = null;
-                            //if (viewType == typeof(ProfileViewModel))
-                            //{
-                            //    args = new object[] { Me.id };
-                            //}
-                            viewModel = (ViewModel)Activator.CreateInstance(viewType, args);
+                            if (viewType == typeof(ProfileViewModel))
+                            {
+                                var player = PlayersService.GetPlayer(Settings.Default.PlayerNick);
+                                if (player is null)
+                                {
+                                    player = new();
+                                    player.FillTest();
+                                }
+                                viewModel = new ProfileViewModel(player);
+                            }
+                            else
+                            {
+                                viewModel = (ViewModel)Activator.CreateInstance(viewType);
+                            }
                             ViewModels[viewType] = viewModel;
                         }
                         else
@@ -127,7 +136,20 @@ namespace beta.ViewModels
                     }
                     else
                     {
-                        viewModel = (ViewModel)Activator.CreateInstance(viewType);
+                        if (viewType == typeof(ProfileViewModel))
+                        {
+                            var player = PlayersService.GetPlayer(Settings.Default.PlayerNick);
+                            if (player is null)
+                            {
+                                player = new();
+                                player.FillTest();
+                            }
+                            viewModel = new ProfileViewModel(player);
+                        }
+                        else
+                        {
+                            viewModel = (ViewModel)Activator.CreateInstance(viewType);
+                        }
                         ViewModels.Add(viewType, viewModel);
                     }
                     SelectedViewModel = viewModel;

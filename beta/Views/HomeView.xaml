@@ -52,7 +52,7 @@
                 </Grid.OpacityMask>
             </Grid>
 
-            <ContentControl Content="{Binding NewsViewModel}" Grid.Row="2" Margin="20 60 20 0">
+            <ContentControl Content="{Binding NewsViewModel}" Grid.Row="2" Margin="-20 60 -20 0">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type vm:NewsViewModel}">
                         <Grid IsHitTestVisible="False" Opacity=".7">
@@ -801,7 +801,7 @@
                                                                     <Button Margin="4 -6 0 0" Padding="2 1" ToolTip="{Binding SourceUrl}"
                                                                             Style="{StaticResource ButtonLinkStyle}" Opacity="1" Content="{Binding title}"
                                                                             Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding SourceUrl}">
-                                                                        
+
                                                                     </Button>
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="10 0 0 4" VerticalAlignment="Bottom">
@@ -907,7 +907,7 @@
                                                                                         ToolTip="{Binding Author.UserUrl}"/>
                                                                                 <TextBlock Text="{Binding timestampISO}" FontSize="12" Opacity=".5" Margin="4 4 0 0"/>
                                                                             </StackPanel>
-                                                                            <Path Margin="10 0 0 0" ToolTip="{Binding content}" Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z">
+                                                                            <Path Margin="10 0 0 0" ToolTip="{Binding content, Converter={StaticResource HTMLConverter}}" Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z">
                                                                                 <Path.Style>
                                                                                     <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                                                                         <Style.Triggers>
@@ -951,9 +951,85 @@
                         </ContentControl>
                     </Border>
                 </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width=".6*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Content="{Binding PlayersViewModel}" VerticalAlignment="Top">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type vm:PlayersViewModel}">
+                                <Border Background="{StaticResource BackgroundHalfBlack}" Margin="0 20 0 0"
+                                    CornerRadius="10" Padding="10">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ToggleButton x:Name="ToggleSearchBtn" Background="Transparent">
+                                                <Path Data="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+                                            </ToggleButton>
+
+                                            <TextBox Grid.Column="1" Margin="0 0 10 0" MinHeight="0"
+                                                     Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                     ui:ControlHelper.PlaceholderText="Search" BorderThickness="0">
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=ToggleSearchBtn, Path=IsChecked}" Value="False">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Setter Property="Text" Value=""/>
+                                                            </DataTrigger>
+                                                         </Style.Triggers>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+                                            <StackPanel Orientation="Horizontal" Grid.Column="2" VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FilterText}" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <Path Fill="Orange" Height="10" Data="M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,4.5C17,4.5 21.27,7.61 23,12C21.27,16.39 17,19.5 12,19.5C7,19.5 2.73,16.39 1,12C2.73,7.61 7,4.5 12,4.5M3.18,12C4.83,15.36 8.24,17.5 12,17.5C15.76,17.5 19.17,15.36 20.82,12C19.17,8.64 15.76,6.5 12,6.5C8.24,6.5 4.83,8.64 3.18,12Z" />
+                                                    <TextBlock Text="{Binding PlayersView.Count}" Margin="4 0"/>
+                                                </StackPanel>
+                                                <TextBlock>
+                                                    <Run Text="&#8226;" Foreground="LimeGreen"/>
+                                                    <Run Text="{Binding Players.Count, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Grid>
+                                        <ListBox ItemsSource="{Binding PlayersView}" SelectedValue="{Binding SelectedPlayer}"
+                                                 Grid.Row="2" Margin="0 10 0 0"
+                                                 MaxHeight="400" Background="Transparent" VirtualizingPanel.IsVirtualizing="True"
+                                                 VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                                            <ListBox.GroupStyle>
+                                                <GroupStyle/>
+                                            </ListBox.GroupStyle>
+                                            <ListBox.Resources>
+                                                <Style TargetType="GroupItem" BasedOn="{StaticResource PlayersGroupStyle}"/>
+                                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlayerListBoxItemStyle}">
+                                                    <!--<Setter Property="Focusable" Value="False"/>-->
+                                                </Style>
+                                            </ListBox.Resources>
+                                        </ListBox>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                    <controls:CrossFadeContentControl Grid.Column="1" Content="{Binding SelectedPlayerProfile}" Margin="20 30 20 0" VerticalAlignment="Top"/>
+
+                </Grid>
             </StackPanel>
-
-
         </Grid>
     </ScrollViewer>
 </UserControl>

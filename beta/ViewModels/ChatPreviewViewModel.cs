@@ -53,8 +53,10 @@ namespace beta.ViewModels
 
         #endregion
 
-        private void OnIrcStateChanged(object sender, IrcState e) =>
+        private void OnIrcStateChanged(object sender, IrcState e)
+        {
             PendingConnectionToIRC = e != IrcState.Disconnected;
+        }
 
         protected override void Dispose(bool disposing)
         {

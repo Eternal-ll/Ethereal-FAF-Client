@@ -7,7 +7,5 @@
              d:DataContext="{d:DesignInstance {x:Type vm:ProfileViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
-    </Grid>
+    
 </UserControl>

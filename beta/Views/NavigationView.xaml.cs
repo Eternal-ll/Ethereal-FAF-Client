@@ -11,6 +11,6 @@ namespace beta.Views
         public NavigationView() => InitializeComponent();
 
         private void OnNavigationViewSelectionChanged(ModernWpf.Controls.NavigationView sender, NavigationViewSelectionChangedEventArgs args) =>
-            ((NavigationViewModel)DataContext).CurrentViewTag = ((NavigationViewItem)args.SelectedItem).Tag.ToString();
+            ((NavigationViewModel)DataContext).CurrentViewTag = ((NavigationViewItem)args.SelectedItem).Tag?.ToString();
     }
 }

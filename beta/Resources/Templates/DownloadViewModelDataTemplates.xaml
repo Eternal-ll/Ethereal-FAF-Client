@@ -108,4 +108,8 @@
     <DataTemplate DataType="{x:Type vm:PassPasswordViewModel}">
         <modals:PassPasswordView DataContext="{Binding}"/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:ConnectionViewModel}">
+        <modals:ConnectionView DataContext="{Binding}"/>
+    </DataTemplate>
 </ResourceDictionary>

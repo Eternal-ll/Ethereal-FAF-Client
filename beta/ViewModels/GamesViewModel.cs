@@ -84,6 +84,7 @@ namespace beta.ViewModels
             //GamesService.GameUpdated += OnGameUpdated;
             GamesService.GameEnd += OnGameEnd;
             GamesService.GameLaunched += OnGameLaunched;
+            GamesService.GameClosed += GamesService_GameClosed;
 
 
             //Foes = SocialService.GetFoes;
@@ -638,31 +639,34 @@ namespace beta.ViewModels
 
         private void OnGameLaunched(object sender, GameInfoMessage e)
         {
-            if (e.GameType != GameType && e.FeaturedMod != FeaturedMod.FAF) return;
-            var games = Games;
-            for (int i = 0; i < games.Count; i++)
+            if (e.GameType != GameType) return;
+
+            e.State = GameState.Launched;
+            Task.Run(() =>
             {
-                var cgame = games[i];
-                if (cgame.uid == e.uid)
-                {
-                    cgame.State = GameState.Launched;
-                    Task.Run(() =>
-                    {
-                        Thread.Sleep(5000);
-                        cgame.State = GameState.Playing;
-                        Thread.Sleep(7000);
-                        games.Remove(e);
-                    });
-                    break;
-                }
-            }
+                Thread.Sleep(5000);
+                e.State = GameState.Playing;
+                Thread.Sleep(7000);
+                Games.Remove(e);
+            });
         }
 
+
+        private void GamesService_GameClosed(object sender, GameInfoMessage e)
+        {
+            if (e.GameType != GameType) return;
+
+            e.State = GameState.Closed;
+            Task.Run(() =>
+            {
+                Thread.Sleep(7000);
+                Games.Remove(e);
+            });
+        }
         private void OnGameEnd(object sender, GameInfoMessage game)
         {
-            if (!IsNotRequiredGame(game)) return;
+            if (game.GameType != GameType) return;
 
-            return;
             for (int i = 0; i < Games.Count; i++)
             {
                 var cgame = Games[i];

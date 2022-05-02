@@ -121,7 +121,15 @@ namespace beta.Models
         public async Task WriteAsync(string data)
         {
             if (data[^1] != '\n') data += '\n';
-            await Stream.WriteAsync(StringEncoder.GetBytes(data));
+            try
+            {
+                await Stream.WriteAsync(StringEncoder.GetBytes(data));
+            }
+            catch (Exception ex)
+            {
+                OnStateChanged(ManagedTcpClientState.Disconnected);
+                throw ex;
+            }
         }
 
         public async Task WaitResponse()
@@ -342,8 +350,8 @@ namespace beta.Models
         {
             if (IsDisposed) return;
             IsListening = true;
-            TcpClient.Close();
-            TcpClient.Dispose();
+            TcpClient?.Close();
+            TcpClient?.Dispose();
             OnStateChanged(ManagedTcpClientState.Disconnected);
             IsDisposed = true;
         }

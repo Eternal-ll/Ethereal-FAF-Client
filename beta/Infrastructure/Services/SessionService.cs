@@ -3,7 +3,6 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Models;
 using beta.Models.Debugger;
-using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
@@ -12,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +21,7 @@ namespace beta.Infrastructure.Services
     public class SessionService : ISessionService
     {
         #region Events
+        public event EventHandler<AuthentificationFailedData> AuthentificationFailed;
         public event EventHandler<SessionState> StateChanged;
         public event EventHandler<bool> Authorized;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
@@ -82,6 +83,7 @@ namespace beta.Infrastructure.Services
             OAuthService.StateChanged += OnAuthResult;
 
             #region Response actions for server
+            Operations.Add(ServerCommand.authentication_failed, OnAuthentificationFailedData);
             Operations.Add(ServerCommand.notice, OnNoticeData);
 
             Operations.Add(ServerCommand.irc_password, OnIrcPassowrdData);
@@ -110,6 +112,7 @@ namespace beta.Infrastructure.Services
             #endregion
         }
         #endregion
+
         public async Task<string> GenerateUID(string session)
         {
             Logger.LogInformation($"Generating UID for session: {session}");
@@ -148,7 +151,14 @@ namespace beta.Infrastructure.Services
         }
         public async Task AuthorizeAsync(string accessToken, CancellationToken token)
         {
+            OnSessionStateChanged(SessionState.PendingConnection);
             Logger.LogInformation($"Starting authorization process to lobby server");
+
+            if (Client is not null)
+            {
+                Client.TcpClient?.Close();
+            }
+
             Client = new()
             {
                 Host = "lobby.faforever.com",
@@ -167,8 +177,19 @@ namespace beta.Infrastructure.Services
             string authJson = ServerCommands.PassAuthentication(accessToken, generatedUID, session);
 
             Logger.LogInformation($"Sending data for authentication to lobby-server...");
+            Client.StateChanged += Client_StateChanged;
             await Client.WriteAsync(authJson);
         }
+
+        private void Client_StateChanged(object sender, ManagedTcpClientState e)
+        {
+            if (e == ManagedTcpClientState.Disconnected)
+            {
+                OnSessionStateChanged(SessionState.Disconnected);
+                IsAuthorized = false;
+            }
+        }
+
         public async Task<string> GetSession()
         {
             /* WRITE
@@ -188,6 +209,13 @@ namespace beta.Infrastructure.Services
             //Logger.LogInformation($"Sent to lobby-server:\n{command}");
             AppDebugger.LOGLobby($"Sent to lobby-server:\n {command.ToJsonFormat()}");
             Client.Write(command);
+        }
+
+
+        public async Task SendAsync(string command)
+        {
+            AppDebugger.LOGLobby($"Sent to lobby-server:\n {command.ToJsonFormat()}");
+            await Client.WriteAsync(command);
         }
 
         public void Ping()
@@ -239,6 +267,12 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region Server response actions
+        private void OnAuthentificationFailedData(string json)
+        {
+            IsAuthorized = false;
+            AuthentificationFailed?.Invoke(this, JsonSerializer.Deserialize<AuthentificationFailedData>(json));
+            //OnSessionStateChanged(SessionState.AuthentificationFailed);
+        }
         private void OnIceUniversalData(string json) => OnIceUniversalDataReceived(JsonSerializer.Deserialize<IceUniversalData>(json));
 
         private void OnNoticeData(string json)
@@ -277,7 +311,7 @@ namespace beta.Infrastructure.Services
         {
             // TODO FIX ME???? ERROR UP?
             Settings.Default.access_token = null;
-            OAuthService.AuthAsync();
+            //OAuthService.AuthAsync();
         }
 
         private void OnPlayerData(string json)
@@ -294,7 +328,6 @@ namespace beta.Infrastructure.Services
             if (gameInfoMessage.games is not null)
                 OnGamesReceived(gameInfoMessage.games);
             else OnGameReceived(gameInfoMessage);
-
             //AppDebugger.LOGLobby(json.ToJsonFormat());
         }
         private void OnMatchmakerData(string json) => OnMatchMakerDataReceived(JsonSerializer.Deserialize<MatchMakerData>(json));
@@ -305,7 +338,10 @@ namespace beta.Infrastructure.Services
 
         }
 
-        private void OnGameLaunchData(string json) => OnGameLaunchDataReceived(JsonSerializer.Deserialize<GameLaunchData>(json));
+        private void OnGameLaunchData(string json)
+        {
+            OnGameLaunchDataReceived(JsonSerializer.Deserialize<GameLaunchData>(json));
+        }
 
         private void OnPing(string json = null) => Client.Write(ServerCommands.Pong);
 
@@ -318,7 +354,7 @@ namespace beta.Infrastructure.Services
             AppDebugger.LOGLobby($"Received PONG. TIME ELAPSED: {Stopwatch.Elapsed:c}");
 
             Stopwatch.Reset();
-        } 
+        }
         #endregion
     }
 }

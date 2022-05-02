@@ -161,13 +161,12 @@ namespace beta.Infrastructure.Services
                     return;
             }
 
-            //if (newGame.sim_mods.Count > 0) return;
-            if (newGame.FeaturedMod != FeaturedMod.FAF) return;
-
+            newGame.Updated = DateTime.UtcNow;
             var games = Games;
 
             if (TryGetGame(newGame.uid, out var game))
             {
+                game.Updated = DateTime.UtcNow;
                 if (newGame.State == GameState.Closed)
                 {
                     if (game.State == GameState.Playing)
@@ -177,8 +176,14 @@ namespace beta.Infrastructure.Services
                     }
                     else
                     {
+                        game.State = GameState.Closed;
                         // host closed game
                         OnGameClosed(game);
+                    }
+
+                    for (int i = 0; i < game.Players.Length; i++)
+                    {
+                        game.Players[i].Game = null;
                     }
                     return;
                 }
@@ -205,7 +210,7 @@ namespace beta.Infrastructure.Services
                         var leftPlayer = PlayersService.GetPlayer(left[i]);
                         if (leftPlayer is null)
                         {
-                            Logger.LogError("Player that left from game not found");
+                            Logger.LogError($"Player {left[i]} left from game but not found");
                         }
                         else
                         {
@@ -236,11 +241,7 @@ namespace beta.Infrastructure.Services
                     }
                 }
 
-                // TODO OPtimize
-                //if (game.PlayersCountChanged != 0)
-                //{
-                //    HandleTeams(game);
-                //}
+                // TODO Optimize to not load everytime
                 game.teams = newGame.teams;
                 HandleTeams(game);
 
@@ -272,15 +273,8 @@ namespace beta.Infrastructure.Services
             else
             {
                 //Logger.LogInformation($"Received new game {newGame.uid} by {newGame.host}");
-                // currently we are not supporting UI notification about new game
-                //if (newGame.num_players == 0)
-                //{
-                //    //Logger.LogInformation($"Empty game {newGame.uid} by {newGame.host}: didnt pass");
-                //    return;
-                //}
 
-                
-
+                newGame.OldState = GameState.None;
                 if (newGame.State == GameState.Closed)
                 {
                     //Logger.LogInformation($"Closed game {newGame.uid} by {newGame.host}: didnt pass");
@@ -298,8 +292,5 @@ namespace beta.Infrastructure.Services
         private void OnGameEnd(GameInfoMessage game) => GameEnd?.Invoke(this, game);
         private void OnGameClosed(GameInfoMessage game) => GameClosed?.Invoke(this, game);
         private void OnGameLaunched(GameInfoMessage game) => GameLaunched?.Invoke(this, game);
-
     }
-
-
 }

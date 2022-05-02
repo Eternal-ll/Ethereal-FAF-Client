@@ -47,7 +47,7 @@ namespace beta.ViewModels
         }
     }
 
-    internal class ProfileViewModel : Base.ViewModel
+    internal class ProfileViewModel : Base.ViewModel, ISelectedPlayerProfile
     {
         public ProfileViewModel(PlayerInfoMessage player)
         {

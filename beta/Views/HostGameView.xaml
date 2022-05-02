@@ -5,19 +5,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:vm="clr-namespace:beta.ViewModels"
+             xmlns:view="clr-namespace:beta.Views"
              d:DataContext="{d:DesignInstance {x:Type vm:HostGameViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid Margin="20 -28 20 20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <StackPanel>
             <TextBlock Text="Create game" FontSize="16" FontWeight="DemiBold"/>
-            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0 25 0 0" ui:ControlHelper.PlaceholderText="Title"/>
-            <Grid Margin="0 20 0 0">
+            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0 25 0 0" ui:ControlHelper.PlaceholderText="Title"
+                     ui:ControlHelper.Description=" Required"/>
+            <Grid Margin="0 10 0 0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="Auto"/>
@@ -25,7 +27,9 @@
                 <PasswordBox PasswordChanged="PasswordBox_PasswordChanged" ui:ControlHelper.PlaceholderText="Password"/>
                 <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
             </Grid>
-            
+
+            <TextBlock Text="{Binding SelectedMap.DisplayedName, StringFormat='Selected map: {0}'}" Margin="0 10 0 0"/>
+
             <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
             <ListBox ItemsSource="{Binding FeaturedMods}" SelectedItem="{Binding FeaturedMod}" HorizontalAlignment="Left">
                 <ListBox.Resources>
@@ -55,9 +59,12 @@
                 </StackPanel>
             </StackPanel>
             <CheckBox Content="Enforce rating restriction" IsChecked="{Binding IsRatingRestrictionEnabled}"/>
+            <Button Content="Host" Command="{Binding HostGameCommand}"/>
         </StackPanel>
         <Rectangle Grid.Column="1" Margin="30 45 30 0" Width="2" Fill="Gray" Opacity=".2"/>
-        <Grid Grid.Column="2" Margin="0 45 0 0">
+        <ContentControl Grid.Column="2" Content="{Binding Maps}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <!--<Grid Grid.Column="2" Margin="0 45 0 0" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="256"/>
                 <RowDefinition Height="Auto"/>
@@ -66,6 +73,6 @@
             <ContentControl Height="256" Width="256" Content="{Binding SelectedGameMap}"/>
             <TextBox Grid.Row="1" Margin="0 10" Text="{Binding MapFilterText, UpdateSourceTrigger=PropertyChanged}"/>
             <ListBox Grid.Row="2" Width="256" ItemsSource="{Binding MapsView}" SelectedItem="{Binding SelectedMapName}" SelectedIndex="0"/>
-        </Grid>
+        </Grid>-->
     </Grid>
 </UserControl>

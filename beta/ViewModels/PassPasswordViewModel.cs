@@ -11,11 +11,9 @@ namespace beta.ViewModels
     /// </summary>
     internal class PassPasswordViewModel : Base.ViewModel
     {
-        private readonly ContentDialog ContentDialog;
-
         public PassPasswordViewModel()
         {
-            ContentDialog = App.Services.GetService<INotificationService>().ContentDialog;
+
         }
 
         #region Password
@@ -27,7 +25,7 @@ namespace beta.ViewModels
             {
                 if (Set(ref _Password, value))
                 {
-                    ContentDialog.IsPrimaryButtonEnabled = !string.IsNullOrEmpty(value);
+
                 }
             }
         }
@@ -36,7 +34,7 @@ namespace beta.ViewModels
         #region PassPasswordCommand
         private ICommand _PassPasswordCommand;
         public ICommand PassPasswordCommand => _PassPasswordCommand ??= new LambdaCommand(OnPassPasswordCommand);
-        private void OnPassPasswordCommand(object parameter) {}
+        private void OnPassPasswordCommand(object parameter) { Password = parameter.ToString(); }
 
         #endregion
     }

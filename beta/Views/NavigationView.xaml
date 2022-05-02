@@ -113,7 +113,21 @@
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
-                <ui:NavigationViewItem Content="{Binding Login}" Tag="Profile" Icon="{StaticResource ProfilePathIcon}"/>
+                <!--Tag="Profile"-->
+                <ui:NavigationViewItem Icon="{StaticResource ProfilePathIcon}">
+                    <ContentControl>
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{Binding Me}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Me}" Value="{x:Null}">
+                                        <Setter Property="Content" Value="{Binding Login}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Settings" Tag="Settings" Icon="{StaticResource SettingsPathIcon}"/>
                 <ui:NavigationViewItem Content="Logout" Tag="Logout" Icon="{StaticResource ExitPathIcon}"/>
             </ui:NavigationView.FooterMenuItems>
@@ -124,31 +138,52 @@
             </ui:NavigationView.Background>
         </ui:NavigationView>
 
-        <TextBlock FontWeight="SemiBold"
+        <ui:TitleBarButton HorizontalAlignment="Left" VerticalAlignment="Top"
+                           FontFamily="SegoiUI" FontSize="14">
+            <Button Background="Transparent" Padding="0" HorizontalContentAlignment="Left">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Setter Property="Width" Value="200"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=UINavigationView, Path=IsPaneOpen}" Value="False">
+                                <Setter Property="Width" Value="50"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <TextBlock FontWeight="SemiBold"
                    Margin="12 6"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
                    Padding="38 0 0 0">
-            <TextBlock.Background>
-                <VisualBrush Stretch="None"
+                    <TextBlock.Background>
+                        <VisualBrush Stretch="None"
                              AlignmentX="Left">
-                    <VisualBrush.Visual>
-                        <ui:PathIcon Height="12"
+                            <VisualBrush.Visual>
+                                <ui:PathIcon Height="12"
                                      Data="M199.46,58.57,233.15,117H211.67L167.46,40h67.83L246,58.56H199.46ZM144.51,0h67.72L224,20.48H156.26Zm25.28,117-16-27.82H92.66L76.63,117H55.93L123.39,0h.54l67.16,117h-21.3ZM123.21,36.49l-16.95,29.4h33.91ZM22,20.48,33.77,0h69L90.94,20.48ZM35.28,117H12.84L46.53,58.57H0L10.71,40h69Z"
                                      />
-                    </VisualBrush.Visual>
-                </VisualBrush>
-            </TextBlock.Background>
-            <TextBlock.Resources>
-                <Style TargetType="TextBlock">
-                    <Setter Property="Text" Value=""/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=UINavigationView, Path=IsPaneOpen}" Value="True">
-                            <Setter Property="Text" Value="Ethereal FAF client"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBlock.Resources>
-        </TextBlock>
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </TextBlock.Background>
+                    <TextBlock.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value=""/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=UINavigationView, Path=IsPaneOpen}" Value="True">
+                                    <Setter Property="Text" Value="Ethereal FAF client"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Resources>
+                </TextBlock>
+                <ui:FlyoutService.Flyout>
+                    <ui:Flyout Placement="Bottom">
+                        <StackPanel HorizontalAlignment="Stretch">
+                            <Button Content="Restart" Command="{StaticResource RestartCommand}"/>
+                            <Button Content="Logout" Command="{StaticResource LogoutCommand}" Margin="0 10 0 0"/>
+                        </StackPanel>
+                    </ui:Flyout>
+                </ui:FlyoutService.Flyout>
+            </Button>
+        </ui:TitleBarButton>
     </Grid>
 </UserControl>

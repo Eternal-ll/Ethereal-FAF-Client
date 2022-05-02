@@ -17,7 +17,6 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
@@ -38,7 +37,8 @@ namespace beta.Infrastructure.Services
         private GameInfoMessage LastGame;
         private IceAdapterClient IceAdapterClient;
         private readonly List<string> IceMessagesQueue = new();
-
+        private readonly ApiFeaturedModFileData[] PreviousFeaturedModData;
+        private bool IsLocalFilesChanged;
         private Process ForgedAlliance;
 
         public bool GameIsRunning => ForgedAlliance is not null;
@@ -61,6 +61,7 @@ namespace beta.Infrastructure.Services
 
             SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
             SessionService.IceUniversalDataReceived += SessionService_IceUniversalDataReceived;
+            SessionService.Authorized += SessionService_Authorized;
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
@@ -70,6 +71,23 @@ namespace beta.Infrastructure.Services
             IceService.IceServersReceived += IceService_IceServersReceived;
             PlayersService = playersService;
             NotificationService = notificationService;
+        }
+
+        private void SessionService_Authorized(object sender, bool e)
+        {
+            if (e)
+            {
+                var ices = IceMessagesQueue;
+                if (IceAdapterClient is not null && IceAdapterClient.IsConnected)
+                {
+                    SessionService.Send(ServerCommands.RestoreGameSession(LastGame.uid.ToString()));
+                    for (int i = 0; i < ices.Count; i++)
+                    {
+                        SessionService.Send(ServerCommands.UniversalGameCommand("IceMsg", ices[i]));
+                    }
+                }
+                ices.Clear();
+            }
         }
 
         private void SessionService_IceUniversalDataReceived(object sender, IceUniversalData e)
@@ -131,7 +149,6 @@ namespace beta.Infrastructure.Services
         {
             try
             {
-
                 IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
             }
             catch
@@ -169,8 +186,12 @@ namespace beta.Infrastructure.Services
             if (me.ratings.TryGetValue("global", out var rating))
             {
                 args.Append("/numgames ");
-                args.Append(rating.DisplayedRating);
+                args.Append(rating.number_of_games);
                 args.Append(' ');
+            }
+            else
+            {
+                args.Append("/numgames 0 ");
             }
 
             if (me.clan is not null)
@@ -253,7 +274,7 @@ namespace beta.Infrastructure.Services
                 //{
                 //    IceMessagesQueue.Clear();
                 //}
-                //IceMessagesQueue.Add(e);
+                IceMessagesQueue.Add(e);
             }
         }
 
@@ -379,17 +400,15 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation("Map confirmed!");
 
             // Check current patch
+            // ConfirmPatch takes about 1800ms to process
             if (!await ConfirmPatch(game.FeaturedMod)) return;
-
             Logger.LogInformation("Patch confirmed");
 
             string command;
+            
+            command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
 
-            if (game.password_protected)
-                command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
-            else command = ServerCommands.JoinGame(game.uid.ToString());
-
-            SessionService.Send(command);
+            await SessionService.SendAsync(command);
         }
 
         private async Task<bool> ConfirmPatch(FeaturedMod mod)
@@ -709,7 +728,79 @@ namespace beta.Infrastructure.Services
             sb[^1] = '}';
             var command = sb.ToString();
 
-            SessionService.Send(command);
+            // Check map
+            if (!ConfirmMap(mapName))
+            {
+                Logger.LogWarning("Map {1} required to download", mapName);
+
+                ContentDialogResult result;
+
+                if (!Settings.Default.AlwaysDownloadMap)
+                {
+                    result = await NotificationService.ShowDialog("Map required to download:\n" + mapName, "Download", "Always download", "Cancel");
+
+                    if (result == ContentDialogResult.None)
+                    {
+                        Logger.LogWarning($"Refused to download map {mapName}");
+                        return;
+                    }
+
+                    if (result == ContentDialogResult.Secondary)
+                    {
+                        Logger.LogWarning("Set to always download map");
+                        // Always download
+                        Settings.Default.AlwaysDownloadMap = true;
+                    }
+                }
+                else
+                {
+                    Logger.LogWarning("Auto downloading map");
+                }
+
+                // Run task for downloading
+                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.mapname}.zip")));
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
+
+                if (!model.IsCompleted)
+                {
+                    return;
+                }
+
+                if (!ConfirmMap(mapName))
+                {
+                    await NotificationService.ShowPopupAsync("Something went wrong on downloading map, try again");
+                    return;
+                }
+
+                //result = await NotificationService.ShowDialog(model, close: "Hide", secondary: "Cancel");
+
+                //if (result == ContentDialogResult.Secondary)
+                //{
+
+                //    Logger.LogWarning($"Cancelled downloading of map {game.mapname}");
+                //    model.Cancel();
+                //    model.Dispose();
+                //    return;
+                //}
+
+                // because it is .zip file, we cant just wait till model itself complete to download.
+                // we have to wait the service to complete unzip process;
+                //MapsService.DownloadCompleted += OnRequiredMapDownloadCompleted;
+            }
+            Logger.LogInformation("Map confirmed!");
+
+            // Check current patch
+            if (!await ConfirmPatch(mod)) return;
+            Logger.LogInformation("Patch confirmed");
+
+            try
+            {
+                SessionService.Send(command);
+            }
+            catch(Exception ex)
+            {
+                NotificationService.ShowExceptionAsync(ex);
+            }
         }
     }
 }

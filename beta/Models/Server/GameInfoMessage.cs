@@ -388,6 +388,7 @@ namespace beta.Models.Server
                     .TotalSeconds > 300;
 
         public DateTime? CreatedTime { get; set; }
+        public DateTime Updated { get; set; }
 
         public IPlayer Host { get; set; }
 
@@ -515,8 +516,11 @@ namespace beta.Models.Server
         {
             get => _map_file_path;
             set => Set(ref _map_file_path, value);
-        } 
+        }
         #endregion
+
+
+        public bool IsNeroxisMap => mapname.Contains("Neroxis", StringComparison.OrdinalIgnoreCase);
 
         public string host { get; set; }
 

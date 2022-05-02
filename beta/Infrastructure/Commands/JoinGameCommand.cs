@@ -9,7 +9,12 @@ namespace beta.Infrastructure.Commands
     internal class JoinGameCommand : Command
     {
         private readonly IGameSessionService GameLauncherService;
-        public JoinGameCommand() => GameLauncherService = App.Services.GetService<IGameSessionService>();
+        private readonly INotificationService NotificationService;
+        public JoinGameCommand()
+        {
+            GameLauncherService = App.Services.GetService<IGameSessionService>();
+            NotificationService = App.Services.GetService<INotificationService>();
+        }
         public override bool CanExecute(object parameter)
         {
             if (parameter is GameInfoMessage game)
@@ -17,10 +22,17 @@ namespace beta.Infrastructure.Commands
             return false;
         }
 
-        public override void Execute(object parameter)
+        public override async void Execute(object parameter)
         {
             if (parameter is GameInfoMessage game)
-                GameLauncherService.JoinGame(game);
+                await GameLauncherService.JoinGame(game)
+                    .ContinueWith(task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            NotificationService.ShowExceptionAsync(task.Exception);
+                        }
+                    });
         }
     }
     internal class WatchGameCommand : Command
