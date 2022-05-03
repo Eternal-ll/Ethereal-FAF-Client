@@ -1153,7 +1153,7 @@
                 </Grid.InputBindings>
             </Grid>
             <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                <Image Source="{Binding SelectedMap.MapLargePreview}" Margin="10"/>
+                <Image Source="{Binding SelectedMap.MapLargePreview}" Margin="10" Width="512" Height="512"/>
                 <Border Style="{StaticResource MapInfoBorderStyle}" HorizontalAlignment="Right" VerticalAlignment="Top"
                         Padding="0" Margin="20">
                     <Button Content="Close" FontSize="20" Command="{Binding CloseBigPreviewCommand}"/>

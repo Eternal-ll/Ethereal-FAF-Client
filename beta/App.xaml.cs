@@ -90,12 +90,12 @@ namespace beta
             emojisCache = GetPathToFolder(Folder.Common);
             if (Directory.Exists(emojisCache))
                 Directory.CreateDirectory(emojisCache);
-            //emojisCache = GetPathToFolder(Folder.Maps);
-            //if (Directory.Exists(emojisCache))
-            //    Directory.CreateDirectory(emojisCache);
-            //emojisCache = GetPathToFolder(Folder.Mods);
-            //if (Directory.Exists(emojisCache))
-            //    Directory.CreateDirectory(emojisCache);
+            emojisCache = GetPathToFolder(Folder.Maps);
+            if (Directory.Exists(emojisCache))
+                Directory.CreateDirectory(emojisCache);
+            emojisCache = GetPathToFolder(Folder.Mods);
+            if (Directory.Exists(emojisCache))
+                Directory.CreateDirectory(emojisCache);
 
             var host = Hosting;
 
@@ -127,5 +127,22 @@ namespace beta
             : Environment.CurrentDirectory;
 
         private static string GetSourceCodePath([CallerFilePath] string Path = null) => Path;
+
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            var win = new Window()
+            {
+                Content = new ExceptionWrapper(e.Exception)
+            };
+            win.Closed += Win_Closed;
+            win.Show();
+            // Prevent default unhandled exception processing
+            e.Handled = true;
+        }
+
+        private void Win_Closed(object sender, EventArgs e)
+        {
+            Environment.Exit(-1);
+        }
     }
 }

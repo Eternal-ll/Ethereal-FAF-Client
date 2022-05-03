@@ -1,4 +1,6 @@
-﻿namespace beta.Views
+﻿using System.Windows.Controls;
+
+namespace beta.Views
 {
     /// <summary>
     /// Interaction logic for HomeView.xaml
@@ -8,6 +10,14 @@
         public HomeView()
         {
             InitializeComponent();
+        }
+
+        private void TextBox_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        {
+            if (!(bool)e.NewValue)
+            {
+                ((TextBox)sender).Text = string.Empty;
+            }
         }
     }
 }

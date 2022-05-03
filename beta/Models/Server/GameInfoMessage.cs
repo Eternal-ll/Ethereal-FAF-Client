@@ -1,4 +1,5 @@
-﻿using beta.Models.Server.Base;
+﻿using beta.Infrastructure.Utils;
+using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
@@ -485,24 +486,7 @@ namespace beta.Models.Server
                     }
                     else
                     {
-                        var img = new BitmapImage();
-                        img.BeginInit();
-                        img.DecodePixelWidth = 100;
-                        img.DecodePixelHeight = 100;
-                        img.CacheOption = BitmapCacheOption.OnDemand;
-                        img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
-                        img.UriSource = new($"https://content.faforever.com/maps/previews/small/{mapname}.png");
-                        img.EndInit();
-                        //img.DownloadFailed += (s, e) =>
-                        //{
-                        //    _AvatarImage = App.Current.Resources["QuestionIcon"] as ImageSource;
-                        //    OnPropertyChanged(nameof(AvatarImage));
-                        //};
-                        //img.DownloadCompleted += (s, e) =>
-                        //{
-                        //    ((BitmapImage)s).Freeze();
-                        //};
-                        _AvatarImage = img;
+                        _AvatarImage = ImageTools.InitializeLazyBitmapImage($"https://content.faforever.com/maps/previews/small/{mapname}.png", 100, 100);
                     }
                 }
                 return _AvatarImage;

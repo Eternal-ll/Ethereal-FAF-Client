@@ -873,41 +873,44 @@
                                                                 </ContentControl.Style>
                                                                 <ContentControl.ContentTemplate>
                                                                     <DataTemplate>
-                                                                        <StackPanel Margin="20 0 0 0" Width="200" VerticalAlignment="Top"
+                                                                        <Grid>
+                                                                            <StackPanel Margin="20 0 0 0" Width="200" VerticalAlignment="Top"
                                                                         Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                                                            <Border CornerRadius="6" Height="32" Width="32" ToolTip="{Binding Author.UserName}" HorizontalAlignment="Left">
-                                                                                <Border.Style>
-                                                                                    <Style TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-                                                                                        <Setter Property="Background" Value="{Binding Author.UserIconBgColor}"/>
-                                                                                    </Style>
-                                                                                </Border.Style>
-                                                                                <Grid>
-                                                                                    <TextBlock Text="{Binding Author.UserIconText}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-                                                                                    <Grid Background="White">
-                                                                                        <Grid.Style>
-                                                                                            <Style TargetType="Grid">
-                                                                                                <Style.Triggers>
-                                                                                                    <DataTrigger Binding="{Binding Author.UserPictureUrl}" Value="">
-                                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                                                    </DataTrigger>
-                                                                                                    <DataTrigger Binding="{Binding Author.UserPictureUrl}" Value="{x:Null}">
-                                                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                                                    </DataTrigger>
-                                                                                                </Style.Triggers>
-                                                                                            </Style>
-                                                                                        </Grid.Style>
+                                                                                <Border CornerRadius="6" Height="32" Width="32" ToolTip="{Binding Author.UserName}" HorizontalAlignment="Left">
+                                                                                    <Border.Style>
+                                                                                        <Style TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
+                                                                                            <Setter Property="Background" Value="{Binding Author.UserIconBgColor}"/>
+                                                                                        </Style>
+                                                                                    </Border.Style>
+                                                                                    <Grid>
+                                                                                        <TextBlock Text="{Binding Author.UserIconText}" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                                                                        <Grid Background="White">
+                                                                                            <Grid.Style>
+                                                                                                <Style TargetType="Grid">
+                                                                                                    <Style.Triggers>
+                                                                                                        <DataTrigger Binding="{Binding Author.UserPictureUrl}" Value="">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                        <DataTrigger Binding="{Binding Author.UserPictureUrl}" Value="{x:Null}">
+                                                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                                                        </DataTrigger>
+                                                                                                    </Style.Triggers>
+                                                                                                </Style>
+                                                                                            </Grid.Style>
+                                                                                        </Grid>
+                                                                                        <Image Source="{Binding Author.UserPictureUrl, Converter={StaticResource ToBitmapImageConverter}}"/>
                                                                                     </Grid>
-                                                                                    <Image Source="{Binding Author.UserPictureUrl, Converter={StaticResource ToBitmapImageConverter}}"/>
-                                                                                </Grid>
-                                                                            </Border>
+                                                                                </Border>
 
-                                                                            <StackPanel Margin="4 -4 0 0">
-                                                                                <Button Style="{StaticResource ButtonLinkStyle}" Content="{Binding Author.UserName}"
+                                                                                <StackPanel Margin="4 -4 0 0">
+                                                                                    <Button Style="{StaticResource ButtonLinkStyle}" Content="{Binding Author.UserName}"
                                                                             Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding Author.UserUrl}"
                                                                                         ToolTip="{Binding Author.UserUrl}"/>
-                                                                                <TextBlock Text="{Binding timestampISO}" FontSize="12" Opacity=".5" Margin="4 4 0 0"/>
+                                                                                    <TextBlock Text="{Binding timestampISO}" FontSize="12" Opacity=".5" Margin="4 4 0 0"/>
+                                                                                </StackPanel>
                                                                             </StackPanel>
-                                                                            <Path Margin="10 0 0 0" ToolTip="{Binding content, Converter={StaticResource HTMLConverter}}" Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z">
+
+                                                                            <Path Margin="10 0 4 10" HorizontalAlignment="Right" VerticalAlignment="Center" ToolTip="{Binding content, Converter={StaticResource HTMLConverter}}" Data="M12,3C17.5,3 22,6.58 22,11C22,15.42 17.5,19 12,19C10.76,19 9.57,18.82 8.47,18.5C5.55,21 2,21 2,21C4.33,18.67 4.7,17.1 4.75,16.5C3.05,15.07 2,13.13 2,11C2,6.58 6.5,3 12,3Z">
                                                                                 <Path.Style>
                                                                                     <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                                                                         <Style.Triggers>
@@ -922,7 +925,7 @@
                                                                                     </Style>
                                                                                 </Path.Style>
                                                                             </Path>
-                                                                        </StackPanel>
+                                                                        </Grid>
                                                                     </DataTemplate>
                                                                 </ContentControl.ContentTemplate>
                                                             </ContentControl>
@@ -974,7 +977,8 @@
 
                                             <TextBox Grid.Column="1" Margin="0 0 10 0" MinHeight="0"
                                                      Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                                     ui:ControlHelper.PlaceholderText="Search" BorderThickness="0">
+                                                     ui:ControlHelper.PlaceholderText="Search" BorderThickness="0"
+                                                     IsVisibleChanged="TextBox_IsVisibleChanged">
                                                 <TextBox.Style>
                                                     <Style TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
                                                         <Style.Triggers>

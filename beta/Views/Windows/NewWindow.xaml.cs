@@ -45,7 +45,7 @@ namespace beta.Views.Windows
                 Settings.Default.IsWindowMaximized = false;
             }
             if (!ShutdownApplication) return;
-            App.Current.Shutdown();
+            //App.Current.Shutdown();
         }
     }
 }

@@ -215,7 +215,7 @@
                                         </StackPanel>
                                     </StackPanel>
                                     <ItemsControl Style="{StaticResource TeamsItemsStyle}"/>
-                                    <TextBlock Text="{Binding Friends}"/>
+                                    <!--<TextBlock Text="{Binding Friends}"/>-->
                                 </StackPanel>
                             </DataTemplate>
                         </ContentControl.ContentTemplate>

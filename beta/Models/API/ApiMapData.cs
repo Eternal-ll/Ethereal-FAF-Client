@@ -43,7 +43,7 @@ namespace beta.Models.API
             {
                 if (_MapLargePreview is null)
                 {
-                    _MapLargePreview = ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge, 100, 100);
+                    _MapLargePreview = ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
                 }
                 return _MapLargePreview;
             }

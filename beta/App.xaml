@@ -4,7 +4,8 @@
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
-             xmlns:helper="clr-namespace:beta.Infrastructure.Helpers">
+             xmlns:helper="clr-namespace:beta.Infrastructure.Helpers"
+             DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
