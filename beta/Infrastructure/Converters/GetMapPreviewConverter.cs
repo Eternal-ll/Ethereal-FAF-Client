@@ -1,6 +1,4 @@
-﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using beta.Infrastructure.Utils;
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -9,17 +7,9 @@ namespace beta.Infrastructure.Converters
 {
     public class GetMapPreviewConverter : IValueConverter
     {
-        private readonly IMapsService MapService;
-
-        public GetMapPreviewConverter()
-        {
-            MapService = App.Services.GetService<IMapsService>();
-        }
-
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var t = MapService.GetMapPreview(new Uri("https://content.faforever.com/maps/previews/large/" + (string)value + ".png"), Folder.MapsLargePreviews);
-            return t;
+            return ImageTools.InitializeLazyBitmapImage("https://content.faforever.com/maps/previews/large/" + (string)value + ".png");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
