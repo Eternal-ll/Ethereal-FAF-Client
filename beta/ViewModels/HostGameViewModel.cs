@@ -117,8 +117,8 @@ namespace beta.ViewModels
         public static FeaturedMod[] FeaturedMods => new[]
         {
             FeaturedMod.FAF,
-            FeaturedMod.FAFBeta,
-            FeaturedMod.FAFDevelop,
+            //FeaturedMod.FAFBeta,
+            //FeaturedMod.FAFDevelop,
         };
 
         #region FeaturedMod
