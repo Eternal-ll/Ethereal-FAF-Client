@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;
@@ -75,6 +76,10 @@ namespace beta.ViewModels
                     OnPropertyChanged(nameof(InputVisibility));
                     OnPropertyChanged(nameof(LoadingInputVisibility));
 
+                    if (!value)
+                    {
+                        Visibility = Visibility.Collapsed;
+                    }
                     new Thread(() =>
                     {
                         while (IsPendingAuthorization)
@@ -166,6 +171,10 @@ namespace beta.ViewModels
 
         private async Task HandleOAuthResultTask(Task<TokenBearer> task)
         {
+            if (CancellationTokenSource.IsCancellationRequested)
+            {
+                IsPendingAuthorization = false;
+            }
             CancellationTokenSource = new();
             if (task.IsFaulted)
             {
@@ -204,6 +213,15 @@ namespace beta.ViewModels
             }
         }
 
+        #region Visibility
+        private Visibility _Visibility = Visibility.Collapsed;
+        public Visibility Visibility
+        {
+            get => _Visibility;
+            set => Set(ref _Visibility, value);
+        }
+        #endregion
+
         private async Task AuthorizeAsync() => await OAuthService.AuthAsync(Progress)
             .ContinueWith(task => HandleOAuthResultTask(task));
 
@@ -226,8 +244,12 @@ namespace beta.ViewModels
         /// </summary>
         public ICommand LoginWithBrowserCommand => _LoginWithBrowserCommand ??= new LambdaCommand(OnLoginWithBrowserCommand, CanLoginWithBrowserCommand);
         private bool CanLoginWithBrowserCommand(object parameter) => !IsPendingAuthorization;
-        private async void OnLoginWithBrowserCommand(object parameter) => await OAuthService.AuthByBrowser(CancellationTokenSource.Token, Progress)
+        private async void OnLoginWithBrowserCommand(object parameter)
+        {
+            Visibility = Visibility.Visible;
+            await OAuthService.AuthByBrowser(CancellationTokenSource.Token, Progress)
                 .ContinueWith(task => HandleOAuthResultTask(task));
+        }
 
         #endregion
 
