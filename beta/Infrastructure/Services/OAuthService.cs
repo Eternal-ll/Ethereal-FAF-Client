@@ -11,7 +11,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Principal;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -162,7 +162,7 @@ namespace beta.Infrastructure.Services
 
             #region GET hydra.faforever.com/oauth2/auth
             progress?.Report("GET hydra faforever com/oauth2/auth");
-            var url = @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=faf-python-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby&state=" + generatedState;
+            var url = @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=eternal-faf-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby+upload_map+upload_mod&state=" + generatedState;
             var stream = await SafeRequest(url, progress);
 
             _ = stream ?? throw new ArgumentNullException(nameof(stream), $"Stream is null on {url}");
@@ -300,7 +300,7 @@ namespace beta.Infrastructure.Services
 
             return await FetchOAuthDataAsync(refresh_token, true);
         }
-        private async Task<TokenBearer> FetchOAuthDataAsync(string data, bool isRefreshToken = false, IProgress<string> progress = null)
+        private async Task<TokenBearer> FetchOAuthDataAsync(string data, bool isRefreshToken = false, IProgress<string> progress = null, int port = 0)
         {
             if (data is null) return null;
 
@@ -316,8 +316,8 @@ namespace beta.Infrastructure.Services
             type += data;
 
             var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=faf-python-client&redirect_uri=http://localhost"));
-
+                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=eternal-faf-client" +
+                $"&redirect_uri=http://localhost{(port == 0 ? "" : $":{port}")}"));
             return await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
         }
       
@@ -361,29 +361,42 @@ namespace beta.Infrastructure.Services
         public async Task<TokenBearer> AuthByBrowser(CancellationToken token, IProgress<string> progress = null)
         {
             OnStateChanged(new(OAuthState.PendingAuthorization, "Pending authorization using browser callbacks"));
-            progress?.Report("Checking user privileges");
-            using var identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new (identity);
-            if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
+
+            progress?.Report("Checking available ports");
+            int? avaiablePort = null;
+            var ports = new int[] { 57728, 59573, 58256, 53037, 51360 };
+            IPGlobalProperties ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+            var listeners = ipGlobalProperties.GetActiveTcpListeners();
+            for (int i = 0; i < ports.Length; i++)
             {
-                throw new NotSupportedException("Not enough priviliges to start local HTTP listener. Start application with administrator privileges");
+                var isFree = true;
+                for (int j = 0; j < listeners.Length; j++)
+                {
+                    if (listeners[j].Port == ports[i])
+                    {
+                        isFree = false;
+                        break;
+                    }
+                }
+                if (!isFree) continue;
+                avaiablePort = ports[i];
+                break;
+            }
+            if (!avaiablePort.HasValue)
+            {
+                throw new ArgumentOutOfRangeException($"None of these ports are avaiable for listening:\n{string.Join(',', ports)}");
             }
 
-            progress?.Report("Starting HTTP listener");
             HttpListener httpListener = new();
-            httpListener.Prefixes.Add($"http://*/");
+            httpListener.Prefixes.Add($"http://localhost:{avaiablePort.Value}/");
             httpListener.Start();
             progress?.Report("HTTP listener started");
 
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            var url = "https://hydra.faforever.com/oauth2/auth?" +
-                "response_type=code&" +
-                "client_id=faf-python-client&" +
-                $"redirect_uri=http://localhost&" +
-                   "scope=openid+offline+public_profile+lobby&" +
+            var url = "https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=eternal-faf-client&" +
+                $"redirect_uri=http://localhost:{avaiablePort.Value}&scope=openid+offline+public_profile+lobby+upload_map+upload_mod&" +
                 "state=" + generatedState;
 
-            progress?.Report("Opening OAuth form");
             Process.Start(new ProcessStartInfo
             {
                 FileName = url,
@@ -392,55 +405,32 @@ namespace beta.Infrastructure.Services
 
             progress?.Report("Waiting for callback from FAForever");
 
-            HttpListenerContext ctx = null;
-            await Task.Run(() =>
-            {
-                var task = httpListener.GetContextAsync();
-                try
-                {
-                    task.Wait(token);
-                    if (task.IsCompleted) ctx = task.Result;
-                }
-                catch { }
-                httpListener.Stop();
-            });
+            var context = await httpListener.GetContextAsync().AsCancellable(token);
+            httpListener.Close();
 
-            if (token.IsCancellationRequested)
+            var response = context.Response;
+            var request = context.Request;
+
+            progress?.Report("Fetching OAuth token");
+            if (response.StatusCode == 200)
             {
-                return null;
+                //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
+                var query = request.Url.Query[1..];
+
+            var data = query.Split('&');
+            for (int i = 0; i < data.Length; i++)
+            {
+                var paramData = data[i].Split('=');
+                if (paramData[0] == "code")
+                {
+                    return await FetchOAuthDataAsync(paramData[1], false, progress, avaiablePort.Value);
+                }
             }
-            if (ctx.Response is not null)
+            return null;
+            }
+            else
             {
-                progress?.Report("Fetching OAuth token");
-                if (ctx.Response.StatusCode == 200)
-                {
-                    //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
-                    var query = ctx.Request.Url.Query;
-
-                    var codeIndex = query.IndexOf("code=");
-
-                    if (codeIndex == -1)
-                    {
-                        OnStateChanged(new(OAuthState.INVALID, $"Cant find special code in answer {query}"));
-                        httpListener.Stop();
-                        throw new ArgumentNullException(nameof(ctx.Response), $"Cant find special code in answer {query}");  
-                    }
-
-                    var codedata = query[codeIndex..];
-
-                    var delIndex = codedata.IndexOf('&');
-
-                    var code = codedata;
-                    if (delIndex != -1)
-                    {
-                        code = codedata[..delIndex];
-                    }
-                    return await FetchOAuthDataAsync(code);
-                }
-                else
-                {
-                    OnStateChanged(new(OAuthState.INVALID, $"Status code: {ctx.Response.StatusCode} on redirect from OAuth"));
-                }
+                OnStateChanged(new(OAuthState.INVALID, $"Status code: {response.StatusCode} on redirect from OAuth"));
             }
             return null;
         }
