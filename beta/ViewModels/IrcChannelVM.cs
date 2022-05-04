@@ -2,8 +2,6 @@
 using beta.Models.IRC.Base;
 using beta.ViewModels.Base;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Windows.Threading;
 
 namespace beta.ViewModels
 {
