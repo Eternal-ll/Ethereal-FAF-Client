@@ -257,7 +257,7 @@ namespace beta.Infrastructure.Services
             //Send(IrcCommands.List());
         }
 
-        public void GetChannelUsers(string channel) => Send(IrcCommands.Names(channel));
+        public void GetChannelUsers(string channel) => SendCommand(IrcUserCommand.NAMES, IrcCommands.Names(channel), channel);
 
         Timer timer = null;
         TimerCallback tm = null;
@@ -328,7 +328,7 @@ namespace beta.Infrastructure.Services
                     sb.Remove(0, 1);
                     sb.Remove(sb.Length - 2, 2);
 
-                    OnChannelTopicUpdated(new(ircData[3], sb.ToString()));
+                    OnChannelTopicUpdated(new(ircData[3], sb.ToString(), from));
 
                     AppDebugger.LOGIRC($"Channel: {ircData[3]} topic: {sb}");
                     if (!Channels.Contains(ircData[3])) Channels.Add(ircData[3]);
@@ -392,15 +392,13 @@ namespace beta.Infrastructure.Services
                     AppDebugger.LOGIRC($"End of user lists: {channel} users: {ChannelUsers[channel].Count}");
                     break;
 
-                case "433":
-
-                    break;//Nickname is unavailable: Being held for registered user
+                case "433"://Nickname is unavailable: Being held for registered user
                 case "432":
-                    Send(IrcCommands.Nickname(Nick + '`'));
                     if (timer is null)
                     {
                         if (tm is null) tm = new(ChangeNickName);
-                        timer = new Timer(tm, null, 10000, 10000);
+                        Send(IrcCommands.Nickname(Nick + '`'));
+                        timer = new Timer(tm, null, 15000, 15000);
                     }
                     break;
                 case "JOIN": // someone joined
@@ -433,7 +431,7 @@ namespace beta.Infrastructure.Services
                     {
                         AppDebugger.LOGIRC($"user: {from} removed topic in channel: {ircData[2]}");
                     }
-                    OnChannelTopicUpdated(new(ircData[2], sb.ToString()));
+                    OnChannelTopicUpdated(new(ircData[2], sb.ToString(), from));
 
                     break;
                 case "NICK": // someone changed their nick
@@ -555,6 +553,10 @@ namespace beta.Infrastructure.Services
                 case IrcUserCommand.KICK:
                     channel = text.Split()[1][1..];
                     break;
+                case IrcUserCommand.NAMES:
+                    ChannelUsers[channel].Clear();
+                    Send(text);
+                    break;
                 case IrcUserCommand.LIST:
                     break;
                 case IrcUserCommand.PRIVMSG:
@@ -571,10 +573,8 @@ namespace beta.Infrastructure.Services
                     SetTopic(channel, newTopic);
                     break;
                 case IrcUserCommand.PART:
-                    channel = data[1];
                     if (!channel.StartsWith('#')) channel = "#" + channel;
                     ChannelUsers.Remove(channel);
-                    Leave(channel);
                     break;
                 default:
                     throw new NotImplementedException("IRC Command is not recognized");

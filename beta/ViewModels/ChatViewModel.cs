@@ -32,6 +32,13 @@ namespace beta.ViewModels
             set
             {
                 _TestInputControl = value;
+                if (value is not null)
+                {
+                    value.LeaveRequired += (s, e) =>
+                    {
+                        OnLeaveFromChannelCommand(SelectedChannel.Name);
+                    };
+                }
             }
         }
 
@@ -42,6 +49,10 @@ namespace beta.ViewModels
             get => _SelectedChannel;
             set
             {
+                if (_SelectedChannel is not null)
+                {
+                    _SelectedChannel.IsSelected = false;
+                }
                 if (Set(ref _SelectedChannel, value))
                 {
                     FilterText = string.Empty;
@@ -49,6 +60,7 @@ namespace beta.ViewModels
                     {
                         UpdateSelectedChannelUsers();
                         UpdateSelectedChannelHistory();
+                        value.IsSelected = true;
                     }
                     else
                     {
@@ -171,20 +183,31 @@ namespace beta.ViewModels
         {
             var channel = parameter.ToString();
             if (string.IsNullOrWhiteSpace(channel)) return;
-            IrcService.Leave(channel);
-            var channels = Channels;
 
-            for (int i = 0; i < channels.Count; i++)
+            if (SelectedChannel?.Name == channel)
             {
-                if (channels[i].Name == channel)
-                {
-                    channels.RemoveAt(i);
-                    if (SelectedChannel is not null && SelectedChannel.Name == channel)
-                    {
-
-                    }
-                }
+                Channels.Remove(SelectedChannel);
+                SelectedChannel = null;
             }
+
+            IrcService.Leave(channel);
+            //var channels = Channels;
+
+            //for (int i = 0; i < channels.Count; i++)
+            //{
+            //    if (channels[i].Name == channel)
+            //    {
+            //        Channels.Remove(channels[i]);
+            //        if (SelectedChannel is not null && SelectedChannel.Name == channel)
+            //        {
+            //            SelectedChannel = null;
+            //            if (channels.Count > 0)
+            //            {
+            //                SelectedChannel = channels[0];
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         #endregion
@@ -195,8 +218,10 @@ namespace beta.ViewModels
         private void OnRefreshUserListCommand(object parameter)
         {
             if (SelectedChannel is null) return;
+            //SelectedChannel.Users.Clear();
             SelectedChannelPlayers.Clear();
-            IrcService.GetChannelUsers(SelectedChannel.Name);
+            UpdateSelectedChannelUsers();
+            //IrcService.GetChannelUsers(SelectedChannel.Name);
         }
         #endregion
 
@@ -305,7 +330,7 @@ namespace beta.ViewModels
         {
             var channel = GetChannel(e.Channel);
             var msg = channel.AddMessage(e);
-            if (SelectedChannel.Name == channel.Name)
+            if (SelectedChannel?.Name == channel.Name)
             {
                 SelectedChannelHistory.Add(msg);
             }
@@ -341,10 +366,16 @@ namespace beta.ViewModels
 
         private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
-            var channel = GetChannel(e.Channel);
-            if (channel.RemoveUser(e.User) && channel.IsSelected && GetIndexOfPlayer(e.User, out var index))
+            var channels = Channels;
+            foreach (var channel in channels)
             {
-                SelectedChannelPlayers.RemoveAt(index);
+                if (channel.Name == e.Channel)
+                {
+                    if (channel.RemoveUser(e.User) && channel.IsSelected && GetIndexOfPlayer(e.User, out var index))
+                    {
+                        SelectedChannelPlayers.RemoveAt(index);
+                    }
+                }
             }
         }
 
@@ -364,8 +395,16 @@ namespace beta.ViewModels
         private void OnChannelTopicChangedBy(object sender, IrcChannelTopicChangedBy e) =>
             GetChannel(e.Channel).TopicChangedBy = e;
 
-        private void OnChannelTopicUpdated(object sender, IrcChannelTopicUpdated e) =>
-            GetChannel(e.Channel).Topic = e.Topic;
+        private void OnChannelTopicUpdated(object sender, IrcChannelTopicUpdated e)
+        {
+            var channel = GetChannel(e.Channel);
+            channel.Topic = e.Topic;
+            var msg = channel.AddMessage(new IrcNotificationMessage(e.ToString()));
+            if (channel.IsSelected)
+            {
+                SelectedChannelHistory.Add(msg);
+            }
+        }
 
         private readonly Dictionary<string, bool> ChannelUsersUpdates = new();
         private void OnChannelUsersReceived(object sender, IrcChannelUsers e)

@@ -10,6 +10,7 @@
              xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:controls="clr-namespace:beta.Resources.Controls"
              xmlns:custom="clr-namespace:beta.Resources.Controls"
+             xmlns:irc="clr-namespace:beta.Models.IRC"
              xmlns:vm="clr-namespace:beta.ViewModels"
              x:Name="Root"
              mc:Ignorable="d" 
@@ -105,7 +106,7 @@
                         Orientation="Horizontal">
                             <ComboBox
                             ItemsSource="{Binding Channels}"
-                            SelectedItem="{Binding SelectedChannel}"
+                            SelectedValue="{Binding SelectedChannel}"
                             BorderThickness="0"
                             Background="{DynamicResource NavigationViewExpandedPaneBackground}"
                             Padding="20 6 20 10"
@@ -310,9 +311,7 @@
                         <DataTemplate DataType="{x:Type models:UnknownPlayer}">
 
                         </DataTemplate>
-                    </ListBox.Resources>
-                    <ListBox.ItemTemplate>
-                        <ItemContainerTemplate>
+                        <DataTemplate DataType="{x:Type irc:IrcChannelMessage}">
                             <Grid ShowGridLines="False">
                                 <Grid.Style>
                                     <Style TargetType="Grid">
@@ -498,8 +497,101 @@
                                               />
                                     </Button>-->
                             </Grid>
-                        </ItemContainerTemplate>
-                    </ListBox.ItemTemplate>
+                        </DataTemplate>
+                        <DataTemplate DataType="{x:Type irc:IrcNotificationMessage}">
+
+                            <Grid ShowGridLines="True">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Margin" Value="10 0 0 4"/>
+                                        <!--<Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                <Setter Property="Margin" Value="10 -8 0 4"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>-->
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="2*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Horizontal" Grid.Column="1" Visibility="Collapsed">
+                                    <TextBlock Margin="-34 0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <!--<Setter Property="Grid.Column" Value="2"/>-->
+                                                <Setter Property="Opacity" Value=".4"/>
+                                                <Setter Property="FontSize" Value="12"/>
+                                                <Setter Property="Visibility" Value="Hidden"/>
+                                                <Setter Property="Margin" Value="0 6 0 0"/>
+                                                <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                            Path=IsMouseOver}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                    <!--<DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>-->
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <TextBlock VerticalAlignment="Center" Visibility="Collapsed">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <!--<Setter Property="Grid.Column" Value="2"/>-->
+                                            <Setter Property="Opacity" Value=".4"/>
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                            <Setter Property="Margin" Value="0 6 0 0"/>
+                                            <!--<Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>-->
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
+                                                            Path=IsMouseOver}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                                <!--<DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                    <Setter Property="Grid.Row" Value="1"/>
+                                                    <Setter Property="Grid.Column" Value="0"/>
+                                                    <Setter Property="Text" Value="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
+                                                </DataTrigger>-->
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <TextBlock Background="Transparent" VerticalAlignment="Center"
+                                        Grid.Column="1" Grid.Row="1" Opacity=".8"
+                                        behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
+                                        TextWrapping="Wrap">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" >
+                                            <Setter Property="Margin" Value="0 2 0 2"/>
+                                            <!--<Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                    <Setter Property="Margin" Value="0 0 0 0"/>
+                                                    <Setter Property="RenderTransform">
+                                                        <Setter.Value>
+                                                            <TranslateTransform Y="2"/>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>-->
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.Resources>
                 </ListBox>
                 <!--#endregion-->
 
@@ -679,7 +771,7 @@
             </Grid>
 
             <!--#region Channel users -->
-            <ListBox x:Name="ChannelUsers" Grid.Row="2" MinWidth="400" SelectedIndex="-1"
+            <ListBox x:Name="ChannelUsers" Grid.Row="2" MinWidth="300" SelectedIndex="-1"
                     ItemsSource="{Binding SelectedChannelPlayersView}"
                     Background="Transparent"
                     VirtualizingPanel.IsContainerVirtualizable="True"
