@@ -219,8 +219,6 @@ namespace beta.Resources.Controls
                     if (SelectedChannel is null) return;
                     var nick = Properties.Settings.Default.PlayerNick;
 
-                    var msg = SelectedChannel.AddMessage(new IrcChannelMessage(SelectedChannel.Name, nick, CurrentText));
-
                     IrcService.SendMessage(SelectedChannel.Name, CurrentText);
                 }
                 CurrentText = string.Empty;
