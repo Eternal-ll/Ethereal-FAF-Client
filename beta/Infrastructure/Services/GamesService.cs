@@ -148,8 +148,8 @@ namespace beta.Infrastructure.Services
             switch (newGame.FeaturedMod)
             {
                 case FeaturedMod.FAF:
-                case FeaturedMod.FAFBeta:
-                case FeaturedMod.FAFDevelop:
+                //case FeaturedMod.FAFBeta:
+                //case FeaturedMod.FAFDevelop:
                     break;
                 default: return;
             }
