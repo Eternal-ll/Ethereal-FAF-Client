@@ -8,6 +8,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace beta
@@ -137,6 +139,11 @@ namespace beta
             win.Closed += Win_Closed;
             win.Show();
             // Prevent default unhandled exception processing
+            Task.Run(() =>
+            {
+                Thread.Sleep(10000);
+                Environment.Exit(-1);
+            });
             e.Handled = true;
         }
 
