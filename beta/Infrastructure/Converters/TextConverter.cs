@@ -259,7 +259,6 @@ namespace beta.Infrastructure.Converters
                     continue;
                 }
                 // Is player
-                if (word.Length > 4)
                 if (PlayersService.TryGetPlayer(word, out var player))
                 {
                     inlineUIContainer = new InlineUIContainer(new Button()
