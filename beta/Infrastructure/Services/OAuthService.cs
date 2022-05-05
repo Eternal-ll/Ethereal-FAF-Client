@@ -162,7 +162,7 @@ namespace beta.Infrastructure.Services
 
             #region GET hydra.faforever.com/oauth2/auth
             progress?.Report("GET hydra faforever com/oauth2/auth");
-            var url = @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=eternal-faf-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby+upload_map+upload_mod&state=" + generatedState;
+            var url = @"https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=ethereal-faf-client&redirect_uri=http://localhost&scope=openid+offline+public_profile+lobby+upload_map+upload_mod&state=" + generatedState;
             var stream = await SafeRequest(url, progress);
 
             _ = stream ?? throw new ArgumentNullException(nameof(stream), $"Stream is null on {url}");
@@ -316,7 +316,7 @@ namespace beta.Infrastructure.Services
             type += data;
 
             var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=eternal-faf-client" +
+                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=ethereal-faf-client" +
                 $"&redirect_uri=http://localhost{(port == 0 ? "" : $":{port}")}"));
             return await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
         }
@@ -393,7 +393,7 @@ namespace beta.Infrastructure.Services
             progress?.Report("HTTP listener started");
 
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            var url = "https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=eternal-faf-client&" +
+            var url = "https://hydra.faforever.com/oauth2/auth?response_type=code&client_id=ethereal-faf-client&" +
                 $"redirect_uri=http://localhost:{avaiablePort.Value}&scope=openid+offline+public_profile+lobby+upload_map+upload_mod&" +
                 "state=" + generatedState;
 
