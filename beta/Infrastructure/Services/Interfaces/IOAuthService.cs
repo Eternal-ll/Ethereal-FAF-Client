@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace beta.Infrastructure.Services.Interfaces
 {
     /// <summary>
-    /// OAuth2 service
+    /// OAuth 2.0 service
     /// </summary>
     public interface IOAuthService
     {
@@ -16,7 +16,7 @@ namespace beta.Infrastructure.Services.Interfaces
         /// </summary>
         public event EventHandler<OAuthEventArgs> StateChanged;
         /// <summary>
-        /// 
+        /// Setup local token
         /// </summary>
         /// <param name="access_token"></param>
         /// <param name="refresh_token"></param>

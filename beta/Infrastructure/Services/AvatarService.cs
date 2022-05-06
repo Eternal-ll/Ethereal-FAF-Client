@@ -1,5 +1,5 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
+using beta.Models.Enums;
 using beta.Models.Server;
 using System;
 using System.Collections.Generic;

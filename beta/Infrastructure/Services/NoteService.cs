@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Enums;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace beta.Infrastructure.Services
         /// Notes: player - note
         /// </summary>
         private readonly Dictionary<string, string> Notes = new();
-        private static string Path => App.GetPathToFolder(Models.Folder.Common) + "notes.txt";
+        private static string Path => App.GetPathToFolder(Folder.Common) + "notes.txt";
 
         public NoteService()
         {

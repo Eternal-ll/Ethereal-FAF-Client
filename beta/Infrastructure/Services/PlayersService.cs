@@ -243,6 +243,12 @@ namespace beta.Infrastructure.Services
         {
             Logger.LogInformation("Self player instance received");
             e.me.RelationShip = PlayerRelationShip.Me;
+
+            e.me.Note = new();
+            if (NoteService.TryGet(e.me.login, out var note))
+            {
+                e.me.Note.Text = note;
+            }
             Self = e.me;
             PlayersDic.TryAdd(e.me.id, e.me);
             PlayerReceived?.Invoke(this, e.me);
@@ -267,6 +273,12 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
+            player.Note = new();
+            if (NoteService.TryGet(player.login, out var note))
+            {
+                player.Note.Text = note;
+            }
+
             HandlePlayerRelationship(player);
 
             if(!PlayersDic.TryAdd(player.id, player))
@@ -289,15 +301,6 @@ namespace beta.Infrastructure.Services
 
         private void HandlePlayerData(PlayerInfoMessage player)
         {
-            #region Add note about player
-
-            player.Note = new();
-            if (NoteService.TryGet(player.login, out var note))
-            {
-                player.Note.Text = note;
-            }
-
-            #endregion
 
             if (PlayersDic.TryGetValue(player.id, out var matchedPlayer))
             {
@@ -310,6 +313,11 @@ namespace beta.Infrastructure.Services
             }
             else
             {
+                player.Note = new();
+                if (NoteService.TryGet(player.login, out var note))
+                {
+                    player.Note.Text = note;
+                }
                 OnNewPlayerReceived(player);
                 //Logger.LogInformation($"New player {player.id} received");
             }

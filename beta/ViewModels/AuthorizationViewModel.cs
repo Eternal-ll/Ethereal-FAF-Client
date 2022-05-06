@@ -1,5 +1,4 @@
 ﻿using beta.Infrastructure.Commands;
-using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;

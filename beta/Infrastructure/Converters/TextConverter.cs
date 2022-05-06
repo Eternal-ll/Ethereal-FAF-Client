@@ -1,5 +1,5 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
+using beta.Models.Enums;
 using beta.Resources.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using System;

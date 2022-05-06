@@ -2,6 +2,7 @@
 using beta.Infrastructure.Utils;
 using beta.Models;
 using beta.Models.API;
+using beta.Models.Enums;
 using beta.Models.Ice;
 using beta.Models.Server;
 using beta.Models.Server.Base;

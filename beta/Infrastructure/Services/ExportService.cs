@@ -1,4 +1,5 @@
 ﻿using beta.Models.API;
+using beta.Models.Enums;
 using DevExpress.Office.Utils;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
@@ -59,7 +60,7 @@ namespace beta.Infrastructure.Services
                 document.InsertSingleLineText(table[0, 5].Range.Start, "Рейтинг");
                 document.InsertSingleLineText(table[0, 6].Range.Start, "Количество игр");
 
-                var pathToCache = App.GetPathToFolder(Models.Folder.MapsLargePreviews);
+                var pathToCache = App.GetPathToFolder(Folder.MapsLargePreviews);
 
                 for (int i = 0; i < maps.Length; i++)
                 {

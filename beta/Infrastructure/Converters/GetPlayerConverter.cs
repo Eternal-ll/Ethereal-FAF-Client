@@ -32,11 +32,6 @@ namespace beta.Infrastructure.Converters
             if (value is PlayerInfoMessage)
                 return value;
 
-            if (value is ChannelMessage channelMessage)
-                if (channelMessage.From is not null)
-                    playerName = channelMessage.From;
-                else return null;
-
             if (value is string player)
                 playerName = player;
 

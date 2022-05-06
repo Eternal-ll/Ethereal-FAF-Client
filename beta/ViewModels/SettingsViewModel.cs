@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows.Input;
@@ -108,7 +109,7 @@ namespace beta.ViewModels
         #endregion
 
         #region PathToPatch
-        private string _PathToPatch = App.GetPathToFolder(Models.Folder.ProgramData);//Settings.Default.PathToMods;
+        private string _PathToPatch = App.GetPathToFolder(Folder.ProgramData);//Settings.Default.PathToMods;
         public string PathToPatch
         {
             get => _PathToPatch;

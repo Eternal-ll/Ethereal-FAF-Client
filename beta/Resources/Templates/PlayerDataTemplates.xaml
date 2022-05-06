@@ -754,7 +754,7 @@
                              MinHeight="0"
                              Margin="6 0"
                              FontSize="13"
-                             Text="{Binding Note.Text}">
+                             Text="{Binding Note.Text, UpdateSourceTrigger=PropertyChanged}">
                 <TextBox.Resources>
                     <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent"/>
                     <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
@@ -1002,7 +1002,7 @@
                 </ContentControl.Style>
             </ContentControl>
 
-            <ContentControl Height="40" Width="40" Content="{Binding Game.Map}" Grid.Column="3" Grid.RowSpan="2">
+            <!--<ContentControl Height="40" Width="40" Content="{Binding Game.Map}" Grid.Column="3" Grid.RowSpan="2">
                 <ContentControl.Style>
                     <Style TargetType="ContentControl">
                         <Style.Triggers>
@@ -1012,7 +1012,7 @@
                         </Style.Triggers>
                     </Style>
                 </ContentControl.Style>
-            </ContentControl>
+            </ContentControl>-->
 
 
         </Grid>

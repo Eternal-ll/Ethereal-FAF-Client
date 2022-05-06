@@ -1,4 +1,4 @@
-﻿namespace beta.Models
+﻿namespace beta.Models.Enums
 {
     public enum Folder : byte
     {
