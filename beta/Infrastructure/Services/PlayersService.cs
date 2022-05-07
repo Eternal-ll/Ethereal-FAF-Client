@@ -182,10 +182,31 @@ namespace beta.Infrastructure.Services
         {
             if (TryGetPlayer(e.Key, out var player))
             {
+                var oldRelationship = player.RelationShip;
                 player.RelationShip = e.Value;
                 player.Updated = DateTime.UtcNow;
                 OnPlayerUpdated(player);
                 Logger.LogWarning($"Relationship with player {e.Key} updated to {e.Value}");
+
+                if (player.Game is not null)
+                {
+                    if (e.Value == PlayerRelationShip.Friend)
+                    {
+                        player.Game.Friends++;
+                    }
+                    if (e.Value == PlayerRelationShip.Foe)
+                    {
+                        player.Game.Foes++;
+                    }
+                    if (oldRelationship == PlayerRelationShip.Friend)
+                    {
+                        player.Game.Friends--;
+                    }
+                    if (oldRelationship == PlayerRelationShip.Foe)
+                    {
+                        player.Game.Foes--;
+                    }
+                }
             }
             else
             {
@@ -283,7 +304,7 @@ namespace beta.Infrastructure.Services
 
             if(!PlayersDic.TryAdd(player.id, player))
             {
-                if(PlayersDic.TryGetValue(player.id, out var matchedPlayer))
+                if (PlayersDic.TryGetValue(player.id, out var matchedPlayer))
                 {
                     Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}, updated instead");
                     matchedPlayer.login = player.login;
