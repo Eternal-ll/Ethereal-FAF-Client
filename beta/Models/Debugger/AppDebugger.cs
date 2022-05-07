@@ -1,6 +1,5 @@
 ﻿using beta.Views.Windows;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace beta.Models.Debugger
 {
@@ -43,5 +42,8 @@ namespace beta.Models.Debugger
         {
 
         }
+
+        [Conditional("DEBUG")]
+        public static void LOGReplayOutput(string data) => DebugWindow.ReplayOutput += data;
     }
 }

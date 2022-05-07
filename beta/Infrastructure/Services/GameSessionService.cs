@@ -33,6 +33,7 @@ namespace beta.Infrastructure.Services
         private readonly IIceService IceService;
         private readonly IPlayersService PlayersService;
         private readonly INotificationService NotificationService;
+        private readonly IReplayServerService ReplayServerService;
         private readonly ILogger Logger;
 
         private GameInfoMessage LastGame;
@@ -51,7 +52,11 @@ namespace beta.Infrastructure.Services
             IMapsService mapsService,
             ISessionService sessionService,
             IGamesService gamesService,
-            ILogger<GameSessionService> logger, IIceService iceService, IPlayersService playersService, INotificationService notificationService)
+            ILogger<GameSessionService> logger,
+            IIceService iceService,
+            IPlayersService playersService,
+            INotificationService notificationService,
+            IReplayServerService replayServerService)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
@@ -59,6 +64,9 @@ namespace beta.Infrastructure.Services
             SessionService = sessionService;
             IceService = iceService;
             GamesService = gamesService;
+            PlayersService = playersService;
+            NotificationService = notificationService;
+            ReplayServerService = replayServerService;
 
             SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
             SessionService.IceUniversalDataReceived += SessionService_IceUniversalDataReceived;
@@ -70,8 +78,13 @@ namespace beta.Infrastructure.Services
             };
 
             IceService.IceServersReceived += IceService_IceServersReceived;
-            PlayersService = playersService;
-            NotificationService = notificationService;
+            replayServerService.ReplayRecorderCreated += ReplayServerService_ReplayRecorderCreated;
+        }
+
+        private void ReplayServerService_ReplayRecorderCreated(object sender, ReplayRecorder e)
+        {
+            e.Game = ForgedAlliance;
+            e.Initialize();
         }
 
         private void SessionService_Authorized(object sender, bool e)
@@ -146,85 +159,96 @@ namespace beta.Infrastructure.Services
             }
         }
 
+        private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
+            // player info
+            string country = "", string clan = "",
+            // player rating
+            int mean = 1500, int deviation = 500, int games = 0)
+        {
+            var me = PlayersService.Self;
+            if (me is not null)
+            {
+                if (me.ratings.TryGetValue(ratingType.ToString(), out var rating))
+                {
+                    mean = (int)rating.rating[0];
+                    deviation = (int)rating.rating[1];
+                    games = rating.number_of_games;
+                }
+                country = me.country;
+                clan = me.clan ?? string.Empty;
+            }
+            if (country.Length > 0)
+            {
+                args.Append("/country ");
+                args.Append(country);
+                args.Append(' ');
+            }
+            if (clan.Length > 0)
+            {
+                args.Append("/clan ");
+                args.Append(clan);
+                args.Append(' ');
+            }
+            args.Append("/mean ");
+            args.Append(mean);
+            args.Append(' ');
+            args.Append("/deviation ");
+            args.Append(deviation);
+            args.Append(' ');
+            args.Append("/numgames ");
+            args.Append(games);
+            args.Append(' ');
+        }
+
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
         {
+            IceAdapterClient ice = null;
             try
             {
-                IceAdapterClient = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
+                ice = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
             }
             catch
             {
                 NotificationService.ShowPopupAsync("Cant launch ice adapter. Check java8sdk install");
+                return;
             }
-
-            IceAdapterClient.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
-            IceAdapterClient.IceMessageReceived += IceAdapterClient_IceMessageReceived;
-            IceAdapterClient.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
-
+            ice.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
+            ice.IceMessageReceived += IceAdapterClient_IceMessageReceived;
+            ice.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
             // these commands will be ququed and passed after established connect
-            IceAdapterClient.SetLobbyInitMode("normal");
-            IceAdapterClient.PassIceServers(IceService.IceServers);
+            var initMode = e.init_mode;
+            // 0 - normal
+            // 1 - auto
+            ice.SetLobbyInitMode("normal");
+            ice.PassIceServers(IceService.IceServers);
 
             var me = PlayersService.Self;
 
+            // game args
             StringBuilder args = new();
-
-            // global
-            args.Append("/mean ");
-            args.Append((int)me.ratings["global"].rating[0]);
-            args.Append(' ');
-            args.Append("/deviation ");
-            args.Append((int)me.ratings["global"].rating[1]);
-            args.Append(' ');
-
-            if (me.country is not null)
-            {
-                args.Append("/country ");
-                args.Append(me.country);
-                args.Append(' ');
-            }
-
-            if (me.ratings.TryGetValue("global", out var rating))
-            {
-                args.Append("/numgames ");
-                args.Append(rating.number_of_games);
-                args.Append(' ');
-            }
-            else
-            {
-                args.Append("/numgames 0 ");
-            }
-
-            if (me.clan is not null)
-            {
-                args.Append("/clan ");
-                args.Append(me.clan);
-                args.Append(' ');
-            }
-
-            var info = $"{{\"uid\": {e.uid}, \"recorder\": {me.login}, \"featured_mod\": \"{e.mod}\", \"launched_at\": \"time.time\"}}";
-
-
-            args.Append("/init ");
-            args.Append($" init_{e.mod.ToString().ToLower()}.lua");
-            args.Append(' ');
-
+            // hide embedded game bug report
             args.Append("/nobugreport ");
+            args.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
+            // port from Ice-Adapter status message ["gpgnet"]["local_port"]
+            args.Append($"/gpgnet 127.0.0.1:{ice.GpgNetPort} ");
+            // append player data
+            FillPlayerArgs(args, e.rating_type);
+            // append replay stream
+            bool isSavingReplay = true;
+            if (isSavingReplay)
+            {
+                var replayPort = ReplayServerService.StartReplayServer();
+                args.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\"");
+            }
+            // append game logger
+            bool isLogging = false;
+            if (isLogging)
+            {
+                args.Append($"/ log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\"");
+            }
 
-
-            //args.Append("/ savereplay ");
-            //args.Append($"\"gpgnet://localhost:{44444}/{e.uid}/{me.login}.SCFAreplay\"");
-
-            // port from first Ice-Adapter status message ["gpgnet"]["local_port"]
-            args.Append("/gpgnet 127.0.0.1:" + IceAdapterClient.GpgNetPort);
-
+            //var info = $"{{\"uid\": {e.uid}, \"recorder\": {me.login}, \"featured_mod\": \"{e.mod}\", \"launched_at\": \"time.time\"}}";
             Logger.LogWarning($"Starting game with args: {args}");
-
-
-            //"C:\ProgramData\FAForever\bin\ForgedAlliance.exe" / mean 2140 / deviation 90 / country  RU / numgames 765 / clan ZFG / init init_faf.lua / log "C:\ProgramData\FAForever\logs\game.uid.16677222.log" / nobugreport / savereplay "gpgnet://localhost:64331/16677222/Eternal-.SCFAreplay" / gpgnet 127.0.0.1:37729
-            //                                                    mean 2139 /deviation 89 /country RU /numgames /clan ZFG /init init_faf.lua /nobugreport /savereplay /gpgnet 127.0.0.1:64399
-            // Starting game with args: / mean 2139 / deviation 89 / country RU / numgames / clan ZFG / init  init_faf.lua / nobugreport / gpgnet 127.0.0.1:22122
-            var t = args.ToString();
             ForgedAlliance = new()
             {
                 StartInfo = new()
@@ -234,8 +258,12 @@ namespace beta.Infrastructure.Services
                     UseShellExecute = true
                 }
             };
-
-            ForgedAlliance.Start();
+            if (!ForgedAlliance.Start())
+            {
+                Logger.LogError("Cant start game");
+                return;
+            }
+            IceAdapterClient = ice;
             Task.Run(async () =>
             {
                 await ForgedAlliance.WaitForExitAsync();
@@ -244,7 +272,6 @@ namespace beta.Infrastructure.Services
                 ForgedAlliance = null;
 
                 await IceAdapterClient.CloseAsync();
-
                 IceAdapterClient.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
                 IceAdapterClient.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
                 IceAdapterClient.ConnectionToGpgNetServerChanged -= IceAdapterClient_ConnectionToGpgNetServerChanged;
@@ -651,16 +678,9 @@ namespace beta.Infrastructure.Services
 
         public async Task Close()
         {
-            try
+            if (ForgedAlliance is not null && !ForgedAlliance.HasExited)
             {
-                if (IceAdapterClient is not null)
-                {
-                    await IceAdapterClient.CloseAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                await NotificationService.ShowPopupAsync(new ErrorEventArgs(ex));
+                ForgedAlliance.Close();
             }
         }
 

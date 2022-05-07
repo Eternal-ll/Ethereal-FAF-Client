@@ -3,7 +3,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:beta.Views.Windows"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance {x:Type local:ServerDebugWindow}}"
         Title="ServerDebugWindow" Height="450" Width="800">
     <TabControl Background="Gray">
         <TabControl.Resources>
@@ -30,6 +32,19 @@
         <TabItem Header="Ice JSON-RPC client">
             <Grid>
                 <RichTextBox x:Name="IceJsonRPC" Background="White" Foreground="Black"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Replay output">
+            <Grid>
+                <RichTextBox Background="White" Foreground="Black" DataContext="{Binding ReplayOutput, Mode=OneWay}">
+                    <RichTextBox.Document>
+                        <FlowDocument>
+                            <Paragraph>
+                                <Run Text="{Binding Mode=OneWay}"/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox.Document>
+                </RichTextBox>
             </Grid>
         </TabItem>
     </TabControl>
