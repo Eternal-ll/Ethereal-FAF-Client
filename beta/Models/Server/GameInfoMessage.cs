@@ -213,6 +213,8 @@ namespace beta.Models.Server
                     var friendsCount = 0;
                     var clanmatesCount = 0;
                     var foesCount = 0;
+                    var oldPlayerss = Players;
+
                     if (value is not null)
                     {
                         List<PlayerInfoMessage> players = new();
@@ -223,7 +225,6 @@ namespace beta.Models.Server
                             {
                                 var iPlayer = team.Players[j];
                                 if (iPlayer is not PlayerInfoMessage player) continue;
-
                                 if (player.IsFavourite)
                                     favouritesCount++;
                                 if (player.IsClanmate)
@@ -232,6 +233,8 @@ namespace beta.Models.Server
                                     friendsCount++;
                                 if (player.RelationShip == PlayerRelationShip.Foe)
                                     foesCount++;
+                                // TODO HOTFIX
+                                //if (player.Game is null) player.Game = this;
                                 players.Add(player);
                             }
                         }
@@ -525,7 +528,29 @@ namespace beta.Models.Server
                 }
                 return _AvatarImage;
             }
-        } 
+        }
+        #endregion
+
+        #region LargeMapPreview
+        private ImageSource _LargeMapPreview;
+        public ImageSource LargeMapPreview
+        {
+            get
+            {
+                if (_LargeMapPreview is null)
+                {
+                    if (mapname.StartsWith("neroxis"))
+                    {
+                        _LargeMapPreview = App.Current.Resources["MapGenIcon"] as ImageSource;
+                    }
+                    else
+                    {
+                        _LargeMapPreview = ImageTools.InitializeLazyBitmapImage($"https://content.faforever.com/maps/previews/large/{mapname}.png");
+                    }
+                }
+                return _LargeMapPreview;
+            }
+        }
         #endregion
 
         #region map_file_path

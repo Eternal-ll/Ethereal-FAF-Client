@@ -205,7 +205,17 @@
                             <DataTemplate DataType="{x:Type models:GameInfoMessage}">
                                 <StackPanel Width="240" Margin="20 10">
                                     <TextBlock Text="{Binding title}" FontSize="16" FontWeight="DemiBold" Margin="0 0 0 20"/>
-                                    <Border Style="{StaticResource MapPreviewBorderStyle}" Width="200" Height="200"/>
+                                    <Border Width="250" Height="250" CornerRadius="4">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{Binding LargeMapPreview}" Stretch="Uniform"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
 
                                     <StackPanel Orientation="Horizontal" Margin="0 20">
                                         <StackPanel>
