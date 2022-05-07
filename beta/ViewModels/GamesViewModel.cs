@@ -98,36 +98,6 @@ namespace beta.ViewModels
 
         protected CollectionViewSource GamesViewSource;
 
-        #region Foes
-        private string[] _Foes;
-        public string[] Foes
-        {
-            get => _Foes;
-            set
-            {
-                if (Set(ref _Foes, value) && IsFoesGamesHidden)
-                {
-                    RefreshGameView();
-                }
-            }
-        }
-        #endregion
-
-        #region Friends
-        private string[] _Friends;
-        public string[] Friends
-        {
-            get => _Friends;
-            set
-            {
-                if (Set(ref _Friends, value) && IsOnlyFriendsGamesVisible)
-                {
-                    RefreshGameView();
-                }
-            }
-        }
-        #endregion
-
         #region SelectedGame
         private GameInfoMessage _SelectedGame;
         public GameInfoMessage SelectedGame
@@ -218,7 +188,7 @@ namespace beta.ViewModels
                         _IsOnlyFriendsGamesVisible = false;
                         OnPropertyChanged(nameof(IsOnlyFriendsGamesVisible));
                     }
-                    if (Foes?.Length > 1) RefreshGameView();
+                    RefreshGameView();
                 }
             }
         }
@@ -238,8 +208,7 @@ namespace beta.ViewModels
                         _IsFoesGamesHidden = false;
                         OnPropertyChanged(nameof(IsFoesGamesHidden));
                     }
-
-                    if (Friends?.Length > 1) RefreshGameView();
+                    RefreshGameView();
                 }
             }
         }
@@ -521,29 +490,17 @@ namespace beta.ViewModels
                     }
             }
 
-            if (IsOnlyFriendsGamesVisible)
+            if (game.Host is PlayerInfoMessage player)
             {
-                var friends = Friends;
-                bool passed = false;
-
-                if (friends is not null)
+                if (IsOnlyFriendsGamesVisible && player.RelationShip != PlayerRelationShip.Friend)
                 {
-                    foreach (var foe in friends)
-                        if (foe.Equals(game.host, StringComparison.OrdinalIgnoreCase))
-                            passed = true;
-
-                    if (!passed) return false;
+                    return false;
                 }
-            }
 
-            if (IsFoesGamesHidden)
-            {
-                var foes = Foes;
-
-                if (foes is not null)
-                    foreach (var foe in foes)
-                        if (foe.Equals(game.host, StringComparison.OrdinalIgnoreCase))
-                            return false;
+                if (IsFoesGamesHidden && player.RelationShip == PlayerRelationShip.Foe)
+                {
+                    return false;
+                }
             }
 
             var filter = FilterText;
