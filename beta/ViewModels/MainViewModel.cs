@@ -41,7 +41,7 @@ namespace beta.ViewModels
             if (e == SessionState.Disconnected)
             {
                 SessionService.StateChanged -= SessionService_StateChanged;
-                await NotificationService.ShowConnectionDialog(new ConnectionViewModel());
+                await App.Current.Dispatcher.Invoke(() => NotificationService.ShowConnectionDialog(new ConnectionViewModel()));
             }
         }
 
