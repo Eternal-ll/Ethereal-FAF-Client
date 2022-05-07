@@ -339,6 +339,11 @@ namespace beta.Infrastructure.Services
                 await NotificationService.ShowPopupAsync("Unsupported map");
                 return;
             }
+            if (game.sim_mods.Count > 0)
+            {
+                await NotificationService.ShowPopupAsync("Mods not supported");
+                return;
+            }
 
             //if (game.FeaturedMod != FeaturedMod.FAF)
             //{
