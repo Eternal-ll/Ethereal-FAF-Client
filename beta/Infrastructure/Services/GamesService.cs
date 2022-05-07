@@ -282,6 +282,10 @@ namespace beta.Infrastructure.Services
                 }
                 newGame.Host = PlayersService.GetPlayer(newGame.host);
                 HandleTeams(newGame);
+                for (int i = 0; i < newGame.Players.Length; i++)
+                {
+                    newGame.Players[i].Game = newGame;
+                }
                 games.Add(newGame);
                 OnNewGameReceived(newGame);
             }
