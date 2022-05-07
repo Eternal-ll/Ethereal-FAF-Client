@@ -251,6 +251,7 @@
                 <Setter Property="Source" Value="{Binding AvatarImage}"/>
                 <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
                 <Setter Property="Visibility" Value="Visible"/>
+                <Setter Property="Margin" Value="0 0 6 0"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>

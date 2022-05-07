@@ -113,7 +113,7 @@
                                 <Style TargetType="ItemsControl">
                                     <Setter Property="Margin" Value="0 0 0 10"/>
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ToolTip}}, Path=DataContext.AnyWithAvatar}"
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.AnyWithAvatar}"
                                                      Value="False">
                                             <Setter Property="Margin" Value="-40 0 0 10"/>
                                         </DataTrigger>
@@ -286,7 +286,7 @@
                 </ui:ProgressRing.Style>
             </ui:ProgressRing>
             <Image
-                Source="{Binding mapname, Converter={StaticResource GetMapPreviewConverter}}"
+                Source="{Binding LargeMapPreview}"
                 Stretch="UniformToFill"
                 Height="400"
                 Width="400"/>
@@ -455,20 +455,6 @@
             Background="Transparent"
             HorizontalAlignment="Stretch"
             d:DataContext="{d:DesignInstance {x:Type sModels:GameInfoMessage}}">
-            <!--<Grid.ToolTip>
-                <ToolTip>
-                    <ItemsControl ItemsSource="{Binding teams}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Value.Count, StringFormat='Count: {0}'}"/>
-                                    <ItemsControl ItemsSource="{Binding Value}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ToolTip>
-            </Grid.ToolTip>-->
             <Grid.Resources>
                 <SolidColorBrush x:Key="Bg" Color="Black" Opacity=".5"/>
             </Grid.Resources>
@@ -877,6 +863,12 @@
                     <TextBlock Margin="7 4 0 0"
                                ToolTip="{StaticResource PlayersToolTip}"
                                Style="{StaticResource PlayersTextBlockStyle}">
+                        <!--<Run DataContext="{Binding Friends}" FontSize="10" Style="{StaticResource RunCounterStyle}"
+                             Foreground="LimeGreen"/>
+                        <Run DataContext="{Binding Clanmates}" FontSize="10" Style="{StaticResource RunCounterStyle}"
+                             Foreground="Firebrick"/>
+                        <Run DataContext="{Binding Foes, Mode=OneWay}" FontSize="10" Style="{StaticResource RunCounterStyle}"
+                             Foreground="Red"/>-->
                         <Run Style="{StaticResource NumPlayersRunStyle}"/>
                         <Run Text="/" FontSize="12"/>
                         <Run Text="{Binding max_players}"/>
@@ -1187,8 +1179,7 @@
                     </TextBlock>
                 </StackPanel>
             </Border>
-            <TextBlock Text="{Binding State}" Visibility="Collapsed" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-
+            
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
