@@ -897,6 +897,69 @@
         </StackPanel>
     </DataTemplate>
 
+    <DataTemplate x:Key="PlayerDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
+        <Grid ShowGridLines="False" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Style="{StaticResource AvatarImageStyle}"/>
+
+            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
+
+            <TextBlock Text="{Binding LoginWithClan}"
+                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
+                       ToolTip="{StaticResource RatingsToolTip}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                <Setter Property="Foreground" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="PlayerDataTemplateStacked" DataType="{x:Type sModels:PlayerInfoMessage}">
+        <StackPanel Orientation="Horizontal" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
+            <Image Style="{StaticResource AvatarImageStyle}"/>
+
+            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
+
+            <TextBlock Text="{Binding LoginWithClan}"
+                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
+                       ToolTip="{StaticResource RatingsToolTip}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                <Setter Property="Foreground" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+
     <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
         <Grid ShowGridLines="False" Background="Transparent" Margin="10 0 0 0" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
             <Grid.ColumnDefinitions>
@@ -1013,8 +1076,6 @@
                     </Style>
                 </ContentControl.Style>
             </ContentControl>-->
-
-
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

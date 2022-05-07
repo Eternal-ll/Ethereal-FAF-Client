@@ -59,6 +59,22 @@ namespace beta.Models.Server
             }
         }
 
+        public bool AnyWithAvatar
+        {
+            get
+            {
+                var players = Players;
+                if (players is null || players.Length == 0) return false;
+                for (int i = 0; i < players.Length; i++)
+                {
+                    if (players[i] is PlayerInfoMessage player && player.Avatar is not null)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
         public InGameTeam(int number, IPlayer[] players)
         {
             Number = number;
@@ -229,6 +245,8 @@ namespace beta.Models.Server
                     Friends = friendsCount;
                     Clanmates = clanmatesCount;
                     Foes = foesCount;
+
+                    OnPropertyChanged(nameof(AnyWithAvatar));
                 }
             }
         }
@@ -241,6 +259,22 @@ namespace beta.Models.Server
             get => _Players;
             set => Set(ref _Players, value);
         }
+        #endregion
+
+        #region AnyWithAvatar
+        public bool AnyWithAvatar
+        {
+            get
+            {
+                var teams = Teams;
+                for (int i = 0; i < teams.Length; i++)
+                {
+                    if (teams[i].AnyWithAvatar) return true;
+                }
+                return false;
+            }
+        }
+
         #endregion
 
         #region AverageRating // On fly
