@@ -70,6 +70,14 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>-->
+                <GroupBox Header="Config">
+                    <StackPanel>
+                        <Button ToolTip="{Binding ConfigPath}"
+                                Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding ConfigPath}">
+                            <Path Style="{StaticResource PathFolderDataStyle}"/>
+                        </Button>
+                    </StackPanel>
+                </GroupBox>
                 <GroupBox Header="Autorization">
                     <CheckBox IsChecked="{Binding IsAutoJoin}">
                         <TextBlock>
