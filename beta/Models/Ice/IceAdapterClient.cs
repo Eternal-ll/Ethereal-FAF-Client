@@ -120,7 +120,7 @@ namespace beta.Models.Ice
             var ports = GetFreePort(2);
             RpcPort = ports[0];
             GpgNetPort = ports[1];
-            var process = new IceAdapterProcess(playerId, playerLogin, ports[0], ports[1]);
+            IceAdapterProcess = new IceAdapterProcess(playerId, playerLogin, ports[0], ports[1]);
 
             ManagedTcpClient = new()
             {
@@ -136,6 +136,7 @@ namespace beta.Models.Ice
         }
         public async Task Initialize()
         {
+            Logger.LogInformation("Connection to local ice server");
             await ManagedTcpClient.ConnectAsync();
         }
 
