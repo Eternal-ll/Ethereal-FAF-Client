@@ -225,27 +225,21 @@
                         <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
                         <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
                         <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="DimGray" Opacity=".05"/>
-                        <ui:Flyout x:Key="EmojiFlyout">
+                        <!--<ui:Flyout x:Key="EmojiFlyout">
                             <Grid Margin="-10 -10 -10 -4">
                                 <Grid.RowDefinitions>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-                                <Canvas Background="Black" Opacity=".2"
-                                            Margin="-2 -2 -2 -2"/>
-                                <Image
-                                        Source="{Binding Source}"
-                                        Width="100"
-                                        MaxHeight="100"
-                                        Margin="0"
-                                        Stretch="Uniform">
+                                <Canvas Background="Black" Opacity=".2" Margin="-2 -2 -2 -2"/>
+                                <Image Source="{Binding Source}" Width="100"
+                                        MaxHeight="100" Margin="0" Stretch="Uniform">
                                     <Image.Style>
-                                        <Style>
-                                        </Style>
+                                        <Style></Style>
                                     </Image.Style>
                                 </Image>
-                                <TextBox
+                                <TextBox x:Name="EmojiNameTextBox"
                                         Grid.Row="1"
                                         Margin="0 8 0 0"
                                         Opacity=".5"    
@@ -258,14 +252,14 @@
                                         Style="{StaticResource DefaultButtonStyle}"
                                         Content="Copy"
                                         Command="{StaticResource CopyCommand}"
-                                        CommandParameter="{Binding ToolTip, Converter={StaticResource EmojiFormatConverter}}"
+                                        CommandParameter="{Binding ElementName=EmojiNameTextBox, Path=Text}"
                                         HorizontalAlignment="Center"
                                         Padding="10 2 10 4"
                                         Opacity=".7"
                                         Margin="0"
                                         Background="Transparent"/>
                             </Grid>
-                        </ui:Flyout>
+                        </ui:Flyout>-->
                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Margin" Value="0"/>
@@ -278,13 +272,13 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                        <Style TargetType="Image">
+                        <!--<Style TargetType="Image">
                             <Setter Property="MaxHeight" Value="24"/>
                             <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
                         </Style>
                         <Style TargetType="controls:GifImage">
                             <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
-                        </Style>
+                        </Style>-->
                         <!--<Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                                 <Setter Property="IsTabStop" Value="False"/>
                                 <Setter Property="Content">
@@ -429,7 +423,7 @@
                                 </TextBlock>
 
                                 <TextBlock Background="Transparent" VerticalAlignment="Center"
-                                        Grid.Column="1" Grid.Row="1" Opacity=".8"
+                                        Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Opacity=".8"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
                                         TextWrapping="Wrap">
                                     <TextBlock.Style>
@@ -448,7 +442,7 @@
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
-                                <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Grid.RowSpan="2" Margin="0">
+                                <Canvas IsHitTestVisible="False" Grid.ColumnSpan="3" Grid.RowSpan="2" Margin="-10 0 0 0">
                                     <Canvas.Style>
                                         <Style TargetType="Canvas">
                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -499,8 +493,7 @@
                             </Grid>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type irc:IrcNotificationMessage}">
-
-                            <Grid ShowGridLines="True">
+                            <Grid ShowGridLines="False">
                                 <Grid.Style>
                                     <Style TargetType="Grid">
                                         <Setter Property="Margin" Value="10 0 0 4"/>
@@ -576,6 +569,7 @@
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" >
                                             <Setter Property="Margin" Value="0 2 0 2"/>
+                                            <Setter Property="FontStyle" Value="Italic"/>
                                             <!--<Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSame}" Value="True">
                                                     <Setter Property="Margin" Value="0 0 0 0"/>
@@ -596,7 +590,6 @@
                 <!--#endregion-->
 
                 <custom:TestControl Grid.Row="2" x:Name="TestInputControl"/>
-
 
                 <TextBlock behavior:TextBlockExtensions.BindableInlines="{Binding SelectedChannel.Topic, Converter={StaticResource TextConverter}}"
                            VerticalAlignment="Top" Margin="10" TextWrapping="Wrap">
@@ -659,6 +652,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <!--#region Chat options -->
+                <!--<ToggleButton x:Name="AdditionalSettingsBtn" Height="30" Width="30" Margin="8 6 0 0" VerticalAlignment="Top" Background="Transparent" Padding="6 0"
+                              Checked="ToggleButton_Checked">
+                    <Path Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"/>
+                </ToggleButton>-->
                 <Button
                 Margin="8 6 0 0"
                 Height="30"
@@ -752,7 +749,7 @@
                                     <Separator Opacity=".5" Margin="0 6 0 10"/>
                                     --><!--<CheckBox Content="Enable map preview" IsChecked="{Binding IsChatMapPreviewEnabled}"/>--><!--
                                     <CheckBox Content="Enable game preview" IsChecked="False"/>-->
-                                    <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2" Margin="0 10 0 0"/>
+                                    <Button Content="Refresh users list" Command="{Binding RefreshUserListCommand}" Padding="6 2"/>
                                 </StackPanel>
                             </Border>
                         </Canvas>

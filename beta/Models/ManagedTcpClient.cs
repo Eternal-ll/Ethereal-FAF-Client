@@ -191,7 +191,7 @@ namespace beta.Models
         }
         #endregion
 
-        public async Task ConnectAsync(CancellationToken token)
+        public async Task ConnectAsync(CancellationToken token = default)
         {
             if (TcpClient is not null)
             {

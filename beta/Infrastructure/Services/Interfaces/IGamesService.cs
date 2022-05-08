@@ -45,6 +45,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersLeftGame;
 
         public List<GameInfoMessage> Games { get; }
+        public GameInfoMessage GetGame(long uid);
     }
     public interface INewGamesService<GameType, GameState> : IGamesService
     {

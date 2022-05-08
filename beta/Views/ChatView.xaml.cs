@@ -22,7 +22,11 @@ namespace beta.Views
 
             HistoryListBoxScrollViewer.ScrollChanged += HistoryListBoxScrollViewer_ScrollChanged;
             DataContextChanged += ChatView_DataContextChanged;
+
+            MouseDown += ChatView_MouseDown;
+            FocusableChanged += ChatView_FocusableChanged;
         }
+
         bool AtTheBottom = false;
         private void HistoryListBoxScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
@@ -42,5 +46,32 @@ namespace beta.Views
             }
         }
         private void OnShowJoinToChannelClick(object sender, RoutedEventArgs e) => JoinChannelInput.Focus();
+
+        bool IsSettingsOpen = false;
+        private void ToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            IsSettingsOpen = true;
+        }
+
+        private void ChatView_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            //if (IsSettingsOpen)
+            //{
+            //    if (!(AdditionalSettingsBtn.IsMouseOver || SettingsPopup.IsMouseOver))
+            //    {
+            //        AdditionalSettingsBtn.IsChecked = false;
+            //    }
+            //}
+        }
+        private void ChatView_FocusableChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            //if (IsSettingsOpen)
+            //{
+            //    if (!(AdditionalSettingsBtn.IsMouseOver || SettingsPopup.IsMouseOver))
+            //    {
+            //        AdditionalSettingsBtn.IsChecked = false;
+            //    }
+            //}
+        }
     }
 }

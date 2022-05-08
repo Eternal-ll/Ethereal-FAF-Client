@@ -30,7 +30,7 @@
         </Style.Resources>
         <Setter Property="RenderTransform">
             <Setter.Value>
-                <TranslateTransform Y="5"/>
+                <TranslateTransform Y="0"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -45,14 +45,14 @@
         </Style.Resources>
         <Setter Property="RenderTransform">
             <Setter.Value>
-                <TranslateTransform Y="5"/>
+                <TranslateTransform Y="0"/>
             </Setter.Value>
         </Setter>
     </Style>
     <Style x:Key="ButtonPlayerStyle" TargetType="Button" BasedOn="{StaticResource HoverButtonStyle}">
         <Setter Property="RenderTransform">
             <Setter.Value>
-                <TranslateTransform Y="5"/>
+                <TranslateTransform Y="0"/>
             </Setter.Value>
         </Setter>
     </Style>

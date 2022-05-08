@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Emoji;
 using beta.Models.Enums;
 using beta.Resources.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,19 +19,6 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Converters
 {
-    public abstract class EmojiCache
-    {
-        public string Name { get; set; }
-        public Uri PathToFile { get; set; }
-    }
-    public class GIFEmojiCache : EmojiCache
-    {
-        public GifBitmapDecoder GifBitmapDecoder;
-    }
-    public class BitmapEmojiCache : EmojiCache
-    {
-        public ImageSource ImageSource;
-    }
     // TODO: Move to Service!!! This logic should be in some ChatService
     internal class TextConverter : IValueConverter
     {
@@ -51,7 +39,7 @@ namespace beta.Infrastructure.Converters
 
         private InlineUIContainer GetEmoji(string emoji)
         {
-            emoji = emoji.Substring(1, emoji.Length - 2);
+            emoji = emoji[1..^1];
             InlineUIContainer ui = new();
 
             for (int i = 0; i < Cache.Count; i++)
@@ -76,13 +64,8 @@ namespace beta.Infrastructure.Converters
                             Source = emojiCache.ImageSource
                         };
                     }
-
-                    image.DataContext = image;
-                    image.ToolTip = emoji;
-                    image.Stretch = Stretch.Uniform;
-                    image.MaxHeight = 24;
-                    image.Margin = new(2, 0, 2, 0);
-
+                    image.Style = (Style)App.Current.Resources["EmojiImageStyle"];
+                    image.Tag = ':' + emoji + ':';
                     ui.Child = image;
                     return ui;
                 }
@@ -172,11 +155,8 @@ namespace beta.Infrastructure.Converters
                             };
                             cache = emojiCache;
                         }
-                        image.DataContext = image;
-                        image.ToolTip = emoji;
-                        image.Stretch = Stretch.Uniform;
-                        image.MaxHeight = 24;
-                        image.Margin = new(2, 0, 2, 0);
+                        image.Style = (Style)App.Current.Resources["EmojiImageStyle"];
+                        image.Tag = ':' + emoji + ':';
 
                         ui.Child = image;
                         Cache.Add(cache);
@@ -187,7 +167,8 @@ namespace beta.Infrastructure.Converters
             ui.Child = new Image
             {
                 Source = App.Current.Resources["QuestionIcon"] as ImageSource,
-                ToolTip = emoji
+                ToolTip = ":" + emoji + ":",
+                Style = (Style)App.Current.Resources["EmojiImageStyle"]
             };
             return ui;
         }
@@ -214,21 +195,28 @@ namespace beta.Infrastructure.Converters
                 var word = words[i];
                 if (!isText)
                 {
-                    if (run is not null)
+                    if (run is not null && !string.IsNullOrWhiteSpace(run.Text))
                     {
-                        if (i == 0 && run.Text.Trim().Length == 0) continue;
-                        if (i > 0)
-                        {
-                            run.Text = run.Text.Insert(0, " ");
-                        }
+                        //if (string.IsNullOrWhiteSpace(run.Text)) continue;
+                        //if (i > 0)
+                        //{
+                        //    run.Text = run.Text.Insert(0, " ");
+                        //}
                         inlines.Add(run);
                     }
-                    run = new();
+                    run = new()
+                    {
+                        BaselineAlignment = BaselineAlignment.Top
+                    };
                 }
                 if (inlineUIContainer is not null)
                 {
                     inlines.Add(inlineUIContainer);
                     inlineUIContainer = null;
+                    if (run is not null)
+                    {
+                        run.Text = " " + run.Text;
+                    }
                 }
                 // Is URL
                 if ((word.StartsWith("https:") || word.StartsWith("http")) && Uri.IsWellFormedUriString(word, UriKind.Absolute)
@@ -245,7 +233,7 @@ namespace beta.Infrastructure.Converters
                     isText = false;
                     continue;
                 }
-                // Is local directory
+                // Is local directory   
                 if (Regex.IsMatch(word, @"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$"))
                 {
                     inlineUIContainer = new InlineUIContainer(new Button()
@@ -261,10 +249,17 @@ namespace beta.Infrastructure.Converters
                 // Is player
                 if (PlayersService.TryGetPlayer(word, out var player))
                 {
-                    inlineUIContainer = new InlineUIContainer(new Button()
+                    //<ContentControl ContentTemplate="{StaticResource PlayerDataTemplateStacked}" Content="{Binding Host}" Margin = "6 0 0 0" />
+                    //inlineUIContainer = new InlineUIContainer(new Button()
+                    //{
+                    //    Content = player,
+                    //    Style = App.Current.Resources["ButtonPlayerStyle"] as Style
+                    //});
+                    inlineUIContainer = new(new ContentControl()
                     {
-                        Content = player,
-                        Style = App.Current.Resources["ButtonPlayerStyle"] as Style
+                        ContentTemplate = (DataTemplate)App.Current.Resources["PlayerDataTemplateStacked"],
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        Content = player
                     });
                     isText = false;
                     continue;
@@ -272,7 +267,7 @@ namespace beta.Infrastructure.Converters
                 // Is emoji
                 if (Regex.IsMatch(word, @"\:.*?\:"))
                 {
-                    inlineUIContainer = GetEmoji(text);
+                    inlineUIContainer = GetEmoji(word);
                     isText = false;
                     continue;
                 }

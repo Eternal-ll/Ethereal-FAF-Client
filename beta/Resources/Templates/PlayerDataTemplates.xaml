@@ -6,6 +6,8 @@
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                     xmlns:sModels="clr-namespace:beta.Models.Server"
                     mc:Ignorable="d">
+    
+    
 
     <ContextMenu x:Key="UniversalPlayerContextMenu"
                  d:DataContext="{d:DesignInstance sModels:PlayerInfoMessage}">
@@ -241,6 +243,7 @@
         <Setter Property="Stretch" Value="Uniform"/>
         <Setter Property="Source" Value="{Binding Flag}"/>
         <Setter Property="ToolTip" Value="{Binding country}"/>
+        <Setter Property="Margin" Value="0 2 0 0"/>
     </Style>
 
     <Style x:Key="AvatarImageStyle" TargetType="Image">
@@ -261,6 +264,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
+                <ColumnDefinition Width="28"/>
+                <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="{Binding Key}"/>
             <TextBlock DataContext="{Binding Value}" Grid.Column="1" HorizontalAlignment="Right" Margin="10 0 0 0">
@@ -282,9 +287,9 @@
                         </Style>
                     </Run.Style>
                 </Run>
-                <Run Text="{Binding rating[0], Mode=OneWay, StringFormat='{} {0:0}'}" Foreground="Gray"/>
-                <Run Text="{Binding rating[1], Mode=OneWay, StringFormat='+- {0:0}'}" Foreground="Gray"/>
             </TextBlock>
+            <TextBlock Grid.Column="2" Text="{Binding Value.rating[0], StringFormat='{}{0:0}'}" Foreground="Gray" HorizontalAlignment="Right"/>
+            <TextBlock Grid.Column="3" Text="{Binding Value.rating[1], StringFormat=' +- {0:0}'}" Foreground="Gray"/>
         </Grid>
     </DataTemplate>
     
@@ -299,33 +304,84 @@
         </Grid>
     </DataTemplate>
 
+
+
+    <DataTemplate x:Key="PlayerDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
+        <Grid ShowGridLines="False" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Style="{StaticResource AvatarImageStyle}"/>
+
+            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
+
+            <TextBlock Text="{Binding LoginWithClan}"
+                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
+                       ToolTip="{StaticResource RatingsToolTip}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                <Setter Property="Foreground" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayerDataTemplateStacked" DataType="{x:Type sModels:PlayerInfoMessage}">
+        <StackPanel Orientation="Horizontal" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
+            <Image Style="{StaticResource AvatarImageStyle}"/>
+
+            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
+
+            <TextBlock Text="{Binding LoginWithClan}"
+                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
+                       ToolTip="{StaticResource RatingsToolTip}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
+                                <Setter Property="Foreground" Value="Firebrick"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
+                                <Setter Property="Foreground" Value="LightGreen"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+    </DataTemplate>
+
     <Style x:Key="TeamsItemsStyle" TargetType="ItemsControl">
         <Style.Resources>
             <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                 <Grid d:DataContext="{d:DesignInstance {x:Type sModels:PlayerInfoMessage}}"
-                                  ShowGridLines="False">
+                                  ShowGridLines="False"
+                      ContextMenu="{StaticResource UniversalPlayerContextMenu}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="16"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="48"/>
                         <ColumnDefinition MinWidth="40"/>
                     </Grid.ColumnDefinitions>
-                    <Image Source="{Binding Flag}" Height="16" Width="16"/>
-                    <TextBlock Margin="4 0 0 0" Grid.Column="1" Text="{Binding login}">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RelationShip}" Value="1">
-                                        <Setter Property="Foreground" Value="LimeGreen"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding RelationShip}" Value="2">
-                                        <Setter Property="Foreground" Value="Red"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <TextBlock Grid.Column="1" HorizontalAlignment="Right" Margin="0 -4 -8 0"
+                    <ContentControl ContentTemplate="{StaticResource PlayerDataTemplate}" Content="{Binding}"/>
+
+                    <TextBlock HorizontalAlignment="Right" Margin="0 -4 -8 0"
                                            Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -341,11 +397,8 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <Image Visibility="Visible" Margin="8 0 0 0" Stretch="Uniform"
-                           Width="40" Height="20" HorizontalAlignment="Left" Grid.Column="2"
-                                       Style="{StaticResource AvatarImageStyle}"/>
-                    <TextBlock Margin="10 0 0 0" Grid.Column="3" HorizontalAlignment="Right"
-                                           Text="{Binding ratings[global].DisplayedRating}"/>
+                    <TextBlock Margin="10 0 0 0" Grid.Column="3" HorizontalAlignment="Right" 
+                               Text="{Binding ratings[global].DisplayedRating}"/>
                 </Grid>
             </DataTemplate>
 
@@ -408,7 +461,19 @@
                                 </TextBlock.Background>
                             </TextBlock>
                         </StackPanel>
-                        <ItemsControl ItemsSource="{Binding Players}" Margin="0 0 0 10"/>
+                        <ItemsControl ItemsSource="{Binding Players}">
+                            <ItemsControl.Style>
+                                <Style TargetType="ItemsControl">
+                                    <Setter Property="Margin" Value="0 0 0 10"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}, Path=DataContext.AnyWithAvatar}"
+                                                     Value="False">
+                                            <Setter Property="Margin" Value="-40 0 0 10"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ItemsControl.Style>
+                        </ItemsControl>
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -427,7 +492,7 @@
                     <SolidColorBrush Color="Black" Opacity=".2"/>
                 </WrapPanel.Background>
 
-                <Image Style="{StaticResource FlagImageStyle}" Margin="10 10 0 10" />
+                <Image Style="{StaticResource FlagImageStyle}" Margin="10 10 0 10"/>
 
                 <Image Style="{StaticResource AvatarImageStyle}" Margin="10 10 10 10"  Grid.Column="1" HorizontalAlignment="Center"/>
 
@@ -898,69 +963,6 @@
         </StackPanel>
     </DataTemplate>
 
-    <DataTemplate x:Key="PlayerDataTemplate" DataType="{x:Type sModels:PlayerInfoMessage}">
-        <Grid ShowGridLines="False" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <Image Style="{StaticResource AvatarImageStyle}"/>
-
-            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
-
-            <TextBlock Text="{Binding LoginWithClan}"
-                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
-                       ToolTip="{StaticResource RatingsToolTip}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
-                                <Setter Property="Foreground" Value="Firebrick"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
-                                <Setter Property="Foreground" Value="LightGreen"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
-                                <Setter Property="Foreground" Value="Red"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </Grid>
-    </DataTemplate>
-    
-    <DataTemplate x:Key="PlayerDataTemplateStacked" DataType="{x:Type sModels:PlayerInfoMessage}">
-        <StackPanel Orientation="Horizontal" Background="Transparent" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
-            <Image Style="{StaticResource AvatarImageStyle}"/>
-
-            <Image Style="{StaticResource FlagImageStyle}" Grid.Column="1" HorizontalAlignment="Right"/>
-
-            <TextBlock Text="{Binding LoginWithClan}"
-                       Grid.Column="2" Margin="6 0 0 0" HorizontalAlignment="Left"
-                       ToolTip="{StaticResource RatingsToolTip}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsClanmate}" Value="True">
-                                <Setter Property="Foreground" Value="Firebrick"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding RelationShip}" Value="1">
-                                <Setter Property="Foreground" Value="LightGreen"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding RelationShip}" Value="4">
-                                <Setter Property="Foreground" Value="Red"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
-        </StackPanel>
-    </DataTemplate>
-
     <DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
         <Grid ShowGridLines="False" Background="Transparent" Margin="10 0 0 0" ContextMenu="{StaticResource UniversalPlayerContextMenu}">
             <Grid.ColumnDefinitions>
@@ -1046,17 +1048,17 @@
                                                         </Grid>
                                                     </ToolTip>
                                                 </TextBlock.ToolTip>
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Opacity" Value=".5"/>
-                                                                        <Style.Triggers>
-                                                                            <Trigger Property="IsMouseOver" Value="True">
-                                                                                <Setter Property="Opacity" Value="1"/>
-                                                                            </Trigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Opacity" Value=".5"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Opacity" Value="1"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </StackPanel>
                                     </Setter.Value>
                                 </Setter>

@@ -1,11 +1,14 @@
-﻿using beta.Models.Debugger;
+﻿using beta.Models.Server;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using ZstdNet;
 
 namespace beta.Models
 {
@@ -21,15 +24,14 @@ namespace beta.Models
         private readonly TcpClient TcpClient;
         private Socket RelaySocket;
 
-        public Process Game;
+        private Process ForgedAlliance;
+        private GameInfoMessage Game;
 
         public ReplayRecorder(TcpClient tcpClient) => TcpClient = tcpClient;
-        public void Initialize(bool relayToFAF = true)
+        public void Initialize(Process forgedAlliance, GameInfoMessage game, string recorder, bool relayToFAF = true)
         {
-            if (Game is null)
-            {
-                throw new ArgumentNullException(nameof(Game));
-            }
+            game.Command = Server.Enums.ServerCommand.game_info;
+
             if (relayToFAF)
             {
                 try
@@ -45,37 +47,97 @@ namespace beta.Models
 
             Task.Run(() =>
             {
-                var game = Game;
+                var process = forgedAlliance;
                 var relay = RelaySocket;
                 var client = TcpClient;
                 var stream = client.GetStream();
                 List<byte> cache = new();
                 byte[] last = Array.Empty<byte>();
-                while (client.Connected && !game.HasExited)
+                try
                 {
-                    if (client.Available == 0)
+                    while (client.Connected && !process.HasExited)
                     {
-                        if (last.Length > 0)
+                        if (client.Available == 0)
                         {
-                            if (RelaySocket is not null && RelaySocket.Connected)
+                            if (last.Length > 0)
                             {
-                                RelaySocket.Send(last);
+                                if (RelaySocket is not null && RelaySocket.Connected)
+                                {
+                                    RelaySocket.Send(last);
+                                }
+                                cache.AddRange(last);
+                                last = Array.Empty<byte>();
                             }
-                            cache.AddRange(last);
-                            //var data = Encoding.ASCII.GetString(last);
-                            //AppDebugger.LOGReplayOutput(data);
-                            last = Array.Empty<byte>(); 
+                            Thread.Sleep(50);
+                            continue;
                         }
-                        Thread.Sleep(50);
-                        continue;
+                        last = new byte[client.Available];
+                        stream.Read(last, 0, last.Length);
                     }
-                    last = new byte[client.Available];
-                    stream.Read(last, 0, last.Length);
                 }
+                catch { }
                 StreamFinished?.Invoke(this, null);
                 stream.Dispose();
                 client.Close();
+
+                double gameEnd = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var gameData = GetReplayMetadata(game, recorder, gameEnd) + '\n';
+                using var compressor = new Compressor();
+                var compressed = compressor.Wrap(cache.ToArray());
+                gameData += Convert.ToBase64String(compressed);
+
+                var fileName = $"{game.uid}-{recorder}.fafreplay";
+                var replayPath = "C:\\ProgramData\\FAForever\\replays";
+                if (Directory.Exists(replayPath)) Directory.CreateDirectory(replayPath);
+
+                //var data = gameData + Convert.ToBase64String(cache.ToArray());
+
+                File.WriteAllText(replayPath + '\\' + fileName, gameData);
             });
+        }
+        public string GetReplayMetadata(GameInfoMessage game, string recorder, double gameEnd)
+        {
+            StringBuilder sb = new();
+            sb.Append('{');
+            //"uid": 16986178, 
+            //"recorder": "Eternal-", 
+            //"featured_mod": "faf", 
+            //"launched_at": 1651989848.747021, 
+            //"complete": true, 
+            //"state": "PLAYING", 
+            //"num_players": 1, 
+            //"max_players": 8, 
+            //"title": "Eternal-'s game", 
+            //"host": "Eternal-", 
+            //"mapname": "scmp_021", 
+            //"map_file_path": "maps/scmp_021.zip", 
+            //"teams": { "1": ["Eternal-"]}, 
+            //"sim_mods": { }, 
+            //"password_protected": false,
+            //"visibility": "PUBLIC", 
+            //"command": "game_info", 
+            //"game_end": 1651990035.971194
+            sb.Append("\"command\": \"game_info\",");
+            sb.Append($"\"uid\": {game.uid},");
+            sb.Append($"\"featured_mod\": \"{game.FeaturedMod.ToString().ToLower()}\",");
+            sb.Append($"\"launched_at\": {game.launched_at.Value.ToString().Replace(',', '.')},");
+            sb.Append($"\"state\": \"{game.State.ToString().ToUpper()}\",");
+            sb.Append($"\"num_players\": {game.num_players},");
+            sb.Append($"\"max_players\": {game.max_players},");
+            sb.Append($"\"title\": \"{game.title}\",");
+            sb.Append($"\"host\": \"{game.host}\",");
+            sb.Append($"\"mapname\": \"{game.mapname}\",");
+            sb.Append($"\"map_file_path\": \"{game.map_file_path}\",");
+            sb.Append($"\"teams\": {JsonSerializer.Serialize(game.teams)},");
+            sb.Append($"\"sim_mods\": {JsonSerializer.Serialize(game.sim_mods)},");
+            sb.Append($"\"password_protected\": {game.password_protected.ToString().ToLower()},");
+            sb.Append($"\"visibility\": \"{game.Visibility.ToString().ToUpper()}\",");
+
+            // manual data
+            sb.Append($"\"recorder\": \"{recorder}\",");
+            sb.Append($"\"complete\": true,");
+            sb.Append($"\"game_end\": {gameEnd}}}");
+            return sb.ToString();
         }
     }
 }

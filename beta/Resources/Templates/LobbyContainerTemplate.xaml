@@ -387,6 +387,8 @@
     </Storyboard>
 
     <Style x:Key="BorderNotifyStyle" TargetType="Border">
+        <Setter Property="Grid.Row" Value="1"/>
+        <Setter Property="Grid.Column" Value="1"/>
         <Setter Property="Padding" Value="10 2"/>
         <Setter Property="Opacity" Value="0"/>
         <Setter Property="Visibility" Value="Collapsed"/>
@@ -438,8 +440,11 @@
                     <Condition Binding="{Binding State}" Value="2"/>
                 </MultiDataTrigger.Conditions>
                 <MultiDataTrigger.Setters>
+                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                    <Setter Property="Grid.Row" Value="1"/>
+                    <Setter Property="Grid.Column" Value="1"/>
                     <Setter Property="Padding" Value="4 2"/>
-                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <!--<Setter Property="BorderBrush" Value="Transparent"/>-->
                     <!--<Setter Property="Background" Value="Transparent"/>-->
                     <Setter Property="Opacity" Value="1"/>
                     <Setter Property="Visibility" Value="Visible"/>
@@ -1136,8 +1141,7 @@
                     </Path>
                 </Button>-->
             </Grid>
-            <Border Grid.Row="1" Grid.Column="1"
-                    HorizontalAlignment="Right"
+            <Border HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Margin="0 4 4 0"
                     BorderThickness="1"

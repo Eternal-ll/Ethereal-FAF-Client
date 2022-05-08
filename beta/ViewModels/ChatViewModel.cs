@@ -67,6 +67,7 @@ namespace beta.ViewModels
                         SelectedChannelPlayers.Clear();
                         SelectedChannelHistory.Clear();
                     }
+                    if (TestInputControl is null) return;
                     TestInputControl.SelectedChannel = value;
                 }
             }
@@ -323,7 +324,7 @@ namespace beta.ViewModels
                 .Invoke(() => SelectedChannelPlayers = players);
 
             // TODO
-            SelectedChannelPlayersViewSource.Dispatcher.Invoke(() => TestInputControl.UpdateUsers(users));
+            SelectedChannelPlayersViewSource.Dispatcher.Invoke(() => TestInputControl?.UpdateUsers(users));
         }
 
         private void OnChannelMessageReceived(object sender, IrcChannelMessage e)

@@ -47,6 +47,7 @@
                 <ResourceDictionary>
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
+                    <converter:HumanTimeConverter x:Key="HumanTimeConverter"/>
 
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
@@ -94,6 +95,7 @@
                 </ui:ThemeResources>
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
+                <ResourceDictionary Source="Resources/ResourceDictionaries/EmojiResourceDictionary.xaml"/>
 
 
                 <ResourceDictionary Source="Resources/Styles/ListBoxItemStyles.xaml"/>

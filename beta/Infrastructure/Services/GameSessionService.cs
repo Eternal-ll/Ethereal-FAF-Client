@@ -43,6 +43,9 @@ namespace beta.Infrastructure.Services
         private bool IsLocalFilesChanged;
         private Process ForgedAlliance;
 
+
+        private long GameUID = 0;
+
         public bool GameIsRunning => ForgedAlliance is not null;
 
         public GameSessionState State => throw new NotImplementedException();
@@ -83,8 +86,12 @@ namespace beta.Infrastructure.Services
 
         private void ReplayServerService_ReplayRecorderCreated(object sender, ReplayRecorder e)
         {
-            e.Game = ForgedAlliance;
-            e.Initialize();
+            var game = GamesService.GetGame(GameUID);
+            if (game is null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+            e.Initialize(ForgedAlliance, game, PlayersService.Self.login);
         }
 
         private void SessionService_Authorized(object sender, bool e)
@@ -200,18 +207,40 @@ namespace beta.Infrastructure.Services
             args.Append(' ');
         }
 
+        private async Task InitializeIce()
+        {
+            await Task.Run(async () => await IceAdapterClient.Initialize())
+                .ContinueWith(async t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        await InitializeIce();
+                    }
+                });
+        }
+
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
+        {
+            Task.Run(() => RunGame(e));
+        }
+
+        private async Task RunGame(GameLaunchData e)
         {
             IceAdapterClient ice = null;
             try
             {
                 ice = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
+                IceAdapterClient = ice;
+                await InitializeIce();
             }
             catch
             {
-                NotificationService.ShowPopupAsync("Cant launch ice adapter. Check java8sdk install");
+                App.Current.Dispatcher.Invoke(() =>
+                NotificationService.ShowPopupAsync("Cant launch ice adapter. Check java8sdk install"));
                 return;
             }
+            GameUID = e.uid;
+
             ice.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
             ice.IceMessageReceived += IceAdapterClient_IceMessageReceived;
             ice.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
@@ -264,21 +293,18 @@ namespace beta.Infrastructure.Services
                 return;
             }
             IceAdapterClient = ice;
-            Task.Run(async () =>
-            {
-                await ForgedAlliance.WaitForExitAsync();
-                ForgedAlliance.Close();
-                ForgedAlliance.Dispose();
-                ForgedAlliance = null;
+            await ForgedAlliance.WaitForExitAsync();
+            ForgedAlliance.Close();
+            ForgedAlliance.Dispose();
+            ForgedAlliance = null;
 
-                await IceAdapterClient.CloseAsync();
-                IceAdapterClient.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
-                IceAdapterClient.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
-                IceAdapterClient.ConnectionToGpgNetServerChanged -= IceAdapterClient_ConnectionToGpgNetServerChanged;
-                IceAdapterClient = null;
+            await ice.CloseAsync();
+            ice.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
+            ice.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
+            ice.ConnectionToGpgNetServerChanged -= IceAdapterClient_ConnectionToGpgNetServerChanged;
+            ice = null;
 
-                SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
-            });
+            SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
         }
 
         private void IceAdapterClient_ConnectionToGpgNetServerChanged(object sender, bool e)
@@ -507,11 +533,11 @@ namespace beta.Infrastructure.Services
 
         private bool ConfirmMap(string name) => MapsService.CheckLocalMap(name) switch
         {
-            Models.Enums.LocalMapState.NotExist => false,
-            Models.Enums.LocalMapState.Older => false,
-            Models.Enums.LocalMapState.Newest => false,
-            Models.Enums.LocalMapState.Same => true,
-            Models.Enums.LocalMapState.Unknown => false,
+            LocalMapState.NotExist => false,
+            LocalMapState.Older => false,
+            LocalMapState.Newest => false,
+            LocalMapState.Same => true,
+            LocalMapState.Unknown => false,
             _ => throw new NotImplementedException(),
         };
 

@@ -4,11 +4,9 @@ using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
@@ -198,6 +196,7 @@ namespace beta.Models.Server
 
         #region Teams
         private InGameTeam[] _Teams;
+        [JsonIgnore]
         public InGameTeam[] Teams
         {
             get => _Teams;
@@ -257,6 +256,7 @@ namespace beta.Models.Server
 
         #region Players
         private PlayerInfoMessage[] _Players;
+        [JsonIgnore]
         public PlayerInfoMessage[] Players
         {
             get => _Players;
@@ -297,21 +297,12 @@ namespace beta.Models.Server
 
         #region PlayersCountChanged
         private int? _PlayersCountChanged;
+        [JsonIgnore]
         public int? PlayersCountChanged
         {
             get => _PlayersCountChanged;
             set => Set(ref _PlayersCountChanged, value);
         }
-        #endregion
-
-        #region Size
-        private string _Size;
-        public string Size
-        {
-            get => _Size;
-            set => Set(ref _Size, value);
-        }
-
         #endregion
 
         #region MapName // On fly
@@ -386,6 +377,7 @@ namespace beta.Models.Server
 
         #region Favourites
         private int _Favourites;
+        [JsonIgnore]
         public int Favourites
         {
             get => _Favourites;
@@ -395,6 +387,7 @@ namespace beta.Models.Server
 
         #region Friends
         private int _Friends;
+        [JsonIgnore]
         public int Friends
         {
             get => _Friends;
@@ -404,6 +397,7 @@ namespace beta.Models.Server
 
         #region Clanmates
         private int _Clanmates;
+        [JsonIgnore]
         public int Clanmates
         {
             get => _Clanmates;
@@ -413,6 +407,7 @@ namespace beta.Models.Server
 
         #region Foes
         private int _Foes;
+        [JsonIgnore]
         public int Foes
         {
             get => _Foes;
@@ -425,9 +420,12 @@ namespace beta.Models.Server
         public bool ReplayLessThanFiveMinutes => !launched_at.HasValue || (DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(launched_at.Value))
                     .TotalSeconds > 300;
 
+        [JsonIgnore]
         public DateTime? CreatedTime { get; set; }
+        [JsonIgnore]
         public DateTime Updated { get; set; }
-
+        
+        [JsonIgnore]
         public IPlayer Host { get; set; }
 
         #endregion
@@ -511,6 +509,8 @@ namespace beta.Models.Server
 
         #region AvatarImage
         private ImageSource _AvatarImage;
+
+        [JsonIgnore]
         public ImageSource AvatarImage
         {
             get
@@ -533,6 +533,7 @@ namespace beta.Models.Server
 
         #region LargeMapPreview
         private ImageSource _LargeMapPreview;
+        [JsonIgnore]
         public ImageSource LargeMapPreview
         {
             get
@@ -625,9 +626,10 @@ namespace beta.Models.Server
                     }
                 }
             }
-        } 
+        }
         #endregion
 
+        [JsonIgnore]
         public string[] PlayersLogins { get; set; }
 
         protected override void Dispose(bool disposing)

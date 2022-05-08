@@ -140,11 +140,11 @@ namespace beta
             win.Closed += Win_Closed;
             win.Show();
             // Prevent default unhandled exception processing
-            Task.Run(() =>
-            {
-                Thread.Sleep(10000);
-                Environment.Exit(-1);
-            });
+            //Task.Run(() =>
+            //{
+            //    Thread.Sleep(10000);
+            //    Environment.Exit(-1);
+            //});
             e.Handled = true;
         }
 

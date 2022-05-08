@@ -11,6 +11,7 @@
 	  <PlatformTarget>AnyCPU</PlatformTarget>
 	  <AssemblyName>Ethereal FAF Client</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -314,6 +315,7 @@
     <PackageReference Include="Notification.WPF" Version="6.1.0.4" />
     <PackageReference Include="OxyPlot.Core" Version="2.0.0" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
+    <PackageReference Include="ZstdNet" Version="1.4.5" />
   </ItemGroup>
 
   <ItemGroup>

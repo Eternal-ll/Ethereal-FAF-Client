@@ -296,5 +296,11 @@ namespace beta.Infrastructure.Services
         private void OnGameEnd(GameInfoMessage game) => GameEnd?.Invoke(this, game);
         private void OnGameClosed(GameInfoMessage game) => GameClosed?.Invoke(this, game);
         private void OnGameLaunched(GameInfoMessage game) => GameLaunched?.Invoke(this, game);
+
+        public GameInfoMessage GetGame(long uid)
+        {
+            if (TryGetGame(uid, out var game)) return game;
+            return null;
+        }
     }
 }

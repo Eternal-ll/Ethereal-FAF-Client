@@ -99,7 +99,7 @@ namespace beta.Models.Ice
                 return true;
             }
 
-            AppDebugger.LOGJSONRPC($"NOT SEN\n{json.ToJsonFormat()}");
+            AppDebugger.LOGJSONRPC($"NOT SEND\n{json.ToJsonFormat()}");
             return false;
         }
 
@@ -131,9 +131,12 @@ namespace beta.Models.Ice
 
             DataToSend.Add(IceJsonRpcMethods.AskStatus(++JsonRpcId));
 
-            ManagedTcpClient.Connect();
             ManagedTcpClient.StateChanged += ManagedTcpClient_StateChanged;
             ManagedTcpClient.DataReceived += OnJsonRpcDataReceived;
+        }
+        public async Task Initialize()
+        {
+            await ManagedTcpClient.ConnectAsync();
         }
 
         private bool IsInitialized = false;
@@ -209,18 +212,18 @@ namespace beta.Models.Ice
 
         public async Task CloseAsync()
         {
-            Send(IceJsonRpcMethods.Quit());
-            if (IceAdapterProcess is not null)
+            if (Send(IceJsonRpcMethods.Quit()))
             {
-                await IceAdapterProcess.Process.WaitForExitAsync();
-                if (IceAdapterProcess.Process.HasExited)
-                {
+                if (IceAdapterProcess?.Process is not null) 
                     IceAdapterProcess.Process.Close();
-                    IceAdapterProcess.Process.Dispose();
-                }
+            }
+            else
+            {
+                IceAdapterProcess?.Process?.Close();
             }
         }
 
+        bool pendingConnection = false;
         private void ManagedTcpClient_StateChanged(object sender, ManagedTcpClientState e)
         {
             AppDebugger.LOGJSONRPC($"JSON-RPC TCP Client state changed to \"{e}\"");
@@ -231,24 +234,27 @@ namespace beta.Models.Ice
                 for (int i = 0; i < DataToSend.Count; i++)
                 {
                     AppDebugger.LOGJSONRPC($"----Sending from queue------");
+                    if (DataToSend.Count == 0) continue;
                     if (Send(DataToSend[i]))
                     {
-                        DataToSend.RemoveAt(i);
                     }
                 }
+                DataToSend.Clear();
             }
             else
             {
                 IsConnected = false;
                 JsonRpcId = 0;
             }
-
             if (e == ManagedTcpClientState.CantConnect)
             {
+                if (pendingConnection) return;
                 ManagedTcpClient.Connect();
                 AppDebugger.LOGJSONRPC($"Reconnecting to RPC Server...");
-
+                pendingConnection = true;
+                return;
             }
+            pendingConnection = false;
         }
     }
 }
