@@ -2,6 +2,7 @@
 using beta.Models.Debugger;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Diagnostics;
 
 namespace beta.Models.Ice
@@ -24,7 +25,7 @@ namespace beta.Models.Ice
             {
                 StartInfo = new()
                 {
-                    FileName = $"java.exe",
+                    FileName = $"java",
                     Arguments = $"-jar \"{file.FullName}\" {args}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
@@ -32,14 +33,24 @@ namespace beta.Models.Ice
                     //CreateNoWindow = true,
                 }
             };
-            Logger.LogInformation($"Initializing {file.Name} with {args}");
-            Process.Start();
+            Logger.LogInformation($"Initializing {file.FullName} with {args}");
+            try
+            {
+                Process.Start();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex.Message);
+            }
             //Process.StartInfo.Environment.Add("LOG_DIR", @"C:\Program Files (x86)\Forged Alliance Forever\lib\ice-adapter\logs\");
             Process.BeginErrorReadLine();
             Process.BeginOutputReadLine();
+#if DEBUG
             Process.OutputDataReceived += OnIceOutputDataReceived;
             Process.ErrorDataReceived += OnIceErrorDataReceived;
             Process.Exited += OnIceExited;
+#endif
+            Logger.LogInformation("Local ice server initialized");
         }
 
         private void OnIceExited(object sender, System.EventArgs e)
