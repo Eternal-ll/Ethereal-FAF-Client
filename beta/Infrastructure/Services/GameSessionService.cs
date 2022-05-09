@@ -214,6 +214,7 @@ namespace beta.Infrastructure.Services
                 {
                     if (t.IsFaulted)
                     {
+                        Logger.LogError(t.Exception.Message);
                         await InitializeIce();
                     }
                 });
@@ -233,10 +234,10 @@ namespace beta.Infrastructure.Services
                 IceAdapterClient = ice;
                 await InitializeIce();
             }
-            catch
+            catch(Exception ex)
             {
-                App.Current.Dispatcher.Invoke(() =>
-                NotificationService.ShowPopupAsync("Cant launch ice adapter. Check java8sdk install"));
+                SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                App.Current.Dispatcher.Invoke(() => NotificationService.ShowExceptionAsync(ex));
                 return;
             }
             GameUID = e.uid;
@@ -475,6 +476,11 @@ namespace beta.Infrastructure.Services
             var dataToDownload = await ConfirmPatchFiles(mod);
             if (dataToDownload.Length == 0) return true;
 
+            if (ForgedAlliance is not null && !ForgedAlliance.HasExited)
+            {
+                await NotificationService.ShowPopupAsync("You cant update pathc being in game");
+                return false;
+            }
             // we have patch files to download
 
             Logger.LogWarning($"Patch {mod} required to download");
@@ -853,6 +859,50 @@ namespace beta.Infrastructure.Services
             {
                 NotificationService.ShowExceptionAsync(ex);
             }
+        }
+
+        public async Task WatchGame(long replayId, string mapName, int playerId, FeaturedMod featuredMod, bool isLive = true)
+        {
+            if (featuredMod != FeaturedMod.FAF) return;
+            // game args
+            StringBuilder args = new();
+            // hide embedded game bug report
+            args.Append("/nobugreport ");
+            args.Append($"/init init_{featuredMod.ToString().ToLower()}.lua ");
+            args.Append($"/replay gpgnet://lobby.faforever.com/{replayId}/{playerId}.SCFAreplay ");
+            args.Append($"/replayid {replayId} ");
+            args.Append("/log \"C:\\ProgramData\\FAForever\\logs\\replay.log\"");
+            //'"C:\\ProgramData\\FAForever\\bin\\ForgedAlliance.exe" /replay gpgnet://lobby.faforever.com/16997391/369689.SCFAreplay /init init_faf.lua /nobugreport /log "C:\\ProgramData\\FAForever\\logs\\replay.log" /replayid 16997391'
+            if (!ConfirmMap(mapName))
+            {
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
+
+                if (!model.IsCompleted)
+                {
+                    return;
+                }
+            }
+
+            if (!await ConfirmPatch(featuredMod)) return;
+
+            ForgedAlliance = new()
+            {
+                StartInfo = new()
+                {
+                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
+                    Arguments = args.ToString(),
+                    UseShellExecute = true
+                }
+            };
+            if (!ForgedAlliance.Start())
+            {
+                Logger.LogError("Cant start game");
+                return;
+            }
+            await ForgedAlliance.WaitForExitAsync();
+            ForgedAlliance.Close();
+            ForgedAlliance.Dispose();
+            ForgedAlliance = null;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using beta.Models;
 using System;
-using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services.Interfaces
 {

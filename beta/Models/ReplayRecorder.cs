@@ -2,13 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Formats.Asn1;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using ZstdNet;
+using ZstdSharp;
+using System.IO.Compression;
 
 namespace beta.Models
 {
@@ -65,7 +67,7 @@ namespace beta.Models
                                 {
                                     RelaySocket.Send(last);
                                 }
-                                cache.AddRange(last);
+                                //cache.AddRange(last);
                                 last = Array.Empty<byte>();
                             }
                             Thread.Sleep(50);
@@ -80,19 +82,30 @@ namespace beta.Models
                 stream.Dispose();
                 client.Close();
 
-                double gameEnd = DateTimeOffset.Now.ToUnixTimeSeconds();
-                var gameData = GetReplayMetadata(game, recorder, gameEnd) + '\n';
-                using var compressor = new Compressor();
-                var compressed = compressor.Wrap(cache.ToArray());
-                gameData += Convert.ToBase64String(compressed);
+                //double gameEnd = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                var fileName = $"{game.uid}-{recorder}.fafreplay";
-                var replayPath = "C:\\ProgramData\\FAForever\\replays";
-                if (Directory.Exists(replayPath)) Directory.CreateDirectory(replayPath);
+                //var gameData = GetReplayMetadata(game, recorder, gameEnd) + '\n';
 
-                //var data = gameData + Convert.ToBase64String(cache.ToArray());
+                //if (cache[0] == 80)
+                //for (int i = 0; i < cache.Count; i++)
+                //{
+                //    if (cache[i] == '\x00')
+                //    {
+                //        cache.RemoveRange(0, i + 1);
+                //        break;
+                //    }
+                //}
+                ////var data = Encoding.UTF8.GetString(cache.ToArray());
 
-                File.WriteAllText(replayPath + '\\' + fileName, gameData);
+                ////using var compressor = new Compressor();
+                ////var compressed = compressor.Wrap(cache.ToArray());
+
+
+                //var fileName = $"{game.uid}-{recorder}.fafreplay";
+                //var replayPath = "C:\\ProgramData\\FAForever\\replays";
+                //if (Directory.Exists(replayPath)) Directory.CreateDirectory(replayPath);
+
+                //File.WriteAllText(replayPath + '\\' + fileName, gameData);
             });
         }
         public string GetReplayMetadata(GameInfoMessage game, string recorder, double gameEnd)
@@ -134,6 +147,7 @@ namespace beta.Models
             sb.Append($"\"visibility\": \"{game.Visibility.ToString().ToUpper()}\",");
 
             // manual data
+            //sb.Append($"\"compression\": \"zstd\",");
             sb.Append($"\"recorder\": \"{recorder}\",");
             sb.Append($"\"complete\": true,");
             sb.Append($"\"game_end\": {gameEnd}}}");

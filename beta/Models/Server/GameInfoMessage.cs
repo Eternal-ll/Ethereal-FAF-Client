@@ -417,8 +417,7 @@ namespace beta.Models.Server
 
         #endregion
 
-        public bool ReplayLessThanFiveMinutes => !launched_at.HasValue || (DateTime.UtcNow - DateTime.UnixEpoch.AddSeconds(launched_at.Value))
-                    .TotalSeconds > 300;
+        public bool ReplayLessThanFiveMinutes => !launched_at.HasValue && (Duration > new TimeSpan(0, 5, 0));
 
         [JsonIgnore]
         public DateTime? CreatedTime { get; set; }
