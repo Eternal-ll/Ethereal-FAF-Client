@@ -12,10 +12,20 @@ namespace beta.Views.Windows
         {
             InitializeComponent();
 
-            Top = Settings.Default.Top;
-            Left = Settings.Default.Left;
-            Height = Settings.Default.Height;
-            Width = Settings.Default.Width;
+            //var top = Settings.Default.Top;
+            //var left = Settings.Default.Left;
+            //var height = Settings.Default.Height;
+            //var width = Settings.Default.Width;
+
+            //if (top < 0 || top > 1000) top = 0;
+            //if(left < 0 || left > 1000) left = 0;
+            //if (height < 0 || height > 1000) height = 1000;
+            //if (width < 0 || width > 1000) width = 1000;
+
+            //Top = top;
+            //Left = left;
+            //Height = height;
+            //Width = width;
 
             if (Settings.Default.IsWindowMaximized)
             {
