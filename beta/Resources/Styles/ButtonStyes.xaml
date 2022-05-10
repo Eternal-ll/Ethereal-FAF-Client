@@ -33,6 +33,7 @@
                 <TranslateTransform Y="0"/>
             </Setter.Value>
         </Setter>
+        <Setter Property="ToolTip" Value="{Binding StringFormat='Navigate to {0}'}"/>
     </Style>
     <Style x:Key="ButtonExplorerStyle" TargetType="Button" BasedOn="{StaticResource HoverButtonStyle}">
         <Style.Resources>
