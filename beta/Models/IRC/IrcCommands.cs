@@ -83,7 +83,7 @@ namespace beta.Models.IRC
         /// </summary>
         /// <param name="reason"></param>
         /// <returns></returns>
-        internal static string Quit(string reason = null) => "QUIT :" + reason;
+        internal static string Quit(string reason = null) => "QUIT " + reason is not null ? ':' + reason : string.Empty;
         /// <summary>
         /// Tests the presence of a connection. A PING message results in a PONG reply.
         /// </summary>
