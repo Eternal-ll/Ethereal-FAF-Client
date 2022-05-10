@@ -71,9 +71,9 @@ namespace beta.ViewModels
             GamesWithBlockedMap = new();
             //App.Current.Dispatcher.BeginInvoke(new Action(() =>
             //{
-                GamesViewSource = new();
-                BindingOperations.EnableCollectionSynchronization(Games, _lock);
-                GamesViewSource.Source = Games;
+            GamesViewSource = new();
+            BindingOperations.EnableCollectionSynchronization(Games, _lock);
+            GamesViewSource.Source = Games;
             GamesViewSource.IsLiveSortingRequested = true;
             GamesViewSource.Filter += OnGameFilter;
             //}));

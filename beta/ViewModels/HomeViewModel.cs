@@ -1,5 +1,6 @@
 ﻿using beta.Models.Server;
 using beta.ViewModels.Base;
+using System.Threading.Tasks;
 
 namespace beta.ViewModels
 {
@@ -11,11 +12,14 @@ namespace beta.ViewModels
     {       
         public HomeViewModel()
         {
-            NewsViewModel = new();
-            ForumViewModel = new();
+            Task.Run(() =>
+            {
+                NewsViewModel = new();
+                ForumViewModel = new();
+                CustomGamesViewModel = new();
+                ApiClientUsersCounterViewModel = new();
+            });
             PlayersViewModel = new();
-            CustomGamesViewModel = new();
-
             PlayersViewModel.PropertyChanged += PlayersViewModel_PropertyChanged;
         }
 
@@ -39,7 +43,7 @@ namespace beta.ViewModels
         public ForumViewModel ForumViewModel { get; set; }
         public PlayersViewModel PlayersViewModel { get; set; }
         public CustomGamesViewModel CustomGamesViewModel { get; set; }
-
+        public ApiClientUsersCounterViewModel ApiClientUsersCounterViewModel { get; set; }
         #region SelectedPlayerProfile
         private ISelectedPlayerProfile _SelectedPlayerProfile = new PlugViewModel();
         public ISelectedPlayerProfile SelectedPlayerProfile

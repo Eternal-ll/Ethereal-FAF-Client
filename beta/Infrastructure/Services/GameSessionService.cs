@@ -42,6 +42,7 @@ namespace beta.Infrastructure.Services
         private readonly ApiFeaturedModFileData[] PreviousFeaturedModData;
         private bool IsLocalFilesChanged;
         private Process ForgedAlliance;
+        private Process ReplayForgedAlliance;
 
 
         private long GameUID = 0;
@@ -476,9 +477,9 @@ namespace beta.Infrastructure.Services
             var dataToDownload = await ConfirmPatchFiles(mod);
             if (dataToDownload.Length == 0) return true;
 
-            if (ForgedAlliance is not null && !ForgedAlliance.HasExited)
+            if ((ForgedAlliance is not null && !ForgedAlliance.HasExited) || (ReplayForgedAlliance is not null && !ReplayForgedAlliance.HasExited))
             {
-                await NotificationService.ShowPopupAsync("You cant update pathc being in game");
+                await NotificationService.ShowPopupAsync("You cant update patch when game is launched");
                 return false;
             }
             // we have patch files to download
@@ -885,7 +886,7 @@ namespace beta.Infrastructure.Services
 
             if (!await ConfirmPatch(featuredMod)) return;
 
-            ForgedAlliance = new()
+            ReplayForgedAlliance = new()
             {
                 StartInfo = new()
                 {
@@ -894,15 +895,15 @@ namespace beta.Infrastructure.Services
                     UseShellExecute = true
                 }
             };
-            if (!ForgedAlliance.Start())
+            if (!ReplayForgedAlliance.Start())
             {
                 Logger.LogError("Cant start game");
                 return;
             }
-            await ForgedAlliance.WaitForExitAsync();
-            ForgedAlliance.Close();
-            ForgedAlliance.Dispose();
-            ForgedAlliance = null;
+            await ReplayForgedAlliance.WaitForExitAsync();
+            ReplayForgedAlliance.Close();
+            ReplayForgedAlliance.Dispose();
+            ReplayForgedAlliance = null;
         }
     }
 }

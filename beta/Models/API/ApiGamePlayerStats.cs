@@ -11,7 +11,7 @@ namespace beta.Models.API
         public double BeforeDeviation => GetDouble(Attributes["beforeDeviation"]);
         public double BeforeMean => GetDouble(Attributes["beforeMean"]);
 
-        public DateTime ScoreDateTime => DateTime.Parse(Attributes["scoreTime"]);
+        public DateTime? ScoreDateTime => DateTime.TryParse(Attributes["scoreTime"], out var res) ? res : null;
 
         private int? _RatingAfter;
         public int RatingAfter => _RatingAfter ??= Convert.ToInt32(AfterMean - 3 * AfterDeviation);

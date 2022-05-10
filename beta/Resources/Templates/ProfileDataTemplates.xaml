@@ -80,7 +80,7 @@
                                                     <Run Foreground="Red">
                                                         <Run.Style>
                                                             <Style TargetType="Run">
-                                                                <Setter Property="Text" Value="{Binding ExpiresAT}"/>
+                                                                <Setter Property="Text" Value="{Binding ExpiresAt}"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding ExpiresAt}" Value="{x:Null}">
                                                                         <Setter Property="Text" Value="Unlimited"/>
@@ -177,8 +177,10 @@
                         </liveCharts:CartesianChart.AxisX>
                     </liveCharts:CartesianChart>
                 </Grid>-->
-                    <oxy:Plot Grid.Row="2" Grid.ColumnSpan="2"  PlotAreaBorderColor="Black" DefaultTrackerTemplate="{x:Null}"
-                              Background="Gray">
+                    <oxy:Plot Grid.Row="2" Grid.ColumnSpan="2"  PlotAreaBorderColor="Gray" LegendTextColor="Gray"
+                              LegendTitleColor="Gray" TextColor="White" TitleColor="Red" SubtitleColor="Red"
+                              DefaultTrackerTemplate="{x:Null}"
+                              Background="Transparent">
                         <!--<oxy:Plot.DefaultTrackerTemplate>
                         <ControlTemplate>
                             <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
@@ -207,7 +209,7 @@
                                 DataFieldX="RatingAfter"
                                      MarkerType="Circle" LabelMargin="0" MarkerSize="2"
                                     MarkerFill="Black" CanTrackerInterpolatePoints="False"/>-->
-                        <oxy:LineSeries ItemsSource="{Binding SelectedRatingData}" Color="LightBlue"
+                        <oxy:LineSeries ItemsSource="{Binding SelectedRatingData}" Color="Red"
                                     DataFieldX="ScoreDateTime" DataFieldY="RatingAfter" Width="500" Height="200"/>
                     </oxy:Plot>
                     <!--<oxy:PlotView Grid.Row="2" Grid.RowSpan="2" Model="{Binding PlotModel}"
@@ -426,13 +428,14 @@
             <StackPanel x:Name="TitleBlock" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top"
                         Margin="10 0">
                 <Border Style="{StaticResource ProfileBorderStyle}" Margin="0">
-                    <StackPanel DataContext="{Binding Player}">
+                    <ContentControl Content="{Binding Player}" ContentTemplate="{StaticResource PlayerDataTemplateStacked}"/>
+                    <!--<StackPanel DataContext="{Binding Player}">
                         <StackPanel Orientation="Horizontal">
                             <Image Style="{StaticResource FlagImageStyle}"/>
                             <Image Style="{StaticResource AvatarImageStyle}" Margin="10 0 0 0"/>
                             <TextBlock Text="{Binding LoginWithClan}" Margin="10 0 0 0"/>
                         </StackPanel>
-                    </StackPanel>
+                    </StackPanel>-->
                 </Border>
                 <Border Margin="10 0 0 0">
                     <Border.Style>

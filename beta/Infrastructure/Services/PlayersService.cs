@@ -371,7 +371,7 @@ namespace beta.Infrastructure.Services
             PlayersDic.TryGetValue(id, out player);
             if (player is null)
             {
-                Logger.LogWarning($"Player not found: id {id}, players ({PlayersDic.Count})");
+                //Logger.LogWarning($"Player not found: id {id}, players ({PlayersDic.Count})");
             }
             return player is not null;
         }
@@ -384,7 +384,7 @@ namespace beta.Infrastructure.Services
             player = GetPlayer(login);
             if (player is null)
             {
-                Logger.LogWarning($"Player not found: login {login}, players ({PlayersDic.Count})");
+                //Logger.LogWarning($"Player not found: login {login}, players ({PlayersDic.Count})");
             }
             return player is not null;
         }

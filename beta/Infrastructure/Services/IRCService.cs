@@ -247,14 +247,15 @@ namespace beta.Infrastructure.Services
             //Send(IrcCommands.Nickname("Eternal-"));
             //Send("NAMES #aeolus");
             //Send("OPER Eternal- Qzwxec12#");
-            Send("MODE #test2 +o MarcSpector");
+            //Send("MODE #test2 +o MarcSpector");
             //Send("INVITE MarcSpector #aeolus1");
             //Send(IrcCommands.Leave("#aeolus1"));
             //Send(IrcCommands.Join("#aeolus2", "test")); 
             //Send("MODE #aeolus2");
             //Send(IrcCommands.Topic("#aeolus1", "test"));
-            //Send("KICK #aeolus1 Eternal-");
+            Send("KICK #test2 Didvul");
             //Send(IrcCommands.List());
+            //Send(IrcCommands.Nickname("Eternal-"));
         }
 
         public void GetChannelUsers(string channel) => SendCommand(IrcUserCommand.NAMES, IrcCommands.Names(channel), channel);
@@ -390,6 +391,7 @@ namespace beta.Infrastructure.Services
                     channel = ircData[3];
                     OnChannelUsersReceived(new(channel, ChannelUsers[channel].ToArray()));
                     AppDebugger.LOGIRC($"End of user lists: {channel} users: {ChannelUsers[channel].Count}");
+                    ChannelUsers.Remove(channel);
                     break;
 
                 case "433"://Nickname is unavailable: Being held for registered user
@@ -554,7 +556,6 @@ namespace beta.Infrastructure.Services
                     channel = text.Split()[1][1..];
                     break;
                 case IrcUserCommand.NAMES:
-                    ChannelUsers[channel].Clear();
                     Send(text);
                     break;
                 case IrcUserCommand.LIST:

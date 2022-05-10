@@ -100,13 +100,13 @@ namespace beta.ViewModels
             }
             Data[SelectedRatingType] = data.ToArray();
             OnPropertyChanged(nameof(SelectedRatingData));
-            var series = new ChartValues<ObservablePoint>();
-            for (int i = 0; i < data.Count; i++)
-            {
-                series.Add(new(data[i].ScoreDateTime.Ticks, data[i].RatingAfter));
-            }
-            SeriesValues = series;
-            OnPropertyChanged(nameof(SeriesValues));
+            //var series = new ChartValues<ObservablePoint>();
+            //for (int i = 0; i < data.Count; i++)
+            //{
+            //    //series.Add(new(data[i].ScoreDateTime.Ticks, data[i].RatingAfter));
+            //}
+            //SeriesValues = series;
+            //OnPropertyChanged(nameof(SeriesValues));
 
         }
     }

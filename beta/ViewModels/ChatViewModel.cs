@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -36,6 +37,7 @@ namespace beta.ViewModels
                 {
                     value.LeaveRequired += (s, e) =>
                     {
+                        if (SelectedChannel is null) return;
                         OnLeaveFromChannelCommand(SelectedChannel.Name);
                     };
                 }
@@ -58,8 +60,11 @@ namespace beta.ViewModels
                     FilterText = string.Empty;
                     if (value is not null)
                     {
-                        UpdateSelectedChannelUsers();
-                        UpdateSelectedChannelHistory();
+                        Task.Run(() =>
+                        {
+                            UpdateSelectedChannelUsers();
+                            UpdateSelectedChannelHistory();
+                        });
                         value.IsSelected = true;
                     }
                     else
@@ -140,12 +145,13 @@ namespace beta.ViewModels
             ircService.ChannelTopicChangedBy += OnChannelTopicChangedBy;
             ircService.UserJoined += OnChannelUserJoin;
             ircService.UserLeft += OnChannelUserLeft;
+            ircService.UserDisconnected += IrcService_UserDisconnected;
             ircService.UserChangedName += OnUserChangedName;
             ircService.ChannedMessageReceived += OnChannelMessageReceived;
             #endregion
 
             if (ircService.State == IrcState.Authorized)
-                ircService.Channels.ForEach(channel => ircService.GetChannelUsers(channel));
+                ircService.Channels.ForEach(channel => ircService.Join(channel));
         }
 
 
@@ -187,7 +193,13 @@ namespace beta.ViewModels
 
             if (SelectedChannel?.Name == channel)
             {
-                Channels.Remove(SelectedChannel);
+                for (int i = 0; i < Channels.Count; i++)
+                {
+                    if (Channels[i].Name == channel)
+                    {
+                        Channels.RemoveAt(i);
+                    }
+                }
                 SelectedChannel = null;
             }
 
@@ -221,7 +233,7 @@ namespace beta.ViewModels
             if (SelectedChannel is null) return;
             //SelectedChannel.Users.Clear();
             SelectedChannelPlayers.Clear();
-            UpdateSelectedChannelUsers();
+            Task.Run(() => UpdateSelectedChannelUsers());
             //IrcService.GetChannelUsers(SelectedChannel.Name);
         }
         #endregion
@@ -308,8 +320,7 @@ namespace beta.ViewModels
             {
                 history.Add(msgs[i]);
             }
-            SelectedChannelPlayersViewSource.Dispatcher
-                .Invoke(() => SelectedChannelHistory = history);
+            SelectedChannelPlayersViewSource.Dispatcher.Invoke(() => SelectedChannelHistory = history);
         }
         private void UpdateSelectedChannelUsers()
         {
@@ -333,7 +344,7 @@ namespace beta.ViewModels
             var msg = channel.AddMessage(e);
             if (SelectedChannel?.Name == channel.Name)
             {
-                SelectedChannelHistory.Add(msg);
+                SelectedChannelHistory?.Add(msg);
             }
         }
 
@@ -365,6 +376,7 @@ namespace beta.ViewModels
             }
         }
 
+
         private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
             var channels = Channels;
@@ -376,9 +388,29 @@ namespace beta.ViewModels
                     {
                         SelectedChannelPlayers.RemoveAt(index);
                     }
+                    else
+                    {
+
+                    }
                 }
             }
         }
+        private void IrcService_UserDisconnected(object sender, string e)
+        {
+            var channels = Channels;
+            foreach (var channel in channels)
+            {
+                if (channel.RemoveUser(e) && channel.IsSelected && GetIndexOfPlayer(e, out var index))
+                {
+                    SelectedChannelPlayers.RemoveAt(index);
+                }
+                else
+                {
+
+                }
+            }
+        }
+
 
         private string SelfLogin = Properties.Settings.Default.PlayerNick;
 
@@ -389,7 +421,7 @@ namespace beta.ViewModels
 
             if (channel.AddUser(e.User) && channel.IsSelected)
             {
-                SelectedChannelPlayers.Add(GetChatPlayer(e.User));
+                SelectedChannelPlayers?.Add(GetChatPlayer(e.User));
             }
         }
 
@@ -403,7 +435,7 @@ namespace beta.ViewModels
             var msg = channel.AddMessage(new IrcNotificationMessage(e.ToString()));
             if (channel.IsSelected)
             {
-                SelectedChannelHistory.Add(msg);
+                SelectedChannelHistory?.Add(msg);
             }
         }
 
@@ -422,7 +454,7 @@ namespace beta.ViewModels
             }
             if (SelectedChannel is not null && SelectedChannel.Name == e.Channel)
             {
-                UpdateSelectedChannelUsers();
+                Task.Run(() => UpdateSelectedChannelUsers());
             }
         }
 

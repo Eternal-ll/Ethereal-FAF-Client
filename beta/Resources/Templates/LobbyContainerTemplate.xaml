@@ -1093,7 +1093,9 @@
                                     <Setter Property="IsEnabled" Value="True"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding State}" Value="2">
-                                    <Setter Property="Content" Value="Not supported"/>
+                                    <Setter Property="Command" Value="{StaticResource WatchGameCommand}"/>
+                                    <Setter Property="IsEnabled" Value="True"/>
+                                    <Setter Property="Content" Value="Watch"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding State}" Value="3">
                                     <Setter Property="Content" Value="You cant join"/>

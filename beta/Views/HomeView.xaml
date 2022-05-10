@@ -156,6 +156,132 @@
                 </controls:CrossFadeContentControl.Resources>
             </controls:CrossFadeContentControl>
 
+            <ContentControl Content="{Binding ApiClientUsersCounterViewModel}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                            Margin="30 60">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:ApiClientUsersCounterViewModel}">
+                        <Border Background="{StaticResource BackgroundHalfBlack}" CornerRadius="10" Padding="10 10 10 0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Command="{Binding RefreshCommand}" ToolTip="Refresh" Background="Transparent">
+                                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                                    </Button>
+                                    <TextBlock Text="Greater than" VerticalAlignment="Center" Margin="10 0"/>
+                                    <DatePicker SelectedDate="{Binding SelectedDate}"/>
+                                </StackPanel>
+                                <Grid>
+                                    <ListBox ItemsSource="{Binding ClientCounterDictionary}" Background="Transparent"
+                                         Margin="0 10 0 10" Focusable="False" MaxHeight="160">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="Padding" Value="6 4"/>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.Style>
+                                            <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsPendingRequest}" Value="True">
+                                                        <Setter Property="Visibility" Value="Hidden"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.Style>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Height="30">
+                                                        <Image.Style>
+                                                            <Style TargetType="Image">
+                                                                <Setter Property="Source">
+                                                                    <Setter.Value>
+                                                                        <DrawingImage>
+                                                                            <DrawingImage.Drawing>
+                                                                                <DrawingGroup>
+                                                                                    <GeometryDrawing Brush="#090909" Geometry="M16 32c-8.837 0-16-7.163-16-16s7.163-16 16-16 16 7.163 16 16-7.163 16-16 16z"/>
+
+                                                                                    <GeometryDrawing Brush="White" Geometry="M16 32c-8.837 0-16-7.163-16-16s7.163-16 16-16 16 7.163 16 16-7.163 16-16 16zM16 2.147c-7.651 0-13.853 6.202-13.853 13.853s6.202 13.853 13.853 13.853 13.853-6.202 13.853-13.853-6.202-13.853-13.853-13.853zM24.026 16.058l3.538 6.127h-2.256l-4.642-8.077h7.122l1.125 1.949h-4.886zM18.256 9.917h7.111l1.24 2.147h-7.117zM20.911 22.185l-1.684-2.917h-6.415l-1.684 2.917h-2.173l7.083-12.268h0.057l7.052 12.268h-2.235zM16.020 13.743l-1.78 3.083h3.56zM5.388 12.064l1.24-2.147h7.243l-1.24 2.147h-7.243zM6.787 22.185h-2.357l3.538-6.127h-4.886l1.125-1.949h7.243z"/>
+
+                                                                                </DrawingGroup>
+                                                                            </DrawingImage.Drawing>
+                                                                        </DrawingImage>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Setter Property="RenderTransform">
+                                                                    <Setter.Value>
+                                                                        <TransformGroup>
+                                                                            <TranslateTransform X="4" Y="4"/>
+                                                                            <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                                                        </TransformGroup>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Key}" Value="null">
+                                                                        <Setter Property="ToolTip" Value="Unknown client"/>
+                                                                        <Setter Property="Source">
+                                                                            <Setter.Value>
+                                                                                <DrawingImage>
+                                                                                    <DrawingImage.Drawing>
+                                                                                        <GeometryDrawing Brush="{DynamicResource SystemControlBackgroundBaseMediumHighBrush}"
+                                                                                                         Geometry="{StaticResource QuestionPathGeometry}"/>
+                                                                                    </DrawingImage.Drawing>
+                                                                                </DrawingImage>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                        <Setter Property="RenderTransform">
+                                                                            <Setter.Value>
+                                                                                <TransformGroup>
+                                                                                    <TranslateTransform X="4" Y="4"/>
+                                                                                    <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                                                                </TransformGroup>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Key}" Value="faf-client">
+                                                                        <Setter Property="ToolTip" Value="Legacy FAF Client"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Key}" Value="downlords-faf-client">
+                                                                        <Setter Property="ToolTip" Value="Official FAF Client"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Key}" Value="ethereal-faf-client">
+                                                                        <Setter Property="ToolTip" Value="Ethereal FAF Client"/>
+                                                                        <Setter Property="RenderTransform" Value="{x:Null}"/>
+                                                                        <Setter Property="Source">
+                                                                            <Setter.Value>
+                                                                                <DrawingImage>
+                                                                                    <DrawingImage.Drawing>
+                                                                                        <DrawingGroup>
+                                                                                            <GeometryDrawing Brush="#090909" Geometry="M218.6,50.8L139,4.8c-9.7-5.6-21.6-5.6-31.4,0L28.4,50.4c-9.8,5.6-15.8,16-15.8,27.3l0.2,91.4   c0,11.2,6,21.5,15.7,27.1l79.6,46c9.7,5.6,21.6,5.6,31.4,0l79.2-45.5c9.8-5.6,15.8-16,15.8-27.3l-0.2-91.4   C234.3,66.7,228.3,56.4,218.6,50.8z"/>
+
+                                                                                            <GeometryDrawing Brush="White" Geometry="M151.7,78.7h35.9c2.5,0,4.8,1.3,6,3.5l1,1.7c2.7,4.7-0.7,10.5-6,10.5h-35.9c-2.5,0-4.8-1.3-6-3.5l-1-1.7    C142.9,84.5,146.3,78.7,151.7,78.7z
+                                             M157,164.9l-8.3-14.4c-1.2-2.2-3.5-3.5-6-3.5h-38.9c-2.5,0-4.8,1.3-6,3.5l-8.3,14.4    c-1.2,2.2-3.5,3.5-6,3.5h0c-5.3,0-8.7-5.7-6.1-10.4l40.1-72c2.7-4.8,9.5-4.8,12.2,0l40,72c2.6,4.6-0.8,10.4-6.1,10.4H163    C160.6,168.4,158.2,167.1,157,164.9z M122.9,115.2c-5.4,0-9.7,4.4-9.7,9.7c0,5.4,4.4,9.7,9.7,9.7c5.4,0,9.7-4.4,9.7-9.7    C132.7,119.6,128.3,115.2,122.9,115.2z
+                                             M51.5,83.9l1-1.7c1.2-2.2,3.5-3.5,6-3.5h36.9c5.4,0,8.7,5.8,6,10.5l-1,1.7c-1.2,2.2-3.5,3.5-6,3.5H57.6    C52.2,94.4,48.9,88.6,51.5,83.9z
+                                             M51.7,168.4h-1.1c-5.4,0-8.7-5.8-6-10.5l13.8-23.9c2.7-4.7-0.7-10.5-6-10.5H40.7c-5.4,0-8.7-5.8-6-10.5    l0.2-0.3c1.2-2.2,3.5-3.5,6-3.5h36.9c5.4,0,8.7,5.8,6,10.5l-26,45.1C56.5,167.1,54.2,168.4,51.7,168.4z
+                                             M169,109.3h36.9c2.5,0,4.8,1.3,6,3.5l0.2,0.3c2.7,4.7-0.7,10.5-6,10.5h-11.6c-5.4,0-8.7,5.8-6,10.5    l13.8,23.9c2.7,4.7-0.7,10.5-6,10.5H195c-2.5,0-4.8-1.3-6-3.5l-26-45.1C160.3,115.2,163.6,109.3,169,109.3z"/>
+
+                                                                                        </DrawingGroup>
+                                                                                    </DrawingImage.Drawing>
+                                                                                </DrawingImage>
+                                                                            </Setter.Value>
+                                                                        </Setter>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Image.Style>
+                                                    </Image>
+                                                    <TextBlock VerticalAlignment="Center" Margin="10 0 0 0" Text="{Binding}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <ui:ProgressRing IsActive="{Binding IsPendingRequest}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
+
 
             <!--<ContentControl Content="{Binding NewsViewModel}"  Margin="30 -140 30 20" Grid.Row="1">
                 <ContentControl.ContentTemplate>
@@ -175,23 +301,25 @@
                     </Style>
                 </Border.Style>
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 10 10 0">
-                        <Button Command="{Binding NewsViewModel.RefreshCommand}" VerticalAlignment="Top" Margin="0 4 0 0" ToolTip="Refresh"
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="{StaticResource BackgroundHalfBlack}"
+                            CornerRadius="10" Padding="10">
+                        <Border.RenderTransform>
+                            <TranslateTransform Y="-60"/>
+                        </Border.RenderTransform>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Command="{Binding NewsViewModel.RefreshCommand}" VerticalAlignment="Top" Margin="0 4 0 0" ToolTip="Refresh"
                                 Background="Transparent" IsEnabled="{Binding NewsViewModel.IsInputEnabled}">
-                            <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
-                        </Button>
-                        <TextBlock Text="Per page" VerticalAlignment="Top" FontWeight="DemiBold" FontSize="16" Margin="10 4 10 0"/>
-                        <ComboBox ItemsSource="{Binding NewsViewModel.PageSizes}" SelectedValue="{Binding NewsViewModel.PerPage}" IsEnabled="{Binding NewsViewModel.IsInputEnabled}"
+                                <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                            </Button>
+                            <TextBlock Text="Per page" VerticalAlignment="Top" FontWeight="DemiBold" FontSize="16" Margin="10 4 10 0"/>
+                            <ComboBox ItemsSource="{Binding NewsViewModel.PageSizes}" SelectedValue="{Binding NewsViewModel.PerPage}" IsEnabled="{Binding NewsViewModel.IsInputEnabled}"
                                                       Background="{StaticResource NavigationViewDefaultPaneBackground}" BorderThickness="0"/>
-                        <TextBlock Text="Page" VerticalAlignment="Top" FontWeight="DemiBold" FontSize="16" Margin="10 4 10 0"/>
-                        <ComboBox ItemsSource="{Binding NewsViewModel.Pages}" SelectedValue="{Binding NewsViewModel.CurrentPage}"
+                            <TextBlock Text="Page" VerticalAlignment="Top" FontWeight="DemiBold" FontSize="16" Margin="10 4 10 0"/>
+                            <ComboBox ItemsSource="{Binding NewsViewModel.Pages}" SelectedValue="{Binding NewsViewModel.CurrentPage}"
                                                       Background="{StaticResource NavigationViewDefaultPaneBackground}" BorderThickness="0"
                                                       IsEnabled="{Binding NewsViewModel.IsInputEnabled}"/>
-                    </StackPanel>
+                        </StackPanel>
+                    </Border>
                     <ui:ProgressRing IsActive="{Binding NewsViewModel.IsPendingRequest}" Grid.Row="1"/>
                     <ListBox SelectedValue="{Binding NewsViewModel.SelectedPost}" VerticalAlignment="Bottom" Grid.Row="1"
                     Background="Transparent"    
