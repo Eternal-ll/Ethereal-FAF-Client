@@ -13,8 +13,8 @@
             By = by;
         }
         public override string ToString() => string.IsNullOrWhiteSpace(Topic)?
-            $"{By} removed topic":
-            $"{By} changed topic";
+            $"Topic removed by {By}":
+            $"Topic changed by {By}";
 
     }
 }

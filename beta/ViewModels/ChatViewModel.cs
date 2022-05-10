@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -54,24 +55,39 @@ namespace beta.ViewModels
                 if (_SelectedChannel is not null)
                 {
                     _SelectedChannel.IsSelected = false;
+
+                    //App.Current.Dispatcher.Invoke(() =>
+                    //{
+                    //    SelectedChannelPlayersViewSource = null;
+                    OnPropertyChanged(nameof(SelectedChannelPlayersView));
+                    //    //BindingOperations.DisableCollectionSynchronization(_SelectedChannel.History);
+                    //    //BindingOperations.DisableCollectionSynchronization(_SelectedChannel.Players);
+                    //});
                 }
                 if (Set(ref _SelectedChannel, value))
                 {
                     FilterText = string.Empty;
                     if (value is not null)
                     {
-                        Task.Run(() =>
+                        //if (value.Users is not null)
+                        //    Task.Run(() =>
+                        //    {
+                        //        UpdateSelectedChannelUsers(value.Users.ToArray());
+                        //    });
+                        
+                        App.Current.Dispatcher.Invoke(() =>
                         {
-                            UpdateSelectedChannelUsers();
-                            UpdateSelectedChannelHistory();
+                            SelectedChannelPlayersViewSource.Source = value.Players;
+                            BindingOperations.EnableCollectionSynchronization(value.Players, _lock);
+                            OnPropertyChanged(nameof(SelectedChannelPlayersView));
                         });
                         value.IsSelected = true;
                     }
                     else
                     {
-                        SelectedChannelPlayers.Clear();
-                        SelectedChannelHistory.Clear();
+                        SelectedChannelPlayers?.Clear();
                     }
+
                     if (TestInputControl is null) return;
                     TestInputControl.SelectedChannel = value;
                 }
@@ -92,8 +108,8 @@ namespace beta.ViewModels
                 }
             }
         }
-        private readonly CollectionViewSource SelectedChannelPlayersViewSource = new();
-        public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource.View;
+        private CollectionViewSource SelectedChannelPlayersViewSource = new();
+        public ICollectionView SelectedChannelPlayersView => SelectedChannelPlayersViewSource?.View;
 
         private ObservableCollection<IrcMessage> _SelectedChannelHistory;
         public ObservableCollection<IrcMessage> SelectedChannelHistory
@@ -139,7 +155,7 @@ namespace beta.ViewModels
 
             #region IrcService event listeners
             ircService.StateChanged += OnStateChanged;
-            IrcService.NotificationMessageReceived += IrcService_NotificationMessageReceived;
+            ircService.NotificationMessageReceived += IrcService_NotificationMessageReceived;
             ircService.ChannelUsersReceived += OnChannelUsersReceived;
             ircService.ChannelTopicUpdated += OnChannelTopicUpdated;
             ircService.ChannelTopicChangedBy += OnChannelTopicChangedBy;
@@ -150,8 +166,8 @@ namespace beta.ViewModels
             ircService.ChannedMessageReceived += OnChannelMessageReceived;
             #endregion
 
-            if (ircService.State == IrcState.Authorized)
-                ircService.Channels.ForEach(channel => ircService.Join(channel));
+            //if (ircService.State == IrcState.Authorized)
+            //    ircService.Channels.ForEach(channel => ircService.Join(channel));
         }
 
 
@@ -190,37 +206,15 @@ namespace beta.ViewModels
         {
             var channel = parameter.ToString();
             if (string.IsNullOrWhiteSpace(channel)) return;
-
-            if (SelectedChannel?.Name == channel)
-            {
-                for (int i = 0; i < Channels.Count; i++)
-                {
-                    if (Channels[i].Name == channel)
-                    {
-                        Channels.RemoveAt(i);
-                    }
-                }
-                SelectedChannel = null;
-            }
-
             IrcService.Leave(channel);
-            //var channels = Channels;
-
-            //for (int i = 0; i < channels.Count; i++)
-            //{
-            //    if (channels[i].Name == channel)
-            //    {
-            //        Channels.Remove(channels[i]);
-            //        if (SelectedChannel is not null && SelectedChannel.Name == channel)
-            //        {
-            //            SelectedChannel = null;
-            //            if (channels.Count > 0)
-            //            {
-            //                SelectedChannel = channels[0];
-            //            }
-            //        }
-            //    }
-            //}
+            for (int i = 0; i < Channels.Count; i++)
+            {
+                if (Channels[i].Name == channel)
+                {
+                    if (i > 0 && Channels[i].IsSelected) SelectedChannel = Channels[i - 1];
+                    Channels.RemoveAt(i);
+                }
+            }
         }
 
         #endregion
@@ -231,22 +225,29 @@ namespace beta.ViewModels
         private void OnRefreshUserListCommand(object parameter)
         {
             if (SelectedChannel is null) return;
-            //SelectedChannel.Users.Clear();
-            SelectedChannelPlayers.Clear();
-            Task.Run(() => UpdateSelectedChannelUsers());
-            //IrcService.GetChannelUsers(SelectedChannel.Name);
+            Task.Run(() => OnChannelUsersReceived(this, new(SelectedChannel.Name, SelectedChannel.Users.ToArray())));
         }
         #endregion
 
         #region JoinChannelCommand
         private ICommand _JoinChannelCommand;
         public ICommand JoinChannelCommand => _JoinChannelCommand ??= new LambdaCommand(OnJoinChannelCommand, CanJoinChannelCommand);
-        private bool CanJoinChannelCommand(object parameter) => !string.IsNullOrWhiteSpace(NewChannelText);
+        private bool CanJoinChannelCommand(object parameter) => parameter is not null && parameter is string channel && !string.IsNullOrWhiteSpace(channel);
         private void OnJoinChannelCommand(object parameter)
         {
-            var channel = NewChannelText;
+            if (parameter is not string channel) return;
             if (string.IsNullOrWhiteSpace(channel)) return;
             if (!channel.StartsWith('#')) channel = "#" + channel;
+            var channels = Channels;
+            for (int i = 0; i < channels.Count; i++)
+            {
+                if (channels[i].Name == channel)
+                {
+                    SelectedChannel = channels[i];
+                    NewChannelText = string.Empty;
+                    return;
+                }
+            }
             IrcService.Join(channel);
             NewChannelText = string.Empty;
         }
@@ -285,7 +286,6 @@ namespace beta.ViewModels
             IrcChannelVM channel = new(name);
             Channels.Add(channel);
             SelectedChannel = channel;
-            BindingOperations.EnableCollectionSynchronization(channel.History, _lock);
             return channel;
         }
 
@@ -308,49 +308,48 @@ namespace beta.ViewModels
             return new UnknownPlayer()
             {
                 IsChatModerator = isChatMod,
-                login = login
+                login = ircName
             };
         }
-        private void UpdateSelectedChannelHistory()
+        private void UpdateSelectedChannelHistory(IrcMessage[] msgs)
         {
             var history = new ObservableCollection<IrcMessage>();
-            var msgs = SelectedChannel.History.ToArray();
 
             for (int i = 0; i < msgs.Length; i++)
             {
                 history.Add(msgs[i]);
             }
-            SelectedChannelPlayersViewSource.Dispatcher.Invoke(() => SelectedChannelHistory = history);
+            App.Current.Dispatcher.Invoke(() => SelectedChannelHistory = history);
         }
-        private void UpdateSelectedChannelUsers()
+        private void UpdateSelectedChannelUsers(string[] users)
         {
             var players = new ObservableCollection<IPlayer>();
-            var users = SelectedChannel.Users.ToArray();
 
             for (int i = 0; i < users.Length; i++)
             {
                 players.Add(GetChatPlayer(users[i]));
             }
-            SelectedChannelPlayersViewSource.Dispatcher
+            App.Current.Dispatcher
                 .Invoke(() => SelectedChannelPlayers = players);
 
             // TODO
-            SelectedChannelPlayersViewSource.Dispatcher.Invoke(() => TestInputControl?.UpdateUsers(users));
+            App.Current.Dispatcher.Invoke(() => TestInputControl?.UpdateUsers(users));
         }
 
         private void OnChannelMessageReceived(object sender, IrcChannelMessage e)
         {
-            var channel = GetChannel(e.Channel);
-            var msg = channel.AddMessage(e);
-            if (SelectedChannel?.Name == channel.Name)
-            {
-                SelectedChannelHistory?.Add(msg);
-            }
+            if (TryGetChannel(e.Channel, out var channel))
+                channel.AddMessage(e);
         }
 
         private bool GetIndexOfPlayer(string login, out int index)
         {
+            index = -1;
             var players = SelectedChannelPlayers;
+            if (players is null)
+            {
+                return false;
+            }
             for (int j = 0; j < players.Count; j++)
             {
                 if (players[j].login == login)
@@ -359,7 +358,6 @@ namespace beta.ViewModels
                     return true;
                 }
             }
-            index = -1;
             return false;
         }
 
@@ -369,29 +367,21 @@ namespace beta.ViewModels
             for (int i = 0; i < channels.Count; i++)
             {
                 var channel = channels[i];
-                if (channel.UpdateUser(e.From, e.To) && channel.IsSelected && GetIndexOfPlayer(e.From, out var index))
+                if (channel.UpdateUser(e.From, e.To))
                 {
-                    SelectedChannelPlayers[index] = GetChatPlayer(e.To);
                 }
+                channel.UpdatePlayer(GetChatPlayer(e.To), e.From);
             }
         }
 
 
         private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
-            var channels = Channels;
-            foreach (var channel in channels)
+            if (TryGetChannel(e.Channel, out var channel))
             {
-                if (channel.Name == e.Channel)
+                if (channel.RemoveUser(e.User))
                 {
-                    if (channel.RemoveUser(e.User) && channel.IsSelected && GetIndexOfPlayer(e.User, out var index))
-                    {
-                        SelectedChannelPlayers.RemoveAt(index);
-                    }
-                    else
-                    {
-
-                    }
+                    //SelectedChannelPlayers.RemoveAt(index);
                 }
             }
         }
@@ -400,9 +390,9 @@ namespace beta.ViewModels
             var channels = Channels;
             foreach (var channel in channels)
             {
-                if (channel.RemoveUser(e) && channel.IsSelected && GetIndexOfPlayer(e, out var index))
+                if (channel.RemoveUser(e))
                 {
-                    SelectedChannelPlayers.RemoveAt(index);
+                    //SelectedChannelPlayers.RemoveAt(index);
                 }
                 else
                 {
@@ -414,48 +404,91 @@ namespace beta.ViewModels
 
         private string SelfLogin = Properties.Settings.Default.PlayerNick;
 
+        bool TryGetChannel(string name, out IrcChannelVM channel)
+        {
+            var channels = Channels;
+            for (int i = 0; i < channels.Count; i++)
+            {
+                channel = channels[i];
+                if (channel.Name == name)
+                {
+                    return true;
+                }
+            }
+            channel = null;
+            return false;
+        }
+
         private void OnChannelUserJoin(object sender, IrcUserJoin e)
         {
-            if (SelfLogin == e.User) return;
-            var channel = GetChannel(e.Channel);
-
-            if (channel.AddUser(e.User) && channel.IsSelected)
+            if (TryGetChannel(e.Channel, out var channel))
             {
-                SelectedChannelPlayers?.Add(GetChatPlayer(e.User));
+                if (channel.AddUser(e.User) && channel.IsSelected)
+                {
+                    SelectedChannelPlayers?.Add(GetChatPlayer(e.User));
+                }
+            }
+        }
+        private void OnChannelTopicChangedBy(object sender, IrcChannelTopicChangedBy e)
+        {
+            if (TryGetChannel(e.Channel, out var channel))
+            {
+                channel.TopicChangedBy = e;
+                channel.AddMessage(new IrcNotificationMessage(e.ToString()));
             }
         }
 
-        private void OnChannelTopicChangedBy(object sender, IrcChannelTopicChangedBy e) =>
-            GetChannel(e.Channel).TopicChangedBy = e;
-
+        private IrcChannelTopicUpdated LastTopicUpdated;
         private void OnChannelTopicUpdated(object sender, IrcChannelTopicUpdated e)
         {
-            var channel = GetChannel(e.Channel);
-            channel.Topic = e.Topic;
-            var msg = channel.AddMessage(new IrcNotificationMessage(e.ToString()));
-            if (channel.IsSelected)
+            if (TryGetChannel(e.Channel, out var channel))
             {
-                SelectedChannelHistory?.Add(msg);
-            }
-        }
-
-        private readonly Dictionary<string, bool> ChannelUsersUpdates = new();
-        private void OnChannelUsersReceived(object sender, IrcChannelUsers e)
-        {
-            var channel = GetChannel(e.Channel);
-            channel.Users.AddRange(e.Users);
-            if (ChannelUsersUpdates.ContainsKey(e.Channel))
-            {
-                ChannelUsersUpdates[e.Channel] = true;
+                channel.Topic = e.Topic;
+                channel.AddMessage(new IrcNotificationMessage(e.ToString()));
             }
             else
             {
-                ChannelUsersUpdates.Add(e.Channel, true);
+                LastTopicUpdated = e;
             }
-            if (SelectedChannel is not null && SelectedChannel.Name == e.Channel)
+        }
+        private void OnChannelUsersReceived(object sender, IrcChannelUsers e)
+        {
+            IrcChannelVM channel;
+            var found = TryGetChannel(e.Channel, out channel);
+            if (!found)
             {
-                Task.Run(() => UpdateSelectedChannelUsers());
+                channel = new(e.Channel);
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    BindingOperations.EnableCollectionSynchronization(channel.History, _lock);
+                });
             }
+            if (LastTopicUpdated is not null)
+            {
+                channel.Topic = LastTopicUpdated.Topic;
+                channel.AddMessage(new IrcNotificationMessage(LastTopicUpdated.ToString()));
+                LastTopicUpdated = null;
+            }
+            channel.Users = new(e.Users);
+            ObservableCollection<IPlayer> players = new();
+            for (int i = 0; i < e.Users.Length; i++)
+            {
+                players.Add(GetChatPlayer(e.Users[i]));
+            }
+            if (channel.IsSelected)
+            {
+                SelectedChannel = null;
+                channel.Players = players;
+            }
+            else
+            {
+                channel.Players = players;
+            }
+            if (!found)
+            {
+                Channels.Add(channel);
+            }
+            SelectedChannel = channel;
         }
 
         private void OnStateChanged(object sender, IrcState e)
@@ -474,6 +507,13 @@ namespace beta.ViewModels
                     Channels[i].Users.Clear();
                     SelectedChannelPlayers.Clear();
                 }
+            }
+            else if (e == IrcState.Disconnected)
+            {
+                SelectedChannel = null;
+                Channels.Clear();
+                SelectedChannelHistory.Clear();
+                SelectedChannelPlayers.Clear();
             }
         }
 

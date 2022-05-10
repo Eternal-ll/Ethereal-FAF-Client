@@ -93,98 +93,148 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Orientation="Horizontal" Margin="0 0 130 0" VerticalAlignment="Top">
-                    <ui:TitleBarButton 
-                    Margin="30 0 10 0"
-                    HorizontalAlignment="Left"
-                    Width="NaN"
-                    Padding="0"
-                    HorizontalContentAlignment="Left"
-                    HoverBackground="Transparent"
-                    PressedBackground="Transparent">
-                        <StackPanel 
-                        Orientation="Horizontal">
-                            <ComboBox
-                            ItemsSource="{Binding Channels}"
-                            SelectedValue="{Binding SelectedChannel}"
-                            BorderThickness="0"
-                            Background="{DynamicResource NavigationViewExpandedPaneBackground}"
-                            Padding="20 6 20 10"
-                            FontWeight="DemiBold"
-                            ui:ControlHelper.CornerRadius="6"
-                                MaxDropDownHeight="200">
-                                <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="Gray" Opacity=".3"/>
-                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedUnfocused" Color="Gray" Opacity=".3"/>
-                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="Gray" Opacity=".4"/>
-                                    <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="Gray" Opacity=".1"/>
-                                </ComboBox.Resources>
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Left"/>
-                                        <Button HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                    Padding="4 2 4 4"
-                                                    Margin="0 1 0 0"        
-                                                    Background="Transparent"
-                                                    Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},Path=DataContext.LeaveFromChannelCommand}"
-                                                    CommandParameter="{Binding Name}">
-                                                <Path  Margin="0 2 0 0" Fill="Gray" Height="10"
-                                                  Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z">
-                                                    <!--TODO BINDING ERRORS-->
-                                                    <!--<Path.Style>
-                                                        <Style TargetType="Path">
-                                                            <Setter Property="Fill" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
-                                                                Path=Foreground}"/>
-                                                            <Setter Property="Opacity" Value=".6"/>
+            <ui:TitleBarButton Margin="30 0 130 0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                               Width="NaN" Padding="0" FontFamily="SegoiUI" HorizontalContentAlignment="Left"
+                               HoverBackground="Transparent" PressedBackground="Transparent">
+                <StackPanel Orientation="Horizontal">
+                    <Border Style="{StaticResource ClippedBorder}" CornerRadius="6">
+                        <ListBox ItemsSource="{Binding Channels}" SelectedValue="{Binding SelectedChannel}"
+                                     VerticalAlignment="Center">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.Resources>
+                                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Gray" Opacity=".2"/>
+                                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Gray" Opacity=".3"/>
+                                <DataTemplate DataType="{x:Type vm:IrcChannelVM}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Name}" Margin="0 0 10 0">
+                                            <TextBlock.RenderTransform>
+                                                <TranslateTransform Y="-1"/>
+                                            </TextBlock.RenderTransform>
+                                            <TextBlock.ToolTip>
+                                                <ToolTip>
+                                                    <TextBlock>
+                                                        <Run>
+                                                            <Run.Style>
+                                                                <Style TargetType="Run">
+                                                                    <Setter Property="Text" Value="Switch to"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
+                                                                                     Value="True">
+                                                                            <Setter Property="Text" Value="Selected"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Run.Style>
+                                                        </Run>
+                                                        <Run Text="{Binding Name, Mode=OneWay}" FontWeight="DemiBold" Foreground="LimeGreen"/>
+                                                        <Run Text="with"/>
+                                                        <Run Text="{Binding Players.Count, Mode=OneWay, StringFormat='{}{0} users'}"
+                                                             FontWeight="DemiBold" Foreground="LimeGreen"/>
+                                                    </TextBlock>
+                                                </ToolTip>
+                                            </TextBlock.ToolTip>
+                                    </TextBlock>
+                                        <Button Padding="4 2 4 4" Margin="-6 0 4 0" Background="Transparent"
+                                                Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},Path=DataContext.LeaveFromChannelCommand}"
+                                                CommandParameter="{Binding Name}">
+                                            <Button.ToolTip>
+                                                <ToolTip>
+                                                    <TextBlock>
+                                                            <Run Text="Leave from" Foreground="Red"/>
+                                                            <Run Text="{Binding Name, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                </ToolTip>
+                                            </Button.ToolTip>
+                                            <Path  Margin="0 2 0 0" Fill="Red" Height="10"
+                                                  Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}"
+                                                                         Value="False">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
-                                                                Path=IsSelected}" Value="True">
-                                                                    --><!--<Setter Property="Visibility" Value="Collapsed"/>-->
-                                                                    <!--<Setter Property="Fill" Value="Red"/>--><!--
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ComboBoxItem}},
-                                                                Path=IsMouseOver}" Value="True">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                    --><!--<Setter Property="Fill" Value="Red"/>--><!--
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Path.Style>-->
-                                                </Path>
-                                            </Button>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                            <Button Background="{DynamicResource NavigationViewExpandedPaneBackground}" ToolTip="Join channel"
-                                    Margin="10 0 0 0" Content=" + " FontWeight="Bold" ui:ControlHelper.CornerRadius="6" Click="OnShowJoinToChannelClick">
-                                <ui:FlyoutService.Flyout>
-                                    <ui:Flyout Placement="BottomEdgeAlignedLeft">
-                                        <StackPanel
-                                        Orientation="Vertical"
-                                        Margin="-6">
-                                        <TextBox x:Name="JoinChannelInput" BorderThickness="0" MinWidth="100"
-                                            ui:ControlHelper.CornerRadius="4" Text="{Binding NewChannelText, UpdateSourceTrigger=PropertyChanged}"
-                                            ui:ControlHelper.PlaceholderText="Channel">
-                                            <TextBox.InputBindings>
-                                                <KeyBinding Key="Enter" Command="{Binding JoinChannelCommand}"/>
-                                            </TextBox.InputBindings>
-                                        </TextBox>
-                                            <TextBlock
-                                            Margin="4 4 4 0"
-                                            Opacity=".5"
-                                            Text='Press Enter to join'
-                                            FontSize="12"/>
-                                        <Button Content="Join" Command="{Binding JoinChannelCommand}"/>
+                                                        </DataTrigger>
+                                                        <Trigger Property="IsMouseOver" Value="False">
+                                                            <Setter Property="Opacity" Value=".6"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </StackPanel>
-                                    </ui:Flyout>
-                                </ui:FlyoutService.Flyout>
-                            </Button>
-                        </StackPanel>
-                    </ui:TitleBarButton>
+                                </DataTemplate>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                    <Setter Property="Padding" Value="10 4 0 4"/>
+                                    <Setter Property="Height" Value="32"/>
+                                </Style>
+                            </ListBox.Resources>
+
+                        </ListBox>
+                    </Border>
+                    <ToggleButton x:Name="AddNewChannelToggle" Background="{DynamicResource NavigationViewExpandedPaneBackground}" ToolTip="Add new channel"
+                                  Margin="10 0 0 0" Content=" + " FontWeight="Bold" ui:ControlHelper.CornerRadius="6"
+                                  Click="OnShowJoinToChannelClick"/>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=AddNewChannelToggle, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <StackPanel.Resources>
+                            <ToolTip x:Key="NewChannelToolTip">
+                                <TextBlock>
+                                        <Run>
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Setter Property="Text" Value="Write name of IRC channel to join or create"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding NewChannelText, Converter={StaticResource IsNotNullOrWhiteSpaceConverter}}" Value="True">
+                                                            <Setter Property="Text" Value="Join to"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                        <Run Foreground="LimeGreen">
+                                            <Run.Style>
+                                                <Style TargetType="Run">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding NewChannelText, Converter={StaticResource IsNotNullOrWhiteSpaceConverter}}" Value="True">
+                                                            <Setter Property="Text" Value="{Binding NewChannelText}"/>
+                                                        </DataTrigger>
+                                                        <!--TODO [0] error on empty text-->
+                                                        <!--<MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding NewChannelText, Converter={StaticResource IsNotNullOrWhiteSpaceConverter}}" Value="True"/>
+                                                                <Condition Binding="{Binding NewChannelText[0]}" Value="#"/>
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Text" Value="{Binding NewChannelText}"/>
+                                                        </MultiDataTrigger>-->
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Run.Style>
+                                        </Run>
+                                </TextBlock>
+                            </ToolTip>
+                        </StackPanel.Resources>
+                        <TextBox x:Name="JoinChannelInput" BorderThickness="0" MinWidth="100" MaxLength="55"
+                                 ui:ControlHelper.CornerRadius="4" Text="{Binding NewChannelText, UpdateSourceTrigger=PropertyChanged}"
+                                 ui:ControlHelper.PlaceholderText="#channel" ToolTip="{StaticResource NewChannelToolTip}"
+                                 KeyDown="JoinChannelInput_KeyDown">
+                        </TextBox>
+                        <Button x:Name="JoinBtn" Content="Join" Command="{Binding JoinChannelCommand}" CommandParameter="{Binding NewChannelText}"
+                                ToolTip="{StaticResource NewChannelToolTip}" Click="Button_Click" KeyDown="JoinChannelInput_KeyDown"/>
+                    </StackPanel>
                 </StackPanel>
+            </ui:TitleBarButton>
 
             <Grid Margin="0 0 0 30" Grid.Row="1">
                 <Grid.RowDefinitions>
@@ -216,9 +266,9 @@
 
                 <!--#region Channel history -->
                 <ListBox x:Name="HistoryListBox" Grid.Row="1"
-                        ItemsSource="{Binding SelectedChannelHistory}"
+                        ItemsSource="{Binding SelectedChannel.History}"
                         VirtualizingPanel.IsVirtualizing="True"
-                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        VirtualizingPanel.VirtualizationMode="Standard"
                         VirtualizingPanel.IsContainerVirtualizable="True"
                         Background="Transparent">
                     <ListBox.Resources>
@@ -266,11 +316,11 @@
                             <Setter Property="Focusable" Value="False"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <Style.Triggers>
+                            <!--<Style.Triggers>
                                 <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
                                     <Setter Property="Margin" Value="0 6 0 0"/>
                                 </DataTrigger>
-                            </Style.Triggers>
+                            </Style.Triggers>-->
                         </Style>
                         <!--<Style TargetType="Image">
                             <Setter Property="MaxHeight" Value="24"/>
@@ -514,11 +564,11 @@
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
 
-                                <StackPanel Orientation="Horizontal" Grid.Column="1" Visibility="Collapsed">
+                                <!--<StackPanel Orientation="Horizontal" Grid.Column="1" Visibility="Collapsed">
                                     <TextBlock Margin="-34 0" VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <!--<Setter Property="Grid.Column" Value="2"/>-->
+                                                --><!--<Setter Property="Grid.Column" Value="2"/>--><!--
                                                 <Setter Property="Opacity" Value=".4"/>
                                                 <Setter Property="FontSize" Value="12"/>
                                                 <Setter Property="Visibility" Value="Hidden"/>
@@ -529,38 +579,38 @@
                                                             Path=IsMouseOver}" Value="True">
                                                         <Setter Property="Visibility" Value="Visible"/>
                                                     </DataTrigger>
-                                                    <!--<DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                    --><!--<DataTrigger Binding="{Binding IsSame}" Value="True">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>-->
+                                                    </DataTrigger>--><!--
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                </StackPanel>
+                                </StackPanel>-->
 
-                                <TextBlock VerticalAlignment="Center" Visibility="Collapsed">
+                                <!--<TextBlock VerticalAlignment="Center" Visibility="Collapsed">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
-                                            <!--<Setter Property="Grid.Column" Value="2"/>-->
+                                            --><!--<Setter Property="Grid.Column" Value="2"/>--><!--
                                             <Setter Property="Opacity" Value=".4"/>
                                             <Setter Property="FontSize" Value="12"/>
                                             <Setter Property="Visibility" Value="Hidden"/>
                                             <Setter Property="Margin" Value="0 6 0 0"/>
-                                            <!--<Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>-->
+                                            --><!--<Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>--><!--
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                                             Path=IsMouseOver}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible"/>
                                                 </DataTrigger>
-                                                <!--<DataTrigger Binding="{Binding IsSame}" Value="True">
+                                                --><!--<DataTrigger Binding="{Binding IsSame}" Value="True">
                                                     <Setter Property="Grid.Row" Value="1"/>
                                                     <Setter Property="Grid.Column" Value="0"/>
                                                     <Setter Property="Text" Value="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
-                                                </DataTrigger>-->
+                                                </DataTrigger>--><!--
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
-                                </TextBlock>
+                                </TextBlock>-->
 
                                 <TextBlock Background="Transparent" VerticalAlignment="Center"
                                         Grid.Column="1" Grid.Row="1" Opacity=".8"
@@ -629,7 +679,7 @@
             <StackPanel Orientation="Horizontal" Margin="18 0 0 0" VerticalAlignment="Center">
                 <TextBlock>
                     <Run Text="&#8226;" Foreground="LimeGreen"/>
-                    <Run Text="{Binding SelectedChannelPlayers.Count, Mode=OneWay}"/>
+                    <Run Text="{Binding SelectedChannel.Players.Count, Mode=OneWay}"/>
                 </TextBlock>
                 <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
                     <StackPanel.Style>

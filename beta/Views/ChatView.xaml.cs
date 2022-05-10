@@ -73,5 +73,30 @@ namespace beta.Views
             //    }
             //}
         }
+
+        private void JoinChannelInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                HideNewChannelInput();
+                if (sender is TextBox input)
+                {
+                    JoinBtn.Command.Execute(input.Text);
+                }
+            }
+        }
+
+        private void HideNewChannelInput()
+        {
+            if (!string.IsNullOrWhiteSpace(JoinChannelInput.Text))
+            {
+                AddNewChannelToggle.IsChecked = false;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            HideNewChannelInput();
+        }
     }
 }

@@ -109,14 +109,14 @@ namespace beta.Resources.Controls
             {
                 if (Set(ref _SelectedChannel, value))
                 {
-                    if (value is not null)
-                    {
-                        Users = value.Users.ToArray();
-                    }
-                    else
-                    {
-                        Users = Array.Empty<string>();
-                    }
+                    //if (value is not null)
+                    //{
+                    //    Users = value.Users.ToArray();
+                    //}
+                    //else
+                    //{
+                    //    Users = Array.Empty<string>();
+                    //}
                 }
             }
         }
@@ -387,7 +387,7 @@ namespace beta.Resources.Controls
 
         #region Players auto suggestion on TAB
 
-        public ObservableCollection<string> SuggestedPlayers { get; set; } = new();
+        public ObservableCollection<IPlayer> SuggestedPlayers { get; set; } = new();
         public Visibility PlayersSuggestionBoxVisiblity => SuggestedPlayers.Count > 0 && AutoCompletionEnabled ? Visibility.Visible : Visibility.Collapsed;
 
 
@@ -435,8 +435,8 @@ namespace beta.Resources.Controls
         #endregion
 
         #region SelectedPlayer
-        private string _SelectedPlayer;
-        public string SelectedPlayer
+        private IPlayer _SelectedPlayer;
+        public IPlayer SelectedPlayer
         {
             get => _SelectedPlayer;
             set
@@ -445,7 +445,7 @@ namespace beta.Resources.Controls
                 {
                     if (value is not null)
                     {
-                        CurrentText = completionLine + value;
+                        CurrentText = completionLine + value.login;
                         RichTextBox.SelectionStart = _CurrentText.Length;
                         if (!RichTextBox.IsFocused)
                         {
@@ -499,11 +499,12 @@ namespace beta.Resources.Controls
 
                 SuggestedPlayers.Clear();
 
-                if (Users is not null)
-                    for (int i = 0; i < Users.Length; i++)
+                var players = SelectedChannel?.Players;
+                if (players is not null)
+                    for (int i = 0; i < players.Count; i++)
                     {
-                        if (Users[i].StartsWith(completionText, StringComparison.OrdinalIgnoreCase))
-                            SuggestedPlayers.Add(Users[i]);
+                        if (players[i].login.StartsWith(completionText, StringComparison.OrdinalIgnoreCase))
+                            SuggestedPlayers.Add(players[i]);
                     }
 
                 OnPropertyChanged(nameof(PlayersSuggestionBoxVisiblity));

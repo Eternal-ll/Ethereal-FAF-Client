@@ -2,17 +2,11 @@
 using beta.Models.IRC;
 using beta.Models.IRC.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
     public interface IIrcService
     {
-        public void Test();
-
-        public IrcState State { get; set; }
-        public List<string> Channels { get; }
-
         #region Events
         public event EventHandler<IrcState> StateChanged;
 
@@ -63,11 +57,14 @@ namespace beta.Infrastructure.Services.Interfaces
         /// </summary>
         public event EventHandler<IrcChannelUsers> ChannelUsersReceived;
 
-        public event EventHandler<IrcNotificationMessage> NotificationMessageReceived; 
+        public event EventHandler<IrcNotificationMessage> NotificationMessageReceived;
 
         #endregion
 
+        public IrcState State { get; set; }
+
         #region Methods
+        public void Test();
         public void Connect(string host, int port);
         public void Restart(string nickname, string password);
 

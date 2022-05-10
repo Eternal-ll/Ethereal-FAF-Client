@@ -16,55 +16,20 @@ namespace beta.Infrastructure.Services
         #region Events
         public event EventHandler<IrcState> StateChanged;
 
-        /// <summary>
-        /// User connected to IRC server
-        /// </summary>
         public event EventHandler<string> UserConnected;
-        /// <summary>
-        /// User disconnected from IRC server
-        /// </summary>
         public event EventHandler<string> UserDisconnected;
-
-        /// <summary>
-        /// User joined to specific channel
-        /// </summary>
         public event EventHandler<IrcUserJoin> UserJoined;
-        /// <summary>
-        /// User left from specific channel
-        /// </summary>
         public event EventHandler<IrcUserLeft> UserLeft;
-
         public event EventHandler<IrcUserChangedName> UserChangedName;
 
-        /// <summary>
-        /// Private message received from specific user
-        /// </summary>
         public event EventHandler<IrcPrivateMessage> PrivateMessageReceived;
-        /// <summary>
-        /// Channel message received from specific channel
-        /// </summary>
         public event EventHandler<IrcChannelMessage> ChannedMessageReceived;
 
-        /// <summary>
-        /// Specific channel topic updated
-        /// </summary>
         public event EventHandler<IrcChannelTopicUpdated> ChannelTopicUpdated;
-
-        /// <summary>
-        /// Specific channel topic changed by specific user
-        /// </summary>
         public event EventHandler<IrcChannelTopicChangedBy> ChannelTopicChangedBy;
         
-        /// <summary>
-        /// 
-        /// </summary>
         public event EventHandler<IrcChannelUsers> ChannelUsersReceived;
-
-        /// <summary>
-        /// 
-        /// </summary>
         public event EventHandler<IrcNotificationMessage> NotificationMessageReceived;
-
         #endregion
 
         #region Properties
@@ -72,9 +37,9 @@ namespace beta.Infrastructure.Services
         private ManagedTcpClient ManagedTcpClient;
 
         private string Nick;
+        private string OriginalNick;
         private string Password;
-
-        public List<string> Channels { get; private set; } = new();
+        private List<string> UsersCache;
 
         #region State
         private IrcState _State;
@@ -111,6 +76,7 @@ namespace beta.Infrastructure.Services
                 return;
             }
             Nick = nickname;
+            OriginalNick = nickname;
             Password = password;
             Connect(null, 0);
         }
@@ -121,11 +87,6 @@ namespace beta.Infrastructure.Services
             {
                 case ManagedTcpClientState.Disconnected: State = IrcState.Disconnected;
                     State = IrcState.Disconnected;
-
-                    foreach (var item in ChannelUsers)
-                    {
-                        item.Value.Clear();
-                    }
                     break;
                 case ManagedTcpClientState.TimedOut: State = IrcState.TimedOut;
                     State = IrcState.TimedOut;
@@ -174,14 +135,12 @@ namespace beta.Infrastructure.Services
 
         public void Leave(string channel)
         {
-            Channels.Remove(channel);
-            ChannelUsers.Remove(channel);
             Send(IrcCommands.Leave(channel));
         }
 
         public void Leave(string[] channels)
         {
-            throw new NotImplementedException();
+            Send(IrcCommands.Leave(channels));
         }
 
         public void LeaveAll() => Send(IrcCommands.LeaveAllJoinedChannels());
@@ -233,8 +192,6 @@ namespace beta.Infrastructure.Services
             AppDebugger.LOGIRC($"You sent: {message}");
         }
 
-        private readonly Dictionary<string, List<string>> ChannelUsers = new();
-
         public void Test()
         {
             //Send(IrcCommands.Leave("#aeolus"));
@@ -265,7 +222,8 @@ namespace beta.Infrastructure.Services
 
         void ChangeNickName(object obj)
         {
-            Send(IrcCommands.Nickname(Properties.Settings.Default.PlayerNick));
+            Send(IrcCommands.Nickname(OriginalNick));
+            Nick = OriginalNick;
             timer?.Dispose();
             timer = null;
         }
@@ -305,17 +263,13 @@ namespace beta.Infrastructure.Services
                     //:irc.faforever.com 001 Eternal- :Welcome to the FAForever IRC Network Eternal-!Eternal-@85.26.165.
                     State = IrcState.Authorized;
                     AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
-                    if (Channels.Count == 0) Join("#aeolus");
-                    for (int i = 0; i < Channels.Count; i++)
-                    {
-                        Join(Channels[i]);
-                    }
+                    Join("#aeolus");
                     break;
                 case "321": // start of list of 322
                     AppDebugger.LOGIRC($"Start of available channels");
                     break;
                 case "322": // channel information after 321
-                    AppDebugger.LOGIRC($"Channel: {ircData[3]}, users: {ircData[4]}");
+                    AppDebugger.LOGIRC($"Channel: {ircData[3]}, users count: {ircData[4]}");
                     break;
                 case "323": // end of list of 322
                     AppDebugger.LOGIRC($"End of available channels");
@@ -332,7 +286,6 @@ namespace beta.Infrastructure.Services
                     OnChannelTopicUpdated(new(ircData[3], sb.ToString(), from));
 
                     AppDebugger.LOGIRC($"Channel: {ircData[3]} topic: {sb}");
-                    if (!Channels.Contains(ircData[3])) Channels.Add(ircData[3]);
 
                     break;
                 case "333": // Sent to a client to let them know who set the topic (<nick>) and when they set it (<setat> is a unix timestamp). Sent after RPL_TOPIC.
@@ -366,32 +319,21 @@ namespace beta.Infrastructure.Services
                     }
                     break;
                 case "353": // channel users after MODE
-                    
                     //:irc.faforever.com 353 Eternal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
                     string channel = ircData[4];
                     var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
-                    //OnChannelUsersReceived(new(channel, users));
+                    AppDebugger.LOGIRC($"channel: {channel} users: ({users.Length}) {string.Join(", ", users)}");
 
-                    //AppDebugger.LOGIRC($"channel: {channel} users count: {users.Length}");
-                    AppDebugger.LOGIRC($"channel: {channel} users: {string.Join(", ", users)}");
-
-                    if (ChannelUsers.ContainsKey(channel))
-                    {
-                        ChannelUsers[channel].AddRange(users);
-                    }
-                    else
-                    {
-                        ChannelUsers.Add(channel, new(users));
-                    }
-
-                    
+                    if (UsersCache is null) UsersCache = new();
+                    UsersCache.AddRange(users);                    
                     break;
                 case "366":
                     //:irc.faforever.com 366 Eternal- #test :End of /NAMES list.
                     channel = ircData[3];
-                    OnChannelUsersReceived(new(channel, ChannelUsers[channel].ToArray()));
-                    AppDebugger.LOGIRC($"End of user lists: {channel} users: {ChannelUsers[channel].Count}");
-                    ChannelUsers.Remove(channel);
+                    var cachesUsers = UsersCache.ToArray();
+                    OnChannelUsersReceived(new(channel, cachesUsers));
+                    AppDebugger.LOGIRC($"End of user lists: {channel} users: {cachesUsers.Length}");
+                    UsersCache = null;
                     break;
 
                 case "433"://Nickname is unavailable: Being held for registered user
@@ -399,12 +341,14 @@ namespace beta.Infrastructure.Services
                     if (timer is null)
                     {
                         if (tm is null) tm = new(ChangeNickName);
-                        Send(IrcCommands.Nickname(Nick + '`'));
+                        Nick += '`';
+                        Send(IrcCommands.Nickname(Nick));
                         timer = new Timer(tm, null, 15000, 15000);
                     }
                     break;
                 case "JOIN": // someone joined
                     {
+                        if (Nick == from) return;
                         //:ThurnisHaley!396062@Clk-10163F26.hsd1.ma.comcast.net JOIN :#aeolus
                         channel = ircData[2][1..^1];
 
@@ -503,6 +447,7 @@ namespace beta.Infrastructure.Services
                     break;
                 case "PART":
                     {
+                        if (Nick == from) return;
                         OnUserLeft(new(ircData[2].TrimEnd(), from.Trim()));
 
                         AppDebugger.LOGIRC($"user: {from} left from {ircData[2]}");
@@ -563,10 +508,6 @@ namespace beta.Infrastructure.Services
                 case IrcUserCommand.PRIVMSG:
                     break;
                 case IrcUserCommand.QUIT:
-                    foreach (var item in ChannelUsers)
-                    {
-                        item.Value.Clear();
-                    }
                     Quit();
                     break;
                 case IrcUserCommand.TOPIC:
@@ -575,7 +516,6 @@ namespace beta.Infrastructure.Services
                     break;
                 case IrcUserCommand.PART:
                     if (!channel.StartsWith('#')) channel = "#" + channel;
-                    ChannelUsers.Remove(channel);
                     break;
                 default:
                     throw new NotImplementedException("IRC Command is not recognized");

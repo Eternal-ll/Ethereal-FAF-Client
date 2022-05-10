@@ -14,5 +14,6 @@ namespace beta.Models.IRC
             By = by;
             At = DateTime.UnixEpoch.AddSeconds(double.Parse(at));
         }
+        public override string ToString() => $"Topic changed by {By} at {At.ToShortTimeString()}";
     }
 }

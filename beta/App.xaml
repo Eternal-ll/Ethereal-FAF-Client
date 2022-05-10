@@ -48,6 +48,7 @@
                     <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
                     <converter:HumanTimeConverter x:Key="HumanTimeConverter"/>
+                    <converter:IsNotNullOrWhiteSpaceConverter x:Key="IsNotNullOrWhiteSpaceConverter"/>
 
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->
