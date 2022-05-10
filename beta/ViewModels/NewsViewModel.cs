@@ -123,6 +123,8 @@ namespace beta.ViewModels
                         SidebarMid = post.Embedded.Media[0].ImageUrl; posts[i] = null;
                     }
                 }
+                post.Title.Text = WebUtility.HtmlDecode(post.Title.Text);
+                post.Content.Text = WebUtility.HtmlDecode(post.Content.Text);
             }
             OnPropertyChanged(nameof(SidebarRight));
             OnPropertyChanged(nameof(SidebarMid));
