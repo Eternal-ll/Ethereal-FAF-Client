@@ -226,7 +226,8 @@ namespace beta.Infrastructure.Converters
                     inlineUIContainer = new InlineUIContainer(new Button()
                     {
                         Content = word,
-                        Command = App.Current.Resources.MergedDictionaries[2]["NavigateUriCommand"] as ICommand,
+                        DataContext = url,
+                        Command = App.Current.Resources["NavigateUriCommand"] as ICommand,
                         CommandParameter = url,
                         Style = App.Current.Resources["ButtonLinkStyle"] as Style
                     });
@@ -239,7 +240,7 @@ namespace beta.Infrastructure.Converters
                     inlineUIContainer = new InlineUIContainer(new Button()
                     {
                         Content = word,
-                        Command = App.Current.Resources.MergedDictionaries[2]["NavigateExplorerCommand"] as ICommand,
+                        Command = App.Current.Resources["NavigateExplorerCommand"] as ICommand,
                         CommandParameter = word,
                         Style = App.Current.Resources["ButtonExplorerStyle"] as Style
                     });
