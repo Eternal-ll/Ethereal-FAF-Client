@@ -227,8 +227,6 @@ namespace beta.Infrastructure.Services
         {
             Send(IrcCommands.Nickname(OriginalNick));
             Nick = OriginalNick;
-            timer?.Dispose();
-            timer = null;
         }
 
         private void ManagedTcpClient_DataReceived(object sender, string data)
@@ -388,6 +386,12 @@ namespace beta.Infrastructure.Services
                     OnUserChangedName(new(from, to));
 
                     AppDebugger.LOGIRC($"user: {from} changed his nickname from: {from} to: {to}");
+
+                    if (from == Nick && to == OriginalNick)
+                    {
+                        timer.Dispose();
+                        timer = null;
+                    }
 
                     break;
                 case "NOTICE": // someone sent a notice
