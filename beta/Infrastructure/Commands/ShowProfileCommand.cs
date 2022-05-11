@@ -1,13 +1,18 @@
-﻿using beta.Models.Server;
+﻿using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Server;
 using beta.ViewModels;
-using beta.Views.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
-using System.Windows;
 
 namespace beta.Infrastructure.Commands
 {
     internal class ShowProfileCommand : Base.Command
     {
+        private readonly IPlayersService PlayersService;
+        public ShowProfileCommand()
+        {
+            PlayersService = App.Services.GetService<IPlayersService>();
+        }
         //private ProfileWindow _Window;
         ContentDialog Dialog;
         public override bool CanExecute(object parameter) => Dialog is null;
@@ -19,10 +24,18 @@ namespace beta.Infrastructure.Commands
                 // TODO Notify
                 return;
             }
-            if (parameter is not PlayerInfoMessage model) 
+            PlayerInfoMessage model = null;
+
+            if (parameter is PlayerInfoMessage player)
             {
-                return;
+                model = player;
             }
+            if (parameter is int id)
+            {
+                model = PlayersService.GetPlayer(id.ToString());
+            }
+
+            if (model is null) return;
             Dialog = new()
             {
                 //Owner = App.Current.MainWindow,
