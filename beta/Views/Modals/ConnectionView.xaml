@@ -22,7 +22,7 @@
         </StackPanel>
         <ContentControl Content="{Binding Exception}" Grid.Row="1"/>
         <StackPanel Grid.Row="3">
-            <CheckBox IsChecked="{Binding IsOAuthRequested}" Content="Use OAuth 2.0" Margin="0 10"
+            <CheckBox IsChecked="{Binding IsOAuthRequested}" Content="Not use saved access token" Margin="0 10"
                       ToolTip="If token expired, you must update token before connecting to lobby"/>
             <StackPanel Orientation="Horizontal">
                 <Button Grid.Row="2" Content="Connect" HorizontalAlignment="Center" Command="{Binding ConnectCommand}"
