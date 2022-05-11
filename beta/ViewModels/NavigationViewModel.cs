@@ -28,6 +28,7 @@ namespace beta.ViewModels
             DownloadService.DownloadEnded += DownloadService_DownloadEnded;
 
             Login = Properties.Settings.Default.PlayerNick;
+            Me = PlayersService.Self;
             
             ViewModels = new()
             {
@@ -36,7 +37,7 @@ namespace beta.ViewModels
                 { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
                 //{ typeof(MapsVaultViewModel), new MapsVaultViewModel() },
                 { typeof(SettingsViewModel), new SettingsViewModel() },
-                //{ typeof(ProfileViewModel), new ProfileViewModel(player) }
+                { typeof(UserProfileViewModel), new UserProfileViewModel() }
             };
         }
 

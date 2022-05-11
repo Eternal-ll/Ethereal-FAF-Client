@@ -80,7 +80,7 @@ namespace beta.Infrastructure.Services
 
             socialService.PlayerdRelationshipChanged += SocialService_PlayerdRelationshipChanged;
 
-            ircService.UserDisconnected += IrcService_UserDisconnected;
+            ircService.UserDisconnected += IrcService_UserDisconnected; 
             ircService.UserLeft += IrcService_UserLeft;
 
             System.Windows.Application.Current.Exit += (s, e) =>
@@ -99,6 +99,14 @@ namespace beta.Infrastructure.Services
 
             favoritesService.FavouriteAdded += FavoritesService_FavouriteAdded;
             favoritesService.FavouriteRemoved += FavoritesService_FavouriteRemoved;
+
+            sessionService.SocialDataReceived += SessionService_SocialDataReceived;
+        }
+
+        private void SessionService_SocialDataReceived(object sender, SocialData e)
+        {
+            FriendsIds = new(e.friends);
+            FoesIds = new(e.foes);
         }
 
         private void SessionService_StateChanged(object sender, SessionState e)
@@ -394,30 +402,6 @@ namespace beta.Infrastructure.Services
         {
             var players = Players;
             return null;
-
-            //if (string.IsNullOrWhiteSpace(filter))
-            //    while (enumerator.MoveNext())
-            //        if (relationShip.HasValue)
-            //            if (relationShip.Value == enumerator.Current.RelationShip)
-            //                yield return enumerator.Current;
-            //            else { }
-            //        else yield return enumerator.Current;
-            //else
-            //    while (enumerator.MoveNext())
-            //        if (method == ComparisonMethod.STARTS_WITH)
-            //            if (enumerator.Current.login.StartsWith(filter, StringComparison.OrdinalIgnoreCase))
-            //                if (relationShip.HasValue)
-            //                    if (relationShip.Value == enumerator.Current.RelationShip)
-            //                        yield return enumerator.Current;
-            //                    else { }
-            //                else yield return enumerator.Current;
-            //            else { }
-            //        else if (enumerator.Current.login.Contains(filter, StringComparison.OrdinalIgnoreCase))
-            //            if (relationShip.HasValue)
-            //                if (relationShip.Value == enumerator.Current.RelationShip)
-            //                    yield return enumerator.Current;
-            //                else { }
-            //            else yield return enumerator.Current;
         }
 
         private bool IsClanMate(string clan) => Self.clan != null && Self.clan == clan;
@@ -430,7 +414,8 @@ namespace beta.Infrastructure.Services
 
             for (int i = 0; i < friends.Count; i++)
             {
-                if (friends[i] == id) return true;
+                if (friends[i] == id)
+                    return true;
             }
             return false;
         }

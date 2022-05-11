@@ -25,7 +25,7 @@ namespace beta.ViewModels
         #endregion
 
         #region SelectedDate
-        private DateTime _SelectedDate = DateTime.Now;
+        private DateTime _SelectedDate = DateTime.Today;
         public DateTime SelectedDate
         {
             get => _SelectedDate;

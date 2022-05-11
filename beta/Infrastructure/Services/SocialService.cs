@@ -31,9 +31,9 @@ namespace beta.Infrastructure.Services
 
         public SocialData SocialMessage { get; set; }
 
-        public List<int> Friends { get; private set; }
+        public List<int> Friends { get; private set; } = new();
 
-        public List<int> Foes { get; private set; }
+        public List<int> Foes { get; private set; } = new();
 
         public SocialService(ISessionService sessionService)
         {

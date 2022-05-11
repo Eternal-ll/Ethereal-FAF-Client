@@ -114,14 +114,13 @@
 
             <ui:NavigationView.FooterMenuItems>
                 <!--Tag="Profile"-->
-                <ui:NavigationViewItem Icon="{StaticResource ProfilePathIcon}">
-                    <ContentControl>
+                <ui:NavigationViewItem Icon="{StaticResource ProfilePathIcon}" Tag="UserProfile">
+                    <ContentControl Margin="-40 0 0 0" Content="{Binding Me}" ContentTemplate="{StaticResource PlayerDataTemplateStacked}">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
-                                <Setter Property="Content" Value="{Binding Me}"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Me}" Value="{x:Null}">
-                                        <Setter Property="Content" Value="{Binding Login}"/>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ui:NavigationView}}, Path=IsPaneOpen}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
