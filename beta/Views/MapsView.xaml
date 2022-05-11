@@ -702,7 +702,7 @@
                                                     <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                                         <Setter Property="Fill" Value="LightGreen"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsRanked}" Value="False">
+                                                            <DataTrigger Binding="{Binding IsRanked}" Value="false">
                                                                 <Setter Property="Fill" Value="Red"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -715,7 +715,7 @@
                                                         <Setter Property="Text" Value="Ranked"/>
                                                         <Setter Property="Foreground" Value="LightGreen"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsRanked}" Value="False">
+                                                            <DataTrigger Binding="{Binding IsRanked}" Value="false">
                                                                 <Setter Property="Text" Value="Not ranked"/>
                                                                 <Setter Property="Foreground" Value="Red"/>
                                                             </DataTrigger>

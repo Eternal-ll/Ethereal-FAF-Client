@@ -88,7 +88,7 @@ namespace beta.Models.API
                 return desc;
             }
         }
-        public string IsRanked => MapData?["ranked"];
+        public string IsRanked => MapData?["ranked"] is not null ? MapData["ranked"].ToLower() : null;
         public string Version => MapData?["version"];
         public int? Width
         {
