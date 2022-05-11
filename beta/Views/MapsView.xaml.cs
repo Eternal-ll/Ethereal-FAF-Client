@@ -117,7 +117,7 @@ namespace beta.Views
                     OnPropertyChanged(nameof(IsResultListVisible));
                     if (value == ApiState.Idle)
                     {
-                        Dispatcher.Invoke(() => ResponseView.Refresh());
+                        //Dispatcher.Invoke(() => ResponseView.Refresh());
                         OnPropertyChanged(nameof(ResponseView));
                     }
                 }
@@ -824,7 +824,7 @@ namespace beta.Views
                 var json = new StreamReader(stream).ReadToEnd();
 
                 var data = JsonSerializer.Deserialize<ApiUniversalResults>(json);
-
+                List<ApiMapData> dataAsList = new();
                 for (int i = 0; i < data.Data.Length; i++)
                 {
                     var map = data.Data[i];
@@ -863,13 +863,16 @@ namespace beta.Views
                     }
                     #endregion
 
+                    if (map.IsHidden.Value) continue;
+
                     // Check if installed
                     map.LocalState = MapsService.CheckLocalMap(map.FolderName);
 
                     // Check if legacy map
                     map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
+                    dataAsList.Add(map);
                 }
-
+                data.Data = dataAsList.ToArray();
                 LastData = data.Data;
                 OnPropertyChanged(nameof(LastData));
                 if (IsOnlyLocalMaps)
