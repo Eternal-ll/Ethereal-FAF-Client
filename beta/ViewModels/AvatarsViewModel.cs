@@ -1,91 +1,11 @@
-﻿using beta.Infrastructure.Commands;
+﻿using beta.Models;
 using beta.Models.API;
 using beta.Models.API.Base;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
 namespace beta.ViewModels
 {
-    public abstract class ApiViewModel : Base.ViewModel
-    {
-        protected bool IsRefreshing = false;
-
-        #region IsPendingRequest
-        private bool _IsPendingRequest;
-        public bool IsPendingRequest
-        {
-            get => _IsPendingRequest;
-            set
-            {
-                if (Set(ref _IsPendingRequest, value))
-                {
-                    OnPropertyChanged(nameof(IsInputEnabled));
-                }
-            }
-        }
-        #endregion
-
-        public bool IsInputEnabled => !IsPendingRequest;
-
-        public async Task DoRequestAsync()
-        {
-            IsPendingRequest = true;
-            await RequestTask();
-            IsPendingRequest = false;
-            if (IsRefreshing) IsRefreshing = false;
-        }
-
-        public void RunRequest() => Task.Run(() => DoRequestAsync());
-
-        protected abstract Task RequestTask();
-
-        #region RefreshCommand
-        private ICommand _RefreshCommand;
-        public ICommand RefreshCommand => _RefreshCommand ??= new LambdaCommand(OnRefreshCommand, CanRefreshCommand);
-        private bool CanRefreshCommand(object parameter) => !IsPendingRequest;
-        protected virtual void OnRefreshCommand(object parameter)
-        {
-            IsRefreshing = true;
-            RunRequest();
-        }
-        #endregion
-    }
-    public abstract class ApiPlayerViewModel : ApiViewModel
-    {
-        public int PlayerId { get; private set; }
-
-        public ApiPlayerViewModel(int playerId) => PlayerId = playerId;
-    }
-    internal class AvatarModel
-    {
-        public string ToolTip { get; set; }
-        public Uri Url { get; set; }
-        private BitmapImage _Preview;
-        public BitmapImage Preview
-        {
-            get
-            {
-                if (_Preview is not null) return _Preview;
-                BitmapImage img = new();
-                img.BeginInit();
-                img.DecodePixelHeight = 20;
-                img.DecodePixelWidth = 40;
-                img.CacheOption = BitmapCacheOption.OnLoad;
-                img.UriSource = Url;
-                img.EndInit();
-                _Preview = img;
-                return _Preview;
-            }
-        }
-
-        public string Filename { get; set; }
-        public DateTime AssignedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-        public DateTime? ExpiresAt { get; set; }
-        public bool IsSelected { get; set; }
-    }
     internal class AvatarsViewModel : ApiPlayerViewModel
     {
         public EventHandler<AvatarModel> AvatarChanged;

@@ -26,14 +26,6 @@ namespace beta.ViewModels
             SessionService.NotificationReceived += SessionService_NotificationReceived;
 
             ChildViewModel = new AuthorizationViewModel();
-            //ChildViewModel = new NavigationViewModel();
-
-            //Task.Run(() =>
-            //{
-            //    //App.Current.Dispatcher.Invoke(() => Services.GetService<INotificationService>().ShowDialog(new ConnectionViewModel()));
-            //    Thread.Sleep(000);
-            //    App.Current.Dispatcher.Invoke(() => NotificationService.ShowConnectionDialog(new ConnectionViewModel()));
-            //});
         }
 
         private async void SessionService_StateChanged(object sender, SessionState e)

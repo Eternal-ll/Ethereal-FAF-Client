@@ -62,11 +62,9 @@ namespace beta.ViewModels
         }
         #endregion
 
-
         public int[] Pages => Enumerable.Range(1, TotalPages).ToArray();
 
         public int[] PageSizes => new int[] { 10, 15, 20, 25, 30, 35 };
-
 
         #region PerPage
         private int _PerPage = 20;

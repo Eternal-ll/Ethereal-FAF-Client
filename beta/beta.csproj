@@ -687,6 +687,5 @@
 
   <ItemGroup>
     <Folder Include="Models\API\MapsVault\" />
-    <Folder Include="ViewModels\Api\" />
   </ItemGroup>
 </Project>

@@ -147,7 +147,10 @@ namespace beta.Infrastructure.Services
 
         public void Ping() => Send(IrcCommands.Ping());
 
-        public void Quit(string reason = null) => Send(IrcCommands.Quit(reason));
+        public void Quit(string reason = null)
+        {
+            Send(IrcCommands.Quit(reason));
+        }
 
         public void SendMessage(string channelOrUser, string message)
         {

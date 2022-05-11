@@ -22,6 +22,9 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.Resources>
+            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
+                <TextBlock Text="{Binding login}" Margin="56 0 4 0" Opacity=".7"/>
+            </DataTemplate>
             <Storyboard x:Key="OpacityAnimationShow">
                 <DoubleAnimation
                 Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2"/>
@@ -122,7 +125,7 @@
                                                                 <Style TargetType="Run">
                                                                     <Setter Property="Text" Value="Switch to"/>
                                                                     <Style.Triggers>
-                                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
+                                                                        <DataTrigger Binding="{Binding IsSelected}"
                                                                                      Value="True">
                                                                             <Setter Property="Text" Value="Selected"/>
                                                                         </DataTrigger>
@@ -352,9 +355,6 @@
                                     <Thickness x:Key="FlyoutContentThemePadding">0</Thickness>
                                 </Style.Resources>
                             </Style>-->
-                        <DataTemplate DataType="{x:Type models:UnknownPlayer}">
-
-                        </DataTemplate>
                         <DataTemplate DataType="{x:Type irc:IrcChannelMessage}">
                             <Grid ShowGridLines="False">
                                 <Grid.Style>
@@ -420,9 +420,6 @@
                                                 </Button>
                                             </StackPanel>
                                         </DataTemplate>-->
-                                            <DataTemplate DataType="{x:Type models:UnknownPlayer}">
-                                                <TextBlock Text="{Binding login}" Margin="56 0 4 0" Opacity=".7"/>
-                                            </DataTemplate>
                                         </ContentControl.Resources>
                                     </ContentControl>
                                     <TextBlock  Margin="-34 0" VerticalAlignment="Center">

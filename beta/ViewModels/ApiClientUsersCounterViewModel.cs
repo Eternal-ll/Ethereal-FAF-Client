@@ -54,26 +54,13 @@ namespace beta.ViewModels
             string url = "https://api.faforever.com/data/player?&fields[player]=userAgent,updateTime&page[totals]=true";
             WebRequest request = WebRequest.Create(url + query);
             var result = await JsonSerializer.DeserializeAsync<ApiUniversalResultWithMeta<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
-            var players = result.Data;
-
             Dictionary<string, int> dic = new();
-            foreach (var player in players)
-            {
-                if (dic.ContainsKey(player.UserAgent))
-                {
-                    dic[player.UserAgent]++;
-                }
-                else
-                {
-                    dic.Add(player.UserAgent, 1);
-                }
-            }
             var pagesCount = result.Meta.Page.AvaiablePagesCount;
-            for (int i = 2; i <= pagesCount; i++)
+            for (int i = 1; i <= pagesCount; i++)
             {
                 request = WebRequest.Create(url + query + $"&page[number]={i}");
                 result = await JsonSerializer.DeserializeAsync<ApiUniversalResultWithMeta<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
-                players = result.Data;
+                var players = result.Data;
                 foreach (var player in players)
                 {
                     if (dic.ContainsKey(player.UserAgent))

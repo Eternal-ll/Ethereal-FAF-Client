@@ -25,8 +25,6 @@ namespace beta.ViewModels
         public DownloadViewModel(params DownloadItem[] downloads)
         {
             Downloads = downloads;
-            //Task.Factory.StartNew(async () => _TotalSize = await CalculateTotalSize(downloads).ConfigureAwait(false));
-            //Task.Run(() => DownloadAll());
         }
         private bool IsCanceled = false;
         public void Cancel()
@@ -177,27 +175,6 @@ namespace beta.ViewModels
         private DownloadConfiguration CurrentDownloadConfiguration;
 
         public DownloadItem[] Downloads { get; private set; }
-
-        private static async Task<long> CalculateTotalSize(DownloadItem[] downloads)
-        {
-            long total = 0;
-
-            //for (int i = 0; i < downloads.Length; i++)
-            //{
-            //    var download = downloads[i];
-            //    HttpClient client = new();
-                
-            //    var t = await client.GetAsync(download.Url, HttpCompletionOption.ResponseContentRead);
-            //    WebRequest request = WebRequest.Create(download.Url);
-            //    request.Method = "GET";
-            //    var response = await request.GetResponseAsync();
-            //    total += response.ContentLength;
-            //}
-
-            return total;
-        }
-
-        //public async Task Cancel() => CurrentDownloadModel.CancelAsync();
 
         public void DownloadAll() => Task.Run(() => DownloadAll(Downloads));
         public async Task DownloadAllAsync() => await DownloadAll(Downloads);

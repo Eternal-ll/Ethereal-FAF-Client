@@ -1,6 +1,5 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
 using beta.Models.API;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
@@ -19,32 +18,19 @@ namespace beta.ViewModels
         public event EventHandler Finished;
         public PlayerInfoMessage Me { get; private set; }
 
-        private readonly IMapsService MapsService;
         private readonly IPlayersService PlayersService;
         private readonly IGameSessionService GameSessionService;
         private readonly INotificationService NotificationService;
 
         public HostGameViewModel()
         {
-            MapsService=App.Services.GetService<IMapsService>();
             PlayersService = App.Services.GetService<IPlayersService>();
             GameSessionService = App.Services.GetService<IGameSessionService>();
             NotificationService = App.Services.GetService<INotificationService>();
 
             Me = PlayersService.Self;
-
-            LocalMapsName = MapsService.GetLocalMaps();
-            MapsViewSource.Source = LocalMapsName;
-
-            MapsViewSource.Filter += MapsViewSource_Filter;
             Maps = new();
             Maps.MapSelected += (s, e) => SelectedMap = e;
-        }
-
-        private void MapsViewSource_Filter(object sender, FilterEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(MapFilterText)) return;
-            e.Accepted = e.Item.ToString().Contains(MapFilterText, System.StringComparison.OrdinalIgnoreCase);
         }
 
         public MapsView Maps { get; set; }
@@ -137,42 +123,10 @@ namespace beta.ViewModels
             get => _SelectedMapName;
             set
             {
-                if (Set(ref _SelectedMapName, value))
-                {
-                    //if (value is null) SelectedGameMap = null;
-                    //else SelectedGameMap = MapsService.GetGameMap(value).Result;
-                }
+                Set(ref _SelectedMapName, value);
             }
         }
         #endregion
-
-        #region SelectedGameMap
-        private GameMap _SelectedGameMap;
-        public GameMap SelectedGameMap
-        {
-            get => _SelectedGameMap;
-            set => Set(ref _SelectedGameMap, value);
-        }
-        #endregion
-
-        #region MapFilterText
-        private string _MapFilterText;
-        public string MapFilterText
-        {
-            get => _MapFilterText;
-            set
-            {
-                if (Set(ref _MapFilterText, value))
-                {
-                    MapsView.Refresh();
-                }
-            }
-        }
-        #endregion
-
-        public string[] LocalMapsName { get; private set; }
-        private readonly CollectionViewSource MapsViewSource = new();
-        public ICollectionView MapsView => MapsViewSource.View;
 
         #region SelectedMap
         private ApiMapData _SelectedMap;

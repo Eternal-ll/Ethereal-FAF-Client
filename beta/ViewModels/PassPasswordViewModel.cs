@@ -1,7 +1,4 @@
 ﻿using beta.Infrastructure.Commands;
-using beta.Infrastructure.Services.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using ModernWpf.Controls;
 using System.Windows.Input;
 
 namespace beta.ViewModels

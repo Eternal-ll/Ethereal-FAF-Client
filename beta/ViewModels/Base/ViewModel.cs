@@ -27,7 +27,7 @@ namespace beta.ViewModels.Base
         {
             if (!disposing || _Disposed) return;
             _Disposed = true;
-            // Освобождение управляемых ресурсов
+            // Clean resources
         }
     }
 }

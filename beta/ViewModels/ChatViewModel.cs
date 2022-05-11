@@ -505,15 +505,12 @@ namespace beta.ViewModels
                 for (int i = 0; i < Channels.Count; i++)
                 {
                     Channels[i].Users.Clear();
-                    SelectedChannelPlayers.Clear();
                 }
             }
             else if (e == IrcState.Disconnected)
             {
                 SelectedChannel = null;
                 Channels.Clear();
-                SelectedChannelHistory.Clear();
-                SelectedChannelPlayers.Clear();
             }
         }
 

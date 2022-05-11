@@ -1,13 +1,13 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
+using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -16,36 +16,6 @@ using System.Windows.Threading;
 
 namespace beta.ViewModels
 {
-    public class PropertyFilterDescription
-    {
-        public PropertyFilterDescription(string displayedProperty, string property)
-        {
-            DisplayedProperty = displayedProperty;
-            Property = property;
-        }
-
-        public string DisplayedProperty { get; }
-        public string Property { get; }
-    }
-    public enum FilterDescription
-    {
-        None,
-        Contains,
-        StartsWith,
-        EndsWith,
-    }
-    public class BlockedMapDescription
-    {
-        public BlockedMapDescription(string name, FilterDescription filter)
-        {
-            Name = name;
-            Filter = filter;
-        }
-
-        public string Name { get; }
-        public FilterDescription Filter { get; }
-
-    }
     public abstract class GamesViewModel : Base.ViewModel
     {
         public abstract GameType GameType { get; }
@@ -69,26 +39,17 @@ namespace beta.ViewModels
 
             Games = new();
             GamesWithBlockedMap = new();
-            //App.Current.Dispatcher.BeginInvoke(new Action(() =>
-            //{
             GamesViewSource = new();
             BindingOperations.EnableCollectionSynchronization(Games, _lock);
             GamesViewSource.Source = Games;
             GamesViewSource.IsLiveSortingRequested = true;
             GamesViewSource.Filter += OnGameFilter;
-            //}));
-
-            //Task.Run(() => HandleGames(GamesService.Games.ToArray()));
 
             GamesService.NewGameReceived += OnNewGame;
             //GamesService.GameUpdated += OnGameUpdated;
             GamesService.GameEnd += OnGameEnd;
             GamesService.GameLaunched += OnGameLaunched;
             GamesService.GameClosed += GamesService_GameClosed;
-
-
-            //Foes = SocialService.GetFoes;
-            //Friends = SocialService.GetFriends;
         }
 
         public ObservableCollection<GameInfoMessage> Games { get; private set; }
@@ -699,6 +660,9 @@ namespace beta.ViewModels
             base.Dispose(disposing);
         }
     }
+    /// <summary>
+    /// Custom open games
+    /// </summary>
     public class CustomGamesViewModel : GamesViewModel
     {
         public override GameType GameType { get; } = GameType.Custom;
@@ -715,6 +679,9 @@ namespace beta.ViewModels
             return true;
         }
     }
+    /// <summary>
+    /// Custom live games
+    /// </summary>
     public class CustomLiveGamesViewModel : GamesViewModel
     {
         public override GameType GameType => GameType.Custom;
@@ -736,6 +703,9 @@ namespace beta.ViewModels
             return true;
         }
     }
+    /// <summary>
+    /// Coop open games
+    /// </summary>
     public class CoopGamesViewModel : GamesViewModel
     {
         public override GameType GameType => GameType.Coop;
@@ -746,6 +716,9 @@ namespace beta.ViewModels
             return true;
         }
     }
+    /// <summary>
+    /// Matchmaker games
+    /// </summary>
     public class MatchMakerGamesViewModel : GamesViewModel
     {
         public override GameType GameType => GameType.MatchMaker;

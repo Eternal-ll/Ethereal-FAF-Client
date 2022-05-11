@@ -81,6 +81,7 @@ namespace beta.Models
                 StreamFinished?.Invoke(this, null);
                 stream.Dispose();
                 client.Close();
+                // TODO
 
                 //double gameEnd = DateTimeOffset.Now.ToUnixTimeSeconds();
 

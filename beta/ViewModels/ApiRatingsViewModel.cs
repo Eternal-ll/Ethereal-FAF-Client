@@ -17,9 +17,6 @@ namespace beta.ViewModels
         public RatingType[] RatingTypes { get; private set; }
 
         private readonly Dictionary<RatingType, ApiGamePlayerStats[]> Data = new();
-
-
-
         private static string ConvertTicksToDateTimeString(double value)
           => new DateTime((long)value).ToString();
 
@@ -53,15 +50,6 @@ namespace beta.ViewModels
         }
         #endregion
 
-        //#region PlotModel
-        //private PlotModel _PlotModel;
-        //public PlotModel PlotModel
-        //{
-        //    get => _PlotModel;
-        //    set => Set(ref _PlotModel, value);
-        //}
-        //#endregion
-
         public ApiGamePlayerStats[] SelectedRatingData => Data[SelectedRatingType];
 
         protected override async Task RequestTask()
@@ -77,17 +65,7 @@ namespace beta.ViewModels
             var index = 0;
             int last = 0;
             DateTime lastDate = DateTime.Now;
-            for (int j = 0; j < result.Data.Length; j++)
-            {
-                var item = result.Data[j];
-                var difference = item.RatingAfter - last;
-                last = item.RatingAfter;
-                index++;
-
-                data.Add(item);
-                
-            }
-            for (int i = 2; i <= pages; i++)
+            for (int i = 1; i <= pages; i++)
             {
                 result = await ApiRequest<ApiUniversalResultWithMeta<ApiGamePlayerStats[]>>.Request(url + $"&page[number]=" + i);
                 for (int j = 0; j < result.Data.Length; j++)
@@ -100,14 +78,6 @@ namespace beta.ViewModels
             }
             Data[SelectedRatingType] = data.ToArray();
             OnPropertyChanged(nameof(SelectedRatingData));
-            //var series = new ChartValues<ObservablePoint>();
-            //for (int i = 0; i < data.Count; i++)
-            //{
-            //    //series.Add(new(data[i].ScoreDateTime.Ticks, data[i].RatingAfter));
-            //}
-            //SeriesValues = series;
-            //OnPropertyChanged(nameof(SeriesValues));
-
         }
     }
 }
