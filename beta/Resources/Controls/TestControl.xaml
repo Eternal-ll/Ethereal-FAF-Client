@@ -178,8 +178,12 @@
             </Grid>
             <Border Visibility="{Binding PlayersSuggestionBoxVisiblity}"
                     Margin="{Binding Thickness}"
-                    MaxHeight="200">
-                <StackPanel>
+                    MaxHeight="400">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
                     <TextBlock
                         Text="Suggestions"
                         HorizontalAlignment="Center"
@@ -188,7 +192,8 @@
                     <ListBox ItemsSource="{Binding SuggestedPlayers}"
                              SelectedItem="{Binding SelectedPlayer}"
                              Background="Transparent"
-                             SelectedIndex="{Binding SelectedSuggestedPlayerIndex}">
+                             SelectedIndex="{Binding SelectedSuggestedPlayerIndex}"
+                             Grid.Row="1">
                         <ListBox.Resources>
                             <!--<DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
                                 <StackPanel Orientation="Horizontal">
@@ -208,7 +213,7 @@
                             </Style>
                         </ListBox.Resources>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </Border>
         </Canvas>
         <TextBox x:Name="RichTextBox" Text="{Binding CurrentText, UpdateSourceTrigger=PropertyChanged}"
