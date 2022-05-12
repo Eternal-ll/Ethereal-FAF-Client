@@ -27,6 +27,16 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Grid.Resources>
+                                <Style x:Key="RelationshipBtnStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="False">
+                                            <Setter Property="Opacity" Value=".6"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
                                 <DataTemplate DataType="{x:Type api:ApiPlayerData}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -34,7 +44,7 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Text="{Binding Login}"/>
-                                        <Button Padding="4 2 4 4" Margin="-6 0 4 0" Background="Transparent" Grid.Column="1"
+                                        <Button Margin="0 -4" Background="Transparent" Grid.Column="1"
                                                 CommandParameter="{Binding Id}">
                                             <Button.ToolTip>
                                                 <ToolTip>
@@ -43,19 +53,6 @@
                                             </Button.ToolTip>
                                             <Path  Margin="0 2 0 0" Fill="Red" Height="10"
                                                   Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"/>
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource RelationshipBtnStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}"
-                                                                         Value="False">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                        <Trigger Property="IsMouseOver" Value="False">
-                                                            <Setter Property="Opacity" Value=".6"/>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
                                         </Button>
                                     </Grid>
                                 </DataTemplate>
@@ -80,10 +77,10 @@
                             <TextBlock Text="Foes" Grid.Column="1" FontSize="16" Margin="10 0 10 10"/>
                             <ListBox Grid.Row="1" ItemsSource="{Binding FriendsData}">
                                 <ListBox.Resources>
-                                    <Style x:Key="RelationshipBtnStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Style TargetType="Button" BasedOn="{StaticResource RelationshipBtnStyle}">
                                         <Setter Property="Command" Value="{StaticResource RemoveFriendCommand}"/>
                                     </Style>
-                                    <Style x:Key="MenuItemRelationshipStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
+                                    <Style TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
                                         <Setter Property="Header">
                                             <Setter.Value>
                                                 <TextBlock FontSize="14">
@@ -104,7 +101,7 @@
                             </ListBox>
                             <ListBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding FoesData}">
                                 <ListBox.Resources>
-                                    <Style x:Key="RelationshipBtnStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                    <Style x:Key="RelationshipBtnStyle" TargetType="Button" BasedOn="{StaticResource RelationshipBtnStyle}">
                                         <Setter Property="Command" Value="{StaticResource RemoveFoeCommand}"/>
                                     </Style>
                                     <Style x:Key="MenuItemRelationshipStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuItemStyle}">
