@@ -169,9 +169,10 @@ namespace beta
         {
             var win = new Window()
             {
-                Content = new ExceptionWrapper(e.Exception)
+                Content = new ExceptionWrapper(e.Exception),
+                Resources = App.Current.Resources
             };
-            win.Closed += Win_Closed;
+            //win.Closed += Win_Closed;
             win.Show();
             // Prevent default unhandled exception processing
             //Task.Run(() =>
