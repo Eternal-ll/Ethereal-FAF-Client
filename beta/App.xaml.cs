@@ -1,6 +1,5 @@
 ﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
 using beta.Models.Debugger;
 using beta.Models.Enums;
 using beta.Views.Windows;
@@ -9,9 +8,9 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using ZstdNet;
 //using ZstdSharp;
 
@@ -169,7 +168,16 @@ namespace beta
         {
             var win = new Window()
             {
-                Content = new ExceptionWrapper(e.Exception),
+                Content = new TextBox()
+                {
+                    Text = e.Exception.ToString(),
+                    IsReadOnly = true,
+                    Background = new SolidColorBrush(Colors.Transparent)
+                },
+                Background = new SolidColorBrush(Colors.DarkGray)
+                {
+                    Opacity = .1
+                },
                 Resources = App.Current.Resources
             };
             //win.Closed += Win_Closed;

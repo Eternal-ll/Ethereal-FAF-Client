@@ -28,8 +28,8 @@ namespace beta.Models.Ice
                     FileName = $"java",
                     Arguments = $"-jar \"{file.FullName}\" {args}",
                     UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
+                    //RedirectStandardOutput = true,
+                    //RedirectStandardError = true,
                     //CreateNoWindow = true,
                 }
             };
@@ -43,12 +43,12 @@ namespace beta.Models.Ice
                 Logger.LogError(ex.Message);
             }
             //Process.StartInfo.Environment.Add("LOG_DIR", @"C:\Program Files (x86)\Forged Alliance Forever\lib\ice-adapter\logs\");
-            Process.BeginErrorReadLine();
-            Process.BeginOutputReadLine();
+            //Process.BeginErrorReadLine();
+            //Process.BeginOutputReadLine();
 #if DEBUG
-            Process.OutputDataReceived += OnIceOutputDataReceived;
-            Process.ErrorDataReceived += OnIceErrorDataReceived;
-            Process.Exited += OnIceExited;
+            //Process.OutputDataReceived += OnIceOutputDataReceived;
+            //Process.ErrorDataReceived += OnIceErrorDataReceived;
+            //Process.Exited += OnIceExited;
 #endif
             Logger.LogInformation("Local ice server initialized");
         }

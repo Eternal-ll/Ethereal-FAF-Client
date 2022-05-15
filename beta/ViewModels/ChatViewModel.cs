@@ -8,10 +8,8 @@ using beta.Models.IRC.Base;
 using beta.Models.Server;
 using beta.Resources.Controls;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -149,6 +147,7 @@ namespace beta.ViewModels
             groupDescription.GroupNames.Add("IRC users");
             groupDescription.GroupNames.Add("Foes");
             SelectedChannelPlayersViewSource.GroupDescriptions.Add(groupDescription);
+            SelectedChannelPlayersViewSource.SortDescriptions.Add(new(nameof(IPlayer.login), ListSortDirection.Ascending));
             SelectedChannelPlayersViewSource.Filter += PlayersFilter;
 
             playersService.PlayerUpdated += PlayersService_PlayerUpdated;
@@ -272,23 +271,6 @@ namespace beta.ViewModels
 
         private void IrcService_NotificationMessageReceived(object sender, IrcNotificationMessage e) => SelectedChannel?.History.Add(e);
 
-        private IrcChannelVM GetChannel(string name)
-        {
-            var channels = Channels;
-            for (int i = 0; i < channels.Count; i++)
-            {
-                var fChannel = channels[i];
-                if (fChannel.Name == name)
-                {
-                    return fChannel;
-                }
-            }
-            IrcChannelVM channel = new(name);
-            Channels.Add(channel);
-            SelectedChannel = channel;
-            return channel;
-        }
-
         private IPlayer GetChatPlayer(string login)
         {
             bool isChatMod = login.StartsWith('@');
@@ -311,54 +293,11 @@ namespace beta.ViewModels
                 login = ircName
             };
         }
-        private void UpdateSelectedChannelHistory(IrcMessage[] msgs)
-        {
-            var history = new ObservableCollection<IrcMessage>();
-
-            for (int i = 0; i < msgs.Length; i++)
-            {
-                history.Add(msgs[i]);
-            }
-            App.Current.Dispatcher.Invoke(() => SelectedChannelHistory = history);
-        }
-        private void UpdateSelectedChannelUsers(string[] users)
-        {
-            var players = new ObservableCollection<IPlayer>();
-
-            for (int i = 0; i < users.Length; i++)
-            {
-                players.Add(GetChatPlayer(users[i]));
-            }
-            App.Current.Dispatcher
-                .Invoke(() => SelectedChannelPlayers = players);
-
-            // TODO
-            App.Current.Dispatcher.Invoke(() => TestInputControl?.UpdateUsers(users));
-        }
 
         private void OnChannelMessageReceived(object sender, IrcChannelMessage e)
         {
             if (TryGetChannel(e.Channel, out var channel))
                 channel.AddMessage(e);
-        }
-
-        private bool GetIndexOfPlayer(string login, out int index)
-        {
-            index = -1;
-            var players = SelectedChannelPlayers;
-            if (players is null)
-            {
-                return false;
-            }
-            for (int j = 0; j < players.Count; j++)
-            {
-                if (players[j].login == login)
-                {
-                    index = j;
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void OnUserChangedName(object sender, IrcUserChangedName e)
@@ -374,14 +313,13 @@ namespace beta.ViewModels
             }
         }
 
-
         private void OnChannelUserLeft(object sender, IrcUserLeft e)
         {
             if (TryGetChannel(e.Channel, out var channel))
             {
                 if (channel.RemoveUser(e.User))
                 {
-                    //SelectedChannelPlayers.RemoveAt(index);
+
                 }
             }
         }
@@ -392,7 +330,7 @@ namespace beta.ViewModels
             {
                 if (channel.RemoveUser(e))
                 {
-                    //SelectedChannelPlayers.RemoveAt(index);
+
                 }
                 else
                 {
@@ -400,9 +338,6 @@ namespace beta.ViewModels
                 }
             }
         }
-
-
-        private string SelfLogin = Properties.Settings.Default.PlayerNick;
 
         bool TryGetChannel(string name, out IrcChannelVM channel)
         {

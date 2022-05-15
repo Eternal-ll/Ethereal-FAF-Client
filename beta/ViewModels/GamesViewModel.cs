@@ -90,7 +90,7 @@ namespace beta.ViewModels
                         case nameof(GameInfoMessage.rating_max):
                         case nameof(GameInfoMessage.rating_min):
                         case nameof(GameInfoMessage.AverageRating):
-                            if (!int.TryParse(value, out _))
+                            if (!int.TryParse(value, out _) && Games.Count == ((ListCollectionView)GamesView).Count)
                             {
                                 return;
                             }

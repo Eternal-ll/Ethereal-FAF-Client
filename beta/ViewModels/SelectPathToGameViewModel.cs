@@ -74,7 +74,7 @@ namespace beta.ViewModels
                     ContentDialog.IsPrimaryButtonEnabled = value;
                     if (value)
                     {
-                        File.WriteAllText(App.GetPathToFolder(Models.Enums.Folder.ProgramData) + "fa_path.lua", $"fa_path = \"{Path}\"\n");
+                        File.WriteAllText(App.GetPathToFolder(Models.Enums.Folder.ProgramData) + "fa_path.lua", $"fa_path = \"{Path.Replace('\\','/')}\"\n");
                     }
                 }
             }

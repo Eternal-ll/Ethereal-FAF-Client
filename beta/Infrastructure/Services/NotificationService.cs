@@ -171,7 +171,7 @@ namespace beta.Infrastructure.Services
                 ContentDialog.Content = new ExceptionWrapper(ex);
                 ContentDialog.CloseButtonText = "Close";
                 ContentDialog.PrimaryButtonText = "Copy trace";
-                ContentDialog.PrimaryButtonCommand = App.Current.Resources["CopyCommand"] as ICommand;
+                ContentDialog.PrimaryButtonCommand = (ICommand)App.Current.Resources["CopyCommand"];
                 ContentDialog.PrimaryButtonCommandParameter = ex.ToString();
                 await ContentDialog.ShowAsync();
             });

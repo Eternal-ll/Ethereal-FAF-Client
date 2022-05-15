@@ -399,14 +399,7 @@
                             <TextBlock Text="Open folder"/>
                             <Path Style="{StaticResource PathFolderDataStyle}"/>
                         </StackPanel>
-                    </Button>
-                    <Separator Margin="4 0">
-                        <Separator.LayoutTransform>
-                            <RotateTransform Angle="90"/>
-                        </Separator.LayoutTransform>
-                    </Separator>
-                    <Button Content="Export maps" ToolTip="Exports loaded maps to .docx file" Command="{StaticResource ExportCommand}" CommandParameter="{Binding LastData}"/>
-
+                    </Button>   
                 </WrapPanel>
             </WrapPanel>
             <StackPanel Orientation="Horizontal" Margin="10 4 10 10">

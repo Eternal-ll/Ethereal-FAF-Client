@@ -40,6 +40,7 @@ namespace beta.ViewModels
             groupDescription.GroupNames.Add("IRC users");
             groupDescription.GroupNames.Add("Foes");
             PlayersCollectionViewSource.GroupDescriptions.Add(groupDescription);
+            PlayersCollectionViewSource.SortDescriptions.Add(new(nameof(IPlayer.login), ListSortDirection.Ascending));
 
             PlayersCollectionViewSource.Filter += PlayersCollectionViewSource_Filter;
 

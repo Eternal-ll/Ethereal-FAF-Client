@@ -68,8 +68,6 @@ namespace beta.ViewModels
         {
             if (disposing)
             {
-                CustomLiveGamesViewModel?.Dispose();
-                CustomGamesViewModel?.Dispose();
                 CustomLiveGamesViewModel.Dispose();
                 CustomGamesViewModel.Dispose();
             }

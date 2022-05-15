@@ -468,7 +468,7 @@
                             </Style>
                         </StackPanel.Style>
                         <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Width="200"
-                             ui:ControlHelper.PlaceholderText="Search"/>
+                             ui:ControlHelper.PlaceholderText="Search" IsVisibleChanged="TextBox_IsVisibleChanged"/>
                         <TextBlock Text="by" VerticalAlignment="Center" Margin="10 0" FontFamily="segoeui"/>
                         <ComboBox SelectedItem="{Binding SelectedFilterDescription}" SelectedIndex="0"
                               ItemsSource="{Binding FilterDescriptions}"

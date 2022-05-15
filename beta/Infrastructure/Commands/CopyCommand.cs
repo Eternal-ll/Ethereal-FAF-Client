@@ -1,5 +1,4 @@
 ﻿using beta.Infrastructure.Commands.Base;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace beta.Infrastructure.Commands
@@ -14,8 +13,7 @@ namespace beta.Infrastructure.Commands
             var text = string.Empty;
             if (parameter is string data) text = data;
             else text = parameter.ToString();
-
-            Task.Run(() => Clipboard.SetText(text));
+            Clipboard.SetText(text);    
         }
     }
 }
