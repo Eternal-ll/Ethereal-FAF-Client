@@ -747,8 +747,18 @@ namespace beta.Infrastructure.Services
                 await NotificationService.ShowPopupAsync("Map not selected");
                 return;
             }
+            if (string.IsNullOrWhiteSpace(mapName))
+            {
+                await NotificationService.ShowPopupAsync("Map not selected");
+                return;
+            }
 
-            if (!await ConfirmPatch(mod)) return;
+            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            {
+
+                await NotificationService.ShowPopupAsync("You must select path to game via settings");
+                return;
+            }
 
             //"title":"Welcome",
             //"featured_mod":"faf",
