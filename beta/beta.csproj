@@ -305,7 +305,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="21.2.5" />
     <PackageReference Include="Downloader" Version="2.3.3" />
     <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
