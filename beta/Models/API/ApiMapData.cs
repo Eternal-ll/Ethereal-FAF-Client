@@ -7,7 +7,7 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Models.API
 {
-    public class ApiMapData : ApiUniversalWithRelations2
+    public class ApiMapData : ApiUniversalWithRelations
     {
         #region Attributes getters
         public string DisplayedName => Attributes?["displayName"];

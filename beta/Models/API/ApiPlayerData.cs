@@ -3,7 +3,7 @@ using System;
 
 namespace beta.Models.API
 {
-    public class ApiPlayerData : ApiUniversalWithRelations2
+    public class ApiPlayerData : ApiUniversalWithRelations
     {
         public string Login => Attributes["login"];
         public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
