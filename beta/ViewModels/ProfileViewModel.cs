@@ -1,4 +1,5 @@
 ﻿using beta.Models.API;
+using beta.Models.API.Base;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using System;

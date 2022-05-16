@@ -23,7 +23,6 @@ namespace beta
             .UseContentRoot(App.CurrentDirectory)
             .ConfigureAppConfiguration((host, cfg) => cfg
             .SetBasePath(App.CurrentDirectory)
-            // TODO: Some settings in json format, currently there is nothing, but maybe it will be useful
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true))
             .ConfigureServices(App.ConfigureServices);
     }

@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Models.API;
+using beta.Models.API.Base;
 using beta.Models.API.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -823,7 +824,7 @@ namespace beta.Views
                 var stream = webRequest.GetResponse().GetResponseStream();
                 var json = new StreamReader(stream).ReadToEnd();
 
-                var data = JsonSerializer.Deserialize<ApiUniversalResults>(json);
+                var data = JsonSerializer.Deserialize<ApiUniversalResult<ApiMapData[]>>(json);
                 List<ApiMapData> dataAsList = new();
                 for (int i = 0; i < data.Data.Length; i++)
                 {
@@ -842,7 +843,7 @@ namespace beta.Views
                             }
                             else
                             {
-                                map.AuthorData = data.GetAttributesFromIncluded(ApiDataType.player, map.Relations["author"].Data[0].Id);
+                                map.AuthorData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.player, map.Relations["author"].Data[0].Id);
 
                                 if (!AuthorIdToLogin.ContainsKey(authorId))
                                 {
@@ -853,12 +854,12 @@ namespace beta.Views
 
                         if (map.Relations["latestVersion"].Data is not null)
                         {
-                            map.MapData = data.GetAttributesFromIncluded(ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
+                            map.MapData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
                         }
 
                         if (map.Relations["reviewsSummary"].Data is not null)
                         {
-                            map.ReviewsSummaryData = data.GetAttributesFromIncluded(ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id);
+                            map.ReviewsSummaryData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id);
                         }
                     }
                     #endregion

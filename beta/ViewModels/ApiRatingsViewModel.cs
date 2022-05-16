@@ -1,4 +1,5 @@
 ﻿using beta.Models.API;
+using beta.Models.API.Base;
 using beta.Models.Server.Enums;
 using LiveCharts;
 using LiveCharts.Defaults;
@@ -58,7 +59,7 @@ namespace beta.ViewModels
                 Data[SelectedRatingType] = null;
             }
             var url = $"https://api.faforever.com/data/gamePlayerStats?filter=(player.id=={PlayerId};ratingChanges.leaderboard.id=={(int)SelectedRatingType})&fields[gamePlayerStats]=afterDeviation,afterMean,beforeDeviation,beforeMean,scoreTime&page[totals]=yes&page[size]=500";
-            var result = await ApiRequest<ApiUniversalResultWithMeta<ApiGamePlayerStats[]>>.Request(url);
+            var result = await ApiRequest<ApiUniversalResult<ApiGamePlayerStats[]>>.Request(url);
             List<ApiGamePlayerStats> data = new();
             var pages = result.Meta.Page.AvaiablePagesCount;
             var index = 0;
@@ -66,7 +67,7 @@ namespace beta.ViewModels
             DateTime lastDate = DateTime.Now;
             for (int i = 1; i <= pages; i++)
             {
-                result = await ApiRequest<ApiUniversalResultWithMeta<ApiGamePlayerStats[]>>.Request(url + $"&page[number]=" + i);
+                result = await ApiRequest<ApiUniversalResult<ApiGamePlayerStats[]>>.Request(url + $"&page[number]=" + i);
                 for (int j = 0; j < result.Data.Length; j++)
                 {
                     var difference = result.Data[j].RatingAfter - last;

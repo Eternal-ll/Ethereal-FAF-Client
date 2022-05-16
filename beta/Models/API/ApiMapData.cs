@@ -25,32 +25,14 @@ namespace beta.Models.API
         public LocalMapState LocalState { get; set; }
 
         private BitmapImage _MapSmallPreview;
-        public ImageSource MapSmallPreview
-        {
-            get
-            {
-                if (_MapSmallPreview is null)
-                {
-                    _MapSmallPreview = ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 100, 100);
-                }
-                return _MapSmallPreview;
-            }
-        }
+        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 100, 100);
+
         private ImageSource _MapLargePreview;
-        public ImageSource MapLargePreview
-        {
-            get
-            {
-                if (_MapLargePreview is null)
-                {
-                    _MapLargePreview = ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
-                }
-                return _MapLargePreview;
-            }
-        }
+        public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
+        #endregion
+
 
         public Dictionary<string, string> AuthorData { get; set; }
-
         #region Author data getters
         private string _AuthorLogin;
         public string AuthorLogin
@@ -125,8 +107,6 @@ namespace beta.Models.API
         public double SummaryScore => ReviewsSummaryData?["score"] is null ? 0 : double.Parse(ReviewsSummaryData["score"].Replace('.', ','));
         public double SummaryLowerBound => double.TryParse(ReviewsSummaryData?["lowerBound"].Replace('.', ',').Replace("null", null), out var result) ? result : 0;
         public double SummaryFiveRate => SummaryLowerBound != 0 ? 5 * SummaryLowerBound : -1;
-        #endregion
-
         #endregion
     }
 }

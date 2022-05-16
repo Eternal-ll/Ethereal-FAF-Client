@@ -1,4 +1,5 @@
 ﻿using beta.Models.API;
+using beta.Models.API.Base;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -53,13 +54,13 @@ namespace beta.ViewModels
             string query = BuildQuery();
             string url = "https://api.faforever.com/data/player?&fields[player]=userAgent,updateTime&page[totals]=true";
             WebRequest request = WebRequest.Create(url + query);
-            var result = await JsonSerializer.DeserializeAsync<ApiUniversalResultWithMeta<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
+            var result = await JsonSerializer.DeserializeAsync<ApiUniversalResult<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
             Dictionary<string, int> dic = new();
             var pagesCount = result.Meta.Page.AvaiablePagesCount;
             for (int i = 1; i <= pagesCount; i++)
             {
                 request = WebRequest.Create(url + query + $"&page[number]={i}");
-                result = await JsonSerializer.DeserializeAsync<ApiUniversalResultWithMeta<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
+                result = await JsonSerializer.DeserializeAsync<ApiUniversalResult<ApiPlayerData[]>>(request.GetResponse().GetResponseStream());
                 var players = result.Data;
                 foreach (var player in players)
                 {

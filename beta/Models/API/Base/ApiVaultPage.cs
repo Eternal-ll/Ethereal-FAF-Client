@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace beta.Models.API
+namespace beta.Models.API.Base
 {
     public class ApiVaultPage
     {

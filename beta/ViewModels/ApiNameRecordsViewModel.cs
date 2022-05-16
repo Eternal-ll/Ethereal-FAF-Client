@@ -1,4 +1,5 @@
 ﻿using beta.Models.API;
+using beta.Models.API.Base;
 using System.Threading.Tasks;
 
 namespace beta.ViewModels

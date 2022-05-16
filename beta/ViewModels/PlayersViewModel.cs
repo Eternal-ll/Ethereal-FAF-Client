@@ -2,7 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Server;
-using DevExpress.Data.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;

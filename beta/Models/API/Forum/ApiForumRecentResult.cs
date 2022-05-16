@@ -1,7 +1,6 @@
-﻿using beta.Models.API.Forum;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace beta.Models.API.News
+namespace beta.Models.API.Forum
 {
     public class ApiForumRecentResult
     {

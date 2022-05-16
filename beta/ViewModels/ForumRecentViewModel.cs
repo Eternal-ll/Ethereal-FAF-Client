@@ -1,4 +1,4 @@
-﻿using beta.Models.API.News;
+﻿using beta.Models.API.Forum;
 using System.Net;
 using System.Text;
 using System.Text.Json;

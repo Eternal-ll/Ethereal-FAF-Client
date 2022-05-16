@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.API;
+using beta.Models.API.Base;
 using beta.Models.Server;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
