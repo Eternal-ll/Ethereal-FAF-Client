@@ -10,16 +10,19 @@ using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.Properties;
 using beta.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ModernWpf.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace beta.Infrastructure.Services
 {
@@ -37,6 +40,7 @@ namespace beta.Infrastructure.Services
         private readonly IReplayServerService ReplayServerService;
         private readonly ILogger Logger;
 
+        private readonly IConfiguration Configuration;
         private GameInfoMessage LastGame;
         private IceAdapterClient IceAdapterClient;
         private readonly List<string> IceMessagesQueue = new();
@@ -61,7 +65,7 @@ namespace beta.Infrastructure.Services
             IIceService iceService,
             IPlayersService playersService,
             INotificationService notificationService,
-            IReplayServerService replayServerService)
+            IReplayServerService replayServerService, IConfiguration configuration)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
@@ -72,7 +76,9 @@ namespace beta.Infrastructure.Services
             PlayersService = playersService;
             NotificationService = notificationService;
             ReplayServerService = replayServerService;
-
+            Configuration = configuration;
+            var section = configuration.GetSection("TEST");
+            section.Value = "TEST!#$";
             SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
             SessionService.IceUniversalDataReceived += SessionService_IceUniversalDataReceived;
             SessionService.Authorized += SessionService_Authorized;
@@ -212,11 +218,11 @@ namespace beta.Infrastructure.Services
         private async Task InitializeIce()
         {
             await Task.Run(async () => await IceAdapterClient.Initialize())
-                .ContinueWith(async t =>
+                .ContinueWith(async task =>
                 {
-                    if (t.IsFaulted)
+                    if (task.IsFaulted)
                     {
-                        Logger.LogError(t.Exception.Message);
+                        Logger.LogError(task.Exception.Message);
                         await InitializeIce();
                     }
                 });
@@ -224,34 +230,46 @@ namespace beta.Infrastructure.Services
 
         private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
         {
-            Task.Run(() => RunGame(e));
+            Task.Run(async () =>
+            {
+                if (LastGame is null)
+                {
+                    // that means that we received matchmaker game launch data and we have to confirm path and mods
+                }
+                await RunGame(e);
+            })
+                .ContinueWith(task =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        App.Current.Dispatcher.Invoke(() => NotificationService.ShowExceptionAsync(task.Exception));
+                        SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                    }
+                });
         }
+
+        private string GetInitMode(int mode) => mode switch
+        {
+            0 => "normal",
+            1 => "auto",
+            _ => throw new NotImplementedException($"Unknown mode: {mode}")
+        };
 
         private async Task RunGame(GameLaunchData e)
         {
-            IceAdapterClient ice = null;
-            try
-            {
-                ice = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
-                IceAdapterClient = ice;
-                await InitializeIce();
-            }
-            catch(Exception ex)
-            {
-                SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
-                App.Current.Dispatcher.Invoke(() => NotificationService.ShowExceptionAsync(ex));
-                return;
-            }
+            IceAdapterClient ice = new(Settings.Default.PlayerId.ToString(), Settings.Default.PlayerNick);
+            IceAdapterClient = ice;
+            await InitializeIce();
+
             GameUID = e.uid;
 
             ice.GpgNetMessageReceived += IceAdapterClient_GpgNetMessageReceived;
             ice.IceMessageReceived += IceAdapterClient_IceMessageReceived;
             ice.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
             // these commands will be ququed and passed after established connect
-            var initMode = e.init_mode;
-            // 0 - normal
-            // 1 - auto
-            ice.SetLobbyInitMode("normal");
+
+            var mode = GetInitMode(e.init_mode);
+            ice.SetLobbyInitMode(mode);
             ice.PassIceServers(IceService.IceServers);
 
             var me = PlayersService.Self;
@@ -279,7 +297,6 @@ namespace beta.Infrastructure.Services
                 args.Append($"/ log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\"");
             }
 
-            //var info = $"{{\"uid\": {e.uid}, \"recorder\": {me.login}, \"featured_mod\": \"{e.mod}\", \"launched_at\": \"time.time\"}}";
             Logger.LogWarning($"Starting game with args: {args}");
             ForgedAlliance = new()
             {
@@ -293,9 +310,8 @@ namespace beta.Infrastructure.Services
             if (!ForgedAlliance.Start())
             {
                 Logger.LogError("Cant start game");
-                return;
+                throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
             }
-            IceAdapterClient = ice;
             await ForgedAlliance.WaitForExitAsync();
             ForgedAlliance.Close();
             ForgedAlliance.Dispose();
@@ -308,6 +324,7 @@ namespace beta.Infrastructure.Services
             ice = null;
 
             SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+            LastGame = null;
         }
 
         private void IceAdapterClient_ConnectionToGpgNetServerChanged(object sender, bool e)
@@ -342,86 +359,33 @@ namespace beta.Infrastructure.Services
             SessionService.Send(t);
         }
 
-        public async Task JoinGame(GameInfoMessage game)
+        public async Task ConfirmMap(string mapName, bool askToDownload = false)
         {
-            Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
-
-            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            if (!ConfirmLocalMapState(mapName))
             {
-                var model = new SelectPathToGameViewModel();
-                var result = await NotificationService.ShowDialog(model);
-                if (result is ContentDialogResult.None)
-                {
-                    return;
-                }
-                Settings.Default.PathToGame = model.Path;
-            }
-
-            if (ForgedAlliance is not null)
-            {
-                await NotificationService.ShowPopupAsync("Game already is running");
-                return;
-            }
-
-            if (game.mapname.StartsWith("neroxis"))
-            {
-                await NotificationService.ShowPopupAsync("Unsupported map");
-                return;
-            }
-            if (game.sim_mods.Count > 0)
-            {
-                await NotificationService.ShowPopupAsync("Mods not supported");
-                return;
-            }
-
-            //if (game.FeaturedMod != FeaturedMod.FAF)
-            //{
-            //    await NotificationService.ShowPopupAsync("Unsupported game mode");
-            //    return;
-            //}
-
-            string password = string.Empty;
-
-            if (game.password_protected)
-            {
-                PassPasswordViewModel model = new();
-                var result = await NotificationService.ShowDialog(model);
-                if (result is ContentDialogResult.None)
-                {
-                    Logger.LogInformation($"User refused to pass password to game {game.uid} by {game.host}");
-                    return;
-                }
-                password = model.Password;
-            }
-
-
-            LastGame = game;
-
-            // Check mods?
-            // ...
-
-            // Check map
-            if (!ConfirmMap(game.mapname))
-            {
-                Logger.LogWarning("Map {1} required to download", game.mapname);
-
-                ContentDialogResult result;
-
                 if (!Settings.Default.AlwaysDownloadMap)
                 {
-                    result = await NotificationService.ShowDialog("Map required to download:\n" + game.mapname, "Download", "Always download", "Cancel");
-
-                    if (result == ContentDialogResult.None)
+                    if (!askToDownload)
                     {
-                        Logger.LogWarning($"Refused to download map {game.mapname}");
-                        return;
+                        throw new Exception($"Map \"{mapName}\" is not installed");
                     }
 
-                    if (result == ContentDialogResult.Secondary)
+                    switch (await new ContentDialog()
                     {
-                        Logger.LogWarning("Set to always download map");
-                        // Always download
-                        Settings.Default.AlwaysDownloadMap = true;
+                        Content = $"Download map \"{mapName}\"",
+                        CloseButtonText = "No",
+                        PrimaryButtonText = "Yes",
+                        SecondaryButtonText = "Always"
+                    }.ShowAsync())
+                    {
+                        case ContentDialogResult.None:
+                            Logger.LogWarning($"Refused to download map {mapName}");
+                            return;
+                        case ContentDialogResult.Primary:
+                            break;
+                        case ContentDialogResult.Secondary:
+                            Settings.Default.AlwaysDownloadMap = true;
+                            break;
                     }
                 }
                 else
@@ -430,46 +394,66 @@ namespace beta.Infrastructure.Services
                 }
 
                 // Run task for downloading
-                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.mapname}.zip")));
-                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{game.mapname}.zip"));
+                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{mapName}.zip")));
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
 
-                if (!model.IsCompleted)
+                if (!model.IsCompleted && Settings.Default.AlwaysDownloadMap)
                 {
-                    return;
+                    throw new Exception($"Map \"{mapName}\" downloading is not completed");
                 }
-
-                if (!ConfirmMap(game.mapname))
-                {
-                    await NotificationService.ShowPopupAsync("Something went wrong on downloading map, try again");
-                    return;
-                }
-
-                //result = await NotificationService.ShowDialog(model, close: "Hide", secondary: "Cancel");
-
-                    //if (result == ContentDialogResult.Secondary)
-                    //{
-
-                    //    Logger.LogWarning($"Cancelled downloading of map {game.mapname}");
-                    //    model.Cancel();
-                    //    model.Dispose();
-                    //    return;
-                    //}
-
-                    // because it is .zip file, we cant just wait till model itself complete to download.
-                    // we have to wait the service to complete unzip process;
-                    //MapsService.DownloadCompleted += OnRequiredMapDownloadCompleted;
             }
-            Logger.LogInformation("Map confirmed!");
+            else
+            {
+                Logger.LogInformation($"Map \"{mapName}\" confirmed!");
+            }
+        }
+
+        public async Task JoinGame(GameInfoMessage game, string password = null)
+        {
+            Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
+
+            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            {
+                throw new Exception("Can`t find directory with \"Supreme Commander: Forged Alliance\"");
+            }
+
+            if (ForgedAlliance is not null)
+            {
+                throw new Exception("Game \"Supreme Commander: Forged Alliance\" is already running");
+            }
+
+            if (game.mapname.StartsWith("neroxis"))
+            {
+                throw new NotImplementedException("Neroxis map generator is not supported");
+            }
+
+            if (game.sim_mods.Count > 0)
+            {
+                throw new NotImplementedException("SIM mods is not supported");
+            }
+
+            if (game.password_protected)
+            {
+                if (password is null)
+                {
+                    throw new ArgumentNullException("Given password is null. Lobby is password protected. You must insert password to join to lobby");
+                }
+            }
+
+            LastGame = game;
+
+            // Check mods?
+            // ...
+
+            // Check map
+            await ConfirmMap(game.mapname);
 
             // Check current patch
             // ConfirmPatch takes about 1800ms to process
             if (!await ConfirmPatch(game.FeaturedMod)) return;
             Logger.LogInformation("Patch confirmed");
 
-            string command;
-            
-            command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
-
+            string command = ServerCommands.JoinGame(game.uid.ToString(), password: password);
             await SessionService.SendAsync(command);
         }
 
@@ -477,20 +461,23 @@ namespace beta.Infrastructure.Services
         {
             var dataToDownload = await ConfirmPatchFiles(mod);
             if (dataToDownload.Length == 0) return true;
-
-            if ((ForgedAlliance is not null && !ForgedAlliance.HasExited) || (ReplayForgedAlliance is not null && !ReplayForgedAlliance.HasExited))
-            {
-                await NotificationService.ShowPopupAsync("You cant update patch when game is launched");
-                return false;
-            }
             // we have patch files to download
+
+            if (ForgedAlliance is not null && !ForgedAlliance.HasExited)
+            {
+                throw new Exception("You cant update patch while game is running");
+            }
+            if (ReplayForgedAlliance is not null && !ReplayForgedAlliance.HasExited)
+            {
+                throw new Exception("You cant update patch while replay is running");
+            }
 
             Logger.LogWarning($"Patch {mod} required to download");
 
-            ContentDialogResult result;
-
             if (!Settings.Default.AlwaysDownloadPatch)
             {
+                //MessageBox.Show("", "", MessageBoxButton.YesNo);
+                ContentDialogResult result;
                 result = await NotificationService.ShowDialog("Patch required to download:\n" + mod, "Download", "Always download", "Cancel");
 
                 if (result == ContentDialogResult.None)
@@ -519,27 +506,15 @@ namespace beta.Infrastructure.Services
 
             if (!download.IsCompleted)
             {
-                Logger.LogWarning("Patch download didnt complete");
-                return false;
+                throw new Exception("Patch download is not completed");
             }
 
             var files = await ConfirmPatchFiles(mod);
             if (files.Length == 0) return true;
-
-            var wrong = string.Empty;
-            for (int i = 0; i < files.Length; i++)
-            {
-                wrong += files[i].Name;
-                if (i < files.Length - 1)
-                {
-                    wrong += ", ";
-                }
-            }
-            await NotificationService.ShowPopupAsync($"Something went wrong. Patch files didn`t match MD5:\n{wrong}");
-            return false;
+            throw new Exception($"Something went wrong. Patch files didn`t match MD5:\n{string.Join(',', files.Select(f => f.Name))}");
         }
 
-        private bool ConfirmMap(string name) => MapsService.CheckLocalMap(name) switch
+        private bool ConfirmLocalMapState(string name) => MapsService.CheckLocalMap(name) switch
         {
             LocalMapState.NotExist => false,
             LocalMapState.Older => false,
@@ -634,13 +609,6 @@ namespace beta.Infrastructure.Services
             return true;
         }
 
-        private async void OnDownloadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-            ((DownloadViewModel)sender).Completed -= OnDownloadCompleted;
-
-            if (!e.Cancelled) await JoinGame(LastGame);
-        }
-
         private bool CopyOriginalBin()
         {
             Logger.LogInformation("Copying original game files from Bin folder...");
@@ -684,21 +652,6 @@ namespace beta.Infrastructure.Services
             return true;
         }
 
-        public void JoinGame(GameInfoMessage game, string password)
-        {
-            /* SEND
-            "command": "game_join",
-            "uid": _,
-            "password": _,
-            */
-
-            /* REPLY / WRONG
-            "command": "notice",
-            "style": "info",
-            "text": "Bad password (it's case sensitive)."
-             */
-        }
-
         public void RestoreGame(int uid)
         {
             /* SEND
@@ -729,36 +682,26 @@ namespace beta.Infrastructure.Services
             NotificationService.Notify("Patch reset completed");
         }
 
-        public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Friends, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
+        public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Public, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
         {
+            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            {
+                throw new Exception("Can`t find directory with \"Supreme Commander: Forged Alliance\"");
+            }
+
             if (ForgedAlliance is not null)
             {
-                await NotificationService.ShowPopupAsync("Game is running");
-                return;
+                throw new Exception("Game \"Supreme Commander: Forged Alliance\" is already running");
             }
 
             if (string.IsNullOrWhiteSpace(title))
             {
-                await NotificationService.ShowPopupAsync("Title not selected");
-                return;
+                throw new ArgumentNullException(nameof(title), "Title is empty");
             }
 
             if (string.IsNullOrWhiteSpace(mapName))
             {
-                await NotificationService.ShowPopupAsync("Map not selected");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(mapName))
-            {
-                await NotificationService.ShowPopupAsync("Map not selected");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
-            {
-
-                await NotificationService.ShowPopupAsync("You must select path to game via settings");
-                return;
+                throw new ArgumentNullException(nameof(mapName), "Map name is empty");
             }
 
             //"title":"Welcome",
@@ -772,7 +715,6 @@ namespace beta.Infrastructure.Services
 
             StringBuilder sb = new();
             sb.Append("{\"command\":\"game_host\",");
-
             sb.Append($"\"title\":\"{title}\",");
             sb.Append($"\"mod\":\"{mod.ToString().ToLower()}\",");
             sb.Append($"\"mapname\":\"{mapName}\",");
@@ -799,78 +741,13 @@ namespace beta.Infrastructure.Services
             var command = sb.ToString();
 
             // Check map
-            if (!ConfirmMap(mapName))
-            {
-                Logger.LogWarning("Map {1} required to download", mapName);
-
-                ContentDialogResult result;
-
-                if (!Settings.Default.AlwaysDownloadMap)
-                {
-                    result = await NotificationService.ShowDialog("Map required to download:\n" + mapName, "Download", "Always download", "Cancel");
-
-                    if (result == ContentDialogResult.None)
-                    {
-                        Logger.LogWarning($"Refused to download map {mapName}");
-                        return;
-                    }
-
-                    if (result == ContentDialogResult.Secondary)
-                    {
-                        Logger.LogWarning("Set to always download map");
-                        // Always download
-                        Settings.Default.AlwaysDownloadMap = true;
-                    }
-                }
-                else
-                {
-                    Logger.LogWarning("Auto downloading map");
-                }
-
-                // Run task for downloading
-                //await Task.Run(() => MapsService.Download(new($"https://content.faforever.com/maps/{game.mapname}.zip")));
-                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
-
-                if (!model.IsCompleted)
-                {
-                    return;
-                }
-
-                if (!ConfirmMap(mapName))
-                {
-                    await NotificationService.ShowPopupAsync("Something went wrong on downloading map, try again");
-                    return;
-                }
-
-                //result = await NotificationService.ShowDialog(model, close: "Hide", secondary: "Cancel");
-
-                //if (result == ContentDialogResult.Secondary)
-                //{
-
-                //    Logger.LogWarning($"Cancelled downloading of map {game.mapname}");
-                //    model.Cancel();
-                //    model.Dispose();
-                //    return;
-                //}
-
-                // because it is .zip file, we cant just wait till model itself complete to download.
-                // we have to wait the service to complete unzip process;
-                //MapsService.DownloadCompleted += OnRequiredMapDownloadCompleted;
-            }
-            Logger.LogInformation("Map confirmed!");
+            await ConfirmMap(mapName, true);
 
             // Check current patch
             if (!await ConfirmPatch(mod)) return;
             Logger.LogInformation("Patch confirmed");
-
-            try
-            {
-                SessionService.Send(command);
-            }
-            catch(Exception ex)
-            {
-                NotificationService.ShowExceptionAsync(ex);
-            }
+            
+            SessionService.Send(command);
         }
 
         public async Task WatchGame(long replayId, string mapName, int playerId, FeaturedMod featuredMod, bool isLive = true)
@@ -885,7 +762,7 @@ namespace beta.Infrastructure.Services
             args.Append($"/replayid {replayId} ");
             args.Append("/log \"C:\\ProgramData\\FAForever\\logs\\replay.log\"");
             //'"C:\\ProgramData\\FAForever\\bin\\ForgedAlliance.exe" /replay gpgnet://lobby.faforever.com/16997391/369689.SCFAreplay /init init_faf.lua /nobugreport /log "C:\\ProgramData\\FAForever\\logs\\replay.log" /replayid 16997391'
-            if (!ConfirmMap(mapName))
+            if (!ConfirmLocalMapState(mapName))
             {
                 var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
 

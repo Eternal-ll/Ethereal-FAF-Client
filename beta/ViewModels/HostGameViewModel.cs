@@ -1,4 +1,5 @@
-﻿using beta.Infrastructure.Commands;
+﻿using AsyncAwaitBestPractices;
+using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.API;
 using beta.Models.Server;
@@ -6,9 +7,7 @@ using beta.Models.Server.Enums;
 using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Windows.Data;
 using System.Windows.Input;
 
 namespace beta.ViewModels
@@ -103,8 +102,8 @@ namespace beta.ViewModels
         public static FeaturedMod[] FeaturedMods => new[]
         {
             FeaturedMod.FAF,
-            //FeaturedMod.FAFBeta,
-            //FeaturedMod.FAFDevelop,
+            FeaturedMod.FAFBeta,
+            FeaturedMod.FAFDevelop,
         };
 
         #region FeaturedMod
@@ -141,18 +140,19 @@ namespace beta.ViewModels
         private ICommand _HostGameCommand;
         public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
         private bool CanHostGameCommand(object parameter) => SelectedMap is not null;
-        private async void OnHostGameCommand(object parameter)
+        private void OnHostGameCommand(object parameter)
         {
             if (SelectedMap is null)
             {
-                await NotificationService.ShowPopupAsync("Map is not selected");
+                NotificationService.ShowPopupAsync("Map is not selected");
                 return;
             }
             Finished?.Invoke(this, null);
 
             string title = string.IsNullOrWhiteSpace(Title) ? "Ethereal lobby" : Title;
-            await GameSessionService.HostGame(title, FeaturedMod, SelectedMap.FolderName, MinAllowedRating, MaxAllowedRating,
-                IsFriendsOnly ? GameVisibility.Friends : GameVisibility.Public, IsRatingRestrictionEnabled, Password);
+            GameSessionService.HostGame(title, FeaturedMod, SelectedMap.FolderName, MinAllowedRating, MaxAllowedRating,
+                IsFriendsOnly ? GameVisibility.Friends : GameVisibility.Public, IsRatingRestrictionEnabled, Password)
+                .SafeFireAndForget(onException: ex => NotificationService.ShowExceptionAsync(ex));
         }
         #endregion
     }

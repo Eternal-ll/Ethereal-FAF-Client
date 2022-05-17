@@ -74,6 +74,11 @@ namespace beta.ViewModels
         {
             for (int i = 0; i < e.Length; i++)
             {
+                var p = e[i];
+                if (e[i].RelationShip == Models.Server.Enums.PlayerRelationShip.Me && p.login == "Eternal-")
+                {
+
+                }
                 UpdatePlayer(e[i]);
             }
         }
@@ -111,6 +116,10 @@ namespace beta.ViewModels
         private void PlayersService_PlayerUpdated(object sender, PlayerInfoMessage e) => UpdatePlayer(e);
         private void UpdatePlayer(PlayerInfoMessage player)
         {
+            if (player.RelationShip == Models.Server.Enums.PlayerRelationShip.Me && player.login =="Eternal-")
+            {
+
+            }
             var players = Players;
             for (int i = 0; i < players.Count; i++)
             {

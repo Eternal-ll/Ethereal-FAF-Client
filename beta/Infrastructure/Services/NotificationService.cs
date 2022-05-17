@@ -177,7 +177,7 @@ namespace beta.Infrastructure.Services
             });
         }
 
-        public void Notify(string text) => NotificationManager.Show(text);
+        public void Notify(string text) => NotificationManager.ShowFilePopUpMessage(text);
 
         public void Notify(object model) => NotificationManager.Show(model);
 

@@ -1,8 +1,10 @@
 ﻿using beta.Infrastructure.Commands.Base;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
+using beta.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using System;
+using ModernWpf.Controls;
+using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Commands
 {
@@ -25,7 +27,19 @@ namespace beta.Infrastructure.Commands
         public override async void Execute(object parameter)
         {
             if (parameter is GameInfoMessage game)
-                await GameLauncherService.JoinGame(game)
+            {
+                string password = null;
+                if (game.password_protected)
+                {
+                    PassPasswordViewModel model = new();
+                    var result = await NotificationService.ShowDialog(model);
+                    if (result is ContentDialogResult.None)
+                    {
+                        return;
+                    }
+                    password = model.Password;
+                }
+                await Task.Run(async () => await GameLauncherService.JoinGame(game, password))
                     .ContinueWith(task =>
                     {
                         if (task.IsFaulted)
@@ -33,6 +47,7 @@ namespace beta.Infrastructure.Commands
                             NotificationService.ShowExceptionAsync(task.Exception);
                         }
                     });
+            }
         }
     }
 }

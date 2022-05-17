@@ -417,7 +417,7 @@ namespace beta.Models.Server
 
         #endregion
 
-        public bool ReplayLessThanFiveMinutes => Duration > new TimeSpan(0, 5, 0);
+        public bool ReplayLessThanFiveMinutes => Duration < new TimeSpan(0, 5, 0);
 
         [JsonIgnore]
         public DateTime? CreatedTime { get; set; }

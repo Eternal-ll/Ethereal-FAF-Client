@@ -17,6 +17,12 @@
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputType>Exe</OutputType>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
@@ -305,6 +311,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.4" />
+    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
     <PackageReference Include="Downloader" Version="2.3.3" />
     <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
@@ -685,5 +693,7 @@
 
   <ItemGroup>
     <Folder Include="Models\API\MapsVault\" />
+    <Folder Include="ViewModels\API\Base\" />
+    <Folder Include="ViewModels\Common\Base\" />
   </ItemGroup>
 </Project>

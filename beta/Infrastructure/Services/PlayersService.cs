@@ -135,23 +135,6 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        //private void GamesService_NewGameReceived(object sender, GameInfoMessage e)
-        //{
-        //    foreach (var team in e.teams)
-        //        foreach (var login in team.Value)
-        //        {
-        //            if (TryGetPlayer(login, out var player))
-        //            {
-        //                player.Game = e;
-        //                OnPlayerUpdated(player);
-        //            }
-        //            else
-        //            {
-        //                Logger.LogWarning($"New game received, but player not found");
-        //            }
-        //        }
-        //}
-
         private void IrcService_UserLeft(object sender, Models.IRC.IrcUserLeft e)
         {
             // TODO
@@ -172,17 +155,15 @@ namespace beta.Infrastructure.Services
 
         private void IrcService_UserDisconnected(object sender, string e)
         {
-            return;
             if (TryGetPlayer(e, out var player))
             {
                 PlayersDic.Remove(player.id, out var removed);
 
                 PlayerLeft?.Invoke(this, player);
-                Logger.LogWarning("User disconnected");
             }
             else
             {
-                Logger.LogWarning("User disconnected, but player instance not found");
+                Logger.LogError("User disconnected, but player instance not found");
             }
         }
 
@@ -221,40 +202,6 @@ namespace beta.Infrastructure.Services
                 Logger.LogWarning($"Relationship with player {e.Key} changed to {e.Value} but instance not found");
             }
         }
-
-        //private void GamesService_PlayersJoinedToGame(object sender, KeyValuePair<GameInfoMessage, string[]> e)
-        //{
-        //    for (int i = 0; i < e.Value.Length; i++)
-        //    {
-        //        if (TryGetPlayer(e.Value[i], out var player))
-        //        {
-        //            player.Game = e.Key;
-        //            OnPlayerUpdated(player);
-        //            //Logger.LogInformation($"Player {player.login} joined to game and updated");
-        //        }
-        //        else
-        //        {
-        //            Logger.LogWarning($"Player {e.Value[i]} joined to game and not updated");
-        //        }
-        //    }
-        //}
-
-        //private void GamesService_PlayersLeftFromGame(object sender, string[] e)
-        //{
-        //    for (int i = 0; i < e.Length; i++)
-        //    {
-        //        if (TryGetPlayer(e[i], out var player))
-        //        {
-        //            player.Game = null;
-        //            OnPlayerUpdated(player);
-        //            //Logger.LogInformation($"Player {player.login} left from game and updated");
-        //        }
-        //        else
-        //        {
-        //            Logger.LogWarning($"Player {e[i]} left from game and not updated");
-        //        }
-        //    }
-        //}
         #endregion
 
         #region Event listeners
@@ -273,15 +220,15 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation("Self player instance received");
             e.me.RelationShip = PlayerRelationShip.Me;
 
-            e.me.Note = new();
-            if (NoteService.TryGet(e.me.login, out var note))
-            {
-                e.me.Note.Text = note;
-            }
+            //e.me.Note = new();
+            //if (NoteService.TryGet(e.me.login, out var note))
+            //{
+            //    e.me.Note.Text = note;
+            //}
             Self = e.me;
-            PlayersDic.TryAdd(e.me.id, e.me);
-            PlayerReceived?.Invoke(this, e.me);
-            SelfReceived?.Invoke(this, e.me);
+            PlayersDic.TryAdd(e.me.id, Self);
+            //PlayerReceived?.Invoke(this, Self);
+            //SelfReceived?.Invoke(this, Self);
         }
 
         private void HandlePlayerRelationship(PlayerInfoMessage player)
@@ -295,22 +242,26 @@ namespace beta.Infrastructure.Services
         }
         private void AddNewPlayer(PlayerInfoMessage player)
         {
-            //TODO Workaround, because server sends two times self player instance.IDK why
-            if (player.id == Self.id)
-            {
-                Logger.LogWarning($"Self received, but didnt passed");
-                return;
-            }
-
             player.Note = new();
             if (NoteService.TryGet(player.login, out var note))
             {
                 player.Note.Text = note;
             }
 
-            HandlePlayerRelationship(player);
+            if (player.id == Self.id)
+            {
+                player.RelationShip = PlayerRelationShip.Me;
+                Self = player;
+                SelfReceived?.Invoke(this, Self);
+                //Logger.LogWarning($"Self received, but didnt passed");
+                //return;
+            }
+            else
+            {
+                HandlePlayerRelationship(player);
+            }
 
-            if(!PlayersDic.TryAdd(player.id, player))
+            if (!PlayersDic.TryAdd(player.id, player))
             {
                 if (PlayersDic.TryGetValue(player.id, out var matchedPlayer))
                 {
@@ -326,19 +277,20 @@ namespace beta.Infrastructure.Services
                     Logger.LogWarning($"Tried to add player that is already in dictionary: {player.id} - {player.login}, but update didnt work");
                 }
             }
+            else
+            {
+                PlayerReceived?.Invoke(this, player);
+            }
         }
 
         private void HandlePlayerData(PlayerInfoMessage player)
         {
-
             if (PlayersDic.TryGetValue(player.id, out var matchedPlayer))
             {
                 matchedPlayer.login = player.login;
                 matchedPlayer.ratings = player.ratings;
                 matchedPlayer.Updated = DateTime.UtcNow;
-
                 OnPlayerUpdated(matchedPlayer);
-                //Logger.LogInformation($"Player {player.id} updated");
             }
             else
             {
@@ -347,8 +299,7 @@ namespace beta.Infrastructure.Services
                 {
                     player.Note.Text = note;
                 }
-                OnNewPlayerReceived(player);
-                //Logger.LogInformation($"New player {player.id} received");
+                AddNewPlayer(player);
             }
         }
 
@@ -511,13 +462,5 @@ namespace beta.Infrastructure.Services
         }
 
         protected virtual void OnPlayerUpdated(PlayerInfoMessage e) => PlayerUpdated?.Invoke(this, e);
-        private void OnNewPlayerReceived(PlayerInfoMessage e)
-        {
-            AddNewPlayer(e);
-            PlayerReceived?.Invoke(this, e);
-        }
-
-        //protected virtual void OnPlayersUpdated(PlayerInfoMessage[] e) => 
-        //protected virtual void OnPlayersReceived(PlayerInfoMessagep[] e) =>
     }
 }

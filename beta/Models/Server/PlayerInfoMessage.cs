@@ -111,6 +111,10 @@ namespace beta.Models.Server
             get => _Game;
             set
             {
+                if (login == "Eternal-")
+                {
+
+                }
                 if (Set(ref _Game, value))
                 {
                     if (value is null)

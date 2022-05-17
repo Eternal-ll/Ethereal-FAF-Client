@@ -75,6 +75,7 @@ namespace beta.ViewModels
                     if (value)
                     {
                         File.WriteAllText(App.GetPathToFolder(Models.Enums.Folder.ProgramData) + "fa_path.lua", $"fa_path = \"{Path.Replace('\\','/')}\"\n");
+                        Settings.Default.PathToGame = Path;
                     }
                 }
             }

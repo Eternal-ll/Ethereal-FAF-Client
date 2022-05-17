@@ -38,7 +38,7 @@ namespace beta.Infrastructure.Services.Interfaces
 
         public Task Close();
 
-        public Task JoinGame(GameInfoMessage game);
+        public Task JoinGame(GameInfoMessage game, string password = null);
         public Task WatchGame(long replayId, string mapName, int playerId, FeaturedMod featuredMod, bool isLive = true);
 
         /// <summary>

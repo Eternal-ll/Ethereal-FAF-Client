@@ -129,10 +129,19 @@ namespace beta.Infrastructure.Services
                 for (int i = 0; i < valuePair.Value.Length; i++)
                 {
                     var player = PlayersService.GetPlayer(valuePair.Value[i]);
-                    players[i] = player;
                     if (player is null)
                     {
                         Logger.LogWarning($"Player not found {valuePair.Value[i]}");
+                        players[i] = new UnknownPlayer()
+                        {
+                            login = valuePair.Value[i],
+                            RelationShip = PlayerRelationShip.None
+                        };
+                    }
+                    else
+                    {
+                        player.Game = game;
+                        players[i] = player;
                     }
                 }
 
@@ -145,6 +154,10 @@ namespace beta.Infrastructure.Services
 
         private void HandleGameData(GameInfoMessage newGame)
         {
+            if(newGame.host == "Eternal-")
+            {
+
+            }
             switch (newGame.FeaturedMod)
             {
                 case FeaturedMod.FAF:
@@ -282,10 +295,6 @@ namespace beta.Infrastructure.Services
                 }
                 newGame.Host = PlayersService.GetPlayer(newGame.host);
                 HandleTeams(newGame);
-                for (int i = 0; i < newGame.Players.Length; i++)
-                {
-                    newGame.Players[i].Game = newGame;
-                }
                 games.Add(newGame);
                 OnNewGameReceived(newGame);
             }

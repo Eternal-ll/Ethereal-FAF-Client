@@ -421,7 +421,6 @@
                             </Style.Triggers>
                         </Style>
                     </TabItem.Style>
-
                 </TabItem>
             </TabControl>
 

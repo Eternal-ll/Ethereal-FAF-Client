@@ -557,7 +557,7 @@ namespace beta.ViewModels
 
         private void OnGameLaunched(object sender, GameInfoMessage e)
         {
-            if (e.GameType != GameType) return;
+            if (e.GameType != GameType && GameState == GameState.Open) return;
 
             e.State = GameState.Launched;
             Task.Run(() =>
@@ -621,10 +621,6 @@ namespace beta.ViewModels
 
         private void OnGameUpdated(object sender, GameInfoMessage game)
         {
-            if (game.State == GameState.Playing && GameState == GameState.Open)
-            {
-
-            }
             if (!IsNotRequiredGame(game)) return;
             HandleGameData(game);
         }
