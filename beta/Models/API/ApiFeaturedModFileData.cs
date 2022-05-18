@@ -2,7 +2,7 @@
 
 namespace beta.Models.API
 {
-    public class ApiFeaturedModFileData : Base.ApiUniversalWithAttributes
+    public class ApiFeaturedModFileData : Base.ApiUniversalData
     {
         public Uri Url => Uri.TryCreate(Attributes?["url"], UriKind.Absolute, out var uri) ? uri : null;
         public string Name => Attributes?["name"];

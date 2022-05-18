@@ -5,7 +5,7 @@ namespace beta.Models.API.Base
 {
     public static class ApiUniversalTools
     {
-        public static Dictionary<string, string> GetAttributesFromIncluded(ApiUniversalWithAttributes[] included, ApiDataType type, int id)
+        public static Dictionary<string, string> GetAttributesFromIncluded(ApiUniversalData[] included, ApiDataType type, int id)
         {
             if (included is null) return null;
 

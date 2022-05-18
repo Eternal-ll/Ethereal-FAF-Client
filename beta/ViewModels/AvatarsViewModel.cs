@@ -60,7 +60,7 @@ namespace beta.ViewModels
                 };
                 var avatarId = result1.Data.Relations["avatar"].Data[0].Id;
 
-                var result2 = await ApiRequest<ApiUniversalResult<ApiUniversalWithAttributes>>.RequestWithId("https://api.faforever.com/data/avatar/", avatarId,
+                var result2 = await ApiRequest<ApiUniversalResult<ApiUniversalData>>.RequestWithId("https://api.faforever.com/data/avatar/", avatarId,
                     "?fields[avatar]=filename,tooltip,url");
 
                 model.Filename = result2.Data.Attributes["filename"];

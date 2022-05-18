@@ -8,7 +8,7 @@ namespace beta.Models.API.Base
         public T Data { get; set; }
 
         [JsonPropertyName("included")]
-        public ApiUniversalWithAttributes[] Included { get; set; }
+        public ApiUniversalData[] Included { get; set; }
 
         [JsonPropertyName("meta")]
         public ApiVaultMeta Meta { get; set; }

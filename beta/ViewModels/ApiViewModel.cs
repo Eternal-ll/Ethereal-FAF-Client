@@ -1,11 +1,30 @@
 ﻿using beta.Infrastructure.Commands;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace beta.ViewModels
 {
     public abstract class ApiViewModel : Base.ViewModel
     {
+        #region Id
+        private int _Id;
+        /// <summary>
+        /// Entity id
+        /// </summary>
+        public int Id
+        {
+            get => _Id;
+            set
+            {
+                if (Set(ref _Id, value))
+                {
+                    RunRequest();
+                }
+            }
+        }
+        #endregion
+
         protected bool IsRefreshing = false;
 
         #region IsPendingRequest
@@ -23,12 +42,17 @@ namespace beta.ViewModels
         }
         #endregion
 
+        public Visibility InputVisibility => IsPendingRequest ? Visibility.Hidden : Visibility.Visible;
+
         public bool IsInputEnabled => !IsPendingRequest;
 
         public async Task DoRequestAsync()
         {
             IsPendingRequest = true;
-            await RequestTask();
+            await RequestTask().ContinueWith(task =>
+            {
+                if (task.IsFaulted) IsPendingRequest = false;
+            });
             IsPendingRequest = false;
             if (IsRefreshing) IsRefreshing = false;
         }

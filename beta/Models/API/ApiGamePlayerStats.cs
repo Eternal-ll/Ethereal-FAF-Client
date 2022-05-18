@@ -3,7 +3,7 @@ using System;
 
 namespace beta.Models.API
 {
-    public class ApiGamePlayerStats : ApiUniversalWithAttributes
+    public class ApiGamePlayerStats : ApiUniversalData
     {
         private static double GetDouble(string value) => double.Parse(value.Replace('.', ','));
         public double AfterDeviation => GetDouble(Attributes["afterDeviation"]);

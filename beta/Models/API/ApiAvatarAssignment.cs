@@ -3,7 +3,7 @@ using System;
 
 namespace beta.Models.API
 {
-    public class ApiAvatarAssignment : ApiUniversalWithRelations
+    public class ApiAvatarAssignment : ApiUniversalData
     {
         public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
         public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
