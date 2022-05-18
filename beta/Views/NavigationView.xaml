@@ -114,7 +114,8 @@
 
             <ui:NavigationView.FooterMenuItems>
                 <!--Tag="Profile"-->
-                <ui:NavigationViewItem Icon="{StaticResource ProfilePathIcon}" Tag="UserProfile">
+                <ui:NavigationViewItem Icon="{StaticResource ProfilePathIcon}" Tag="UserProfile"
+                                       ToolTip="{Binding Me}">
                     <ContentControl Margin="-40 0 0 0" Content="{Binding Me}" ContentTemplate="{StaticResource PlayerDataTemplateStacked}">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
