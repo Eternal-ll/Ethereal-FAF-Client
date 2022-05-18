@@ -1,5 +1,8 @@
 ﻿namespace beta.Models.Enums
 {
+    /// <summary>
+    /// Enum of legacy maps of Supreme Commander: Forged Alliance
+    /// </summary>
     public enum LegacyMap : byte
     {
         SCMP_001 = 1,

@@ -8,9 +8,13 @@
 
         
         map,
-        mapVersion,
-        mapReviewsSummary,
         mapStatistics,
+        mapReviewsSummary,
+
+        mapVersion,
+        mapVersionStatistics,
+        mapVersionReview,
+        mapVersionReviewsSummary,
 
         featuredModFile,
 
