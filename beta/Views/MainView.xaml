@@ -59,7 +59,7 @@
             <view:ProfileView DataContext="{Binding}"/>
         </DataTemplate>-->
         <DataTemplate DataType="{x:Type vm:MapsVaultViewModel}">
-            <view:MapsView/>
+            <view:MapsVaultView/>
         </DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <view:SettingsView DataContext="{Binding}"/>

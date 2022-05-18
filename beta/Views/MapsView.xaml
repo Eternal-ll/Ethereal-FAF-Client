@@ -776,7 +776,7 @@
                                 </WrapPanel>
                                 <StackPanel Grid.Column="4" Orientation="Horizontal" >
                                     <!--<ui:RatingControl PlaceholderValue="{Binding SummaryFiveRate, Mode=OneWay}" IsHitTestVisible="False"/>-->
-                                    <Border ToolTip="Average rating">
+                                    <Border ToolTip="Average rating" VerticalAlignment="Top">
                                         <Border.Style>
                                             <Style TargetType="Border" BasedOn="{StaticResource MapInfoBorderStyle}">
                                                 <Style.Triggers>
@@ -794,7 +794,7 @@
                                             </TextBlock>
                                         </StackPanel>
                                     </Border>
-                                    <Border ToolTip="Unique score">
+                                    <Border ToolTip="Unique score" VerticalAlignment="Top">
                                         <Border.Style>
                                             <Style TargetType="Border" BasedOn="{StaticResource MapInfoBorderStyle}">
                                                 <Style.Triggers>
@@ -815,6 +815,22 @@
                                             <TextBlock Text="{Binding LocalState, Mode=OneWay}"/>
                                         </StackPanel>
                                     </Border>-->
+                                    <Button Content="See details" Command="{DynamicResource NavigateCommand}" CommandParameter="{Binding Id}" Margin="10 10 0 0">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
+                                                                 Value="False">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsSelected}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
