@@ -480,25 +480,6 @@
                 FontSize="14"/>-->
 
 
-            <Border Grid.Row="1" CornerRadius="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10 10 0 0"
-                            ToolTip="Secured with password"
-                            Padding="6"
-                            Background="{StaticResource BackgroundHalfBlack}">
-                <Path
-                            Fill="White"
-                            Height="14"
-                            Stretch="Uniform"
-                            Data="{StaticResource SecuredIconPathGeometry}"/>
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding password_protected}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-            </Border>
 
             <Border Grid.Row="1"
                     Style="{StaticResource MapPreviewBorderStyle}"
@@ -713,6 +694,25 @@
                 </ui:ProgressRing.Style>-->
             </ui:ProgressRing>
 
+            <Border Grid.Row="1" CornerRadius="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10 10 0 0"
+                            ToolTip="Secured with password"
+                            Padding="6"
+                            Background="{StaticResource BackgroundHalfBlack}">
+                <Path
+                            Fill="White"
+                            Height="14"
+                            Stretch="Uniform"
+                            Data="{StaticResource SecuredIconPathGeometry}"/>
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding password_protected}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
             <StackPanel
                 Grid.Column="1"
                 Grid.Row="1"
