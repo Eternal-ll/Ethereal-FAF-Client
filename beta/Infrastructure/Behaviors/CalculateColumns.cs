@@ -6,6 +6,8 @@ namespace beta.Infrastructure.Behaviors
 {
     public class CalculateColumns : Behavior<UniformGrid>
     {
+        public int Width { get; set; }
+        public int WidthOffset { get; set; }
         protected override void OnAttached()
         {
             AssociatedObject.SizeChanged += OnDataGridSizeChanged;
@@ -13,8 +15,8 @@ namespace beta.Infrastructure.Behaviors
 
         private void OnDataGridSizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
         {
-            if (e.NewSize.Width < 600) AssociatedObject.Columns = 1;
-            else AssociatedObject.Columns = Convert.ToInt32((e.NewSize.Width - 60) / (330));
+            if (e.NewSize.Width < Width) AssociatedObject.Columns = 1;
+            else AssociatedObject.Columns = Convert.ToInt32((e.NewSize.Width - WidthOffset) / Width);
         }
 
         protected override void OnDetaching()

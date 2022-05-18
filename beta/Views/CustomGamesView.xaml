@@ -64,20 +64,8 @@
                                 <ItemsPanelTemplate>
                                     <UniformGrid VerticalAlignment="Top">
                                         <i:Interaction.Behaviors>
-                                            <customI:CalculateColumns/>
+                                            <customI:CalculateColumns Width="330" WidthOffset="60"/>
                                         </i:Interaction.Behaviors>
-                                        <!--<UniformGrid.Style>
-                                            <Style TargetType="UniformGrid">
-                                                -->
-                                        <!--<Setter Property="Columns" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=IdleGamesColumns}"/>-->
-                                        <!--<Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsListView}" Value="True">
-                                                        <Setter Property="Columns" Value="1"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>-->
-                                        <!--
-                                            </Style>
-                                        </UniformGrid.Style>-->
                                     </UniformGrid>
                                 </ItemsPanelTemplate>
                             </Setter.Value>
