@@ -8,7 +8,7 @@ namespace beta.ViewModels
     public abstract class ApiViewModel : Base.ViewModel
     {
         #region Id
-        private int _Id;
+        private int _Id = -1;
         /// <summary>
         /// Entity id
         /// </summary>
@@ -37,6 +37,7 @@ namespace beta.ViewModels
                 if (Set(ref _IsPendingRequest, value))
                 {
                     OnPropertyChanged(nameof(IsInputEnabled));
+                    OnPropertyChanged(nameof(InputVisibility));
                 }
             }
         }
