@@ -14,20 +14,27 @@ namespace beta.Views
             InitializeComponent();
             ContentFrame.Navigate(typeof(MapsView));
             Resources.Add("NavigateCommand", new LambdaCommand(OnNavigateCommand));
+            ((NavigationThemeTransition)ContentFrame.ContentTransitions[0])
+                .DefaultNavigationTransitionInfo = new SlideNavigationTransitionInfo()
+                { Effect = SlideNavigationTransitionEffect.FromRight };
         }
-
+        int lastId = 0;
         private void OnNavigateCommand(object parameter)
         {
             if (parameter is null)
             {
                 if (ContentFrame.CanGoBack)
-                    ContentFrame.GoBack(new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
+                    ContentFrame.GoBack();
                 //ContentFrame.Navigate(typeof(MapsView), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight });
                 return;
             }
             if (parameter is int id)
             {
-                ContentFrame.Navigate(typeof(MapDetailsView), null, new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight});
+                if (lastId == id && ContentFrame.CanGoForward)
+                {
+                    ContentFrame.GoForward();
+                }
+                else ContentFrame.Navigate(new MapDetailsView(id));
             }
         }
     }

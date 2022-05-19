@@ -1,11 +1,10 @@
 ﻿using beta.Models.API.Enums;
-using System.Collections.Generic;
 
 namespace beta.Models.API.Base
 {
     public static class ApiUniversalTools
     {
-        public static Dictionary<string, string> GetAttributesFromIncluded(ApiUniversalData[] included, ApiDataType type, int id)
+        public static ApiUniversalData GetDataFromIncluded(ApiUniversalData[] included, ApiDataType type, int? id)
         {
             if (included is null) return null;
 
@@ -15,8 +14,9 @@ namespace beta.Models.API.Base
 
                 if (item.Type != type) continue;
 
-                if (item.Id == id)
-                    return item.Attributes;
+                if (id.HasValue && item.Id != id) continue;
+
+                return item;
             }
 
             return null;

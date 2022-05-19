@@ -1154,7 +1154,7 @@
             <!--<GridSplitter Margin="0 0 0 0" HorizontalAlignment="Left" Grid.Column="1" Width="2" Visibility="{Binding ExtendedPanelVisibility}"/>-->
         </Grid>
 
-        <Grid  Grid.RowSpan="3" Visibility="{Binding BigPreviewVisibility}">
+        <Grid Grid.RowSpan="3" Visibility="{Binding BigPreviewVisibility}">
             <Grid Grid.RowSpan="3" Background="{StaticResource BackgroundHalfBlack}">
                 <Grid.InputBindings>
                     <MouseBinding MouseAction="LeftClick" Command="{Binding CloseBigPreviewCommand}"/>

@@ -7,8 +7,11 @@
              xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
              d:DataContext="{d:DesignInstance {x:Type vm:MapViewModel}}"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+             IsEnabled="{Binding IsInputEnabled}">
     <UserControl.Resources>
+        <SolidColorBrush x:Key="Hover" Color="Orange" Opacity=".7"/>
+        <SolidColorBrush x:Key="Selected" Color="Orange"/>
         <Style TargetType="Border" x:Key="BorderStyle">
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Background" Value="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"/>
@@ -16,6 +19,10 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
             <Setter Property="Padding" Value="20 10"/>
+        </Style>
+        <Style x:Key="ItemBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
         </Style>
         <Style TargetType="Separator">
             <Setter Property="Opacity" Value=".2"/>
@@ -30,6 +37,16 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Grid.Column" Value="1"/>
         </Style>
+        <Style x:Key="IfNullTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Text" Value="{Binding}"/>
+            <Style.Triggers>
+                <Trigger Property="DataContext" Value="{x:Null}">
+                    <Setter Property="Text" Value="0"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <SolidColorBrush x:Key="RatingControlUnselectedForeground" Color="Orange" Opacity=".2"/>
+        <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="Orange"/>
     </UserControl.Resources>
     <Grid ShowGridLines="False" Margin="4">
         <Grid.RowDefinitions>
@@ -37,7 +54,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="310"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <ui:TitleBarButton HorizontalAlignment="Left" Background="Transparent" Margin="6">
@@ -49,367 +66,433 @@
                 </TextBlock>
             </Button>
         </ui:TitleBarButton>
-        <ContentControl Grid.Row="1"/>
-        <Border Style="{StaticResource BorderStyle}" Padding="20" Grid.Row="1" VerticalAlignment="Top">
-            <Grid>
-                <StackPanel HorizontalAlignment="Center">
-                    <Border Height="256" Width="256" Style="{StaticResource BorderStyle}" Margin="0" Background="Gray"/>
-                    <TextBlock Text="Astro Crater" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
-                    <TextBlock Text="by BRS_Astro" HorizontalAlignment="Center" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" TextElement.FontSize="18" Margin="0 20">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="4.6"/>
-                                <Path Height="12" Margin="4 0 0 0"/>
-                            </StackPanel>
-                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                            <Separator.LayoutTransform>
-                                <RotateTransform Angle="90"/>
-                            </Separator.LayoutTransform>
-                        </Separator>
-                        <StackPanel>
-                            <TextBlock Text="318" HorizontalAlignment="Center"/>
-                            <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                            <Separator.LayoutTransform>
-                                <RotateTransform Angle="90"/>
-                            </Separator.LayoutTransform>
-                        </Separator>
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Path Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                <TextBlock Text="2000"/>
-                            </StackPanel>
-                            <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="Download .zip"/>
-                        <Button Content="Download" Margin="10 0 0 0" Background="LimeGreen"/>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
-                        <Button Content="Installed" Background="Green" IsHitTestVisible="False" Focusable="False"/>
-                        <Button Content="Delete" Background="Red" Margin="10 0 0 0"/>
-                    </StackPanel>
+        <StackPanel Grid.Row="1">
+            <Border Style="{StaticResource BorderStyle}" Padding="20">
+                <Grid MinHeight="360">
+                    <ContentControl Content="{Binding}" Visibility="{Binding InputVisibility}">
+                        <ContentControl.Resources>
+                            <DataTemplate DataType="{x:Type vm:MapViewModel}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <Border Height="256" Width="256" Style="{StaticResource BorderStyle}" Margin="0">
+                                        <Border.Background>
+                                            <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
+                                        </Border.Background>
+                                    </Border>
+                                    <TextBlock Text="{Binding Data.DisplayedName}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
+                                    <TextBlock HorizontalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Data.Author, StringFormat='by {0}'}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.Author}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="by Unknown"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" TextElement.FontSize="18" Margin="0 20 0 0">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <TextBlock DataContext="{Binding Data.ReviewsSummary.LowerBound}" Style="{StaticResource IfNullTextBlockStyle}"/>
+                                                <Path Height="12" Margin="4 0 0 0" Style="{StaticResource {x:Type Path}}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                            <Separator.LayoutTransform>
+                                                <RotateTransform Angle="90"/>
+                                            </Separator.LayoutTransform>
+                                        </Separator>
+                                        <StackPanel>
+                                            <TextBlock DataContext="{Binding Data.ReviewsSummary.ReviewsCount}" HorizontalAlignment="Center"
+                                                   Style="{StaticResource IfNullTextBlockStyle}"/>
+                                            <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                            <Separator.LayoutTransform>
+                                                <RotateTransform Angle="90"/>
+                                            </Separator.LayoutTransform>
+                                        </Separator>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                                <TextBlock Text="{Binding Data.StatisticsSummary.PlaysCount}" Style="{StaticResource IfNullTextBlockStyle}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.Resources>
+                    </ContentControl>
+                    <ui:ProgressRing IsActive="{Binding IsPendingRequest}"/>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource BorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Version"/>
+                    <Separator/>
+                    <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.Resources>
+                            <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                            <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                <Setter Property="Focusable" Value="True"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Margin" Value="4 0"/>
+                                <Setter Property="Background" Value="Transparent"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border>
+                                    <Border.Style>
+                                        <Style TargetType="Border" BasedOn="{StaticResource ItemBorderStyle}">
+                                            <Setter Property="Padding" Value="10 4"/>
+                                            <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
+                                                                 Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Selected}"/>
+                                                    <Setter Property="TextElement.Foreground" Value="Black"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}"
+                                                                 Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource Hover}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding Version}"/>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
-            </Grid>
-        </Border>
+            </Border>
+            <Border Style="{StaticResource BorderStyle}">
+                <UniformGrid>
+                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Download .zip"/>
+                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Download" Background="LimeGreen"/>
+                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Installed" Background="Green" IsHitTestVisible="False" Focusable="False"/>
+                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Delete" Background="Red"/>
+                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Update" Background="Orange"/>
+                </UniformGrid>
+            </Border>
+        </StackPanel>
         <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0 4 18 4">
             <StackPanel>
                 <Border Style="{StaticResource BorderStyle}" Margin="4 0 4 4">
-                    <StackPanel>
-                        <TextBlock Text="Version"/>
-                        <Separator/>
-                        <TextBlock Text="Test"/>
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource BorderStyle}">
                     <Expander Header="Description" IsExpanded="True">
                         <StackPanel>
                             <Separator/>
-                            <TextBlock Text="Pure instant messaging — simple, fast, secure, and synced across all your devices. One of the world's top 10 most downloaded apps with over 500 million active users."
-                                       TextWrapping="Wrap"/>
+                            <Grid>
+                                <TextBlock DataContext="{Binding CurrentMapVersionVM.Data.Description}"
+                                           TextWrapping="Wrap" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                                    Path=DataContext.CurrentMapVersionVM.InputVisibility}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding}"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="DataContext" Value="{x:Null}">
+                                                    <Setter Property="Text" Value="No description"/>
+                                                </Trigger>
+                                                <Trigger Property="DataContext" Value="">
+                                                    <Setter Property="Text" Value="No description"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ui:ProgressRing IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                            </Grid>
                         </StackPanel>
                     </Expander>
                 </Border>
                 <Border Style="{StaticResource BorderStyle}">
                     <Expander Header="Additional information" IsExpanded="True">
-                        <StackPanel>
-                            <Separator/>
-                            <ListBox>
-                                <ListBox.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid VerticalAlignment="Top">
-                                            <i:Interaction.Behaviors>
-                                                <customI:CalculateColumns Width="200" WidthOffset="0"/>
-                                            </i:Interaction.Behaviors>
-                                        </UniformGrid>
-                                    </ItemsPanelTemplate>
-                                </ListBox.ItemsPanel>
-                                <ListBox.Resources>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                        <Setter Property="Focusable" Value="False"/>
-                                        <Setter Property="IsHitTestVisible" Value="False"/>
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="Margin" Value="10"/>
-                                    </Style>
-                                    <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
-                                        <Setter Property="Grid.Column" Value="0"/>
-                                        <Setter Property="Fill" Value="White"/>
-                                        <Setter Property="Opacity" Value=".8"/>
-                                        <Setter Property="VerticalAlignment" Value="Top"/>
-                                        <Setter Property="HorizontalAlignment" Value="Left"/>
-                                        <Setter Property="Margin" Value="0 4 4 0"/>
-                                    </Style>
-                                </ListBox.Resources>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
-                                        <TextBlock Text="Approximate size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="11.5 MB" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Text="&#xf271;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
-                                        <TextBlock Text="Release data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="25.05.2022" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Text="&#xf1da;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
-                                        <TextBlock Text="Update data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="25.05.2022" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Path Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                        <TextBlock Text="Games played" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="2000" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Path Height="14" Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
-                                        <TextBlock Text="Map size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="10x10 km" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Path Data="M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z" Height="14">
-                                            <Path.RenderTransform>
-                                                <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
-                                            </Path.RenderTransform>
-                                            <Path.Style>
-                                                <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
-                                                    <Setter Property="Fill" Value="LightGreen"/>
-                                                    <Style.Triggers>
-                                                        <!--<DataTrigger Binding="" Value="false">
-                                                            <Setter Property="Fill" Value="Red"/>
-                                                        </DataTrigger>-->
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Path.Style>
-                                        </Path>
-                                        <TextBlock Text="Is ranked" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="True" Foreground="LightGreen" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="24"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <Path Fill="Yellow" Height="14" Data="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17.8 21.2L22.6 16.4L21.3 15L17.7 18.6L16.2 17L15 18.2L17.8 21.2" />
-                                        <TextBlock Text="Is recommended" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                        <TextBlock Text="True" Foreground="Yellow" Grid.Column="1" Grid.Row="1"/>
-                                    </Grid>
-                                </ListBoxItem>
-                            </ListBox>
-                        </StackPanel>
+                        <Grid>
+                            <StackPanel Visibility="{Binding CurrentMapVersionVM.InputVisibility}">
+                                <Separator/>
+                                <ListBox>
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid VerticalAlignment="Top">
+                                                <i:Interaction.Behaviors>
+                                                    <customI:CalculateColumns Width="200" WidthOffset="0"/>
+                                                </i:Interaction.Behaviors>
+                                            </UniformGrid>
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.Resources>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                            <Setter Property="Focusable" Value="False"/>
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Margin" Value="10"/>
+                                        </Style>
+                                        <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                            <Setter Property="Grid.Column" Value="0"/>
+                                            <Setter Property="Fill" Value="White"/>
+                                            <Setter Property="Opacity" Value=".8"/>
+                                            <Setter Property="VerticalAlignment" Value="Top"/>
+                                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                                            <Setter Property="Margin" Value="0 4 4 0"/>
+                                        </Style>
+                                    </ListBox.Resources>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                                            <TextBlock Text="Approximate size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="Unknown" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="&#xf271;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
+                                            <TextBlock Text="Release data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.CreateTime}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="&#xf1da;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
+                                            <TextBlock Text="Update data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.UpdateTime}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                            <TextBlock Text="Games played" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding CurrentMapVersionVM.Data.Statistics.PlaysCount}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Height="14" Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
+                                            <TextBlock Text="Map size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.MapKmSizeLabel}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Data="M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z" Height="14">
+                                                <Path.RenderTransform>
+                                                    <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                                                </Path.RenderTransform>
+                                                <Path.Style>
+                                                    <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                                        <Setter Property="Fill" Value="LightGreen"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
+                                                                <Setter Property="Fill" Value="Red"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Path.Style>
+                                            </Path>
+                                            <TextBlock Text="Is ranked" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.IsRanked}" Grid.Column="1" Grid.Row="1">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="LightGreen"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
+                                                                <Setter Property="Foreground" Value="Red"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <ListBoxItem.Style>
+                                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Data.IsRecommended}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBoxItem.Style>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Fill="Yellow" Height="14" Data="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17.8 21.2L22.6 16.4L21.3 15L17.7 18.6L16.2 17L15 18.2L17.8 21.2" />
+                                            <TextBlock Text="Is recommended" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="True" Foreground="Yellow" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                </ListBox>
+                            </StackPanel>
+                            <ui:ProgressRing IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                        </Grid>
                     </Expander>
                 </Border>
                 <Border Style="{StaticResource BorderStyle}">
                     <Expander Header="Ratings and reviews" IsExpanded="True">
-                        <StackPanel>
-                            <Separator/>
-                            <StackPanel Orientation="Horizontal">
-                                <StackPanel>
-                                    <TextBlock Text="4.6" FontSize="54" FontWeight="DemiBold"/>
-                                    <TextBlock Text="318 ratings" Opacity=".6" HorizontalAlignment="Center"/>
+                        <Grid>
+                            <StackPanel Visibility="{Binding CurrentMapVersionVM.InputVisibility}">
+                                <Separator/>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel MinWidth="80">
+                                        <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding CurrentMapVersionVM.Data.Summary.Score}" FontSize="54" FontWeight="DemiBold" HorizontalAlignment="Center"/>
+
+                                        <TextBlock DataContext="{Binding CurrentMapVersionVM.Data.Summary.ReviewsCount}" Opacity=".6" HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource IfNullTextBlockStyle}">
+                                                    <Setter Property="Text" Value="{Binding StringFormat='{}{0} ratings'}"/>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                    </StackPanel>
+                                    <Grid Margin="20 0 0 0">
+                                        <Grid.Resources>
+                                            <Style TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="Orange" Opacity=".2"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Setter Property="Foreground" Value="Orange"/>
+                                                <Setter Property="Grid.Column" Value="2"/>
+                                                <Setter Property="Width" Value="200"/>
+                                            </Style>
+                                        </Grid.Resources>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="5" Opacity=".5"/>
+                                        <TextBlock Text="4" Opacity=".5" Grid.Row="1"/>
+                                        <TextBlock Text="3" Opacity=".5" Grid.Row="2"/>
+                                        <TextBlock Text="2" Opacity=".5" Grid.Row="3"/>
+                                        <TextBlock Text="1" Opacity=".5" Grid.Row="4"/>
+                                        <Path/>
+                                        <Path Grid.Row="1"/>
+                                        <Path Grid.Row="2"/>
+                                        <Path Grid.Row="3"/>
+                                        <Path Grid.Row="4"/>
+                                        <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[5]}"/>
+                                        <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[4]}" Grid.Row="1"/>
+                                        <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[3]}" Grid.Row="2"/>
+                                        <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[2]}" Grid.Row="3"/>
+                                        <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[1]}" Grid.Row="4"/>
+                                    </Grid>
+                                    <StackPanel Margin="10 8 0 0" VerticalAlignment="Top">
+                                        <Button Content="Not implemented" IsEnabled="False"/>
+                                    </StackPanel>
                                 </StackPanel>
-                                <Grid Margin="20 0 0 0">
-                                    <Grid.Resources>
-                                        <Style TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}">
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <SolidColorBrush Color="Orange" Opacity=".2"/>
-                                                </Setter.Value>
-                                            </Setter>
-                                            <Setter Property="Foreground" Value="Orange"/>
-                                            <Setter Property="Grid.Column" Value="2"/>
-                                            <Setter Property="Width" Value="200"/>
+                                <!--<TextBlock Text="Ratings and reviews of current selected version" FontStyle="Italic" Opacity=".5" Margin="0 10"/>-->
+                                <ListBox ItemsSource="{Binding CurrentMapVersionVM.Data.Reviews}" MaxHeight="400" Margin="0 20 -16 0" Padding="0 0 20 0">
+                                    <ListBox.Resources>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                            <Setter Property="Focusable" Value="False"/>
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Margin" Value="0 4"/>
                                         </Style>
-                                    </Grid.Resources>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Text="5" Opacity=".5"/>
-                                    <TextBlock Text="4" Opacity=".5" Grid.Row="1"/>
-                                    <TextBlock Text="3" Opacity=".5" Grid.Row="2"/>
-                                    <TextBlock Text="2" Opacity=".5" Grid.Row="3"/>
-                                    <TextBlock Text="1" Opacity=".5" Grid.Row="4"/>
-                                    <Path/>
-                                    <Path Grid.Row="1"/>
-                                    <Path Grid.Row="2"/>
-                                    <Path Grid.Row="3"/>
-                                    <Path Grid.Row="4"/>
-                                    <ProgressBar Value="15"/>
-                                    <ProgressBar Grid.Row="1"/>
-                                    <ProgressBar Grid.Row="2"/>
-                                    <ProgressBar Grid.Row="3"/>
-                                    <ProgressBar Grid.Row="4"/>
-                                </Grid>
-                                <StackPanel Margin="10 8 0 0" VerticalAlignment="Top">
-                                    <Button Content="Not implemented" IsEnabled="False"/>
-                                </StackPanel>
+                                    </ListBox.Resources>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource ItemBorderStyle}">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Author}"/>
+                                                        <ui:RatingControl Value="{Binding Score}" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
+                                                                  Margin="10 1 -20 -5">
+                                                            <ui:RatingControl.RenderTransform>
+                                                                <ScaleTransform ScaleX=".7" ScaleY=".7"/>
+                                                            </ui:RatingControl.RenderTransform>
+                                                        </ui:RatingControl>
+                                                        <TextBlock Text="{Binding CreateTime}" Opacity=".5"/>
+                                                    </StackPanel>
+                                                    <TextBlock TextWrapping="Wrap" Text="{Binding Text}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </StackPanel>
-                            <!--<TextBlock Text="Ratings and reviews of current selected version" FontStyle="Italic" Opacity=".5" Margin="0 10"/>-->
-                            <ListBox MaxHeight="400" Margin="0 20 -16 0" Padding="0 0 20 0">
-                                <ListBox.Resources>
-                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                        <Setter Property="Focusable" Value="False"/>
-                                        <Setter Property="IsHitTestVisible" Value="False"/>
-                                        <Setter Property="Padding" Value="0"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        <Setter Property="Margin" Value="0 4"/>
-                                    </Style>
-                                    <Style x:Key="BorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
-                                        <Setter Property="Margin" Value="0"/>
-                                        <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
-                                    </Style>
-                                    <SolidColorBrush x:Key="RatingControlUnselectedForeground" Color="Orange" Opacity=".2"/>
-                                    <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="Orange"/>
-                                </ListBox.Resources>
-                                <ListBoxItem>
-                                    <Border Style="{StaticResource BorderStyle}">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Eternal-"/>
-                                                <ui:RatingControl Value="3" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
-                                                                  Margin="10 1 -20 -5">
-                                                    <ui:RatingControl.RenderTransform>
-                                                        <ScaleTransform ScaleX=".7" ScaleY=".7"/>
-                                                    </ui:RatingControl.RenderTransform>
-                                                </ui:RatingControl>
-                                                <TextBlock Text="25.05.2022" Opacity=".5"/>
-                                            </StackPanel>
-                                            <TextBlock TextWrapping="Wrap" Text="That's too much for the ladder.\nAnd it's so much pl much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much playayed on custom games, why, adding more of that?"/>
-                                        </StackPanel>
-                                    </Border>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Border Style="{StaticResource BorderStyle}">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Eternal-"/>
-                                                <ui:RatingControl Value="3" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
-                                                                  Margin="10 1 -20 -5">
-                                                    <ui:RatingControl.RenderTransform>
-                                                        <ScaleTransform ScaleX=".7" ScaleY=".7"/>
-                                                    </ui:RatingControl.RenderTransform>
-                                                </ui:RatingControl>
-                                                <TextBlock Text="25.05.2022" Opacity=".5"/>
-                                            </StackPanel>
-                                            <TextBlock TextWrapping="Wrap" Text="That's too much for the ladder.\nAnd it's so much pl much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much playayed on custom games, why, adding more of that?"/>
-                                        </StackPanel>
-                                    </Border>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Border Style="{StaticResource BorderStyle}">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Eternal-"/>
-                                                <ui:RatingControl Value="3" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
-                                                                  Margin="10 1 -20 -5">
-                                                    <ui:RatingControl.RenderTransform>
-                                                        <ScaleTransform ScaleX=".7" ScaleY=".7"/>
-                                                    </ui:RatingControl.RenderTransform>
-                                                </ui:RatingControl>
-                                                <TextBlock Text="25.05.2022" Opacity=".5"/>
-                                            </StackPanel>
-                                            <TextBlock TextWrapping="Wrap" Text="That's too much for the ladder.\nAnd it's so much pl much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much playayed on custom games, why, adding more of that?"/>
-                                        </StackPanel>
-                                    </Border>
-                                </ListBoxItem>
-                                <ListBoxItem>
-                                    <Border Style="{StaticResource BorderStyle}">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="Eternal-"/>
-                                                <ui:RatingControl Value="3" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
-                                                                  Margin="10 1 -20 -5">
-                                                    <ui:RatingControl.RenderTransform>
-                                                        <ScaleTransform ScaleX=".7" ScaleY=".7"/>
-                                                    </ui:RatingControl.RenderTransform>
-                                                </ui:RatingControl>
-                                                <TextBlock Text="25.05.2022" Opacity=".5"/>
-                                            </StackPanel>
-                                            <TextBlock TextWrapping="Wrap" Text="That's too much for the ladder.\nAnd it's so much pl much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much play much for the ladder.\nAnd it's so much playayed on custom games, why, adding more of that?"/>
-                                        </StackPanel>
-                                    </Border>
-                                </ListBoxItem>
-                            </ListBox>
-                        </StackPanel>
+                            <ui:ProgressRing IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                        </Grid>
                     </Expander>
                 </Border>
                 <Border Style="{StaticResource BorderStyle}" Background="Transparent" BorderThickness="0" Padding="0 10">

@@ -21,6 +21,7 @@ namespace beta.Models.API.Base
 
         [JsonPropertyName("meta")]
         public ApiVaultMeta Meta { get; set; }
+        public virtual void ParseIncluded() { }
     }
     
 }

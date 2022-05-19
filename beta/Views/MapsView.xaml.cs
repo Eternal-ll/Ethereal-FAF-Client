@@ -843,8 +843,8 @@ namespace beta.Views
                             }
                             else
                             {
-                                map.AuthorData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.player, map.Relations["author"].Data[0].Id);
-
+                                map.AuthorData = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.player, map.Relations["author"].Data[0].Id).Attributes;
+                                
                                 if (!AuthorIdToLogin.ContainsKey(authorId))
                                 {
                                     AuthorIdToLogin.Add(authorId, map.AuthorLogin);
@@ -854,12 +854,13 @@ namespace beta.Views
 
                         if (map.Relations["latestVersion"].Data is not null)
                         {
-                            map.MapData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
+                            var entity = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
+                            map.MapData = entity.Attributes;
                         }
 
                         if (map.Relations["reviewsSummary"].Data is not null)
                         {
-                            map.ReviewsSummaryData = ApiUniversalTools.GetAttributesFromIncluded(data.Included, ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id);
+                            map.ReviewsSummaryData = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id).Attributes;
                         }
                     }
                     #endregion
