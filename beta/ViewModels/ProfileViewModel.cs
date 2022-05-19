@@ -18,6 +18,8 @@ namespace beta.ViewModels
         {
             if (url[^1] != '/') url += '/';
 
+            if (query is not null && query.Length > 0 && query[0] != '?') query = '?' + query;
+
             var requestUrl = url + id + query;
 
             //WebRequest request = WebRequest.Create(requestUrl);
