@@ -851,12 +851,12 @@
                                          Value="True">
                                 <Setter Property="HorizontalContentAlignment" Value="Left"/>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding IsHidden}" Value="True">
+                            <!--<DataTrigger Binding="{Binding IsHidden}" Value="True">
                                 <Setter Property="IsTabStop" Value="False"/>
                                 <Setter Property="Focusable" Value="False"/>
                                 <Setter Property="IsSelected" Value="False"/>
                                 <Setter Property="IsHitTestVisible" Value="False"/>
-                            </DataTrigger>
+                            </DataTrigger>-->
                         </Style.Triggers>
                     </Style>
                 </ListBox.Resources>
