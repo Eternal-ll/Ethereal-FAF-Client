@@ -4,9 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
              d:DataContext="{d:DesignInstance {x:Type vm:MapViewModel}}"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              IsEnabled="{Binding IsInputEnabled}">
     <UserControl.Resources>
@@ -37,6 +38,10 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Grid.Column" Value="1"/>
         </Style>
+        <Style x:Key="AwesomeTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}"/>
+            <Setter Property="Opacity" Value=".8"/>
+        </Style>
         <Style x:Key="IfNullTextBlockStyle" TargetType="TextBlock">
             <Setter Property="Text" Value="{Binding}"/>
             <Style.Triggers>
@@ -44,6 +49,10 @@
                     <Setter Property="Text" Value="0"/>
                 </Trigger>
             </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PlugGridStyle" TargetType="Grid">
+            <Setter Property="Background" Value="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"/>
         </Style>
         <SolidColorBrush x:Key="RatingControlUnselectedForeground" Color="Orange" Opacity=".2"/>
         <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="Orange"/>
@@ -59,7 +68,7 @@
         </Grid.ColumnDefinitions>
         <ui:TitleBarButton HorizontalAlignment="Left" Background="Transparent" Margin="6">
             <Button Command="{DynamicResource NavigateCommand}" Padding="10 2" Margin="0 -2">
-                <TextBlock Text="Back to maps vault">
+                <TextBlock Text="Back">
                     <TextBlock.RenderTransform>
                         <TranslateTransform Y="-1"/>
                     </TextBlock.RenderTransform>
@@ -73,16 +82,46 @@
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type vm:MapViewModel}">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <Border Height="256" Width="256" Style="{StaticResource BorderStyle}" Margin="0">
+                                    <!--<Border Height="256" Width="256" Style="{StaticResource BorderStyle}" Margin="0">
                                         <Border.Background>
                                             <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
                                         </Border.Background>
+                                    </Border>-->
+                                    <Border Height="256" Width="256" Margin="0">
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsHidden}" Value="True">
+                                                        <Setter Property="Background">
+                                                            <Setter.Value>
+                                                                <VisualBrush Stretch="None" AlignmentX="Center" AlignmentY="Center">
+                                                                    <VisualBrush.Visual>
+                                                                        <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                                                        <Run Text="Version data is hidden" FontSize="20" Foreground="Gray"/>
+                                                                        <LineBreak/>
+                                                                        <Run Text="by author or vault team" Foreground="DimGray"/>
+                                                                            </TextBlock>
+                                                                        </Grid>
+                                                                    </VisualBrush.Visual>
+                                                                </VisualBrush>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
                                     </Border>
                                     <TextBlock Text="{Binding Data.DisplayedName}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
                                     <TextBlock HorizontalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="{Binding Data.Author, StringFormat='by {0}'}"/>
+                                                <Setter Property="behavior:TextBlockExtensions.BindableInlines" Value="{Binding Data.Author, Converter={StaticResource TextConverter}, StringFormat='by {0}'}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Data.Author}" Value="{x:Null}">
                                                         <Setter Property="Text" Value="by Unknown"/>
@@ -129,15 +168,20 @@
                     <ui:ProgressRing IsActive="{Binding IsPendingRequest}"/>
                 </Grid>
             </Border>
-
             <Border Style="{StaticResource BorderStyle}">
                 <StackPanel>
                     <TextBlock Text="Version"/>
                     <Separator/>
-                    <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}">
+                    <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}"
+                             ScrollViewer.CanContentScroll="False" Loaded="ListBox_Loaded" MaxHeight="200"
+                             Padding="0 0 20 0" Margin="0 0 -14 0">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel/>
+                                <UniformGrid>
+                                    <i:Interaction.Behaviors>
+                                        <customI:CalculateColumns Width="48" WidthOffset="0"/>
+                                    </i:Interaction.Behaviors>
+                                </UniformGrid>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.Resources>
@@ -148,8 +192,9 @@
                                 <Setter Property="Focusable" Value="True"/>
                                 <Setter Property="Padding" Value="0"/>
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="Margin" Value="4 0"/>
+                                <Setter Property="Margin" Value="4"/>
                                 <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="TextBlock.TextAlignment" Value="Center"/>
                             </Style>
                         </ListBox.Resources>
                         <ListBox.ItemTemplate>
@@ -179,54 +224,88 @@
                     </ListBox>
                 </StackPanel>
             </Border>
-            <Border Style="{StaticResource BorderStyle}">
-                <UniformGrid>
-                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Download .zip"/>
-                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Download" Background="LimeGreen"/>
-                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Installed" Background="Green" IsHitTestVisible="False" Focusable="False"/>
-                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Delete" Background="Red"/>
-                    <Button HorizontalAlignment="Stretch" Margin="4" Content="Update" Background="Orange"/>
-                </UniformGrid>
+            <Border Style="{StaticResource BorderStyle}" Visibility="{Binding CurrentMapVersionVM.DownloadsVisibility}">
+                <StackPanel>
+                    <ui:ProgressBar IsIndeterminate="True"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding CurrentMapVersionVM.Data.FolderName, StringFormat='Downloading {0}'}" Margin="0 10 0 0" Opacity=".5"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource BorderStyle}" Visibility="{Binding ButtonsVisibility}">
+                <WrapPanel IsEnabled="{Binding CurrentMapVersionVM.IsInputEnabled}">
+                    <WrapPanel.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="4"/>
+                            <Setter Property="Width" Value="122"/>
+                        </Style>
+                    </WrapPanel.Resources>
+                    <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Direct .zip" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
+                            Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding CurrentMapVersionVM.Data.DownloadUrl}"/>
+                    <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Copy link" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
+                            Command="{StaticResource CopyCommand}" CommandParameter="{Binding CurrentMapVersionVM.Data.DownloadUrl}"/>
+                    <Button Command="{Binding CurrentMapVersionVM.DownloadCommand}" Visibility="{Binding CurrentMapVersionVM.DownloadVisibility}" Content="Download" Background="LimeGreen"/>
+                    <Button Visibility="{Binding CurrentMapVersionVM.InstalledVisibility}" Content="Installed" Margin="4" Background="Green" IsHitTestVisible="False" Focusable="False">
+                        <!--<StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Installed" VerticalAlignment="Center"/>
+                            <Border Style="{StaticResource BorderStyle}" Background="Orange"
+                                    Padding="8 0" Margin="4 0 0 0">
+                                <TextBlock Text="{Binding CurrentMapVersionVM.Data.Version}"/>
+                            </Border>
+                        </StackPanel>-->
+                    </Button>
+                    <Button Visibility="{Binding CurrentMapVersionVM.UpdateVisibility}" Margin="4" Content="Update" Background="Orange"/>
+                    <Button Command="{Binding CurrentMapVersionVM.DeleteCommand}" Visibility="{Binding CurrentMapVersionVM.DeleteVisibility}" Content="Delete" Background="Red"/>
+                    <!--<TextBlock Text="{Binding CurrentMapVersionVM.Data.LocalState}"/>-->
+                </WrapPanel>
             </Border>
         </StackPanel>
-        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0 4 18 4">
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0 4 18 4" Loaded="ScrollViewer_Loaded">
             <StackPanel>
                 <Border Style="{StaticResource BorderStyle}" Margin="4 0 4 4">
                     <Expander Header="Description" IsExpanded="True">
-                        <StackPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
                             <Separator/>
-                            <Grid>
-                                <TextBlock DataContext="{Binding CurrentMapVersionVM.Data.Description}"
-                                           TextWrapping="Wrap" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
+                            <TextBlock Grid.Row="1" DataContext="{Binding CurrentMapVersionVM.Data.Description}"
+                                       TextWrapping="Wrap" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
                                     Path=DataContext.CurrentMapVersionVM.InputVisibility}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding}"/>
-                                            <Style.Triggers>
-                                                <Trigger Property="DataContext" Value="{x:Null}">
-                                                    <Setter Property="Text" Value="No description"/>
-                                                </Trigger>
-                                                <Trigger Property="DataContext" Value="">
-                                                    <Setter Property="Text" Value="No description"/>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="{Binding}"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="DataContext" Value="{x:Null}">
+                                                <Setter Property="Text" Value="No description"/>
+                                            </Trigger>
+                                            <Trigger Property="DataContext" Value="">
+                                                <Setter Property="Text" Value="No description"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Grid Grid.Row="1" Style="{StaticResource PlugGridStyle}" Visibility="{Binding CurrentMapVersionVM.PlugVisibility}">
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                    <Run Text="Version data is hidden" FontSize="20" Foreground="Gray"/>
+                                    <LineBreak/>
+                                    <Run Text="by author or vault team" Foreground="DimGray"/>
                                 </TextBlock>
-                                <ui:ProgressRing IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
                             </Grid>
-                        </StackPanel>
+                            <ui:ProgressRing Grid.RowSpan="2" IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                        </Grid>
                     </Expander>
                 </Border>
                 <Border Style="{StaticResource BorderStyle}">
-                    <Expander Header="Additional information" IsExpanded="True">
+                    <Expander Header="General information" IsExpanded="True">
                         <Grid>
-                            <StackPanel Visibility="{Binding CurrentMapVersionVM.InputVisibility}">
+                            <StackPanel Visibility="{Binding InputVisibility}">
                                 <Separator/>
                                 <ListBox>
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid VerticalAlignment="Top">
+                                            <UniformGrid>
                                                 <i:Interaction.Behaviors>
                                                     <customI:CalculateColumns Width="200" WidthOffset="0"/>
                                                 </i:Interaction.Behaviors>
@@ -239,7 +318,10 @@
                                             <Setter Property="IsHitTestVisible" Value="False"/>
                                             <Setter Property="Padding" Value="0"/>
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="VerticalContentAlignment" Value="Top"/>
                                             <Setter Property="Margin" Value="10"/>
+                                            <Setter Property="VerticalAlignment" Value="Top"/>
+                                            <!--<Setter Property="Background" Value="Gray"/>-->
                                         </Style>
                                         <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                             <Setter Property="Grid.Column" Value="0"/>
@@ -260,9 +342,11 @@
                                                 <RowDefinition/>
                                                 <RowDefinition/>
                                             </Grid.RowDefinitions>
-                                            <Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
-                                            <TextBlock Text="Approximate size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="Unknown" Grid.Column="1" Grid.Row="1"/>
+                                            <!--<Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />-->
+                                            <TextBlock Text="&#xf279;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+
+                                            <TextBlock Text="Map type" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding Data.MapType}" Grid.Column="1" Grid.Row="1"/>
                                         </Grid>
                                     </ListBoxItem>
                                     <ListBoxItem>
@@ -275,96 +359,14 @@
                                                 <RowDefinition/>
                                                 <RowDefinition/>
                                             </Grid.RowDefinitions>
-                                            <TextBlock Text="&#xf271;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
-                                            <TextBlock Text="Release data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.CreateTime}" Grid.Column="1" Grid.Row="1"/>
+                                            <!--<Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />-->
+                                            <TextBlock Text="&#xf71d;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+
+                                            <TextBlock Text="Battle type" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding Data.BattleType}" Grid.Column="1" Grid.Row="1"/>
                                         </Grid>
                                     </ListBoxItem>
-                                    <ListBoxItem>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <TextBlock Text="&#xf1da;" FontFamily="{StaticResource FontAwesomeSolidFree}" Margin="0 4" Opacity=".8"/>
-                                            <TextBlock Text="Update data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.UpdateTime}" Grid.Column="1" Grid.Row="1"/>
-                                        </Grid>
-                                    </ListBoxItem>
-                                    <ListBoxItem>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Path Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                            <TextBlock Text="Games played" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding CurrentMapVersionVM.Data.Statistics.PlaysCount}" Grid.Column="1" Grid.Row="1"/>
-                                        </Grid>
-                                    </ListBoxItem>
-                                    <ListBoxItem>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Path Height="14" Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
-                                            <TextBlock Text="Map size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.MapKmSizeLabel}" Grid.Column="1" Grid.Row="1"/>
-                                        </Grid>
-                                    </ListBoxItem>
-                                    <ListBoxItem>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="24"/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Path Data="M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z" Height="14">
-                                                <Path.RenderTransform>
-                                                    <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
-                                                </Path.RenderTransform>
-                                                <Path.Style>
-                                                    <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
-                                                        <Setter Property="Fill" Value="LightGreen"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
-                                                                <Setter Property="Fill" Value="Red"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Path.Style>
-                                            </Path>
-                                            <TextBlock Text="Is ranked" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="{Binding CurrentMapVersionVM.Data.IsRanked}" Grid.Column="1" Grid.Row="1">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="LightGreen"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
-                                                                <Setter Property="Foreground" Value="Red"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Grid>
-                                    </ListBoxItem>
+                                    <!--TODO from from listbox to above and add desc-->
                                     <ListBoxItem>
                                         <ListBoxItem.Style>
                                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
@@ -386,13 +388,429 @@
                                                 <RowDefinition/>
                                             </Grid.RowDefinitions>
                                             <Path Fill="Yellow" Height="14" Data="M5.8 21L7.4 14L2 9.2L9.2 8.6L12 2L14.8 8.6L22 9.2L18.8 12H18C14.9 12 12.4 14.3 12 17.3L5.8 21M17.8 21.2L22.6 16.4L21.3 15L17.7 18.6L16.2 17L15 18.2L17.8 21.2" />
-                                            <TextBlock Text="Is recommended" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
-                                            <TextBlock Text="True" Foreground="Yellow" Grid.Column="1" Grid.Row="1"/>
+                                            <TextBlock Text="Recommended" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="Map is recommended by MM team" Margin="0 0 0 -10" TextWrapping="Wrap" Grid.Column="1" Grid.Row="1">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Yellow"/>
+                                                        <Style.Triggers>
+                                                            <Trigger Property="Text" Value="False">
+                                                                <Setter Property="Foreground" Value="Red"/>
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Path Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                            <TextBlock Text="Games played" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding Data.GamesPlayed}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="&#xf4ff;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                            <TextBlock Text="Author" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Grid.Column="1" Grid.Row="1">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="behavior:TextBlockExtensions.BindableInlines" Value="{Binding Data.Author, Converter={StaticResource TextConverter}}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Data.Author}" Value="{x:Null}">
+                                                                <Setter Property="Text" Value="Unknown"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="&#xf271;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                            <TextBlock Text="Release data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding Data.CreateTime, StringFormat='dd.MM.yyyy'}" Grid.Column="1" Grid.Row="1"/>
+                                        </Grid>
+                                    </ListBoxItem>
+                                    <ListBoxItem>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="24"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="&#xf1da;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                            <TextBlock Text="Update data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text="{Binding Data.UpdateTime, StringFormat='dd.MM.yyyy'}" Grid.Column="1" Grid.Row="1"/>
                                         </Grid>
                                     </ListBoxItem>
                                 </ListBox>
                             </StackPanel>
                             <ui:ProgressRing IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                        </Grid>
+                    </Expander>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}">
+                    <Expander Header="Version information" IsExpanded="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Separator/>
+                            <ListBox Grid.Row="1">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid VerticalAlignment="Top">
+                                            <i:Interaction.Behaviors>
+                                                <customI:CalculateColumns Width="200" WidthOffset="0"/>
+                                            </i:Interaction.Behaviors>
+                                        </UniformGrid>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.Resources>
+                                    <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                                    <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                                    <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                        <Setter Property="Focusable" Value="False"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Margin" Value="10"/>
+                                    </Style>
+                                    <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                        <Setter Property="Grid.Column" Value="0"/>
+                                        <Setter Property="Fill" Value="White"/>
+                                        <Setter Property="Opacity" Value=".8"/>
+                                        <Setter Property="VerticalAlignment" Value="Top"/>
+                                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                                        <Setter Property="Margin" Value="0 4 4 0"/>
+                                    </Style>
+                                </ListBox.Resources>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Path Height="14" Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
+                                        <TextBlock Text="Map size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.MapKmSizeLabel}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Path Height="14" Data="M48 136C48 149.3 37.25 160 24 160C10.75 160 0 149.3 0 136V32C0 14.33 14.33 0 32 0H136C149.3 0 160 10.75 160 24C160 37.25 149.3 48 136 48H48V136zM127.8 176C127.8 149.5 149.3 128 175.8 128C202.3 128 223.8 149.5 223.8 176C223.8 202.5 202.3 224 175.8 224C149.3 224 127.8 202.5 127.8 176V176zM218.7 256C227.8 256 236.5 258.3 244 262.4C211.6 274.3 186.8 301.9 178.8 336H122.7C107.9 336 96 324.1 96 309.3C96 279.9 119.9 256 149.3 256H218.7zM517.3 336H461.2C453.2 301.9 428.4 274.3 395.1 262.4C403.5 258.3 412.2 256 421.3 256H490.7C520.1 256 544 279.9 544 309.3C544 324.1 532.1 336 517.3 336H517.3zM432 360C432 373.3 421.3 384 408 384H232C218.7 384 208 373.3 208 360C208 351.6 209.4 343.5 212.1 336C220.7 311.7 241.1 293.4 267.1 288.1C271.9 288.3 275.9 288 280 288H360C364.1 288 368.1 288.3 372 288.1C398 293.4 419.3 311.7 427.9 336C430.6 343.5 432 351.6 432 360zM416 176C416 149.5 437.5 128 464 128C490.5 128 512 149.5 512 176C512 202.5 490.5 224 464 224C437.5 224 416 202.5 416 176zM384 192C384 227.3 355.3 256 320 256C284.7 256 256 227.3 256 192C256 156.7 284.7 128 320 128C355.3 128 384 156.7 384 192zM480 24C480 10.75 490.7 0 504 0H608C625.7 0 640 14.33 640 32V136C640 149.3 629.3 160 616 160C602.7 160 592 149.3 592 136V48H504C490.7 48 480 37.25 480 24zM48 464H136C149.3 464 160 474.7 160 488C160 501.3 149.3 512 136 512H32C14.33 512 0 497.7 0 480V376C0 362.7 10.75 352 24 352C37.25 352 48 362.7 48 376V464zM504 464H592V376C592 362.7 602.7 352 616 352C629.3 352 640 362.7 640 376V480C640 497.7 625.7 512 608 512H504C490.7 512 480 501.3 480 488C480 474.7 490.7 464 504 464z"/>
+                                        <TextBlock Text="Max players" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.MaxPlayers}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Path Data="M9,3L5,7H8V14H10V7H13M16,17V10H14V17H11L15,21L19,17H16Z" Height="14">
+                                            <Path.RenderTransform>
+                                                <ScaleTransform ScaleX="1.1" ScaleY="1.1"/>
+                                            </Path.RenderTransform>
+                                            <Path.Style>
+                                                <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                                    <Setter Property="Fill" Value="LightGreen"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
+                                                            <Setter Property="Fill" Value="Red"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Path.Style>
+                                        </Path>
+                                        <StackPanel Orientation="Horizontal" Grid.Column="1" >
+                                            <TextBlock Text="Map is ranked" VerticalAlignment="Top" Opacity=".8 "/>
+                                            <TextBlock Text=" &#xf059;" Margin="0 2 0 0" Style="{StaticResource AwesomeTextBlockStyle}">
+                                                <TextBlock.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock>
+                                                            <Run Text="True:" FontWeight="DemiBold" Foreground="LightGreen"/>
+                                                            <Run Text="You can gain/lose rating by playing on this map"/>
+                                                            <Run Text="False:" FontWeight="DemiBold" Foreground="Red"/>
+                                                            <Run Text="You cant gain/lose rating by playing on this map"/>
+                                                        </TextBlock>
+                                                    </ToolTip>
+                                                </TextBlock.ToolTip>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.IsRanked}" Grid.Column="1" Grid.Row="1">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="LightGreen"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsRanked}" Value="False">
+                                                            <Setter Property="Foreground" Value="Red"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Path Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                        <TextBlock Text="Games played" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding CurrentMapVersionVM.Data.Statistics.PlaysCount}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Path Height="14" Data="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                                        <TextBlock Text="Approximate size" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="Unknown" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="&#xf07b;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                        <TextBlock Text="Folder name" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.FolderName}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="&#xf271;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                        <TextBlock Text="Release data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.CreateTime, StringFormat='dd.MM.yyyy'}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text="&#xf1da;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                        <TextBlock Text="Update data" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.UpdateTime, StringFormat='dd.MM.yyyy'}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                            </ListBox>
+                            <Grid Grid.Row="1" Style="{StaticResource PlugGridStyle}" Visibility="{Binding CurrentMapVersionVM.PlugVisibility}">
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                    <Run Text="Version data is hidden" FontSize="20" FontWeight="DemiBold" Foreground="Gray"/>
+                                    <LineBreak/>
+                                    <Run Text="by author or vault team" Foreground="DimGray"/>
+                                </TextBlock>
+                            </Grid>
+                            <ui:ProgressRing Grid.RowSpan="2" IsActive="{Binding CurrentMapVersionVM.IsPendingRequest}"/>
+                        </Grid>
+                    </Expander>
+                </Border>
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.Scenario}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Expander Header="Scenario information" IsExpanded="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.Resources>
+                                <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsHitTestVisible" Value="False"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Margin" Value="10"/>
+                                </Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
+                                    <Setter Property="Grid.Column" Value="0"/>
+                                    <Setter Property="Fill" Value="White"/>
+                                    <Setter Property="Opacity" Value=".8"/>
+                                    <Setter Property="VerticalAlignment" Value="Top"/>
+                                    <Setter Property="HorizontalAlignment" Value="Left"/>
+                                    <Setter Property="Margin" Value="0 4 4 0"/>
+                                </Style>
+                            </Grid.Resources>
+                            <Separator/>
+                            <ListBox Grid.Row="1">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid VerticalAlignment="Top">
+                                            <i:Interaction.Behaviors>
+                                                <customI:CalculateColumns Width="200" WidthOffset="0"/>
+                                            </i:Interaction.Behaviors>
+                                        </UniformGrid>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Image Height="24" HorizontalAlignment="Left" Margin="0 -10" Source="{StaticResource MassResourceImage}"/>
+                                        <TextBlock Text="Mexes count" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.Scenario[Mass]}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Image Height="20" HorizontalAlignment="Left" Margin="0 -10" Source="{StaticResource HydroCarbonResourceImage}"/>
+                                        <TextBlock Text="Hydrocarbons count" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.Scenario[Hydrocarbon]}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                                <ListBoxItem>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="24"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Text=" &#xf06a;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                        <TextBlock Text="Map version" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                        <TextBlock Text="{Binding CurrentMapVersionVM.Data.Scenario[map_version]}" Grid.Column="1" Grid.Row="1"/>
+                                    </Grid>
+                                </ListBoxItem>
+                            </ListBox>
+                            <ListBoxItem Grid.Row="2" IsHitTestVisible="True">
+                                <ListBoxItem.Style>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.Scenario[AdaptiveMap]}" Value="true">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListBoxItem.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="&#xf5a9;" Style="{StaticResource AwesomeTextBlockStyle}"/>
+                                    <TextBlock Text="Adaptive map" Grid.Column="1" VerticalAlignment="Top" Opacity=".8 "/>
+                                    <TextBlock Margin="0 0 0 10" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" Text="Advanced map settings become available that allow you to adjust the map itself and how it will play out directly from the game lobby. The purpose of the adaptive map series is a customizable map experience. It allows you e.g. to adapt the given map resources to the player count (Dynamic Spawn Of Resources) and to add/remove resources as well as units/wrecks."/>
+                                    <TextBlock Grid.Row="0" x:Name="AdaptiveDesc" Text="Additional information https://wiki.faforever.com/en/Adaptive-Maps" Visibility="Collapsed"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Tag="Additional information https://wiki.faforever.com/en/Adaptive-Maps"
+                                               behavior:TextBlockExtensions.BindableInlines="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource TextConverter}}"/>
+                                </Grid>
+                            </ListBoxItem>
                         </Grid>
                     </Expander>
                 </Border>
@@ -404,7 +822,6 @@
                                 <StackPanel Orientation="Horizontal">
                                     <StackPanel MinWidth="80">
                                         <TextBlock Style="{StaticResource IfNullTextBlockStyle}" DataContext="{Binding CurrentMapVersionVM.Data.Summary.Score}" FontSize="54" FontWeight="DemiBold" HorizontalAlignment="Center"/>
-
                                         <TextBlock DataContext="{Binding CurrentMapVersionVM.Data.Summary.ReviewsCount}" Opacity=".6" HorizontalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource IfNullTextBlockStyle}">
@@ -412,7 +829,6 @@
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-
                                     </StackPanel>
                                     <Grid Margin="20 0 0 0">
                                         <Grid.Resources>
@@ -422,9 +838,11 @@
                                                         <SolidColorBrush Color="Orange" Opacity=".2"/>
                                                     </Setter.Value>
                                                 </Setter>
+                                                <Setter Property="MinHeight" Value="6"/>
                                                 <Setter Property="Foreground" Value="Orange"/>
                                                 <Setter Property="Grid.Column" Value="2"/>
                                                 <Setter Property="Width" Value="200"/>
+                                                <Setter Property="Maximum" Value="{Binding CurrentMapVersionVM.Data.Summary.ReviewsCount}"/>
                                             </Style>
                                         </Grid.Resources>
                                         <Grid.RowDefinitions>
@@ -439,16 +857,16 @@
                                             <ColumnDefinition/>
                                             <ColumnDefinition/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="5" Opacity=".5"/>
-                                        <TextBlock Text="4" Opacity=".5" Grid.Row="1"/>
-                                        <TextBlock Text="3" Opacity=".5" Grid.Row="2"/>
-                                        <TextBlock Text="2" Opacity=".5" Grid.Row="3"/>
-                                        <TextBlock Text="1" Opacity=".5" Grid.Row="4"/>
-                                        <Path/>
-                                        <Path Grid.Row="1"/>
-                                        <Path Grid.Row="2"/>
-                                        <Path Grid.Row="3"/>
-                                        <Path Grid.Row="4"/>
+                                        <TextBlock Text="5" Opacity=".5" FontSize="10" Margin="0 1.5 0 0"/>
+                                        <TextBlock Text="4" Opacity=".5" FontSize="10" Margin="0 1.5 0 0" Grid.Row="1"/>
+                                        <TextBlock Text="3" Opacity=".5" FontSize="10" Margin="0 1.5 0 0" Grid.Row="2"/>
+                                        <TextBlock Text="2" Opacity=".5" FontSize="10" Margin="0 1.5 0 0" Grid.Row="3"/>
+                                        <TextBlock Text="1" Opacity=".5" FontSize="10" Margin="0 1.5 0 0" Grid.Row="4"/>
+                                        <Path Margin="4 0"/>
+                                        <Path Margin="4 0" Grid.Row="1"/>
+                                        <Path Margin="4 0" Grid.Row="2"/>
+                                        <Path Margin="4 0" Grid.Row="3"/>
+                                        <Path Margin="4 0" Grid.Row="4"/>
                                         <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[5]}"/>
                                         <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[4]}" Grid.Row="1"/>
                                         <ProgressBar Value="{Binding CurrentMapVersionVM.Data.PointsCount[3]}" Grid.Row="2"/>
@@ -462,9 +880,12 @@
                                 <!--<TextBlock Text="Ratings and reviews of current selected version" FontStyle="Italic" Opacity=".5" Margin="0 10"/>-->
                                 <ListBox ItemsSource="{Binding CurrentMapVersionVM.Data.Reviews}" MaxHeight="400" Margin="0 20 -16 0" Padding="0 0 20 0">
                                     <ListBox.Resources>
+                                        <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                                        <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                                        <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
                                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                             <Setter Property="Focusable" Value="False"/>
-                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="IsHitTestVisible" Value="True"/>
                                             <Setter Property="Padding" Value="0"/>
                                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                                             <Setter Property="Margin" Value="0 4"/>
@@ -475,7 +896,7 @@
                                             <Border Style="{StaticResource ItemBorderStyle}">
                                                 <StackPanel>
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding Author}"/>
+                                                        <TextBlock behavior:TextBlockExtensions.BindableInlines="{Binding Author, Converter={StaticResource TextConverter}}"/>
                                                         <ui:RatingControl Value="{Binding Score}" Focusable="False" IsTabStop="False" IsReadOnly="True" Padding="0"
                                                                   Margin="10 1 -20 -5">
                                                             <ui:RatingControl.RenderTransform>
@@ -525,8 +946,36 @@
                             </ListBox.Resources>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Style="{StaticResource BorderStyle}" Padding="10">
+                                    <Border Padding="10" Cursor="Hand">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform Y="0"/>
+                                        </Border.RenderTransform>
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Trigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                                                                     To="-4" From="0" Duration="0:0:0.1" FillBehavior="HoldEnd"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </Trigger.EnterActions>
+                                                        <Trigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                                                                     To="0" From="-4" Duration="0:0:0.1"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </Trigger.ExitActions>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
                                         <StackPanel>
+                                            <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=RenderTransform.Y}"/>-->
                                             <Border Style="{StaticResource BorderStyle}" Margin="0 10 0 0" Background="Gray"
                                                     MaxWidth="128" Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"/>
                                             <TextBlock Text="Astro gap" HorizontalAlignment="Center" TextWrapping="Wrap" FontSize="16" Margin="0 10 0 0"/>

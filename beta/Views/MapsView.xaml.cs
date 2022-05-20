@@ -353,7 +353,7 @@ namespace beta.Views
         }
 
         #region MapName
-        private string _MapName = string.Empty;
+        private string _MapName;
         public string MapName
         {
             get => _MapName;
@@ -362,7 +362,7 @@ namespace beta.Views
         #endregion
 
         #region AuthorName
-        private string _AuthorName = string.Empty;
+        private string _AuthorName;
         public string AuthorName
         {
             get => _AuthorName;
@@ -472,7 +472,7 @@ namespace beta.Views
                         BuildQuery();
                         DoRequest();
                     }
-                    if (value && ResponseView.SortDescriptions.Count == 0)
+                    if (value && ResponseView?.SortDescriptions.Count == 0)
                     {
                         SelectedSort = SortDescriptions[0];
                     }
@@ -652,7 +652,7 @@ namespace beta.Views
             }
             else
             {
-                if (MapName.Length > 0)
+                if (MapName?.Length > 0)
                 {
                     filter.Append($"displayName=='{MapName}';");
                 }
@@ -694,6 +694,9 @@ namespace beta.Views
                     filter.Remove(filter.Length - 1, 1);
                     filter.Append(");");
                 }
+
+                // 
+                filter.Append("latestVersion.hidden=='false'&");
 
                 if (SelectedMapWidths.Count > 0)
                 {
@@ -825,7 +828,7 @@ namespace beta.Views
                 var json = new StreamReader(stream).ReadToEnd();
 
                 var data = JsonSerializer.Deserialize<ApiUniversalResult<ApiMapData[]>>(json);
-                List<ApiMapData> dataAsList = new();
+                //List<ApiMapData> dataAsList = new();
                 for (int i = 0; i < data.Data.Length; i++)
                 {
                     var map = data.Data[i];
@@ -865,16 +868,19 @@ namespace beta.Views
                     }
                     #endregion
 
-                    if (map.IsHidden.Value) continue;
-
+                    //if (map.IsHidden.HasValue && map.IsHidden.Value) continue;
                     // Check if installed
                     map.LocalState = MapsService.CheckLocalMap(map.FolderName);
 
                     // Check if legacy map
                     map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
-                    dataAsList.Add(map);
+                    //if (map.IsLegacyMap && map.MapData is not null)
+                    //{
+                    //    map.MapData["hidden"] = "false";
+                    //}
+                    //dataAsList.Add(map);
                 }
-                data.Data = dataAsList.ToArray();
+                //data.Data = dataAsList.ToArray();
                 LastData = data.Data;
                 OnPropertyChanged(nameof(LastData));
                 if (IsOnlyLocalMaps)

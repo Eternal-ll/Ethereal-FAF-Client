@@ -41,23 +41,28 @@ namespace beta.Models.API.MapsVault
         /// Is map originals from Supreme Commander: Forged Alliance. <seealso cref="LegacyMap"/>
         /// </summary>
         public bool IsLegacyMap => _IsLegacyMap ??= Enum.IsDefined(typeof(LegacyMap),
-            FolderName.Contains('.') ?
-            FolderName.Split('.')[0].ToUpper() :
+            //FolderName.Contains('.') ?
+            //FolderName.Split('.')[0].ToUpper() :
             FolderName.ToUpper());
+
+        public bool IsLatestVersion { get; set; }
         
-        //public LocalMapState LocalState { get; set; }
+        /// <summary>
+        /// Local state of map <see cref="LocalMapState"/>
+        /// </summary>
+        public LocalMapState LocalState { get; set; }
 
         private BitmapImage _MapSmallPreview;
         /// <summary>
         /// 
         /// </summary>
-        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge, 100, 100);
+        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 100, 100);
 
         private ImageSource _MapLargePreview;
         /// <summary>
         /// 
         /// </summary>
-        public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall);
+        public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
         /// <summary>
         /// <seealso cref="Tools.CalculateMapSizeToPixels(int)"/>
         /// </summary>
@@ -79,5 +84,6 @@ namespace beta.Models.API.MapsVault
         public ApiUniversalSummary Summary { get; set; }
         public UniversalReviewModel[] Reviews { get; set; }
         public Dictionary<int, int> PointsCount { get; set; }
+        public Dictionary<string, string> Scenario { get; set; }
     }
 }

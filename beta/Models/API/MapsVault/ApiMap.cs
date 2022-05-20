@@ -1,18 +1,18 @@
 ﻿using beta.Models.API.Universal;
-using beta.Models.Server;
+using System;
 
 namespace beta.Models.API.MapsVault
 {
     internal class ApiMap : Base.ApiUniversalData
     {
-        public string DisplayedName => Attributes?["displayName"];
-        public string BattleType => Attributes?["battleType"];
-        public string MapType => Attributes?["mapType"];
-        public string GamesPlayed => Attributes?["gamesPlayed"];
-        public string IsRecommended => Attributes?["recommended"];
+        public string DisplayedName => Attributes["displayName"];
+        public string BattleType => Attributes["battleType"];
+        public string MapType => Attributes["mapType"];
+        public int GamesPlayed => int.Parse(Attributes["gamesPlayed"]);
+        public bool IsRecommended => bool.Parse(Attributes["recommended"]);
 
-        public string CreateTime => Attributes?["createTime"];
-        public string UpdateTime => Attributes?["updateTime"];
+        public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
+        public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
 
         public ApiUniversalStatistics StatisticsSummary { get; set; }
         public ApiUniversalSummary ReviewsSummary { get; set; }
@@ -22,6 +22,5 @@ namespace beta.Models.API.MapsVault
     {
         //public MapVersionModel[] Versions { get; set; }
         public string Author { get; set; }
-        public PlayerInfoMessage AuthorInstance { get; set; }
     }
 }
