@@ -3,6 +3,7 @@ using beta.Models.Enums;
 using beta.Models.Server;
 using beta.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
@@ -14,8 +15,9 @@ namespace beta.Infrastructure.Services.Interfaces
         public Map GetMap(Uri uri, PreviewType previewType, bool attachScenario = true);
         public BitmapImage GetMapPreview(Uri uri, Folder folder = Folder.MapsSmallPreviews);
         public void AttachMapScenario(GameMap map);
-        public Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri);
-
+        public void Delete(string name);
+        public Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri, bool showUI = true);
+        public Dictionary<string, string> GetMapScenario(string mapName, bool isLegacy = false);
         public bool IsLegacyMap(string name);
         public LocalMapState CheckLocalMap(string name);
         public string[] GetLocalMaps();

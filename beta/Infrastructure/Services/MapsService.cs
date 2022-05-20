@@ -75,7 +75,7 @@ namespace beta.Infrastructure.Services
             var data = name.Split('.');
             if (data.Length > 1)
             {
-                if (int.TryParse(data[1], out var v))
+                if (int.TryParse(data[1].Replace("v", null), out var v))
                 {
                     version = v;
                 }
@@ -93,7 +93,7 @@ namespace beta.Infrastructure.Services
 
                 if (data.Length > 1)
                 {
-                    if (int.TryParse(data[1], out var v))
+                    if (int.TryParse(data[1].Replace("v", null), out var v))
                     {
                         if (version is null)
                         {
@@ -103,6 +103,10 @@ namespace beta.Infrastructure.Services
                         if (v > version)
                         {
                             return LocalMapState.Older;
+                        }
+                        if (v == version)
+                        {
+                            return LocalMapState.Same;
                         }
                         else
                         {
@@ -185,7 +189,7 @@ namespace beta.Infrastructure.Services
                     ["type"] = "",
                     ["size"] = "",
                     ["map_version"] = "", // comes with game_info from server
-                    ["AdaptiveMap"] = "False",
+                    ["AdaptiveMap"] = "",
                     ["Mass"] = "",
                     ["Hydrocarbon"] = "",
                     ["description"] = "",
@@ -246,7 +250,7 @@ namespace beta.Infrastructure.Services
         /// https://content.faforever.com/maps/scmp_haz04.v0001.zip
         /// </summary>
         /// <param name="uri"></param>
-        public async Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri)
+        public async Task<DownloadViewModel> DownloadAndExtractAsync(Uri uri, bool showUI = true)
         {
             var commonPath = App.GetPathToFolder(Folder.Common);
             var name = uri.Segments[^1];
@@ -254,7 +258,7 @@ namespace beta.Infrastructure.Services
 
             var model = DownloadService.GetDownload(dModel);
 
-            NotificationService.ShowDownloadDialog(model);
+            if(showUI) NotificationService.ShowDownloadDialog(model);
 
             await model.DownloadAllAsync();
 
@@ -403,6 +407,12 @@ namespace beta.Infrastructure.Services
 
             CachedMaps.Add(gameMap);
             return gameMap;
+        }
+
+        public void Delete(string name)
+        {
+            string extractPath = App.GetPathToFolder(Folder.Maps);
+            Directory.Delete(extractPath + name, true);
         }
 
         //https://api.faforever.com/data/map
