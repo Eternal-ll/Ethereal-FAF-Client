@@ -1,6 +1,9 @@
-﻿using beta.ViewModels;
+﻿using beta.Infrastructure.Behaviors;
+using beta.ViewModels;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace beta.Views
 {
@@ -16,6 +19,20 @@ namespace beta.Views
         private void ListBox_Initialized(object sender, System.EventArgs e)
         {
             ((ListBox)sender).ItemsSource = Enumerable.Range(0, 20);
+        }
+
+        private void ScrollViewer_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var scroll = (ScrollViewer)sender;
+            var property = scroll.GetType().GetProperty("ScrollInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+            property.SetValue(scroll, new ScrollInfoAdapter((IScrollInfo)property.GetValue(scroll)));
+        }
+
+        private void ListBox_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            //var scroll = Tools.FindChild<ScrollViewer>((ListBox)sender);
+            //var property = scroll.GetType().GetProperty("ScrollInfo", BindingFlags.NonPublic | BindingFlags.Instance);
+            //property.SetValue(scroll, new ScrollInfoAdapter((IScrollInfo)property.GetValue(scroll)));
         }
     }
 }
