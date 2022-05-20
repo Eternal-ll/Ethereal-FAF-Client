@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Commands;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -7,6 +8,8 @@ namespace beta.ViewModels
 {
     public abstract class ApiViewModel : Base.ViewModel
     {
+        public event EventHandler RequestFinished;
+
         #region Id
         private int _Id = -1;
         /// <summary>
@@ -56,6 +59,7 @@ namespace beta.ViewModels
             });
             IsPendingRequest = false;
             if (IsRefreshing) IsRefreshing = false;
+            RequestFinished?.Invoke(this, null);
         }
 
         public void RunRequest() => Task.Run(() => DoRequestAsync());
