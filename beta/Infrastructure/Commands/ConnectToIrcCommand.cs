@@ -15,8 +15,7 @@ namespace beta.Infrastructure.Commands
             NotificationService = App.Services.GetService<INotificationService>();
         }
         public override bool CanExecute(object parameter) => IrcService.State == Models.Enums.IrcState.Disconnected;
-        public override void Execute(object parameter)
-        {
+        public override void Execute(object parameter) => 
             Task.Run(() => IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password))
                 .ContinueWith(task =>
                 {
@@ -25,7 +24,6 @@ namespace beta.Infrastructure.Commands
                         NotificationService.ShowExceptionAsync(task.Exception);
                     }
                 });
-        }
     }
     internal class DisconnectFromIrcCommand : Base.Command
     {

@@ -44,7 +44,6 @@
                     <cmd:ShowProfileCommand x:Key="ShowProfileCommand"/>
                 </ResourceDictionary>
                 <ResourceDictionary>
-                    <converter:GetMapPreviewConverter x:Key="GetMapPreviewConverter"/>
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
                     <converter:HumanTimeConverter x:Key="HumanTimeConverter"/>
                     <converter:IsNotNullOrWhiteSpaceConverter x:Key="IsNotNullOrWhiteSpaceConverter"/>
@@ -59,17 +58,12 @@
                     <converter:TransparentColorConverter x:Key="TransparentColorConverter"/>
                     <converter:IsNullConverter x:Key="IsNullConverter"/>
                     <converter:ObjectToTypeConverter x:Key="ObjectToTypeConverter"/>
-                    <converter:WidthToRowsConverter x:Key="WidthToRowsConverter"/>
 
                     <!--Chat converters-->
-                    <converter:EmojiFormatConverter x:Key="EmojiFormatConverter"/>
-
                     <converter:ChatPlayerHighlightConverter x:Key="ChatPlayerHighlightConverter"/>
                     <converter:CheckIfEmojiOnlyConverter x:Key="CheckIfEmojiOnlyConverter"/>
 
                     <converter:TextConverter x:Key="TextConverter"/>
-
-                    <converter:ToGlyphsTextConverter x:Key="GlyphsTextConverter"/>
                     <converter:MoreThanConverter x:Key="MoreThanConverter"/>
                 </ResourceDictionary>
 

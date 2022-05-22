@@ -4,6 +4,9 @@ using System.Windows.Controls.Primitives;
 
 namespace beta.Infrastructure.Behaviors
 {
+    /// <summary>
+    /// Dynamis column calculator for <see cref="UniformGrid"/>
+    /// </summary>
     public class CalculateColumns : Behavior<UniformGrid>
     {
         public int Width { get; set; } = 100;

@@ -10,7 +10,10 @@ namespace beta.Infrastructure.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length == 3 && values[0] is double && values[1] is double && values[2] is CornerRadius)
+            if (values.Length == 3 &&
+                values[0] is double &&
+                values[1] is double &&
+                values[2] is CornerRadius)
             {
                 var width = (double)values[0];
                 var height = (double)values[1];

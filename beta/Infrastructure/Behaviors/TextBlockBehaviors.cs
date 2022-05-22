@@ -5,6 +5,9 @@ using System.Windows.Documents;
 
 namespace beta.Infrastructure.Behaviors
 {
+    /// <summary>
+    /// Bindable inlines for TextBlock
+    /// </summary>
     public static class TextBlockExtensions
     {
         public static IEnumerable<Inline> GetBindableInlines(DependencyObject obj)
