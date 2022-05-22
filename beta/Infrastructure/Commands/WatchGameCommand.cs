@@ -58,8 +58,14 @@ namespace beta.Infrastructure.Commands
                     await NotificationService.ShowPopupAsync("Replay is less than 5 minutes");
                     return;
                 }
-                await GameLauncherService.WatchGame(player.Game.uid, player.Game.mapname, player.id, player.Game.FeaturedMod, true)
-                    .ConfigureAwait(false);
+                Task.Run(() => GameLauncherService.WatchGame(player.Game.uid, player.Game.mapname, player.id, player.Game.FeaturedMod, true))
+                    .ContinueWith(task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            NotificationService.ShowExceptionAsync(task.Exception);
+                        }
+                    });
             }
         }
     }
