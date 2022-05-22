@@ -6,7 +6,7 @@ namespace beta.Infrastructure.Behaviors
 {
     public class CalculateColumns : Behavior<UniformGrid>
     {
-        public int Width { get; set; }
+        public int Width { get; set; } = 100;
         public int WidthOffset { get; set; } = 0;
         protected override void OnAttached()
         {
