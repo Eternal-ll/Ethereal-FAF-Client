@@ -7,7 +7,7 @@ namespace beta.Infrastructure.Behaviors
     public class CalculateColumns : Behavior<UniformGrid>
     {
         public int Width { get; set; }
-        public int WidthOffset { get; set; }
+        public int WidthOffset { get; set; } = 0;
         protected override void OnAttached()
         {
             AssociatedObject.SizeChanged += OnDataGridSizeChanged;
