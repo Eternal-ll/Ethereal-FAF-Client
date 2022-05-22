@@ -96,6 +96,7 @@
                 <ui:XamlControlsResources/>
                 <ResourceDictionary Source="Resources/Styles/GlyphsStyle.xaml"/>
                 <ResourceDictionary Source="Resources/ResourceDictionaries/EmojiResourceDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/ResourceDictionaries/UIDictionary.xaml"/>
 
 
                 <ResourceDictionary Source="Resources/Styles/ListBoxItemStyles.xaml"/>
