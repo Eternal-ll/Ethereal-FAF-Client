@@ -52,6 +52,7 @@ namespace beta.ViewModels
 
         public async Task DoRequestAsync()
         {
+            if (IsPendingRequest) return;
             IsPendingRequest = true;
             await RequestTask().ContinueWith(task =>
             {

@@ -2,6 +2,7 @@
 using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.API;
+using beta.Models.API.MapsVault;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
 using beta.Views;
@@ -128,8 +129,8 @@ namespace beta.ViewModels
         #endregion
 
         #region SelectedMap
-        private ApiMapData _SelectedMap;
-        public ApiMapData SelectedMap
+        private ApiMapModel _SelectedMap;
+        public ApiMapModel SelectedMap
         {
             get => _SelectedMap;
             set => Set(ref _SelectedMap, value);
@@ -150,7 +151,7 @@ namespace beta.ViewModels
             Finished?.Invoke(this, null);
 
             string title = string.IsNullOrWhiteSpace(Title) ? "Ethereal lobby" : Title;
-            GameSessionService.HostGame(title, FeaturedMod, SelectedMap.FolderName, MinAllowedRating, MaxAllowedRating,
+            GameSessionService.HostGame(title, FeaturedMod, SelectedMap.LatestVersion.FolderName, MinAllowedRating, MaxAllowedRating,
                 IsFriendsOnly ? GameVisibility.Friends : GameVisibility.Public, IsRatingRestrictionEnabled, Password)
                 .SafeFireAndForget(onException: ex => NotificationService.ShowExceptionAsync(ex));
         }

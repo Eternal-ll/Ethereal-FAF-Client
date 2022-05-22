@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Behaviors;
+using beta.Models.API.MapsVault;
 using beta.ViewModels;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +16,7 @@ namespace beta.Views
         public MapDetailsView() => InitializeComponent();
         public MapDetailsView(int id) : this() => DataContext = new MapViewModel(id);
         public MapDetailsView(string name) : this() => DataContext = new MapViewModel(name);
-
+        public MapDetailsView(ApiMapModel selected, ApiMapModel[] similar) : this() => DataContext = new MapViewModel(selected, similar);
         private void ListBox_Initialized(object sender, System.EventArgs e)
         {
             ((ListBox)sender).ItemsSource = Enumerable.Range(0, 20);

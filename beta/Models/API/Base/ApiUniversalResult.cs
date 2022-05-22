@@ -20,7 +20,42 @@ namespace beta.Models.API.Base
         [JsonPropertyName("meta")]
         public ApiVaultMeta Meta { get; set; }
 
-        public virtual void ParseIncluded() {}
+        public virtual void ParseIncluded() { }
+    }
+    internal class ApiMapsResult : ApiUniversalResult<ApiMapModel[]>
+    {
+        public override void ParseIncluded()
+        {
+            var included = Included;
+            var data = Data;
+            if (included is null || data is null) return;
+            if (included.Length == 0 || data.Length == 0) return;
+
+            foreach (var map in data)
+            {
+                var relations = map.GetRelations();
+                foreach (var relation in relations)
+                {
+                    var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Key, relation.Value);
+                    switch (relation.Key)
+                    {
+                        case ApiDataType.mapVersion:
+                            map.LatestVersion = entity.CastTo<MapVersionModel>();
+                            if (map.LatestVersion.IsLegacyMap)
+                            {
+                                map.LatestVersion.Attributes["hidden"] = "false";
+                            }
+                            continue;
+                        case ApiDataType.player:
+                            map.Author = entity.Attributes["login"];
+                            continue;
+                        case ApiDataType.mapReviewsSummary:
+                            map.ReviewsSummary = entity.CastTo<ApiUniversalSummary>();
+                            continue;
+                    }
+                }
+            }
+        }
     }
     internal class ApiMapResult : ApiUniversalResult<ApiMapModel>
     {

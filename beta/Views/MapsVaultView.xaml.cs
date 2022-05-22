@@ -12,7 +12,7 @@ namespace beta.Views
         public MapsVaultView()
         {
             InitializeComponent();
-            ContentFrame.Navigate(typeof(MapsView));
+            ContentFrame.Navigate(new MapsView(ContentFrame.NavigationService));
             Resources.Add("NavigateCommand", new LambdaCommand(OnNavigateCommand));
             ((NavigationThemeTransition)ContentFrame.ContentTransitions[0])
                 .DefaultNavigationTransitionInfo = new SlideNavigationTransitionInfo()

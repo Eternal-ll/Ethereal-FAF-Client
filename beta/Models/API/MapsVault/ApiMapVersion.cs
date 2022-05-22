@@ -13,7 +13,7 @@ namespace beta.Models.API.MapsVault
     /// <summary>
     /// API entity of mapVersion table
     /// </summary>
-    internal class ApiMapVersion : ApiUniversalData
+    public class ApiMapVersion : ApiUniversalData
     {
         public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
         public string Description => Attributes["description"];
@@ -34,7 +34,7 @@ namespace beta.Models.API.MapsVault
     /// <summary>
     /// Extends <seealso cref="ApiMapVersion"/> for additional properties
     /// </summary>
-    internal class MapVersionModel : ApiMapVersion
+    public class MapVersionModel : ApiMapVersion
     {
         private bool? _IsLegacyMap;
         /// <summary>

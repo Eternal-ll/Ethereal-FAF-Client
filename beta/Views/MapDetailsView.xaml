@@ -4,7 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.modernwpf.com/2019"
+             xmlns:apiUniversal="clr-namespace:beta.Models.API.Universal"
              xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
+             xmlns:apiVaults="clr-namespace:beta.Models.API.MapsVault"
              xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
              d:DataContext="{d:DesignInstance {x:Type vm:MapViewModel}}"
              mc:Ignorable="d"
@@ -13,14 +15,8 @@
     <UserControl.Resources>
         <SolidColorBrush x:Key="Hover" Color="Orange" Opacity=".7"/>
         <SolidColorBrush x:Key="Selected" Color="Orange"/>
-        <Style TargetType="Border" x:Key="BorderStyle">
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Background" Value="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
-            <Setter Property="Padding" Value="20 10"/>
-        </Style>
+        <SolidColorBrush x:Key="RatingControlUnselectedForeground" Color="Orange" Opacity=".2"/>
+        <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="Orange"/>
         <Style x:Key="ItemBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
@@ -29,10 +25,8 @@
             <Setter Property="Opacity" Value=".2"/>
             <Setter Property="Margin" Value="-20 10 -20 10"/>
         </Style>
-        <Style TargetType="Path">
-            <Setter Property="Data" Value="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
+        <Style TargetType="Path" BasedOn="{StaticResource PathStarDataStyle}">
             <Setter Property="Fill" Value="Orange"/>
-            <Setter Property="Stretch" Value="Uniform"/>
             <Setter Property="Height" Value="10"/>
             <Setter Property="Margin" Value="2 0 8 0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -50,12 +44,43 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
         <Style x:Key="PlugGridStyle" TargetType="Grid">
             <Setter Property="Background" Value="{StaticResource AcrylicBackgroundFillColorDefaultBrush}"/>
         </Style>
-        <SolidColorBrush x:Key="RatingControlUnselectedForeground" Color="Orange" Opacity=".2"/>
-        <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="Orange"/>
+        <Style x:Key="TransparentListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Resources>
+                <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+            </Style.Resources>
+        </Style>
+        <Style x:Key="SmallPreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <ImageBrush ImageSource="{Binding LatestVersion.MapSmallPreview}"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding LatestVersion.IsHidden}" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <VisualBrush Stretch="None" AlignmentX="Center" AlignmentY="Center">
+                                <VisualBrush.Visual>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+                                                                        <Run Text="Hidden" FontSize="14" Foreground="Gray"/>
+                                                                        <LineBreak/>
+                                                                        <Run Text="by author or" Foreground="DimGray"/>
+                                                        <LineBreak/>
+                                                        <Run Text="vault team" Foreground="Gray"/>
+                                    </TextBlock>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <Grid ShowGridLines="False" Margin="4">
         <Grid.RowDefinitions>
@@ -82,11 +107,6 @@
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type vm:MapViewModel}">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <!--<Border Height="256" Width="256" Style="{StaticResource BorderStyle}" Margin="0">
-                                        <Border.Background>
-                                            <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
-                                        </Border.Background>
-                                    </Border>-->
                                     <Border Height="256" Width="256" Margin="0">
                                         <Border.Style>
                                             <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
@@ -131,32 +151,40 @@
                                         </TextBlock.Style>
                                     </TextBlock>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" TextElement.FontSize="18" Margin="0 20 0 0">
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock DataContext="{Binding Data.ReviewsSummary.LowerBound}" Style="{StaticResource IfNullTextBlockStyle}"/>
-                                                <Path Height="12" Margin="4 0 0 0" Style="{StaticResource {x:Type Path}}"/>
-                                            </StackPanel>
-                                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                            <Separator.LayoutTransform>
-                                                <RotateTransform Angle="90"/>
-                                            </Separator.LayoutTransform>
-                                        </Separator>
-                                        <StackPanel>
-                                            <TextBlock DataContext="{Binding Data.ReviewsSummary.ReviewsCount}" HorizontalAlignment="Center"
+                                        <ContentControl Content="{Binding Data.ReviewsSummary}">
+                                            <ContentControl.Resources>
+                                                <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
+                                                                <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                                            <Separator.LayoutTransform>
+                                                                <RotateTransform Angle="90"/>
+                                                            </Separator.LayoutTransform>
+                                                        </Separator>
+                                                        <StackPanel>
+                                                            <TextBlock DataContext="{Binding ReviewsCount}" HorizontalAlignment="Center"
                                                    Style="{StaticResource IfNullTextBlockStyle}"/>
-                                            <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                            <Separator.LayoutTransform>
-                                                <RotateTransform Angle="90"/>
-                                            </Separator.LayoutTransform>
-                                        </Separator>
+                                                            <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                                        </StackPanel>
+                                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                                            <Separator.LayoutTransform>
+                                                                <RotateTransform Angle="90"/>
+                                                            </Separator.LayoutTransform>
+                                                        </Separator>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ContentControl.Resources>
+                                        </ContentControl>
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal">
                                                 <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                                <TextBlock Text="{Binding Data.StatisticsSummary.PlaysCount}" Style="{StaticResource IfNullTextBlockStyle}"/>
+                                                <TextBlock Text="{Binding Data.GamesPlayed}" Style="{StaticResource IfNullTextBlockStyle}"/>
                                             </StackPanel>
                                             <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
                                         </StackPanel>
@@ -174,6 +202,7 @@
                     <Separator/>
                     <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}"
                              ScrollViewer.CanContentScroll="False" Loaded="ListBox_Loaded" MaxHeight="200"
+                             Style="{StaticResource TransparentListBoxStyle}"
                              Padding="0 0 20 0" Margin="0 0 -14 0">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -185,9 +214,6 @@
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.Resources>
-                            <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
-                            <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
-                            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                 <Setter Property="Focusable" Value="True"/>
                                 <Setter Property="Padding" Value="0"/>
@@ -488,7 +514,7 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Separator/>
-                            <ListBox Grid.Row="1">
+                            <ListBox Grid.Row="1" Style="{StaticResource TransparentListBoxStyle}">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <UniformGrid VerticalAlignment="Top">
@@ -499,9 +525,6 @@
                                     </ItemsPanelTemplate>
                                 </ListBox.ItemsPanel>
                                 <ListBox.Resources>
-                                    <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
-                                    <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
-                                    <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
                                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                                         <Setter Property="Focusable" Value="False"/>
                                         <Setter Property="Padding" Value="0"/>
@@ -916,98 +939,126 @@
                         </Grid>
                     </Expander>
                 </Border>
-                <Border Style="{StaticResource BorderStyle}" Background="Transparent" BorderThickness="0" Padding="0 10">
-                    <StackPanel>
-                        <Grid Margin="20 0 0 0">
-                            <TextBlock Text="Similar maps" FontSize="16" FontWeight="DemiBold"/>
-                            <Button Content="Not implemented" HorizontalAlignment="Right" IsEnabled="False" Padding="10 4"/>
-                        </Grid>
-                        <ListBox Initialized="ListBox_Initialized" Background="Transparent" Margin="0 10 0 0">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid VerticalAlignment="Top" Rows="1" Margin="-8 0">
-                                        <i:Interaction.Behaviors>
-                                            <customI:CalculateColumns Width="200" WidthOffset="0"/>
-                                        </i:Interaction.Behaviors>
-                                    </UniformGrid>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                            <ListBox.Resources>
-                                <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
-                                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
-                                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
-                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                    <Setter Property="Focusable" Value="False"/>
-                                    <Setter Property="Padding" Value="0"/>
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                    <Setter Property="Margin" Value="4 0"/>
-                                    <Setter Property="Background" Value="Transparent"/>
-                                </Style>
-                            </ListBox.Resources>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Padding="10" Cursor="Hand">
-                                        <Border.RenderTransform>
-                                            <TranslateTransform Y="0"/>
-                                        </Border.RenderTransform>
-                                        <Border.Style>
-                                            <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Trigger.EnterActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-                                                                                     To="-4" From="0" Duration="0:0:0.1" FillBehavior="HoldEnd"/>
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
-                                                        </Trigger.EnterActions>
-                                                        <Trigger.ExitActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-                                                                                     To="0" From="-4" Duration="0:0:0.1"/>
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
-                                                        </Trigger.ExitActions>
-                                                    </Trigger>
-                                                </Style.Triggers>
+                <ContentControl Content="{Binding Similar}">
+                    <ContentControl.Style>
+                        <Style TargetType="ContentControl">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Similar}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ContentControl.Style>
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource BorderStyle}" Background="Transparent" BorderThickness="0" Padding="0 10">
+                                <StackPanel>
+                                    <Grid Margin="20 0 0 0">
+                                        <TextBlock Text="Similar maps" FontSize="16" FontWeight="DemiBold"/>
+                                        <Button Content="Not implemented" HorizontalAlignment="Right" IsEnabled="False" Padding="10 4"/>
+                                    </Grid>
+                                    <ListBox ItemsSource="{Binding}" Background="Transparent" Margin="0 10 0 0">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid VerticalAlignment="Top" Rows="1" Margin="-8 0">
+                                                    <i:Interaction.Behaviors>
+                                                        <customI:CalculateColumns Width="200"/>
+                                                    </i:Interaction.Behaviors>
+                                                </UniformGrid>
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.Resources>
+                                            <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                                            <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                                            <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+                                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                                <Setter Property="Focusable" Value="False"/>
+                                                <Setter Property="Padding" Value="0"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                <Setter Property="Margin" Value="4 0"/>
+                                                <Setter Property="Background" Value="Transparent"/>
                                             </Style>
-                                        </Border.Style>
-                                        <StackPanel>
-                                            <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=RenderTransform.Y}"/>-->
-                                            <Border Style="{StaticResource BorderStyle}" Margin="0 10 0 0" Background="Gray"
-                                                    MaxWidth="128" Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"/>
-                                            <TextBlock Text="Astro gap" HorizontalAlignment="Center" TextWrapping="Wrap" FontSize="16" Margin="0 10 0 0"/>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10">
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                        <TextBlock Text="4.6"/>
-                                                        <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
-                                                        <TextBlock Text="255" FontSize="12" VerticalAlignment="Center" Opacity=".5"/>
+
+                                            <DataTemplate DataType="{x:Type apiVaults:ApiMapModel}">
+                                                <Border Padding="0" Cursor="Hand" Margin="4">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick" Command="{DynamicResource NavigateCommand}" CommandParameter="{Binding Id}"/>
+                                                    </Border.InputBindings>
+                                                    <Border.RenderTransform>
+                                                        <TranslateTransform Y="0"/>
+                                                    </Border.RenderTransform>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Trigger.EnterActions>
+                                                                        <BeginStoryboard>
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                                                         To="-2" From="0" Duration="0:0:0.1" FillBehavior="HoldEnd"/>
+                                                                            </Storyboard>
+                                                                        </BeginStoryboard>
+                                                                    </Trigger.EnterActions>
+                                                                    <Trigger.ExitActions>
+                                                                        <BeginStoryboard>
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                                                         To="0" From="-2" Duration="0:0:0.1"/>
+                                                                            </Storyboard>
+                                                                        </BeginStoryboard>
+                                                                    </Trigger.ExitActions>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <StackPanel>
+                                                        <!--<TextBlock Text="{Binding ReviewsSummary}"/>-->
+                                                        <Border Margin="0 10 0 0" MaxWidth="128"
+                                        Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
+                                        Style="{StaticResource SmallPreviewBorderStyle}"/>
+                                                        <TextBlock Text="{Binding DisplayedName}"
+                                           ToolTip="{Binding DisplayedName}"
+                                           HorizontalAlignment="Center" FontSize="16" Margin="10 10 10 0"/>
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10">
+                                                            <ContentControl Content="{Binding ReviewsSummary}">
+                                                                <ContentControl.Resources>
+                                                                    <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <StackPanel>
+                                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                                    <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
+                                                                                    <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
+                                                                                    <TextBlock Text="{Binding ReviewsCount}" FontSize="12" VerticalAlignment="Center" Opacity=".5"/>
+                                                                                </StackPanel>
+                                                                                <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                                                            </StackPanel>
+                                                                            <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                                                                <Separator.LayoutTransform>
+                                                                                    <RotateTransform Angle="90"/>
+                                                                                </Separator.LayoutTransform>
+                                                                            </Separator>
+                                                                        </StackPanel>
+                                                                    </DataTemplate>
+                                                                </ContentControl.Resources>
+                                                            </ContentControl>
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                                                    <TextBlock Text="{Binding GamesPlayed}" FontSize="14"/>
+                                                                </StackPanel>
+                                                                <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </StackPanel>
                                                     </StackPanel>
-                                                    <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                                </StackPanel>
-                                                <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                                    <Separator.LayoutTransform>
-                                                        <RotateTransform Angle="90"/>
-                                                    </Separator.LayoutTransform>
-                                                </Separator>
-                                                <StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                                        <TextBlock Text="2000" FontSize="14"/>
-                                                    </StackPanel>
-                                                    <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </StackPanel>
-                </Border>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.Resources>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
             </StackPanel>
         </ScrollViewer>
     </Grid>

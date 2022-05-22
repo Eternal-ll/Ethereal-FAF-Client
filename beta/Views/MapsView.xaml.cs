@@ -3,8 +3,9 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Infrastructure.Utils;
 using beta.Models.API;
 using beta.Models.API.Base;
-using beta.Models.API.Enums;
+using beta.Models.API.MapsVault;
 using Microsoft.Extensions.DependencyInjection;
+using ModernWpf.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,14 +15,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace beta.Views
 {
@@ -49,10 +53,12 @@ namespace beta.Views
         }
         #endregion
 
-        public event EventHandler<ApiMapData> MapSelected;
+        public event EventHandler<ApiMapModel> MapSelected;
 
         private readonly IMapsService MapsService;
         private readonly ICacheService CacheService;
+        private readonly NavigationService NavigationService;
+        public MapsView(NavigationService navigationService) : this() => NavigationService = navigationService;
         public MapsView()
         {
             InitializeComponent();
@@ -67,8 +73,6 @@ namespace beta.Views
             WidthsList.SelectionChanged += MapSizesSelectionChanged;
             HeightsList.SelectionChanged += MapSizesSelectionChanged;
 
-            ResultListBox.SizeChanged += ResultListBox_SizeChanged;
-
             _SearchForAuthorCommand = new LambdaCommand(OnSearchForAuthorCommand);
 
             _ShowBigPreviewCommand = new LambdaCommand(OnShowBigPreviewCommand);
@@ -76,27 +80,7 @@ namespace beta.Views
 
             Resources.Add("SearchForAuthorCommand", _SearchForAuthorCommand);
             Resources.Add("ShowBigPreviewCommand", _ShowBigPreviewCommand);
-        }
-
-        private void ResultListBox_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            CalculateGridColumns(e.NewSize.Width);
-        }
-
-        private void CalculateGridColumns(double size)
-        {
-            if (!IsGridEnabled) return;
-
-            if (IsDescriptionEnabled)
-            {
-                if (size < 960) GridColumns = 1;
-                else GridColumns = Convert.ToInt32(size / 580);
-            }
-            else
-            {
-                if (size < 400) GridColumns = 1;
-                else GridColumns = Convert.ToInt32(size / 207);
-            }
+            Resources.Add(nameof(OpenDetailsCommand), OpenDetailsCommand);
         }
 
         private void MapSizesSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -295,12 +279,9 @@ namespace beta.Views
             get => _IsOnlyLocalMaps;
             set
             {
-                if (Set(ref _IsOnlyLocalMaps, value))
+                if (SetStandardField(ref _IsOnlyLocalMaps, value))
                 {
-                    if (value)
-                    {
-                        DoRequestForLocalMaps();
-                    }
+                    DoRequest();
                 }
             }
         }
@@ -412,16 +393,14 @@ namespace beta.Views
         #endregion
 
         #region SelectedMap
-        private ApiMapData _SelectedMap;
-        public ApiMapData SelectedMap
+        private ApiMapModel _SelectedMap;
+        public ApiMapModel SelectedMap
         {
             get => _SelectedMap;
             set
             {
                 if (Set(ref _SelectedMap, value))
                 {
-                    if (value is not null && value.IsHidden.Value)
-                        value = null;
                     MapSelected?.Invoke(this, value);
                 }
             }
@@ -452,8 +431,6 @@ namespace beta.Views
 
         #endregion
 
-        #region UI View
-
         #region IsSortEnabled
         private bool _IsSortEnabled;
         public bool IsSortEnabled
@@ -465,13 +442,8 @@ namespace beta.Views
                 {
                     OnPropertyChanged(nameof(SortPanelVisibility));
 
-                    if (!value)
-                    {
-                        //ResponseViewSource.LiveSortingProperties.Clear();
-                        //ResponseView.SortDescriptions.Clear();
-                        BuildQuery();
-                        DoRequest();
-                    }
+                    BuildQuery();
+                    DoRequest();
                     if (value && ResponseView?.SortDescriptions.Count == 0)
                     {
                         SelectedSort = SortDescriptions[0];
@@ -556,70 +528,6 @@ namespace beta.Views
         public ICollectionView ResponseView => ResponseViewSource.View;
         #endregion
 
-        #region IsExtendedViewEnabled
-        private bool _IsExtendedViewEnabled;
-        public bool IsExtendedViewEnabled
-        {
-            get => _IsExtendedViewEnabled;
-            set
-            {
-                if (Set(ref _IsExtendedViewEnabled, value))
-                {
-                    OnPropertyChanged(nameof(ExtendedPanelVisibility));
-                }
-            }
-        }
-        #endregion
-
-        public Visibility ExtendedPanelVisibility => IsExtendedViewEnabled ? Visibility.Visible : Visibility.Collapsed;
-
-        #region IsDescriptionEnabled
-        private bool _IsDescriptionEnabled = true;
-        public bool IsDescriptionEnabled
-        {
-            get => _IsDescriptionEnabled;
-            set
-            {
-                if (Set(ref _IsDescriptionEnabled, value))
-                {
-                    OnPropertyChanged(nameof(DescriptionVisibility));
-                    if (IsGridEnabled)
-                    {
-                        CalculateGridColumns(ResultListBox.ActualWidth);
-                    }
-                }
-            }
-        }
-        #endregion
-
-        public Visibility DescriptionVisibility => IsDescriptionEnabled ? Visibility.Visible : Visibility.Collapsed;
-
-        #region IsGridEnabled
-        private bool _IsGridEnabled;
-        public bool IsGridEnabled
-        {
-            get => _IsGridEnabled;
-            set
-            {
-                if (Set(ref _IsGridEnabled, value))
-                {
-                    CalculateGridColumns(ResultListBox.ActualWidth);
-                }
-            }
-        }
-        #endregion
-
-        #region GridColumns
-        private int _GridColumns;
-        public int GridColumns
-        {
-            get => _GridColumns;
-            set => Set(ref _GridColumns, value);
-        }
-        #endregion
-
-        #endregion
-
         private Thread RequestThread;
         private bool PageIndexChanged = false;
 
@@ -636,10 +544,12 @@ namespace beta.Views
             nameof(ApiMapData.SummaryLowerBound) => "reviewsSummary.lowerBound",
             nameof(ApiMapData.SummaryScore) => "reviewsSummary.score",
             nameof(ApiMapData.SummaryReviews) => "reviewsSummary.reviews",
-            nameof(ApiMapData.CreateTime) => "latestVersion.createTime",
-            nameof(ApiMapData.UpdateTime) => "latestVersion.updateTime",
+            nameof(ApiMapData.CreateTime) => "createTime",
+            nameof(ApiMapData.UpdateTime) => "updateTime",
             _ => null,
         };
+
+        private bool IsAnyFilter = false;
 
         private void BuildQuery()
         {
@@ -652,6 +562,18 @@ namespace beta.Views
             }
             else
             {
+                if (IsOnlyLocalMaps)
+                {
+                    var maps = MapsService.GetLocalMaps();
+                    filter.Append($"latestVersion.folderName=in=(");
+                    
+                    foreach (var map in maps)
+                    {
+                        filter.Append($"'{map}',");
+                    }
+                    filter[^1] = ')';
+                    filter.Append(';');
+                }
                 if (MapName?.Length > 0)
                 {
                     filter.Append($"displayName=='{MapName}';");
@@ -691,12 +613,9 @@ namespace beta.Views
                         filter.Append($"'{Tools.CalculateMapSizeToPixels(num)}',");
                     }
                     // Remove last ','
-                    filter.Remove(filter.Length - 1, 1);
-                    filter.Append(");");
+                    filter[^1] = ')';
+                    filter.Append(';');
                 }
-
-                // 
-                filter.Append("latestVersion.hidden=='false'&");
 
                 if (SelectedMapWidths.Count > 0)
                 {
@@ -707,9 +626,12 @@ namespace beta.Views
                         filter.Append($"'{Tools.CalculateMapSizeToPixels(num)}',");
                     }
                     // Remove last ','
-                    filter.Remove(filter.Length - 1, 1);
-                    filter.Append(");");
+                    filter[^1] = ')';
+                    filter.Append(';');
                 }
+                IsAnyFilter = filter.Length > 0;
+                // 
+                filter.Append("latestVersion.hidden=='false';");
 
                 if (filter.Length > 0)
                 {
@@ -758,11 +680,6 @@ namespace beta.Views
                 return;
             }
 
-            if (IsOnlyLocalMaps)
-            {
-                IsOnlyLocalMaps = false;
-            }
-
             if (LastQuery == CurrentQuery)
             {
                 if (!PageIndexChanged) return;
@@ -785,37 +702,7 @@ namespace beta.Views
 
         }
         private readonly ObservableCollection<ApiMapData> LocalMaps = new();
-        private void DoRequestForLocalMaps()
-        {
-            if (RequestThread is not null)
-            {
-                return;
-            }
-
-            LocalMaps.Clear();
-            ResponseViewSource.Source = LocalMaps;
-
-            RequestThread = new(() =>
-            {
-                var maps = MapsService.GetLocalMaps();
-                Status = ApiState.Idle;
-                for (int i = 0; i < maps.Length; i++)
-                {
-                    var map = maps[i].ToLower();
-                    if (map.IndexOf('.') != -1)
-                    {
-                        map = map[..(map.IndexOf('.') + 1)];
-                    }
-                    CurrentQuery = $"filter=(latestVersion.folderName=={map}*)";
-                    //CurrentQuery = $"filter=(latestVersion.folderName=={maps[i]})";
-                    Request();
-                }
-                RequestThread = null;
-            });
-            Status = ApiState.PendingRequest;
-            RequestThread.Start();
-        }
-        public ApiMapData[] LastData { get; set; }
+        internal ApiMapModel[] LastData { get; set; }
         private void Request()
         {
             var query = CurrentQuery;
@@ -827,82 +714,18 @@ namespace beta.Views
                 var stream = webRequest.GetResponse().GetResponseStream();
                 var json = new StreamReader(stream).ReadToEnd();
 
-                var data = JsonSerializer.Deserialize<ApiUniversalResult<ApiMapData[]>>(json);
-                //List<ApiMapData> dataAsList = new();
-                for (int i = 0; i < data.Data.Length; i++)
-                {
-                    var map = data.Data[i];
-
-                    #region Loading data Author / Map / Reviews summaries
-                    // it is complicated...
-                    if (data.Included is not null)
-                    {
-                        if (map.Relations["author"].Data is not null)
-                        {
-                            var authorId = map.Relations["author"].Data[0].Id;
-                            if (AuthorIdToLogin.TryGetValue(authorId, out var login))
-                            {
-                                map.AuthorLogin = login;
-                            }
-                            else
-                            {
-                                map.AuthorData = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.player, map.Relations["author"].Data[0].Id).Attributes;
-                                
-                                if (!AuthorIdToLogin.ContainsKey(authorId))
-                                {
-                                    AuthorIdToLogin.Add(authorId, map.AuthorLogin);
-                                }
-                            }
-                        }
-
-                        if (map.Relations["latestVersion"].Data is not null)
-                        {
-                            var entity = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.mapVersion, map.Relations["latestVersion"].Data[0].Id);
-                            map.MapData = entity.Attributes;
-                        }
-
-                        if (map.Relations["reviewsSummary"].Data is not null)
-                        {
-                            map.ReviewsSummaryData = ApiUniversalTools.GetDataFromIncluded(data.Included, ApiDataType.mapReviewsSummary, map.Relations["reviewsSummary"].Data[0].Id).Attributes;
-                        }
-                    }
-                    #endregion
-
-                    //if (map.IsHidden.HasValue && map.IsHidden.Value) continue;
-                    // Check if installed
-                    map.LocalState = MapsService.CheckLocalMap(map.FolderName);
-
-                    // Check if legacy map
-                    map.IsLegacyMap = MapsService.IsLegacyMap(map.FolderName);
-                    //if (map.IsLegacyMap && map.MapData is not null)
-                    //{
-                    //    map.MapData["hidden"] = "false";
-                    //}
-                    //dataAsList.Add(map);
-                }
-                //data.Data = dataAsList.ToArray();
+                var data = JsonSerializer.Deserialize<ApiMapsResult>(json);
+                data.ParseIncluded();
+                    
                 LastData = data.Data;
                 OnPropertyChanged(nameof(LastData));
-                if (IsOnlyLocalMaps)
-                {
-                    if (data.Data.Length > 0)
-                    {
-                        Dispatcher.Invoke(() => LocalMaps.Add(data.Data[0]));
-                    }
-                }
-                else
-                {
-                    Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
-                    AvailablePagesCount = data.Meta.Page.AvaiablePagesCount;
-
-                    _PageNumber = data.Meta.Page.PageNumber;
-                    OnPropertyChanged(nameof(PageNumber));
-                    PageIndexChanged = false;
-
-                    TotalRecords = data.Meta.Page.TotalRecords;
-                }
-
-                LastQuery = CurrentQuery;
+                Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
+                AvailablePagesCount = data.Meta.Page.AvaiablePagesCount;
+                _PageNumber = data.Meta.Page.PageNumber;
+                OnPropertyChanged(nameof(PageNumber));
+                PageIndexChanged = false;
+                TotalRecords = data.Meta.Page.TotalRecords;
+                LastQuery = query;
             }
             catch (Exception ex)
             {
@@ -911,16 +734,35 @@ namespace beta.Views
             finally
             {
                 Elapsed = watcher.Elapsed;
-
-                if (!IsOnlyLocalMaps)
-                {
-                    Status = ApiState.Idle;
-                    RequestThread = null;
-                }
+                Status = ApiState.Idle;
+                RequestThread = null;
             }
         }
 
         #region Commands
+
+        #region OpenDetailsCommand
+        private ICommand _OpenDetailsCommand;
+        public ICommand OpenDetailsCommand => _OpenDetailsCommand ??= new LambdaCommand(OnOpenDetailsCommand);
+        private void OnOpenDetailsCommand(object parameter)
+        {
+            if (parameter is null) return;
+            if (parameter is int id)
+            {
+                var selected = LastData.First(m => m.Id == id);
+                if (IsAnyFilter)
+                {
+                    var maps = new List<ApiMapModel>(LastData);
+                    maps.Remove(selected);
+                    NavigationService?.Navigate(new MapDetailsView(selected, maps.ToArray()));
+                }
+                else
+                {
+                    NavigationService?.Navigate(new MapDetailsView(selected, null));
+                }
+            }
+        }
+        #endregion
 
         #region SearchForAuthorCommand
         private ICommand _SearchForAuthorCommand;
@@ -1000,6 +842,68 @@ namespace beta.Views
             {
                 PageNumber++;
             }
+        }
+
+        Dictionary<string, string[]> SuggestionCache = new();
+        private bool PendingQuery = false;
+        private readonly HttpClient httpClient = new HttpClient();
+        private CancellationTokenSource cancel;
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            // Only get results when it was a user typing,
+            // otherwise assume the value got filled in by TextMemberPath
+            // or the handler for SuggestionChosen.
+            var query = sender.Text;
+            MapName = query;
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.SuggestionChosen)
+            {
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                sender.IsSuggestionListOpen = false;
+                sender.ItemsSource = null;
+                PendingQuery = false;
+                return;
+            }
+            else
+            {
+                if (query[0] != '*') query = '*' + query;
+                if (query[^1] != '*') query += '*';
+                MapName = query;
+                if (SuggestionCache.TryGetValue(query, out var cached))
+                {
+                    sender.IsSuggestionListOpen = true;
+                    sender.ItemsSource = cached;
+                    return;
+                }
+            }
+            if (PendingQuery) return;
+            PendingQuery = true;
+            string queryy = $"https://api.faforever.com/data/map?fields[map]=displayName&filter=(displayName=='{query}';latestVersion.hidden=='false')&page[limit]=10&page[totals]=true";
+            if (cancel is not null) cancel.Cancel();
+            Task.Run(async () =>
+            {
+                cancel = new();
+                var response = await httpClient.GetAsync(queryy, cancel.Token);
+                var data = await JsonSerializer.DeserializeAsync<ApiUniversalResult<ApiUniversalData[]>>(await response.Content.ReadAsStreamAsync(cancel.Token));
+                string[] res = new string[data.Data.Length == 0 ? 1 : data.Data.Length];
+                res[0] = "No results found";
+                for (int i = 0; i < data.Data.Length; i++)
+                {
+                    var map = data.Data[i];
+                    res[i] = map.Attributes["displayName"];
+                }
+                res = res.OrderBy(x => x.Length).ToArray();
+                Dispatcher.Invoke(() =>
+                {
+                    sender.IsSuggestionListOpen = res.Length > 0;
+                    sender.ItemsSource = res;
+                    if (!SuggestionCache.ContainsKey(query))
+                        SuggestionCache.Add(query, res);
+                });
+                PendingQuery = false;
+            });
         }
     }
 }

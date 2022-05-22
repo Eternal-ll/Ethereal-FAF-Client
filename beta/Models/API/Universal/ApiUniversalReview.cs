@@ -3,14 +3,14 @@ using System;
 
 namespace beta.Models.API.Universal
 {
-    internal class ApiUniversalReview : Base.ApiUniversalData
+    public class ApiUniversalReview : Base.ApiUniversalData
     {
         public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
         public double Score => double.Parse(Attributes["score"]);
         public string Text => Attributes["text"];
         public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
     }
-    internal class UniversalReviewModel : ApiUniversalReview
+    public class UniversalReviewModel : ApiUniversalReview
     {
         public string Author { get; set; }
         public int? AuthorId { get; set; }
@@ -30,15 +30,16 @@ namespace beta.Models.API.Universal
             }
         }
     }
-    internal class ApiUniversalSummary : Base.ApiUniversalData
+    public class ApiUniversalSummary : Base.ApiUniversalData
     {
         public double LowerBound => double.Parse(Attributes["lowerBound"].Replace('.',','));
         public double Negative => double.Parse(Attributes["negative"].Replace('.', ','));
         public double Positive => double.Parse(Attributes["positive"].Replace('.', ','));
         public int ReviewsCount => int.Parse(Attributes["reviews"]);
         public double Score => double.Parse(Attributes["score"].Replace('.', ','));
+        public double Average => Score / ReviewsCount;
     }
-    internal class ApiUniversalStatistics : Base.ApiUniversalData
+    public class ApiUniversalStatistics : Base.ApiUniversalData
     {
         public int DownloadsCount => int.Parse(Attributes["downloads"]);
         public int DrawsCount => int.Parse(Attributes["draws"]);

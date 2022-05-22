@@ -32,6 +32,13 @@ namespace beta.ViewModels
         public MapViewModel(int id) : this() => Id = id;
         public MapViewModel(string name) : this() => 
             Task.Run(() => GetMapId(name));
+        public MapViewModel(ApiMapModel selected, ApiMapModel[] similar) : this()
+        {
+            Data = selected;
+            if (similar is not null && similar.Length == 0) similar = null;
+            Similar = similar;
+            CurrentMapVersionVM = new(selected.LatestVersion);
+        }
 
         private async Task GetMapId(string name)
         {
@@ -43,6 +50,8 @@ namespace beta.ViewModels
 
             IsPendingRequest = false;
         }
+
+        public ApiMapModel[] Similar { get; set; }
 
         #region Data
         private ApiMapModel _Data;
@@ -184,6 +193,28 @@ namespace beta.ViewModels
         public MapVersionViewModel(int id) : this() => Id = id;
         public MapVersionViewModel(string name) : this() =>
             Task.Run(() => GetMapVersionId(name));
+        public MapVersionViewModel(MapVersionModel version) : this()
+        {
+            IsPendingRequest = true;
+            Id = version.Id;
+            HandleLocalState(version);
+            Data = version;
+            Task.Run(async () =>
+            {
+                var result = await ApiRequest<ApiMapVersionResult>.RequestWithId(
+                    url: "https://api.faforever.com/data/mapVersion/",
+                    id: Id,
+                    query: "?include=reviews,reviewsSummary,statistics&fields[mapVersionReview]=createTime,score,text,updateTime&fields[mapVersionReviewsSummary]=lowerBound,negative,positive,reviews,score&fields[mapVersionStatistics]=plays");
+                result.ParseIncluded();
+                Data.Reviews = result.Data.Reviews;
+                Data.Summary = result.Data.Summary;
+                Data.Statistics = result.Data.Statistics;
+                OnPropertyChanged(nameof(Data.Reviews));
+                OnPropertyChanged(nameof(Data.Summary));
+                OnPropertyChanged(nameof(Data.Statistics));
+            });
+            IsPendingRequest = false;
+        }
 
         #region Properties
 
