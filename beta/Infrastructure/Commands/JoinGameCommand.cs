@@ -28,6 +28,16 @@ namespace beta.Infrastructure.Commands
         {
             if (parameter is GameInfoMessage game)
             {
+                if (game.GameType is Models.Server.Enums.GameType.MatchMaker)
+                {
+                    await NotificationService.ShowDialog("You cant connect to matchmaker game");
+                    return;
+                }
+                if(game.GameType is Models.Server.Enums.GameType.Coop)
+                {
+                    await NotificationService.ShowDialog("Coop not supported");
+                    return;
+                }
                 string password = null;
                 if (game.password_protected)
                 {
