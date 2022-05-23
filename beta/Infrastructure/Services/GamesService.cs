@@ -170,7 +170,7 @@ namespace beta.Infrastructure.Services
             switch (newGame.GameType)
             {
                 case GameType.Coop:
-                case GameType.MatchMaker:
+                //case GameType.MatchMaker:
                     return;
             }
 
