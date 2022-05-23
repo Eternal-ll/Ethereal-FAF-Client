@@ -85,6 +85,9 @@
         <!--<DataTemplate DataType="{x:Type vm:ChatConnectingViewModel}">
             <view:ChatConnectingView DataContext="{Binding}"/>
         </DataTemplate>-->
+        <DataTemplate DataType="{x:Type vm:MatchMakerViewModel}">
+            <view:MatchMakerView DataContext="{Binding}"/>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid Background="{DynamicResource NavigationViewDefaultPaneBackground}">
         <Grid Visibility="{Binding TitleBarVisibility}" VerticalAlignment="Top">

@@ -1,0 +1,138 @@
+﻿<UserControl x:Class="beta.Views.MatchMakerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:beta.Views"
+             xmlns:server="clr-namespace:beta.Models.Server"
+             xmlns:vm="clr-namespace:beta.ViewModels"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
+             d:DataContext="{d:DesignInstance {x:Type vm:MatchMakerViewModel}}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style x:Key="TransparentListBoxStyle" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Resources>
+                <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="Transparent"/>
+                <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
+            </Style.Resources>
+        </Style>
+        <DataTemplate DataType="{x:Type server:QueueDataModel}">
+            <Border Style="{StaticResource BorderStyle}" Width="160"
+                                        Background="{StaticResource SystemControlBackgroundChromeBlackLowBrush}">
+                <StackPanel TextBlock.TextAlignment="Center">
+                    <TextBlock Text="{Binding Name}" FontSize="40"/>
+                    <TextBlock Text="{Binding Mode}" Opacity=".7"/>
+                    <TextBlock Text="{Binding CountInQueue, StringFormat='In queue: {0}'}" Opacity=".7"/>
+                </StackPanel>   
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+    <ScrollViewer>
+        <StackPanel Margin="4 0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource BorderStyle}" Grid.Row="1">
+                    <StackPanel>
+                        <TextBlock Text="Modes" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <ListBox ItemsSource="{Binding Queues}" Style="{StaticResource TransparentListBoxStyle}"
+                             SelectedValue="{Binding CurrentQueue}"
+                             HorizontalAlignment="Center" Height="180">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.Resources>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                    <Setter Property="LayoutTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="False">
+                                            <!--<Setter Property="Opacity" Value=".5"/>-->
+                                            <!--<Setter Property="LayoutTransform">
+                                            <Setter.Value>
+                                                <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                                            </Setter.Value>
+                                        </Setter>-->
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <BeginStoryboard.Storyboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         To=".5" From="1" Duration="0:0:0.1"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                                                         To=".8" From="1" Duration="0:0:0.1"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                                                         To=".8" From="1" Duration="0:0:0.1"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard.Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <BeginStoryboard.Storyboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         To="1" From=".5" Duration="0:0:0.1"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                                                         To="1" From=".8" Duration="0:0:0.1"/>
+                                                            <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                                                         To="1" From=".8" Duration="0:0:0.1"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard.Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.Resources>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="8 4">
+                    <Button Content="Check map pool"/>
+                    <Button Content="Check patch" Margin="8 0"/>
+                </StackPanel>
+                <Border Style="{StaticResource BorderStyle}" Grid.Row="3">
+                    <StackPanel TextBlock.TextAlignment="Center">
+                        <ui:ProgressRing IsActive="True" Height="50" Width="50" Margin="50 50 50 20"/>
+                        <TextBlock Text="Searching..." Opacity=".5" Margin="0 0 0 30"/>
+                        <TextBlock Text="Game info" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <!--<Border Style="{StaticResource BorderStyle}" Grid.Row="4">
+                    <TextBlock Text="Game info" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>-->
+                <Border Style="{StaticResource BorderStyle}" Grid.Column="1" Grid.Row="1" Grid.RowSpan="4">
+                    <TextBlock Text="Chat" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </Grid>
+            <ContentControl Content="{Binding GamesViewModel}" Margin="0 0 0 8">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type vm:MatchMakerGamesViewModel}">
+                        <Border Style="{StaticResource BorderStyle}">
+                            <local:CustomGamesView DataContext="{Binding}"/>
+                        </Border>
+                    </DataTemplate>
+                </ContentControl.Resources>
+            </ContentControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -79,11 +79,11 @@
         /// </summary>
         set_party_factions,
         /// <summary>
-        /// Incoming message that TMM match is found
+        /// Incoming message that matchmaker match is found
         /// </summary>
         match_found,
         /// <summary>
-        /// Incoming message that TMM match cancelled
+        /// Incoming message that matchmaker match cancelled
         /// </summary>
         match_cancelled,
         /// <summary>

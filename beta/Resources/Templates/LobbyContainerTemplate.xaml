@@ -29,7 +29,7 @@
                     <ContentControl ContentTemplate="{StaticResource PlayerDataTemplate}" Content="{Binding}"/>
 
                     <TextBlock HorizontalAlignment="Right" Margin="0 -4 -8 0"
-                                           Text="{Binding ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
+                                           Text="{Binding DisplayedRating.DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="Red"/>
@@ -45,7 +45,7 @@
                         </TextBlock.Style>
                     </TextBlock>
                     <TextBlock Margin="10 0 0 0" Grid.Column="3" HorizontalAlignment="Right" 
-                               Text="{Binding ratings[global].DisplayedRating}"/>
+                               Text="{Binding DisplayedRating.DisplayedRating}"/>
                 </Grid>
             </DataTemplate>
 
@@ -130,13 +130,21 @@
     <Style x:Key="PlayersToolTipStyle" TargetType="ToolTip" BasedOn="{StaticResource DefaultToolTipStyle}">
         <Setter Property="Content">
             <Setter.Value>
-                <ItemsControl Style="{StaticResource TeamsItemsStyle}"/>
+                <StackPanel>
+                    <TextBlock Margin="-8 -8 -8 0" Padding="8" TextWrapping="Wrap">
+                        <TextBlock.Background>
+                            <SolidColorBrush Color="Black" Opacity=".2"/>
+                        </TextBlock.Background>
+                        <Run Text="Rating type:"/>
+                        <Run Text="{Binding RatingType, Converter={StaticResource RatingTypeConverter}}" Foreground="LightGreen"/>
+                    </TextBlock>
+                    <ItemsControl Style="{StaticResource TeamsItemsStyle}"/>
+                </StackPanel>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <ToolTip x:Key="PlayersToolTip" FontSize="14" Placement="Bottom" ToolTipService.ShowDuration="60000"
-                                     Style="{StaticResource PlayersToolTipStyle}"/>
+    <ToolTip x:Key="PlayersToolTip" FontSize="14" Placement="Bottom" Style="{StaticResource PlayersToolTipStyle}"/>
     
     <Style x:Key="PlayersTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource GameTextStyle}">
         <Setter Property="Padding" Value="26 0 0 0"/>
@@ -248,7 +256,7 @@
                 Text="{Binding login}"
                 Grid.Column="1"/>
             <Grid 
-                DataContext="{Binding ratings[global], Mode=OneWay}"
+                DataContext="{Binding DisplayedRating, Mode=OneWay}"
                 Margin="10 0"
                 Grid.Column="2"
                 HorizontalAlignment="Right">
@@ -382,7 +390,7 @@
 
     <Storyboard x:Key="OpacityAnimation">
         <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                         From="0" To="1" AutoReverse="True"
+                                         From="0" To="1" AutoReverse="True" FillBehavior="Stop"
                                          Duration="0:0:.4" RepeatBehavior="0:0:12"/>
     </Storyboard>
 
@@ -748,7 +756,7 @@
                     <ContentControl ContentTemplate="{StaticResource PlayerDataTemplateStacked}" Content="{Binding Host}"
                                     Margin="6 0 0 0"/>
 
-                    <TextBlock Text="{Binding Host.ratings[global].DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
+                    <TextBlock Text="{Binding Host.DisplayedRating.DisplayedDifferenceArrow, NotifyOnTargetUpdated=True}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Foreground" Value="Red"/>
@@ -759,8 +767,8 @@
                                                 <TextBlock>
                                                     <TextBlock.Text>
                                                         <MultiBinding StringFormat="{}{0} after {1} g">
-                                                            <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
-                                                            <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                            <Binding Path="Host.DisplayedRating.DisplayedRatingDifference"/>
+                                                            <Binding Path="Host.DisplayedRating.GamesDifference"/>
                                                         </MultiBinding>
                                                     </TextBlock.Text>
                                                 </TextBlock>
@@ -781,8 +789,8 @@
                                                         <TextBlock>
                                                             <TextBlock.Text>
                                                                 <MultiBinding StringFormat="{}+{0} after {1} g">
-                                                                    <Binding Path="Host.ratings[global].DisplayedRatingDifference"/>
-                                                                    <Binding Path="Host.ratings[global].GamesDifference"/>
+                                                                    <Binding Path="Host.DisplayedRating.DisplayedRatingDifference"/>
+                                                                    <Binding Path="Host.DisplayedRating.GamesDifference"/>
                                                                 </MultiBinding>
                                                             </TextBlock.Text>
                                                         </TextBlock>
@@ -804,7 +812,7 @@
                                             </BeginStoryboard>
                                         </EventTrigger.Actions>
                                     </EventTrigger>
-                                    <DataTrigger Binding="{Binding Host.ratings[global].GamesDifference}"
+                                    <DataTrigger Binding="{Binding Host.DisplayedRating.GamesDifference}"
                                                  Value="0">
                                         <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
@@ -1112,36 +1120,17 @@
                                     <Setter Property="IsEnabled" Value="False"/>
                                     <Setter Property="Content" Value="Not supported"/>
                                 </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding GameType}" Value="2"/>
+                                        <Condition Binding="{Binding State}" Value="1"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </MultiDataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Button.Style>
                 </Button>
-                <!--<Button
-                    Background="Transparent"
-                    Grid.Column="2"
-                    Style="{StaticResource LobbyContainerBtnStyle}"
-                    ToolTip="Details"
-                    ui:FlyoutService.Flyout="{StaticResource LobbyDetailedFlyout}">
-                    <Button.Resources>
-                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
-                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
-                    </Button.Resources>
-                    <Path
-                        Fill="White"
-                        Stretch="Uniform"
-                        Height="16">
-                        <Path.Style>
-                            <Style TargetType="Path">
-                                <Setter Property="Data" Value="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True">
-                                        <Setter Property="Data" Value="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Path.Style>
-                    </Path>
-                </Button>-->
             </Grid>
             <Border HorizontalAlignment="Right"
                     VerticalAlignment="Top"

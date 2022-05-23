@@ -28,6 +28,7 @@ namespace beta.Models.Server
 
         public int Number { get; }
         public IPlayer[] Players { get; }
+        public RatingType VisibleRatingType { get; set; }
         public int SumRating
         {
             get
@@ -36,7 +37,9 @@ namespace beta.Models.Server
                 int sum = 0;
                 for (int i = 0; i < Players.Length; i++)
                     if (Players[i] is PlayerInfoMessage player)
-                        sum += player.ratings["global"].DisplayedRating;
+                    {
+                        sum += player.DisplayedRating.DisplayedRating;
+                    }
                 return sum;
             }
         }
@@ -216,6 +219,13 @@ namespace beta.Models.Server
 
                     if (value is not null)
                     {
+                        for (int i = 0; i < value.Length; i++)
+                        {
+                            var team = value[i];
+                            team.VisibleRatingType = RatingType;
+                        }
+
+
                         List<PlayerInfoMessage> players = new();
                         for (int i = 0; i < value.Length; i++)
                         {

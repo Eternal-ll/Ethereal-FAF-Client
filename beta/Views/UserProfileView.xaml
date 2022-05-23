@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:beta.Views"
+             xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:vm="clr-namespace:beta.ViewModels"
              xmlns:api="clr-namespace:beta.Models.API"
              d:DataContext="{d:DesignInstance {x:Type vm:UserProfileViewModel}}"
@@ -19,8 +20,8 @@
                         <Button Content="Refresh" Command="{Binding RefreshCommand}" IsEnabled="{Binding IsInputEnabled}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition MinWidth="300"/>
+                                <ColumnDefinition MinWidth="300"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -43,7 +44,7 @@
                                             <ColumnDefinition/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Login}"/>
+                                        <TextBlock behavior:TextBlockExtensions.BindableInlines="{Binding Login, Converter={StaticResource TextConverter}}"/>
                                         <Button Margin="0 -4" Background="Transparent" Grid.Column="1"
                                                 CommandParameter="{Binding Id}">
                                             <Button.ToolTip>

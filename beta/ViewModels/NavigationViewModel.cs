@@ -35,7 +35,7 @@ namespace beta.ViewModels
                 { typeof(HomeViewModel), new HomeViewModel() },
                 { typeof(ChatControlViewModel), new ChatControlViewModel() },
                 { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
-                //{ typeof(MapsVaultViewModel), new MapsVaultViewModel() },
+                { typeof(MatchMakerViewModel), new MatchMakerViewModel() },
                 { typeof(SettingsViewModel), new SettingsViewModel() },
                 { typeof(UserProfileViewModel), new UserProfileViewModel() }
             };

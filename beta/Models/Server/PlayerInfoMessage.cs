@@ -29,10 +29,11 @@ namespace beta.Models.Server
             player.id = int.Parse(Settings.Default.PlayerId.ToString());
             player.ratings = new()
             {
-                { "global", new() { rating = new double[] { 9999, 1 } } },
-                { "ladder_1v1", new() { rating = new double[] { 9999, 1 } } },
-                { "tmm_2v2", new() { rating = new double[] { 9999, 1 } } },
-                { "tmm_4v4_share_until_death", new() { rating = new double[] { 9999, 1 } } },
+                { RatingType.global, new() { rating = new double[] { 9999, 1 } } },
+                { RatingType.ladder_1v1, new() { rating = new double[] { 9999, 1 } } },
+                { RatingType.tmm_2v2, new() { rating = new double[] { 9999, 1 } } },
+                { RatingType.tmm_4v4_full_share, new() { rating = new double[] { 9999, 1 } } },
+                { RatingType.tmm_4v4_share_until_death, new() { rating = new double[] { 9999, 1 } } },
             };
         }
     }
@@ -129,6 +130,7 @@ namespace beta.Models.Server
                         return;
                     }
 
+                    OnPropertyChanged(nameof(DisplayedRating));
                     GameState = value.host.Equals(login, StringComparison.OrdinalIgnoreCase) ? GameState.Host : GameState.Open;
                 }
             }
@@ -210,14 +212,15 @@ namespace beta.Models.Server
         public string clan { get; set; }
 
         #region ratings
-        private Dictionary<string, Rating> _ratings;
-        public Dictionary<string, Rating> ratings
+        private Dictionary<RatingType, Rating> _ratings;
+        public Dictionary<RatingType, Rating> ratings
         {
             get => _ratings;
             set
             {
                 if (value != _ratings)
                 {
+                    
                     if (_ratings is not null)
                         foreach (var item in value)
                         {
@@ -230,19 +233,38 @@ namespace beta.Models.Server
                             }
                             else
                             {
+                                item.Value.RatingDifference[0] += item.Value.rating[0];
+                                item.Value.RatingDifference[1] += item.Value.rating[1];
+                                item.Value.GamesDifference++;
                                 _ratings.Add(item.Key, item.Value);
-
-                                _ratings[item.Key].RatingDifference[0] += item.Value.rating[0];
-                                _ratings[item.Key].RatingDifference[1] += item.Value.rating[1];
-                                _ratings[item.Key].GamesDifference++;
                             };
                         }
                     else _ratings = value;
                     OnPropertyChanged(nameof(ratings));
+                    OnPropertyChanged(nameof(DisplayedRating));
                 }
             }
         }
         #endregion
+
+        public Rating DisplayedRating
+        {
+            get
+            {
+                if (ratings is null) return null;
+                RatingType ratingType = RatingType.global;
+                if (Game is not null)
+                {
+                    ratingType = Game.RatingType;
+                }
+                return ratings.TryGetValue(ratingType, out var rating) ? rating : new()
+                {
+                    number_of_games = 0,
+                    rating = new double[] { 1500, 500 },
+                    RatingDifference = new double[] {1500, 500}
+                };
+            }
+        }
 
         // TODO RENAME to PlayerAvatarData?
 

@@ -564,6 +564,14 @@ namespace beta.ViewModels
             {
                 Thread.Sleep(5000);
                 e.State = GameState.Playing;
+                if (GameType == GameType.MatchMaker)
+                {
+                    Thread.Sleep(5000);
+                    e.OldState = GameState.Playing;
+                    e.State = GameState.None;
+                    e.State = GameState.Playing;
+                    return;
+                }
                 Thread.Sleep(7000);
                 Games.Remove(e);
             });
@@ -721,8 +729,42 @@ namespace beta.ViewModels
 
         public override GameState GameState => GameState.None; // Open + Playing
 
+        #region IsFilterByRatingTypeEnabled
+        private bool _IsFilterByRatingTypeEnabled;
+        public bool IsFilterByRatingTypeEnabled
+        {
+            get => _IsFilterByRatingTypeEnabled;
+            set
+            {
+                if (Set(ref _IsFilterByRatingTypeEnabled, value))
+                {
+                    GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        #region SelectedRatingType
+        private RatingType _SelectedRatingType;
+        public RatingType SelectedRatingType
+        {
+            get => _SelectedRatingType;
+            set
+            {
+                if (Set(ref _SelectedRatingType, value) && IsFilterByRatingTypeEnabled)
+                {
+                    GamesView.Refresh();
+                }
+            }
+        }
+        #endregion
+
         protected override bool FilterGame(GameInfoMessage game)
         {
+            if (IsFilterByRatingTypeEnabled)
+            {
+                return game.RatingType == SelectedRatingType;
+            }
             return true;
         }
 

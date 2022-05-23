@@ -75,7 +75,7 @@ namespace beta.ViewModels
         private int? GetGlobal()
         {
             if (Me is null) return null;
-            if (Me.ratings.TryGetValue("global", out var rating)) return rating.DisplayedRating;
+            if (Me.ratings.TryGetValue(RatingType.global, out var rating)) return rating.DisplayedRating;
             return null;
         }
 

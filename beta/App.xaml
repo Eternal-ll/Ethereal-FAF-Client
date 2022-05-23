@@ -47,6 +47,7 @@
                     <converter:GetPlayerConverter x:Key="GetPlayerConverter"/>
                     <converter:HumanTimeConverter x:Key="HumanTimeConverter"/>
                     <converter:IsNotNullOrWhiteSpaceConverter x:Key="IsNotNullOrWhiteSpaceConverter"/>
+                    <converter:RatingTypeConverter x:Key="RatingTypeConverter"/>
 
                     <!--Depreciated, calculations moved to Rating class-->
                     <!--<converter:RatingDifferenceConverter x:Key="RatingDifferenceConverter"/>-->

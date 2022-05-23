@@ -375,21 +375,11 @@ namespace beta.Infrastructure.Services
 
             Uri uri = new($"https://content.faforever.com/maps/previews/small/{name}.png");
 
-            //Task.Run(async () =>
-            //{
-            //_ = Task.Run(() =>
-            //  CacheService.GetBitmapSource(uri, Folder.MapsSmallPreviews)
-            //      .ContinueWith(task =>
-            //      {
-            //          gameMap.ImageSource = task.Result;
-            //      })
-            //);
             await CacheService.SetMapSource(gameMap, uri, Folder.MapsSmallPreviews).ConfigureAwait(false);
             if (gameMap.IsLegacy)
             {
                 gameMap.Scenario = GetMapScenario(name, true);
             }
-            //});
 
             Maps.TryAdd(name, gameMap);
             return gameMap;
@@ -414,9 +404,5 @@ namespace beta.Infrastructure.Services
             string extractPath = App.GetPathToFolder(Folder.Maps);
             Directory.Delete(extractPath + name, true);
         }
-
-        //https://api.faforever.com/data/map
-        //include=latestVersion,reviewsSummary&page[size]=50&page[number]=1&page[totals]=None
-        //https://api.faforever.com/data/map?include=latestVersion,reviewsSummary&page%5Bsize%5D=50&page%5Bnumber%5D=1&page%5Btotals%5D=None
     }
 }

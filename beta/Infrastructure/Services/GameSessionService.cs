@@ -22,7 +22,6 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace beta.Infrastructure.Services
 {
@@ -183,7 +182,7 @@ namespace beta.Infrastructure.Services
             var me = PlayersService.Self;
             if (me is not null)
             {
-                if (me.ratings.TryGetValue(ratingType.ToString(), out var rating))
+                if (me.ratings.TryGetValue(ratingType, out var rating))
                 {
                     mean = (int)rating.rating[0];
                     deviation = (int)rating.rating[1];
@@ -749,7 +748,6 @@ namespace beta.Infrastructure.Services
             
             SessionService.Send(command);
         }
-
         public async Task WatchGame(long replayId, string mapName, int playerId, FeaturedMod featuredMod, bool isLive = true)
         {
             if (featuredMod != FeaturedMod.FAF) return;
@@ -764,7 +762,7 @@ namespace beta.Infrastructure.Services
             //'"C:\\ProgramData\\FAForever\\bin\\ForgedAlliance.exe" /replay gpgnet://lobby.faforever.com/16997391/369689.SCFAreplay /init init_faf.lua /nobugreport /log "C:\\ProgramData\\FAForever\\logs\\replay.log" /replayid 16997391'
             if (!ConfirmLocalMapState(mapName))
             {
-                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"));
+                var model = await MapsService.DownloadAndExtractAsync(new($"https://content.faforever.com/maps/{mapName}.zip"), false);
 
                 if (!model.IsCompleted)
                 {

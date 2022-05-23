@@ -124,7 +124,7 @@ namespace beta.ViewModels
                 List<RatingType> ratings = new();
                 foreach (var rating in Player.ratings.Keys)
                 {
-                    ratings.Add(Enum.Parse<RatingType>(rating, true));
+                    ratings.Add(rating);
                 }
                 ApiRatingsViewModel = new ApiRatingsViewModel(Player.id, ratings.ToArray());
             }

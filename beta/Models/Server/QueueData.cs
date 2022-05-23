@@ -10,14 +10,20 @@ namespace beta.Models.Server
         [JsonPropertyName("queue_name")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public MatchMakerType Type { get; set; }
-        public string Name => Type switch
-        {
-            MatchMakerType.ladder1v1 => "1v1",
-            MatchMakerType.tmm2v2 => "2v2",
-            MatchMakerType.tmm4v4_full_share or
-            MatchMakerType.tmm4v4_share_until_death => "4v4",
-            _ => Type.ToString(),
-        };
+        public string queue_pop_time { get; set; }
+        /// <summary>
+        /// Seconds to auto-match
+        /// </summary>
+        public double queue_pop_time_delta { get; set; }
+
+        [JsonPropertyName("num_players")]
+        public int CountInQueue { get; set; }
+        public int team_size { get; set; }
+        public int[][] boundary_80s { get; set; }
+        public int[][] boundary_75s { get; set; }
+    }
+    public class QueueDataModel : QueueData
+    {
         public string Mode => Type switch
         {
             MatchMakerType.ladder1v1 or
@@ -26,17 +32,17 @@ namespace beta.Models.Server
             MatchMakerType.tmm4v4_full_share => "Full share",
             _ => "Unknown"
         };
-        public string queue_pop_time { get; set; }
-        public double queue_pop_time_delta { get; set; }
-
-        [JsonPropertyName("num_players")]
-        public int CountInQueue { get; set; }
-        public int team_size { get; set; }
-        public int[][] boundary_80s { get; set; }
-        public int[][] boundary_75s { get; set; }
+        public string Name => Type switch
+        {
+            MatchMakerType.ladder1v1 => "1 vs 1",
+            MatchMakerType.tmm2v2 => "2 vs 2",
+            MatchMakerType.tmm4v4_full_share or
+            MatchMakerType.tmm4v4_share_until_death => "4 vs 4",
+            _ => Type.ToString(),
+        };
 
         public DateTime Updated { get; }
-        public QueueData()
+        public QueueDataModel()
         {
             Updated = DateTime.Now;
         }

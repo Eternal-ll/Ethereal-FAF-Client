@@ -64,11 +64,6 @@
             </Style>
             <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
 
-            <ui:Flyout x:Key="MessagePlayerCardFlyout" Placement="RightEdgeAlignedTop">
-                <ContentControl Content="{Binding Converter={StaticResource GetPlayerConverter}}"
-                                    Style="{StaticResource PlayerCardContentControlStyle}"/>
-            </ui:Flyout>
-
             <Style TargetType="GroupItem" BasedOn="{StaticResource PlayersGroupStyle}"/>
 
             <Style x:Key="BorderStyle" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
@@ -278,83 +273,13 @@
                         <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
                         <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
                         <SolidColorBrush x:Key="SystemControlHighlightListLowBrush" Color="DimGray" Opacity=".05"/>
-                        <!--<ui:Flyout x:Key="EmojiFlyout">
-                            <Grid Margin="-10 -10 -10 -4">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Canvas Background="Black" Opacity=".2" Margin="-2 -2 -2 -2"/>
-                                <Image Source="{Binding Source}" Width="100"
-                                        MaxHeight="100" Margin="0" Stretch="Uniform">
-                                    <Image.Style>
-                                        <Style></Style>
-                                    </Image.Style>
-                                </Image>
-                                <TextBox x:Name="EmojiNameTextBox"
-                                        Grid.Row="1"
-                                        Margin="0 8 0 0"
-                                        Opacity=".5"    
-                                        BorderThickness="0"
-                                        Background="Transparent"
-                                        IsReadOnly="True"
-                                        Text="{Binding ToolTip, StringFormat=':{0}:'}"/>
-                                <Button
-                                        Grid.Row="2"
-                                        Style="{StaticResource DefaultButtonStyle}"
-                                        Content="Copy"
-                                        Command="{StaticResource CopyCommand}"
-                                        CommandParameter="{Binding ElementName=EmojiNameTextBox, Path=Text}"
-                                        HorizontalAlignment="Center"
-                                        Padding="10 2 10 4"
-                                        Opacity=".7"
-                                        Margin="0"
-                                        Background="Transparent"/>
-                            </Grid>
-                        </ui:Flyout>-->
                         <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Margin" Value="0"/>
                             <Setter Property="Focusable" Value="False"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
-                            <!--<Style.Triggers>
-                                <DataTrigger Binding="{Binding From, Converter={StaticResource IsNullConverter}}" Value="False">
-                                    <Setter Property="Margin" Value="0 6 0 0"/>
-                                </DataTrigger>
-                            </Style.Triggers>-->
                         </Style>
-                        <!--<Style TargetType="Image">
-                            <Setter Property="MaxHeight" Value="24"/>
-                            <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
-                        </Style>
-                        <Style TargetType="controls:GifImage">
-                            <Setter Property="ui:ContextFlyoutService.ContextFlyout" Value="{StaticResource EmojiFlyout}"/>
-                        </Style>-->
-                        <!--<Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                                <Setter Property="IsTabStop" Value="False"/>
-                                <Setter Property="Content">
-                                    <Setter.Value>
-                                        <TextBlock
-                                            Text="{Binding login}"
-                                            Padding="26 0 0 0">
-                                            <TextBlock.Background>
-                                                <ImageBrush ImageSource="{Binding Flag}"
-                                                            Stretch="None"
-                                                            AlignmentX="Left"
-                                                            AlignmentY="Top"/>
-                                            </TextBlock.Background>
-                                        </TextBlock>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter Property="Padding" Value="6 0 6 2"/>
-                                <Setter Property="Margin" Value="0"/>
-                                <Setter Property="ui:FlyoutService.Flyout" Value="{StaticResource MessagePlayerCardFlyout}"/>
-                                <Style.Resources>
-                                    <Thickness x:Key="FlyoutContentThemePadding">0</Thickness>
-                                </Style.Resources>
-                            </Style>-->
                         <DataTemplate DataType="{x:Type irc:IrcChannelMessage}">
                             <Grid ShowGridLines="False">
                                 <Grid.Style>
@@ -396,31 +321,6 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </ContentControl.Style>
-                                        <ContentControl.Resources>
-                                            <!--<DataTemplate DataType="{x:Type sModels:PlayerInfoMessage}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <Image Style="{StaticResource AvatarImageStyle}" Width="40" Margin="-40 0 4 0"/>
-                                                <Image Source="{Binding Flag}" Height="18" Width="18"/>
-                                                <Button Background="Transparent" FontWeight="DemiBold" Margin="0 0 0 0">
-                                                    <TextBlock Text="{Binding login}"/>
-                                                    <Button.Style>
-                                                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                            -->
-                                            <!--<Setter Property="Content" Value="{Binding From}"/>-->
-                                            <!--
-                                                            <Setter Property="Padding" Value="6 0 6 2"/>
-                                                            <Setter Property="Margin" Value="-8 0 0 0"/>
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Foreground" Value="Orange"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                </Button>
-                                            </StackPanel>
-                                        </DataTemplate>-->
-                                        </ContentControl.Resources>
                                     </ContentControl>
                                     <TextBlock  Margin="-34 0" VerticalAlignment="Center">
                                         <TextBlock.Style>
@@ -509,34 +409,6 @@
                                     <Canvas IsHitTestVisible="False" Background="Orange" Width="2"
                                                 Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Canvas}}, Path=ActualHeight}"/>
                                 </Canvas>
-                                <!--<Button Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                            Margin="0 -10 32 0">
-                                        <Button.Resources>
-                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Gray" Opacity=".4"/>
-                                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Gray" Opacity=".6"/>
-                                        </Button.Resources>
-                                        <Button.Background>
-                                            <SolidColorBrush Color="Gray" Opacity=".2"/>
-                                        </Button.Background>
-                                        <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Setter Property="Padding" Value="0"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
-                                                        Path=IsMouseOver}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                        <Path Margin="6"
-                                              Height="4"
-                                              Stretch="Uniform"
-                                              Fill="White"
-                                              Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"
-                                              />
-                                    </Button>-->
                             </Grid>
                         </DataTemplate>
                         <DataTemplate DataType="{x:Type irc:IrcNotificationMessage}">
@@ -544,11 +416,6 @@
                                 <Grid.Style>
                                     <Style TargetType="Grid">
                                         <Setter Property="Margin" Value="10 0 0 4"/>
-                                        <!--<Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSame}" Value="True">
-                                                <Setter Property="Margin" Value="10 -8 0 4"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>-->
                                     </Style>
                                 </Grid.Style>
                                 <Grid.ColumnDefinitions>
@@ -560,55 +427,6 @@
                                     <RowDefinition/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
-
-                                <!--<StackPanel Orientation="Horizontal" Grid.Column="1" Visibility="Collapsed">
-                                    <TextBlock Margin="-34 0" VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                --><!--<Setter Property="Grid.Column" Value="2"/>--><!--
-                                                <Setter Property="Opacity" Value=".4"/>
-                                                <Setter Property="FontSize" Value="12"/>
-                                                <Setter Property="Visibility" Value="Hidden"/>
-                                                <Setter Property="Margin" Value="0 6 0 0"/>
-                                                <Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
-                                                            Path=IsMouseOver}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                    --><!--<DataTrigger Binding="{Binding IsSame}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>--><!--
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>-->
-
-                                <!--<TextBlock VerticalAlignment="Center" Visibility="Collapsed">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            --><!--<Setter Property="Grid.Column" Value="2"/>--><!--
-                                            <Setter Property="Opacity" Value=".4"/>
-                                            <Setter Property="FontSize" Value="12"/>
-                                            <Setter Property="Visibility" Value="Hidden"/>
-                                            <Setter Property="Margin" Value="0 6 0 0"/>
-                                            --><!--<Setter Property="Text" Value="{Binding Created, StringFormat='Today at {0:HH:mm}'}"/>--><!--
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
-                                                            Path=IsMouseOver}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                                --><!--<DataTrigger Binding="{Binding IsSame}" Value="True">
-                                                    <Setter Property="Grid.Row" Value="1"/>
-                                                    <Setter Property="Grid.Column" Value="0"/>
-                                                    <Setter Property="Text" Value="{Binding Created, StringFormat='{}{0:HH:mm}'}"/>
-                                                </DataTrigger>--><!--
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>-->
-
                                 <TextBlock Background="Transparent" VerticalAlignment="Center"
                                         Grid.Column="1" Grid.Row="1" Opacity=".8"
                                         behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"
@@ -617,16 +435,6 @@
                                         <Style TargetType="TextBlock" >
                                             <Setter Property="Margin" Value="0 2 0 2"/>
                                             <Setter Property="FontStyle" Value="Italic"/>
-                                            <!--<Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSame}" Value="True">
-                                                    <Setter Property="Margin" Value="0 0 0 0"/>
-                                                    <Setter Property="RenderTransform">
-                                                        <Setter.Value>
-                                                            <TranslateTransform Y="2"/>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>-->
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
@@ -699,10 +507,6 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <!--#region Chat options -->
-                <!--<ToggleButton x:Name="AdditionalSettingsBtn" Height="30" Width="30" Margin="8 6 0 0" VerticalAlignment="Top" Background="Transparent" Padding="6 0"
-                              Checked="ToggleButton_Checked">
-                    <Path Data="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z"/>
-                </ToggleButton>-->
                 <Button
                 Margin="8 6 0 0"
                 Height="30"

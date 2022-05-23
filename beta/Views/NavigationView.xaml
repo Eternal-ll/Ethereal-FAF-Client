@@ -87,7 +87,7 @@
                 </ui:NavigationViewItem>
                 <!--<ui:NavigationViewItemSeparator/>-->
                 <ui:NavigationViewItem Content="Global" Tag="GlobalGames" Icon="{StaticResource EathPathIcon}"/>
-                <!--<ui:NavigationViewItem Content="Matchmaker" Tag="Matchmaker" Icon="{StaticResource SwordsPathIcon}"/>-->
+                <ui:NavigationViewItem Content="Matchmaking" Tag="MatchMaker" Icon="{StaticResource SwordsPathIcon}"/>
                 <ui:NavigationViewItemSeparator/>
                 <ui:NavigationViewItem Content="Maps vault" Tag="MapsVault" Icon="{StaticResource MapsPathIcon}"/>
                 <!--<ui:NavigationViewItem Content="Vaults" Icon="{StaticResource WarehousePathIcon}">

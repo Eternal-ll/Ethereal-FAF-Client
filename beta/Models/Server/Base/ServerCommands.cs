@@ -102,7 +102,7 @@ namespace beta.Models.Server.Base
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
-        public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"queue\", \"state\": \"start\"}}";
+        public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\"}}";
 
         // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
         // TODO

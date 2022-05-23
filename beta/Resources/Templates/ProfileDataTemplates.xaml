@@ -179,24 +179,23 @@
                 </Grid>-->
                     <oxy:Plot Grid.Row="2" Grid.ColumnSpan="2"  PlotAreaBorderColor="Gray" LegendTextColor="Gray"
                               LegendTitleColor="Gray" TextColor="White" TitleColor="Red" SubtitleColor="Red"
-                              DefaultTrackerTemplate="{x:Null}"
-                              Background="Transparent">
+                              Background="Transparent" MinWidth="500" DefaultTrackerTemplate="{x:Null}">
                         <!--<oxy:Plot.DefaultTrackerTemplate>
                         <ControlTemplate>
                             <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
                                                 Background="Black" ContentStringFormat="test" Distance="20">
                                 
-                    -->
-                        <!--<oxy:TrackerControl.Background>
+                    
+                        --><!--<oxy:TrackerControl.Background>
                                     <LinearGradientBrush EndPoint="0,1">
                                         <GradientStop Color="#f0e0e0ff" />
                                         <GradientStop Offset="1" Color="#f0ffffff" />
                                     </LinearGradientBrush>
-                                </oxy:TrackerControl.Background>-->
-                        <!--
+                                </oxy:TrackerControl.Background>--><!--
+                        
                     
                                 <oxy:TrackerControl.Content>
-                                    <TextBlock Text="{Binding Position}" Margin="7" />
+                                    <TextBlock Text="{Binding}" Margin="7" />
                                 </oxy:TrackerControl.Content>
                             </oxy:TrackerControl>
                         </ControlTemplate>
@@ -209,7 +208,7 @@
                                 DataFieldX="RatingAfter"
                                      MarkerType="Circle" LabelMargin="0" MarkerSize="2"
                                     MarkerFill="Black" CanTrackerInterpolatePoints="False"/>-->
-                        <oxy:LineSeries ItemsSource="{Binding SelectedRatingData}" Color="Red"
+                    <oxy:LineSeries ItemsSource="{Binding SelectedRatingData}" Color="Red" CanTrackerInterpolatePoints="False"
                                     DataFieldX="ScoreDateTime" DataFieldY="RatingAfter" Width="500" Height="200"/>
                     </oxy:Plot>
                     <!--<oxy:PlotView Grid.Row="2" Grid.RowSpan="2" Model="{Binding PlotModel}"
@@ -378,7 +377,7 @@
                                 <StackPanel>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="110"/>
                                             <ColumnDefinition Width="40"/>
                                             <ColumnDefinition Width="30"/>
                                         </Grid.ColumnDefinitions>
@@ -391,11 +390,11 @@
                                             <DataTemplate>
                                                 <Grid ShowGridLines="False">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="110"/>
                                                         <ColumnDefinition Width="40"/>
                                                         <ColumnDefinition Width="30"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding Key}" Margin="0 0 10 0" ToolTip="{Binding Key}"/>
+                                                    <TextBlock Text="{Binding Key, Converter={StaticResource RatingTypeConverter}}" Margin="0 0 10 0" ToolTip="{Binding Key}"/>
                                                     <TextBlock Text="{Binding Value.DisplayedRating}" Grid.Column="1"/>
                                                     <TextBlock Text="{Binding Value.number_of_games}" Grid.Column="2"/>
                                                 </Grid>
