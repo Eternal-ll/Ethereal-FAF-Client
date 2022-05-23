@@ -9,6 +9,9 @@ using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IMapsService
     {
         public event EventHandler<string> DownloadCompleted;

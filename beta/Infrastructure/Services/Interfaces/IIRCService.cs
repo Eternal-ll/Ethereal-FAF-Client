@@ -5,6 +5,9 @@ using System;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    /// <summary>
+    /// IRC-service
+    /// </summary>
     public interface IIrcService
     {
         #region Events

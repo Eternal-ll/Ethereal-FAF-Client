@@ -19,7 +19,6 @@ namespace beta.Infrastructure.Services
         public event EventHandler<string> DownloadCompleted;
 
         private readonly ICacheService CacheService;
-        private readonly IApiService ApiService;
         private readonly IDownloadService DownloadService;
         private readonly INotificationService NotificationService;
 
@@ -32,10 +31,9 @@ namespace beta.Infrastructure.Services
         public string[] GetLocalMaps() => LocalMaps.ToArray();
 
         private string PathToLegacyMaps => Settings.Default.PathToGame is not null ? Settings.Default.PathToGame + @"\maps\" : null;
-        public MapsService(ICacheService cacheService, IApiService apiService, IDownloadService downloadService, INotificationService notificationService)
+        public MapsService(ICacheService cacheService, IDownloadService downloadService, INotificationService notificationService)
         {
             CacheService = cacheService;
-            ApiService = apiService;
 
             var path = App.GetPathToFolder(Folder.Maps);    
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);

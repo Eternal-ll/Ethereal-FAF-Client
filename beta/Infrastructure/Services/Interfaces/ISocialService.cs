@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
+    /// <summary>
+    /// Social service
+    /// </summary>
     public interface ISocialService
     {
         /// <summary>

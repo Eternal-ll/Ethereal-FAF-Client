@@ -3,7 +3,10 @@ using System;
 
 namespace beta.Infrastructure.Services.Interfaces
 {
-    internal interface IReplayServerService
+    /// <summary>
+    /// Replay service for saving and stream replays
+    /// </summary>
+    public interface IReplayServerService
     {
         public event EventHandler<ReplayRecorder> ReplayRecorderCreated;
 

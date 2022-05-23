@@ -12,6 +12,9 @@ namespace beta.Infrastructure.Services.Interfaces
         Connected,
         AuthentificationFailed
     }
+    /// <summary>
+    /// Main service for communicating with lobby-server
+    /// </summary>
     public interface ISessionService
     {
         public event EventHandler<SessionState> StateChanged;

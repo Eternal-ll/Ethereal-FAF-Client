@@ -22,7 +22,6 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IIceService, IceService>()
             .AddSingleton<INotificationService, NotificationService>()
             .AddSingleton<IFavouritesService, FavouritesService>()
-            .AddSingleton<IReplayServerService, ReplayServerService>()
-            .AddTransient<IApiService, ApiService>();
+            .AddSingleton<IReplayServerService, ReplayServerService>();
     }
 }
