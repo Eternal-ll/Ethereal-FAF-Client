@@ -3,7 +3,9 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -37,17 +39,51 @@ namespace beta.ViewModels
             // TODO Add settings to not include reporting
             Progress = new Progress<string>((data) => ProgressText = data);
 
-            if (Settings.Default.AutoJoin)
+            if (Settings.Default.AutoJoin && File.Exists("User.TokenBearer.txt"))
             {
-                OAuthService.SetToken(
-                    Settings.Default.access_token,
-                    Settings.Default.refresh_token,
-                    Settings.Default.id_token,
-                    Settings.Default.ExpiresIn);
-
-                Task.Run(() => AuthorizeAsync());
+                Task.Run(() =>
+                {
+                    OAuthService.SetToken(
+                        Settings.Default.access_token,
+                        Settings.Default.refresh_token,
+                        Settings.Default.id_token,
+                        Settings.Default.ExpiresIn);
+                    OAuthService.AuthAsync(Progress)
+                    .ContinueWith(task => HandleOAuthResultTask(task));
+                });
             }
+
+            BrowserName = GetDefaultBrowser();
         }
+
+        private string GetDefaultBrowser()
+        {
+            string userChoice = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice";
+            string progId;
+            using RegistryKey userChoiceKey = Registry.CurrentUser.OpenSubKey(userChoice);
+            if (userChoiceKey == null)
+            {
+                return "Unknown";
+            }
+            object progIdValue = userChoiceKey.GetValue("Progid");
+            if (progIdValue == null)
+            {
+                return "Unknown";
+            }
+            progId = progIdValue.ToString();
+            return progId switch
+            {
+                "IE.HTTP" => "Internet Explorer",
+                "FirefoxURL" => "Firefox",
+                "ChromeHTML" => "Chrome",
+                "OperaStable" => "Opera",
+                "SafariHTML" => "Safari",
+                "MSEdgeHTM" or "AppXq0fevzme2pys62n3e0fbqa7peapykr8v" => "Edge",
+                _ => progId,
+            };
+        }
+
+        public string BrowserName { get; set; }
 
         private void SessionService_AuthentificationFailed(object sender, Models.Server.AuthentificationFailedData e)
         {
@@ -79,37 +115,37 @@ namespace beta.ViewModels
                     {
                         Visibility = Visibility.Collapsed;
                     }
-                    new Thread(() =>
-                    {
-                        while (IsPendingAuthorization)
-                        {
-                            var state = ProgressText;
-                            var data = state.Split('.');
-
-                            string points = string.Empty;
-                            switch (data.Length)
-                            {
-                                case 1:
-                                    points = ".";
-                                    break;
-                                case 2:
-                                    points = "..";
-                                    break;
-                                case 3:
-                                    points = "...";
-                                    break;
-                            }
-                            ProgressText = data[0] + points;
-                            Thread.Sleep(500);
-                        }
-                    })
+                    if (ProgressTextThread is not null) return;
+                    ProgressTextThread = new Thread(UpdateProgressText)
                     {
                         IsBackground = true
-                    }.Start();
+                    };
+                    ProgressTextThread.Start();
                 }
             }
         }
         #endregion
+
+        Thread ProgressTextThread;
+
+        private void UpdateProgressText()
+        {
+            string points = string.Empty;
+            while (IsPendingAuthorization)
+            {
+                //bool removeThree = points.Length == 3;
+                //ProgressText = removeThree ? ProgressText[..^3] : ProgressText[..^(points.Length > 0 ? 3 - points.Length : 0)] + points;
+                //points = points.Length switch
+                //{
+                //    0 => ".",
+                //    1 => "..",
+                //    2 => "...",
+                //    _ => string.Empty,
+                //};
+                Thread.Sleep(3500);
+            }
+            ProgressTextThread = null;
+        }
 
         public Visibility InputVisibility => !IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
         public Visibility LoadingInputVisibility => IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
@@ -124,21 +160,6 @@ namespace beta.ViewModels
                 if (Set(ref _ProgressText, value))
                 {
 
-                }
-            }
-        }
-        #endregion
-
-        #region IsTrailerSoundsOn - Trailer sounds on / off
-        private bool _IsTrailerSoundsOn = Settings.Default.IsTrailerSoundsOn;
-        public bool IsTrailerSoundsOn
-        {
-            get => _IsTrailerSoundsOn;
-            set
-            {
-                if (Set(ref _IsTrailerSoundsOn, value))
-                {
-                    Settings.Default.IsTrailerSoundsOn = value;
                 }
             }
         }
@@ -220,9 +241,6 @@ namespace beta.ViewModels
             set => Set(ref _Visibility, value);
         }
         #endregion
-
-        private async Task AuthorizeAsync() => await OAuthService.AuthAsync(Progress)
-            .ContinueWith(task => HandleOAuthResultTask(task));
 
         #region LoginCommand - Log in using parsing
         private ICommand _LoginCommand;

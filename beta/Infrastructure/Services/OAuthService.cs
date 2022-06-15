@@ -19,15 +19,6 @@ using System.Threading.Tasks;
 
 namespace beta.Infrastructure.Services
 {
-    internal static class OAuthExtension
-    {
-        public static ByteArrayContent GetQueryByteArrayContent(string text)
-        {
-            ByteArrayContent byteArrayContent = new(Encoding.UTF8.GetBytes(text));
-            byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            return byteArrayContent;
-        }
-    }
     public class OAuthService : IOAuthService
     {
         public event EventHandler<OAuthEventArgs> StateChanged;
@@ -41,64 +32,7 @@ namespace beta.Infrastructure.Services
             Logger = logger;
         }
 
-        #region Encoding table
-        // TODO: So, in some request we are getting html encoded strings (On code) like "=" as "%3D" and i`m thinking about encode them, but it is not necessary.
-
-        //        Unencoded UrlEncoded UrlEncodedUnicode UrlPathEncoded EscapedDataString EscapedUriString HtmlEncoded HtmlAttributeEncoded HexEscaped
-        //A         A          A                 A              A                 A                A           A                    %41
-        //B         B          B                 B              B                 B                B           B                    %42
-        //a         a          a                 a              a                 a                a           a                    %61
-        //b         b          b                 b              b                 b                b           b                    %62
-        //0         0          0                 0              0                 0                0           0                    %30
-        //1         1          1                 1              1                 1                1           1                    %31
-        //[space]   +          +                 %20            %20               %20              [space]     [space]              %20
-        //!         !          !                 !              !                 !                !           !                    %21
-        //"         %22        %22               "              %22               %22              &quot;      &quot;               %22
-        //#         %23        %23               #              %23               #                #           #                    %23
-        //$         %24        %24               $              %24               $                $           $                    %24
-        //%         %25        %25               %              %25               %25              %           %                    %25
-        //&         %26        %26               &              %26               &                &amp;       &amp;                %26
-        //'         %27        %27               '              '                 '                &#39;       &#39;                %27
-        //(         (          (                 (              (                 (                (           (                    %28
-        //)         )          )                 )              )                 )                )           )                    %29
-        //*         *          *                 *              %2A               *                *           *                    %2A
-        //+         %2b        %2b               +              %2B               +                +           +                    %2B
-        //,         %2c        %2c               ,              %2C               ,                ,           ,                    %2C
-        //-         -          -                 -              -                 -                -           -                    %2D
-        //.         .          .                 .              .                 .                .           .                    %2E
-        // /         %2f        %2f               /              %2F               /                /           /                    %2F
-        //:         %3a        %3a               :              %3A               :                :           :                    %3A
-        //;         %3b        %3b               ;              %3B               ;                ;           ;                    %3B
-        //<         %3c        %3c               <              %3C               %3C              &lt;        &lt;                 %3C
-        //=         %3d        %3d               =              %3D               =                =           =                    %3D
-        //>         %3e        %3e               >              %3E               %3E              &gt;        >                    %3E
-        //?         %3f        %3f               ?              %3F               ?                ?           ?                    %3F
-        //@         %40        %40               @              %40               @                @           @                    %40
-        //[         %5b        %5b               [              %5B               %5B              [           [                    %5B
-        //\         %5c        %5c               \              %5C               %5C              \           \                    %5C
-        //]         %5d        %5d               ]              %5D               %5D              ]           ]                    %5D
-        //^         %5e        %5e               ^              %5E               %5E              ^           ^                    %5E
-        //_         _          _                 _              _                 _                _           _                    %5F
-        //`         %60        %60               `              %60               %60              `           `                    %60
-        //{         %7b        %7b               {              %7B               %7B              {           {                    %7B
-        //|         %7c        %7c               |              %7C               %7C              |           |                    %7C
-        //}         %7d        %7d               }              %7D               %7D              }           }                    %7D
-        //~         %7e        %7e               ~              ~                 ~                ~           ~                    %7E
-        //Ā         %c4%80     %u0100            %c4%80         %C4%80            %C4%80           Ā           Ā                    [OoR]
-        //ā         %c4%81     %u0101            %c4%81         %C4%81            %C4%81           ā           ā                    [OoR]
-        //Ē         %c4%92     %u0112            %c4%92         %C4%92            %C4%92           Ē           Ē                    [OoR]
-        //ē         %c4%93     %u0113            %c4%93         %C4%93            %C4%93           ē           ē                    [OoR]
-        //Ī         %c4%aa     %u012a            %c4%aa         %C4%AA            %C4%AA           Ī           Ī                    [OoR]
-        //ī         %c4%ab     %u012b            %c4%ab         %C4%AB            %C4%AB           ī           ī                    [OoR]
-        //Ō         %c5%8c     %u014c            %c5%8c         %C5%8C            %C5%8C           Ō           Ō                    [OoR]
-        //ō         %c5%8d     %u014d            %c5%8d         %C5%8D            %C5%8D           ō           ō                    [OoR]
-        //Ū         %c5%aa     %u016a            %c5%aa         %C5%AA            %C5%AA           Ū           Ū                    [OoR]
-        //ū         %c5%ab     %u016b            %c5%ab         %C5%AB            %C5%AB           ū           ū                    [OoR] 
-
-        #endregion
-
         private TokenBearer TokenBearer;
-
         public void SetToken(string accessToken, string refreshToken, string idToken, double expiresIn) => TokenBearer = new()
         {
             AccessToken = accessToken,
@@ -111,27 +45,9 @@ namespace beta.Infrastructure.Services
         private async Task<Stream> SafeRequest(string requestUri, ByteArrayContent data = null, IProgress<string> progress = null)
         {
             Logger.LogInformation($"POST {requestUri}, data: \n{data?.ReadAsStringAsync().Result}");
-            //try
-            //{
-                if (data is not null)
-                    return await (await HttpClient.PostAsync(requestUri, data)).Content.ReadAsStreamAsync();
-                return await HttpClient.GetStreamAsync(requestUri);
-            //}
-            //catch (Exception e)
-            //{
-            //    Logger.LogError(e.Message, e.StackTrace);
-            //    if (e is HttpRequestException || e is AggregateException)
-            //    {
-            //        OnStateChanged(new(OAuthState.NO_CONNECTION, "No connection", e.StackTrace));
-            //    }
-            //    else
-            //    {
-            //        OnStateChanged(new(OAuthState.INVALID, $"Something went wrong on {requestUri} endpoint", e.StackTrace));
-            //    }
-            //    throw e;
-            //}
-
-            //return null;
+            if (data is not null)
+                return await (await HttpClient.PostAsync(requestUri, data)).Content.ReadAsStreamAsync();
+            return await HttpClient.GetStreamAsync(requestUri);
         }
 
         private async Task<string> GetOAuthCodeAsync(string usernameOrEmail, string password, IProgress<string> progress = null)
@@ -315,9 +231,12 @@ namespace beta.Infrastructure.Services
             string type = isRefreshToken ? "grant_type=refresh_token&refresh_token=" : "grant_type=authorization_code&code=";
             type += data;
 
-            var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",
-                OAuthExtension.GetQueryByteArrayContent($"{type}&client_id=ethereal-faf-client" +
+
+            ByteArrayContent byteArrayContent = new(Encoding.UTF8.GetBytes($"{type}&client_id=ethereal-faf-client" +
                 $"&redirect_uri=http://localhost{(port == 0 ? "" : $":{port}")}"));
+            byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+            var stream = await SafeRequest("https://hydra.faforever.com/oauth2/token",byteArrayContent);
             return await JsonSerializer.DeserializeAsync<TokenBearer>(stream);
         }
       
@@ -405,8 +324,31 @@ namespace beta.Infrastructure.Services
 
             progress?.Report("Waiting for callback from FAForever");
 
-            var context = await httpListener.GetContextAsync().AsCancellable(token);
-            httpListener.Close();
+            HttpListenerContext context = null;
+            bool isCanceled = false;
+            await httpListener.GetContextAsync().AsCancellable(token)
+                .ContinueWith(task =>
+                {
+                    isCanceled = task.IsCanceled;
+                    if (!task.IsCanceled && !task.IsFaulted)
+                    {
+                        context = task.Result;
+                        context.Response.StatusCode = 200;
+                        App.ResourceAssembly
+                            .GetManifestResourceStream("beta.Resources.OAuthResult.html")
+                            .CopyTo(context.Response.OutputStream);
+                        context.Response.Close();
+                    }
+                    httpListener.Close();
+                });
+            if (isCanceled)
+            {
+                return null;
+            }
+            if (context is null)
+            {
+                throw new Exception("Didnt get http listener context");
+            }
 
             var response = context.Response;
             var request = context.Request;
@@ -416,17 +358,16 @@ namespace beta.Infrastructure.Services
             {
                 //?code=3rHPSzZNaFNJLft6ESkP0Dg9yv-k676EHhlVMSWtRmA.zSPeJ-K0cg0Ed-MhtppRROLRFCTlgWrIBMQDiZbrQTo&scope=openid+offline+public_profile+lobby&state=9g5VGjFTy067aQilMTbcQA%3D%3D
                 var query = request.Url.Query[1..];
-
-            var data = query.Split('&');
-            for (int i = 0; i < data.Length; i++)
-            {
-                var paramData = data[i].Split('=');
-                if (paramData[0] == "code")
+                var data = query.Split('&');
+                for (int i = 0; i < data.Length; i++)
                 {
-                    return await FetchOAuthDataAsync(paramData[1], false, progress, avaiablePort.Value);
+                    var paramData = data[i].Split('=');
+                    if (paramData[0] == "code")
+                    {
+                        return await FetchOAuthDataAsync(paramData[1], false, progress, avaiablePort.Value);
+                    }
                 }
-            }
-            return null;
+                return null;
             }
             else
             {

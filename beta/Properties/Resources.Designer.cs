@@ -79,15 +79,5 @@ namespace beta.Properties {
                 return ((byte[])(obj));
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] FafTrailer {
-            get {
-                object obj = ResourceManager.GetObject("FafTrailer", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }
