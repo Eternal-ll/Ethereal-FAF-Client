@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows10.0.18362.0</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>beta.Program</StartupObject>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -25,6 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Fonts\fa-brands-400.ttf" />
+    <None Remove="Resources\Fonts\fa-duotone-900.ttf" />
+    <None Remove="Resources\Fonts\fa-light-300.ttf" />
+    <None Remove="Resources\Fonts\fa-regular-400.ttf" />
+    <None Remove="Resources\Fonts\fa-solid-900.ttf" />
+    <None Remove="Resources\Fonts\fa-thin-100.ttf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
@@ -289,8 +295,8 @@
     <None Remove="Resources\Images\PlayerGameStatus\unknown.png" />
     <None Remove="Resources\Images\Random\1.jpg" />
     <None Remove="Resources\Images\Random\2.jpg" />
-    <None Remove="Resources\Images\Random\hilly plateau 6v6.small.png" />
-    <None Remove="Resources\Images\Random\Namalsk_1.jpg" />
+    <None Remove="Resources\OAuthResult.html" />
+    <None Remove="Resources\SVG Resources\SVG\Logo.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -298,9 +304,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
-    <Resource Include="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
-    <Resource Include="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
+    <Resource Include="Resources\Fonts\fa-brands-400.ttf" />
+    <Resource Include="Resources\Fonts\fa-duotone-900.ttf" />
+    <Resource Include="Resources\Fonts\fa-light-300.ttf" />
+    <Resource Include="Resources\Fonts\fa-regular-400.ttf" />
+    <Resource Include="Resources\Fonts\fa-solid-900.ttf" />
+    <Resource Include="Resources\Fonts\fa-thin-100.ttf" />
     <Resource Include="Resources\Images\MapResources\hydrocarbon_strategic.png" />
     <Resource Include="Resources\Images\MapResources\mass_strategic.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
@@ -318,8 +327,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="ModernWpfUI" Version="0.9.4" />
-    <PackageReference Include="Notification.WPF" Version="6.1.0.4" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.5" />
+    <PackageReference Include="Notification.WPF" Version="6.1.0.5" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
     <PackageReference Include="ZstdSharp.Port" Version="0.6.1" />
@@ -584,12 +593,8 @@
     <Resource Include="Resources\Images\Random\2.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Images\Random\hilly plateau 6v6.small.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Images\Random\Namalsk_1.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <EmbeddedResource Include="Resources\OAuthResult.html" />
+    <Resource Include="Resources\SVG Resources\SVG\Logo.svg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -686,13 +691,9 @@
     <None Update="Resources\Images\Emoji\9967-baron-bunny-dance.gif">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\Media\Trailer\Trailer.mp4">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\API\MapsVault\" />
     <Folder Include="ViewModels\API\Base\" />
     <Folder Include="ViewModels\Common\Base\" />
   </ItemGroup>
