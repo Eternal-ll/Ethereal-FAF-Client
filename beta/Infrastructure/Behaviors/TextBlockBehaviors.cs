@@ -10,15 +10,11 @@ namespace beta.Infrastructure.Behaviors
     /// </summary>
     public static class TextBlockExtensions
     {
-        public static IEnumerable<Inline> GetBindableInlines(DependencyObject obj)
-        {
-            return (IEnumerable<Inline>)obj.GetValue(BindableInlinesProperty);
-        }
+        public static IEnumerable<Inline> GetBindableInlines(DependencyObject obj) =>
+            (IEnumerable<Inline>)obj.GetValue(BindableInlinesProperty);
 
-        public static void SetBindableInlines(DependencyObject obj, IEnumerable<Inline> value)
-        {
+        public static void SetBindableInlines(DependencyObject obj, IEnumerable<Inline> value) => 
             obj.SetValue(BindableInlinesProperty, value);
-        }
 
         public static readonly DependencyProperty BindableInlinesProperty =
             DependencyProperty.RegisterAttached("BindableInlines", typeof(IEnumerable<Inline>), typeof(TextBlockExtensions), new PropertyMetadata(null, OnBindableInlinesChanged));
