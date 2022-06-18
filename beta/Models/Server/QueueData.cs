@@ -1,29 +1,68 @@
 ﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
+using beta.ViewModels.Base;
 using System;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.Server
 {
-    public class QueueData : ServerMessage
+    public class QueueData : ViewModel, IServerMessage
     {
+        public ServerCommand Command { get; set; }
         [JsonPropertyName("queue_name")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public MatchMakerType Type { get; set; }
-        public string queue_pop_time { get; set; }
+        [JsonPropertyName("queue_pop_time")]
+        private string _queue_pop_time;
+        public string queue_pop_time
+        {
+            get => _queue_pop_time;
+            set => Set(ref _queue_pop_time, value);
+        }
+
+        #region TimeSpanToMatch
         /// <summary>
         /// Seconds to auto-match
         /// </summary>
-        public double queue_pop_time_delta { get; set; }
+        private double _queue_pop_time_delta;
+        public double queue_pop_time_delta
+        {
+            get => _queue_pop_time_delta;
+            set
+            {
+                if (Set(ref _queue_pop_time_delta, value))
+                {
+                    OnPropertyChanged(nameof(TimeSpanToMatch));
+                }
+            }
+        }
+        #endregion
 
+        public TimeSpan TimeSpanToMatch => TimeSpan.FromSeconds(queue_pop_time_delta);
+
+        #region _CountInQueue
+        private int _CountInQueue;
         [JsonPropertyName("num_players")]
-        public int CountInQueue { get; set; }
+        public int CountInQueue
+        {
+            get => _CountInQueue;
+            set => Set(ref _CountInQueue, value);
+        } 
+        #endregion
         public int team_size { get; set; }
-        public int[][] boundary_80s { get; set; }
+
+        #region boundary_80s
+        private int[][] _boundary_80s;
+        public int[][] boundary_80s
+        {
+            get => _boundary_80s;
+            set => Set(ref _boundary_80s, value);
+        } 
+        #endregion
         public int[][] boundary_75s { get; set; }
-    }
-    public class QueueDataModel : QueueData
-    {
+
+        //Additional fields
+
         public string Mode => Type switch
         {
             MatchMakerType.ladder1v1 or
@@ -40,11 +79,5 @@ namespace beta.Models.Server
             MatchMakerType.tmm4v4_share_until_death => "4 vs 4",
             _ => Type.ToString(),
         };
-
-        public DateTime Updated { get; }
-        public QueueDataModel()
-        {
-            Updated = DateTime.Now;
-        }
     }
 }

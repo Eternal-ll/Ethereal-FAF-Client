@@ -33,9 +33,9 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<GameInfoMessage> GameFilled;
 
         public GameSessionState State { get; }
-
+        
         public bool GameIsRunning { get; }
-
+        public bool IsLaunching { get; set; }
         public Task Close();
 
         public Task JoinGame(GameInfoMessage game, string password = null);

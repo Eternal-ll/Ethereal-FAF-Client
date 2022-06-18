@@ -13,7 +13,7 @@
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch"
              d:DataContext="{d:DesignInstance {x:Type local:MapsView}}">
-    <Grid TextElement.Foreground="White" IsEnabled="{Binding IsInputBlocked}">
+    <Grid TextElement.Foreground="White" >
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
             <RowDefinition Height="Auto"/>
@@ -123,10 +123,25 @@
                 </Style.Resources>
             </Style>
         </Grid.Resources>
-        <Border Style="{StaticResource BorderStyle}" Margin="8 0 8 8" Padding="10"  Grid.Row="1">
+        <Border Style="{StaticResource BorderStyle}" Margin="8 0 8 8" Padding="10"  Grid.Row="1" IsEnabled="{Binding IsInputBlocked}">
             <StackPanel Visibility="{Binding StandardFormVisibility}">
-                <WrapPanel>
-                    <ui:AutoSuggestBox PlaceholderText="Map name" Width="200"
+                <WrapPanel Margin="-10 0 0 0">
+                    <WrapPanel.Resources>
+                        <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
+                            <Setter Property="ItemsPanel">
+                                <Setter.Value>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                            <Setter Property="Padding" Value="6 2"/>
+                            <Setter Property="Height" Value="32"/>
+                        </Style>
+                    </WrapPanel.Resources>
+                    <ui:AutoSuggestBox PlaceholderText="Map name" Width="200" Margin="10 0 0 0"
                                         TextChanged="AutoSuggestBox_TextChanged"/>
                     <TextBlock Text=" &#xf059;" Margin="0 2 0 0" Style="{StaticResource AwesomeTextBlockStyle}"
                                VerticalAlignment="Center" FontSize="20">
@@ -206,61 +221,34 @@
                             </Button.Style>
                         </Button>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Resources>
-                            <Style TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}">
-                                <Setter Property="ItemsPanel">
-                                    <Setter.Value>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel/>
-                                        </ItemsPanelTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                    <TextBlock Text="Sizes: " FontSize="14" VerticalAlignment="Center" Margin="20 0 4 0"/>
+                    <ToggleButton x:Name="ToggleWidthsBtn" Content="Width"/>
+                    <ListBox x:Name="WidthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'
+                                VerticalAlignment="Stretch">
+                        <ListBox.Style>
+                            <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ToggleWidthsBtn, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="SelectedItem" Value="{x:Null}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
-                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                <Setter Property="Padding" Value="6 2"/>
-                                <Setter Property="Height" Value="32"/>
+                        </ListBox.Style>
+                    </ListBox>
+                    <ToggleButton x:Name="ToggleHeightsBtn" Content="Height"/>
+                    <ListBox x:Name="HeightsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'>
+                        <ListBox.Style>
+                            <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=ToggleHeightsBtn, Path=IsChecked}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="SelectedItem" Value="{x:Null}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
-                        </StackPanel.Resources>
-                        <TextBlock Text="Sizes: " FontSize="14" VerticalAlignment="Center" Margin="20 0 4 0"/>
-                        <ToggleButton Content="Width"/>
-                        <!--<TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
-                            Path=Children[1]}"/>-->
-                        <ListBox x:Name="WidthsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'
-                                 VerticalAlignment="Stretch">
-                            <ListBox.Style>
-                                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
-                            Path=Children[1].IsChecked}" Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Setter Property="SelectedItem" Value="{x:Null}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ListBox.Style>
-                        </ListBox>
-                        <ToggleButton Content="Height"/>
-                        <ListBox x:Name="HeightsList" ItemsSource="{Binding MapSizes}" SelectionMode="Extended" ItemStringFormat='0 km'>
-                            <ListBox.Style>
-                                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type StackPanel}},
-                            Path=Children[3].IsChecked}" Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Setter Property="SelectedItem" Value="{x:Null}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ListBox.Style>
-                        </ListBox>
-                        <!--<Expander Header="Width" ExpandDirection="Right" Margin="4 0" Height="34">
-                        </Expander>
-                        <Expander Header="Height" ExpandDirection="Right" Margin="4 0" Height="34">
-                        </Expander>-->
-                        <!--<ComboBox ItemsSource="{Binding MapSizes}" SelectedValue="{Binding MinimumSlots}" ui:ControlHelper.PlaceholderText="Width"/>-->
-                        <!--<ComboBox ItemsSource="{Binding MapSizes}" SelectedValue="{Binding MaximumSlots}" ui:ControlHelper.PlaceholderText="Height"/>-->
-                    </StackPanel>
+                        </ListBox.Style>
+                    </ListBox>
                     <CheckBox IsChecked="{Binding IsOnlyRanked}" Content="Show only ranked" Margin="10 0 0 0"/>
                     <CheckBox IsChecked="{Binding IsOnlyRecommended}" Content="Show only recommended" Margin="10 0 0 0"/>
                     <CheckBox IsChecked="{Binding IsOnlyLocalMaps}" Content="Show installed maps" Margin="10 0 0 0"/>
@@ -298,7 +286,7 @@
                 </StackPanel>
             </StackPanel>
         </Border>
-        <StackPanel Grid.Row="2">
+        <StackPanel Grid.Row="2" IsEnabled="{Binding IsInputBlocked}">
             <Grid TextBlock.FontSize="14" Margin="10 0 10 8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -312,7 +300,34 @@
                 </Grid.Resources>
                 <StackPanel Orientation="Horizontal">
                     <Button Content="Search" Click="Button_Click" />
-                    <ToggleButton x:Name="ShowQueryToggleBtn" Margin="10 0" Content="Show query"/>
+                    <Button Margin="10 0">
+                        <TextBlock>
+                            <Run Text="&#xf013;" FontFamily="{StaticResource FontAwesomeSolid}"/>
+                            <Run Text="Settings"/>
+                        </TextBlock>
+                        <ui:FlyoutService.Flyout>
+                            <ui:Flyout Placement="BottomEdgeAlignedLeft">
+                                <StackPanel>
+                                    <TextBlock Text="Settings" FontSize="16" Margin="0 0 0 10"/>
+                                    <CheckBox x:Name="ShowQueryToggleBtn" Content="Show query"/>
+                                    <CheckBox IsChecked="{Binding IsInfinityScrollEnabled}" Content="Enable infinity scroll"
+                                              ToolTip="Maps will preload on scroll"/>
+                                    <TextBlock Text="Map card settings" FontSize="16" Margin="0 10"/>
+                                    <CheckBox IsChecked="{Binding IsMapTitleEnabled}" Content="Show map title"/>
+                                    <CheckBox IsChecked="{Binding IsMapInteractiveButtonsEnabled}" Content="Show interactive buttons"/>
+                                    <CheckBox IsChecked="{Binding IsDescriptionEnabled}" Content="Show map description"/>
+                                    <StackPanel IsEnabled="{Binding IsDescriptionEnabled}">
+                                        <CheckBox IsChecked="{Binding IsMapLabelsEnabled}" Content="Show description label"/>
+                                        <CheckBox IsChecked="{Binding IsMapSummaryEnabled}" Content="Show map summary"/>
+                                        <CheckBox IsChecked="{Binding IsMapDataEnabled}" Content="Show map data"/>
+                                        <Slider Value="{Binding MapDescriptionOpacity}" Maximum="1" Minimum="0.1"
+                                            AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="1"/>
+                                        <TextBlock Text="Description opacity" Opacity=".5" FontSize="12"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ui:Flyout>
+                        </ui:FlyoutService.Flyout>
+                    </Button>
                     <Button Content="Open folder"
                         Command="{StaticResource NavigateExplorerCommand}" CommandParameter="Maps"/>
                 </StackPanel>
@@ -357,11 +372,11 @@
             </WrapPanel>
         </StackPanel>
         <Grid Grid.Row="3">
-            <ui:ProgressRing Grid.Row="2" IsActive="{Binding IsPendingRequest}"
+            <!--<ui:ProgressRing Grid.Row="2" IsActive="{Binding IsPendingRequest}"
                          Width="100" Height="100" HorizontalAlignment="Center" VerticalAlignment="Center"
-                         IsHitTestVisible="False"/>
-            <ListBox Grid.Row="2" Visibility="{Binding IsResultListVisible}"
-                 SelectedValue="{Binding SelectedMap}" ItemsSource="{Binding ResponseView}"
+                         IsHitTestVisible="False"/>-->
+            <ListBox Grid.Row="2" Loaded="ListBox_Loaded"
+                 SelectedValue="{Binding SelectedMap}" ItemsSource="{Binding LastData}"
                  Background="Transparent" VerticalAlignment="Top"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
@@ -384,7 +399,7 @@
                         <Setter Property="Margin" Value="-20 10 -20 10"/>
                     </Style>
                     <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                        <Setter Property="Focusable" Value="False"/>
+                        <!--<Setter Property="Focusable" Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Path=DataContext.Selectable}"/>-->
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Setter Property="Margin" Value="0"/>
@@ -426,6 +441,73 @@
                         </Style.Triggers>
                     </Style>
 
+                    <Style x:Key="RemoveButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="ButtonBackground" Color="Red" Opacity=".6"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#DE3C3C"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#C73535"/>
+
+                            <SolidColorBrush x:Key="ButtonForeground" Color="#E2E2E2"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#F0F0F0"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#DEDEDE"/>
+                        </Style.Resources>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LatestVersion.IsLegacyMap}" Value="True">
+                                <Setter Property="IsEnabled" Value="False"/>
+                                <Setter Property="ToolTip" Value="Cant delete legacy map"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding LatestVersion.IsDeletable}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+                        <Setter Property="ToolTip" Value="Delete map"/>
+                        <Setter Property="Content" Value="&#xf1f8;"/>
+                        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    </Style>
+                    <Style x:Key="DownloadButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="ButtonBackground" Color="#62FF57" Opacity=".7"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#53EC48"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#42DA38"/>
+
+                            <SolidColorBrush x:Key="ButtonForeground" Color="#E2E2E2"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#F0F0F0"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#DEDEDE"/>
+                        </Style.Resources>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LatestVersion.IsDeletable}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Content" Value="&#xf34a;"/>
+                        <Setter Property="ToolTip" Value="Download map"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}"/>
+                    </Style>
+                    
+                    <Style x:Key="UpgradeButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="ButtonBackground" Color="#FF5500" Opacity=".6"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#FF6111"/>
+                            <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#EC570D"/>
+
+                            <SolidColorBrush x:Key="ButtonForeground" Color="#E2E2E2"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="#F0F0F0"/>
+                            <SolidColorBrush x:Key="ButtonForegroundPressed" Color="#DEDEDE"/>
+                        </Style.Resources>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding LatestVersion.LocalState}" Value="1">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Content" Value="&#xf34a;"/>
+                        <Setter Property="ToolTip" Value="Update map"/>
+                        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeSolid}"/>
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    </Style>
                     <DataTemplate DataType="{x:Type apiVaults:ApiMapModel}">
                         <Border Padding="0" Cursor="Hand" Margin="4">
                             <Border.InputBindings>
@@ -460,41 +542,91 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel>
-                                <!--<TextBlock Text="{Binding ReviewsSummary}"/>-->
-                                <Border Margin="0 10 0 0" MaxWidth="128"
+                                <Border Margin="0 10" MaxWidth="128"
                                         Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
-                                        Style="{StaticResource SmallPreviewBorderStyle}"/>
+                                        Style="{StaticResource SmallPreviewBorderStyle}" Padding="0"
+                                        ToolTip="{Binding DisplayedName}">
+                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top"
+                                                Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapInteractiveButtonVisibility}">
+                                        <Button Style="{StaticResource RemoveButtonStyle}"/>
+                                        <Button Style="{StaticResource UpgradeButtonStyle}"/>
+                                        <Button Style="{StaticResource DownloadButtonStyle}"/>
+                                    </StackPanel>
+                                </Border>
                                 <TextBlock Text="{Binding DisplayedName}"
                                            ToolTip="{Binding DisplayedName}"
-                                           HorizontalAlignment="Center" FontSize="16" Margin="10 10 10 0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10">
-                                    <ContentControl Content="{Binding ReviewsSummary}">
-                                        <ContentControl.Resources>
-                                            <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <StackPanel>
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                            <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
-                                                            <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
-                                                            <TextBlock Text="{Binding ReviewsCount}" FontSize="12" VerticalAlignment="Center" Opacity=".5"/>
-                                                        </StackPanel>
-                                                        <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                                    </StackPanel>
-                                                    <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                                        <Separator.LayoutTransform>
-                                                            <RotateTransform Angle="90"/>
-                                                        </Separator.LayoutTransform>
-                                                    </Separator>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ContentControl.Resources>
-                                    </ContentControl>
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                            <TextBlock Text="{Binding GamesPlayed}" FontSize="14"/>
+                                           HorizontalAlignment="Center" FontSize="16" Margin="10 0 10 10"
+                                           Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapTitleVisibility}"/>
+                                <StackPanel Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapDescriptionVisibility}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 10"
+                                            Opacity="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapDescriptionOpacity}"
+                                            Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapDataVisibility}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" ToolTip="Map size in km">
+                                                <Path Height="14" Margin="0" Fill="White" Data="M19,12H17V15H14V17H19V12M7,9H10V7H5V12H7V9M21,3H3A2,2 0 0,0 1,5V19A2,2 0 0,0 3,21H21A2,2 0 0,0 23,19V5A2,2 0 0,0 21,3M21,19H3V5H21V19Z" />
+                                                <TextBlock FontSize="14" Text="{Binding LatestVersion.MapKmSizeLabel}" Margin="6 0 0 0"/>
+                                            </StackPanel>
+                                            <TextBlock Text="Map size" FontSize="12" Opacity=".5" HorizontalAlignment="Center"
+                                                   Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapLabelsVisibility}"/>
                                         </StackPanel>
-                                        <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
+                                        <Separator Margin="10 0" Width="20">
+                                            <Separator.LayoutTransform>
+                                                <RotateTransform Angle="90"/>
+                                            </Separator.LayoutTransform>
+                                        </Separator>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" ToolTip="Max players">
+                                                <Path Height="14" Data="M48 136C48 149.3 37.25 160 24 160C10.75 160 0 149.3 0 136V32C0 14.33 14.33 0 32 0H136C149.3 0 160 10.75 160 24C160 37.25 149.3 48 136 48H48V136zM127.8 176C127.8 149.5 149.3 128 175.8 128C202.3 128 223.8 149.5 223.8 176C223.8 202.5 202.3 224 175.8 224C149.3 224 127.8 202.5 127.8 176V176zM218.7 256C227.8 256 236.5 258.3 244 262.4C211.6 274.3 186.8 301.9 178.8 336H122.7C107.9 336 96 324.1 96 309.3C96 279.9 119.9 256 149.3 256H218.7zM517.3 336H461.2C453.2 301.9 428.4 274.3 395.1 262.4C403.5 258.3 412.2 256 421.3 256H490.7C520.1 256 544 279.9 544 309.3C544 324.1 532.1 336 517.3 336H517.3zM432 360C432 373.3 421.3 384 408 384H232C218.7 384 208 373.3 208 360C208 351.6 209.4 343.5 212.1 336C220.7 311.7 241.1 293.4 267.1 288.1C271.9 288.3 275.9 288 280 288H360C364.1 288 368.1 288.3 372 288.1C398 293.4 419.3 311.7 427.9 336C430.6 343.5 432 351.6 432 360zM416 176C416 149.5 437.5 128 464 128C490.5 128 512 149.5 512 176C512 202.5 490.5 224 464 224C437.5 224 416 202.5 416 176zM384 192C384 227.3 355.3 256 320 256C284.7 256 256 227.3 256 192C256 156.7 284.7 128 320 128C355.3 128 384 156.7 384 192zM480 24C480 10.75 490.7 0 504 0H608C625.7 0 640 14.33 640 32V136C640 149.3 629.3 160 616 160C602.7 160 592 149.3 592 136V48H504C490.7 48 480 37.25 480 24zM48 464H136C149.3 464 160 474.7 160 488C160 501.3 149.3 512 136 512H32C14.33 512 0 497.7 0 480V376C0 362.7 10.75 352 24 352C37.25 352 48 362.7 48 376V464zM504 464H592V376C592 362.7 602.7 352 616 352C629.3 352 640 362.7 640 376V480C640 497.7 625.7 512 608 512H504C490.7 512 480 501.3 480 488C480 474.7 490.7 464 504 464z"/>
+                                                <TextBlock FontSize="14" Text="{Binding LatestVersion.MaxPlayers}" Margin="6 0 0 0"/>
+                                            </StackPanel>
+                                            <TextBlock Text="Players" FontSize="12" Opacity=".5"
+                                                   Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapLabelsVisibility}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Margin="0 0 0 10"
+                                            Opacity="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapDescriptionOpacity}"
+                                            Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapSummaryVisibility}">
+                                        <ContentControl Content="{Binding ReviewsSummary}">
+                                            <ContentControl.Resources>
+                                                <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <StackPanel>
+                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" ToolTip="Average rating">
+                                                                <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
+                                                                <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
+                                                                <TextBlock Text="{Binding ReviewsCount}" FontSize="12" VerticalAlignment="Center" Opacity=".5"/>
+                                                            </StackPanel>
+                                                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"
+                                                   Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapLabelsVisibility}"/>
+                                                        </StackPanel>
+                                                        <Separator Grid.Column="1" Margin="10 0" Width="20">
+                                                            <Separator.LayoutTransform>
+                                                                <RotateTransform Angle="90"/>
+                                                            </Separator.LayoutTransform>
+                                                        </Separator>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ContentControl.Resources>
+                                        </ContentControl>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" ToolTip="Number of played games">
+                                                <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                                <TextBlock Text="{Binding GamesPlayed}" FontSize="14"/>
+                                            </StackPanel>
+                                            <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"
+                                                   Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},
+                                            Path=DataContext.MapLabelsVisibility}"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>

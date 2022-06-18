@@ -19,13 +19,14 @@
                 <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="Transparent"/>
             </Style.Resources>
         </Style>
-        <DataTemplate DataType="{x:Type server:QueueDataModel}">
+        <DataTemplate DataType="{x:Type server:QueueData}">
             <Border Style="{StaticResource BorderStyle}" Width="160"
                                         Background="{StaticResource SystemControlBackgroundChromeBlackLowBrush}">
                 <StackPanel TextBlock.TextAlignment="Center">
                     <TextBlock Text="{Binding Name}" FontSize="40"/>
                     <TextBlock Text="{Binding Mode}" Opacity=".7"/>
                     <TextBlock Text="{Binding CountInQueue, StringFormat='In queue: {0}'}" Opacity=".7"/>
+                    <TextBlock Text="{Binding TimeSpanToMatch, StringFormat='{}{0:mm}:{0:ss}'}" Opacity=".7"/>
                 </StackPanel>   
             </Border>
         </DataTemplate>

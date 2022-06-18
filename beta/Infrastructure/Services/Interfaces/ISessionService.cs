@@ -34,6 +34,8 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
         public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
+        public event EventHandler<MatchCancelledData> MatchCancelledDataReceived;
+        public event EventHandler<MatchFoundData> MatchFoundDataReceived;
 
         public bool IsAuthorized { get; }
         public Task AuthorizeAsync(string accessToken, CancellationToken token);

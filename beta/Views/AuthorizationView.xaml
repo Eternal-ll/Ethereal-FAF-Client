@@ -8,6 +8,9 @@
              d:DataContext="{d:DesignInstance {x:Type vm:AuthorizationViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <vm:AuthorizationViewModel/>
+    </UserControl.DataContext>
     <Grid ShowGridLines="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -89,7 +92,7 @@
                     </DrawingImage>
                 </Image.Source>
             </Image>
-            <TextBlock Text="FAF Ethereal Client" VerticalAlignment="Center" FontWeight="Bold" Margin="10 0" Foreground="LightGray"/>
+            <TextBlock Text="Ethereal FAF Client" VerticalAlignment="Center" FontWeight="Bold" Margin="10 0" Foreground="LightGray"/>
         </StackPanel>
         <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" Visibility="{Binding LoadingInputVisibility}">
             <TextBlock Text="{Binding ProgressText}" Foreground="LightGray" FontWeight="DemiBold" TextWrapping="Wrap"

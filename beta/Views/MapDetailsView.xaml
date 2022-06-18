@@ -88,11 +88,11 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="310"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <ui:TitleBarButton HorizontalAlignment="Left" Background="Transparent" Margin="6">
-            <Button Command="{DynamicResource NavigateCommand}" Padding="10 2" Margin="0 -2">
+            <Button Command="{Binding BackCommand}" Padding="10 2" Margin="0 -2">
                 <TextBlock Text="Back">
                     <TextBlock.RenderTransform>
                         <TranslateTransform Y="-1"/>
@@ -107,7 +107,7 @@
                         <ContentControl.Resources>
                             <DataTemplate DataType="{x:Type vm:MapViewModel}">
                                 <StackPanel HorizontalAlignment="Center">
-                                    <Border Height="256" Width="256" Margin="0">
+                                    <Border Height="256" Width="256" Margin="0" Padding="0">
                                         <Border.Style>
                                             <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
                                                 <Setter Property="Background">
@@ -133,9 +133,33 @@
                                                             </Setter.Value>
                                                         </Setter>
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ElementName=ScaleToggleButton,Path=IsChecked}" Value="True">
+                                                        <DataTrigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Width"  
+                                                                                     From="256" To="512" Duration="0:0:1"/>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Height"
+                                                                                     From="256" To="512" Duration="0:0:1"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.EnterActions>
+                                                        <DataTrigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                                     To="256" From="512" Duration="0:0:1"/>
+                                                                    <DoubleAnimation Storyboard.TargetProperty="Height"
+                                                                                     To="256" From="512" Duration="0:0:1"/>
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </DataTrigger.ExitActions>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
+                                        <ToggleButton x:Name="ScaleToggleButton" Background="Gray" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                      Content="Scale"/>
                                     </Border>
                                     <TextBlock Text="{Binding Data.DisplayedName}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
                                     <TextBlock HorizontalAlignment="Center">
@@ -295,22 +319,10 @@
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Separator/>
-                            <TextBlock Grid.Row="1" DataContext="{Binding CurrentMapVersionVM.Data.Description}"
+                            <TextBlock Grid.Row="1" 
+                                       behavior:TextBlockExtensions.BindableInlines="{Binding CurrentMapVersionVM.Data.Description, Converter={StaticResource TextConverter}}"
                                        TextWrapping="Wrap" Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
                                     Path=DataContext.CurrentMapVersionVM.InputVisibility}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="{Binding}"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="DataContext" Value="{x:Null}">
-                                                <Setter Property="Text" Value="No description"/>
-                                            </Trigger>
-                                            <Trigger Property="DataContext" Value="">
-                                                <Setter Property="Text" Value="No description"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
                             </TextBlock>
                             <Grid Grid.Row="1" Style="{StaticResource PlugGridStyle}" Visibility="{Binding CurrentMapVersionVM.PlugVisibility}">
                                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
@@ -928,7 +940,8 @@
                                                         </ui:RatingControl>
                                                         <TextBlock Text="{Binding CreateTime}" Opacity=".5"/>
                                                     </StackPanel>
-                                                    <TextBlock TextWrapping="Wrap" Text="{Binding Text}"/>
+                                                    <TextBlock TextWrapping="Wrap"
+                                                               behavior:TextBlockExtensions.BindableInlines="{Binding Text, Converter={StaticResource TextConverter}}"/>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>
@@ -982,7 +995,8 @@
                                             <DataTemplate DataType="{x:Type apiVaults:ApiMapModel}">
                                                 <Border Padding="0" Cursor="Hand" Margin="4">
                                                     <Border.InputBindings>
-                                                        <MouseBinding MouseAction="LeftClick" Command="{DynamicResource NavigateCommand}" CommandParameter="{Binding Id}"/>
+                                                        <MouseBinding MouseAction="LeftClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}},
+                                                            Path=DataContext.OpenDetailsCommand}" CommandParameter="{Binding Id}"/>
                                                     </Border.InputBindings>
                                                     <Border.RenderTransform>
                                                         <TranslateTransform Y="0"/>

@@ -218,9 +218,7 @@
         <Setter Property="Height" Value="70"/>
         <Setter Property="Background">
             <Setter.Value>
-                <ImageBrush Stretch="Uniform"
-                            ImageSource="{Binding AvatarImage}">
-                </ImageBrush>
+                <ImageBrush Stretch="Uniform" ImageSource="{Binding AvatarImage}"/>
             </Setter.Value>
         </Setter>
         <Style.Triggers>

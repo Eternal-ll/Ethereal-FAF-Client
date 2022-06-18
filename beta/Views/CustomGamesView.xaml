@@ -12,9 +12,6 @@
              d:DataContext="{d:DesignInstance {x:Type vm:CustomGamesViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <!--<UserControl.DataContext>
-        <vm:CustomGamesViewModel/>
-    </UserControl.DataContext>-->
     <Grid ShowGridLines="False">
         <Grid.Resources>
             <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
@@ -213,7 +210,6 @@
                                         </StackPanel>
                                     </StackPanel>
                                     <ItemsControl Style="{StaticResource TeamsItemsStyle}"/>
-                                    <!--<TextBlock Text="{Binding Friends}"/>-->
                                 </StackPanel>
                             </DataTemplate>
                         </ContentControl.ContentTemplate>
@@ -221,13 +217,8 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
-        
-        <WrapPanel Orientation="Vertical" Grid.ColumnSpan="2">
-            <!--<WrapPanel Margin="10 10 10 0">
-                <TextBlock Text="{Binding GamesView.Count, StringFormat='On view: {0}'}"/>
 
-                <TextBlock Text="{Binding Games.Count, StringFormat='Total: {0}'}" Margin="10 0 0 0"/>
-            </WrapPanel>-->
+        <WrapPanel Orientation="Horizontal" Grid.ColumnSpan="2">
             <ui:TitleBarButton>
                 <WrapPanel Margin="10">
                     <Canvas Height="32"/>
@@ -550,11 +541,97 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Button VerticalAlignment="Stretch" Margin="10 0 0 0" ToolTip="Refresh" Command="{Binding RefreshCommand}">
-                        <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                    <Button VerticalAlignment="Stretch" Margin="10 0" ToolTip="Refresh" Command="{Binding RefreshCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                            <TextBlock x:Name="Test" Width="0" Text="Refresh" FontWeight="DemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Margin" Value="6 0 0 0"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}},
+                                                Path=IsMouseOver}" Value="True">
+                                                <DataTrigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="47" From="0" Duration="0:0:0.1"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.EnterActions>
+                                                <DataTrigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="0" From="47" Duration="0:0:0.1"/>
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </DataTrigger.ExitActions>
+                                            </DataTrigger>
+                                            <Trigger Property="Width" Value="0">
+                                                <Setter Property="Margin" Value="0"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Button VerticalAlignment="Stretch" FontWeight="DemiBold">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}" Value="{x:Type vm:CustomGamesViewModel}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Setter Property="Command" Value="{Binding ShowLiveGamesCommand}"/>
+                                        <Setter Property="ToolTip" Value="Show live games"/>
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <TextBlock Margin="0 -11 0 -4">
+                                                        <Run Text="&#8226;" FontSize="20"/>
+                                                        <Run Text="Live"/>
+                                                        <Run Text="games"/>
+                                                        <Run Text="{Binding LiveGamesViewModel.Games.Count, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter Property="Background" Value="Red"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}" Value="{x:Type vm:CustomLiveGamesViewModel}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Setter Property="Command" Value="{Binding ShowOpenGamesCommand}"/>
+                                        <Setter Property="ToolTip" Value="Show open lobbies"/>
+                                        <Setter Property="Content">
+                                            <Setter.Value>
+                                                <TextBlock Text="{Binding OpenGamesViewModel.Games.Count, Mode=OneWay, StringFormat='Open lobbies {0}'}"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                     </Button>
                 </WrapPanel>
             </ui:TitleBarButton>
+            <TextBlock VerticalAlignment="Center" FontWeight="DemiBold" FontSize="14">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
+                                                 Value="{x:Type vm:CustomGamesViewModel}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Text" Value="{Binding GamesView.Count, StringFormat='Open games on view: {0}'}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Converter={StaticResource ObjectToTypeConverter}}"
+                                                 Value="{x:Type vm:CustomLiveGamesViewModel}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Text" Value="{Binding GamesView.Count, StringFormat='&#8226; Live games on view: {0}'}"/>
+                                <Setter Property="Foreground" Value="Red"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </WrapPanel>
     </Grid>
 </UserControl>

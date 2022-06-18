@@ -29,7 +29,10 @@ namespace beta.ViewModels
             NotificationService = App.Services.GetService<INotificationService>();
 
             Me = PlayersService.Self;
-            Maps = new();
+            Maps = new()
+            {
+                Selectable = true
+            };
             Maps.MapSelected += (s, e) => SelectedMap = e;
         }
 

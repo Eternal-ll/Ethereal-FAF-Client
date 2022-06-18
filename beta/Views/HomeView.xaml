@@ -6,12 +6,143 @@
              xmlns:local="clr-namespace:beta.Views"
              xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:model="clr-namespace:beta.Models"
-             xmlns:apiNews="clr-namespace:beta.Models.API.News"
+             xmlns:apiNews="clr-namespace:FAF.Domain.Direct.Entities;assembly=FAF.API.Domain.Direct"
              xmlns:vm="clr-namespace:beta.ViewModels" xmlns:controls="clr-namespace:beta.Resources.Controls"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance vm:HomeViewModel}">
-    <ScrollViewer>
+    <UserControl.DataContext>
+        <vm:HomeViewModel/>
+    </UserControl.DataContext>
+
+    <!--<Grid Margin="10 32 10 20">
+        <ContentControl Content="{Binding NewsViewModel}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type apiNews:Post}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Embedded.Media[0].SourceUrl, Converter={StaticResource ToBitmapImageConverter}}"
+                                   MaxHeight="100" MaxWidth="100" VerticalAlignment="Top" ToolTip="{Binding Embedded.Media[0].Title.Text}"/>
+                        <TextBlock Text="{Binding Title.Text, Converter={StaticResource HTMLConverter}}"
+                                       TextWrapping="Wrap" Margin="10 -4 0 0" Grid.Column="1" MaxHeight="90"
+                                       VerticalAlignment="Top"/>
+                    </Grid>
+                </DataTemplate>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="ToolTip">
+                        <Setter.Value>
+                            <ToolTip>
+                                <TextBlock Text="{Binding Excerpt.Text, Converter={StaticResource HTMLConverter}}"/>
+                            </ToolTip>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="ContextMenu">
+                        <Setter.Value>
+                            <ContextMenu>
+                                <MenuItem Header="Open in browser"
+                                              Command="{StaticResource NavigateUriCommand}"
+                                              CommandParameter="{Binding NewshubExternalLinkUrl}">
+                                    <MenuItem.Icon>
+                                        <TextBlock Text="&#xf35d;" FontFamily="{StaticResource FontAwesomeRegular}"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <DataTemplate DataType="{x:Type vm:NewsViewModel}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width=".6*"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentControl Content="{Binding SelectedPost}">
+                            <ContentControl.Resources>
+                                <DataTemplate DataType="{x:Type apiNews:Post}">
+                                    <ScrollViewer>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <StackPanel>
+                                                <Border Background="{StaticResource AcrylicBackgroundFillColorDefaultBrush}" VerticalAlignment="Top"
+                                                        Padding="4" CornerRadius="4" Grid.Column="1" Margin="0 0 0 10">
+                                                    <TextBlock Text="{Binding Title.Text, Converter={StaticResource HTMLConverter}}"
+                                                       TextWrapping="Wrap" FontSize="16" FontWeight="DemiBold"/>
+                                                </Border>
+                                                <Image x:Name="PostPreview" Source="{Binding Embedded.Media[0].SourceUrl, Converter={StaticResource ToBitmapImageConverter}}"
+                                                   MaxHeight="200" Stretch="Uniform" VerticalAlignment="Top"
+                                                           HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Content.Text, Converter={StaticResource HTMLConverter}}"
+                                                       TextWrapping="Wrap" Grid.Row="2" Grid.ColumnSpan="2"/>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0 0 0 10" HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+                                             ui:ControlHelper.PlaceholderText="Search"/>
+                                <Button Content="&#xf2f9;" FontFamily="{StaticResource FontAwesomeLight}"
+                                            Grid.Column="1" Margin="10 0"/>
+                                <Button Content="&#xf013;" FontFamily="{StaticResource FontAwesomeSolid}" Grid.Column="2">
+                                    <ui:FlyoutService.Flyout>
+                                        <ui:Flyout Placement="BottomEdgeAlignedRight">
+                                            <StackPanel>
+                                                <TextBlock Text="News settings" FontWeight="DemiBold" Margin="0 0 0 10"
+                                                               FontSize="16"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Posts per page" Margin="0 0 10 0"
+                                                                   VerticalAlignment="Center"/>
+                                                    <ComboBox ItemsSource="{Binding PageSizes}"
+                                                                  SelectedValue="{Binding PerPage}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </ui:Flyout>
+                                    </ui:FlyoutService.Flyout>
+                                </Button>
+                            </Grid>
+                            <ListBox ItemsSource="{Binding PostsView}" SelectedItem="{Binding SelectedPost}"
+                                         Padding="0 0 10 0" Grid.Row="1"/>
+                            <Grid Grid.Row="2" Margin="0 10 0 0">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <TextBlock Text="Page" FontWeight="DemiBold"
+                                                   Foreground="LightGray"
+                                                   VerticalAlignment="Center" Margin="0 0 10 0"/>
+                                    <ComboBox ItemsSource="{Binding Pages}" SelectedValue="{Binding CurrentPage}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+    </Grid>-->
+
+
+    <!--<ScrollViewer>
         <Grid Background="#FF1F1F1F" Height="5000" ShowGridLines="False">
             <Grid.RowDefinitions>
                 <RowDefinition Height="500"/>
@@ -78,7 +209,7 @@
 
             <controls:CrossFadeContentControl Content="{Binding NewsViewModel.SelectedPost}">
                 <controls:CrossFadeContentControl.Resources>
-                    <DataTemplate DataType="{x:Type apiNews:PostModel}">
+                    <DataTemplate DataType="{x:Type apiNews:Post}">
                         <Border HorizontalAlignment="Left" Margin="30 30 0 150"
                                 VerticalAlignment="Stretch"
                                 Background="{StaticResource NavigationViewDefaultPaneBackground}"
@@ -158,7 +289,7 @@
             </controls:CrossFadeContentControl>
 
             <ContentControl Content="{Binding ApiClientUsersCounterViewModel}" HorizontalAlignment="Right" VerticalAlignment="Top"
-                            Margin="30 60">
+                            Margin="30 60" Visibility="Collapsed">
                 <ContentControl.Resources>
                     <DataTemplate DataType="{x:Type vm:ApiClientUsersCounterViewModel}">
                         <Border Background="{StaticResource BackgroundHalfBlack}" CornerRadius="10" Padding="10 10 10 0">
@@ -284,13 +415,13 @@
             </ContentControl>
 
 
-            <!--<ContentControl Content="{Binding NewsViewModel}"  Margin="30 -140 30 20" Grid.Row="1">
+            --><!--<ContentControl Content="{Binding NewsViewModel}"  Margin="30 -140 30 20" Grid.Row="1">
                 <ContentControl.ContentTemplate>
-                    <DataTemplate>-->
+                    <DataTemplate>--><!--
             <Border Margin="30 -140 30 14" Grid.Row="1">
                 <Border.Style>
                     <Style TargetType="Border" BasedOn="{StaticResource SpecialBorder}">
-                        <!--<Setter Property="Opacity" Value=".4"/>
+                        --><!--<Setter Property="Opacity" Value=".4"/>
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Opacity" Value=".8"/>
@@ -298,7 +429,7 @@
                             <DataTrigger Binding="{Binding ElementName=ListBox, Path=SelectedItem, Converter={StaticResource IsNullConverter}}" Value="False">
                                 <Setter Property="Opacity" Value="1"/>
                             </DataTrigger>
-                        </Style.Triggers>-->
+                        </Style.Triggers>--><!--
                     </Style>
                 </Border.Style>
                 <Grid>
@@ -360,9 +491,9 @@
                             <Style x:Key="AnimatedRectangleShadow" TargetType="Rectangle">
                                 <Style.Triggers>
 
-                                    <!--<DataTrigger Binding="{Binding BitmapImage.IsDownloading}" Value="True">
+                                    --><!--<DataTrigger Binding="{Binding BitmapImage.IsDownloading}" Value="True">
                                 <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>-->
+                            </DataTrigger>--><!--
 
                                     <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},
                                                 Path=IsSelected}" Value="True">
@@ -374,7 +505,7 @@
                                                 To=".01"
                                                 From="-1"
                                                 Duration="0:0:0.2"/>
-                                                    <!--<DoubleAnimation
+                                                    --><!--<DoubleAnimation
                                                 Storyboard.TargetProperty="RenderTransform.(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
                                                 To=".01"
                                                 From="-1"
@@ -385,7 +516,7 @@
                                                                 From="0"
                                                                 Duration="0:0:0.5"/>-->
                                                     <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                                From="0" To="1" Duration="0:0:0.3"/>-->
+                                                                                From="0" To="1" Duration="0:0:0.3"/>--><!--
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
@@ -398,13 +529,13 @@
                                                 From=".01"
                                                 BeginTime="0:0:0.2"
                                                 Duration="0:0:0.4"/>
-                                                    <!--<DoubleAnimation
+                                                    --><!--<DoubleAnimation
                                                                 Storyboard.TargetProperty="Fill.(LinearGradientBrush.Opacity)"
                                                                 To="0"
                                                                 From="1"
                                                                 Duration="0:0:0.3"/>-->
                                                     <!--<DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                                From="1" To="0" Duration="0:0:0.2"/>-->
+                                                                                From="1" To="0" Duration="0:0:0.2"/>--><!--
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.ExitActions>
@@ -419,7 +550,7 @@
                                         <DataTrigger.EnterActions>
                                             <BeginStoryboard>
                                                 <Storyboard>
-                                                    <!--<DoubleAnimation
+                                                    --><!--<DoubleAnimation
                                                 Storyboard.TargetProperty="Width"
                                                 From="250" To="220"
                                                 Duration="0:0:0.3"/>-->
@@ -427,21 +558,21 @@
                                                 Storyboard.TargetProperty="OpacityMask.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
                                                 To=".8"
                                                 From="1"
-                                                Duration="0:0:0.3"/>-->
+                                                Duration="0:0:0.3"/>--><!--
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.EnterActions>
                                         <DataTrigger.ExitActions>
                                             <BeginStoryboard>
                                                 <Storyboard>
-                                                    <!--<DoubleAnimation
+                                                    --><!--<DoubleAnimation
                                                 Storyboard.TargetProperty="Width"
                                                 From="220" To="250" Duration="0:0:0.3"/>-->
                                                     <!--<DoubleAnimation
                                                 Storyboard.TargetProperty="OpacityMask.(LinearGradientBrush.GradientStops)[0].(GradientStop.Offset)"
                                                 To="1"
                                                 From=".8"
-                                                Duration="0:0:0.3"/>-->
+                                                Duration="0:0:0.3"/>--><!--
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </DataTrigger.ExitActions>
@@ -491,7 +622,7 @@
                                 </Style.Triggers>
                             </Style>
 
-                            <DataTemplate DataType="{x:Type apiNews:PostModel}">
+                            <DataTemplate DataType="{x:Type apiNews:Post}">
                                 <Border
                             Height="120"
                             CornerRadius="10"
@@ -504,14 +635,14 @@
                                     Canvas.Right="0"
                                     Canvas.Top="0"
                                     HorizontalAlignment="Right">
-                                            <!--<Image.OpacityMask>
+                                            --><!--<Image.OpacityMask>
                                         <LinearGradientBrush StartPoint="1 .5" EndPoint="0 .5">
                                             <GradientStop Color="White" Offset=".8"/>
                                             <GradientStop Color="#00000000" Offset="1"/>
                                         </LinearGradientBrush>
-                                    </Image.OpacityMask>-->
+                                    </Image.OpacityMask>--><!--
                                         </Image>
-                                        <!--<ui:ProgressRing HorizontalAlignment="Center"
+                                        --><!--<ui:ProgressRing HorizontalAlignment="Center"
                                                     VerticalAlignment="Center" Height="50" Width="50"
                                                     IsActive="True"
                                                     Visibility="{Binding ImageVisibility}">
@@ -527,7 +658,7 @@
                                         </Style>
                                     </ui:ProgressRing.Style>-->
                                         <!--
-                            </ui:ProgressRing>-->
+                            </ui:ProgressRing>--><!--
                                         <Rectangle
                                     Style="{StaticResource AnimatedRectangleShadow}"
                                     Canvas.Left="0"
@@ -552,7 +683,7 @@
                                     MaxWidth="{Binding ElementName=NewsImage, Path=ActualWidth}"
                                     Canvas.Top="30">
                                         </TextBlock>
-                                        <!--<Canvas DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
+                                        --><!--<Canvas DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
                                         Visibility="Collapsed"
                                         x:Name="Test"/>-->
                                         <!--<TextBlock Text="{Binding ElementName=Test, Path=DataContext}" Visibility="Collapsed">
@@ -592,7 +723,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
-                                </TextBlock>-->
+                                </TextBlock>--><!--
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -605,9 +736,9 @@
                     </ListBox>
                 </Grid>
             </Border>
-            <!--</DataTemplate>
+            --><!--</DataTemplate>
                 </ContentControl.ContentTemplate>
-            </ContentControl>-->
+            </ContentControl>--><!--
 
             <StackPanel VerticalAlignment="Top"
                             Grid.Row="2"
@@ -939,7 +1070,7 @@
                                                                             ToolTip="{Binding Author.UserUrl}" Margin="0 0 0 2"/>
                                                                     <TextBlock Text="{Binding timestampISO}" Opacity=".5" FontSize="12" VerticalAlignment="Bottom" Margin="0 0 0 -1"/>
                                                                 </StackPanel>
-                                                                <!--<Button Grid.Column="1" ToolTip="{Binding SourceUrl}" Content="Visit"
+                                                                --><!--<Button Grid.Column="1" ToolTip="{Binding SourceUrl}" Content="Visit"
                                                                         HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 0 4"
                                                                         Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding SourceUrl}">
                                                                     <Button.Style>
@@ -952,7 +1083,7 @@
                                                                             </Style.Triggers>
                                                                         </Style>
                                                                     </Button.Style>
-                                                                </Button>-->
+                                                                </Button>--><!--
 
 
                                                             </Grid>
@@ -992,10 +1123,10 @@
                                                             <ContentControl Grid.Column="4" Content="{Binding Teaser}">
                                                                 <ContentControl.Style>
                                                                     <Style TargetType="ContentControl">
-                                                                        <!--<Setter Property="Content" Value="{Binding Teaser}"/>-->
+                                                                        --><!--<Setter Property="Content" Value="{Binding Teaser}"/>--><!--
                                                                         <Style.Triggers>
                                                                             <DataTrigger Binding="{Binding Teaser}" Value="{x:Null}">
-                                                                                <!--<Setter Property="Content" Value="{Binding}"/>-->
+                                                                                --><!--<Setter Property="Content" Value="{Binding}"/>--><!--
                                                                             </DataTrigger>
                                                                         </Style.Triggers>
                                                                     </Style>
@@ -1043,10 +1174,10 @@
                                                                                 <Path.Style>
                                                                                     <Style TargetType="Path" BasedOn="{StaticResource {x:Type Path}}">
                                                                                         <Style.Triggers>
-                                                                                            <!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
+                                                                                            --><!--<DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}},Path=IsMouseOver}"
                                                                                              Value="False">
                                                                                                 <Setter Property="Opacity" Value=".3"/>
-                                                                                            </DataTrigger>-->
+                                                                                            </DataTrigger>--><!--
                                                                                             <DataTrigger Binding="{Binding content}" Value="{x:Null}">
                                                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                                                             </DataTrigger>
@@ -1070,7 +1201,7 @@
                                                         <Setter Property="IsTabStop" Value="False"/>
                                                         <Style.Triggers>
                                                             <Trigger Property="IsMouseOver" Value="False">
-                                                                <!--<Setter Property="Opacity" Value=".8"/>-->
+                                                                --><!--<Setter Property="Opacity" Value=".8"/>--><!--
                                                             </Trigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -1115,7 +1246,7 @@
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                                 <Setter Property="Text" Value=""/>
                                                             </DataTrigger>
-                                                         </Style.Triggers>
+                                                        </Style.Triggers>
                                                     </Style>
                                                 </TextBox.Style>
                                             </TextBox>
@@ -1150,7 +1281,7 @@
                                             <ListBox.Resources>
                                                 <Style TargetType="GroupItem" BasedOn="{StaticResource PlayersGroupStyle}"/>
                                                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource PlayerListBoxItemStyle}">
-                                                    <!--<Setter Property="Focusable" Value="False"/>-->
+                                                    --><!--<Setter Property="Focusable" Value="False"/>--><!--
                                                 </Style>
                                             </ListBox.Resources>
                                         </ListBox>
@@ -1164,5 +1295,5 @@
                 </Grid>
             </StackPanel>
         </Grid>
-    </ScrollViewer>
+    </ScrollViewer>-->
 </UserControl>

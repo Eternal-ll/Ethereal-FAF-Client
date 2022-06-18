@@ -1,4 +1,5 @@
 ﻿using beta.Properties;
+using ModernWpf.Controls;
 using System.Windows;
 
 namespace beta.Views.Windows

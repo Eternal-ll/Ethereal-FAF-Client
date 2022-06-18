@@ -10,10 +10,18 @@
         Title="Ethereal FAF Client"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:ThemeManager.RequestedTheme="Dark">
+        ui:ThemeManager.RequestedTheme="Dark"
+        Background="{DynamicResource NavigationViewDefaultPaneBackground}">
     <Window.Resources>
         <SolidColorBrush x:Key="ContentDialogBackground" Color="#FF1b1b1b"/>
         <sys:Double x:Key="ContentDialogMaxWidth">1300</sys:Double>
+        <Style TargetType="ui:TitleBarButton">
+            <Setter Property="Width" Value="NaN"/>
+            <Setter Property="Height" Value="NaN"/>
+            <Setter Property="PressedBackground" Value="Transparent"/>
+            <Setter Property="HoverBackground" Value="Transparent"/>
+            <Setter Property="FontFamily" Value="SegouUI"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
     </Window.Resources>
-    <view:MainView x:Name="MainView"/>
 </Window>

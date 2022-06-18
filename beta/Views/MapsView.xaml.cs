@@ -53,6 +53,8 @@ namespace beta.Views
         }
         #endregion
 
+        public bool Selectable { get; set; }
+
         public event EventHandler<ApiMapModel> MapSelected;
 
         private readonly IMapsService MapsService;
@@ -66,6 +68,10 @@ namespace beta.Views
 
             MapsService = App.Services.GetService<IMapsService>();
             CacheService = App.Services.GetService<ICacheService>();
+
+            ResponseViewSource = new();
+            LastData = new();
+            //ResponseViewSource.Source = last
 
             BuildQuery();
             DoRequest();
@@ -83,6 +89,10 @@ namespace beta.Views
             Resources.Add(nameof(OpenDetailsCommand), OpenDetailsCommand);
         }
 
+        public MapsView(bool selectable): base()
+        {
+            Selectable = selectable;
+        }
         private void MapSizesSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             BuildQuery();
@@ -302,6 +312,163 @@ namespace beta.Views
         }
         #endregion
 
+        #region IsInfinityScrollEnabled
+        private bool _IsInfinityScrollEnabled;
+        public bool IsInfinityScrollEnabled
+        {
+            get => _IsInfinityScrollEnabled;
+            set
+            {
+                if (Set(ref _IsInfinityScrollEnabled, value) && value)
+                {
+                    CheckMaps();
+                }
+            }
+        }
+        #endregion
+
+        #region UI
+
+        #region Map card settings
+
+        public Visibility MapLabelsVisibility => IsMapLabelsEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsMapLabelsEnabled
+        private bool _IsMapLabelsEnabled;
+        public bool IsMapLabelsEnabled
+        {
+            get => _IsMapLabelsEnabled;
+            set
+            {
+                if (Set(ref _IsMapLabelsEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapLabelsVisibility));
+                }
+            }
+        }
+        #endregion
+
+        public Visibility MapDataVisibility => IsMapDataEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsMapDataEnabled
+        private bool _IsMapDataEnabled;
+        public bool IsMapDataEnabled
+        {
+            get => _IsMapDataEnabled;
+            set
+            {
+                if (Set(ref _IsMapDataEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapDataVisibility));
+                    IsMapSummaryEnabled = !value;
+                }
+            }
+        }
+        #endregion
+
+        public Visibility MapSummaryVisibility => IsMapSummaryEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsMapSummaryEnabled
+        private bool _IsMapSummaryEnabled = true;
+        public bool IsMapSummaryEnabled
+        {
+            get => _IsMapSummaryEnabled;
+            set
+            {
+                if (Set(ref _IsMapSummaryEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapSummaryVisibility));
+                    IsMapDataEnabled = !value;
+                }
+            }
+        }
+        #endregion
+
+        public Visibility MapTitleVisibility => IsMapTitleEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsMapTitleEnabled
+        private bool _IsMapTitleEnabled;
+        public bool IsMapTitleEnabled
+        {
+            get => _IsMapTitleEnabled;
+            set
+            {
+                if (Set(ref _IsMapTitleEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapTitleVisibility));
+                }
+            }
+        }
+        #endregion
+
+        public Visibility MapInteractiveButtonVisibility => IsMapInteractiveButtonsEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsMapInteractiveButtonsEnabled
+        private bool _IsMapInteractiveButtonsEnabled;
+        public bool IsMapInteractiveButtonsEnabled
+        {
+            get => _IsMapInteractiveButtonsEnabled;
+            set
+            {
+                if (Set(ref _IsMapInteractiveButtonsEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapInteractiveButtonVisibility));
+                }
+            }
+        }
+        #endregion
+
+        public Visibility MapDescriptionVisibility => IsDescriptionEnabled ? Visibility.Visible : Visibility.Collapsed;
+
+        #region IsDescriptionEnabled
+        private bool _IsDescriptionEnabled;
+        public bool IsDescriptionEnabled
+        {
+            get => _IsDescriptionEnabled;
+            set
+            {
+                if (Set(ref _IsDescriptionEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MapDescriptionVisibility));
+                }
+            }
+        }
+        #endregion
+
+        #region MapDescriptionOpacity
+        private double _MapDescriptionOpacity = .6;
+        public double MapDescriptionOpacity
+        {
+            get => _MapDescriptionOpacity;
+            set => Set(ref _MapDescriptionOpacity, value);
+        }
+        #endregion
+
+        #endregion
+
+        #endregion
+
+        private void CheckMaps()
+        {
+            var scroll = MapsScrollViewer;
+            var extent = scroll.ExtentHeight;
+            var original = scroll.ViewportHeight;
+
+            var difference = extent - original;
+            if (difference == 0)
+            {
+                if (IsPendingRequest) return;
+                AppendNewData = true;
+                if (AvailablePagesCount > PageNumber)
+                {
+                    PageNumber++;
+                    DoRequest();
+                }
+            }
+        }
+
+        private bool AppendNewData;
+
         #region MapSizes
         private readonly int[] _MapSizes = new int[]
         {
@@ -399,10 +566,10 @@ namespace beta.Views
             get => _SelectedMap;
             set
             {
-                if (Set(ref _SelectedMap, value))
-                {
-                    MapSelected?.Invoke(this, value);
-                }
+                //if (Set(ref _SelectedMap, value))
+                //{
+                //    MapSelected?.Invoke(this, value);
+                //}
             }
         }
         #endregion
@@ -423,12 +590,6 @@ namespace beta.Views
             get => _CurrentQuery;
             set => Set(ref _CurrentQuery, value);
         }
-        #endregion
-
-        #region Cache
-
-        private readonly Dictionary<int, string> AuthorIdToLogin = new();
-
         #endregion
 
         #region IsSortEnabled
@@ -524,7 +685,7 @@ namespace beta.Views
         #endregion
 
         #region ResponseView
-        private readonly CollectionViewSource ResponseViewSource = new();
+        private readonly CollectionViewSource ResponseViewSource;
         public ICollectionView ResponseView => ResponseViewSource.View;
         #endregion
 
@@ -680,7 +841,7 @@ namespace beta.Views
                 return;
             }
 
-            if (LastQuery == CurrentQuery)
+            if (LastQuery == CurrentQuery)  
             {
                 if (!PageIndexChanged) return;
             }
@@ -702,13 +863,18 @@ namespace beta.Views
 
         }
         private readonly ObservableCollection<ApiMapData> LocalMaps = new();
-        internal ApiMapModel[] LastData { get; set; }
+        public ObservableCollection<ApiMapModel> LastData { get; set; }
         private void Request()
         {
+            var maps = LastData;
             var query = CurrentQuery;
             Stopwatch watcher = new();
             watcher.Start();
             WebRequest webRequest = WebRequest.Create("https://api.faforever.com/data/map?" + query + "&page[totals]=None&include=author,latestVersion,reviewsSummary");
+            if (!IsInfinityScrollEnabled)
+            {
+                DispatcherHelper.RunOnMainThread(() => maps.Clear());
+            }
             try
             {
                 var stream = webRequest.GetResponse().GetResponseStream();
@@ -716,10 +882,16 @@ namespace beta.Views
 
                 var data = JsonSerializer.Deserialize<ApiMapsResult>(json);
                 data.ParseIncluded();
-                    
-                LastData = data.Data;
-                OnPropertyChanged(nameof(LastData));
-                Dispatcher.Invoke(() => ResponseViewSource.Source = data.Data);
+
+                DispatcherHelper.RunOnMainThread(() =>
+                {
+                    foreach (var map in data.Data)
+                    {
+                        map.LatestVersion.LocalState = MapsService.CheckLocalMap(map.LatestVersion.FolderName);
+                        maps.Add(map);
+                    }
+                });
+
                 AvailablePagesCount = data.Meta.Page.AvaiablePagesCount;
                 _PageNumber = data.Meta.Page.PageNumber;
                 OnPropertyChanged(nameof(PageNumber));
@@ -736,6 +908,11 @@ namespace beta.Views
                 Elapsed = watcher.Elapsed;
                 Status = ApiState.Idle;
                 RequestThread = null;
+
+                //if (IsInfinityScrollEnabled)
+                //{
+                //    CheckMaps();
+                //}
             }
         }
 
@@ -750,15 +927,21 @@ namespace beta.Views
             if (parameter is int id)
             {
                 var selected = LastData.First(m => m.Id == id);
+
+                if (Selectable)
+                {
+                    MapSelected?.Invoke(this, selected);
+                    return;
+                }
                 if (IsAnyFilter)
                 {
                     var maps = new List<ApiMapModel>(LastData);
                     maps.Remove(selected);
-                    NavigationService?.Navigate(new MapDetailsView(selected, maps.ToArray()));
+                    NavigationService?.Navigate(new MapDetailsView(selected, maps.ToArray(), NavigationService));
                 }
                 else
                 {
-                    NavigationService?.Navigate(new MapDetailsView(selected, null));
+                    NavigationService?.Navigate(new MapDetailsView(selected, null, NavigationService));
                 }
             }
         }
@@ -904,6 +1087,37 @@ namespace beta.Views
                 });
                 PendingQuery = false;
             });
+        }
+
+        private ScrollViewer MapsScrollViewer { get; set; }
+        private void ListBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            var listbox = (ListBox)sender;
+            var scroll = Tools.FindChild<ScrollViewer>(listbox);
+            scroll.ScrollChanged += Scroll_ScrollChanged;
+            MapsScrollViewer = scroll;
+        }
+
+        private void Scroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.VerticalChange < 0) return;
+            var extent = e.ExtentHeight;
+            var original = e.ViewportHeight;
+            var offset = e.VerticalOffset;
+
+            var originalNew = original + offset;
+            var difference = extent - originalNew;
+            if (difference < 255)
+            {
+                if (!IsInfinityScrollEnabled) return; 
+                if (IsPendingRequest) return;
+                AppendNewData = true;
+                if (AvailablePagesCount > PageNumber)
+                {
+                    PageNumber++;
+                    DoRequest();
+                }
+            }
         }
     }
 }

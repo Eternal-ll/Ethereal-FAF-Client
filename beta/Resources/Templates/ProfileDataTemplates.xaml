@@ -3,7 +3,7 @@
                     xmlns:vm="clr-namespace:beta.ViewModels"
                     xmlns:oxy="http://oxyplot.org/wpf"
                     xmlns:ui="http://schemas.modernwpf.com/2019"
-                    xmlns:liveCharts="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf">
+                    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF">
     <Style x:Key="ProfileBorderStyle" TargetType="Border">
         <Setter Property="Padding" Value="10"/>
         <Setter Property="CornerRadius" Value="6"/>
@@ -177,10 +177,13 @@
                         </liveCharts:CartesianChart.AxisX>
                     </liveCharts:CartesianChart>
                 </Grid>-->
-                    <oxy:Plot Grid.Row="2" Grid.ColumnSpan="2"  PlotAreaBorderColor="Gray" LegendTextColor="Gray"
+                <lvc:CartesianChart Grid.Row="2" Grid.ColumnSpan="2" Series="{Binding Series}" XAxes="{Binding XAxes}"
+                                    ZoomMode="Both" MinWidth="1000"/>
+
+                <!--<oxy:Plot Grid.Row="2" Grid.ColumnSpan="2"  PlotAreaBorderColor="Gray" LegendTextColor="Gray"
                               LegendTitleColor="Gray" TextColor="White" TitleColor="Red" SubtitleColor="Red"
                               Background="Transparent" MinWidth="500" DefaultTrackerTemplate="{x:Null}">
-                        <!--<oxy:Plot.DefaultTrackerTemplate>
+                        --><!--<oxy:Plot.DefaultTrackerTemplate>
                         <ControlTemplate>
                             <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
                                                 Background="Black" ContentStringFormat="test" Distance="20">
@@ -199,18 +202,18 @@
                                 </oxy:TrackerControl.Content>
                             </oxy:TrackerControl>
                         </ControlTemplate>
-                    </oxy:Plot.DefaultTrackerTemplate>-->
+                    </oxy:Plot.DefaultTrackerTemplate>--><!--
                         <oxy:Plot.Axes>
                         <oxy:LinearAxis Position="Left" Title="Rating"/>
                         <oxy:DateTimeAxis Position="Bottom"/>
                     </oxy:Plot.Axes>
-                        <!--<oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding SelectedRatingData}"
+                        --><!--<oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding SelectedRatingData}"
                                 DataFieldX="RatingAfter"
                                      MarkerType="Circle" LabelMargin="0" MarkerSize="2"
-                                    MarkerFill="Black" CanTrackerInterpolatePoints="False"/>-->
+                                    MarkerFill="Black" CanTrackerInterpolatePoints="False"/>--><!--
                     <oxy:LineSeries ItemsSource="{Binding SelectedRatingData}" Color="Red" CanTrackerInterpolatePoints="False"
                                     DataFieldX="ScoreDateTime" DataFieldY="RatingAfter" Width="500" Height="200"/>
-                    </oxy:Plot>
+                    </oxy:Plot>-->
                     <!--<oxy:PlotView Grid.Row="2" Grid.RowSpan="2" Model="{Binding PlotModel}"
                               Background="Transparent"
                               VirtualizingPanel.IsVirtualizing="True">
@@ -238,75 +241,39 @@
                 </Grid.RowDefinitions>
                 <TextBlock Text="Aliases" Margin="0 0 0 10" Opacity=".7" VerticalAlignment="Center"/>
                 <Button Style="{StaticResource RefreshButtonStyle}"/>
-                <Expander Grid.Row="1" Margin="0 4 0 0">
-                    <Expander.Style>
-                        <Style TargetType="Expander" BasedOn="{StaticResource DefaultExpanderStyle}">
-                            <Setter Property="Header">
-                                <Setter.Value>
-                                    <TextBlock FontSize="12">
-                                        <Run>
-                                            <Run.Style>
-                                                <Style TargetType="Run">
-                                                    <Setter Property="Text" Value="Show"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Expander}}, Path=IsExpanded}"
-                                                                     Value="True">
-                                                            <Setter Property="Text" Value="Hide"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Run.Style>
-                                        </Run>
-                                        <Run Text="{Binding Records.Count, StringFormat='{}{0} records', Mode=OneWay}"/>
-                                    </TextBlock>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsExpanded" Value="False">
-                                    <Setter Property="Opacity" Value=".7"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="1"/>
-                                </Trigger>
-                                <DataTrigger Binding="{Binding IsPendingRequest}" Value="True">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Expander.Style>
-                    <ScrollViewer MaxHeight="200" Margin="0 0 -8 -10">
-                        <ItemsControl ItemsSource="{Binding Records}" Margin="0 0 10 10">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Grid.Style>
-                                            <Style TargetType="Grid">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="False">
-                                                        <Setter Property="Opacity" Value=".7"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Grid.Style>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"/>
-                                        <TextBlock Text="{Binding ChangedAt,StringFormat='{}{0:dd.MM.yyyy}'}" Grid.Column="1" Margin="10 0 0 0"
+
+                <ScrollViewer Grid.Row="1" MaxHeight="200" Margin="0 0 -8 2">
+                    <ItemsControl ItemsSource="{Binding Records}" Margin="0 0 10 10">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="False">
+                                                    <Setter Property="Opacity" Value=".7"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}"/>
+                                    <TextBlock Text="{Binding ChangedAt,StringFormat='{}{0:dd.MM.yyyy}'}" Grid.Column="1" Margin="10 0 0 0"
                                                FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                            <TextBlock.ToolTip>
-                                                <ToolTip>
-                                                    <TextBlock Text="{Binding ChangedAt, StringFormat='Changed at {0}'}"/>
-                                                </ToolTip>
-                                            </TextBlock.ToolTip>
+                                        <TextBlock.ToolTip>
+                                            <ToolTip>
+                                                <TextBlock Text="{Binding ChangedAt, StringFormat='Changed at {0}'}"/>
+                                            </ToolTip>
+                                        </TextBlock.ToolTip>
                                     </TextBlock>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Expander>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
                 <ui:ProgressRing Grid.Row="1" IsActive="{Binding IsPendingRequest}"/>
             </Grid>
         </Border>
@@ -326,7 +293,7 @@
 
             <!--<TextBlock Text="Hide (Esc)" ToolTip="Click Escape button on keyboard" Opacity=".5" Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0 0 10 0"/>-->
 
-            <TabControl Grid.Column="1" Grid.ColumnSpan="2" MaxHeight="400" Background="Transparent">
+            <TabControl Grid.Column="1" Grid.ColumnSpan="2" Background="Transparent">
                 <TabControl.Resources>
                     <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
                         <Setter Property="FontSize" Value="14"/>
@@ -406,11 +373,21 @@
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <ContentControl Content="{Binding AvatarsViewModel}" IsTabStop="False"/>
-                            <ContentControl Content="{Binding ApiNameRecordsViewModel}" IsTabStop="False"/>
                         </StackPanel>
                     </Grid>
                 </TabItem>
                 <TabItem Header="Rating charts" Content="{Binding ApiRatingsViewModel}">
+                    <TabItem.Style>
+                        <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
+                            <Style.Triggers>
+                                <Trigger Property="Content" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TabItem.Style>
+                </TabItem>
+                <TabItem Header="Aliases" Content="{Binding ApiNameRecordsViewModel}">
                     <TabItem.Style>
                         <Style TargetType="TabItem" BasedOn="{StaticResource DefaultTabItemStyle}">
                             <Style.Triggers>
@@ -450,37 +427,6 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-            <!--<oxy:PlotView Width="1000" Height="500" Model="{Binding ApiRatingsViewModel.PlotModel}"
-                              Background="Transparent"
-                              VirtualizingPanel.IsVirtualizing="True">
-            </oxy:PlotView>-->
-            <!--<oxy:Plot Padding="0" HorizontalAlignment="Stretch" Grid.Row="2" Grid.ColumnSpan="2" PlotAreaBorderColor="Black">
-                    <oxy:Plot.DefaultTrackerTemplate>
-                        <ControlTemplate>
-                            <oxy:TrackerControl Position="{Binding Position}" LineExtents="{Binding PlotModel.PlotArea}"
-                                                Background="Gray">
-                                
-            --><!--<oxy:TrackerControl.Background>
-                                    <LinearGradientBrush EndPoint="0,1">
-                                        <GradientStop Color="#f0e0e0ff" />
-                                        <GradientStop Offset="1" Color="#f0ffffff" />
-                                    </LinearGradientBrush>
-                                </oxy:TrackerControl.Background>--><!--
-            
-                                <oxy:TrackerControl.Content>
-                                    <TextBlock Text="{Binding Position}" Margin="7" />
-                                </oxy:TrackerControl.Content>
-                            </oxy:TrackerControl>
-                        </ControlTemplate>
-                    </oxy:Plot.DefaultTrackerTemplate>
-                    <oxy:Plot.Axes>
-                        <oxy:LinearAxis Position="Left" Title="Rating"/>
-                        <oxy:DateTimeAxis Position="Bottom"/>
-                    </oxy:Plot.Axes>
-                <oxy:LineSeries Margin="100" StrokeThickness="1" Color="Gray" ItemsSource="{Binding ApiRatingsViewModel.SelectedRatingData}"
-                                DataFieldX="ScoreDateTime" DataFieldY="RatingAfter"
-                                    MarkerFill="Black" CanTrackerInterpolatePoints="False"/>
-                </oxy:Plot>-->
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

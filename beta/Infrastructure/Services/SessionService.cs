@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,13 +35,14 @@ namespace beta.Infrastructure.Services
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
         public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
+        public event EventHandler<MatchCancelledData> MatchCancelledDataReceived;
+        public event EventHandler<MatchFoundData> MatchFoundDataReceived;
         #endregion
 
         #region Properties
 
         private ManagedTcpClient Client;
 
-        private readonly IOAuthService OAuthService;
         private readonly IIrcService IrcService;
 
         private readonly Dictionary<ServerCommand, Action<string>> Operations = new();
@@ -75,12 +75,10 @@ namespace beta.Infrastructure.Services
         #endregion
 
         #region CTOR
-        public SessionService(IOAuthService oAuthService, IIrcService ircService, ILogger<SessionService> logger)
+        public SessionService(IIrcService ircService, ILogger<SessionService> logger)
         {
-            OAuthService = oAuthService;
             IrcService = ircService;
             Logger = logger;
-            OAuthService.StateChanged += OnAuthResult;
 
             #region Response actions for server
             Operations.Add(ServerCommand.authentication_failed, OnAuthentificationFailedData);
@@ -92,7 +90,10 @@ namespace beta.Infrastructure.Services
 
             Operations.Add(ServerCommand.player_info, OnPlayerData);
             Operations.Add(ServerCommand.game_info, OnGameData);
+
             Operations.Add(ServerCommand.matchmaker_info, OnMatchmakerData);
+            Operations.Add(ServerCommand.match_found, OnMatchFoundData);
+            Operations.Add(ServerCommand.match_cancelled, OnMatchCancelledData);
 
             Operations.Add(ServerCommand.ping, OnPing);
             Operations.Add(ServerCommand.pong, OnPong);
@@ -101,7 +102,6 @@ namespace beta.Infrastructure.Services
             Operations.Add(ServerCommand.game_launch, OnGameLaunchData);
 
             Operations.Add(ServerCommand.invalid, OnInvalidData);
-
 
             // Ice/Game/GpgNet related commands
             Operations.Add(ServerCommand.JoinGame, OnIceUniversalData);
@@ -180,7 +180,6 @@ namespace beta.Infrastructure.Services
             Client.StateChanged += Client_StateChanged;
             await Client.WriteAsync(authJson);
         }
-
         private void Client_StateChanged(object sender, ManagedTcpClientState e)
         {
             if (e == ManagedTcpClientState.Disconnected)
@@ -190,20 +189,6 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        public async Task<string> GetSession()
-        {
-            /* WRITE
-            {
-                "command": "ask_session",
-                "version": "0.20.1+12-g2d1fa7ef.git",
-                "user_agent": "faf-client"
-            }*/
-
-            var response = await Client.WriteLineAndGetReply(
-                "{\"command\": \"ask_session\", \"version\": \"0.20.1+12-g2d1fa7ef.git\", \"user_agent\": \"faf-client\"}", ServerCommand.session);
-
-            return response.GetRequiredJsonRowValue(2);
-        }
         public void Send(string command)
         {
             //Logger.LogInformation($"Sent to lobby-server:\n{command}");
@@ -311,7 +296,6 @@ namespace beta.Infrastructure.Services
         {
             // TODO FIX ME???? ERROR UP?
             Settings.Default.access_token = null;
-            //OAuthService.AuthAsync();
         }
 
         private void OnPlayerData(string json)
@@ -331,6 +315,23 @@ namespace beta.Infrastructure.Services
             //AppDebugger.LOGLobby(json.ToJsonFormat());
         }
         private void OnMatchmakerData(string json) => OnMatchMakerDataReceived(JsonSerializer.Deserialize<MatchMakerData>(json));
+        private void OnMatchFoundData(string json)
+        {
+            AppDebugger.LOGLobby(json.ToJsonFormat());
+            var data = JsonSerializer.Deserialize<MatchFoundData>(json);
+            MatchFoundDataReceived?.Invoke(this, data);
+
+            // https://github.com/FAForever/server/issues/607
+            // https://github.com/FAForever/downlords-faf-client/issues/1783
+            // TODO
+            Send(ServerCommands.MatchReady());
+        }
+        private void OnMatchCancelledData(string json)
+        {
+            AppDebugger.LOGLobby(json.ToJsonFormat());
+            var data = JsonSerializer.Deserialize<MatchCancelledData>(json);
+            MatchCancelledDataReceived?.Invoke(this, data);
+        }
 
         // VAULTS
         private void OnMapVaultData(string json)

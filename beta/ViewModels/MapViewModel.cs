@@ -1,19 +1,20 @@
 ﻿using beta.Infrastructure.Commands;
 using beta.Infrastructure.Services.Interfaces;
-using beta.Models;
+using beta.Infrastructure.Utils;
 using beta.Models.API.Base;
 using beta.Models.API.MapsVault;
 using beta.Models.Enums;
+using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
+using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Navigation;
 
 namespace beta.ViewModels
 {
@@ -22,22 +23,52 @@ namespace beta.ViewModels
         private readonly ILogger Logger;
         private readonly IMapsService MapsService;
         private readonly IDownloadService DownloadService;
+        private readonly NavigationService NavigationService;
 
-        public MapViewModel()
+        public MapViewModel(NavigationService nav = null)
         {
             Logger = App.Services.GetService<ILogger<MapViewModel>>();
             MapsService = App.Services.GetService<IMapsService>();
             DownloadService = App.Services.GetService<IDownloadService>();
+            NavigationService = nav;
         }
-        public MapViewModel(int id) : this() => Id = id;
-        public MapViewModel(string name) : this() => 
+        public MapViewModel(int id, NavigationService nav = null) : this(nav) => Id = id;
+        public MapViewModel(string name, NavigationService nav = null) : this(nav) => 
             Task.Run(() => GetMapId(name));
-        public MapViewModel(ApiMapModel selected, ApiMapModel[] similar) : this()
+        public MapViewModel(ApiMapModel selected, ApiMapModel[] similar, NavigationService nav = null) : this(nav)
         {
+            IsPendingRequest = true;
+            Id = selected.Id;
+            IsPendingRequest = false;
             Data = selected;
             if (similar is not null && similar.Length == 0) similar = null;
             Similar = similar;
-            CurrentMapVersionVM = new(selected.LatestVersion);
+            Task.Run(async () =>
+            {
+                var result = await ApiRequest<ApiMapResult>.RequestWithId(
+                    url: "https://api.faforever.com/data/map/",
+                    id: Id,
+                    query: "?include=versions" +
+                    "&fields[mapVersion]=version");
+                result.ParseIncluded();
+                Data.Versions = result.Data.Versions;
+                Versions = new();
+                VersionValues = new();
+                foreach (var entity in result.Data.Versions)
+                {
+                    VersionValues.Add(entity.Id);
+                    if (selected.LatestVersion.Id == entity.Id)
+                    {
+                        Versions.Add(entity.Id, new(selected.LatestVersion));
+                        SelectedMapVersion = entity;
+                        //DispatcherHelper.RunOnMainThread(() => OnPropertyChanged(nameof(SelectedMapVersion)));
+                    }
+                    else
+                    {
+                        Versions.Add(entity.Id, null);
+                    }
+                }
+            });
         }
 
         private async Task GetMapId(string name)
@@ -161,7 +192,7 @@ namespace beta.ViewModels
                 "&fields[mapReviewsSummary]=lowerBound,negative,positive,reviews,score");
             result.ParseIncluded();
 
-            if (result.Data.Versions is not null & result.Data.Versions.Length > 0)
+            if (result.Data.Versions is not null & result.Data.Versions.Length > 0 && Versions is null)
             {
                 Versions = new();
                 VersionValues = new();
@@ -175,6 +206,30 @@ namespace beta.ViewModels
             }
             Data = result.Data;
         }
+
+        #region BackCommand
+        private ICommand _BackCommand;
+        public ICommand BackCommand => _BackCommand ??= new LambdaCommand(OnBackCommand);
+        private void OnBackCommand(object parameter) => NavigationService?.GoBack();
+        #endregion
+
+        #region OpenDetailsCommand
+        private ICommand _OpenDetailsCommand;
+        public ICommand OpenDetailsCommand => _OpenDetailsCommand ??= new LambdaCommand(OnOpenDetailsCommand);
+        private void OnOpenDetailsCommand(object parameter)
+        {
+            if (parameter is null) return;
+            if (parameter is int id)
+            {
+                var maps = Similar;
+                var selected = maps.First(m => m.Id == id);
+                NavigationService?.Navigate(new MapDetailsView(selected, 
+                    maps
+                    .Where(m => m.Id != id)
+                    .ToArray(), NavigationService));
+            }
+        }
+        #endregion
     }
 
     /// <summary>
@@ -209,9 +264,12 @@ namespace beta.ViewModels
                 Data.Reviews = result.Data.Reviews;
                 Data.Summary = result.Data.Summary;
                 Data.Statistics = result.Data.Statistics;
-                OnPropertyChanged(nameof(Data.Reviews));
-                OnPropertyChanged(nameof(Data.Summary));
-                OnPropertyChanged(nameof(Data.Statistics));
+                DispatcherHelper.RunOnMainThread(() =>
+                {
+                    OnPropertyChanged(nameof(Data.Reviews));
+                    OnPropertyChanged(nameof(Data.Summary));
+                    OnPropertyChanged(nameof(Data.Statistics));
+                });
             });
             IsPendingRequest = false;
         }
@@ -362,6 +420,15 @@ namespace beta.ViewModels
                 //"&fields[mapVersionReview]=createTime,score,text,updateTime" +
                 //"&fields[mapVersionReviewsSummary]=lowerBound,negative,positive,reviews,score");
             result.ParseIncluded();
+
+            if (string.IsNullOrWhiteSpace(result.Data.Description))
+                result.Data.Attributes["description"] = "No description";
+            else
+            {
+                result.Data.Attributes["description"] = result.Data.Description
+                    .Replace("\\r", "\r")
+                    .Replace("\\n", "\n");
+            }
 
             if (result.Data.IsLegacyMap)
             {

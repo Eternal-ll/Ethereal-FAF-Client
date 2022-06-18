@@ -51,6 +51,18 @@ namespace beta.Models.API.MapsVault
         /// Local state of map <see cref="LocalMapState"/>
         /// </summary>
         public LocalMapState LocalState { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsDeletable => LocalState switch
+        {
+            LocalMapState.Unknown => false,
+            LocalMapState.NotExist => false,
+            LocalMapState.Older => true,
+            LocalMapState.Newest => true,
+            LocalMapState.Same => true,
+            _ => throw new NotImplementedException()
+        };
 
         private BitmapImage _MapSmallPreview;
         /// <summary>

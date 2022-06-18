@@ -211,6 +211,9 @@ namespace beta.Infrastructure.Services
             for (int i = 0; i < e.Length; i++)
             {
                 AddNewPlayer(e[i]);
+                if (e[i].ratings.TryGetValue(RatingType.global, out var rating))
+                {
+                }
             }
             PlayersReceived?.Invoke(this, e);
         }

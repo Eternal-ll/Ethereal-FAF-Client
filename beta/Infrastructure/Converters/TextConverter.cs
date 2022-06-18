@@ -234,7 +234,7 @@ namespace beta.Infrastructure.Converters
                     isText = false;
                     continue;
                 }
-                // Is local directory   
+                // Is local directory
                 if (Regex.IsMatch(word, @"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$"))
                 {
                     inlineUIContainer = new InlineUIContainer(new Button()

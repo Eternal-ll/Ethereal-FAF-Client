@@ -35,11 +35,18 @@ namespace beta.Infrastructure.Converters
                         second.Append(letter);
                     }
 
+                    if (isClosing)
+                    {
+                        if (second.ToString().Contains("ul"))
+                        {
+
+                        }
+                    }
+
                     if (isClosing && second.ToString().Contains("br", StringComparison.OrdinalIgnoreCase))
                     {
                         main.Append('\r');
                     }
-
 
                     letter = data[i];
                     main.Append(letter);

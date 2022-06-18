@@ -49,18 +49,18 @@
             <view:NavigationView DataContext="{Binding}"/>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type vm:GlobalGamesViewModel}">
+        <!--<DataTemplate DataType="{x:Type vm:GlobalGamesViewModel}">
             <view:GlobalGamesView DataContext="{Binding}"/>
-        </DataTemplate>
+        </DataTemplate>-->
         <DataTemplate DataType="{x:Type vm:ChatControlViewModel}">
             <view:ChatControlView DataContext="{Binding}"/>
         </DataTemplate>
         <!--<DataTemplate DataType="{x:Type vm:ProfileViewModel}">
             <view:ProfileView DataContext="{Binding}"/>
         </DataTemplate>-->
-        <DataTemplate DataType="{x:Type vm:MapsVaultViewModel}">
+        <!--<DataTemplate DataType="{x:Type vm:MapsVaultViewModel}">
             <view:MapsVaultView/>
-        </DataTemplate>
+        </DataTemplate>-->
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
             <view:SettingsView DataContext="{Binding}"/>
         </DataTemplate>
@@ -120,6 +120,6 @@
                            Text="Ethereal FAF client" FontWeight="SemiBold"/>
             </StackPanel>
         </Grid>
-        <control:CrossFadeContentControl Content="{Binding ChildViewModel}"/>
+        <ContentControl Content="{Binding ChildViewModel}"/>
     </Grid>
 </UserControl>

@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Debugger;
 using beta.Models.Enums;
+using beta.Views;
 using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,7 +14,6 @@ using System.Windows.Media;
 
 namespace beta
 {
-
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -62,6 +62,7 @@ namespace beta
         {
             AppDebugger.Init();
             Window = new NewWindow();
+            Window.Content = new NavigationView();
             Window.Show();
 
             string mapPreviews = GetPathToFolder(Folder.MapsSmallPreviews);

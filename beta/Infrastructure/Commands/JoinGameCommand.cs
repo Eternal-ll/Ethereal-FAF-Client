@@ -23,7 +23,6 @@ namespace beta.Infrastructure.Commands
                 return game.State == Models.Server.Enums.GameState.Open;
             return false;
         }
-
         public override async void Execute(object parameter)
         {
             if (parameter is GameInfoMessage game)
@@ -33,7 +32,7 @@ namespace beta.Infrastructure.Commands
                     await NotificationService.ShowDialog("You cant connect to matchmaker game");
                     return;
                 }
-                if(game.GameType is Models.Server.Enums.GameType.Coop)
+                if (game.GameType is Models.Server.Enums.GameType.Coop)
                 {
                     await NotificationService.ShowDialog("Coop not supported");
                     return;
@@ -56,6 +55,7 @@ namespace beta.Infrastructure.Commands
                         {
                             NotificationService.ShowExceptionAsync(task.Exception);
                         }
+                        GameLauncherService.IsLaunching = false;
                     });
             }
         }

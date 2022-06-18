@@ -1,7 +1,7 @@
-﻿using System;
+﻿using beta.Infrastructure.Utils;
+using System;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Converters
 {
@@ -23,20 +23,11 @@ namespace beta.Infrastructure.Converters
             }
             else return null;
 
-            var img = new BitmapImage();
-            img.BeginInit();
-
             if (value.ToString().Contains("forum"))
             {
-                img.DecodePixelWidth = 45;
-                img.DecodePixelHeight = 45;
+                return ImageTools.InitializeLazyBitmapImage(url, 45, 45);
             }
-
-            img.CacheOption = BitmapCacheOption.OnDemand;
-            img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
-            img.UriSource = url;
-            img.EndInit();
-            return img;
+            return ImageTools.InitializeLazyBitmapImage(url);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

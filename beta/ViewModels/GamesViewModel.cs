@@ -4,6 +4,7 @@ using beta.Models;
 using beta.Models.Enums;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
+using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
@@ -12,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 
 namespace beta.ViewModels
@@ -669,32 +671,59 @@ namespace beta.ViewModels
     /// </summary>
     public class CustomGamesViewModel : GamesViewModel
     {
-        public override GameType GameType { get; } = GameType.Custom;
+        private readonly NavigationService NavigationService;
 
+        public override GameType GameType { get; } = GameType.Custom;
         public override GameState GameState => GameState.Open;
+        public CustomLiveGamesViewModel LiveGamesViewModel { get; }
+        private CustomGamesView LiveGamesView { get; }
 
         public CustomGamesViewModel()
         {
             IsGridView = true;
         }
 
+        public CustomGamesViewModel(NavigationService nav) : this()
+        {
+            NavigationService = nav;
+            LiveGamesViewModel = new(nav, this);
+            LiveGamesView = new()
+            {
+                DataContext = LiveGamesViewModel
+            };
+            _ShowLiveGamesCommand = new LambdaCommand(OnShowLiveGamesCommand);
+        }
+
         protected override bool FilterGame(GameInfoMessage game)
         {
             return true;
         }
+
+        #region ShowLiveGamesCommand
+        private ICommand _ShowLiveGamesCommand;
+        public ICommand ShowLiveGamesCommand => _ShowLiveGamesCommand;
+        private void OnShowLiveGamesCommand(object parameter) => NavigationService.Navigate(LiveGamesView);
+        #endregion
     }
     /// <summary>
     /// Custom live games
     /// </summary>
     public class CustomLiveGamesViewModel : GamesViewModel
     {
+        private readonly NavigationService NavigationService;
+
         public override GameType GameType => GameType.Custom;
-
         public override GameState GameState => GameState.Playing;
-
+        public CustomGamesViewModel OpenGamesViewModel { get; }
         public CustomLiveGamesViewModel()
         {
             GamesService.GameLaunched += GamesService_GameLaunched;
+        }
+        public CustomLiveGamesViewModel(NavigationService nav, CustomGamesViewModel openGamesViewModel) : this()
+        {
+            NavigationService = nav;
+            OpenGamesViewModel = openGamesViewModel;
+            _ShowOpenGamesCommand = new LambdaCommand(OnShowOpenGamesCommand);
         }
 
         private void GamesService_GameLaunched(object sender, GameInfoMessage e)
@@ -706,6 +735,12 @@ namespace beta.ViewModels
         {
             return true;
         }
+
+        #region ShowOpenGamesCommand
+        private ICommand _ShowOpenGamesCommand;
+        public ICommand ShowOpenGamesCommand => _ShowOpenGamesCommand;
+        private void OnShowOpenGamesCommand(object parameter) => NavigationService.GoBack();
+        #endregion
     }
     /// <summary>
     /// Coop open games
@@ -770,8 +805,8 @@ namespace beta.ViewModels
 
         public MatchMakerGamesViewModel()
         {
+            IsGridView = true;
             GamesViewSource.SortDescriptions.Add(new SortDescription(nameof(GameInfoMessage.State), ListSortDirection.Ascending));
         }
-
     }
 }

@@ -323,13 +323,12 @@
     <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.4" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
     <PackageReference Include="Downloader" Version="2.3.3" />
-    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.300" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ModernWpfUI" Version="0.9.5" />
     <PackageReference Include="Notification.WPF" Version="6.1.0.5" />
-    <PackageReference Include="OxyPlot.Wpf" Version="2.0.0" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
     <PackageReference Include="ZstdSharp.Port" Version="0.6.1" />
   </ItemGroup>
@@ -696,5 +695,9 @@
   <ItemGroup>
     <Folder Include="ViewModels\API\Base\" />
     <Folder Include="ViewModels\Common\Base\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FAF.API.Domain\FAF.API.Domain.csproj" />
   </ItemGroup>
 </Project>

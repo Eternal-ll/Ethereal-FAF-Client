@@ -64,7 +64,8 @@ namespace beta.Infrastructure.Services
             IIceService iceService,
             IPlayersService playersService,
             INotificationService notificationService,
-            IReplayServerService replayServerService, IConfiguration configuration)
+            IReplayServerService replayServerService,
+            IConfiguration configuration)
         {
             DownloadService = downloadService;
             MapsService = mapsService;
@@ -76,11 +77,11 @@ namespace beta.Infrastructure.Services
             NotificationService = notificationService;
             ReplayServerService = replayServerService;
             Configuration = configuration;
-            var section = configuration.GetSection("TEST");
-            section.Value = "TEST!#$";
+
             SessionService.GameLaunchDataReceived += OnGameLaunchDataReceived;
             SessionService.IceUniversalDataReceived += SessionService_IceUniversalDataReceived;
             SessionService.Authorized += SessionService_Authorized;
+            sessionService.MatchCancelledDataReceived += SessionService_MatchCancelledDataReceived;
 
             System.Windows.Application.Current.Exit += (s, e) =>
             {
@@ -89,6 +90,14 @@ namespace beta.Infrastructure.Services
 
             IceService.IceServersReceived += IceService_IceServersReceived;
             replayServerService.ReplayRecorderCreated += ReplayServerService_ReplayRecorderCreated;
+        }
+
+        private void SessionService_MatchCancelledDataReceived(object sender, MatchCancelledData e)
+        {
+            if (GameIsRunning)
+            {
+                ForgedAlliance.Close();
+            }
         }
 
         private void ReplayServerService_ReplayRecorderCreated(object sender, ReplayRecorder e)
@@ -175,7 +184,7 @@ namespace beta.Infrastructure.Services
 
         private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
             // player info
-            string country = "", string clan = "",
+            string country = "", string clan = null,
             // player rating
             int mean = 1500, int deviation = 500, int games = 0)
         {
@@ -189,7 +198,7 @@ namespace beta.Infrastructure.Services
                     games = rating.number_of_games;
                 }
                 country = me.country;
-                clan = me.clan ?? string.Empty;
+                clan = me.clan;
             }
             if (country.Length > 0)
             {
@@ -197,7 +206,7 @@ namespace beta.Infrastructure.Services
                 args.Append(country);
                 args.Append(' ');
             }
-            if (clan.Length > 0)
+            if (clan?.Length > 0)
             {
                 args.Append("/clan ");
                 args.Append(clan);
@@ -226,11 +235,11 @@ namespace beta.Infrastructure.Services
                     }
                 });
         }
-
-        private void OnGameLaunchDataReceived(object sender, GameLaunchData e)
-        {
+        public bool IsLaunching { get; set; }
+        private void OnGameLaunchDataReceived(object sender, GameLaunchData e) => 
             Task.Run(async () =>
             {
+                IsLaunching = true;
                 if (LastGame is null)
                 {
                     // that means that we received matchmaker game launch data and we have to confirm path and mods
@@ -239,13 +248,13 @@ namespace beta.Infrastructure.Services
             })
                 .ContinueWith(task =>
                 {
+                    IsLaunching = false;
                     if (task.IsFaulted)
                     {
-                        App.Current.Dispatcher.Invoke(() => NotificationService.ShowExceptionAsync(task.Exception));
                         SessionService.Send(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                        App.Current.Dispatcher.Invoke(() => NotificationService.ShowExceptionAsync(task.Exception));
                     }
                 });
-        }
 
         private string GetInitMode(int mode) => mode switch
         {
@@ -267,42 +276,54 @@ namespace beta.Infrastructure.Services
             ice.ConnectionToGpgNetServerChanged += IceAdapterClient_ConnectionToGpgNetServerChanged;
             // these commands will be ququed and passed after established connect
 
-            var mode = GetInitMode(e.init_mode);
-            ice.SetLobbyInitMode(mode);
+            ice.SetLobbyInitMode(e.init_mode
+                .ToString()
+                .ToLower());
+
             ice.PassIceServers(IceService.IceServers);
 
             var me = PlayersService.Self;
 
             // game args
-            StringBuilder args = new();
+            StringBuilder arguments = new();
             // hide embedded game bug report
-            args.Append("/nobugreport ");
-            args.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
+            arguments.Append("/nobugreport ");
+            arguments.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
             // port from Ice-Adapter status message ["gpgnet"]["local_port"]
-            args.Append($"/gpgnet 127.0.0.1:{ice.GpgNetPort} ");
+            arguments.Append($"/gpgnet 127.0.0.1:{ice.GpgNetPort} ");
             // append player data
-            FillPlayerArgs(args, e.rating_type);
+            FillPlayerArgs(arguments, e.rating_type);
+
+            if (e.init_mode == GameInitMode.Auto)
+            {
+                // matchmaker
+                arguments.Append($"/players {e.expected_players} ");
+                arguments.Append($"/team {e.team} ");
+                arguments.Append($"/startspot {e.map_position} ");
+
+            }
+
             // append replay stream
             bool isSavingReplay = true;
             if (isSavingReplay)
             {
                 var replayPort = ReplayServerService.StartReplayServer();
-                args.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\"");
+                arguments.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\" ");
             }
             // append game logger
             bool isLogging = false;
             if (isLogging)
             {
-                args.Append($"/ log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\"");
+                arguments.Append($"/log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\" ");
             }
 
-            Logger.LogWarning($"Starting game with args: {args}");
+            Logger.LogWarning($"Starting game with args: {arguments}");
             ForgedAlliance = new()
             {
                 StartInfo = new()
                 {
                     FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
-                    Arguments = args.ToString(),
+                    Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
             };
@@ -364,27 +385,23 @@ namespace beta.Infrastructure.Services
             {
                 if (!Settings.Default.AlwaysDownloadMap)
                 {
-                    if (!askToDownload)
-                    {
-                        throw new Exception($"Map \"{mapName}\" is not installed");
-                    }
-
-                    switch (await new ContentDialog()
+                    switch (await App.Current.Dispatcher.InvokeAsync(()=>new ContentDialog()
                     {
                         Content = $"Download map \"{mapName}\"",
                         CloseButtonText = "No",
                         PrimaryButtonText = "Yes",
                         SecondaryButtonText = "Always"
-                    }.ShowAsync())
+                    }.ShowAsync()).Result)
                     {
-                        case ContentDialogResult.None:
-                            Logger.LogWarning($"Refused to download map {mapName}");
-                            return;
                         case ContentDialogResult.Primary:
                             break;
                         case ContentDialogResult.Secondary:
                             Settings.Default.AlwaysDownloadMap = true;
                             break;
+                        case ContentDialogResult.None:
+                        default:
+                            Logger.LogWarning($"Refused to download map {mapName}");
+                            return;
                     }
                 }
                 else
@@ -407,13 +424,28 @@ namespace beta.Infrastructure.Services
             }
         }
 
+        public async Task<bool> ConfirmGamePath()
+        {
+            if (!string.IsNullOrWhiteSpace(Settings.Default.PathToGame)) return true;
+
+            var model = new SelectPathToGameViewModel();
+            var result = await App.Current.Dispatcher.InvokeAsync(() => NotificationService.ShowDialog(model));
+            result.Wait();
+            if (result.Result == ContentDialogResult.None)
+            {
+                return false;
+            }
+            Settings.Default.PathToGame = model.Path;
+            return true;
+        }
+
         public async Task JoinGame(GameInfoMessage game, string password = null)
         {
             Logger.LogInformation($"Joining to the game '{game.title}' hosted by '{game.host}' on '{game.mapname}'");
 
-            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            if (!await ConfirmGamePath())
             {
-                throw new Exception("Can`t find directory with \"Supreme Commander: Forged Alliance\"");
+                return;
             }
 
             if (ForgedAlliance is not null)
@@ -683,9 +715,9 @@ namespace beta.Infrastructure.Services
 
         public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Public, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
         {
-            if (string.IsNullOrWhiteSpace(Settings.Default.PathToGame))
+            if(!await ConfirmGamePath())
             {
-                throw new Exception("Can`t find directory with \"Supreme Commander: Forged Alliance\"");
+                return;
             }
 
             if (ForgedAlliance is not null)

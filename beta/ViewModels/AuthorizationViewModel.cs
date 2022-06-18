@@ -2,6 +2,7 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;
+using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using System;
@@ -31,13 +32,13 @@ namespace beta.ViewModels
         {
             OAuthService = App.Services.GetService<IOAuthService>();
             SessionService = App.Services.GetService<ISessionService>();
-            SessionService.AuthentificationFailed += SessionService_AuthentificationFailed;
             NotificationService = App.Services.GetService<INotificationService>();
 
+            SessionService.AuthentificationFailed += SessionService_AuthentificationFailed;
+            SessionService.Authorized += OnSessionAuthorizationCompleted;
             OAuthService.StateChanged += OAuthService_StateChanged;
 
-            // TODO Add settings to not include reporting
-            Progress = new Progress<string>((data) => ProgressText = data);
+            Progress = new Progress<string>((data) => ProgressData = data);
 
             if (Settings.Default.AutoJoin && File.Exists("User.TokenBearer.txt"))
             {
@@ -54,33 +55,40 @@ namespace beta.ViewModels
             }
 
             BrowserName = GetDefaultBrowser();
+
+            ProgressTextThread = new Thread(UpdateProgressText)
+            {
+                IsBackground = true
+            };
+            ProgressTextThread.Start();
+        }
+        private void OnSessionAuthorizationCompleted(object sender, bool e)
+        {
+            if (!e) return;
+            Authorized?.Invoke(this, null);
+            App.Window.Content = new NavigationView();
         }
 
-        private string GetDefaultBrowser()
+        /// <summary>
+        /// Gets default user browser by registry data
+        /// </summary>
+        /// <returns>Name of browser or registry value or unknown</returns>
+        private static string GetDefaultBrowser()
         {
             string userChoice = @"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice";
-            string progId;
             using RegistryKey userChoiceKey = Registry.CurrentUser.OpenSubKey(userChoice);
-            if (userChoiceKey == null)
-            {
-                return "Unknown";
-            }
-            object progIdValue = userChoiceKey.GetValue("Progid");
-            if (progIdValue == null)
-            {
-                return "Unknown";
-            }
-            progId = progIdValue.ToString();
-            return progId switch
-            {
-                "IE.HTTP" => "Internet Explorer",
-                "FirefoxURL" => "Firefox",
-                "ChromeHTML" => "Chrome",
-                "OperaStable" => "Opera",
-                "SafariHTML" => "Safari",
-                "MSEdgeHTM" or "AppXq0fevzme2pys62n3e0fbqa7peapykr8v" => "Edge",
-                _ => progId,
-            };
+            return userChoiceKey is not null && userChoiceKey.GetValue("Progid") is string browser
+                ? browser switch
+                {
+                    "IE.HTTP" => "Internet Explorer",
+                    "FirefoxURL" => "Firefox",
+                    "ChromeHTML" => "Chrome",
+                    "OperaStable" => "Opera",
+                    "SafariHTML" => "Safari",
+                    "MSEdgeHTM" or "AppXq0fevzme2pys62n3e0fbqa7peapykr8v" => "Edge",
+                    _ => browser,
+                }
+                : "Unknown";
         }
 
         public string BrowserName { get; set; }
@@ -88,6 +96,7 @@ namespace beta.ViewModels
         private void SessionService_AuthentificationFailed(object sender, Models.Server.AuthentificationFailedData e)
         {
             IsPendingAuthorization = false;
+            NotificationService.ShowPopupAsync("Server authentification failed");
         }
 
         private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
@@ -115,12 +124,6 @@ namespace beta.ViewModels
                     {
                         Visibility = Visibility.Collapsed;
                     }
-                    if (ProgressTextThread is not null) return;
-                    ProgressTextThread = new Thread(UpdateProgressText)
-                    {
-                        IsBackground = true
-                    };
-                    ProgressTextThread.Start();
                 }
             }
         }
@@ -131,27 +134,27 @@ namespace beta.ViewModels
         private void UpdateProgressText()
         {
             string points = string.Empty;
-            while (IsPendingAuthorization)
+            while (true)
             {
-                //bool removeThree = points.Length == 3;
-                //ProgressText = removeThree ? ProgressText[..^3] : ProgressText[..^(points.Length > 0 ? 3 - points.Length : 0)] + points;
-                //points = points.Length switch
-                //{
-                //    0 => ".",
-                //    1 => "..",
-                //    2 => "...",
-                //    _ => string.Empty,
-                //};
-                Thread.Sleep(3500);
+                Thread.Sleep(500);
+                if (!IsPendingAuthorization) continue;
+                points = points.Length switch
+                {
+                    0 => ".",
+                    1 => "..",
+                    2 => "...",
+                    _ => string.Empty,
+                };
+                ProgressText = ProgressData + points;
             }
-            ProgressTextThread = null;
         }
 
         public Visibility InputVisibility => !IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
         public Visibility LoadingInputVisibility => IsPendingAuthorization ? Visibility.Visible : Visibility.Collapsed;
 
+        private string ProgressData;
         #region ProgressText - Authorization report text
-        private string _ProgressText = "Pending authorization";
+        private string _ProgressText;
         public string ProgressText
         {
             get => _ProgressText;
@@ -224,10 +227,6 @@ namespace beta.ViewModels
                         {
                             await NotificationService.ShowExceptionAsync(task.Exception);
                             IsPendingAuthorization = false;
-                        }
-                        else if (task.IsCompleted || task.IsCompletedSuccessfully)
-                        {
-                            Authorized?.Invoke(this, null);
                         }
                     });
             }

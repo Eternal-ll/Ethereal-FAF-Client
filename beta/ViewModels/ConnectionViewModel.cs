@@ -3,7 +3,6 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.OAuth;
 using beta.Properties;
-using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
@@ -128,22 +127,8 @@ namespace beta.ViewModels
         #endregion
         public bool IsInputEnabled => !IsPendingAuthorization;
 
-
         public ICommand LogoutCommand => (ICommand)App.Current.Resources["LogoutCommand"];
         public ICommand RestartCommand => (ICommand)App.Current.Resources["RestartCommand"];
-
-        #region RestartClientCommand
-        private ICommand _RestartClientCommand;
-        public ICommand RestartClientCommand => _RestartClientCommand ??= new LambdaCommand(OnRestartClientCommand);
-        private void OnRestartClientCommand(object parameter)
-        {
-            App.Window.ShutdownApplication = false;
-            App.Window.Close();
-            NewWindow window = new();
-            App.Window = window;
-            window.Show();
-        }
-        #endregion
 
         #region ConnectCommand
         private ICommand _ConnectCommand;

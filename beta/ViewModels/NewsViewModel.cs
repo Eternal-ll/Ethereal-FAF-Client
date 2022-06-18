@@ -1,27 +1,58 @@
 ﻿using beta.Infrastructure.Commands;
-using beta.Models.API.News;
+using beta.Infrastructure.Utils;
+using FAF.Domain.Direct.Entities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace beta.ViewModels
 {
     public class NewsViewModel : ApiViewModel
     {
-        private string Url = "https://direct.faforever.com/wp-json/wp/v2/posts?_embed=author,wp:featuredmedia&_fields[]=_links&_fields[]=title&_fields[]=date&_fields[]=content&_fields[]=newshub_externalLinkUrl";
+        private string Url = "https://direct.faforever.com/wp-json/wp/v2/posts?_embed=author,wp:featuredmedia";
 
-        public NewsViewModel() => RunRequest();
+        public NewsViewModel() => 
+            DispatcherHelper.RunOnMainThread(() =>
+            {
+                Posts = new();
+                PostsViewSource = new();
+                PostsViewSource.SortDescriptions.Add(
+                    new SortDescription(nameof(Post.NewshubSortIndex), ListSortDirection.Descending));
+                PostsViewSource.Filter += PostsViewSource_Filter;
+                PostsViewSource.Source = Posts;
+                RunRequest();
+            });
 
-        public Uri SidebarLeft { get; set; }
-        public Uri SidebarMid { get; set; }
-        public Uri SidebarRight { get; set; }
+        //public Uri SidebarLeft { get; set; }
+        //public Uri SidebarMid { get; set; }
+        //public Uri SidebarRight { get; set; }
 
-        public PostModel[] Posts { get; set; }
+        public ObservableCollection<Post> Posts { get; private set; }
+        CollectionViewSource PostsViewSource;
+        public ICollectionView PostsView => PostsViewSource.View;
+
+        #region FilterText
+        private string _FilterText;
+        public string FilterText
+        {
+            get => _FilterText;
+            set
+            {
+                if (Set(ref _FilterText, value))
+                {
+                    PostsView.Refresh();
+                }
+            }
+        }
+        #endregion
 
         #region CurrentPage
         private int _CurrentPage = 1;
@@ -39,8 +70,8 @@ namespace beta.ViewModels
         #endregion
 
         #region SelectedPost
-        private IPostModel _SelectedPost = new PlugViewModel();
-        public IPostModel SelectedPost
+        private Post _SelectedPost;
+        public Post SelectedPost
         {
             get => _SelectedPost;
             set => Set(ref _SelectedPost, value);
@@ -81,6 +112,17 @@ namespace beta.ViewModels
         }
         #endregion
 
+        private void PostsViewSource_Filter(object sender, FilterEventArgs e)
+        {
+            var post = (Post)e.Item;
+            var filter = FilterText;
+            e.Accepted = true;
+            if (string.IsNullOrWhiteSpace(filter)) return;
+            e.Accepted = post.Title.Text.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                post.Excerpt.Text.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+                post.Content.Text.Contains(filter, StringComparison.OrdinalIgnoreCase);
+        }
+
         private string BuildQuery()
         {
             StringBuilder sb = new();
@@ -93,14 +135,15 @@ namespace beta.ViewModels
 
         protected override async Task RequestTask()
         {
-            SidebarRight = null;
-            SidebarLeft = null;
-            SidebarMid = null;
-
+            //SidebarRight = null;
+            //SidebarLeft = null;
+            //SidebarMid = null;
+            var viewPosts = Posts;
+            DispatcherHelper.RunOnMainThread(() => viewPosts.Clear());
             var query = BuildQuery();   
             WebRequest request = WebRequest.Create(Url + query);
             var response = await request.GetResponseAsync();
-            var posts = await JsonSerializer.DeserializeAsync<List<PostModel>>(response.GetResponseStream());
+            var posts = await JsonSerializer.DeserializeAsync<List<Post>>(response.GetResponseStream());
            
             for (int i = 0; i < posts.Count; i++)
             {
@@ -109,37 +152,33 @@ namespace beta.ViewModels
                 {
                     if (post.Title.Text.Contains("Right", StringComparison.OrdinalIgnoreCase))
                     {
-                        SidebarRight = post.Embedded.Media[0].ImageUrl;
-                        posts[i] = null;
+                        continue;
                     }
                     else if (post.Title.Text.Contains("Left", StringComparison.OrdinalIgnoreCase))
                     {
-                        SidebarLeft = post.Embedded.Media[0].ImageUrl; posts[i] = null;
+                        continue;
                     }
                     else if (post.Title.Text.Contains("Mid", StringComparison.OrdinalIgnoreCase))
                     {
-                        SidebarMid = post.Embedded.Media[0].ImageUrl; posts[i] = null;
+                        continue;
                     }
                 }
                 post.Title.Text = WebUtility.HtmlDecode(post.Title.Text);
                 post.Content.Text = WebUtility.HtmlDecode(post.Content.Text);
+                post.Excerpt.Text = WebUtility.HtmlDecode(post.Excerpt.Text);
+                DispatcherHelper.RunOnMainThread(() => viewPosts.Add(post));
             }
-            OnPropertyChanged(nameof(SidebarRight));
-            OnPropertyChanged(nameof(SidebarMid));
-            OnPropertyChanged(nameof(SidebarLeft));
 
             // X-Wp-Totalpages
             var data = response.Headers.GetValues("X-Wp-Totalpages");
             TotalPages = data.Length > 0 ? int.Parse(data[0]) : 0;
-
-            Posts = posts.ToArray();
-            OnPropertyChanged(nameof(Posts));
         }
+
         #region HideSelectedPostCommand
         private ICommand _HideSelectedPostCommand;
         public ICommand HideSelectedPostCommand => _HideSelectedPostCommand ??= new LambdaCommand(OnHideSelectedPostCommand, CanHideSelectedPostCommand);
         private bool CanHideSelectedPostCommand(object parameter) => SelectedPost is not null;
-        private void OnHideSelectedPostCommand(object parameter) => SelectedPost = new PlugViewModel();
+        private void OnHideSelectedPostCommand(object parameter) => SelectedPost = null;
         #endregion
     }
 }

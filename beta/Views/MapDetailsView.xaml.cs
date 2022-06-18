@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Navigation;
 
 namespace beta.Views
 {
@@ -14,9 +15,12 @@ namespace beta.Views
     public partial class MapDetailsView : UserControl
     {
         public MapDetailsView() => InitializeComponent();
-        public MapDetailsView(int id) : this() => DataContext = new MapViewModel(id);
-        public MapDetailsView(string name) : this() => DataContext = new MapViewModel(name);
-        public MapDetailsView(ApiMapModel selected, ApiMapModel[] similar) : this() => DataContext = new MapViewModel(selected, similar);
+        public MapDetailsView(int id, NavigationService nav = null) : this() =>
+            DataContext = new MapViewModel(id, nav);
+        public MapDetailsView(string name, NavigationService nav = null) : this() =>
+            DataContext = new MapViewModel(name, nav);
+        public MapDetailsView(ApiMapModel selected, ApiMapModel[] similar, NavigationService nav = null) : this() =>
+            DataContext = new MapViewModel(selected, similar, nav);
         private void ListBox_Initialized(object sender, System.EventArgs e)
         {
             ((ListBox)sender).ItemsSource = Enumerable.Range(0, 20);

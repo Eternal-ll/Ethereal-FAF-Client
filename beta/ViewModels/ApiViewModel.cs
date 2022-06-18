@@ -47,7 +47,6 @@ namespace beta.ViewModels
         #endregion
 
         public Visibility InputVisibility => IsPendingRequest ? Visibility.Hidden : Visibility.Visible;
-
         public bool IsInputEnabled => !IsPendingRequest;
 
         public async Task DoRequestAsync()

@@ -9,7 +9,7 @@ namespace beta.Infrastructure.Services
     internal class IceService : IIceService
     {
         public event EventHandler<string> IceServersReceived;
-
+            
         private readonly ISessionService SessionService;
 
         /// <summary>

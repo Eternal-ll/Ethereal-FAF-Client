@@ -27,7 +27,7 @@
                 <CheckBox Margin="10 0 0 0" Grid.Column="1" Content="Only show to friends"/>
             </Grid>
 
-            <TextBlock Text="{Binding SelectedMap.DisplayedName, StringFormat='Selected map: {0}'}" Margin="0 10 0 0"/>
+            <TextBlock Text="{Binding SelectedMap.LatestVersion.FolderName, StringFormat='Selected map: {0}'}" Margin="0 10 0 0"/>
 
             <TextBlock Text="Game type" FontSize="16" Margin="0 20 0 10"/>
             <ListBox ItemsSource="{Binding FeaturedMods}" SelectedItem="{Binding FeaturedMod}" HorizontalAlignment="Left">

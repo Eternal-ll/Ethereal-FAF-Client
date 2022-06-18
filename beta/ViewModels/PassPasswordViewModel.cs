@@ -31,7 +31,8 @@ namespace beta.ViewModels
         #region PassPasswordCommand
         private ICommand _PassPasswordCommand;
         public ICommand PassPasswordCommand => _PassPasswordCommand ??= new LambdaCommand(OnPassPasswordCommand);
-        private void OnPassPasswordCommand(object parameter) { Password = parameter.ToString(); }
+        private void OnPassPasswordCommand(object parameter) { if(string.IsNullOrEmpty(Password))
+                Password = parameter?.ToString(); }
 
         #endregion
     }

@@ -1,70 +1,94 @@
-﻿using beta.Infrastructure.Services.Interfaces;
+﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace beta.ViewModels
 {
     internal class MatchMakerViewModel : ViewModel
     {
         private readonly ISessionService SessionService;
+        private readonly IQueueService QueueService;
         private readonly ILogger Logger;
+
+        private DispatcherTimer DispatcherTimer;
         public MatchMakerViewModel()
         {
             SessionService = App.Services.GetService<ISessionService>();
             Logger = App.Services.GetService<ILogger<MatchMakerViewModel>>();
+            QueueService = App.Services.GetService<IQueueService>();
 
             SessionService.MatchMakerDataReceived += SessionService_MatchMakerDataReceived;
 
             GamesViewModel = new();
+
+            DispatcherTimer = new(DispatcherPriority.Background, App.Current.Dispatcher)
+            {
+                Interval = new TimeSpan(0, 0, 1)
+            };
+            DispatcherTimer.Tick += DispatcherTimer_Tick;
+            DispatcherTimer.Start();
+        }
+
+        private void DispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            var queues = Queues;
+            foreach (var queue in queues)
+            {
+                if (queue.queue_pop_time_delta > 0)
+                {
+                    queue.queue_pop_time_delta--;
+                }
+            }
         }
 
         private void SessionService_MatchMakerDataReceived(object sender, MatchMakerData e)
         {
             for (int i = 0; i < e.Queues.Length; i++)
             {
+                var incomeQueue = e.Queues[i];
                 for (int j = 0; j < Queues.Length; j++)
                 {
                     var queue = Queues[j];
-                    if (queue.Type == e.Queues[i].Type)
+                    if (queue.Type == incomeQueue.Type)
                     {
-                        Queues[j] = e.Queues[i];
-                        OnPropertyChanged(nameof(Queues));
+                        queue.queue_pop_time = incomeQueue.queue_pop_time;
+                        queue.queue_pop_time_delta = incomeQueue.queue_pop_time_delta;
+                        queue.CountInQueue = incomeQueue.CountInQueue;
                         break;
                     }
                 }
             }
         }
 
-        public QueueDataModel[] Queues { get; set; } = new QueueDataModel[]
+        public QueueData[] Queues { get; set; } = new QueueData[]
         {
-            new QueueDataModel()
+            new QueueData()
             {
-                Type = Models.Server.Enums.MatchMakerType.ladder1v1,
-                CountInQueue = new Random().Next(0,100)
+                Type = Models.Server.Enums.MatchMakerType.ladder1v1
             },
-            new QueueDataModel()
+            new QueueData()
             {
-                Type = Models.Server.Enums.MatchMakerType.tmm2v2,
-                CountInQueue = new Random().Next(0,100)
+                Type = Models.Server.Enums.MatchMakerType.tmm2v2
             },
-            new QueueDataModel()
+            new QueueData()
             {
-                Type = Models.Server.Enums.MatchMakerType.tmm4v4_full_share,
-                CountInQueue = new Random().Next(0,100)
+                Type = Models.Server.Enums.MatchMakerType.tmm4v4_full_share
             },
-            new QueueDataModel()
+            new QueueData()
             {
-                Type = Models.Server.Enums.MatchMakerType.tmm4v4_share_until_death,
-                CountInQueue = new Random().Next(0,100)
+                Type = Models.Server.Enums.MatchMakerType.tmm4v4_share_until_death
             },
         };
 
         #region CurrentQueue
-        private QueueDataModel _CurrentQueue;
-        public QueueDataModel CurrentQueue
+        private QueueData _CurrentQueue;
+        public QueueData CurrentQueue
         {
             get => _CurrentQueue;
             set => Set(ref _CurrentQueue, value);
@@ -79,5 +103,22 @@ namespace beta.ViewModels
             set => Set(ref _GamesViewModel, value);
         }
         #endregion
+
+        #region JoinQueueCommand
+        private ICommand _JoinQueueCommand;
+        public ICommand JoinQueueCommand => _JoinQueueCommand ??= new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
+        private bool CanJoinQueueCommand(object parameter) => true;
+        private void OnJoinQueueCommand(object parameter)
+        {
+            QueueService.SignUpQueue(CurrentQueue.Type);
+        }
+        #endregion
+
+        private ICommand _LeaveQueueCommand;
+        private ICommand LeaveQueueCommand => _LeaveQueueCommand ??= new LambdaCommand(OnLeaveQueueCommand);
+        private void OnLeaveQueueCommand(object parameter)
+        {
+            QueueService.SignUpQueue(CurrentQueue.Type);
+        }
     }
 }

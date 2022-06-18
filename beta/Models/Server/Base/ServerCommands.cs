@@ -103,6 +103,33 @@ namespace beta.Models.Server.Base
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
         public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\"}}";
+        /// <summary>
+        /// Join to MatchMaking queue
+        /// </summary>
+        /// <param name="queue">Queue name</param>
+        /// <returns></returns>
+        public static string JoinToMatchMakingQueue(string queue, string faction) =>
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": \"{faction}\"}}";
+        /// <summary>
+        /// Join to MatchMaking queue
+        /// </summary>
+        /// <param name="queue">Queue name</param>
+        /// <returns></returns>
+        public static string JoinToMatchMakingQueue(string queue, params string[] factions) =>
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}";
+        /// <summary>
+        /// Leave from MatchMaking queue
+        /// </summary>
+        /// <param name="queue">Queue name</param>
+        /// <returns></returns>
+        public static string LeaveMatchmakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"stop\"}}";
+        /// <summary>
+        /// Leave from MatchMaking queue
+        /// </summary>
+        /// <param name="queue">Queue name</param>
+        /// <returns></returns>
+        public static string LeaveMatchmakingQueue() => $"{{\"command\": \"game_matchmaking\", \"state\": \"stop\"}}";
+        public static string MatchReady() => $"{{\"command\": \"match_ready\"}}";
 
         // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
         // TODO

@@ -4,4 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FAF.API.Domain.Base\FAF.API.Domain.Base.csproj" />
+    <ProjectReference Include="..\FAF.API.Domain.Forum\FAF.API.Domain.Forum.csproj" />
+    <ProjectReference Include="..\FAF.API.Domain.Direct\FAF.API.Domain.Direct.csproj" />
+  </ItemGroup>
+
 </Project>

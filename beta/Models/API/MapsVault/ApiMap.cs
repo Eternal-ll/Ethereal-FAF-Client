@@ -23,6 +23,8 @@ namespace beta.Models.API.MapsVault
         public MapVersionModel LatestVersion { get; set; }
         public MapVersionModel[] Versions { get; set; }
 
+
+
         public bool TryGetRelationId(ApiDataType type, out int id)
         {
             id = -1;

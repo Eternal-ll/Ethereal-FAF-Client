@@ -4,6 +4,7 @@ using beta.Properties;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -211,6 +212,15 @@ namespace beta.Models.Server
         public string country { get; set; }
         public string clan { get; set; }
 
+        public Dictionary<RatingType, ObservableCollection<Rating>> RatingHistory = new()
+        {
+            { RatingType.global, new() },
+            { RatingType.ladder_1v1, new() },
+            { RatingType.tmm_2v2, new() },
+            { RatingType.tmm_4v4_full_share, new() },
+            { RatingType.tmm_4v4_share_until_death, new() },
+        };
+
         #region ratings
         private Dictionary<RatingType, Rating> _ratings;
         public Dictionary<RatingType, Rating> ratings
@@ -230,13 +240,16 @@ namespace beta.Models.Server
                                 rating.RatingDifference[0] += item.Value.rating[0] - rating.rating[0];
                                 rating.RatingDifference[1] += item.Value.rating[1] - rating.rating[1];
                                 rating.GamesDifference++;
+                                RatingHistory[item.Key].Add(item.Value);
                             }
                             else
                             {
+
                                 item.Value.RatingDifference[0] += item.Value.rating[0];
                                 item.Value.RatingDifference[1] += item.Value.rating[1];
                                 item.Value.GamesDifference++;
                                 _ratings.Add(item.Key, item.Value);
+                                RatingHistory[item.Key].Add(item.Value);
                             };
                         }
                     else _ratings = value;
