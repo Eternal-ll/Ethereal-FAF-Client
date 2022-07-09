@@ -68,7 +68,7 @@ namespace beta.Models
         public int Port;
         public string Host;
 
-        private NetworkStream Stream;
+        public NetworkStream Stream;
         private Thread TcpThread;
         #endregion
 

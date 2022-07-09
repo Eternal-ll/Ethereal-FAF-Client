@@ -13,7 +13,7 @@ namespace beta.Infrastructure.Commands
         private readonly SelectPathToGameCommand SelectPathToGameCommand;
         public LaunchOfflineGameCommand()
         {
-            NotificationService = App.Services.GetService<INotificationService>();
+            //NotificationService = App.Services.GetService<INotificationService>();
         }
         public override bool CanExecute(object parameter) => true;
 

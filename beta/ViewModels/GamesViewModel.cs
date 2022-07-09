@@ -780,8 +780,8 @@ namespace beta.ViewModels
         #endregion
 
         #region SelectedRatingType
-        private RatingType _SelectedRatingType;
-        public RatingType SelectedRatingType
+        private string _SelectedRatingType;
+        public string SelectedRatingType
         {
             get => _SelectedRatingType;
             set

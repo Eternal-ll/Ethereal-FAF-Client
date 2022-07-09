@@ -33,26 +33,33 @@ namespace beta.Models.API.Base
 
             foreach (var map in data)
             {
-                var relations = map.GetRelations();
-                foreach (var relation in relations)
+                try
                 {
-                    var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Key, relation.Value);
-                    switch (relation.Key)
+                    var relations = map.GetRelations();
+                    foreach (var relation in relations)
                     {
-                        case ApiDataType.mapVersion:
-                            map.LatestVersion = entity.CastTo<MapVersionModel>();
-                            if (map.LatestVersion.IsLegacyMap)
-                            {
-                                map.LatestVersion.Attributes["hidden"] = "false";
-                            }
-                            continue;
-                        case ApiDataType.player:
-                            map.Author = entity.Attributes["login"];
-                            continue;
-                        case ApiDataType.mapReviewsSummary:
-                            map.ReviewsSummary = entity.CastTo<ApiUniversalSummary>();
-                            continue;
+                        var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Key, relation.Value);
+                        switch (relation.Key)
+                        {
+                            case ApiDataType.mapVersion:
+                                map.LatestVersion = entity.CastTo<MapVersionModel>();
+                                if (map.LatestVersion.IsLegacyMap)
+                                {
+                                    map.LatestVersion.Attributes["hidden"] = "false";
+                                }
+                                continue;
+                            case ApiDataType.player:
+                                map.Author = entity.Attributes["login"];
+                                continue;
+                            case ApiDataType.mapReviewsSummary:
+                                map.ReviewsSummary = entity.CastTo<ApiUniversalSummary>();
+                                continue;
+                        }
                     }
+                }
+                catch
+                {
+
                 }
             }
         }

@@ -13,5 +13,6 @@ namespace FAF.Domain.Direct.Models
         /// </summary>
         [JsonPropertyName("wp:featuredmedia")]
         public Media[] Media { get; set; }
+        public Media FirstMedia => Media.Length > 0 ? Media[0] : null;
     }
 }

@@ -13,8 +13,8 @@ namespace beta.Infrastructure.Commands
         private readonly INotificationService NotificationService;
         public WatchGameCommand()
         {
-            GameLauncherService = App.Services.GetService<IGameSessionService>();
-            NotificationService = App.Services.GetService<INotificationService>();
+            //GameLauncherService = App.Services.GetService<IGameSessionService>();
+            //NotificationService = App.Services.GetService<INotificationService>();
         }
         public override bool CanExecute(object parameter)
         {

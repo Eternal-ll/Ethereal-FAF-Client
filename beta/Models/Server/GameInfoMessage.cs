@@ -28,7 +28,7 @@ namespace beta.Models.Server
 
         public int Number { get; }
         public IPlayer[] Players { get; }
-        public RatingType VisibleRatingType { get; set; }
+        public string VisibleRatingType { get; set; }
         public int SumRating
         {
             get
@@ -597,8 +597,7 @@ namespace beta.Models.Server
 
         public double? launched_at { get; set; }
         [JsonPropertyName("rating_type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RatingType RatingType { get; set; }
+        public string RatingType { get; set; }
         public double? rating_min { get; set; }
         public double? rating_max { get; set; }
         public bool enforce_rating_range { get; set; }

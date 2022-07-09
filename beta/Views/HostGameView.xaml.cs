@@ -8,10 +8,31 @@ namespace beta.Views
     /// </summary>
     public partial class HostGameView : UserControl
     {
-        public HostGameView() => InitializeComponent();
+        private readonly HostGameViewModel ViewModel;
+        public HostGameView(HostGameViewModel model)
+        {
+            ViewModel = model;
+            DataContext = model;
+            InitializeComponent();
+            IsVisibleChanged += HostGameView_IsVisibleChanged;
+        }
+
+        private void HostGameView_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue)
+            {
+                ViewModel.AddSelectionEvent();
+                MapsViewContentControl.Content = ViewModel.Maps;
+            }
+            else
+            {
+                ViewModel.RemoveSelectionEvent();
+                MapsViewContentControl.Content = null;
+            }
+        }
 
         private void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e) =>
-            ((HostGameViewModel)DataContext).Password = ((PasswordBox)sender).Password;
+            ViewModel.Password = ((PasswordBox)sender).Password;
 
         private void MapsView_MapSelected(object sender, string e)
         {

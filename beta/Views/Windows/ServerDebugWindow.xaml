@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:beta.Views.Windows"
-        mc:Ignorable="d"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen"
         d:DataContext="{d:DesignInstance {x:Type local:ServerDebugWindow}}"
         Title="ServerDebugWindow" Height="450" Width="800">
     <TabControl Background="Gray">

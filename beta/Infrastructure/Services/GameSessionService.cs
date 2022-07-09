@@ -182,7 +182,7 @@ namespace beta.Infrastructure.Services
             }
         }
 
-        private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
+        private void FillPlayerArgs(StringBuilder args, string ratingType,
             // player info
             string country = "", string clan = null,
             // player rating

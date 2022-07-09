@@ -12,6 +12,7 @@ namespace FAF.Domain.Direct.Models
         /// </summary>
         [JsonPropertyName("rendered")]
         public string Text { get; set; }
+        public string ShortText => Text is null ? null : Text.Length > 200 ? Text.Substring(0, 200) + "..." : Text;
 
         /// <summary>
         /// 

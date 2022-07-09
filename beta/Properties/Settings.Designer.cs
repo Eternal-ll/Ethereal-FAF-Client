@@ -142,53 +142,29 @@ namespace beta.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double Left {
-            get {
-                return ((double)(this["Left"]));
-            }
-            set {
-                this["Left"] = value;
-            }
-        }
+        //[global::System.Configuration.UserScopedSettingAttribute()]
+        //[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        //[global::System.Configuration.DefaultSettingValueAttribute("1024, 768")]
+        //public global::System.Windows.Size WindowSize {
+        //    get {
+        //        return ((global::System.Windows.Size)(this["WindowSize"]));
+        //    }
+        //    set {
+        //        this["WindowSize"] = value;
+        //    }
+        //}
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double Top {
-            get {
-                return ((double)(this["Top"]));
-            }
-            set {
-                this["Top"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("800")]
-        public double Width {
-            get {
-                return ((double)(this["Width"]));
-            }
-            set {
-                this["Width"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("600")]
-        public double Height {
-            get {
-                return ((double)(this["Height"]));
-            }
-            set {
-                this["Height"] = value;
-            }
-        }
+        //[global::System.Configuration.UserScopedSettingAttribute()]
+        //[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        //[global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
+        //public global::System.Windows.Point WindowLocation {
+        //    get {
+        //        return ((global::System.Windows.Point)(this["WindowLocation"]));
+        //    }
+        //    set {
+        //        this["WindowLocation"] = value;
+        //    }
+        //}
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -338,38 +314,26 @@ namespace beta.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool IsTrailerSoundsOn {
+        [global::System.Configuration.DefaultSettingValueAttribute("en-US")]
+        public string Culture {
             get {
-                return ((bool)(this["IsTrailerSoundsOn"]));
+                return ((string)(this["Culture"]));
             }
             set {
-                this["IsTrailerSoundsOn"] = value;
+                this["Culture"] = value;
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1024, 768")]
-        public global::System.Windows.Size WindowSize {
-            get {
-                return ((global::System.Windows.Size)(this["WindowSize"]));
-            }
-            set {
-                this["WindowSize"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0, 0")]
-        public global::System.Windows.Point WindowLocation {
-            get {
-                return ((global::System.Windows.Point)(this["WindowLocation"]));
-            }
-            set {
-                this["WindowLocation"] = value;
-            }
-        }
+        //[global::System.Configuration.UserScopedSettingAttribute()]
+        //[global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        //[global::System.Configuration.DefaultSettingValueAttribute("")]
+        //public string NavigationViewPaneDisplayMode {
+        //    get {
+        //        return ((string)(this["NavigationViewPaneDisplayMode"]));
+        //    }
+        //    set {
+        //        this["NavigationViewPaneDisplayMode"] = value;
+        //    }
+        //}
     }
 }

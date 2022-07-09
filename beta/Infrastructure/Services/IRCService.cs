@@ -39,7 +39,7 @@ namespace beta.Infrastructure.Services
         private string Nick;
         private string OriginalNick;
         private string Password;
-        private List<string> UsersCache;
+        private readonly List<string> ChannelUsersCache = new();
 
         #region State
         private IrcState _State;
@@ -51,7 +51,7 @@ namespace beta.Infrastructure.Services
                 if (_State != value)
                 {
                     _State = value;
-                    OnStateChanged(value);
+                    StateChanged?.Invoke(this, value);
                 }
             }
         } 
@@ -213,9 +213,19 @@ namespace beta.Infrastructure.Services
             //Send(IrcCommands.Join("#aeolus2", "test")); 
             //Send("MODE #aeolus2");
             //Send(IrcCommands.Topic("#aeolus1", "test"));
-            Send("KICK #test2 Didvul");
+            //Send("KICK #test2 Didvul");
             //Send(IrcCommands.List());
             //Send(IrcCommands.Nickname("Eternal-"));
+            //Task.Run(async () =>
+            //{
+            //    var data = "JOIN #test\r\n";
+            //    var bytes = Encoding.UTF8.GetBytes(data);
+            //    var stream = ManagedTcpClient.Stream;
+            //    await stream.WriteAsync(bytes);
+            //    var response = new byte[10000];
+            //    await stream.ReadAsync(response);
+            //    var responseData = Encoding.UTF8.GetString(response);
+            //});
         }
 
         public void GetChannelUsers(string channel) => SendCommand(IrcUserCommand.NAMES, IrcCommands.Names(channel), channel);
@@ -324,17 +334,15 @@ namespace beta.Infrastructure.Services
                     string channel = ircData[4];
                     var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
                     AppDebugger.LOGIRC($"channel: {channel} users: ({users.Length}) {string.Join(", ", users)}");
-
-                    if (UsersCache is null) UsersCache = new();
-                    UsersCache.AddRange(users);                    
+                    ChannelUsersCache.AddRange(users);                    
                     break;
                 case "366":
                     //:irc.faforever.com 366 Eternal- #test :End of /NAMES list.
                     channel = ircData[3];
-                    var cachesUsers = UsersCache.ToArray();
+                    var cachesUsers = ChannelUsersCache.ToArray();
                     OnChannelUsersReceived(new(channel, cachesUsers));
                     AppDebugger.LOGIRC($"End of user lists: {channel} users: {cachesUsers.Length}");
-                    UsersCache = null;
+                    ChannelUsersCache.Clear();
                     break;
 
                 case "433"://Nickname is unavailable: Being held for registered user
@@ -528,8 +536,6 @@ namespace beta.Infrastructure.Services
                     throw new NotImplementedException("IRC Command is not recognized");
             }
         }
-
-        private void OnStateChanged(IrcState state) => StateChanged?.Invoke(this, state);
 
         private void OnUserConnected(string user) => UserConnected?.Invoke(this, user);
         private void OnUserDisconnected(string user) => UserDisconnected?.Invoke(this, user);

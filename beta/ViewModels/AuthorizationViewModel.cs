@@ -1,12 +1,11 @@
 ﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;
-using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,54 +18,67 @@ namespace beta.ViewModels
     /// </summary>
     public class AuthorizationViewModel : Base.ViewModel
     {
-        public event EventHandler Authorized;
+        public event EventHandler<bool> Authorized;
 
         private readonly IOAuthService OAuthService;
         private readonly ISessionService SessionService;
         private readonly INotificationService NotificationService;
+        private readonly NavigationService NavigationService;
 
-        private readonly IProgress<string> Progress;
+        public IProgress<string> Progress;
         private CancellationTokenSource CancellationTokenSource = new();
-
+        public AuthorizationViewModel(IProgress<string> progress) : this()
+        {
+            Progress = progress;
+        }
         public AuthorizationViewModel()
         {
             OAuthService = App.Services.GetService<IOAuthService>();
             SessionService = App.Services.GetService<ISessionService>();
             NotificationService = App.Services.GetService<INotificationService>();
+            NavigationService = App.Services.GetService<NavigationService>();
 
             SessionService.AuthentificationFailed += SessionService_AuthentificationFailed;
             SessionService.Authorized += OnSessionAuthorizationCompleted;
             OAuthService.StateChanged += OAuthService_StateChanged;
 
+            OAuthService.SetToken(
+                Settings.Default.access_token,
+                Settings.Default.refresh_token,
+                Settings.Default.id_token,
+                Settings.Default.ExpiresIn);
+
+            if (Progress is null)
             Progress = new Progress<string>((data) => ProgressData = data);
 
-            if (Settings.Default.AutoJoin && File.Exists("User.TokenBearer.txt"))
-            {
-                Task.Run(() =>
-                {
-                    OAuthService.SetToken(
-                        Settings.Default.access_token,
-                        Settings.Default.refresh_token,
-                        Settings.Default.id_token,
-                        Settings.Default.ExpiresIn);
-                    OAuthService.AuthAsync(Progress)
-                    .ContinueWith(task => HandleOAuthResultTask(task));
-                });
-            }
+            //if (Settings.Default.AutoJoin)
+            //{
+            //    IsPendingAuthorization = true;
+            //    Task.Run(() =>
+            //    {
+            //        OAuthService.AuthAsync(Progress)
+            //        .ContinueWith(task => HandleOAuthResultTask(task));
+            //    });
+            //}
 
             BrowserName = GetDefaultBrowser();
 
-            ProgressTextThread = new Thread(UpdateProgressText)
-            {
-                IsBackground = true
-            };
-            ProgressTextThread.Start();
+            //ProgressTextThread = new Thread(UpdateProgressText)
+            //{
+            //    IsBackground = true
+            //};
+            //ProgressTextThread.Start();
+        }
+        public async Task AuthBySavedToken()
+        {
+            IsPendingAuthorization = true;
+            await OAuthService.AuthAsync(Progress)
+                    .ContinueWith(async task => await HandleOAuthResultTask(task));
         }
         private void OnSessionAuthorizationCompleted(object sender, bool e)
         {
-            if (!e) return;
-            Authorized?.Invoke(this, null);
-            App.Window.Content = new NavigationView();
+            Authorized?.Invoke(this, e);
+            //App.Window.Content = new NavigationView();
         }
 
         /// <summary>
@@ -219,16 +231,14 @@ namespace beta.ViewModels
                 Settings.Default.id_token = task.Result.IdToken;
                 Settings.Default.ExpiresIn = task.Result.ExpiresIn;
                 Settings.Default.ExpiresAt = task.Result.ExpiresAt;
-                await SessionService.AuthorizeAsync(task.Result.AccessToken, CancellationTokenSource.Token)
-                    .ContinueWith(async task =>
-                    {
-                        CancellationTokenSource = new();
-                        if (task.IsFaulted)
-                        {
-                            await NotificationService.ShowExceptionAsync(task.Exception);
-                            IsPendingAuthorization = false;
-                        }
-                    });
+                var taskg = SessionService.AuthorizeAsync(task.Result.AccessToken, CancellationTokenSource.Token);
+                taskg.Wait();
+                CancellationTokenSource = new();
+                if (taskg.IsFaulted)
+                {
+                    await NotificationService.ShowExceptionAsync(task.Exception);
+                    IsPendingAuthorization = false;
+                }
             }
         }
 

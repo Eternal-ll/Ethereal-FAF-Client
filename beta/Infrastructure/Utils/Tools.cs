@@ -84,7 +84,8 @@ namespace beta.Infrastructure.Utils
             1024 => 20,
             2048 => 40,
             4096 => 80,
-            _ => throw new NotImplementedException()
+            _ => pixel
+            //_ => throw new NotImplementedException()
         };
         public static int CalculateMapSizeToPixels(int km) => km switch
         {
@@ -122,8 +123,8 @@ namespace beta.Infrastructure.Utils
         public static FileInfo GetIceAdapterJarFileInfo() => new(ExtractAndReturnPath(Properties.Resources.faf_ice_adapter, "faf-ice-adapter"));
         private static string ExtractAndReturnPath(byte[] binary, string name, string destination = null)
         {
-            string path = App.CurrentDirectory + "\\Third-party applications\\";
-            if (!string.IsNullOrWhiteSpace(destination)) path = App.CurrentDirectory + destination;
+            string path = Environment.CurrentDirectory + "\\Third-party applications\\";
+            if (!string.IsNullOrWhiteSpace(destination)) path = Environment.CurrentDirectory + destination;
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
             path += name;
             if (File.Exists(path)) return path;

@@ -30,11 +30,11 @@ namespace beta.Models.Server
             player.id = int.Parse(Settings.Default.PlayerId.ToString());
             player.ratings = new()
             {
-                { RatingType.global, new() { rating = new double[] { 9999, 1 } } },
-                { RatingType.ladder_1v1, new() { rating = new double[] { 9999, 1 } } },
-                { RatingType.tmm_2v2, new() { rating = new double[] { 9999, 1 } } },
-                { RatingType.tmm_4v4_full_share, new() { rating = new double[] { 9999, 1 } } },
-                { RatingType.tmm_4v4_share_until_death, new() { rating = new double[] { 9999, 1 } } },
+                { "global", new() { rating = new double[] { 9999, 1 } } },
+                { "ladder_1v1", new() { rating = new double[] { 9999, 1 } } },
+                { "tmm_2v2", new() { rating = new double[] { 9999, 1 } } },
+                { "tmm_4v4_full_share", new() { rating = new double[] { 9999, 1 } } },
+                { "tmm_4v4_share_until_death", new() { rating = new double[] { 9999, 1 } } },
             };
         }
     }
@@ -212,18 +212,18 @@ namespace beta.Models.Server
         public string country { get; set; }
         public string clan { get; set; }
 
-        public Dictionary<RatingType, ObservableCollection<Rating>> RatingHistory = new()
+        public Dictionary<string, ObservableCollection<Rating>> RatingHistory = new()
         {
-            { RatingType.global, new() },
-            { RatingType.ladder_1v1, new() },
-            { RatingType.tmm_2v2, new() },
-            { RatingType.tmm_4v4_full_share, new() },
-            { RatingType.tmm_4v4_share_until_death, new() },
+            { "global", new() },
+            { "ladder_1v1", new() },
+            { "tmm_2v2", new() },
+            { "tmm_4v4_full_share", new() },
+            { "tmm_4v4_share_until_death", new() },
         };
 
         #region ratings
-        private Dictionary<RatingType, Rating> _ratings;
-        public Dictionary<RatingType, Rating> ratings
+        private Dictionary<string, Rating> _ratings;
+        public Dictionary<string, Rating> ratings
         {
             get => _ratings;
             set
@@ -265,7 +265,7 @@ namespace beta.Models.Server
             get
             {
                 if (ratings is null) return null;
-                RatingType ratingType = RatingType.global;
+                string ratingType = "global";
                 if (Game is not null)
                 {
                     ratingType = Game.RatingType;

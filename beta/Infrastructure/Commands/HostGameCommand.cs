@@ -13,8 +13,8 @@ namespace beta.Infrastructure.Commands
         private Window Window;
         public HostGameCommand()
         {
-            GameSessionService = App.Services.GetService<IGameSessionService>();
-            NotificationService = App.Services.GetService<INotificationService>();
+            //GameSessionService = App.Services.GetService<IGameSessionService>();
+            //NotificationService = App.Services.GetService<INotificationService>();
         }
         public override bool CanExecute(object parameter) => true;
 
@@ -25,7 +25,7 @@ namespace beta.Infrastructure.Commands
                 NotificationService.ShowPopupAsync("Game is running");
                 return;
             }
-            var model = new HostGameViewModel();
+            var model = App.Services.GetService<HostGameViewModel>();
             Window = new();
             Window.Background = (Brush)App.Current.Resources["NavigationViewDefaultPaneBackground"];
             Window.Content = model;

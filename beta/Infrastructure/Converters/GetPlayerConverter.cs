@@ -16,7 +16,7 @@ namespace beta.Infrastructure.Converters
         private readonly IPlayersService PlayersService;
         public GetPlayerConverter()
         {
-            PlayersService = App.Services.GetService<IPlayersService>();
+            //PlayersService = App.Services.GetService<IPlayersService>();
         }
         /// <summary>
         /// Get player from PlayersService by login, id. Returns Player instance or Null

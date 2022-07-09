@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 
 namespace beta.ViewModels
 {
@@ -52,12 +53,27 @@ namespace beta.ViewModels
 
     internal class ProfileViewModel : Base.ViewModel, ISelectedPlayerProfile
     {
+        private readonly NavigationService NavigationService;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        public ProfileViewModel(int id)
+        {
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="player"></param>
         public ProfileViewModel(PlayerInfoMessage player)
         {
             Player = player;
             Task.Run(() => UpdateInfo());
         }
-        
+        public ProfileViewModel(PlayerInfoMessage player, NavigationService nav) : this(player) => 
+            NavigationService = nav;
+
         public PlayerInfoMessage Player { get; private set; }
 
         #region AvatarsViewModel
@@ -116,23 +132,9 @@ namespace beta.ViewModels
 
         public async Task UpdateInfo()
         {
-            try
-            {
-                var result = await ApiRequest<ApiUniversalResult<ApiPlayerData>>.RequestWithId("https://api.faforever.com/data/player/", Player.id);
-                ApiPlayerData = result.Data;
-
-                List<RatingType> ratings = new();
-                foreach (var rating in Player.ratings.Keys)
-                {
-                    ratings.Add(rating);
-                }
-                ApiRatingsViewModel = new ApiRatingsViewModel(Player.id, ratings.ToArray());
-            }
-            catch (Exception ex)
-            {
-
-            }
+            var result = await ApiRequest<ApiUniversalResult<ApiPlayerData>>.RequestWithId("https://api.faforever.com/data/player/", Player.id);
+            ApiPlayerData = result.Data;
+            ApiRatingsViewModel = new ApiRatingsViewModel(Player.id, Player.ratings.Keys.ToArray());
         }
-
     }
 }

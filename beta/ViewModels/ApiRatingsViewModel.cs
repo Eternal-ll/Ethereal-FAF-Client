@@ -18,9 +18,9 @@ namespace beta.ViewModels
     /// </summary>
     internal class ApiRatingsViewModel : ApiPlayerViewModel
     {
-        public RatingType[] RatingTypes { get; private set; }
+        public string[] RatingTypes { get; private set; }
 
-        private readonly Dictionary<RatingType, ApiGamePlayerStats[]> Data = new();
+        private readonly Dictionary<string, ApiGamePlayerStats[]> Data = new();
 
         #region LiveCharts
         public ISeries[] Series { get; set; } =
@@ -60,7 +60,7 @@ namespace beta.ViewModels
             };
         #endregion
 
-        public ApiRatingsViewModel(int playerId, params RatingType[] ratingTypes) : base(playerId)
+        public ApiRatingsViewModel(int playerId, params string[] ratingTypes) : base(playerId)
         {
             if (ratingTypes.Length == 0) return;
             RatingTypes = ratingTypes;
@@ -72,8 +72,8 @@ namespace beta.ViewModels
         }
 
         #region SelectedRatingType
-        private RatingType _SelectedRatingType;
-        public RatingType SelectedRatingType
+        private string _SelectedRatingType;
+        public string SelectedRatingType
         {
             get => _SelectedRatingType;
             set
@@ -113,7 +113,7 @@ namespace beta.ViewModels
             }
             
 
-            var url = $"https://api.faforever.com/data/gamePlayerStats?filter=(player.id=={PlayerId};ratingChanges.leaderboard.id=={(int)SelectedRatingType})&fields[gamePlayerStats]=afterDeviation,afterMean,beforeDeviation,beforeMean,scoreTime&page[totals]=yes&page[size]=500";
+            var url = $"https://api.faforever.com/data/gamePlayerStats?filter=(player.id=={PlayerId};ratingChanges.leaderboard.technicalName=={SelectedRatingType})&fields[gamePlayerStats]=afterDeviation,afterMean,beforeDeviation,beforeMean,scoreTime&page[totals]=yes&page[size]=500";
             List<ApiGamePlayerStats> data = new();
             var pages = 1;
 

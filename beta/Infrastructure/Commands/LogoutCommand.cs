@@ -14,7 +14,7 @@ namespace beta.Infrastructure.Commands
             Settings.Default.refresh_token = null;
             Settings.Default.id_token = null;
             Settings.Default.AutoJoin = false;
-            App.Restart();
+            new RestartCommand().Execute(null);
         }
     }
 }

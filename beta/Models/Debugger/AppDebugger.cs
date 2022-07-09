@@ -29,7 +29,7 @@ namespace beta.Models.Debugger
         public static void LOGLobby(string data) => DebugWindow.LOGLobby(data);
 
         [Conditional("DEBUG")]
-        public static void LOGIRC(string data) => DebugWindow.LOGIRC(data);
+        public static void LOGIRC(string data) => DebugWindow?.LOGIRC(data);
 
         [Conditional("DEBUG")]
         public static void LOGICE(string data) => DebugWindow.LOGICE(data);

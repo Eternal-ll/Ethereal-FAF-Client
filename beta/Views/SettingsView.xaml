@@ -7,9 +7,6 @@
              d:DataContext="{d:DesignInstance {x:Type vm:SettingsViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.DataContext>
-        <vm:SettingsViewModel/>
-    </UserControl.DataContext>
     <UserControl.Resources>
         <Style x:Key="StackPanelFieldStyle" TargetType="StackPanel">
             <Setter Property="Orientation" Value="Horizontal"/>
@@ -76,6 +73,13 @@
                                 Command="{StaticResource NavigateExplorerCommand}" CommandParameter="{Binding ConfigPath}">
                             <Path Style="{StaticResource PathFolderDataStyle}"/>
                         </Button>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="User Interface">
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox Width="140" SelectedValue="{Binding NavigationViewPaneDisplayMode}"
+                                  ItemsSource="{Binding NavigationViewPaneDisplayModes}"/>
+                        <TextBlock VerticalAlignment="Center" Margin="10 0 0 0" Text="Navigation view pane display mode"/>
                     </StackPanel>
                 </GroupBox>
                 <GroupBox Header="Autorization">

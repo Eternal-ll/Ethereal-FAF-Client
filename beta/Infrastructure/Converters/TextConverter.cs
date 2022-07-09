@@ -34,7 +34,7 @@ namespace beta.Infrastructure.Converters
         private readonly IPlayersService PlayersService;
         public TextConverter()
         {
-            PlayersService = App.Services.GetService<IPlayersService>();
+            //PlayersService = App.Services.GetService<IPlayersService>();
         }
 
         private InlineUIContainer GetEmoji(string emoji)

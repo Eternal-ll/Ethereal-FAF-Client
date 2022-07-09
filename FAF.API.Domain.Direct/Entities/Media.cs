@@ -12,6 +12,7 @@ namespace FAF.Domain.Direct.Entities
         [JsonPropertyName("media_details")]
         public MediaDetails MediaDetails { get; set; }
         [JsonPropertyName("source_url")]
-        public Uri SourceUrl { get; set; }
+        public string Source { get; set; }
+        public Uri SourceAsUri => Uri.TryCreate(Source, UriKind.Absolute, out var link) ? link : null;
     }
 }

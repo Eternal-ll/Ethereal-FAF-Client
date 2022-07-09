@@ -3,19 +3,23 @@ using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Enums;
 using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
+using ModernWpf.Controls;
+using System;
 using System.Configuration;
 using System.IO;
 using System.Windows.Input;
 
 namespace beta.ViewModels
 {
-    internal class SettingsViewModel : Base.ViewModel
+    public class SettingsViewModel : Base.ViewModel
     {
         private readonly INotificationService NotificationService;
+        private readonly MainViewModel MainViewModel;
 
-        public SettingsViewModel()
+        public SettingsViewModel(MainViewModel mainViewModel)
         {
             NotificationService = App.Services.GetService<INotificationService>();
+            MainViewModel = mainViewModel;
         }
 
         #region Authorization
@@ -174,6 +178,30 @@ namespace beta.ViewModels
                 return;
             }
             PathToGame = model.Path;
+        }
+        #endregion
+
+        #endregion
+
+        #region User interface
+
+
+        #region NavigationViewPaneDisplayMode
+        public static NavigationViewPaneDisplayMode[] NavigationViewPaneDisplayModes =>
+            Enum.GetValues<NavigationViewPaneDisplayMode>();
+
+        public NavigationViewPaneDisplayMode NavigationViewPaneDisplayMode
+        {
+            get => Settings.Default.NavigationViewPaneDisplayMode;
+            set
+            {
+                if (!Settings.Default.NavigationViewPaneDisplayMode.Equals(value))
+                {
+                    Settings.Default.NavigationViewPaneDisplayMode = value;
+                    MainViewModel.NavigationViewPaneDisplayMode = value;
+                    OnPropertyChanged(nameof(NavigationViewPaneDisplayMode));
+                }
+            }
         }
         #endregion
 

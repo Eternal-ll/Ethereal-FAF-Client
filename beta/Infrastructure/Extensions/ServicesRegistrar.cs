@@ -1,5 +1,6 @@
 ﻿using beta.Infrastructure.Services;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace beta.Infrastructure.Extensions
@@ -7,6 +8,11 @@ namespace beta.Infrastructure.Extensions
     public static class ServicesRegistrar
     {
         public static IServiceCollection RegisterServices(this IServiceCollection services) => services
+            // 
+            .AddSingleton<ViewService>()
+
+
+
             .AddSingleton<IOAuthService, OAuthService>()
             .AddSingleton<ISessionService, SessionService>()
             .AddSingleton<IPlayersService, PlayersService>()
@@ -22,6 +28,13 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<IIceService, IceService>()
             .AddSingleton<INotificationService, NotificationService>()
             .AddSingleton<IFavouritesService, FavouritesService>()
-            .AddSingleton<IReplayServerService, ReplayServerService>();
+            .AddSingleton<IReplayServerService, ReplayServerService>()
+
+
+            //Settings _________________________
+            
+            // maps vault view settings
+            .AddSingleton(new SettingsService<MapsVMSettings>(MapsVMSettings.Default))
+            ;
     }
 }

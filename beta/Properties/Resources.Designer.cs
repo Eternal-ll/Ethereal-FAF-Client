@@ -61,6 +61,51 @@ namespace beta.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Analytics.
+        /// </summary>
+        internal static string Analytics {
+            get {
+                return ResourceManager.GetString("Analytics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Chat.
+        /// </summary>
+        internal static string Chat {
+            get {
+                return ResourceManager.GetString("Chat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect to IRC.
+        /// </summary>
+        internal static string Connect_to_IRC {
+            get {
+                return ResourceManager.GetString("Connect to IRC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connecting to IRC.
+        /// </summary>
+        internal static string Connecting_to_IRC {
+            get {
+                return ResourceManager.GetString("Connecting to IRC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect from IRC.
+        /// </summary>
+        internal static string Disconnect_from_IRC {
+            get {
+                return ResourceManager.GetString("Disconnect from IRC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] faf_ice_adapter {
@@ -77,6 +122,123 @@ namespace beta.Properties {
             get {
                 object obj = ResourceManager.GetObject("faf-uid", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Global.
+        /// </summary>
+        internal static string Global {
+            get {
+                return ResourceManager.GetString("Global", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        internal static string Home {
+            get {
+                return ResourceManager.GetString("Home", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IRC connected.
+        /// </summary>
+        internal static string IRC_connected {
+            get {
+                return ResourceManager.GetString("IRC connected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IRC disconnected.
+        /// </summary>
+        internal static string IRC_disconnected {
+            get {
+                return ResourceManager.GetString("IRC disconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log in.
+        /// </summary>
+        internal static string Log_in {
+            get {
+                return ResourceManager.GetString("Log in", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Logout.
+        /// </summary>
+        internal static string Logout {
+            get {
+                return ResourceManager.GetString("Logout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maps vault.
+        /// </summary>
+        internal static string Maps_vault {
+            get {
+                return ResourceManager.GetString("Maps vault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Matchmaking.
+        /// </summary>
+        internal static string Matchmaking {
+            get {
+                return ResourceManager.GetString("Matchmaking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mods vault.
+        /// </summary>
+        internal static string Mods_vault {
+            get {
+                return ResourceManager.GetString("Mods vault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Profile.
+        /// </summary>
+        internal static string Profile {
+            get {
+                return ResourceManager.GetString("Profile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reconnect to IRC.
+        /// </summary>
+        internal static string Reconnect_to_IRC {
+            get {
+                return ResourceManager.GetString("Reconnect to IRC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        internal static string Settings {
+            get {
+                return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vault.
+        /// </summary>
+        internal static string Vault {
+            get {
+                return ResourceManager.GetString("Vault", resourceCulture);
             }
         }
     }

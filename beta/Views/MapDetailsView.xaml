@@ -7,7 +7,7 @@
              xmlns:apiUniversal="clr-namespace:beta.Models.API.Universal"
              xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:apiVaults="clr-namespace:beta.Models.API.MapsVault"
-             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
+             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors" xmlns:cachedImage="clr-namespace:CachedImage;assembly=CachedImage"
              d:DataContext="{d:DesignInstance {x:Type vm:MapViewModel}}"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
@@ -58,7 +58,12 @@
         <Style x:Key="SmallPreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
             <Setter Property="Background">
                 <Setter.Value>
-                    <ImageBrush ImageSource="{Binding LatestVersion.MapSmallPreview}"/>
+                    <!--<ImageBrush ImageSource="{Binding LatestVersion.MapSmallPreview}"/>-->
+                    <VisualBrush>
+                        <VisualBrush.Visual>
+                            <cachedImage:Image ImageUrl="{Binding LatestVersion.ThumbnailUrlSmall}"/>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -82,7 +87,7 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid ShowGridLines="False" Margin="4">
+    <Grid ShowGridLines="False" Margin="4 4 0 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
@@ -91,7 +96,8 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ui:TitleBarButton HorizontalAlignment="Left" Background="Transparent" Margin="6">
+        <ui:TitleBarButton HorizontalAlignment="Left" Background="Transparent" Margin="6"
+                           Visibility="{Binding BackButtonVisibility}">
             <Button Command="{Binding BackCommand}" Padding="10 2" Margin="0 -2">
                 <TextBlock Text="Back">
                     <TextBlock.RenderTransform>
@@ -100,216 +106,238 @@
                 </TextBlock>
             </Button>
         </ui:TitleBarButton>
-        <StackPanel Grid.Row="1">
-            <Border Style="{StaticResource BorderStyle}" Padding="20">
-                <Grid MinHeight="360">
-                    <ContentControl Content="{Binding}" Visibility="{Binding InputVisibility}">
-                        <ContentControl.Resources>
-                            <DataTemplate DataType="{x:Type vm:MapViewModel}">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <Border Height="256" Width="256" Margin="0" Padding="0">
-                                        <Border.Style>
-                                            <Style TargetType="Border" BasedOn="{StaticResource BorderStyle}">
-                                                <Setter Property="Background">
-                                                    <Setter.Value>
-                                                        <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
-                                                    </Setter.Value>
-                                                </Setter>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsHidden}" Value="True">
-                                                        <Setter Property="Background">
-                                                            <Setter.Value>
-                                                                <VisualBrush Stretch="None" AlignmentX="Center" AlignmentY="Center">
-                                                                    <VisualBrush.Visual>
-                                                                        <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
+        <ScrollViewer Grid.Row="1" Loaded="ScrollViewer_Loaded" VerticalScrollBarVisibility="Hidden">
+            <StackPanel Grid.Row="1">
+                <Border Style="{StaticResource BorderStyle}" Padding="20">
+                    <Grid MinHeight="360">
+                        <ContentControl Content="{Binding}" Visibility="{Binding InputVisibility}">
+                            <ContentControl.Resources>
+                                <Style x:Key="PreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CurrentMapVersionVM.Data.IsHidden}" Value="True">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <VisualBrush Stretch="None" AlignmentX="Center" AlignmentY="Center">
+                                                        <VisualBrush.Visual>
+                                                            <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextAlignment="Center">
                                                                         <Run Text="Version data is hidden" FontSize="20" Foreground="Gray"/>
                                                                         <LineBreak/>
                                                                         <Run Text="by author or vault team" Foreground="DimGray"/>
-                                                                            </TextBlock>
-                                                                        </Grid>
-                                                                    </VisualBrush.Visual>
-                                                                </VisualBrush>
-                                                            </Setter.Value>
-                                                        </Setter>
+                                                                </TextBlock>
+                                                            </Grid>
+                                                        </VisualBrush.Visual>
+                                                    </VisualBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ElementName=ScaleToggleButton,Path=IsChecked}" Value="True">
+                                            <DataTrigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Width"  
+                                                                                     From="256" To="512" Duration="0:0:0.3"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Height"
+                                                                                     From="256" To="512" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.EnterActions>
+                                            <DataTrigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                                     To="256" From="512" Duration="0:0:0.3"/>
+                                                        <DoubleAnimation Storyboard.TargetProperty="Height"
+                                                                                     To="256" From="512" Duration="0:0:0.3"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </DataTrigger.ExitActions>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                                <DataTemplate DataType="{x:Type vm:MapViewModel}">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <Border Height="256" Width="256" Margin="0" Padding="0" Style="{StaticResource PreviewBorderStyle}">
+                                            <Grid>
+                                                <ToggleButton x:Name="ScaleToggleButton" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                                                    <ToggleButton.Style>
+                                                        <Style TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
+                                                            <Style.Resources>
+                                                                <SolidColorBrush x:Key="ToggleButtonBackgroundChecked" Color="#FFFFFFFF" Opacity="0.1" />
+                                                                <SolidColorBrush x:Key="ToggleButtonBackgroundCheckedPressed" Color="#66FFFFFF"/>
+                                                                <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="White"/>
+                                                            </Style.Resources>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                            <Setter Property="FontFamily" Value="{StaticResource FontAwesomeRegular}"/>
+                                                            <Setter Property="Content" Value="&#xf010e;"/>
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsChecked" Value="False">
+                                                                    <Setter Property="Content" Value="&#xf00e;"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ToggleButton.Style>
+                                                </ToggleButton>
+                                            </Grid>
+                                        </Border>
+                                        <TextBlock Text="{Binding Data.DisplayedName}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
+                                        <TextBlock HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="behavior:TextBlockExtensions.BindableInlines" Value="{Binding Data.Author, Converter={StaticResource TextConverter}, StringFormat='by {0}'}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Data.Author}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="by Unknown"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" TextElement.FontSize="18" Margin="0 20 0 0">
+                                            <ContentControl Content="{Binding Data.ReviewsSummary}">
+                                                <ContentControl.Resources>
+                                                    <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <StackPanel>
+                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                                    <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
+                                                                    <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
+                                                                </StackPanel>
+                                                                <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                                            </StackPanel>
+                                                            <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                                                <Separator.LayoutTransform>
+                                                                    <RotateTransform Angle="90"/>
+                                                                </Separator.LayoutTransform>
+                                                            </Separator>
+                                                            <StackPanel>
+                                                                <TextBlock DataContext="{Binding ReviewsCount}" HorizontalAlignment="Center"
+                                                   Style="{StaticResource IfNullTextBlockStyle}"/>
+                                                                <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
+                                                            </StackPanel>
+                                                            <Separator Grid.Column="1" Margin="10 0" Width="40">
+                                                                <Separator.LayoutTransform>
+                                                                    <RotateTransform Angle="90"/>
+                                                                </Separator.LayoutTransform>
+                                                            </Separator>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ContentControl.Resources>
+                                            </ContentControl>
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
+                                                    <TextBlock Text="{Binding Data.GamesPlayed}" Style="{StaticResource IfNullTextBlockStyle}"/>
+                                                </StackPanel>
+                                                <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ContentControl.Resources>
+                        </ContentControl>
+                        <ui:ProgressRing IsActive="{Binding IsPendingRequest}"/>
+                    </Grid>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Version"/>
+                        <Separator/>
+                        <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}"
+                             ScrollViewer.CanContentScroll="False" Loaded="ListBox_Loaded" MaxHeight="200"
+                             Style="{StaticResource TransparentListBoxStyle}"
+                             Padding="0 0 20 0" Margin="0 0 -14 0">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid>
+                                        <i:Interaction.Behaviors>
+                                            <customI:CalculateColumns Width="48" WidthOffset="0"/>
+                                        </i:Interaction.Behaviors>
+                                    </UniformGrid>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.Resources>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+                                    <Setter Property="Focusable" Value="True"/>
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="Margin" Value="4"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                </Style>
+                            </ListBox.Resources>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border>
+                                        <Border.Style>
+                                            <Style TargetType="Border" BasedOn="{StaticResource ItemBorderStyle}">
+                                                <Setter Property="Padding" Value="10 4"/>
+                                                <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
+                                                                 Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource Selected}"/>
+                                                        <Setter Property="TextElement.Foreground" Value="Black"/>
                                                     </DataTrigger>
-                                                    <DataTrigger Binding="{Binding ElementName=ScaleToggleButton,Path=IsChecked}" Value="True">
-                                                        <DataTrigger.EnterActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="Width"  
-                                                                                     From="256" To="512" Duration="0:0:1"/>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="Height"
-                                                                                     From="256" To="512" Duration="0:0:1"/>
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
-                                                        </DataTrigger.EnterActions>
-                                                        <DataTrigger.ExitActions>
-                                                            <BeginStoryboard>
-                                                                <Storyboard>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="Width"
-                                                                                     To="256" From="512" Duration="0:0:1"/>
-                                                                    <DoubleAnimation Storyboard.TargetProperty="Height"
-                                                                                     To="256" From="512" Duration="0:0:1"/>
-                                                                </Storyboard>
-                                                            </BeginStoryboard>
-                                                        </DataTrigger.ExitActions>
+                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}"
+                                                                 Value="True">
+                                                        <Setter Property="Background" Value="{StaticResource Hover}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <ToggleButton x:Name="ScaleToggleButton" Background="Gray" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                                      Content="Scale"/>
+                                        <TextBlock Text="{Binding Version}"/>
                                     </Border>
-                                    <TextBlock Text="{Binding Data.DisplayedName}" TextWrapping="Wrap" HorizontalAlignment="Center" FontSize="24" Margin="0 10 0 0"/>
-                                    <TextBlock HorizontalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="behavior:TextBlockExtensions.BindableInlines" Value="{Binding Data.Author, Converter={StaticResource TextConverter}, StringFormat='by {0}'}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Data.Author}" Value="{x:Null}">
-                                                        <Setter Property="Text" Value="by Unknown"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" TextElement.FontSize="18" Margin="0 20 0 0">
-                                        <ContentControl Content="{Binding Data.ReviewsSummary}">
-                                            <ContentControl.Resources>
-                                                <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <StackPanel>
-                                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                                <TextBlock Text="{Binding Average, StringFormat='{}{0:0.0}'}"/>
-                                                                <Path Height="12" Margin="4 0" Style="{StaticResource {x:Type Path}}"/>
-                                                            </StackPanel>
-                                                            <TextBlock Text="Average" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                                            <Separator.LayoutTransform>
-                                                                <RotateTransform Angle="90"/>
-                                                            </Separator.LayoutTransform>
-                                                        </Separator>
-                                                        <StackPanel>
-                                                            <TextBlock DataContext="{Binding ReviewsCount}" HorizontalAlignment="Center"
-                                                   Style="{StaticResource IfNullTextBlockStyle}"/>
-                                                            <TextBlock Text="Ratings" FontSize="12" Opacity=".5" HorizontalAlignment="Center"/>
-                                                        </StackPanel>
-                                                        <Separator Grid.Column="1" Margin="10 0" Width="40">
-                                                            <Separator.LayoutTransform>
-                                                                <RotateTransform Angle="90"/>
-                                                            </Separator.LayoutTransform>
-                                                        </Separator>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ContentControl.Resources>
-                                        </ContentControl>
-                                        <StackPanel>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Path Style="{StaticResource {x:Type Path}}" Height="10" Data="M7.97,16L5,19C4.67,19.3 4.23,19.5 3.75,19.5A1.75,1.75 0 0,1 2,17.75V17.5L3,10.12C3.21,7.81 5.14,6 7.5,6H16.5C18.86,6 20.79,7.81 21,10.12L22,17.5V17.75A1.75,1.75 0 0,1 20.25,19.5C19.77,19.5 19.33,19.3 19,19L16.03,16H7.97M7,8V10H5V11H7V13H8V11H10V10H8V8H7M16.5,8A0.75,0.75 0 0,0 15.75,8.75A0.75,0.75 0 0,0 16.5,9.5A0.75,0.75 0 0,0 17.25,8.75A0.75,0.75 0 0,0 16.5,8M14.75,9.75A0.75,0.75 0 0,0 14,10.5A0.75,0.75 0 0,0 14.75,11.25A0.75,0.75 0 0,0 15.5,10.5A0.75,0.75 0 0,0 14.75,9.75M18.25,9.75A0.75,0.75 0 0,0 17.5,10.5A0.75,0.75 0 0,0 18.25,11.25A0.75,0.75 0 0,0 19,10.5A0.75,0.75 0 0,0 18.25,9.75M16.5,11.5A0.75,0.75 0 0,0 15.75,12.25A0.75,0.75 0 0,0 16.5,13A0.75,0.75 0 0,0 17.25,12.25A0.75,0.75 0 0,0 16.5,11.5Z" />
-                                                <TextBlock Text="{Binding Data.GamesPlayed}" Style="{StaticResource IfNullTextBlockStyle}"/>
-                                            </StackPanel>
-                                            <TextBlock Text="Played" FontSize="12" Margin="0 1 0 0" Opacity=".5" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ContentControl.Resources>
-                    </ContentControl>
-                    <ui:ProgressRing IsActive="{Binding IsPendingRequest}"/>
-                </Grid>
-            </Border>
-            <Border Style="{StaticResource BorderStyle}">
-                <StackPanel>
-                    <TextBlock Text="Version"/>
-                    <Separator/>
-                    <ListBox ItemsSource="{Binding Data.Versions}" SelectedValue="{Binding SelectedMapVersion}"
-                             ScrollViewer.CanContentScroll="False" Loaded="ListBox_Loaded" MaxHeight="200"
-                             Style="{StaticResource TransparentListBoxStyle}"
-                             Padding="0 0 20 0" Margin="0 0 -14 0">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid>
-                                    <i:Interaction.Behaviors>
-                                        <customI:CalculateColumns Width="48" WidthOffset="0"/>
-                                    </i:Interaction.Behaviors>
-                                </UniformGrid>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.Resources>
-                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
-                                <Setter Property="Focusable" Value="True"/>
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}" Visibility="{Binding CurrentMapVersionVM.DownloadsVisibility}">
+                    <StackPanel>
+                        <ui:ProgressBar IsIndeterminate="True"/>
+                        <TextBlock TextWrapping="Wrap" Text="{Binding CurrentMapVersionVM.Data.FolderName, StringFormat='Downloading {0}'}" Margin="0 10 0 0" Opacity=".5"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}" Visibility="{Binding ButtonsVisibility}">
+                    <WrapPanel IsEnabled="{Binding CurrentMapVersionVM.IsInputEnabled}">
+                        <WrapPanel.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
                                 <Setter Property="Margin" Value="4"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                <Setter Property="Width" Value="122"/>
                             </Style>
-                        </ListBox.Resources>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border>
-                                    <Border.Style>
-                                        <Style TargetType="Border" BasedOn="{StaticResource ItemBorderStyle}">
-                                            <Setter Property="Padding" Value="10 4"/>
-                                            <Setter Property="Background" Value="{StaticResource SystemControlBackgroundChromeBlackLowBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
-                                                                 Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Selected}"/>
-                                                    <Setter Property="TextElement.Foreground" Value="Black"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}"
-                                                                 Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource Hover}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Text="{Binding Version}"/>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource BorderStyle}" Visibility="{Binding CurrentMapVersionVM.DownloadsVisibility}">
-                <StackPanel>
-                    <ui:ProgressBar IsIndeterminate="True"/>
-                    <TextBlock TextWrapping="Wrap" Text="{Binding CurrentMapVersionVM.Data.FolderName, StringFormat='Downloading {0}'}" Margin="0 10 0 0" Opacity=".5"/>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource BorderStyle}" Visibility="{Binding ButtonsVisibility}">
-                <WrapPanel IsEnabled="{Binding CurrentMapVersionVM.IsInputEnabled}">
-                    <WrapPanel.Resources>
-                        <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                            <Setter Property="Margin" Value="4"/>
-                            <Setter Property="Width" Value="122"/>
-                        </Style>
-                    </WrapPanel.Resources>
-                    <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Direct .zip" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
+                        </WrapPanel.Resources>
+                        <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Direct .zip" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
                             Command="{StaticResource NavigateUriCommand}" CommandParameter="{Binding CurrentMapVersionVM.Data.DownloadUrl}"/>
-                    <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Copy link" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
+                        <Button Visibility="{Binding CurrentMapVersionVM.LatestVisibility}" Content="Copy link" ToolTip="{Binding CurrentMapVersionVM.Data.DownloadUrl}"
                             Command="{StaticResource CopyCommand}" CommandParameter="{Binding CurrentMapVersionVM.Data.DownloadUrl}"/>
-                    <Button Command="{Binding CurrentMapVersionVM.DownloadCommand}" Visibility="{Binding CurrentMapVersionVM.DownloadVisibility}" Content="Download" Background="LimeGreen"/>
-                    <Button Visibility="{Binding CurrentMapVersionVM.InstalledVisibility}" Content="Installed" Margin="4" Background="Green" IsHitTestVisible="False" Focusable="False">
-                        <!--<StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding CurrentMapVersionVM.DownloadCommand}" Visibility="{Binding CurrentMapVersionVM.DownloadVisibility}" Content="Download" Background="LimeGreen"/>
+                        <Button Visibility="{Binding CurrentMapVersionVM.InstalledVisibility}" Content="Installed" Margin="4" Background="Green" IsHitTestVisible="False" Focusable="False">
+                            <!--<StackPanel Orientation="Horizontal">
                             <TextBlock Text="Installed" VerticalAlignment="Center"/>
                             <Border Style="{StaticResource BorderStyle}" Background="Orange"
                                     Padding="8 0" Margin="4 0 0 0">
                                 <TextBlock Text="{Binding CurrentMapVersionVM.Data.Version}"/>
                             </Border>
                         </StackPanel>-->
-                    </Button>
-                    <Button Visibility="{Binding CurrentMapVersionVM.UpdateVisibility}" Margin="4" Content="Update" Background="Orange"/>
-                    <Button Command="{Binding CurrentMapVersionVM.DeleteCommand}" Visibility="{Binding CurrentMapVersionVM.DeleteVisibility}" Content="Delete" Background="Red"/>
-                    <!--<TextBlock Text="{Binding CurrentMapVersionVM.Data.LocalState}"/>-->
+                        </Button>
+                        <Button Visibility="{Binding CurrentMapVersionVM.UpdateVisibility}" Margin="4" Content="Update" Background="Orange"/>
+                        <Button Command="{Binding CurrentMapVersionVM.DeleteCommand}" Visibility="{Binding CurrentMapVersionVM.DeleteVisibility}" Content="Delete" Background="Red"/>
+                        <!--<TextBlock Text="{Binding CurrentMapVersionVM.Data.LocalState}"/>-->
+                    </WrapPanel>
+                </Border>
+                <WrapPanel Margin="4 8">
+                    <Button Content="Settings"/>
                 </WrapPanel>
-            </Border>
-        </StackPanel>
-        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0 4 18 4" Loaded="ScrollViewer_Loaded">
+            </StackPanel>
+        </ScrollViewer>
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Padding="0 4 4 4" Loaded="ScrollViewer_Loaded" VerticalScrollBarVisibility="Hidden">
             <StackPanel>
                 <Border Style="{StaticResource BorderStyle}" Margin="4 0 4 4">
                     <Expander Header="Description" IsExpanded="True">
@@ -952,6 +980,34 @@
                         </Grid>
                     </Expander>
                 </Border>
+
+                <Border Style="{StaticResource BorderStyle}">
+                    <Expander Header="Open lobbies">
+                        <Grid>
+                            <Separator VerticalAlignment="Top"/>
+                            <TextBlock HorizontalAlignment="Center" Text="Work in progress" Opacity=".5"
+                                       Margin="0 40 0 30"/>
+                        </Grid>
+                    </Expander>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}">
+                    <Expander Header="Live matches">
+                        <Grid>
+                            <Separator VerticalAlignment="Top"/>
+                            <TextBlock HorizontalAlignment="Center" Text="Work in progress" Opacity=".5"
+                                       Margin="0 40 0 30"/>
+                        </Grid>
+                    </Expander>
+                </Border>
+                <Border Style="{StaticResource BorderStyle}">
+                    <Expander Header="Latest replays">
+                        <Grid>
+                            <Separator VerticalAlignment="Top"/>
+                            <TextBlock HorizontalAlignment="Center" Text="Work in progress" Opacity=".5"
+                                       Margin="0 40 0 30"/>
+                        </Grid>
+                    </Expander>
+                </Border>
                 <ContentControl Content="{Binding Similar}">
                     <ContentControl.Style>
                         <Style TargetType="ContentControl">
@@ -1029,7 +1085,8 @@
                                                         <!--<TextBlock Text="{Binding ReviewsSummary}"/>-->
                                                         <Border Margin="0 10 0 0" MaxWidth="128"
                                         Height="{Binding RelativeSource={RelativeSource Self}, Path=ActualWidth}"
-                                        Style="{StaticResource SmallPreviewBorderStyle}"/>
+                                        Style="{StaticResource SmallPreviewBorderStyle}">
+                                                        </Border>
                                                         <TextBlock Text="{Binding DisplayedName}"
                                            ToolTip="{Binding DisplayedName}"
                                            HorizontalAlignment="Center" FontSize="16" Margin="10 10 10 0"/>

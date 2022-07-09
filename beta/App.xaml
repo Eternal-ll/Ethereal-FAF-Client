@@ -2,8 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.modernwpf.com/2019"
-             xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:cmd="clr-namespace:beta.Infrastructure.Commands"
+             xmlns:converter="clr-namespace:beta.Infrastructure.Converters"
              xmlns:helper="clr-namespace:beta.Infrastructure.Helpers"
              DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>

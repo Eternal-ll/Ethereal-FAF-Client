@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,19 +18,20 @@ namespace beta.ViewModels
 {
     public class NewsViewModel : ApiViewModel
     {
-        private string Url = "https://direct.faforever.com/wp-json/wp/v2/posts?_embed=author,wp:featuredmedia";
+        private readonly string Url = "https://direct.faforever.com/wp-json/wp/v2/posts?_embed=author,wp:featuredmedia";
+        private readonly HttpClient HttpClient;
 
-        public NewsViewModel() => 
-            DispatcherHelper.RunOnMainThread(() =>
-            {
-                Posts = new();
-                PostsViewSource = new();
-                PostsViewSource.SortDescriptions.Add(
-                    new SortDescription(nameof(Post.NewshubSortIndex), ListSortDirection.Descending));
-                PostsViewSource.Filter += PostsViewSource_Filter;
-                PostsViewSource.Source = Posts;
-                RunRequest();
-            });
+        public NewsViewModel()
+        {
+            HttpClient = new();
+            Posts = new();
+            PostsViewSource = new();
+            PostsViewSource.SortDescriptions.Add(new SortDescription(nameof(Post.NewshubSortIndex), ListSortDirection.Descending));
+            PostsViewSource.SortDescriptions.Add(new SortDescription(nameof(Post.Date), ListSortDirection.Descending));
+            PostsViewSource.Filter += PostsViewSource_Filter;
+            PostsViewSource.Source = Posts;
+            RunRequest();
+        }
 
         //public Uri SidebarLeft { get; set; }
         //public Uri SidebarMid { get; set; }
@@ -95,7 +97,7 @@ namespace beta.ViewModels
 
         public int[] Pages => Enumerable.Range(1, TotalPages).ToArray();
 
-        public int[] PageSizes => new int[] { 10, 15, 20, 25, 30, 35 };
+        public int[] PageSizes => new int[] { 10, 20, 30, 60, 120 };
 
         #region PerPage
         private int _PerPage = 20;
@@ -127,9 +129,7 @@ namespace beta.ViewModels
         {
             StringBuilder sb = new();
             sb.Append($"&page={CurrentPage}");
-
             sb.Append($"&per_page={PerPage}");
-
             return sb.ToString();
         }
 
@@ -140,10 +140,10 @@ namespace beta.ViewModels
             //SidebarMid = null;
             var viewPosts = Posts;
             DispatcherHelper.RunOnMainThread(() => viewPosts.Clear());
-            var query = BuildQuery();   
-            WebRequest request = WebRequest.Create(Url + query);
-            var response = await request.GetResponseAsync();
-            var posts = await JsonSerializer.DeserializeAsync<List<Post>>(response.GetResponseStream());
+            var query = BuildQuery();
+            var response = await HttpClient.GetAsync(Url + query);
+            var stream = await response.Content.ReadAsStreamAsync();
+            var posts = await JsonSerializer.DeserializeAsync<List<Post>>(stream);
            
             for (int i = 0; i < posts.Count; i++)
             {
@@ -154,11 +154,11 @@ namespace beta.ViewModels
                     {
                         continue;
                     }
-                    else if (post.Title.Text.Contains("Left", StringComparison.OrdinalIgnoreCase))
+                    if (post.Title.Text.Contains("Left", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
-                    else if (post.Title.Text.Contains("Mid", StringComparison.OrdinalIgnoreCase))
+                    if (post.Title.Text.Contains("Mid", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -168,10 +168,15 @@ namespace beta.ViewModels
                 post.Excerpt.Text = WebUtility.HtmlDecode(post.Excerpt.Text);
                 DispatcherHelper.RunOnMainThread(() => viewPosts.Add(post));
             }
+            if (posts.Any())
+            {
+                SelectedPost = posts[0];
+            }
 
             // X-Wp-Totalpages
-            var data = response.Headers.GetValues("X-Wp-Totalpages");
-            TotalPages = data.Length > 0 ? int.Parse(data[0]) : 0;
+            var values = response.Headers.GetValues("X-Wp-Totalpages");
+
+            TotalPages = values.Any() ? int.Parse(values.First()) : 1;
         }
 
         #region HideSelectedPostCommand
@@ -180,5 +185,14 @@ namespace beta.ViewModels
         private bool CanHideSelectedPostCommand(object parameter) => SelectedPost is not null;
         private void OnHideSelectedPostCommand(object parameter) => SelectedPost = null;
         #endregion
+
+        protected override void Dispose(bool disposing)
+        {
+            Posts.Clear();
+            Posts = null;
+            PostsViewSource.Filter -= PostsViewSource_Filter;
+            PostsViewSource.Source = null;
+            _HideSelectedPostCommand = null;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using beta.ViewModels;
+using System.Windows.Controls;
 
 namespace beta.Views
 {
@@ -7,6 +8,10 @@ namespace beta.Views
     /// </summary>
     public partial class SettingsView : UserControl
     {
-        public SettingsView() => InitializeComponent();
+        public SettingsView(SettingsViewModel model)
+        {
+            DataContext = model;
+            InitializeComponent();
+        }
     }
 }

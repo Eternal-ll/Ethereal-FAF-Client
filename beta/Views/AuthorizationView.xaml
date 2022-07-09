@@ -2,9 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.modernwpf.com/2019"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:beta.ViewModels"
-             xmlns:ui="http://schemas.modernwpf.com/2019"
              d:DataContext="{d:DesignInstance {x:Type vm:AuthorizationViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -75,7 +75,7 @@
             </Storyboard>
         </Grid.Resources>
 
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="10 4">
+        <!--<StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="10 4">
             <Image Height="32">
                 <Image.Source>
                     <DrawingImage>
@@ -93,11 +93,12 @@
                 </Image.Source>
             </Image>
             <TextBlock Text="Ethereal FAF Client" VerticalAlignment="Center" FontWeight="Bold" Margin="10 0" Foreground="LightGray"/>
-        </StackPanel>
+        </StackPanel>-->
         <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" Visibility="{Binding LoadingInputVisibility}">
             <TextBlock Text="{Binding ProgressText}" Foreground="LightGray" FontWeight="DemiBold" TextWrapping="Wrap"
                        HorizontalAlignment="Center"/>
             <Button Content="Cancel" Command="{Binding CancelAuthorizationCommand}" Margin="0 20 0 0" HorizontalAlignment="Center"/>
+            <Button Command="{StaticResource CopyCommand}"/>
         </StackPanel>
 
         <StackPanel HorizontalAlignment="Center" Margin="0 40 0 0"

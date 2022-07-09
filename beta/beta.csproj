@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <StartupObject>beta.Program</StartupObject>
+    <StartupObject></StartupObject>
 	  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  <PackageProjectUrl>https://github.com/Eternal-ll/Ethereal-FAF-Client</PackageProjectUrl>
 	  <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
@@ -32,8 +32,13 @@
     <None Remove="Resources\Fonts\fa-solid-900.ttf" />
     <None Remove="Resources\Fonts\fa-thin-100.ttf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Light-300.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Solid-900.otf" />
+    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
     <None Remove="Resources\Images\flags\ad.png" />
     <None Remove="Resources\Images\flags\ae.png" />
     <None Remove="Resources\Images\flags\af.png" />
@@ -295,21 +300,29 @@
     <None Remove="Resources\Images\PlayerGameStatus\unknown.png" />
     <None Remove="Resources\Images\Random\1.jpg" />
     <None Remove="Resources\Images\Random\2.jpg" />
+    <None Remove="Resources\Images\Random\faf_logo.png" />
+    <None Remove="Resources\Images\Random\nodeBB_logo.png" />
+    <None Remove="Resources\Images\Random\Official_db_1.png" />
+    <None Remove="Resources\Images\Random\Spooky_db2_1.png" />
+    <None Remove="Resources\Images\Random\Spooky_db_1.png" />
+    <None Remove="Resources\Images\Random\spooky_logo.png" />
     <None Remove="Resources\OAuthResult.html" />
     <None Remove="Resources\SVG Resources\SVG\Logo.svg" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Images\Random\faf_logo.png" />
+    <Resource Include="Resources\Images\Random\nodeBB_logo.png" />
     <Content Include="Resources\logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Fonts\fa-brands-400.ttf" />
-    <Resource Include="Resources\Fonts\fa-duotone-900.ttf" />
-    <Resource Include="Resources\Fonts\fa-light-300.ttf" />
-    <Resource Include="Resources\Fonts\fa-regular-400.ttf" />
-    <Resource Include="Resources\Fonts\fa-solid-900.ttf" />
-    <Resource Include="Resources\Fonts\fa-thin-100.ttf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Light-300.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Solid-900.otf" />
+    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
     <Resource Include="Resources\Images\MapResources\hydrocarbon_strategic.png" />
     <Resource Include="Resources\Images\MapResources\mass_strategic.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
@@ -322,13 +335,14 @@
   <ItemGroup>
     <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.4" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
-    <PackageReference Include="Downloader" Version="2.3.3" />
+    <PackageReference Include="CachedImage" Version="0.1.15" />
+    <PackageReference Include="Downloader" Version="2.3.5" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.300" />
+    <PackageReference Include="Localization.WPF" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-    <PackageReference Include="ModernWpfUI" Version="0.9.5" />
-    <PackageReference Include="Notification.WPF" Version="6.1.0.5" />
+    <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
     <PackageReference Include="ZstdSharp.Port" Version="0.6.1" />
   </ItemGroup>
@@ -593,10 +607,19 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <EmbeddedResource Include="Resources\OAuthResult.html" />
+    <Resource Include="Resources\Images\Random\Official_db_1.png" />
+    <Resource Include="Resources\Images\Random\Spooky_db2_1.png" />
+    <Resource Include="Resources\Images\Random\Spooky_db_1.png" />
+    <Resource Include="Resources\Images\Random\spooky_logo.png" />
     <Resource Include="Resources\SVG Resources\SVG\Logo.svg" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\MapsVMSettings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MapsVMSettings.settings</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -617,6 +640,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Properties\MapsVMSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>MapsVMSettings.Designer.cs</LastGenOutput>
+    </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

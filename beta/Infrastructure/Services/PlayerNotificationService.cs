@@ -1,7 +1,7 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.Models.Server.Enums;
-using Notification.Wpf;
+//using Notification.Wpf;
 
 namespace beta.Infrastructure.Services
 {
@@ -25,13 +25,13 @@ namespace beta.Infrastructure.Services
     {
         private readonly IPlayersService PlayersService;
         private readonly IGamesService GamesService;
-        private readonly NotificationManager NotificationManager;
+        //private readonly NotificationManager NotificationManager;
 
         public PlayerNotificationService(IPlayersService playersService, IGamesService gamesService)
         {
             PlayersService = playersService;
             GamesService = gamesService;
-            NotificationManager = new();
+            //NotificationManager = new();
 
             playersService.PlayersReceived += PlayersService_PlayersReceived;
             playersService.PlayerReceived += PlayersService_PlayerReceived;
@@ -109,7 +109,7 @@ namespace beta.Infrastructure.Services
 
                 return;
             }
-            NotificationManager.Show(new PlayerConnectedEventArgs(player));
+            //NotificationManager.Show(new PlayerConnectedEventArgs(player));
         }
 
         private void HandleAndNotifyOnLeave(PlayerInfoMessage player)

@@ -22,7 +22,7 @@ namespace beta.Models.Server
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameType game_type { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RatingType rating_type { get; set; }
+        public string rating_type { get; set; }
         public int team { get; set; }
 
         [JsonConverter(typeof (JsonStringEnumConverter))]

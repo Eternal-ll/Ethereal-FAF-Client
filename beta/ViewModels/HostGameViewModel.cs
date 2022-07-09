@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace beta.ViewModels
 {
-    internal class HostGameViewModel : Base.ViewModel
+    public class HostGameViewModel : Base.ViewModel
     {
         public event EventHandler Finished;
         public PlayerInfoMessage Me { get; private set; }
@@ -22,21 +22,37 @@ namespace beta.ViewModels
         private readonly IGameSessionService GameSessionService;
         private readonly INotificationService NotificationService;
 
-        public HostGameViewModel()
+        public HostGameViewModel(MapsView mapsView)
         {
             PlayersService = App.Services.GetService<IPlayersService>();
             GameSessionService = App.Services.GetService<IGameSessionService>();
             NotificationService = App.Services.GetService<INotificationService>();
 
             Me = PlayersService.Self;
-            Maps = new()
-            {
-                Selectable = true
-            };
-            Maps.MapSelected += (s, e) => SelectedMap = e;
+            //mapsView.Selectable = true;
+            Maps = mapsView;
+            AddSelectionEvent();
+        }
+        public void AddSelectionEvent()
+        {
+            Maps.MapSelected += Maps_MapSelected;
+        }
+        public void RemoveSelectionEvent()
+        {
+            Maps.MapSelected -= Maps_MapSelected;
         }
 
-        public MapsView Maps { get; set; }
+        private void Maps_MapSelected(object sender, ApiMapModel e)
+        {
+            SelectedMap = e;
+        }
+
+        private MapsView _Maps;
+        public MapsView Maps
+        {
+            get => _Maps;
+            set => Set(ref _Maps, value);
+        }
 
         #region Title
         private string _Title;
@@ -78,7 +94,7 @@ namespace beta.ViewModels
         private int? GetGlobal()
         {
             if (Me is null) return null;
-            if (Me.ratings.TryGetValue(RatingType.global, out var rating)) return rating.DisplayedRating;
+            if (Me.ratings.TryGetValue("global", out var rating)) return rating.DisplayedRating;
             return null;
         }
 

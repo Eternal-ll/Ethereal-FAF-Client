@@ -52,6 +52,7 @@ namespace beta.Models.API.MapsVault
                 {
                     var data = relation.Value.Data;
                     if (data is null) continue;
+                    if (data.Count == 0) continue;
                     if (dic.ContainsKey(data[0].Type)) continue;
                     dic.Add(data[0].Type, data[0].Id);
                 }

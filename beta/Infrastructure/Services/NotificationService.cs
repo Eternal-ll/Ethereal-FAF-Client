@@ -1,7 +1,7 @@
 ﻿using beta.Models;
 using beta.ViewModels;
 using ModernWpf.Controls;
-using Notification.Wpf;
+//using Notification.Wpf;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace beta.Infrastructure.Services
     internal class NotificationService : Interfaces.INotificationService
     {
         //private readonly IGameSessionService GameSessionService;
-        private readonly NotificationManager NotificationManager;
+        //private readonly NotificationManager NotificationManager;
         private delegate void SpecialDelegate();
         
         private SpecialDelegate HideDelegate;
@@ -21,7 +21,7 @@ namespace beta.Infrastructure.Services
         public NotificationService()
         {
             //GameSessionService = App.Services.GetService<IGameSessionService>();
-            NotificationManager = new();
+            //NotificationManager = new();
 
             App.Current.Dispatcher.Invoke(() =>
             {
@@ -177,9 +177,9 @@ namespace beta.Infrastructure.Services
             });
         }
 
-        public void Notify(string text) => NotificationManager.ShowFilePopUpMessage(text);
+        public void Notify(string text) => throw new NotImplementedException();
 
-        public void Notify(object model) => NotificationManager.Show(model);
+        public void Notify(object model) => throw new NotImplementedException();
 
         public async Task ShowConnectionDialog(ConnectionViewModel model)
         {

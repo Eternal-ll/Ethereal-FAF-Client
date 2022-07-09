@@ -30,15 +30,15 @@ namespace beta.ViewModels
             Login = Properties.Settings.Default.PlayerNick;
             Me = PlayersService.Self;
             
-            ViewModels = new()
-            {
-                { typeof(HomeViewModel), new HomeViewModel() },
-                { typeof(ChatControlViewModel), new ChatControlViewModel() },
-                { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
-                { typeof(MatchMakerViewModel), new MatchMakerViewModel() },
-                { typeof(SettingsViewModel), new SettingsViewModel() },
-                { typeof(UserProfileViewModel), new UserProfileViewModel() }
-            };
+            //ViewModels = new()
+            //{
+            //    { typeof(HomeViewModel), new HomeViewModel() },
+            //    { typeof(ChatControlViewModel), new ChatControlViewModel() },
+            //    { typeof(GlobalGamesViewModel), new GlobalGamesViewModel() },
+            //    { typeof(MatchMakerViewModel), new MatchMakerViewModel() },
+            //    { typeof(SettingsViewModel), new SettingsViewModel() },
+            //    { typeof(UserProfileViewModel), new UserProfileViewModel() }
+            //};
         }
 
         #region Me

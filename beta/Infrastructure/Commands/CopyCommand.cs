@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace beta.Infrastructure.Commands
 {
-    internal class CopyCommand : Command
+    public class CopyCommand : Command
     {
         public override bool CanExecute(object parameter) => true;
 

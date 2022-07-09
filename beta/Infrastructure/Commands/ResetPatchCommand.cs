@@ -7,7 +7,7 @@ namespace beta.Infrastructure.Commands
     internal class ResetPatchCommand : Base.Command
     {
         private readonly IGameSessionService GamesSessionService;
-        public ResetPatchCommand() => GamesSessionService = App.Services.GetService<IGameSessionService>();
+        //public ResetPatchCommand() => GamesSessionService = App.Services.GetService<IGameSessionService>();
 
         private Task Task;
 

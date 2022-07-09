@@ -22,7 +22,10 @@ namespace beta.Infrastructure.Behaviors
             AssociatedObject.SizeChanged += OnDataGridSizeChanged;
         protected override void OnDetaching() =>
             AssociatedObject.SizeChanged -= OnDataGridSizeChanged;
-        private void OnDataGridSizeChanged(object sender, System.Windows.SizeChangedEventArgs e) => 
+        private void OnDataGridSizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width > 10000) return;
             AssociatedObject.Columns = e.NewSize.Width <= Width ? 1 : Convert.ToInt32((e.NewSize.Width - WidthOffset) / Width);
+        }
     }
 }

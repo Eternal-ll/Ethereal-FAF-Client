@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using System.Windows.Media.Imaging;
 
 namespace beta.Infrastructure.Utils
@@ -11,32 +10,23 @@ namespace beta.Infrastructure.Utils
             InitializeLazyBitmapImage(new Uri(url), decodeWidth, decodeHeight);
         public static BitmapImage InitializeLazyBitmapImage(Uri url, int? decodeWidth = null, int? decodeHeight = null)
         {
-            BitmapImage img = null;
-            if (Thread.CurrentThread.GetApartmentState() == ApartmentState.STA)
-            {
-                img = new BitmapImage();
-                img.BeginInit();
-                if (decodeWidth.HasValue) img.DecodePixelWidth = decodeWidth.Value;
-                if (decodeHeight.HasValue) img.DecodePixelHeight = decodeHeight.Value;
-                img.CacheOption = BitmapCacheOption.OnDemand;
-                img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
-                img.UriSource = url;
-                img.EndInit();
-            }
-            else
-            {
-                App.Current.Dispatcher.Invoke(() =>
-                {
-                    img = new BitmapImage();
-                    img.BeginInit();
-                    if (decodeWidth.HasValue) img.DecodePixelWidth = decodeWidth.Value;
-                    if (decodeHeight.HasValue) img.DecodePixelHeight = decodeHeight.Value;
-                    img.CacheOption = BitmapCacheOption.OnDemand;
-                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
-                    img.UriSource = url;
-                    img.EndInit();
-                });
-            }
+            var dispatcher = App.Current.Dispatcher;
+            return dispatcher.CheckAccess()
+                ? GetImage(url, decodeWidth, decodeHeight)
+                : dispatcher.Invoke(() => GetImage(url, decodeWidth, decodeHeight),
+                System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private static BitmapImage GetImage(Uri url, int? decodeWidth = null, int? decodeHeight = null)
+        {
+            var img = new BitmapImage();
+            img.BeginInit();
+            if (decodeWidth.HasValue) img.DecodePixelWidth = decodeWidth.Value;
+            if (decodeHeight.HasValue) img.DecodePixelHeight = decodeHeight.Value;
+            img.CacheOption = BitmapCacheOption.OnLoad;
+            img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
+            img.UriSource = url;
+            img.EndInit();
             return img;
         }
 

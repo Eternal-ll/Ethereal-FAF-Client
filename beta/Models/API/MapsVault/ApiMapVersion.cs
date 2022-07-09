@@ -68,7 +68,7 @@ namespace beta.Models.API.MapsVault
         /// <summary>
         /// 
         /// </summary>
-        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 100, 100);
+        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 128, 128);
 
         private ImageSource _MapLargePreview;
         /// <summary>
@@ -84,7 +84,7 @@ namespace beta.Models.API.MapsVault
         /// </summary>
         public Point MapSizeInKm => new Point(Tools.CalculateMapSizeToKm(Width), Tools.CalculateMapSizeToKm(Height));
         /// <summary>
-        /// 
+        /// z
         /// </summary>
         public string MapPixelSizeLabel => $"{MapSizeInPixels.X}x{MapSizeInPixels.Y} px";
         /// <summary>

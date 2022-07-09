@@ -8,7 +8,7 @@ namespace beta.Infrastructure.Commands
     internal class SelectPathToGameCommand : Base.Command
     {
         private readonly INotificationService NotificationService;
-        public SelectPathToGameCommand() => NotificationService = App.Services.GetService<INotificationService>();
+        //public SelectPathToGameCommand() => NotificationService = App.Services.GetService<INotificationService>();
 
         public override bool CanExecute(object parameter) => true;
 

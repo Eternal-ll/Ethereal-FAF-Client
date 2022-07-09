@@ -9,7 +9,7 @@
              d:DataContext="{d:DesignInstance {x:Type vm:HostGameViewModel}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="20 -28 20 20">
+    <Grid Margin="20 6 20 20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
@@ -51,7 +51,7 @@
                     <TextBlock Text="{Binding MinAllowedRating}" VerticalAlignment="Center" Opacity=".5"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Min" VerticalAlignment="Center"/>
+                    <TextBlock Text="Max" VerticalAlignment="Center"/>
                     <Slider  Width="150" Margin="10 0" Minimum="{Binding MinAllowedRating}" Maximum="{Binding MaxRatingRange}"
                              Value="{Binding MaxAllowedRating}"/>
                     <TextBlock Text="{Binding MaxAllowedRating}" VerticalAlignment="Center" Opacity=".5"/>
@@ -61,8 +61,8 @@
             <Button Content="Host" Command="{Binding HostGameCommand}"/>
         </StackPanel>
         <Rectangle Grid.Column="1" Margin="30 45 30 0" Width="2" Fill="Gray" Opacity=".2"/>
-        <ContentControl Grid.Column="2" Content="{Binding Maps}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <ContentControl x:Name="MapsViewContentControl" Grid.Column="2"/>
+        <!--<TextBlock Text="{Binding Maps}"/>-->
         <!--<Grid Grid.Column="2" Margin="0 45 0 0" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="256"/>
