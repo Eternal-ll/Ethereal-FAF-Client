@@ -187,7 +187,7 @@
                         <ui:FontIcon Glyph="&#xe00e;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="{Loc Maps}">
+                        <ui:NavigationViewItem Content="{Loc Maps}" Tag="{x:Type view:MapsView}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Glyph="&#xf03e;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                             </ui:NavigationViewItem.Icon>

@@ -7,7 +7,8 @@
              xmlns:apiUniversal="clr-namespace:beta.Models.API.Universal"
              xmlns:behavior="clr-namespace:beta.Infrastructure.Behaviors"
              xmlns:apiVaults="clr-namespace:beta.Models.API.MapsVault"
-             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors" xmlns:cachedImage="clr-namespace:CachedImage;assembly=CachedImage"
+             xmlns:vm="clr-namespace:beta.ViewModels" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors"
              d:DataContext="{d:DesignInstance {x:Type vm:MapViewModel}}"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
@@ -58,12 +59,7 @@
         <Style x:Key="SmallPreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
             <Setter Property="Background">
                 <Setter.Value>
-                    <!--<ImageBrush ImageSource="{Binding LatestVersion.MapSmallPreview}"/>-->
-                    <VisualBrush>
-                        <VisualBrush.Visual>
-                            <cachedImage:Image ImageUrl="{Binding LatestVersion.ThumbnailUrlSmall}"/>
-                        </VisualBrush.Visual>
-                    </VisualBrush>
+                    <ImageBrush ImageSource="{Binding LatestVersion.ThumbnailUrlSmall}"/>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
@@ -115,7 +111,7 @@
                                 <Style x:Key="PreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
                                     <Setter Property="Background">
                                         <Setter.Value>
-                                            <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.MapLargePreview}"/>
+                                            <ImageBrush ImageSource="{Binding CurrentMapVersionVM.Data.ThumbnailUrlLarge}"/>
                                         </Setter.Value>
                                     </Setter>
                                     <Style.Triggers>

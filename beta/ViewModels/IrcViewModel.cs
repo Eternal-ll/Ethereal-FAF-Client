@@ -31,13 +31,13 @@ namespace beta.ViewModels
             Status = e;
         }
 
+        #region Commands
+
+        #endregion
+
         protected override void Dispose(bool disposing)
         {
             IRCService.StateChanged -= IRCService_StateChanged;
         }
-
-        #region Commands
-
-        #endregion
     }
 }

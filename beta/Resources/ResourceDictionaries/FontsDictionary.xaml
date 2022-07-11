@@ -3,7 +3,7 @@
     <FontFamily x:Key="FontAwesomeBrands">../Fonts/#Font Awesome 6 Brands Regular</FontFamily>
     <FontFamily x:Key="FontAwesomeSolid">../Fonts/#Font Awesome 6 Pro Solid</FontFamily>
     <FontFamily x:Key="FontAwesomeRegular">../Fonts/#Font Awesome 6 Pro Regular</FontFamily>
-    <FontFamily x:Key="FontAwesomeLight">../Fonts/#Font Awesome 6 Pro Light</FontFamily>
-    <FontFamily x:Key="FontAwesomeThin">../Fonts/#Font Awesome 6 Pro Thin</FontFamily>
-    <FontFamily x:Key="FontAwesomeDuotone">../Fonts/#Font Awesome 6 Duetone Solid</FontFamily>
+    <!--<FontFamily x:Key="FontAwesomeLight">../Fonts/#Font Awesome 6 Pro Light</FontFamily>-->
+    <!--<FontFamily x:Key="FontAwesomeThin">../Fonts/#Font Awesome 6 Pro Thin</FontFamily>-->
+    <!--<FontFamily x:Key="FontAwesomeDuotone">../Fonts/#Font Awesome 6 Duetone Solid</FontFamily>-->
 </ResourceDictionary>

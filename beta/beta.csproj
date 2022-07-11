@@ -32,13 +32,10 @@
     <None Remove="Resources\Fonts\fa-solid-900.ttf" />
     <None Remove="Resources\Fonts\fa-thin-100.ttf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
-    <None Remove="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Regular-400.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Free-Solid-900.otf" />
-    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Light-300.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
     <None Remove="Resources\Fonts\Font Awesome 6 Pro-Solid-900.otf" />
-    <None Remove="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
     <None Remove="Resources\Images\flags\ad.png" />
     <None Remove="Resources\Images\flags\ae.png" />
     <None Remove="Resources\Images\flags\af.png" />
@@ -318,11 +315,8 @@
 
   <ItemGroup>
     <Resource Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
-    <Resource Include="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
-    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Light-300.otf" />
     <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
     <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Solid-900.otf" />
-    <Resource Include="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
     <Resource Include="Resources\Images\MapResources\hydrocarbon_strategic.png" />
     <Resource Include="Resources\Images\MapResources\mass_strategic.png" />
     <Resource Include="Resources\Images\PlayerGameStatus\host.png" />
@@ -335,7 +329,6 @@
   <ItemGroup>
     <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.4" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.4" />
-    <PackageReference Include="CachedImage" Version="0.1.15" />
     <PackageReference Include="Downloader" Version="2.3.5" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.300" />
     <PackageReference Include="Localization.WPF" Version="1.0.0" />

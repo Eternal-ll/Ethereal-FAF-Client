@@ -64,17 +64,17 @@ namespace beta.Models.API.MapsVault
             _ => throw new NotImplementedException()
         };
 
-        private BitmapImage _MapSmallPreview;
-        /// <summary>
-        /// 
-        /// </summary>
-        public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 128, 128);
+        //private BitmapImage _MapSmallPreview;
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public ImageSource MapSmallPreview => _MapSmallPreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlSmall, 128, 128);
 
-        private ImageSource _MapLargePreview;
-        /// <summary>
-        /// 
-        /// </summary>
-        public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
+        //private ImageSource _MapLargePreview;
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        //public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
         /// <summary>
         /// <seealso cref="Tools.CalculateMapSizeToPixels(int)"/>
         /// </summary>

@@ -10,7 +10,6 @@
              xmlns:apiVaults="clr-namespace:beta.Models.API.MapsVault"
         xmlns:control="clr-namespace:beta.Resources.Controls" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:customI="clr-namespace:beta.Infrastructure.Behaviors" xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-        xmlns:cachedImage="clr-namespace:CachedImage;assembly=CachedImage" xmlns:ui1="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
              VerticalAlignment="Stretch"
              HorizontalAlignment="Stretch"
@@ -503,15 +502,11 @@
 
                 <Style x:Key="SmallPreviewBorderStyle" TargetType="Border" BasedOn="{StaticResource BorderStyle}">
                     <Setter Property="ToolTip" Value="{Binding DisplayedName}"/>
-                    <!--<Setter Property="Background">
-                            <Setter.Value>
-                                <ImageBrush>
-                                    <ImageBrush.ImageSource>
-                                        <cachedImage:Image ImageUrl="{Binding LatestVersion.MapSmallPreview}"/>
-                                    </ImageBrush.ImageSource>
-                                </ImageBrush>
-                            </Setter.Value>
-                        </Setter>-->
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <ImageBrush ImageSource="{Binding LatestVersion.ThumbnailUrlSmall}"/>
+                        </Setter.Value>
+                        </Setter>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding LatestVersion.IsHidden}" Value="True">
                             <Setter Property="Background" Value="{StaticResource HiddenMapVisualBrush}"/>
@@ -738,7 +733,6 @@
                             <Border Margin="0 10" Width="128" Padding="0" Height="128"
                                     Style="{StaticResource SmallPreviewBorderStyle}">
                                 <Grid>
-                                    <cachedImage:Image ImageUrl="{Binding LatestVersion.ThumbnailUrlSmall}"/>
                                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="4"
                                             Style="{StaticResource ButtonsStackPanelStyle}"
                                             Visibility="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBox}},

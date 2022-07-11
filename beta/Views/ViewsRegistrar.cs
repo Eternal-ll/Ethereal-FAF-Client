@@ -8,7 +8,7 @@ namespace beta.Views
             .AddScoped<CustomGamesView>()
 
             .AddSingleton<HostGameView>()
-            .AddSingleton<MapsView>()
+            .AddTransient<MapsView>()
 
             .AddScoped<SettingsView>()
 

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:beta.Views"
+             d:DataContext="{d:DesignInstance {x:Type local:UnitsDatabasesView}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Margin="0 32 0 0" Cursor="Hand">
@@ -21,20 +22,22 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
-            <Style TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-                <!--<Setter Property="CornerRadius" Value="10"/>-->
-                <!--<Setter Property="Margin" Value="20 10"/>-->
-            </Style>
         </Grid.Resources>
-        <Border>
-            <Image x:Name="One" Source="/Resources/Images/Random/Official_db_1.png"/>
-        </Border>
-        <Border Grid.Row="1">
-            <Image x:Name="Two" Source="/Resources/Images/Random/Spooky_db_1.png"/>
-        </Border>
-        <Border Grid.Row="2">
-            <Image x:Name="Three" Source="/Resources/Images/Random/Spooky_db2_1.png"/>
-        </Border>
+        <Image x:Name="One" Source="/Resources/Images/Random/Official_db_1.png">
+            <Image.InputBindings>
+                <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateCommand}" CommandParameter="https://unitdb.faforever.com"/>
+            </Image.InputBindings>
+        </Image>
+        <Image x:Name="Two" Source="/Resources/Images/Random/Spooky_db_1.png" Grid.Row="1">
+            <Image.InputBindings>
+                <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateCommand}" CommandParameter="https://faforever.github.io/spooky-db"/>
+            </Image.InputBindings>
+        </Image>
+        <Image x:Name="Three" Source="/Resources/Images/Random/Spooky_db2_1.png" Grid.Row="2">
+            <Image.InputBindings>
+                <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateCommand}" CommandParameter="https://faf-unitdb.web.app"/>
+            </Image.InputBindings>
+        </Image>
         <Rectangle Grid.RowSpan="3" Fill="#111111" IsHitTestVisible="False">
             <Rectangle.OpacityMask>
                 <LinearGradientBrush StartPoint="0 .5" EndPoint="1 .5">
