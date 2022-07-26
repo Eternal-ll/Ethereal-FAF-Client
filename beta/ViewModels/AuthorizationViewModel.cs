@@ -49,7 +49,14 @@ namespace beta.ViewModels
                 Settings.Default.ExpiresIn);
 
             if (Progress is null)
-            Progress = new Progress<string>((data) => ProgressData = data);
+            {
+                Progress = new Progress<string>((data) => ProgressData = data);
+                ProgressTextThread = new Thread(UpdateProgressText)
+                {
+                    IsBackground = true
+                };
+                ProgressTextThread.Start();
+            }
 
             //if (Settings.Default.AutoJoin)
             //{
@@ -62,12 +69,6 @@ namespace beta.ViewModels
             //}
 
             BrowserName = GetDefaultBrowser();
-
-            //ProgressTextThread = new Thread(UpdateProgressText)
-            //{
-            //    IsBackground = true
-            //};
-            //ProgressTextThread.Start();
         }
         public async Task AuthBySavedToken()
         {
@@ -209,6 +210,7 @@ namespace beta.ViewModels
             if (CancellationTokenSource.IsCancellationRequested)
             {
                 IsPendingAuthorization = false;
+                Authorized?.Invoke(this, false);
             }
             CancellationTokenSource = new();
             if (task.IsFaulted)

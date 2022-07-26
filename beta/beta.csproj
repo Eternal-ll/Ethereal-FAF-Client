@@ -12,6 +12,7 @@
 	  <AssemblyName>Ethereal FAF Client</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -298,8 +299,10 @@
     <None Remove="Resources\Images\Random\1.jpg" />
     <None Remove="Resources\Images\Random\2.jpg" />
     <None Remove="Resources\Images\Random\faf_logo.png" />
+    <None Remove="Resources\Images\Random\google_studio_logo.png" />
     <None Remove="Resources\Images\Random\nodeBB_logo.png" />
     <None Remove="Resources\Images\Random\Official_db_1.png" />
+    <None Remove="Resources\Images\Random\placeholder.gif" />
     <None Remove="Resources\Images\Random\Spooky_db2_1.png" />
     <None Remove="Resources\Images\Random\Spooky_db_1.png" />
     <None Remove="Resources\Images\Random\spooky_logo.png" />
@@ -309,6 +312,7 @@
 
   <ItemGroup>
     <Resource Include="Resources\Images\Random\faf_logo.png" />
+    <Resource Include="Resources\Images\Random\google_studio_logo.png" />
     <Resource Include="Resources\Images\Random\nodeBB_logo.png" />
     <Content Include="Resources\logo.ico" />
   </ItemGroup>
@@ -336,6 +340,7 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
     <PackageReference Include="ZstdSharp.Port" Version="0.6.1" />
   </ItemGroup>
@@ -601,6 +606,7 @@
     </Resource>
     <EmbeddedResource Include="Resources\OAuthResult.html" />
     <Resource Include="Resources\Images\Random\Official_db_1.png" />
+    <Resource Include="Resources\Images\Random\placeholder.gif" />
     <Resource Include="Resources\Images\Random\Spooky_db2_1.png" />
     <Resource Include="Resources\Images\Random\Spooky_db_1.png" />
     <Resource Include="Resources\Images\Random\spooky_logo.png" />

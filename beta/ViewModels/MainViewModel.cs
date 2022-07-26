@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Services;
+using beta.Infrastructure.Services.Interfaces;
 using beta.ViewModels.Base;
 using ModernWpf.Controls;
 using System.Windows;
@@ -11,14 +12,49 @@ namespace beta.ViewModels
     public class MainViewModel : ViewModel
     {
         private readonly NavigationService NavigationService;
+        private readonly ISessionService SessionService;
+        private readonly IOAuthService OAuthService;
 
         public IrcViewModel IrcViewModel { get; private set; }
 
-        public MainViewModel(IrcViewModel ircViewModel, NavigationService navigationService)
+        public MainViewModel(IrcViewModel ircViewModel, NavigationService navigationService, ISessionService sessionService, IOAuthService oAuthService)
         {
             IrcViewModel = ircViewModel;
             NavigationService = navigationService;
+            SessionService = sessionService;
+            sessionService.Authorized += SessionService_Authorized;
+            OAuthService = oAuthService;
+            OAuthService.StateChanged += OAuthService_StateChanged;
         }
+
+        private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
+        {
+            if (e.State is Models.Enums.OAuthState.PendingAuthorization)
+            {
+                LoaderVisibility = Visibility.Visible;
+            }
+        }
+
+        private void SessionService_Authorized(object sender, bool e)
+        {
+            if (e)
+            {
+                UnAuthorizedVisibility = Visibility.Collapsed;
+                AuthorizedVisibility = Visibility.Visible;
+                return;
+            }
+            UnAuthorizedVisibility = Visibility.Visible;
+            AuthorizedVisibility = Visibility.Collapsed;
+        }
+
+        #region LoaderVisibility
+        private Visibility _LoaderVisibility = Visibility.Collapsed;
+        public Visibility LoaderVisibility
+        {
+            get => _LoaderVisibility;
+            set => Set(ref _LoaderVisibility, value);
+        }
+        #endregion
 
         #region AuthorizedVisibility
         private Visibility _AuthorizedVisibility = Visibility.Collapsed;
@@ -30,7 +66,7 @@ namespace beta.ViewModels
         #endregion
 
         #region UnAuthorizedVisibility
-        public Visibility _UnAuthorizedVisibility = Visibility.Visible;
+        public Visibility _UnAuthorizedVisibility;
         public Visibility UnAuthorizedVisibility
         {
             get => _UnAuthorizedVisibility;

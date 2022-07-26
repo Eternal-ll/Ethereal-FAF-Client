@@ -10,12 +10,12 @@ namespace beta.Views
     /// </summary>
     public partial class ChatView : UserControl
     {
-
         public ScrollViewer ChannelUsersScrollViewer { get; }
         public ScrollViewer HistoryListBoxScrollViewer { get; }
 
-        public ChatView()
+        public ChatView(ChatViewModel model)
         {
+            DataContext = model;
             InitializeComponent();
             ChannelUsersScrollViewer = Tools.FindChild<ScrollViewer>(ChannelUsers);
             HistoryListBoxScrollViewer = Tools.FindChild<ScrollViewer>(HistoryListBox);

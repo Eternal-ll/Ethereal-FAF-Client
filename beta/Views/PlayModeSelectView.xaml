@@ -7,17 +7,117 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid HorizontalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Button Content="Global"/>
-            <Button Content="Matchmaking" Grid.Column="2"/>
-            <Button Content="Coop" Grid.Column="4"/>
-        </Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style TargetType="Image">
+                <Setter Property="Stretch" Value="UniformToFill"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="False">
+                        <Setter Property="Opacity" Value=".5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="Rectangle">
+                <Setter Property="Fill" Value="black"/>
+                <Setter Property="OpacityMask">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint=".5 0" EndPoint=".5 1">
+                            <GradientStop Offset="0"/>
+                            <GradientStop Color="Black" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="StackPanel">
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="Margin" Value="20 0 20 100"/>
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="Margin" Value="40 40 40 100"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Direction="-90" ShadowDepth="0" Color="Black" BlurRadius="30"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="GridStyle" TargetType="Grid">
+                <Setter Property="Clip">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource BorderClipConverter}">
+                            <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                            <Binding Path="ActualHeight" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                            <Binding Path="CornerRadius" RelativeSource="{RelativeSource AncestorType={x:Type Border}}"/>
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+        <Border>
+            <Grid Style="{StaticResource GridStyle}">
+                <!--https://i.ytimg.com/vi/pbHiIeaiGJc/maxresdefault.jpg-->
+                <Image x:Name="Global" Source="https://i.ytimg.com/vi/pbHiIeaiGJc/maxresdefault.jpg"
+                       Stretch="UniformToFill"/>
+                <Rectangle Grid.RowSpan="3" IsHitTestVisible="False" Grid.ColumnSpan="3"/>
+                <StackPanel IsHitTestVisible="False" Opacity="{Binding ElementName=Global, Path=Opacity}">
+                    <TextBlock Text="Global" FontSize="32" FontWeight="Bold"/>
+                    <!--<TextBlock Text="&#xf7a2;" FontFamily="{StaticResource FontAwesomeRegular}" FontSize="100" Margin="0 20 0 40"/>-->
+                    <TextBlock Text="Enjoy Supreme Commander and Supreme Commander: Forged Alliance!"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Column="1">
+            <Grid Style="{StaticResource GridStyle}">
+                <!--https://steamuserimages-a.akamaihd.net/ugc/1842538584388764004/81496DB384A816F2AA5A401F0762B93270358C3D/?imw=512&amp;imh=621&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true-->
+                <Image x:Name="Competitive" Source="https://steamuserimages-a.akamaihd.net/ugc/1842538584388764004/81496DB384A816F2AA5A401F0762B93270358C3D/?imw=512&amp;imh=621&amp;ima=fit&amp;impolicy=Letterbox&amp;imcolor=%23000000&amp;letterbox=true"
+               Stretch="UniformToFill"/>
+                <Rectangle Grid.RowSpan="3" IsHitTestVisible="False"/>
+                <StackPanel Grid.Column="1" Opacity="{Binding ElementName=Competitive, Path=Opacity}">
+                    <TextBlock Text="Competitive" FontSize="32" FontWeight="Bold"/>
+                    <!--<TextBlock Text="&#xe2ce;" FontFamily="{StaticResource FontAwesomeRegular}" FontSize="100" Margin="0 20 0 40"/>-->
+                    <TextBlock Text="FAF has different competitive settings! From the classic 1v1 duel to ranked team games! Climb up the leaderboards and fight with the best of the best!"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Column="2">
+            <Grid Style="{StaticResource GridStyle}">
+                <!--https://i.imgur.com/l5qfX.jpg-->
+                <Image x:Name="Coop" Stretch="UniformToFill" Source="https://i.imgur.com/l5qfX.jpg"/>
+                <Rectangle Grid.RowSpan="3" IsHitTestVisible="False"/>
+                <StackPanel Grid.Column="2" Opacity="{Binding ElementName=Coop, Path=Opacity}">
+                    <TextBlock TextWrapping="Wrap" TextAlignment="Center">
+                <Run Text="Coop" FontSize="32" FontWeight="Bold"/>
+                <!--<LineBreak/>-->
+                <!--<LineBreak/>-->
+                <!--<Run Text="&#xe533;" FontFamily="{StaticResource FontAwesomeSolid}" FontSize="100"/>-->
+                <LineBreak/>
+                <Run Text="Enjoy the original Supreme Commander and Supreme Commander: Forged Alliance campaigns with up to 3 friends in addition to completely new custom made co-op campaign maps!"/>
+                    </TextBlock>
+                    <TextBlock Margin="20 20 20 0">
+                        <Run Text="Open" Foreground="LimeGreen"/>
+                        <Run Text="25" Foreground="LimeGreen" FontWeight="DemiBold"/>
+                        <LineBreak/>
+                        <Run Text="• Live 100" Foreground="Red"/>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="40 20" IsHitTestVisible="True">
+            <ComboBox SelectedValue="Gachi" Width="140">
+                <ComboBoxItem Content="Gachi"/>
+            </ComboBox>
+            <TextBlock Text="Style" Margin="10 0 0 0" FontWeight="DemiBold" Opacity=".5" VerticalAlignment="Center"/>
+        </StackPanel>
     </Grid>
 </UserControl>

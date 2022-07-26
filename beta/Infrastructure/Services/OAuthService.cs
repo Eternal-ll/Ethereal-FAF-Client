@@ -343,6 +343,7 @@ namespace beta.Infrastructure.Services
                 });
             if (isCanceled)
             {
+                OnStateChanged(new(OAuthState.INVALID, "Cancelled"));
                 return null;
             }
             if (context is null)

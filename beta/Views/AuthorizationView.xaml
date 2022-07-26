@@ -96,9 +96,8 @@
         </StackPanel>-->
         <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center" Visibility="{Binding LoadingInputVisibility}">
             <TextBlock Text="{Binding ProgressText}" Foreground="LightGray" FontWeight="DemiBold" TextWrapping="Wrap"
-                       HorizontalAlignment="Center"/>
+                       HorizontalAlignment="Center" Width="240"/>
             <Button Content="Cancel" Command="{Binding CancelAuthorizationCommand}" Margin="0 20 0 0" HorizontalAlignment="Center"/>
-            <Button Command="{StaticResource CopyCommand}"/>
         </StackPanel>
 
         <StackPanel HorizontalAlignment="Center" Margin="0 40 0 0"

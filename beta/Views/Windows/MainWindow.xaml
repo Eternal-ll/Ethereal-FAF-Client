@@ -7,6 +7,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:view="clr-namespace:beta.Views"
         xmlns:vm="clr-namespace:beta.ViewModels"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         Title="Ethereal FAF Client"
         ui:WindowHelper.UseModernWindowStyle="True"
@@ -25,6 +26,36 @@
             <Setter Property="HoverBackground" Value="Transparent"/>
             <Setter Property="FontFamily" Value="SegouUI"/>
             <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="PlaceholderBorderStyle" TargetType="Border">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush>
+                        <GradientStop Color="#2b2b2b" Offset="-1"/>
+                        <GradientStop Color="#707070" Offset="-1.1"/>
+                        <GradientStop Color="#2b2b2b" Offset="0"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Visibility" Value="Visible">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Background.GradientStops[0].(GradientStop.Offset)"
+                                                                     To="1.2" From="-0.9" Duration="0:0:1.5" RepeatBehavior="Forever">
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="Background.GradientStops[1].(GradientStop.Offset)"
+                                                                     To="1.5" From="-0.6" Duration="0:0:1.5" RepeatBehavior="Forever">
+                                </DoubleAnimation>
+                                <DoubleAnimation Storyboard.TargetProperty="Background.GradientStops[2].(GradientStop.Offset)"
+                                                                     To="1.7" From="-0.3" Duration="0:0:1.5" RepeatBehavior="Forever">
+                                </DoubleAnimation>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
     <Grid>
@@ -67,7 +98,7 @@
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItem Tag="{x:Type view:ChatControlView}">
+                <ui:NavigationViewItem Tag="{x:Type view:ChatView}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Glyph="&#xf075;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                     </ui:NavigationViewItem.Icon>
@@ -138,12 +169,12 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <!--<ui:NavigationViewItemSeparator/>-->
-                <ui:NavigationViewItem Content="{Loc Play}" Tag="{x:Type view:PlayModeSelectView}">
+                <ui:NavigationViewItem Content="{Loc Play}" Tag="{x:Type view:PlayModeSelectView}" Visibility="{Binding AuthorizedVisibility}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Glyph="&#xf71d;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="{Loc Global}" Tag="{x:Type view:CustomGamesView}" Visibility="{Binding AuthorizedVisibility}">
+                        <ui:NavigationViewItem Content="{Loc Global}" Tag="{x:Type view:CustomGamesView}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Glyph="&#xf7a2;" FontFamily="{StaticResource FontAwesomeRegular}">
                                     <!--
@@ -156,7 +187,7 @@
                                 </ui:FontIcon>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <ui:NavigationViewItem Content="{Loc Competitive}" Tag="{x:Type view:MatchMakerView}" Visibility="{Binding AuthorizedVisibility}">
+                        <ui:NavigationViewItem Content="{Loc Competitive}" Tag="{x:Type view:MatchMakerView}">
                             <ui:NavigationViewItem.Icon>
                                 <!--<ui:FontIcon Glyph="&#xf71d;" FontFamily="{StaticResource FontAwesomeSolid}"/>-->
                                 <!--<ui:FontIcon Glyph="&#xf2eb;" FontFamily="{StaticResource FontAwesomeSolid}"/>-->
@@ -164,7 +195,7 @@
                                 <!--<ui:FontIcon Glyph="&#xf6eb;" FontFamily="{StaticResource FontAwesomeSolid}"/>-->
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <ui:NavigationViewItem Content="{Loc Coop}" Tag="{x:Type view:MatchMakerView}" Visibility="{Binding AuthorizedVisibility}">
+                        <ui:NavigationViewItem Content="{Loc Coop}" Tag="{x:Type view:MatchMakerView}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:FontIcon Glyph="&#xe533;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                             </ui:NavigationViewItem.Icon>
@@ -182,7 +213,7 @@
                         <ui:FontIcon Glyph="&#xf03d;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItem Content="{Loc Vault}" >
+                <ui:NavigationViewItem Content="{Loc Vault}" Tag="{x:Type view:VaultView}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Glyph="&#xe00e;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                     </ui:NavigationViewItem.Icon>
@@ -239,6 +270,12 @@
                                 <ui:PathIcon Data="M480 223.1h-44.01l-26.1-53.25c-12.5-25.5-35.39-44.23-61.76-50.98l-71.1-21.13c-28.12-6.75-57.92-.4942-80.79 17.13l-39.71 30.47c-1.5 1.125-2.419 2.75-3.669 4.25C140.2 61.74 112.4 0 80 0C35.88 0 0 114.6 0 255.1s35.88 255.1 80 255.1c25.25 0 47.76-37.5 62.39-96h63.08c19.12 0 36.56-11.35 44.06-29.1l8.828-20.52l-10.64-6.273c-16.75-10-30-24.87-38-42.62l-14.84 34.51H154.1C158.1 320.1 160 288.1 160 255.1c0-20.25-.7227-39.77-2.223-58.64c11.25 7.875 26.35 8.39 37.72-.36L235.1 166.6c7.75-6 17.46-7.922 25.33-6.172l14.65 4.333L237.7 252.2C225.1 281.7 236.4 316.1 264 332.5l84.98 50.18L321.5 470.4c-5.25 16.87 4.086 34.86 20.96 40.11c16.88 5.25 34.71-4.069 40.09-20.94l31.68-101.1c5.875-21-3.042-43.26-21.67-54.38l-61.21-36.13l31.27-78.34l20.26 41.48c8.125 16.38 24.86 26.76 43.11 26.88H480c17.62 0 32-14.37 32-31.1C512 238.2 497.6 223.1 480 223.1zM368 96c26.5 0 48-21.5 48-47.1S394.5 0 368 0s-48.01 21.5-48.01 48S341.5 96 368 96z"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <ui:NavigationViewItem Tag="https://datastudio.google.com/u/0/reporting/ad26e447-e1fd-4856-b7d0-78447dfcfde7">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="/Resources/Images/Random/google_studio_logo.png" Margin="0 0 16 0" Width="18" Height="18"/>
+                                <TextBlock Text="{Loc FAF Studio}"/>
+                            </StackPanel>
+                        </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="{Loc Units database}" Tag="{x:Type view:UnitsDatabasesView}">
@@ -285,6 +322,43 @@
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem Tag="{x:Type view:AuthorizationView}" Visibility="{Binding UnAuthorizedVisibility}">
+                    <Border Style="{StaticResource PlaceholderBorderStyle}" CornerRadius="4" Height="16"/>
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Glyph="&#xf110;" FontFamily="{StaticResource FontAwesomeSolid}">
+                            <ui:FontIcon.RenderTransform>
+                                <RotateTransform Angle="10"/>
+                            </ui:FontIcon.RenderTransform>
+                            <ui:FontIcon.Style>
+                                <Style TargetType="ui:FontIcon">
+                                    <Setter Property="RenderTransformOrigin" Value=".5 .5"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="Visibility" Value="Visible">
+                                            <Trigger.EnterActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(RotateTransform.Angle)"
+                                                                         To="360" Duration="0:0:2" RepeatBehavior="Forever" FillBehavior="Stop">
+                                                        </DoubleAnimation>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.EnterActions>
+                                            <Trigger.ExitActions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(RotateTransform.Angle)"
+                                                                         To="0" Duration="0:0:1.5">
+                                                        </DoubleAnimation>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </Trigger.ExitActions>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:FontIcon.Style>
+                        </ui:FontIcon>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="{Loc Log in}" Tag="{x:Type view:AuthorizationView}" Visibility="{Binding UnAuthorizedVisibility}">
                     <ui:NavigationViewItem.Icon>
                         <ui:FontIcon Glyph="&#xf2f6;" FontFamily="{StaticResource FontAwesomeSolid}"/>
@@ -413,7 +487,7 @@
                 </Style>
             </TextBlock.Style>
         </TextBlock>
-        
+
         <StackPanel x:Name="LoadingScreen" VerticalAlignment="Center">
             <ui:ProgressRing x:Name="ProgressRing" Height="64" Width="64"/>
             <TextBlock x:Name="ProgressText" Margin="0 30 0 0" FontSize="16" FontWeight="Medium"

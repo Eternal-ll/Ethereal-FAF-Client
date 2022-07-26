@@ -80,12 +80,12 @@
             </Style>
         </Grid.Resources>
         <!--#region Main Block -->
-            <Grid>
-                <Grid.Resources>
-                    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#111111"/>
-                    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#111111"/>
-                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                </Grid.Resources>
+        <Grid Visibility="{Binding ChatVisibility}">
+            <Grid.Resources>
+                <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#111111"/>
+                <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#111111"/>
+                <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+            </Grid.Resources>
             <Grid.RowDefinitions>
                 <RowDefinition Height="32"/>
                 <RowDefinition Height="*"/>
@@ -459,7 +459,7 @@
             <!--#endregion-->
 
         <!--#region Right block with users -->
-        <Grid
+        <Grid Visibility="{Binding ChatVisibility}"
         Grid.Column="1"
         Margin="2 0 0 0"
         Panel.ZIndex="2"
@@ -665,5 +665,24 @@
 
         </Grid>
         <!--#endregion-->
+
+        <Grid Visibility="{Binding PreviewVisibility}" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Width="200" Margin="-120 0 40 0">
+                <TextBlock Text="Connect to IRC-server using personal account credentinals" TextWrapping="Wrap"
+                           Margin="0 0 0 20" Opacity=".5"/>
+                <TextBox ui:ControlHelper.PlaceholderText="Login"/>
+                <TextBox ui:ControlHelper.PlaceholderText="Password" Margin="0 10 0 20"/>
+                <Button Content="Connect as IRC-user"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Width="200">
+                <TextBlock Text="Connect to IRC-server using given password from FAForever lobby-server"
+                           TextWrapping="Wrap" Opacity=".5"/>
+                <Button Content="Connect as player" Margin="0 20 0 0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

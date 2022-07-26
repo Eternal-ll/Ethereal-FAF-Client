@@ -207,16 +207,16 @@ namespace beta.Models
             };
             TcpThread.Start();
         }
-        public async Task<string> ConnectAndGetReplyAsync(string data, string contains)
+        public async Task<string> ConnectAndGetReplyAsync(string data, string contains, CancellationToken token = default)
         {
             if (TcpClient is not null)
             {
                 TcpClient.Close();
             }
             TcpClient = new();
-            await TcpClient.ConnectAsync(Host, Port);
+            await TcpClient.ConnectAsync(Host, Port, token);
             Stream = TcpClient.GetStream();
-            await Stream.WriteAsync(StringEncoder.GetBytes(data));
+            await Stream.WriteAsync(StringEncoder.GetBytes(data), token);
             byte[] buffer = new byte[16284];
             var reply = string.Empty;
             while (!reply.Contains(contains))
@@ -224,7 +224,7 @@ namespace beta.Models
                 if (Stream.DataAvailable)
                 {
                     buffer = new byte[16284];
-                    await Stream.ReadAsync(buffer);
+                    await Stream.ReadAsync(buffer, token);
                     reply = StringEncoder.GetString(buffer);
                 }
             }

@@ -21,6 +21,8 @@ namespace beta.Views
             .AddTransient<WebViews.WebViewControl>()
             .AddTransient<NewsView>()
             .AddTransient<UnitsDatabasesView>()
+            .AddTransient<ChatView>()
+            .AddTransient<VaultView>()
             ;
     }
 }

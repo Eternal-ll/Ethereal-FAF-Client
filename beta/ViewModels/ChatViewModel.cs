@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -128,6 +129,38 @@ namespace beta.ViewModels
                 }
             }
         }
+
+        #region SelectedGrouping
+        private PropertyGroupDescription _SelectedGrouping;
+        public PropertyGroupDescription SelectedGrouping
+        {
+            get => _SelectedGrouping;
+            set
+            {
+                if (Set(ref _SelectedGrouping, value))
+                {
+                    SelectedChannelPlayersViewSource.GroupDescriptions.Clear();
+                    if (value is not null) SelectedChannelPlayersViewSource.GroupDescriptions.Add(value);
+                }
+            }
+        } 
+        #endregion
+        public PropertyGroupDescription[] PropertyGroupDescriptions { get; set; } = new PropertyGroupDescription[2];
+        private void InitializeGroupDescriptions()
+        {
+            var roleGroupDescription = new PropertyGroupDescription(null, new ChatUserGroupConverter());
+            roleGroupDescription.GroupNames.Add("Me");
+            roleGroupDescription.GroupNames.Add("Moderators");
+            roleGroupDescription.GroupNames.Add("Friends");
+            roleGroupDescription.GroupNames.Add("Clan");
+            roleGroupDescription.GroupNames.Add("Players");
+            roleGroupDescription.GroupNames.Add("IRC users");
+            roleGroupDescription.GroupNames.Add("Foes");
+            PropertyGroupDescriptions[0] = roleGroupDescription;
+            PropertyGroupDescriptions[1] = new PropertyGroupDescription(null, new UserCountryGroupConverter());
+            SelectedGrouping = roleGroupDescription;
+        }
+
         public ChatViewModel()
         {
             var ircService = App.Services.GetService<IIrcService>();
@@ -137,16 +170,8 @@ namespace beta.ViewModels
             PlayersService = playersService;
 
             BindingOperations.EnableCollectionSynchronization(Channels, _lock);
-
-            PropertyGroupDescription groupDescription = new(null, new ChatUserGroupConverter());
-            groupDescription.GroupNames.Add("Me");
-            groupDescription.GroupNames.Add("Moderators");
-            groupDescription.GroupNames.Add("Friends");
-            groupDescription.GroupNames.Add("Clan");
-            groupDescription.GroupNames.Add("Players");
-            groupDescription.GroupNames.Add("IRC users");
-            groupDescription.GroupNames.Add("Foes");
-            SelectedChannelPlayersViewSource.GroupDescriptions.Add(groupDescription);
+            InitializeGroupDescriptions();
+            SelectedChannelPlayersViewSource.GroupDescriptions.Add(SelectedGrouping);
             SelectedChannelPlayersViewSource.SortDescriptions.Add(new(nameof(IPlayer.login), ListSortDirection.Ascending));
             SelectedChannelPlayersViewSource.Filter += PlayersFilter;
 
@@ -167,7 +192,46 @@ namespace beta.ViewModels
 
             //if (ircService.State == IrcState.Authorized)
             //    ircService.Channels.ForEach(channel => ircService.Join(channel));
+            if (Properties.Settings.Default.ConnectIRC)
+            {
+
+            }
         }
+        #region ChatVisibility
+        private Visibility _ChatVisibility = Visibility.Collapsed;
+        public Visibility ChatVisibility
+        {
+            get => _ChatVisibility;
+            set => Set(ref _ChatVisibility, value);
+        }
+        #endregion
+
+        #region PreviewVisibility
+        private Visibility _PreviewVisibility = Visibility.Visible;
+        public Visibility PreviewVisibility
+        {
+            get => _PreviewVisibility;
+            set => Set(ref _PreviewVisibility, value);
+        }
+        #endregion
+
+        #region FormVisibility
+        private Visibility _FormVisibility = Visibility.Visible;
+        public Visibility FormVisibility
+        {
+            get => _FormVisibility;
+            set => Set(ref _FormVisibility, value);
+        }
+        #endregion
+
+        #region LoadingVisibility
+        private Visibility _LoadingVisibility;
+        public Visibility LoadingVisibility
+        {
+            get => _LoadingVisibility;
+            set => Set(ref _LoadingVisibility, value);
+        }
+        #endregion
 
 
         #region FilterText

@@ -38,7 +38,7 @@
                 <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateCommand}" CommandParameter="https://faf-unitdb.web.app"/>
             </Image.InputBindings>
         </Image>
-        <Rectangle Grid.RowSpan="3" Fill="#111111" IsHitTestVisible="False">
+        <Rectangle Grid.RowSpan="3" Fill="black" IsHitTestVisible="False">
             <Rectangle.OpacityMask>
                 <LinearGradientBrush StartPoint="0 .5" EndPoint="1 .5">
                     <GradientStop Offset="0"/>

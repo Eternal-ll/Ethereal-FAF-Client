@@ -2,11 +2,12 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Properties;
 using beta.ViewModels;
-using Localization.WPF;
 using ModernWpf.Controls;
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace beta.Views.Windows
@@ -18,18 +19,20 @@ namespace beta.Views.Windows
     {
         private readonly NavigationService NavigationService;
         private readonly ISessionService SessionService;
+        private readonly IOAuthService OAuthService;
         private readonly MainViewModel MainViewModel;
 
-        public MainWindow(NavigationService navigationService, ISessionService sessionService, MainViewModel viewModel)
+        public MainWindow(NavigationService navigationService, ISessionService sessionService, MainViewModel viewModel, IOAuthService oAuthService)
         {
             MainViewModel = viewModel;
             DataContext = viewModel;
             NavigationService = navigationService;
+            OAuthService = oAuthService;
+            SessionService = sessionService;
             InitializeComponent();
             navigationService.SetFrame(NavigationFrame);
             Loaded += (_, _) => InvokeSplashScreen();
             Closing += OnWindowClosing;
-            SessionService = sessionService;
             sessionService.Authorized += SessionService_Authorized;
         }
 
@@ -144,8 +147,8 @@ namespace beta.Views.Windows
                     //Navigate(typeof(Pages.Dashboard));
                 }, System.Windows.Threading.DispatcherPriority.Render);
                 ProgressData = null;
-                MainViewModel.AuthorizedVisibility = Visibility.Visible;
-                MainViewModel.UnAuthorizedVisibility = Visibility.Collapsed;
+                //MainViewModel.AuthorizedVisibility = Visibility.Visible;
+                //MainViewModel.UnAuthorizedVisibility = Visibility.Collapsed;
             });
         }
 

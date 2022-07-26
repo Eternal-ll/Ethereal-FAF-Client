@@ -9,6 +9,7 @@ namespace beta.ViewModels
             .AddSingleton<SettingsViewModel>()
             .AddSingleton<IrcViewModel>()
             .AddSingleton<HostGameViewModel>()
-            .AddScoped<NewsViewModel>();
+            .AddScoped<NewsViewModel>()
+            .AddSingleton<ChatViewModel>();
     }
 }

@@ -168,7 +168,7 @@ namespace beta.Infrastructure.Services
             Client.DataReceived += OnDataReceived;
             
             var reply = (await Client.ConnectAndGetReplyAsync("{\"command\": \"ask_session\", \"version\": \"0.20.1+12-g2d1fa7ef.git\", \"user_agent\": \"ethereal-faf-client\"}\n",
-                "session")).Split('\"');
+                "session", token)).Split('\"');
 
             //:1058334349}
             string session = reply[^1][1..reply[^1].IndexOf('}')];
