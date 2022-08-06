@@ -31,18 +31,9 @@ namespace beta.Infrastructure.Services
                 return;
             }
 
-            if (!Equals(player.Avatar, avatar) || player.Avatar?.ImageSource is null)
+            if (!Equals(player.Avatar, avatar))
             {
-                if (Cache.TryGetValue(avatar.Url, out var cachedAvatar))
-                {
-                    player.Avatar = cachedAvatar;
-                }
-                else
-                {
-                    avatar.ImageSource = await CacheService.GetBitmapSource(avatar.Url, Folder.PlayerAvatars);
-                    player.Avatar = avatar;
-                    Cache.Add(avatar.Url, avatar);
-                }
+                player.Avatar = avatar;
             }
         }
 

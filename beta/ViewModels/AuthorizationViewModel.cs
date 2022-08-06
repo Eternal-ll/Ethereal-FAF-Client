@@ -3,9 +3,12 @@ using beta.Infrastructure.Services;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.OAuth;
 using beta.Properties;
+using beta.Views;
+using Ethereal.FAF.LobbyServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,24 +22,47 @@ namespace beta.ViewModels
     public class AuthorizationViewModel : Base.ViewModel
     {
         public event EventHandler<bool> Authorized;
-
+        private readonly IServiceProvider ServiceProvider;
         private readonly IOAuthService OAuthService;
         private readonly ISessionService SessionService;
         private readonly INotificationService NotificationService;
         private readonly NavigationService NavigationService;
+        private readonly LobbyServer LobbyServer;
+        public ServersViewModel Servers { get; private set; }
 
         public IProgress<string> Progress;
         private CancellationTokenSource CancellationTokenSource = new();
-        public AuthorizationViewModel(IProgress<string> progress) : this()
+        public AuthorizationViewModel(IProgress<string> progress, IServiceProvider serviceProvider) : this(serviceProvider)
         {
             Progress = progress;
         }
-        public AuthorizationViewModel()
+        public AuthorizationViewModel(IServiceProvider serviceProvider)
         {
-            OAuthService = App.Services.GetService<IOAuthService>();
-            SessionService = App.Services.GetService<ISessionService>();
-            NotificationService = App.Services.GetService<INotificationService>();
-            NavigationService = App.Services.GetService<NavigationService>();
+            OAuthService = serviceProvider.GetService<IOAuthService>();
+            SessionService = serviceProvider.GetService<ISessionService>();
+            NotificationService = serviceProvider.GetService<INotificationService>();
+            NavigationService = serviceProvider.GetService<NavigationService>();
+            Servers = serviceProvider.GetService<ServersViewModel>();
+            LobbyServer = serviceProvider.GetService<LobbyServer>();
+
+
+            LobbyServer.ServerLaunched += (s, e) =>
+            {
+                var servers = Servers.ClientEnvironments;
+                servers.Remove(servers.FirstOrDefault(s => s.Name == "Local"));
+                var local = new ClientEnvironment()
+                {
+                    Name = "Local",
+                };
+                local.Servers.Add(new()
+                {
+                    Name = "Lobby",
+                    Host = e.Split(':')[0],
+                    Port = int.Parse(e.Split(':')[1])
+                });
+                servers.Add(local);
+                MessageBox.Show(e);
+            };
 
             SessionService.AuthentificationFailed += SessionService_AuthentificationFailed;
             SessionService.Authorized += OnSessionAuthorizationCompleted;
@@ -58,17 +84,8 @@ namespace beta.ViewModels
                 ProgressTextThread.Start();
             }
 
-            //if (Settings.Default.AutoJoin)
-            //{
-            //    IsPendingAuthorization = true;
-            //    Task.Run(() =>
-            //    {
-            //        OAuthService.AuthAsync(Progress)
-            //        .ContinueWith(task => HandleOAuthResultTask(task));
-            //    });
-            //}
-
             BrowserName = GetDefaultBrowser();
+            ServiceProvider = serviceProvider;
         }
         public async Task AuthBySavedToken()
         {
@@ -79,7 +96,6 @@ namespace beta.ViewModels
         private void OnSessionAuthorizationCompleted(object sender, bool e)
         {
             Authorized?.Invoke(this, e);
-            //App.Window.Content = new NavigationView();
         }
 
         /// <summary>
@@ -233,7 +249,8 @@ namespace beta.ViewModels
                 Settings.Default.id_token = task.Result.IdToken;
                 Settings.Default.ExpiresIn = task.Result.ExpiresIn;
                 Settings.Default.ExpiresAt = task.Result.ExpiresAt;
-                var taskg = SessionService.AuthorizeAsync(task.Result.AccessToken, CancellationTokenSource.Token);
+                var server = Server.Servers.First(s => s.Name == "Lobby");
+                var taskg = SessionService.AuthorizeAsync(server.Host, server.Port, task.Result.AccessToken, CancellationTokenSource.Token);
                 taskg.Wait();
                 CancellationTokenSource = new();
                 if (taskg.IsFaulted)
@@ -243,6 +260,15 @@ namespace beta.ViewModels
                 }
             }
         }
+
+        #region Server
+        private ClientEnvironment _Server;
+        public ClientEnvironment Server
+        {
+            get => _Server;
+            set => Set(ref _Server, value);
+        }
+        #endregion
 
         #region Visibility
         private Visibility _Visibility = Visibility.Collapsed;
@@ -274,11 +300,45 @@ namespace beta.ViewModels
         private bool CanLoginWithBrowserCommand(object parameter) => !IsPendingAuthorization;
         private async void OnLoginWithBrowserCommand(object parameter)
         {
+            if (Server == null)
+            {
+                MessageBox.Show("Select server");
+                return;
+            }
+            if (!Server.Servers.Any(s => s.Name == "Lobby"))
+            {
+                MessageBox.Show("No information about \"Lobby\" server in selected environment");
+                return;
+            }
             Visibility = Visibility.Visible;
+
+            if (Server.Name == "Local")
+            {
+                var rndm = new Random();
+                Task.Run(() => HandleOAuthResultTask(Task.Run(() => new TokenBearer()
+                {
+                    IdToken = rndm.Next(10000, 1000000).ToString(),
+                    RefreshToken = rndm.Next(10000, 1000000).ToString(),
+                    AccessToken = rndm.Next(10000, 1000000).ToString(),
+                    ExpiresIn = 3600,
+                    TokenType = "Bearer"
+                })));
+                return;
+            }
+            
             await OAuthService.AuthByBrowser(CancellationTokenSource.Token, Progress)
                 .ContinueWith(task => HandleOAuthResultTask(task));
         }
 
+        #endregion
+
+        #region EditServersCommand
+        private ICommand _EditServersCommand;
+        public ICommand EditServersCommand => _EditServersCommand ??= new LambdaCommand(OnEditServersCommand);
+        private void OnEditServersCommand(object paramter)
+        {
+            NavigationService.Navigate(typeof(ServersView));
+        }
         #endregion
 
         #region CancelAuthorizationCommand - Cancel OAuthorizaion process
@@ -288,8 +348,20 @@ namespace beta.ViewModels
         /// </summary>
         public ICommand CancelAuthorizationCommand =>_CancelAuthorizationCommand ??= new LambdaCommand(OnCancelAuthorizationCommand, CanCancelAuthorizationCommand);
         private bool CanCancelAuthorizationCommand(object parameter) => IsPendingAuthorization && CancellationTokenSource.Token.CanBeCanceled;
-        public void OnCancelAuthorizationCommand(object parameter) => CancellationTokenSource.Cancel();
+        public void OnCancelAuthorizationCommand(object parameter)
+        {
+            CancellationTokenSource.Cancel();
+            IsPendingAuthorization = false;
+        }
         #endregion
+
+        private ICommand _HostServerCommand;
+
+        public ICommand HostServerCommand => _HostServerCommand ??= new LambdaCommand(OnHostServerCommand);
+        private void OnHostServerCommand(object p)
+        {
+            LobbyServer.Start();
+        }
 
         protected override void Dispose(bool disposing)
         {

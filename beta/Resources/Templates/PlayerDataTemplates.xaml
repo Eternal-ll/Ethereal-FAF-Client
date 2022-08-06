@@ -285,14 +285,14 @@
 
     <Style x:Key="AvatarImageStyle" TargetType="Image">
         <Setter Property="Height" Value="20"/>
-        <Setter Property="Visibility" Value="Collapsed"/>
+        <Setter Property="Source" Value="{Binding Avatar.UrlSource}"/>
+        <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
+        <Setter Property="Visibility" Value="Visible"/>
+        <Setter Property="Margin" Value="0 0 6 0"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding AvatarImage, Converter={StaticResource IsNullConverter}}" Value="False">
-                <Setter Property="Source" Value="{Binding AvatarImage}"/>
-                <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
-                <Setter Property="Visibility" Value="Visible"/>
-                <Setter Property="Margin" Value="0 0 6 0"/>
-            </DataTrigger>
+            <Trigger Property="Source" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed"/>
+            </Trigger>
         </Style.Triggers>
     </Style>
 

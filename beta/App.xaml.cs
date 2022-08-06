@@ -1,16 +1,17 @@
-﻿using beta.Infrastructure.Commands;
-using beta.Infrastructure.Extensions;
+﻿using beta.Infrastructure.Extensions;
 using beta.Infrastructure.Services;
 using beta.Models.Enums;
 using beta.ViewModels;
 using beta.Views;
 using beta.Views.Windows;
+using Ethereal.FAF.LobbyServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Windows;
-using static beta.Infrastructure.Services.NavigationService;
+using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace beta
 {
@@ -76,17 +77,13 @@ namespace beta
         public static void ConfigureServices(HostBuilderContext host, IServiceCollection services)
         {
             services
-           .AddHostedService<ApplicationHostService>();
-            services
-           .RegisterServices();
-            services
-           .AddSingleton<NavigationService>();
-            services
-           .RegisterViewModel();
-            services
-           .AddScoped<MainWindow>();
-            services
-           .RegisterViews();
+           .AddHostedService<ApplicationHostService>()
+           .RegisterServices()
+           .AddSingleton<NavigationService>()
+           .RegisterViewModel() 
+           .AddScoped<MainWindow>()
+           .RegisterViews()
+           .AddLobbyServer();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

@@ -1,7 +1,10 @@
 ﻿using beta.Infrastructure.Services;
 using beta.Infrastructure.Services.Interfaces;
+using beta.Models.Server;
 using beta.ViewModels.Base;
+using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
+using System;
 using System.Windows;
 
 namespace beta.ViewModels
@@ -12,12 +15,14 @@ namespace beta.ViewModels
     public class MainViewModel : ViewModel
     {
         private readonly NavigationService NavigationService;
+        private readonly IServiceProvider ServiceProvider;
         private readonly ISessionService SessionService;
         private readonly IOAuthService OAuthService;
+        private readonly IPlayersService PlayersService;
 
         public IrcViewModel IrcViewModel { get; private set; }
 
-        public MainViewModel(IrcViewModel ircViewModel, NavigationService navigationService, ISessionService sessionService, IOAuthService oAuthService)
+        public MainViewModel(IrcViewModel ircViewModel, NavigationService navigationService, ISessionService sessionService, IOAuthService oAuthService, IPlayersService playersService, IServiceProvider serviceProvider)
         {
             IrcViewModel = ircViewModel;
             NavigationService = navigationService;
@@ -25,6 +30,14 @@ namespace beta.ViewModels
             sessionService.Authorized += SessionService_Authorized;
             OAuthService = oAuthService;
             OAuthService.StateChanged += OAuthService_StateChanged;
+            PlayersService = playersService;
+            playersService.SelfReceived += PlayersService_SelfReceived;
+            ServiceProvider = serviceProvider;
+        }
+
+        private void PlayersService_SelfReceived(object sender, PlayerInfoMessage e)
+        {
+            Me = e;
         }
 
         private void OAuthService_StateChanged(object sender, Models.OAuthEventArgs e)
@@ -34,21 +47,40 @@ namespace beta.ViewModels
                 LoaderVisibility = Visibility.Visible;
             }
         }
+        private void InitializeViewModels() => App
+            .Current.Dispatcher.Invoke(() =>
+            {
+                var serviceProvider = ServiceProvider;
+                serviceProvider.GetService<CustomGamesViewModel>();
+                serviceProvider.GetService<CustomLiveGamesViewModel>();
+                serviceProvider.GetService<MatchMakerGamesViewModel>();
+            }, System.Windows.Threading.DispatcherPriority.Background);
 
         private void SessionService_Authorized(object sender, bool e)
         {
             if (e)
             {
+                LoaderVisibility = Visibility.Collapsed;
                 UnAuthorizedVisibility = Visibility.Collapsed;
                 AuthorizedVisibility = Visibility.Visible;
+                InitializeViewModels();
                 return;
             }
             UnAuthorizedVisibility = Visibility.Visible;
             AuthorizedVisibility = Visibility.Collapsed;
         }
 
+        #region Me
+        private PlayerInfoMessage _Me;
+        public PlayerInfoMessage Me
+        {
+            get => _Me;
+            set => Set(ref _Me, value);
+        }
+        #endregion
+
         #region LoaderVisibility
-        private Visibility _LoaderVisibility = Visibility.Collapsed;
+        private Visibility _LoaderVisibility = Visibility.Hidden;
         public Visibility LoaderVisibility
         {
             get => _LoaderVisibility;

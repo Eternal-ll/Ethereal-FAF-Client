@@ -19,6 +19,8 @@ namespace beta.ViewModels
         private readonly IOAuthService OAuthService;
         private readonly IProgress<string> Progress;
 
+
+
         public ConnectionViewModel()
         {
             SessionService = App.Services.GetService<ISessionService>();
@@ -138,8 +140,8 @@ namespace beta.ViewModels
         {
             if (IsOAuthRequested) await OAuthService.AuthAsync(Progress)
             .ContinueWith(task => HandleOAuthResultTask(task));
-            else await SessionService.AuthorizeAsync(Settings.Default.access_token, new())
-                    .ContinueWith(task => HandleSessionResultTask(task));
+            //else await SessionService.AuthorizeAsync(Settings.Default.access_token, new())
+                    //.ContinueWith(task => HandleSessionResultTask(task));
         }
         #endregion
 
@@ -157,8 +159,8 @@ namespace beta.ViewModels
                 Settings.Default.id_token = task.Result.IdToken;
                 Settings.Default.ExpiresIn = task.Result.ExpiresIn;
                 Settings.Default.ExpiresAt = task.Result.ExpiresAt;
-                await SessionService.AuthorizeAsync(task.Result.AccessToken, new())
-                    .ContinueWith(task => HandleSessionResultTask(task));
+                //await SessionService.AuthorizeAsync(task.Result.AccessToken, new())
+                    //.ContinueWith(task => HandleSessionResultTask(task));
             }
             else IsPendingAuthorization = false;
         }

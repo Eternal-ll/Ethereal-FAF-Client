@@ -38,7 +38,7 @@ namespace beta.Infrastructure.Services.Interfaces
         public event EventHandler<MatchFoundData> MatchFoundDataReceived;
 
         public bool IsAuthorized { get; }
-        public Task AuthorizeAsync(string accessToken, CancellationToken token);
+        public Task AuthorizeAsync(string host, int port, string accessToken, CancellationToken token);
         public void Ping();
 
         /// <summary>

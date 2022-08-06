@@ -8,19 +8,19 @@ namespace beta.Infrastructure.Commands
     /// </summary>
     internal class RemoveFavouriteCommand : Base.Command
     {
-        private readonly IFavouritesService FavouritesService;
-        //public RemoveFavouriteCommand() => FavouritesService = App.Services.GetService<IFavouritesService>();
+        private IFavouritesService FavouritesService;
         public override bool CanExecute(object parameter) => parameter is int;
-        public override void Execute(object parameter) => FavouritesService.AddFavouritePlayer((int)parameter);
+        public override void Execute(object parameter) => (FavouritesService ??= ServiceProvider.GetService<IFavouritesService>())
+            .AddFavouritePlayer((int)parameter);
     }
     /// <summary>
     /// Add player to favourite list
     /// </summary>
     internal class AddFavouriteCommand : Base.Command
     {
-        private readonly IFavouritesService FavouritesService;
-        //public AddFavouriteCommand() => FavouritesService = App.Services.GetService<IFavouritesService>();
+        private IFavouritesService FavouritesService;
         public override bool CanExecute(object parameter) => parameter is int;
-        public override void Execute(object parameter) => FavouritesService.RemoveFavouritePlayer((int)parameter);
+        public override void Execute(object parameter) => (FavouritesService ??= ServiceProvider.GetService<IFavouritesService>())
+            .RemoveFavouritePlayer((int)parameter);
     }
 }

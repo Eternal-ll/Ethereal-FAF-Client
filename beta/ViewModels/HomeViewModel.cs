@@ -16,7 +16,7 @@ namespace beta.ViewModels
             {
                 NewsViewModel = new();
                 ForumViewModel = new();
-                CustomGamesViewModel = new();
+                //CustomGamesViewModel = new();
                 ApiClientUsersCounterViewModel = new();
             });
             PlayersViewModel = new();

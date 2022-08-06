@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace beta.Models.Server
 {
@@ -45,32 +44,7 @@ namespace beta.Models.Server
 
         #region Custom properties
 
-        #region Flag
-        private ImageSource _Flag;
-        public ImageSource Flag => _Flag ??= App.Current.Resources["Flag." + country] as ImageSource;
-        #endregion
-
-        private BitmapImage _AvatarImage;
-        public ImageSource AvatarImage
-        {
-            get
-            {
-                if (Avatar is null) return null;
-                if (_AvatarImage is null)
-                {
-                    var img = new BitmapImage();
-                    img.BeginInit();
-                    img.DecodePixelWidth = 40;
-                    img.DecodePixelHeight = 20;
-                    img.CacheOption = BitmapCacheOption.OnLoad;
-                    img.UriCachePolicy = new(System.Net.Cache.RequestCacheLevel.CacheIfAvailable);
-                    img.UriSource = Avatar.Url;
-                    img.EndInit();
-                    _AvatarImage = img;
-                }
-                return _AvatarImage;
-            }
-        }
+        public ImageSource Flag => App.Current.Resources["Flag." + country] as ImageSource;
 
         #region GameState
         private GameState _GameState;
@@ -244,7 +218,7 @@ namespace beta.Models.Server
                             }
                             else
                             {
-
+                                item.Value.name = item.Key;
                                 item.Value.RatingDifference[0] += item.Value.rating[0];
                                 item.Value.RatingDifference[1] += item.Value.rating[1];
                                 item.Value.GamesDifference++;

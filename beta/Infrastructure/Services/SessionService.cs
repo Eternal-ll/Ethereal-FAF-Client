@@ -149,7 +149,7 @@ namespace beta.Infrastructure.Services
             Logger.LogInformation($"faf-uid.exe process is closed");
             return result;
         }
-        public async Task AuthorizeAsync(string accessToken, CancellationToken token)
+        public async Task AuthorizeAsync(string host, int port, string accessToken, CancellationToken token)
         {
             OnSessionStateChanged(SessionState.PendingConnection);
             Logger.LogInformation($"Starting authorization process to lobby server");
@@ -161,10 +161,11 @@ namespace beta.Infrastructure.Services
 
             Client = new()
             {
-                Host = "lobby.faforever.com",
-                Port = 8002,
+                Host = host,
+                Port = port,
                 ThreadName = "TCP Lobby Server"
             };
+            //await Client.ConnectAsync(token);
             Client.DataReceived += OnDataReceived;
             
             var reply = (await Client.ConnectAndGetReplyAsync("{\"command\": \"ask_session\", \"version\": \"0.20.1+12-g2d1fa7ef.git\", \"user_agent\": \"ethereal-faf-client\"}\n",
@@ -274,7 +275,6 @@ namespace beta.Infrastructure.Services
 
             OnWelcomeDataReceived(welcomeMessage);
 
-            //OnAuthorization(true);
             if (!IsAuthorized) IsAuthorized = true;
         }
 

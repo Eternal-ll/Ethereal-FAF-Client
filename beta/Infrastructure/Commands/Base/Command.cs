@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Windows.Input;
 
 namespace beta.Infrastructure.Commands.Base
@@ -14,5 +15,7 @@ namespace beta.Infrastructure.Commands.Base
         public abstract bool CanExecute(object parameter);
 
         public abstract void Execute(object parameter);
+
+        protected static IServiceProvider ServiceProvider => App.Services.GetService<IServiceProvider>();
     }
 }

@@ -2,7 +2,6 @@
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models.Server;
 using beta.ViewModels.Base;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Windows.Input;
@@ -10,18 +9,18 @@ using System.Windows.Threading;
 
 namespace beta.ViewModels
 {
-    internal class MatchMakerViewModel : ViewModel
+    public class MatchMakerViewModel : ViewModel
     {
         private readonly ISessionService SessionService;
         private readonly IQueueService QueueService;
         private readonly ILogger Logger;
 
         private DispatcherTimer DispatcherTimer;
-        public MatchMakerViewModel()
+        public MatchMakerViewModel(ISessionService sessionService, IQueueService queueService, ILogger<MatchMakerViewModel> logger)
         {
-            SessionService = App.Services.GetService<ISessionService>();
-            Logger = App.Services.GetService<ILogger<MatchMakerViewModel>>();
-            QueueService = App.Services.GetService<IQueueService>();
+            SessionService = sessionService;
+            QueueService = queueService;
+            Logger = logger;
 
             SessionService.MatchMakerDataReceived += SessionService_MatchMakerDataReceived;
 

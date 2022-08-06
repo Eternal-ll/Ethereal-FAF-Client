@@ -68,8 +68,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-
-                                    <Image Width="40" Height="20" Stretch="Uniform" Source="{Binding Preview}">
+                                    <Image Width="40" Height="20" Stretch="Uniform" Source="{Binding UrlSource}">
                                         <Image.ToolTip>
                                             <ToolTip>
                                                 <StackPanel>

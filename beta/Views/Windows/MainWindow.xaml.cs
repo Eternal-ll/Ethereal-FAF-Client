@@ -4,10 +4,8 @@ using beta.Properties;
 using beta.ViewModels;
 using ModernWpf.Controls;
 using System;
-using System.Collections;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace beta.Views.Windows
@@ -18,11 +16,12 @@ namespace beta.Views.Windows
     public partial class MainWindow : Window
     {
         private readonly NavigationService NavigationService;
+        private readonly IServiceProvider ServiceProvider;
         private readonly ISessionService SessionService;
         private readonly IOAuthService OAuthService;
         private readonly MainViewModel MainViewModel;
 
-        public MainWindow(NavigationService navigationService, ISessionService sessionService, MainViewModel viewModel, IOAuthService oAuthService)
+        public MainWindow(NavigationService navigationService, ISessionService sessionService, MainViewModel viewModel, IOAuthService oAuthService, IServiceProvider serviceProvider)
         {
             MainViewModel = viewModel;
             DataContext = viewModel;
@@ -34,6 +33,7 @@ namespace beta.Views.Windows
             Loaded += (_, _) => InvokeSplashScreen();
             Closing += OnWindowClosing;
             sessionService.Authorized += SessionService_Authorized;
+            ServiceProvider = serviceProvider;
         }
 
         private void SessionService_Authorized(object sender, bool e)
@@ -79,7 +79,7 @@ namespace beta.Views.Windows
                     ProgressData = "Authenticating";
                     Progress<string> progress = new((data) =>
                     ProgressData = data);
-                    var authorization = new AuthorizationViewModel(progress);
+                    var authorization = new AuthorizationViewModel(progress, ServiceProvider);
                     authorization.Authorized += (_, arg) => AuthorizationResult = arg;
                     await authorization.AuthBySavedToken();
                     // TODO One-Task authorization process is not ready yet

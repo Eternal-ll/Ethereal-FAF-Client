@@ -29,7 +29,8 @@ namespace beta.Infrastructure.Extensions
             .AddSingleton<INotificationService, NotificationService>()
             .AddSingleton<IFavouritesService, FavouritesService>()
             .AddSingleton<IReplayServerService, ReplayServerService>()
-
+            .AddSingleton<ISelfService, SelfService>()
+            .AddSingleton<IQueueService, QueueService>()
 
             //Settings _________________________
             

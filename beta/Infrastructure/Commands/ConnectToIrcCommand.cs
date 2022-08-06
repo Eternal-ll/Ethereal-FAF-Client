@@ -8,36 +8,29 @@ namespace beta.Infrastructure.Commands
     public class ConnectToIrcCommand : Base.Command
     {
         private IIrcService IrcService;
-        private readonly INotificationService NotificationService;
-        //public ConnectToIrcCommand()
-        //{
-        //    IrcService = App.Services.GetService<IIrcService>();
-        //    NotificationService = App.Services.GetService<INotificationService>();
-        //}
+        private INotificationService NotificationService;
         public override bool CanExecute(object parameter) => (IrcService ??= App.Services.GetService<IIrcService>())
             .State == Models.Enums.IrcState.Disconnected;
         public override void Execute(object parameter) => 
-            Task.Run(() => IrcService.Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password))
+            Task.Run(() => (IrcService ??= ServiceProvider.GetService<IIrcService>()).Authorize(Settings.Default.PlayerNick, Settings.Default.irc_password))
                 .ContinueWith(task =>
                 {
                     if (task.IsFaulted)
                     {
-                        NotificationService.ShowExceptionAsync(task.Exception);
+                        (NotificationService ??= ServiceProvider.GetService<INotificationService>()).ShowExceptionAsync(task.Exception);
                     }
                 });
     }
     public class DisconnectFromIrcCommand : Base.Command
     {
-        private readonly IIrcService IrcService;
-        //public DisconnectFromIrcCommand() => IrcService = App.Services.GetService<IIrcService>();
-        public override bool CanExecute(object parameter) => IrcService.State == Models.Enums.IrcState.Authorized;
-        public override void Execute(object parameter) => IrcService.Quit();
+        private IIrcService IrcService;
+        public override bool CanExecute(object parameter) => (IrcService ??= ServiceProvider.GetService<IIrcService>()).State == Models.Enums.IrcState.Authorized;
+        public override void Execute(object parameter) => (IrcService ??= ServiceProvider.GetService<IIrcService>()).Quit();
     }
     internal class RefreshIrcCommand : Base.Command
     {
-        private readonly IIrcService IrcService;
-        //public RefreshIrcCommand() => IrcService = App.Services.GetService<IIrcService>();
+        private IIrcService IrcService;
         public override bool CanExecute(object parameter) => true;
-        public override void Execute(object parameter) => IrcService.Restart(Settings.Default.PlayerNick, Settings.Default.irc_password);
+        public override void Execute(object parameter) => (IrcService ??= ServiceProvider.GetService<IIrcService>()).Restart(Settings.Default.PlayerNick, Settings.Default.irc_password);
     }
 }

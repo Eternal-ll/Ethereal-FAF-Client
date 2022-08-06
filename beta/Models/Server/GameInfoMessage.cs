@@ -508,60 +508,20 @@ namespace beta.Models.Server
                     OnPropertyChanged(nameof(MapVersion));
                     OnPropertyChanged(nameof(MapName));
                     OnPropertyChanged(nameof(max_players));
-                    _AvatarImage = null;
-                    OnPropertyChanged(nameof(AvatarImage));
+                    OnPropertyChanged(nameof(SmallMapPreview));
+                    OnPropertyChanged(nameof(LargeMapPreview));
                 }
             }
         }
         #endregion
 
 
-        #region AvatarImage
-        private ImageSource _AvatarImage;
+        
+        [JsonIgnore]
+        public string SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{mapname}.png";
 
         [JsonIgnore]
-        public ImageSource AvatarImage
-        {
-            get
-            {
-                if (_AvatarImage is null)
-                {
-                    if (mapname.StartsWith("neroxis"))
-                    {
-                        _AvatarImage = App.Current.Resources["MapGenIcon"] as ImageSource;
-                    }
-                    else
-                    {
-                        _AvatarImage = ImageTools.InitializeLazyBitmapImage($"https://content.faforever.com/maps/previews/small/{mapname}.png", 100, 100);
-                    }
-                }
-                return _AvatarImage;
-            }
-        }
-        #endregion
-
-        #region LargeMapPreview
-        private ImageSource _LargeMapPreview;
-        [JsonIgnore]
-        public ImageSource LargeMapPreview
-        {
-            get
-            {
-                if (_LargeMapPreview is null)
-                {
-                    if (mapname.StartsWith("neroxis"))
-                    {
-                        _LargeMapPreview = App.Current.Resources["MapGenIcon"] as ImageSource;
-                    }
-                    else
-                    {
-                        _LargeMapPreview = ImageTools.InitializeLazyBitmapImage($"https://content.faforever.com/maps/previews/large/{mapname}.png");
-                    }
-                }
-                return _LargeMapPreview;
-            }
-        }
-        #endregion
+        public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{mapname}.png";
 
         #region map_file_path
         private string _map_file_path;
@@ -571,7 +531,6 @@ namespace beta.Models.Server
             set => Set(ref _map_file_path, value);
         }
         #endregion
-
 
         public bool IsNeroxisMap => mapname.Contains("Neroxis", StringComparison.OrdinalIgnoreCase);
 

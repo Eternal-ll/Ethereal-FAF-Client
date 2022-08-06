@@ -1,4 +1,5 @@
 ﻿using beta.Infrastructure.Commands;
+using beta.Infrastructure.Services;
 using beta.Infrastructure.Services.Interfaces;
 using beta.Models;
 using beta.Models.Enums;
@@ -13,7 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Navigation;
 using System.Windows.Threading;
 
 namespace beta.ViewModels
@@ -672,25 +672,18 @@ namespace beta.ViewModels
     public class CustomGamesViewModel : GamesViewModel
     {
         private readonly NavigationService NavigationService;
+        private readonly IServiceProvider ServiceProvider;
 
         public override GameType GameType { get; } = GameType.Custom;
         public override GameState GameState => GameState.Open;
-        public CustomLiveGamesViewModel LiveGamesViewModel { get; }
-        private CustomGamesView LiveGamesView { get; }
+        private CustomLiveGamesViewModel _LiveGamesViewModel;
+        public CustomLiveGamesViewModel LiveGamesViewModel => _LiveGamesViewModel ??= ServiceProvider.GetService<CustomLiveGamesViewModel>();
 
-        public CustomGamesViewModel()
+        public CustomGamesViewModel(NavigationService nav, IServiceProvider serviceProvider)
         {
+            ServiceProvider = serviceProvider;
             IsGridView = true;
-        }
-
-        public CustomGamesViewModel(NavigationService nav) : this()
-        {
             NavigationService = nav;
-            LiveGamesViewModel = new(nav, this);
-            LiveGamesView = new()
-            {
-                DataContext = LiveGamesViewModel
-            };
             _ShowLiveGamesCommand = new LambdaCommand(OnShowLiveGamesCommand);
         }
 
@@ -702,7 +695,7 @@ namespace beta.ViewModels
         #region ShowLiveGamesCommand
         private ICommand _ShowLiveGamesCommand;
         public ICommand ShowLiveGamesCommand => _ShowLiveGamesCommand;
-        private void OnShowLiveGamesCommand(object parameter) => NavigationService.Navigate(LiveGamesView);
+        private void OnShowLiveGamesCommand(object parameter) => NavigationService.Navigate(typeof(CustomLiveGamesView));
         #endregion
     }
     /// <summary>
@@ -739,7 +732,7 @@ namespace beta.ViewModels
         #region ShowOpenGamesCommand
         private ICommand _ShowOpenGamesCommand;
         public ICommand ShowOpenGamesCommand => _ShowOpenGamesCommand;
-        private void OnShowOpenGamesCommand(object parameter) => NavigationService.GoBack();
+        private void OnShowOpenGamesCommand(object parameter) => NavigationService.Navigate(typeof(CustomOpenGamesView));
         #endregion
     }
     /// <summary>

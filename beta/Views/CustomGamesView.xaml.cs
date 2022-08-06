@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using beta.ViewModels;
+using System.Windows.Controls;
 
 namespace beta.Views
 {
@@ -7,7 +8,11 @@ namespace beta.Views
     /// </summary>
     public partial class CustomGamesView : UserControl
     {
-        public CustomGamesView() => InitializeComponent();
+        public CustomGamesView(GamesViewModel model)
+        {
+            DataContext = model;
+            InitializeComponent();
+        }
 
         private void TextBox_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
@@ -16,5 +21,13 @@ namespace beta.Views
                 ((TextBox)sender).Clear();
             }
         }
+    }
+    public partial class CustomOpenGamesView : CustomGamesView
+    {
+        public CustomOpenGamesView(CustomGamesViewModel model) : base(model){}
+    }
+    public partial class CustomLiveGamesView : CustomGamesView
+    {
+        public CustomLiveGamesView(CustomLiveGamesViewModel model) : base(model){}
     }
 }

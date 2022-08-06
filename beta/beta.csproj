@@ -12,7 +12,6 @@
 	  <AssemblyName>Ethereal FAF Client</AssemblyName>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <RuntimeIdentifier>win-arm64</RuntimeIdentifier>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -624,6 +623,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="Properties\Servers.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Servers.settings</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -642,6 +646,10 @@
     <None Update="Properties\MapsVMSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>MapsVMSettings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\Servers.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Servers.Designer.cs</LastGenOutput>
     </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -724,6 +732,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Ethereal.FAF.LobbyServer\Ethereal.FAF.LobbyServer.csproj" />
     <ProjectReference Include="..\FAF.API.Domain\FAF.API.Domain.csproj" />
   </ItemGroup>
 </Project>

@@ -216,11 +216,6 @@
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Width" Value="70"/>
         <Setter Property="Height" Value="70"/>
-        <Setter Property="Background">
-            <Setter.Value>
-                <ImageBrush Stretch="Uniform" ImageSource="{Binding AvatarImage}"/>
-            </Setter.Value>
-        </Setter>
         <Style.Triggers>
             <DataTrigger Binding="{Binding PreviewType}" Value="0">
                 <Setter Property="Width" Value="100"/>
@@ -275,27 +270,7 @@
     
     <ui:Flyout x:Key="MapDetailedFlyout" Placement="Bottom">
         <Grid>
-            <ui:ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center"
-                             Height="100" Width="100">
-                <ui:ProgressRing.Style>
-                    <Style TargetType="ui:ProgressRing">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}},
-                                    Path=Children[1].Source.IsDownloading}"
-                                                             Value="True">
-                                <Setter Property="IsActive" Value="True"/>
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:ProgressRing.Style>
-            </ui:ProgressRing>
-            <Image
-                Source="{Binding LargeMapPreview}"
-                Stretch="UniformToFill"
-                Height="400"
-                Width="400"/>
+            <Image Source="{Binding LargeMapPreview}" Stretch="UniformToFill" Height="400" Width="400"/>
             <WrapPanel
                 Orientation="Horizontal"
                 VerticalAlignment="Top"
@@ -487,11 +462,10 @@
 
 
 
-            <Border Grid.Row="1"
-                    Style="{StaticResource MapPreviewBorderStyle}"
-                    ToolTip="{Binding mapname}"
+            <Border Grid.Row="1" Style="{StaticResource MapPreviewBorderStyle}" ToolTip="{Binding mapname}"
                     Margin="4">
                 <Grid>
+                    <Image Source="{Binding SmallMapPreview}"/>
                     <!--<ContentControl Content="{Binding Map}" ToolTip="{Binding mapname}"/>-->
                     <!--<Grid.Style>
                         <Style TargetType="Grid">

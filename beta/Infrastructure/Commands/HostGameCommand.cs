@@ -8,21 +8,18 @@ namespace beta.Infrastructure.Commands
 {
     internal class HostGameCommand : Base.Command
     {
-        private readonly IGameSessionService GameSessionService;
-        private readonly INotificationService NotificationService;
+        private IGameSessionService GameSessionService;
+        private INotificationService NotificationService;
         private Window Window;
-        public HostGameCommand()
-        {
-            //GameSessionService = App.Services.GetService<IGameSessionService>();
-            //NotificationService = App.Services.GetService<INotificationService>();
-        }
         public override bool CanExecute(object parameter) => true;
 
         public override void Execute(object parameter)
         {
-            if (GameSessionService.GameIsRunning)
+            var gameSessionService = GameSessionService ??= ServiceProvider.GetService<IGameSessionService>();
+            if (gameSessionService.GameIsRunning)
             {
-                NotificationService.ShowPopupAsync("Game is running");
+                (NotificationService ??= ServiceProvider.GetService<INotificationService>())
+                    .ShowPopupAsync("Game is running");
                 return;
             }
             var model = App.Services.GetService<HostGameViewModel>();

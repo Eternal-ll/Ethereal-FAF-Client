@@ -23,6 +23,11 @@ namespace beta.Views
             .AddTransient<UnitsDatabasesView>()
             .AddTransient<ChatView>()
             .AddTransient<VaultView>()
+            .AddTransient<ServersView>()
+
+            .AddTransient<CustomLiveGamesView>()
+            .AddTransient<CustomOpenGamesView>()
+            .AddTransient<MatchMakerView>()
             ;
     }
 }

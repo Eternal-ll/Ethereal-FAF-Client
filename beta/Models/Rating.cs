@@ -27,6 +27,16 @@ namespace beta.Models
 
         #region On fly
 
+        public string FormatName => name switch
+        {
+            "global" => "Global",
+            "ladder_1v1" => "Ladder 1 vs 1",
+            "tmm_2v2" => "TMM 2 vs 2",
+            "tmm_4v4_share_until_death" => "TMM 4 vs 4 SUD",
+            "tmm_4v4_full_share" => "TMM 4 vs 4 FS",
+            _ => name
+        };
+
         #region DisplayedRating
         private int? _DisplayedRating; // TODO
         public int DisplayedRating => _DisplayedRating ??= Convert.ToInt32(rating[0] - 3 * rating[1]);

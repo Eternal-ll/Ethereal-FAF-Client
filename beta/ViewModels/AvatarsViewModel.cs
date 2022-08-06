@@ -65,7 +65,7 @@ namespace beta.ViewModels
 
                 model.Filename = result2.Data.Attributes["filename"];
                 model.ToolTip = result2.Data.Attributes["tooltip"];
-                model.Url = new(result2.Data.Attributes["url"]);
+                model.UrlSource = result2.Data.Attributes["url"];
 
                 avatars[i] = model;
 

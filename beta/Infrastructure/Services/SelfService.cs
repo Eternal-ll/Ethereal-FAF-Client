@@ -12,12 +12,12 @@ namespace beta.Infrastructure.Services
         public event EventHandler<PlayerInfoMessage> SelfUpdated;
         
         private readonly IPlayersService PlayersService;
-        
-        public SelfService()
+
+        public SelfService(IPlayersService playersService)
         {
-            PlayersService = App.Services.GetService<IPlayersService>();
-            PlayersService.SelfReceived += PlayersService_SelfReceived;
-            PlayersService.PlayerUpdated += PlayersService_PlayerUpdated;
+            PlayersService = playersService;
+            playersService.SelfReceived += PlayersService_SelfReceived;
+            playersService.PlayerUpdated += PlayersService_PlayerUpdated;
         }
 
         private void PlayersService_SelfReceived(object sender, PlayerInfoMessage e)

@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using beta.ViewModels;
+using System.Windows.Controls;
 
 namespace beta.Views
 {
@@ -7,8 +8,9 @@ namespace beta.Views
     /// </summary>
     public partial class MatchMakerView : UserControl
     {
-        public MatchMakerView()
+        public MatchMakerView(MatchMakerViewModel model)
         {
+            DataContext = model;
             InitializeComponent();
         }
 

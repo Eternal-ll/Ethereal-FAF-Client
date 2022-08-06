@@ -10,6 +10,14 @@ namespace beta.ViewModels
             .AddSingleton<IrcViewModel>()
             .AddSingleton<HostGameViewModel>()
             .AddScoped<NewsViewModel>()
-            .AddSingleton<ChatViewModel>();
+            .AddSingleton<ChatViewModel>()
+            .AddSingleton<ServersViewModel>()
+            .AddSingleton<CustomGamesViewModel>()
+            .AddSingleton<CustomLiveGamesViewModel>()
+            .AddScoped<AuthorizationViewModel>()
+
+            .AddSingleton<MatchMakerViewModel>()
+            .AddSingleton<PlayModeSelectVM>()
+            ;
     }
 }
