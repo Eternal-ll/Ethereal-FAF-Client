@@ -21,6 +21,11 @@ namespace beta.Views
                 ((TextBox)sender).Clear();
             }
         }
+
+        private void DataGrid_Initialized(object sender, System.EventArgs e)
+        {
+            var datagrid = (DataGrid)sender;
+        }
     }
     public partial class CustomOpenGamesView : CustomGamesView
     {

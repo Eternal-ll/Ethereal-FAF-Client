@@ -3,8 +3,14 @@
 // Copyright (C) Leszek Pomianowski and WPF UI Contributors.
 // All Rights Reserved.
 
-using FAF.UI.EtherealClient.ViewModels;
+using Ethereal.FAF.UI.Client.Light.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Light.Infrastructure.OAuth;
+using Ethereal.FAF.UI.Client.Light.ViewModels;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,17 +25,29 @@ namespace FAF.UI.EtherealClient.Views.Windows
     /// <summary>
     /// Interaction logic for Container.xaml
     /// </summary>
-    public partial class MainnWindow : INavigationWindow
+    public partial class MainWindow : INavigationWindow
     {
+        private readonly IThemeService _themeService;
+        private readonly ITaskBarService _taskBarService;
+        private readonly IConfiguration Configuration;
+        private readonly FafOAuthClient FafOAuthClient;
+        private readonly LobbyClient LobbyClient;
+        
         private bool _initialized = false;
 
-        private readonly IThemeService _themeService;
-
-        private readonly ITaskBarService _taskBarService;
+        private IProgress<string> SpashProgress;
 
         // NOTICE: In the case of this window, we navigate to the Dashboard after loading with Container.InitializeUi()
 
-        public MainnWindow(ContainerViewModel viewModel, INavigationService navigationService, IPageService pageService, IThemeService themeService, ITaskBarService taskBarService)
+        public MainWindow(
+            ContainerViewModel viewModel,
+            INavigationService navigationService,
+            IPageService pageService,
+            IThemeService themeService,
+            ITaskBarService taskBarService,
+            FafOAuthClient oauthClient,
+            IConfiguration configuration,
+            LobbyClient lobbyClient)
         {
             // Attach the theme service
             _themeService = themeService;
@@ -40,6 +58,9 @@ namespace FAF.UI.EtherealClient.Views.Windows
             // Context provided by the service provider.
             DataContext = viewModel;
 
+            FafOAuthClient = oauthClient;
+            Configuration = configuration;
+
             // Initial preparation of the window.
             InitializeComponent();
 
@@ -47,7 +68,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             SetPageService(pageService);
 
             // If you want to use INavigationService instead of INavigationWindow you can define its navigation here.
-            navigationService.SetNavigation(RootNavigation);
+            navigationService.SetNavigationControl(RootNavigation);
 
             // !! Experimental option
             //RemoveTitlebar();
@@ -57,6 +78,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             // We initialize a cute and pointless loading splash that prepares the view and navigate at the end.
             Loaded += (_, _) => InvokeSplashScreen();
+            LobbyClient = lobbyClient;
 
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
             // Wpf.Ui.Appearance.Watcher.Watch(this, Appearance.BackgroundType.Mica, true, false);
@@ -100,6 +122,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             if (_initialized)
                 return;
             _initialized = true;
+            SpashProgress = new Progress<string>(data => SplashProgressLabel.Text = data);
 
             RootMainGrid.Visibility = Visibility.Collapsed;
             TitleBar.Visibility = Visibility.Collapsed;
@@ -109,9 +132,16 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             Task.Run(async () =>
             {
+                var jwt = Configuration.GetSection("JwtToken").Get<TokenBearer>();
+                if (jwt.AccessToken is null)
+                {
+                    SpashProgress.Report("Waiting for authorization");
+                    await Auth();
+                }
+
                 // Remember to always include Delays and Sleeps in
                 // your applications to be able to charge the client for optimizations later.
-                await Task.Delay(4000);
+                //await Task.Delay(-1);
 
                 Dispatcher.Invoke(() =>
                 {
@@ -160,6 +190,42 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private void RootDialog_OnButtonRightClick(object sender, RoutedEventArgs e)
         {
             RootDialog.Hide();
+        }
+
+        private async Task Auth()
+        {
+            var token = await Task.Run(async () =>
+            {
+                var client = FafOAuthClient;
+                var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.CancelAfter(60000);
+                return await FafOAuthClient.AuthByBrowser(cancellationTokenSource.Token);
+            });
+            if (token is null)
+            {
+                var result = await Dispatcher.InvokeAsync(() => MessageBox.Show("Failed to get response from FAForever.\nPress \"OK\" to try again, or \"Cancel\" to close application",
+                    "Oauth", MessageBoxButton.OKCancel), System.Windows.Threading.DispatcherPriority.Background);
+                if (result == MessageBoxResult.OK || result == MessageBoxResult.None)
+                {
+                    await Auth();
+                }
+                else if (result == MessageBoxResult.Cancel)
+                {
+                    Application.Current.Shutdown();
+                }
+            }
+            else
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtSecurityToken = handler.ReadToken(token.AccessToken) as JwtSecurityToken;
+                if (jwtSecurityToken.Payload.TryGetValue("ext", out var ext))
+                {
+                    var user = JsonSerializer.Deserialize<Ext>(ext.ToString()).Username;
+                    MessageBox.Show($"Succefully got response from FAForever\nWelcome {user}", "OAuth");
+                }
+                SpashProgress.Report("Connecting to server");
+
+            }
         }
     }
 }

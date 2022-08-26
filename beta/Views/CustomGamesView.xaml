@@ -119,7 +119,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>    
+        <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
@@ -136,8 +136,17 @@
                     </Style>
                 </ListBox.Resources>
             </ListBox>
-            <DataGrid Style="{StaticResource CustomGamesDataGridStyle}"
+            <DataGrid ItemsSource="{Binding GamesView}" SelectedValue="{Binding SelectedGame}"
+                RowHeight="40"
+                      EnableRowVirtualization="False"
+                      EnableColumnVirtualization="False"
+                      VirtualizingPanel.IsVirtualizing="True"
                       SelectionMode="Single" IsReadOnly="True" HeadersVisibility="Column" AutoGenerateColumns="False">
+                <DataGrid.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </DataGrid.ItemsPanel>
                 <DataGrid.AlternatingRowBackground>
                     <SolidColorBrush Color="Gray" Opacity=".05"/>
                 </DataGrid.AlternatingRowBackground>
@@ -152,13 +161,14 @@
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Game">
+                    <!--<DataGridTemplateColumn Header="Map" Width="50" SortMemberPath="mapname" CanUserSort="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ContentControl Content="{Binding}"/>
+                                <Image Source="{Binding SmallMapPreview}"  Width="40" Height="40" Stretch="Uniform"/>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                    </DataGridTemplateColumn>-->
+                    <DataGridTextColumn Header="Host" Binding="{Binding host}"/>
                     <DataGridTextColumn Header="Players" Binding="{Binding num_players}"/>
                     <DataGridTextColumn Header="Slots" Binding="{Binding max_players}"/>
                     <DataGridCheckBoxColumn Header="Private" Binding="{Binding password_protected, Mode=OneWay}"/>
@@ -166,8 +176,8 @@
                     <DataGridTextColumn Header="Max rating" Binding="{Binding rating_max}"/>
                     <DataGridTextColumn Header="Min rating" Binding="{Binding rating_min}"/>
                     <DataGridCheckBoxColumn Header="Enforce rating range" Binding="{Binding enforce_rating_range}"/>
-                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"/>
-
+                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}">
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

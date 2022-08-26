@@ -3,7 +3,7 @@
   
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <StartupObject>FAF.UI.EtherealClient.App</StartupObject>
     <AssemblyName>Ethereal FAF Client</AssemblyName>
