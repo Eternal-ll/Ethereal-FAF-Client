@@ -3,6 +3,7 @@ using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
@@ -10,6 +11,8 @@ namespace FAF.Domain.LobbyServer
     public abstract class INPC : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        public virtual void OnPropertyChanged([CallerMemberName] string PropertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
+
     }
     public partial class GameInfoMessage : INPC
     {

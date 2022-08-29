@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
+using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using System;
 using System.Collections.Generic;
@@ -101,7 +102,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             SnackbarService = snackbarService;
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
-            lobby.NotificationReceived += (s, e) => snackbarService.Show("Notification from server", e.text);
+            //lobby.NotificationReceived += (s, e) => snackbarService.Show("Notification from server", e.text);
 
             GameLauncher.LeftFromGame += GameLauncher_LeftFromGame;
 
@@ -112,7 +113,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (Games == null) return;
                 foreach (var game in Games)
                 {
-                    if (game.LaunchedAt.HasValue) OnPropertyChanged(game.HumanLaunchedAt);
+                    if (game.LaunchedAt.HasValue)
+                    {
+                        game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
+                    }
                 }
             }, Application.Current.Dispatcher);
             ContainerViewModel = containerViewModel;
@@ -178,8 +182,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     if (!IsLiveInputEnabled)
                     {
                         _IsLive = true;
-                        OnPropertyChanged(nameof(IsLive));
                     }
+                    else
+                    {
+                        _IsLive = false;
+                    }
+                    OnPropertyChanged(nameof(IsLive));
                     OnPropertyChanged(nameof(HostGameButtonVisibility));
                     GamesView?.Refresh();
                 }
@@ -257,13 +265,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void Lobby_GameReceived(object sender, GameInfoMessage e)
         {
-            return;
             var games = Games;
             if (games is null) return;
             var found = false;
             for (int i = 0; i < games.Count; i++)
             {
-                if (Application.Current is null) return;
                 var g = games[i];
                 if (g.Uid == e.Uid)
                 {
@@ -287,8 +293,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Games = new(e);
-            }, DispatcherPriority.Background);
+            }, DispatcherPriority.Send);
 
+        #region HostGame
+        private AsyncCommand _HostGameCommand;
+        private AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
+
+        private bool CanHostGameCommand(object arg) => GameLauncher.ForgedAlliance is null;
+
+        private async Task OnHostGameCommandAsync()
+        {
+            Lobby.SendAsync(ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001"));
+        }
+        #endregion
+
+        #region JoinGameCommand
         private AsyncCommand<GameInfoMessage> _JoinGameCommand;
         public AsyncCommand<GameInfoMessage> JoinGameCommand => _JoinGameCommand ??= new AsyncCommand<GameInfoMessage>(OnJoinTask, CanJoin);
 
@@ -303,10 +322,24 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             if (game.GameType is GameType.MatchMaker) return;
+            if (game.NumPlayers == 0)
+            {
+                SnackbarService.Show("Warning", "Game is empty, possibly broken", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
+            if (game.Mapname.Contains("neroxis"))
+            {
+                SnackbarService.Show("Warning", "Neroxis generator not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
+            if (game.SimMods is not null && game.SimMods.Count > 0)
+            {
+                SnackbarService.Show("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
             //snackbar.Timeout = int.MaxValue;
             //snackbar.Closed += Snackbar_Closed;
             CancellationTokenSource = new CancellationTokenSource();
-            //snackbar.Show("Patch confirmation", "Preparing patch", Wpf.Ui.Common.SymbolRegular.Alert16);
             ContainerViewModel.SplashVisibility = Visibility.Visible;
             ContainerViewModel.SplashText = "Confirming patch";
             IProgress<string> progress = new Progress<string>(e => ContainerViewModel.SplashText = e);
@@ -328,7 +361,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var snackbar = SnackbarService.GetSnackbarControl();
             var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";
             snackbar.Show("Notification", notify);
-        }
+        } 
+        #endregion
 
         private void Snackbar_Closed(Wpf.Ui.Controls.Snackbar sender, RoutedEventArgs e)
         {

@@ -63,20 +63,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                         Path = bin,
                         Filter = "*.*",
                         EnableRaisingEvents = true,
-                        NotifyFilter = NotifyFilters.LastWrite
-                    },
+                        NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
+            },
                     new FileSystemWatcher()
                     {
                         Path = gamedata,
                         Filter = "*.*",
                         EnableRaisingEvents = true,
-                        NotifyFilter = NotifyFilters.LastWrite,
+                        NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
                     }
                 };
                 foreach (var watcher in FolderWatchers)
                 {
                     logger.LogTrace("File watcher initialized on [{}]", watcher.Path);
-                    ProcessPatchFiles(watcher.Path);
+                    Task.Run(() => ProcessPatchFiles(watcher.Path));
                 }
                 StartWatchers();
                 logger.LogTrace("Initialized with base directory: [{}]", baseDirectory);
@@ -121,18 +121,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             int i = 1;
             foreach (var file in requiredFiles)
             {
+                var origP = file.Group + '\\' + file.Name;
                 var p = file.Group.ToLower() + '\\' + file.Name.ToLower();
                 var url = new Uri(file.CacheableUrl);
                 var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
-                    Logger.LogError($"Failed to download [{p}] [{i}] of [{requiredFiles.Length}]");
-                    progress?.Report($"Failed to download [{p}] [{i}] of [{requiredFiles.Length}]");
+                    Logger.LogError($"Failed to download [{origP}] [{i}] of [{requiredFiles.Length}]");
+                    progress?.Report($"Failed to download [{origP}] [{i}] of [{requiredFiles.Length}]");
                     continue;
                 }
-                Logger.LogTrace($"Downloading [{p}] [{i}] of [{requiredFiles.Length}]");
-                progress?.Report($"Downloading [{p}] [{i}] of [{requiredFiles.Length}]");
-                using var fs = new FileStream(PatchDirectory.FullName + '\\' + p, FileMode.Create);
+                Logger.LogTrace($"Downloading [{origP}] [{i}] of [{requiredFiles.Length}]");
+                progress?.Report($"Downloading [{origP}] [{i}] of [{requiredFiles.Length}]");
+                using var fs = new FileStream(PatchDirectory.FullName + '\\' + origP, FileMode.Create);
                 await fileResponse.Content.CopyToAsync(fs, cancellationToken);
                 i++;
 
@@ -153,8 +154,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             foreach (var watcher in FolderWatchers)
             {
                 watcher.Changed -= OnFileChanged;
-                watcher.Created -= OnFileCreated;
-                watcher.Deleted -= OnFileDeleter;
+                watcher.Deleted -= OnFileDeleted;
             }
         }
         private void StartWatchers()
@@ -162,27 +162,43 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             foreach (var watcher in FolderWatchers)
             {
                 watcher.Changed += OnFileChanged;
-                watcher.Created += OnFileCreated;
-                watcher.Deleted += OnFileDeleter;
+                watcher.Deleted += OnFileDeleted;
             }
         }
 
-        private void OnFileDeleter(object sender, FileSystemEventArgs e)
+        private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             Logger.LogTrace("File deleted [{}] change type [{}]", e.FullPath, e.ChangeType);
+            var data = e.FullPath.Split('\\');
+            var group = data[^2];
+            var path = group + '\\' + e.Name;   
+            FilesMD5.Remove(path);
+            IsFilesChanged = true;
         }
 
-        private void OnFileCreated(object sender, FileSystemEventArgs e)
-        {
-            Logger.LogTrace("File created [{}] change type [{}]", e.FullPath, e.ChangeType);
-        }
-
-        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        private string LastFileInWork;
+        private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             Logger.LogTrace("File edited [{}] change type [{}]", e.FullPath, e.ChangeType);
+            var data = e.FullPath.Split('\\');
+            var group = data[^2];
+            var path = group + '\\' + e.Name;
+            path = path.ToLower();
+            if (LastFileInWork == path) return;
+            LastFileInWork = path;
+            if (FilesMD5.TryGetValue(path, out var cached))
+            {
+                var md5 = await CalculateMD5(e.FullPath);
+                if (cached != md5)
+                {
+                    FilesMD5[path] = md5;
+                    IsFilesChanged = true;
+                }
+            }
+            LastFileInWork = null;
         }
 
-        private void ProcessPatchFiles(string path)
+        private async void ProcessPatchFiles(string path)
         {
             var patch = new DirectoryInfo(path);
             Logger.LogTrace("Processing files in [{}]", patch.FullName);
@@ -190,7 +206,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             {
 
                 var key = file.Directory.Name + '\\' + file.Name;
-                var md5 = CalculateMD5(file.FullName);
+                var md5 = await CalculateMD5(file.FullName);
                 if (!FilesMD5.TryAdd(key, md5))
                 {
                     Logger.LogTrace("File updated in [{}] [{}] with old MD5 [{}] to [{}]", key, file.Name, FilesMD5[key], md5);
@@ -200,11 +216,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 Logger.LogTrace("File added in [{}] [{}] with MD5 [{}]", key, file.Name, md5);
             }
         }
-        static string CalculateMD5(string filename)
+        static async Task<string> CalculateMD5(string filename)
         {
             using var md5 = MD5.Create();
-            using var stream = File.OpenRead(filename);
-            var hash = md5.ComputeHash(stream);
+            using var stream = new FileStream(path: filename, FileMode.Open);
+            var hash = await md5.ComputeHashAsync(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
     }

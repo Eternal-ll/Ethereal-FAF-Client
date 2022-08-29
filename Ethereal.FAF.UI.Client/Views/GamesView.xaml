@@ -88,7 +88,7 @@
                 <Border Style="{StaticResource CardBorder}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="128"/>
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
@@ -98,7 +98,7 @@
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Image Grid.RowSpan="5" Source="{Binding SmallMapPreview}" ToolTip="{Binding Mapname}" Width="100" Height="100" VerticalAlignment="Top"/>
+                        <Image Grid.RowSpan="5" Source="{Binding SmallMapPreview}" ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
                         <TextBlock Grid.Column="2" Margin="4 4 0 0" Text="{Binding HumanTitle}" FontSize="12" HorizontalAlignment="Center" FontWeight="Bold" TextWrapping="Wrap" ToolTip="{Binding Title}"/>
                         <TextBlock Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" Text="50%" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="32"/>
                         <TextBlock Grid.Column="2" Grid.Row="3" Margin="0 0 4 4" VerticalAlignment="Bottom" HorizontalAlignment="Right" Opacity=".5" Text="{Binding HumanLaunchedAt, StringFormat='launched {0}'}"/>
@@ -124,7 +124,7 @@
                     </Style>
                 </Ui:ToggleSwitch.Style>
             </Ui:ToggleSwitch>
-            <Button Content="Host game" Visibility="{Binding ViewModel.HostGameButtonVisibility}"/>
+            <Button Content="Host game" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding }"/>
         </WrapPanel>
         <Ui:VirtualizingItemsControl Grid.Row="1" Margin="-4 0 -16 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
             ItemsSource="{Binding ViewModel.GamesView, Mode=OneWay}" IsTabStop="False"

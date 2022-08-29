@@ -43,6 +43,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private string Uid;
         private string Session;
 
+        public long? LastGameUID;
+
         private IProgress<string> SplashProgress;
 
         public LobbyClient(string host, int port, ILogger logger)
@@ -102,6 +104,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             // Wait for a while...
             Thread.Sleep(1000);
             // Try to connect again
+
             if (!_stop)
                 ConnectAsync();
         }
@@ -156,6 +159,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         NotificationReceived?.Invoke(this, notice);
                         break;
                     case ServerCommand.session:
+                        if (Session is not null && Uid is not null) return;
                         var session = data.Split(':')[^1].Split('}')[0];
                         var uid = await GenerateUID(session);
                         Session = session;
@@ -172,6 +176,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.welcome:
                         SendAsync(ServerCommands.RequestIceServers);
                         SplashProgress?.Report("Welcome to FAForever lobby!");
+
+                        if (LastGameUID.HasValue)
+                        {
+                            SplashProgress?.Report("Restoring session: " + LastGameUID.Value);
+                            SendAsync(ServerCommands.RestoreGameSession(LastGameUID.Value.ToString()));
+                        }
                         break;
                     case ServerCommand.social:
                         SplashProgress?.Report("Preparing app for you");

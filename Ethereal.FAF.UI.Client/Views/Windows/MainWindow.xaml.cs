@@ -98,6 +98,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 if (e)
                 {
                     Container.SplashVisibility = Visibility.Collapsed;
+                    Container.SplashProgressVisibility = Visibility.Visible;
                     //RenderSize = new(1280, 720);
                     Width = 1280;
                     Height = 720;
@@ -108,6 +109,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 else
                 {
                     _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
+                    Container.SplashProgressVisibility = Visibility.Visible;
                     Container.SplashVisibility = Visibility.Visible;
                 }
             }, System.Windows.Threading.DispatcherPriority.Send);

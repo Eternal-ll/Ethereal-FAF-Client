@@ -24,6 +24,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private readonly TokenProvider TokenProvider;
         private readonly ILogger Logger;
 
+        public long? LastGameUID;
+        public Process ForgedAlliance;
+
         public GameLauncher(LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, TokenProvider tokenProvider, PatchClient patchClient)
         {
             LobbyClient = lobbyClient;
@@ -34,8 +37,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             TokenProvider = tokenProvider;
             PatchClient = patchClient;
         }
-        public static string gameId;
-        public Process ForgedAlliance;
 
         private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e)
         {
@@ -48,9 +49,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private async Task RunGame(GameLaunchData e)
         {
-            gameId = e.uid.ToString();
+            LastGameUID = e.uid;
+            LobbyClient.LastGameUID = LastGameUID;
             var jwt = TokenProvider.JwtSecurityToken;
-
             if (jwt is null)
             {
                 Logger.LogError("Access token is null, cant get player data");
@@ -133,10 +134,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //ice = null;
 
             LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+            LastGameUID = null;
+            LobbyClient.LastGameUID = null;
         }
         public async Task JoinGame(GameInfoMessage game, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken, 0, false, cancellationToken, progress);
+            
+
+            
             if (cancellationToken.IsCancellationRequested) return;
             LobbyClient.SendAsync(ServerCommands.JoinGame(game.Uid.ToString()));
         }
