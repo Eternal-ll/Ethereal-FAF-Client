@@ -1,6 +1,5 @@
-﻿using System;
+﻿using FAF.Domain.LobbyServer;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -17,7 +16,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         [JsonPropertyName("method")]
         public string Method { get; set; }
         [JsonPropertyName("params")]
-        public List<string> Params { get; set; }
+        //[JsonConverter(typeof(RawStringConverter))]
+        public List<object> Params { get; set; }
     }
     internal class RpcResult : Rcp
     {

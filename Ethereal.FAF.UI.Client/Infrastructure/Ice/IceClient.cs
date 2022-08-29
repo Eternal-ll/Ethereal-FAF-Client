@@ -39,6 +39,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// Current status of the faf-ice-adapter.
         /// </summary>
         public event EventHandler<IceStatusData> IceStatusReceived;
+        /// <summary>
+        /// Connection status with remote player
+        /// </summary>
+        public event EventHandler<ConnectionState> ConnectionStateChanged;
         private int JsonRpcId = 0;
 
         /// <summary>
@@ -126,42 +130,32 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             if (json.StartsWith("{\"me"))
             {
                 var rpc = JsonSerializer.Deserialize<RpcRequest>(json);
-                var raw = json[(json.IndexOf(':') + 2)..^18];
-                var methodEndIndex = raw.IndexOf('\"');
-                var method = raw[..methodEndIndex];
-
-                var args = raw[(methodEndIndex + 11)..];
                 switch (rpc.Method)
                 {
                     case "onConnectionStateChanged":
-                        var connected = args == "[\"Connected\"]";
+                        var connected = rpc.Params[0].ToString() == "Connected";
                         ConnectionToGpgNetServerChanged?.Invoke(this, connected);
-                        SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     case "onGpgNetMessageReceived":
-                        var data = args.Split(',');
-                        var command = data[0][2..^1];
-                        var param = string.Join(',', data[1..]);
-                        param = param[..^2];
-                        // ["GameState",["Idle"]] - > GameState, ["Idle"]
+                        var command = rpc.Params[0].ToString();
+                        var param = rpc.Params[1].ToString();
                         GpgNetMessageReceived?.Invoke(this, new(command, param));
-                        break;
+                        break;  
                     case "onIceMsg":
-                        args = '[' + args[(args.IndexOf(',') + 1)..];
-                        //Logger.LogInformation($"From RPC received (onIceMsg): ({args.Length} lenght)");
-                        IceMessageReceived?.Invoke(this, args);
+                        var ice = $"[{rpc.Params[1]},\"{rpc.Params[2].ToString().Replace("\"","\\\"")}\"]";
+                        IceMessageReceived?.Invoke(this, ice);
                         break;
                     case "onIceConnectionStateChanged":
-                        data = args[1..^2].Split(',');
-                        var state = data[2][1..];
-                        var localPId = data[0];
-                        var remotePId = data[1];
-                        //Logger.LogInformation(args);
-                        SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        var localPlayerId = int.Parse(rpc.Params[0].ToString());
+                        var remotePlayerId = int.Parse(rpc.Params[1].ToString());
+                        var state = rpc.Params[2].ToString();
+                        Console.WriteLine($"Connection state of [{localPlayerId}] to [{remotePlayerId}] is [{state}]");
+                        ConnectionStateChanged?.Invoke(this, new ConnectionState(localPlayerId, remotePlayerId, state));
+                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     case "onConnected":
-                        //Logger.LogInformation(args);
-                        SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
+                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     default:
                         break;
@@ -188,40 +182,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             }
 
         }
-
-        //bool pendingConnection = false;
-        //private void ManagedTcpClient_StateChanged(object sender, ManagedTcpClientState e)
-        //{
-        //    AppDebugger.LOGJSONRPC($"JSON-RPC TCP Client state changed to \"{e}\"");
-        //    if (e == ManagedTcpClientState.Connected)
-        //    {
-        //        IsConnected = true;
-
-        //        for (int i = 0; i < DataToSend.Count; i++)
-        //        {
-        //            AppDebugger.LOGJSONRPC($"----Sending from queue------");
-        //            if (DataToSend.Count == 0) continue;
-        //            if (Send(DataToSend[i]))
-        //            {
-        //            }
-        //        }
-        //        DataToSend.Clear();
-        //    }
-        //    else
-        //    {
-        //        IsConnected = false;
-        //        JsonRpcId = 0;
-        //    }
-        //    if (e == ManagedTcpClientState.CantConnect)
-        //    {
-        //        if (pendingConnection) return;
-        //        ManagedTcpClient.Connect();
-        //        AppDebugger.LOGJSONRPC($"Reconnecting to RPC Server...");
-        //        pendingConnection = true;
-        //        return;
-        //    }
-        //    pendingConnection = false;
-        //}
+    }
+    public class ConnectionState
+    {
+        public int LocalPlayerId { get; set; }
+        public int RemotePlayerId { get; set; }
+        public string State { get; set; }
+        public ConnectionState(int localPlayerId, int remotePlayerId, string state)
+        {
+            LocalPlayerId = localPlayerId;
+            RemotePlayerId = remotePlayerId;
+            State = state;
+        }
     }
 }
 

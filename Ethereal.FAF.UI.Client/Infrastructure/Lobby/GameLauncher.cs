@@ -16,6 +16,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 {
     public class GameLauncher
     {
+        public event EventHandler LeftFromGame;
+
         private readonly LobbyClient LobbyClient;
         private readonly PatchClient PatchClient;
         private readonly IceManager IceManager;
@@ -123,7 +125,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             ForgedAlliance.Close();
             ForgedAlliance.Dispose();
             ForgedAlliance = null;
-
+            LeftFromGame?.Invoke(this, null);
             //await ice.CloseAsync();
             //ice.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
             //ice.IceMessageReceived -= IceAdapterClient_IceMessageReceived;

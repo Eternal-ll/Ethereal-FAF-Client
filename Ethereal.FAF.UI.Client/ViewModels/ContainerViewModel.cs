@@ -12,6 +12,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             LobbyViewModel = lobbyViewModel;
         }
         public Visibility MainVisibility => SplashVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        #region SplashProgressVisibility
+        private Visibility _SplashProgressVisibility = Visibility.Visible;
+        public Visibility SplashProgressVisibility
+        {
+            get => _SplashProgressVisibility;
+            set => Set(ref _SplashProgressVisibility, value);
+        }
+        #endregion
         #region SplashVisibility
         private Visibility _SplashVisibility;
         public Visibility SplashVisibility
@@ -32,6 +40,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             get => _SplashText;
             set => Set(ref _SplashText, value);
+        }
+        #endregion
+        #region Content
+        private object _Content;
+        public object Content
+        {
+            get => _Content;
+            set => Set(ref _Content, value);
         }
         #endregion
     }

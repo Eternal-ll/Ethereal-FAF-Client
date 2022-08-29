@@ -51,21 +51,7 @@
             <!--  We display our pages inside this element.  -->
             <Border Grid.Column="1" Background="{DynamicResource ControlFillColorDefaultBrush}"
                 CornerRadius="8 0 0 0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <!--<RowDefinition Height="Auto" />-->
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Frame x:Name="RootFrame" Grid.Row="1" />
-                    <!--<ui:Breadcrumb
-                        Grid.Row="0"
-                        Margin="18"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        FontSize="24"
-                        Navigation="{Binding ElementName=RootNavigation}" />-->
-                    
-                </Grid>
+                <Frame x:Name="RootFrame" Grid.Row="1" />
             </Border>
         </Grid>
         <ui:Snackbar
@@ -80,7 +66,7 @@
 
         <Grid x:Name="RootWelcomeGrid" Grid.Row="1" Visibility="{Binding SplashVisibility}">
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <ui:ProgressRing IsIndeterminate="True" Visibility="{Binding SplashVisibility}"/>
+                <ui:ProgressRing IsIndeterminate="True" Visibility="{Binding SplashProgressVisibility}"/>
                 <TextBlock x:Name="SplashProgressLabel" Margin="0 20" FontSize="16" FontWeight="Medium"
                     Text="{Binding SplashText}" TextAlignment="Center" TextWrapping="Wrap" />
                 <TextBox x:Name="LinkTextBox" HorizontalAlignment="Center" Text="https://faforever.zulipchat.com/#narrow/stream/203511-python-server"
@@ -92,6 +78,17 @@
                 </StackPanel>-->
             </StackPanel>
         </Grid>
+        <ContentControl Grid.Row="1" Content="{Binding Content}" Visibility="Visible">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Style.Triggers>
+                        <Trigger Property="Content" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
 
         <!--  Dialogue is above all controls except the navigation buttons. So it covers all the content, but allows you to close or move the application.  -->
         <ui:Dialog

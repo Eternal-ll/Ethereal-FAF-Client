@@ -1,6 +1,5 @@
 ﻿using beta.Models.API;
 using beta.Models.API.Base;
-using FAF.Domain.LobbyServer.Enums;
 using Refit;
 
 namespace Ethereal.FAF.API.Client
@@ -18,7 +17,7 @@ namespace Ethereal.FAF.API.Client
         public interface IContentClient
         {
             [Get("/{url}")]
-            [QueryUriFormat(UriFormat.)]
+            [QueryUriFormat(UriFormat.Unescaped)]
             Task<ApiResponse<Stream>> GetFileStreamAsync(string url, [Authorize("Bearer")] string token, [Header("Verify")] string verify, CancellationToken cancellationToken = default);
 
         }

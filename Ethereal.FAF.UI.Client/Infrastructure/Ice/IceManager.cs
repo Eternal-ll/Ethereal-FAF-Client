@@ -4,6 +4,7 @@ using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Net;
 using System.Net.Sockets;
 
@@ -11,6 +12,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
     public class IceManager
     {
+        public event EventHandler Initialized;
+
         private readonly ILogger Logger;
         private readonly TokenProvider TokenProvider;
         private readonly LobbyClient LobbyClient;
@@ -66,6 +69,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
             IceClient.ConnectionToGpgNetServerChanged += IceClient_ConnectionToGpgNetServerChanged;
             Logger.LogTrace("Initialized ICE client on [{}:{}]", host, RpcPort);
+            Initialized?.Invoke(this, null);
         }
 
         private void IceClient_ConnectionToGpgNetServerChanged(object sender, bool e)
