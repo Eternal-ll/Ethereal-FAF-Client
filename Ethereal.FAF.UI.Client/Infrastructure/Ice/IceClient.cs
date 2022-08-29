@@ -1,7 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice.Base;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -12,7 +11,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
     /// <summary>
     /// Wrapper for https://github.com/FAForever/java-ice-adapter
     /// </summary>
-    internal class IceClient : TcpClient
+    public class IceClient : TcpClient
     {
         /// <summary>
         /// The game sent a message to the faf-ice-adapter via the internal GPGNetServer.

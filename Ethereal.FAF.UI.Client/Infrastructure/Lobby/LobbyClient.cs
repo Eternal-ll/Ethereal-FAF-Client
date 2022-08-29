@@ -78,11 +78,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Logger.LogTrace("Connected to [{host}:{port}]", Host, Port);
             SplashProgress?.Report($"Connected to [{Host}:{Port}]");
             AskSession();
-            Task.Run(async() =>
-            {
-                await Task.Delay(10000);
-                DisconnectAsync();
-            });
+            //Task.Run(async() =>
+            //{
+            //    await Task.Delay(10000);
+            //    DisconnectAsync();
+            //});
         }
         Stopwatch sw = new();
         internal void DisconnectAsync(bool reconnect)
@@ -100,7 +100,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
             // Wait for a while...
             Thread.Sleep(1000);
-            return;
             // Try to connect again
             if (!_stop)
                 ConnectAsync();

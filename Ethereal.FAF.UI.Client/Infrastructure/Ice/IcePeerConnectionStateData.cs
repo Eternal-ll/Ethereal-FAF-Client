@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
-    internal class IcePeerConnectionStateData : IceData
+    public class IcePeerConnectionStateData : IceData
     {
 
         [JsonPropertyName("connected")]

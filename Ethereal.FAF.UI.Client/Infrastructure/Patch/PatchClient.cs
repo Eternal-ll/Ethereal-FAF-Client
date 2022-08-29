@@ -21,28 +21,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private readonly FileSystemWatcher[] FolderWatchers;
         private readonly DirectoryInfo PatchDirectory;
 
-        private readonly Dictionary<string, string> Files = new();
+        private readonly Dictionary<string, string> FilesMD5 = new();
 
         private bool Initalized;
-
-        private readonly Dictionary<FeaturedMod, string> LastFeaturedModUrls = new()
-        {
-            { FeaturedMod.FAF, null },
-            { FeaturedMod.FAFBeta, null },
-            { FeaturedMod.FAFDevelop, null },
-        };
-        private readonly Dictionary<FeaturedMod, FeaturedModFile[]> LastFeaturedModFiles = new()
-        {
-            { FeaturedMod.FAF, null },
-            { FeaturedMod.FAFBeta, null },
-            { FeaturedMod.FAFDevelop, null },
-        };
 
         private bool IsFilesChanged;
 
         public PatchClient(ILogger<PatchClient> logger, IServiceProvider serviceProvider)
         {
-            var baseDirectory = @"C:\ProgramData\FAForever";
+            var baseDirectory = @"C:\ProgramData\FAForever\";
             logger.LogTrace("Initializing with base directory: [{}]", baseDirectory);
             Logger = logger;
             var bin = baseDirectory + "bin";
@@ -99,38 +86,39 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         public async Task UpdatePatch(FeaturedMod mod, string accessToken, int version = 0, bool forceCheck = false, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
-            var path = $"featuredMods/{(int)mod}/files/{(version == 0 ? "latest" : version)}";
-            
+            var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";
+            Logger.LogTrace("Checking patch for [{}] version [{}] with forced confirmation [{}]", mod, version, forceCheck);
             // last patch url was the same
-            if (forceCheck == false && LastFeaturedModUrls.TryGetValue(mod, out var cached) && cached is not null && cached == path)
+            if (!IsFilesChanged && !forceCheck)
             {
-                if (!IsFilesChanged)
-                {
-                    return;
-                }
+                Logger.LogTrace("All files up to date");
+                progress?.Report("All files up to date");
+                return;
             }
             var client = ServiceProvider.GetService<IFeaturedFilesClient>();
             var apiResponse = version == 0 ? 
-                await client.GetAsync(mod, accessToken, cancellationToken) :
-                await client.GetAsync(mod, version, accessToken, cancellationToken);
+                await client.GetLatestAsync((int)mod, accessToken, cancellationToken) :
+                await client.GetAsync((int)mod, version, accessToken, cancellationToken);
             if (!apiResponse.IsSuccessStatusCode)
             {
 
             }
             var files = apiResponse.Content.Data;
-            var requiredFiles = LastFeaturedModFiles[mod].Intersect(files).ToList();
-            if (requiredFiles.Count == 0)
+            var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group + '\\' + f.Name, out var cached) || cached != f.MD5).ToArray();
+            if (requiredFiles.Length == 0)
             {
+                Logger.LogTrace("All files up to date");
+                progress?.Report("All files up to date");
                 return;
             }
             foreach (var file in requiredFiles)
             {
-                var fileResponse = await client.GetFileStream(file.CacheableUrl, accessToken, file.HmacToken, cancellationToken);
+                var fileResponse = await client.GetFileStreamAsync(file.CacheableUrl, accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
                     continue;
                 }
-                using var fs = new FileStream("", FileMode.Create);
+                using var fs = new FileStream(PatchDirectory.FullName + '\\' + file.Group + '\\' + file.Name, FileMode.Create);
                 await fileResponse.Content.CopyToAsync(fs);
             }
         }
@@ -147,12 +135,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             foreach (var file in patch.EnumerateFiles())
             {
 
-                var key = file.DirectoryName + '/' + file.Name;
+                var key = file.DirectoryName + '\\' + file.Name;
                 var md5 = CalculateMD5(file.FullName);
-                if (!Files.TryAdd(key, md5))
+                if (!FilesMD5.TryAdd(key, md5))
                 {
-                    Logger.LogTrace("File updated in [{}] [{}] with old MD5 [{}] to [{}]", key, file.Name, Files[key], md5);
-                    Files[key] = md5;
+                    Logger.LogTrace("File updated in [{}] [{}] with old MD5 [{}] to [{}]", key, file.Name, FilesMD5[key], md5);
+                    FilesMD5[key] = md5;
                     return;
                 }
                 Logger.LogTrace("File added in [{}] [{}] with MD5 [{}]", key, file.Name, md5);

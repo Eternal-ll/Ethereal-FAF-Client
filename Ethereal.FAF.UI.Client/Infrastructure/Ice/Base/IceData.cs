@@ -2,7 +2,7 @@
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice.Base
 {
-    internal abstract class IceData
+    public abstract class IceData
     {
         [JsonPropertyName("localPlayedId")]
         public int LocalPlayedId { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
-    internal class GpgNetMessage
+    public class GpgNetMessage
     {
         public GpgNetMessage(string command, string args)
         {

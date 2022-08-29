@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
-    internal class IceConnectionStateData : IceData
+    public class IceConnectionStateData : IceData
     {
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]

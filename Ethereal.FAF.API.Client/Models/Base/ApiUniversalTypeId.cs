@@ -10,6 +10,7 @@ namespace beta.Models.API.Base
     {
         [JsonPropertyName("id")]
         public string _IdString { get; set; }
+        [JsonIgnore]
         public int Id => int.Parse(_IdString);
 
         [JsonPropertyName("type")]

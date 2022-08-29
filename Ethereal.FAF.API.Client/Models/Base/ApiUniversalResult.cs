@@ -43,10 +43,10 @@ namespace beta.Models.API.Base
                         {
                             case ApiDataType.mapVersion:
                                 map.LatestVersion = entity.CastTo<MapVersionModel>();
-                                if (map.LatestVersion.IsLegacyMap)
-                                {
-                                    map.LatestVersion.Attributes["hidden"] = "false";
-                                }
+                                //if (map.LatestVersion.IsLegacyMap)
+                                //{
+                                //    map.LatestVersion.Attributes["hidden"] = "false";
+                                //}
                                 continue;
                             case ApiDataType.player:
                                 map.Author = entity.Attributes["login"];

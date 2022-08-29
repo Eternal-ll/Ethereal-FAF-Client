@@ -2,14 +2,14 @@
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
-    internal class SnapshotOptions
+    public class SnapshotOptions
     {
         public int player_id { get; set; }
         public string player_login { get; set; }
         public int rpc_port { get; set; }
         public int gpgnet_port { get; set; }
     }
-    internal class SnapshotGpgNet
+    public class SnapshotGpgNet
     {
         public int local_port { get; set; }
         public bool connected { get; set; }
@@ -58,7 +58,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         Stun,
         Relay
     }
-    internal class IcePeerStateData
+    public class IcePeerStateData
     {
         /// <summary>
         /// one peer is always offerer, one answerer
@@ -112,7 +112,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public string remote_player_login { get; set; }
         public int local_game_udp_port { get; set; }
     }
-    internal class IceStatusData
+    public class IceStatusData
     {
         /*
         "{"version":"SNAPSHOT",

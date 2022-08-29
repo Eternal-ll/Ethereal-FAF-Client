@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 {
-    internal class GameLauncher
+    public class GameLauncher
     {
         private readonly LobbyClient LobbyClient;
         private readonly PatchClient PatchClient;

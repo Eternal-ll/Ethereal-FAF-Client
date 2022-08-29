@@ -28,9 +28,10 @@
             </Style>
 
             <DataTemplate x:Key="DefaultCard" DataType="{x:Type models:GameInfoMessage}">
-                <Border Style="{StaticResource CardBorder}">
+                <Border Style="{StaticResource CardBorder}" Cursor="Hand" ToolTip="Double click to do a thing">
                     <Border.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, Path=DataContext.ViewModel.JoinGameCommand}"/>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, 
+                            Path=DataContext.ViewModel.JoinGameCommand}" CommandParameter="{Binding}"/>
                     </Border.InputBindings>
                     <Grid ShowGridLines="False">
                         <Grid.ColumnDefinitions>

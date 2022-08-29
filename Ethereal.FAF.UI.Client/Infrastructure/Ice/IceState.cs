@@ -5,7 +5,7 @@
     /// that is, the STUN or TURN server.
     /// https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     /// </summary>
-    internal enum IceState : byte
+    public enum IceState : byte
     {
         /// <summary>
         /// The ICE agent is gathering addresses or is waiting to be given remote candidates

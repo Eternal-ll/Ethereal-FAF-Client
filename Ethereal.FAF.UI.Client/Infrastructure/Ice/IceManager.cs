@@ -9,7 +9,7 @@ using System.Net.Sockets;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
-    internal class IceManager
+    public class IceManager
     {
         private readonly ILogger Logger;
         private readonly TokenProvider TokenProvider;

@@ -75,7 +75,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
 
         private void Lobby_PlayersReceived(object sender, PlayerInfoMessage[] e) =>
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 Players = new(e);
             }, DispatcherPriority.Background);
@@ -83,11 +83,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient Lobby;
+        private readonly GameLauncher GameLauncher;
         private readonly DispatcherTimer Timer;
 
-        public GamesViewModel(LobbyClient lobby)
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher)
         {
             Lobby = lobby;
+            GameLauncher = gameLauncher;
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
 
@@ -100,7 +102,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     if (game.LaunchedAt.HasValue) OnPropertyChanged(game.HumanLaunchedAt);
                 }
-            }, System.Windows.Application.Current.Dispatcher);
+            }, Application.Current.Dispatcher);
         }
 
         #region SelectedRatingType
@@ -245,7 +247,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var g = games[i];
                 if (g.Uid == e.Uid)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         if (e.State == GameState.Closed) games.RemoveAt(i);
                         else games[i] = e;
@@ -254,15 +256,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
                 else if (g.Host == e.Host || g.LaunchedAt.HasValue && g.NumPlayers == 0)
                 {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => games.RemoveAt(i), DispatcherPriority.Send);
+                    Application.Current.Dispatcher.Invoke(() => games.RemoveAt(i), DispatcherPriority.Send);
                 }
             }
             if (!found)
-                System.Windows.Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Send);
+                Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Send);
         }
 
         private void Lobby_GamesReceived(object sender, GameInfoMessage[] e) =>
-            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 Games = new(e);
             }, DispatcherPriority.Background);
@@ -272,8 +274,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private bool CanJoin(object arg) => true;
 
-        private Task OnJoinTask(GameInfoMessage arg)
+        private async Task OnJoinTask(GameInfoMessage game)
         {
+            if (game.LaunchedAt.HasValue)
+            {
+                return;
+            }
+            if (game.GameType is GameType.MatchMaker) return;
+            await GameLauncher.JoinGame(game);
         }
     }
 }
