@@ -94,8 +94,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             Lobby = lobby;
             GameLauncher = gameLauncher;
+            SnackbarService = snackbarService;
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
+            lobby.NotificationReceived += (s, e) => snackbarService.Show("Notification from server", e.text);
 
             SelectedGameMode = "Custom";
 
@@ -107,7 +109,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     if (game.LaunchedAt.HasValue) OnPropertyChanged(game.HumanLaunchedAt);
                 }
             }, Application.Current.Dispatcher);
-            SnackbarService = snackbarService;
         }
 
         #region SelectedRatingType

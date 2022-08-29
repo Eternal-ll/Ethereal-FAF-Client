@@ -1,5 +1,4 @@
-﻿using beta.Models.API;
-using FAF.Domain.LobbyServer.Enums;
+﻿using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -107,7 +106,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 return;
             }
             var files = apiResponse.Content.Data;
-            var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group + '\\' + f.Name, out var cached) || cached != f.MD5).ToArray();
+            var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group.ToLower() + '\\' + f.Name.ToLower(), out var cached) || cached != f.MD5).ToArray();
             if (requiredFiles.Length == 0)
             {
                 Logger.LogTrace("All files up to date");
@@ -127,12 +126,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
-                    Logger.LogError($"Failed to download [{p}] [{i}] of [{files.Length}]");
-                    progress?.Report($"Failed to download [{p}] [{i}] of [{files.Length}]");
+                    Logger.LogError($"Failed to download [{p}] [{i}] of [{requiredFiles.Length}]");
+                    progress?.Report($"Failed to download [{p}] [{i}] of [{requiredFiles.Length}]");
                     continue;
                 }
-                Logger.LogTrace($"Downloading [{p}] [{i}] of [{files.Length}]");
-                progress?.Report($"Downloading [{p}] [{i}] of [{files.Length}]");
+                Logger.LogTrace($"Downloading [{p}] [{i}] of [{requiredFiles.Length}]");
+                progress?.Report($"Downloading [{p}] [{i}] of [{requiredFiles.Length}]");
                 using var fs = new FileStream(PatchDirectory.FullName + '\\' + p, FileMode.Create);
                 await fileResponse.Content.CopyToAsync(fs, cancellationToken);
                 i++;
@@ -190,7 +189,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             foreach (var file in patch.EnumerateFiles())
             {
 
-                var key = file.DirectoryName + '\\' + file.Name;
+                var key = file.Directory.Name + '\\' + file.Name;
                 var md5 = CalculateMD5(file.FullName);
                 if (!FilesMD5.TryAdd(key, md5))
                 {

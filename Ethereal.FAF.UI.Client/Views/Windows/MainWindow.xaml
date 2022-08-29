@@ -42,10 +42,10 @@
                         PageType="{x:Type v:GamesView}"
                         Icon="XboxController24" />
                 </ui:NavigationStore.Items>
-                <ui:NavigationStore.Footer>
+                <!--<ui:NavigationStore.Footer>-->
                     <!--  A navigation element that does not point to the page can be used as a button.  -->
-                    <ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />
-                </ui:NavigationStore.Footer>
+                    <!--<ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />-->
+                <!--</ui:NavigationStore.Footer>-->
             </ui:NavigationStore>
 
             <!--  We display our pages inside this element.  -->
@@ -80,7 +80,7 @@
 
         <Grid x:Name="RootWelcomeGrid" Grid.Row="1" Visibility="{Binding SplashVisibility}">
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                <ui:ProgressRing IsIndeterminate="True" />
+                <ui:ProgressRing IsIndeterminate="True" Visibility="{Binding SplashVisibility}"/>
                 <TextBlock x:Name="SplashProgressLabel" Margin="0 20" FontSize="16" FontWeight="Medium"
                     Text="{Binding SplashText}" TextAlignment="Center" TextWrapping="Wrap" />
                 <TextBox x:Name="LinkTextBox" HorizontalAlignment="Center" Text="https://faforever.zulipchat.com/#narrow/stream/203511-python-server"
@@ -137,7 +137,7 @@
             Grid.Row="0" Height="30" Padding="10 0"
             ForceShutdown="False"
             MinimizeToTray="False"
-            ShowHelp="True"
+            ShowHelp="False"
             ShowMaximize="True"
             ShowMinimize="True"
             UseSnapLayout="True">

@@ -125,12 +125,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         {
             if (json.StartsWith("{\"me"))
             {
+                var rpc = JsonSerializer.Deserialize<RpcRequest>(json);
                 var raw = json[(json.IndexOf(':') + 2)..^18];
                 var methodEndIndex = raw.IndexOf('\"');
                 var method = raw[..methodEndIndex];
 
                 var args = raw[(methodEndIndex + 11)..];
-                switch (method)
+                switch (rpc.Method)
                 {
                     case "onConnectionStateChanged":
                         var connected = args == "[\"Connected\"]";
@@ -141,7 +142,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                         var data = args.Split(',');
                         var command = data[0][2..^1];
                         var param = string.Join(',', data[1..]);
-                        param = param[..^1];
+                        param = param[..^2];
+                        // ["GameState",["Idle"]] - > GameState, ["Idle"]
                         GpgNetMessageReceived?.Invoke(this, new(command, param));
                         break;
                     case "onIceMsg":

@@ -60,6 +60,9 @@
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding RatingMin}" ToolTip="Minimum rating rest. to join">
                                     <TextBlock Text="{Binding StringFormat='min: {0}'}"/>
                                 </Ui:Badge>
+                                <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding SimMods.Count}" ToolTip="Minimum rating rest. to join">
+                                    <TextBlock Text="{Binding StringFormat='mods: {0}'}"/>
+                                </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding PasswordProtected}" ToolTip="Is password protected">
                                     <Ui:Badge.Style>
                                         <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
