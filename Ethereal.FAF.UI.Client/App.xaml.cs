@@ -88,6 +88,9 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<IceManager>();
             services.AddScoped<GameLauncher>();
 
+            services.AddScoped<SnackbarService>();
+            services.AddScoped<DialogService>();
+
             services.AddFafApi();
 
             services.AddHttpClient();

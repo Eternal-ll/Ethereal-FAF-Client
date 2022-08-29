@@ -80,6 +80,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                     watcher.Changed += OnFileChanged;
                 }
                 logger.LogTrace("Initialized with base directory: [{}]", baseDirectory);
+                IsFilesChanged = true;
             }
             ServiceProvider = serviceProvider;
         }
@@ -95,13 +96,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 progress?.Report("All files up to date");
                 return;
             }
-            var client = ServiceProvider.GetService<IFeaturedFilesClient>();
+            var apiClient = ServiceProvider.GetService<IFeaturedFilesClient>();
             var apiResponse = version == 0 ? 
-                await client.GetLatestAsync((int)mod, accessToken, cancellationToken) :
-                await client.GetAsync((int)mod, version, accessToken, cancellationToken);
+                await apiClient.GetLatestAsync((int)mod, accessToken, cancellationToken) :
+                await apiClient.GetAsync((int)mod, version, accessToken, cancellationToken);
             if (!apiResponse.IsSuccessStatusCode)
             {
 
+                return;
             }
             var files = apiResponse.Content.Data;
             var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group + '\\' + f.Name, out var cached) || cached != f.MD5).ToArray();
@@ -111,16 +113,32 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 progress?.Report("All files up to date");
                 return;
             }
+            apiClient = null;
+            var contentClient = ServiceProvider.GetService<IContentClient>();
+            Logger.LogTrace($"[{requiredFiles.Length}] of [{files.Length}] files required to update");
+            progress?.Report($"[{requiredFiles.Length}] of [{files.Length}] files required to update");
+            int i = 1;
             foreach (var file in requiredFiles)
             {
-                var fileResponse = await client.GetFileStreamAsync(file.CacheableUrl, accessToken, file.HmacToken, cancellationToken);
+                var url = new Uri(file.CacheableUrl);
+                Logger.LogTrace($"Downloading [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
+                progress?.Report($"Downloading [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
+                var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
+                    Logger.LogError($"Failed to download [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
+                    progress?.Report($"Failed to download [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
                     continue;
                 }
+                Logger.LogTrace($"Copying [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
+                progress?.Report($"Copying [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
                 using var fs = new FileStream(PatchDirectory.FullName + '\\' + file.Group + '\\' + file.Name, FileMode.Create);
                 await fileResponse.Content.CopyToAsync(fs);
+                i++;
             }
+            Logger.LogTrace($"Downloaded [{i}] of [{files.Length}]");
+            progress?.Report($"Downloaded [{i}] of [{files.Length}]");
+            IsFilesChanged = false;
         }
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)

@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
@@ -131,7 +132,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
             LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
         }
-        public async Task JoinGame(GameInfoMessage game)
+        public async Task JoinGame(GameInfoMessage game, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken);
         }

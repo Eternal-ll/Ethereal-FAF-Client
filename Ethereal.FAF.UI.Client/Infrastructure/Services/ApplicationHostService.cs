@@ -9,7 +9,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
@@ -86,6 +88,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
                 _navigationWindow!.ShowWindow();
 
+                var snackbarService = _serviceProvider.GetService<SnackbarService>();
+                snackbarService.SetSnackbarControl(((MainWindow)_navigationWindow).RootSnackbar);
+
+                var dialogService = _serviceProvider.GetService<DialogService>();
+                dialogService.SetDialogControl(((MainWindow)_navigationWindow).RootDialog);
                 // NOTICE: You can set this service directly in the window 
                 // _navigationWindow.SetPageService(_pageService);
 

@@ -14,9 +14,13 @@ namespace Ethereal.FAF.API.Client
 
             [Get("/featuredMods/{featuredMod}/files/{version}")]
             Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(int featuredMod, int version, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
-
+        }
+        public interface IContentClient
+        {
             [Get("/{url}")]
+            [QueryUriFormat(UriFormat.Unescaped)]
             Task<ApiResponse<Stream>> GetFileStreamAsync(string url, [Authorize("Bearer")] string token, [Header("Verify")] string verify, CancellationToken cancellationToken = default);
+
         }
     }
 }

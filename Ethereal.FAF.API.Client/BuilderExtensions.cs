@@ -14,8 +14,9 @@ namespace Ethereal.FAF.API.Client
 
             .AddRefitClient<IFeaturedFilesClient>()
             .ConfigureHttpClient(Configure)
-            .AddHttpMessageHandler<VerifyHeaderHandler>()
-
+            .Services
+            .AddRefitClient<IContentClient>()
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://content.faforever.com/"))
             .Services;
     }
 }
