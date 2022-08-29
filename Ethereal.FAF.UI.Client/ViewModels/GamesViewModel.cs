@@ -6,10 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
+using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -86,7 +88,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly GameLauncher GameLauncher;
         private readonly DispatcherTimer Timer;
 
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher)
+        private readonly SnackbarService SnackbarService;
+
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService)
         {
             Lobby = lobby;
             GameLauncher = gameLauncher;
@@ -103,6 +107,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     if (game.LaunchedAt.HasValue) OnPropertyChanged(game.HumanLaunchedAt);
                 }
             }, Application.Current.Dispatcher);
+            SnackbarService = snackbarService;
         }
 
         #region SelectedRatingType
@@ -274,6 +279,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private bool CanJoin(object arg) => true;
 
+        private CancellationTokenSource CancellationTokenSource;
+
         private async Task OnJoinTask(GameInfoMessage game)
         {
             if (game.LaunchedAt.HasValue)
@@ -281,7 +288,29 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             if (game.GameType is GameType.MatchMaker) return;
-            await GameLauncher.JoinGame(game);
+            var snackbar = SnackbarService.GetSnackbarControl();
+            snackbar.Timeout = int.MaxValue;
+            snackbar.Closed += Snackbar_Closed;
+            CancellationTokenSource = new CancellationTokenSource();
+            snackbar.Show("Patch confirmation", "Preparing patch", Wpf.Ui.Common.SymbolRegular.Alert16);
+            IProgress<string> progress = new Progress<string>(e => snackbar.Message = e);
+            try
+            {
+                await GameLauncher.JoinGame(game, CancellationTokenSource.Token, progress);
+            }
+            catch
+            {
+
+            }
+            snackbar.Timeout = 5000;
+
+            snackbar.Show("Notification", "Operation was cancelled");
+        }
+
+        private void Snackbar_Closed(Wpf.Ui.Controls.Snackbar sender, RoutedEventArgs e)
+        {
+            CancellationTokenSource.Cancel();
+            sender.Closed -= Snackbar_Closed;
         }
     }
 }

@@ -134,7 +134,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task JoinGame(GameInfoMessage game, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
-            await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken);
+            await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken, 0, false, cancellationToken, progress);
         }
     }
 }

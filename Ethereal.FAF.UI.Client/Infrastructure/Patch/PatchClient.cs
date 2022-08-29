@@ -26,6 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private bool Initalized;
 
         private bool IsFilesChanged;
+        private bool DownloadingFiles;
 
         public PatchClient(ILogger<PatchClient> logger, IServiceProvider serviceProvider)
         {
@@ -77,8 +78,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 {
                     logger.LogTrace("File watcher initialized on [{}]", watcher.Path);
                     ProcessPatchFiles(watcher.Path);
-                    watcher.Changed += OnFileChanged;
                 }
+                StartWatchers();
                 logger.LogTrace("Initialized with base directory: [{}]", baseDirectory);
                 IsFilesChanged = true;
             }
@@ -113,6 +114,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 progress?.Report("All files up to date");
                 return;
             }
+            StopWatchers();
             apiClient = null;
             var contentClient = ServiceProvider.GetService<IContentClient>();
             Logger.LogTrace($"[{requiredFiles.Length}] of [{files.Length}] files required to update");
@@ -120,30 +122,65 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             int i = 1;
             foreach (var file in requiredFiles)
             {
+                var p = file.Group.ToLower() + '\\' + file.Name.ToLower();
                 var url = new Uri(file.CacheableUrl);
-                Logger.LogTrace($"Downloading [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
-                progress?.Report($"Downloading [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
                 var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
-                    Logger.LogError($"Failed to download [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
-                    progress?.Report($"Failed to download [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
+                    Logger.LogError($"Failed to download [{p}] [{i}] of [{files.Length}]");
+                    progress?.Report($"Failed to download [{p}] [{i}] of [{files.Length}]");
                     continue;
                 }
-                Logger.LogTrace($"Copying [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
-                progress?.Report($"Copying [{file.Group + '\\' + file.Name}] [{i}] of [{files.Length}]");
-                using var fs = new FileStream(PatchDirectory.FullName + '\\' + file.Group + '\\' + file.Name, FileMode.Create);
-                await fileResponse.Content.CopyToAsync(fs);
+                Logger.LogTrace($"Downloading [{p}] [{i}] of [{files.Length}]");
+                progress?.Report($"Downloading [{p}] [{i}] of [{files.Length}]");
+                using var fs = new FileStream(PatchDirectory.FullName + '\\' + p, FileMode.Create);
+                await fileResponse.Content.CopyToAsync(fs, cancellationToken);
                 i++;
+
+                // update MD5 of local file
+                if(!FilesMD5.TryAdd(p, file.MD5))
+                {
+                    FilesMD5[p] = file.MD5;
+                }
             }
             Logger.LogTrace($"Downloaded [{i}] of [{files.Length}]");
             progress?.Report($"Downloaded [{i}] of [{files.Length}]");
             IsFilesChanged = false;
+            StartWatchers();
+        }
+
+        private void StopWatchers()
+        {
+            foreach (var watcher in FolderWatchers)
+            {
+                watcher.Changed -= OnFileChanged;
+                watcher.Created -= OnFileCreated;
+                watcher.Deleted -= OnFileDeleter;
+            }
+        }
+        private void StartWatchers()
+        {
+            foreach (var watcher in FolderWatchers)
+            {
+                watcher.Changed += OnFileChanged;
+                watcher.Created += OnFileCreated;
+                watcher.Deleted += OnFileDeleter;
+            }
+        }
+
+        private void OnFileDeleter(object sender, FileSystemEventArgs e)
+        {
+            Logger.LogTrace("File deleted [{}] change type [{}]", e.FullPath, e.ChangeType);
+        }
+
+        private void OnFileCreated(object sender, FileSystemEventArgs e)
+        {
+            Logger.LogTrace("File created [{}] change type [{}]", e.FullPath, e.ChangeType);
         }
 
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-
+            Logger.LogTrace("File edited [{}] change type [{}]", e.FullPath, e.ChangeType);
         }
 
         private void ProcessPatchFiles(string path)

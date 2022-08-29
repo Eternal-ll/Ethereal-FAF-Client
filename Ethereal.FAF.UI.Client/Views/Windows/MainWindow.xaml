@@ -77,8 +77,6 @@
                         Icon="PuzzlePiece24"
                         Message="Remember that the Heat Death of Universe is coming someday, no time to explain - let's go!"
                         Timeout="5000" />
-        <ui:Snackbar x:Name="ContentSnackBar" Grid.Row="1">
-        </ui:Snackbar>
 
         <Grid x:Name="RootWelcomeGrid" Grid.Row="1" Visibility="{Binding SplashVisibility}">
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
