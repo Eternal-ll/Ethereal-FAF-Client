@@ -121,7 +121,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         protected override void OnDisconnected()
         {
             Thread.Sleep(1000);
-            ConnectAsync();
+            if (IsConnecting)
+            {
+                return;
+            }
+            try
+            {
+                ConnectAsync();
+            }
+            catch
+            {
+
+            }
         }
 
         private bool IsInitialized = false;

@@ -45,6 +45,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         public long? LastGameUID;
 
+        public PlayerInfoMessage Self;
+
         private IProgress<string> SplashProgress;
 
         public LobbyClient(string host, int port, ILogger logger)
@@ -174,6 +176,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.irc_password:
                         break;
                     case ServerCommand.welcome:
+                        var welcome = JsonSerializer.Deserialize<WelcomeData>(data);
+                        Self = welcome.me;
+                        WelcomeDataReceived?.Invoke(this, welcome);
                         SendAsync(ServerCommands.RequestIceServers);
                         SplashProgress?.Report("Welcome to FAForever lobby!");
 
@@ -194,6 +199,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         }
                         else
                         {
+                            if (player.Id == Self.Id)
+                            {
+                                Self = player;
+                            }
                             PlayerReceived?.Invoke(this, player);
                         }
                         break;

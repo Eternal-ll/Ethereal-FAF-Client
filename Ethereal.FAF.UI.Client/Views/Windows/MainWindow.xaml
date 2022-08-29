@@ -69,10 +69,10 @@
                 <ui:ProgressRing Visibility="{Binding SplashProgressVisibility}">
                     <ui:ProgressRing.Style>
                         <Style TargetType="ui:ProgressRing" BasedOn="{StaticResource {x:Type ui:ProgressRing}}">
-                            <Setter Property="IsIndeterminate" Value="True"/>
+                            <Setter Property="IsIndeterminate" Value="False"/>
                             <Style.Triggers>
-                                <Trigger Property="Visibility" Value="Collapsed">
-                                    <Setter Property="IsIndeterminate" Value="False"/>
+                                <Trigger Property="Visibility" Value="Visible">
+                                    <Setter Property="IsIndeterminate" Value="True"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>

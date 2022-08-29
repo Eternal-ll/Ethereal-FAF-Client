@@ -20,6 +20,7 @@ using System.Configuration;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using System;
 using Ethereal.FAF.API.Client;
+using System.Windows.Controls;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -94,6 +95,17 @@ namespace Ethereal.FAF.UI.Client
             services.AddFafApi();
 
             services.AddHttpClient();
+        }
+
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            new Window()
+            {
+                Content = new TextBox()
+                {
+                    Text = e.Exception.Message + '\n' + e.Exception.StackTrace
+                }
+            }.Show();
         }
     }
 }

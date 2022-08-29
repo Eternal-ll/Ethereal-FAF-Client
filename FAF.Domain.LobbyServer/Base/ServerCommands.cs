@@ -48,7 +48,7 @@ namespace FAF.Domain.LobbyServer.Base
         /// <returns></returns>
         public static string HostGame(string title, string gameMod, string mapName, string visibility = "public", string password = null, bool isRehost = false) =>
             $"{{\"command\":\"game_host\", \"title\": \"{title}\", \"mod\":\"{gameMod}\", \"visibility\": \"{visibility}\", \"mapname\":\"{mapName}\", \"password\":" +
-            password is null ? "null," : $"\"{password}\", \"is_rehost\":{isRehost} }}";
+            (password is null ? "null" : $"\"{password}\"") + $", \"is_rehost\":{isRehost.ToString().ToLower()} }}";
 
         /// <summary>
         /// Add to friends

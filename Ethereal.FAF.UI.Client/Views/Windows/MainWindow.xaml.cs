@@ -97,14 +97,16 @@ namespace FAF.UI.EtherealClient.Views.Windows
             {
                 if (e)
                 {
+                    _taskBarService.SetState(this, TaskBarProgressState.None);
+                    if (Container.Content is not null) return;
                     Container.SplashVisibility = Visibility.Collapsed;
-                    Container.SplashProgressVisibility = Visibility.Visible;
+                    Container.SplashProgressVisibility = Visibility.Collapsed;
+                    SplashProgressLabel.Text = "Waiting ending of match";
                     //RenderSize = new(1280, 720);
-                    Width = 1280;
-                    Height = 720;
+                    //Width = 1280;
+                    //Height = 720;
                     //Navigate(typeof(.Dashboard));
 
-                    _taskBarService.SetState(this, TaskBarProgressState.None);
                 }
                 else
                 {

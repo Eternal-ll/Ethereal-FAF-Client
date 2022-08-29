@@ -7,6 +7,9 @@ using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -24,10 +27,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private readonly TokenProvider TokenProvider;
         private readonly ILogger Logger;
 
+        private readonly IHttpClientFactory HttpClientFactory;
+
         public long? LastGameUID;
         public Process ForgedAlliance;
 
-        public GameLauncher(LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, TokenProvider tokenProvider, PatchClient patchClient)
+        public GameLauncher(LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, TokenProvider tokenProvider, PatchClient patchClient, IHttpClientFactory httpClientFactory)
         {
             LobbyClient = lobbyClient;
             IceManager = iceManager;
@@ -36,6 +41,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             lobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
             TokenProvider = tokenProvider;
             PatchClient = patchClient;
+            HttpClientFactory = httpClientFactory;
         }
 
         private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e)
@@ -46,6 +52,50 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     if (t.IsFaulted)
                     LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
                 });
+        }
+        private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
+            // player info
+            string country = "", string clan = null,
+            // player rating
+            int mean = 1500, int deviation = 500, int games = 0)
+        {
+            var me = LobbyClient.Self;
+            if (me is not null)
+            {
+                //if (me.Ratings.TryGetValue(ratingType, out var rating))
+                //{
+                //    mean = (int)rating.rating[0];
+                //    deviation = (int)rating.rating[1];
+                //    games = rating.number_of_games;
+                //}
+                var rating = me.Ratings.Global;
+                mean = (int)rating.rating[0];
+                deviation = (int)rating.rating[1];
+                games = rating.number_of_games;
+                country = me.Country;
+                clan = me.Clan;
+            }
+            if (country.Length > 0)
+            {
+                args.Append("/country ");
+                args.Append(country);
+                args.Append(' ');
+            }
+            if (clan?.Length > 0)
+            {
+                args.Append("/clan ");
+                args.Append(clan);
+                args.Append(' ');
+            }
+            args.Append("/mean ");
+            args.Append(mean);
+            args.Append(' ');
+            args.Append("/deviation ");
+            args.Append(deviation);
+            args.Append(' ');
+            args.Append("/numgames ");
+            args.Append(games);
+            args.Append(' ');
         }
         private async Task RunGame(GameLaunchData e)
         {
@@ -79,9 +129,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             arguments.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
             // port from Ice-Adapter status message ["gpgnet"]["local_port"]
             arguments.Append($"/gpgnet 127.0.0.1:{IceManager.GpgNetPort} ");
-            // append player data
-            arguments.Append(" /mean 1500 /deviation 500 /country RU");
-            //FillPlayerArgs(arguments, e.rating_type);
+
+            FillPlayerArgs(arguments, e.rating_type);
             if (e.init_mode == GameInitMode.Auto)
             {
                 // matchmaker
@@ -139,10 +188,24 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task JoinGame(GameInfoMessage game, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
-            await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken, 0, false, cancellationToken, progress);
-            
+            var map = Environment.ExpandEnvironmentVariables(@"C:\Users\%username%\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\");
 
-            
+            if (!Directory.Exists(map + game.Mapname))
+            {
+                var client = HttpClientFactory.CreateClient();
+                using var fs = new FileStream(game.Mapname + ".zip", FileMode.Create);
+                var response = await client.GetAsync($"https://content.faforever.com/{game.MapFilePath}", cancellationToken);
+                progress?.Report($"Downloading map [{game.Mapname + ".zip"}]");
+                await response.Content.CopyToAsync(fs, cancellationToken);
+                fs.Close();
+                progress?.Report($"Extracting map [{game.Mapname + ".zip"}]");
+                ZipFile.ExtractToDirectory(game.Mapname + ".zip", map, true);
+                File.Delete(game.Mapname + ".zip");
+            }
+
+
+            await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken, 0, false, cancellationToken, progress);
+
             if (cancellationToken.IsCancellationRequested) return;
             LobbyClient.SendAsync(ServerCommands.JoinGame(game.Uid.ToString()));
         }

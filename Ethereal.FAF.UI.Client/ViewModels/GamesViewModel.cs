@@ -43,6 +43,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Lobby = lobby;
             lobby.PlayersReceived += Lobby_PlayersReceived;
             lobby.PlayerReceived += Lobby_PlayerReceived;
+            lobby.WelcomeDataReceived += Lobby_WelcomeDataReceived;
+        }
+
+        public PlayerInfoMessage Self;
+
+        private void Lobby_WelcomeDataReceived(object sender, WelcomeData e)
+        {
+            Self = e.me;
         }
 
         #region Games
@@ -76,7 +84,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void Lobby_PlayerReceived(object sender, PlayerInfoMessage e)
         {
-            throw new NotImplementedException();
+            if (e.Id == Self.Id)
+            {
+                Self = e;
+            }
         }
 
         private void Lobby_PlayersReceived(object sender, PlayerInfoMessage[] e) =>
@@ -125,7 +136,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void GameLauncher_LeftFromGame(object sender, EventArgs e)
         {
-            ContainerViewModel.SplashProgressVisibility = Visibility.Visible;
+            ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
             ContainerViewModel.SplashVisibility = Visibility.Collapsed;
             ContainerViewModel.Content = null;
         }
@@ -297,13 +308,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region HostGame
         private AsyncCommand _HostGameCommand;
-        private AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
+        public AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
 
         private bool CanHostGameCommand(object arg) => GameLauncher.ForgedAlliance is null;
 
         private async Task OnHostGameCommandAsync()
         {
-            Lobby.SendAsync(ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001"));
+            var host = ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001");
+            //Console.WriteLine(host);
+            Lobby.SendAsync(host);
         }
         #endregion
 
@@ -321,10 +334,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 return;
             }
+            if (Lobby.LastGameUID.HasValue)
+            {
+                SnackbarService.Show("Warning", "Game is already running", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
             if (game.GameType is GameType.MatchMaker) return;
             if (game.NumPlayers == 0)
             {
                 SnackbarService.Show("Warning", "Game is empty, possibly broken", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
+            if (game.PasswordProtected)
+            {
+                SnackbarService.Show("Warning", "Game is password protected", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
             if (game.Mapname.Contains("neroxis"))
@@ -347,9 +370,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 await GameLauncher.JoinGame(game, CancellationTokenSource.Token, progress);
             }
-            catch
+            catch (Exception ex)
             {
-
+                ContainerViewModel.SplashVisibility = Visibility.Collapsed;
+                ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
             }
             if (!CancellationTokenSource.IsCancellationRequested)
             {

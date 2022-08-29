@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using FAF.Domain.LobbyServer.Enums;
+using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
