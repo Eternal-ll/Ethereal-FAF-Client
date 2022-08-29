@@ -57,6 +57,7 @@ namespace beta.Models.Server
                     OnPropertyChanged(nameof(GameStatusImage));
             }
         }
+
         #endregion
 
         #region GameStatusImage

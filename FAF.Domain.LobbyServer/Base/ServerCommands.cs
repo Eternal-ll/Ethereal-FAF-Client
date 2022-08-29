@@ -7,6 +7,8 @@ namespace FAF.Domain.LobbyServer.Base
     /// </summary>
     public static class ServerCommands
     {
+        public static string AskSession(string agent, string version) =>
+            $"{{\"command\": \"ask_session\", \"version\": \"{version}\", \"user_agent\": \"{agent}\"}}";
         /// <summary>
         /// JSON for authentication on lobby-server
         /// </summary>

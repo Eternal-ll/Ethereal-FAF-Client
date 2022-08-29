@@ -1,6 +1,8 @@
 ﻿using beta.Infrastructure.Services.Interfaces;
 using beta.ViewModels;
+using beta.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Windows;
 using System.Windows.Media;
 
@@ -22,13 +24,20 @@ namespace beta.Infrastructure.Commands
                     .ShowPopupAsync("Game is running");
                 return;
             }
-            var model = App.Services.GetService<HostGameViewModel>();
+            //var model = App.Services.GetService<HostGameViewModel>();
             Window = new();
             Window.Background = (Brush)App.Current.Resources["NavigationViewDefaultPaneBackground"];
-            Window.Content = model;
-            Window.Closed += Window_Closed;
-            model.Finished += (s, e) => Window.Close();
-            Window.ShowDialog();
+            Window.Content = App.Services.GetService<HostGameView>();
+            //Window.Closed += Window_Closed;
+            //model.Finished += (s, e) => Window.Close();
+            try
+            {
+                Window.Show();
+            }
+            catch(Exception ex)
+            {
+
+            }
         }
 
         private void Window_Closed(object sender, System.EventArgs e)

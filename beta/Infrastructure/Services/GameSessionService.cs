@@ -283,7 +283,6 @@ namespace beta.Infrastructure.Services
             ice.PassIceServers(IceService.IceServers);
 
             var me = PlayersService.Self;
-
             // game args
             StringBuilder arguments = new();
             // hide embedded game bug report
@@ -316,13 +315,12 @@ namespace beta.Infrastructure.Services
             {
                 arguments.Append($"/log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\" ");
             }
-
             Logger.LogWarning($"Starting game with args: {arguments}");
             ForgedAlliance = new()
             {
                 StartInfo = new()
                 {
-                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
+                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAllianceBAC.exe",
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
@@ -715,10 +713,10 @@ namespace beta.Infrastructure.Services
 
         public async Task HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Public, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
         {
-            if(!await ConfirmGamePath())
-            {
-                return;
-            }
+            //if(!await ConfirmGamePath())
+            //{
+            //    return;
+            //}
 
             if (ForgedAlliance is not null)
             {
@@ -772,10 +770,10 @@ namespace beta.Infrastructure.Services
             var command = sb.ToString();
 
             // Check map
-            await ConfirmMap(mapName, true);
+            //await ConfirmMap(mapName, true);
 
             // Check current patch
-            if (!await ConfirmPatch(mod)) return;
+            //if (!await ConfirmPatch(mod)) return;
             Logger.LogInformation("Patch confirmed");
             
             SessionService.Send(command);
@@ -808,7 +806,7 @@ namespace beta.Infrastructure.Services
             {
                 StartInfo = new()
                 {
-                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
+                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAllianceBAC.exe",
                     Arguments = args.ToString(),
                     UseShellExecute = true
                 }

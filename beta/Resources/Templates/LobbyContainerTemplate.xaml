@@ -521,17 +521,9 @@
                             Background="Transparent"
                             Padding="4"
                             Margin="0"
-                            ToolTip="Open scaled version">
-                            <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PreviewType}"
-                                             Value="0">
-                                            <Setter Property="ui:FlyoutService.Flyout" Value="{StaticResource MapDetailedFlyout}"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
+                            ToolTip="Open scaled version"
+                            Command="{StaticResource ShowPictureCommand}"
+                            CommandParameter="{Binding LargeMapPreview}">
                             <Button.Resources>
                                 <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
                                 <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>

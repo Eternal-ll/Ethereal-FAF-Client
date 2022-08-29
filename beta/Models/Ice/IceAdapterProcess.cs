@@ -11,14 +11,14 @@ namespace beta.Models.Ice
     {
         public Process Process { get; private set; }
         private readonly ILogger Logger = App.Services.GetService<ILogger<IceAdapterProcess>>();
-        public IceAdapterProcess(string playerId, string playerLogin, int RpcPort, int GpgNetPort)
+        public IceAdapterProcess(string playerId, string playerLogin, int rpcPort, int gpgnetPort)
         {
             // load settings to show ice window
             // ...
             // delay window
             // ...
             var file = Tools.GetIceAdapterJarFileInfo();
-            var args = $"--id {playerId} --login {playerLogin} --rpc-port {RpcPort} --gpgnet-port {GpgNetPort} --log-level debug";
+            var args = $"--id {playerId} --login {playerLogin} --rpc-port {rpcPort} --gpgnet-port {gpgnetPort} --log-level debug";
             // --info-window
             // --delay-ui time
             Process = new()
@@ -33,7 +33,7 @@ namespace beta.Models.Ice
                     //CreateNoWindow = true,
                 }
             };
-            Logger.LogInformation($"Initializing {file.FullName} with {args}");
+            Logger.LogInformation("Initializing [{}] with [{}]", file.FullName, args);
             try
             {
                 Process.Start();

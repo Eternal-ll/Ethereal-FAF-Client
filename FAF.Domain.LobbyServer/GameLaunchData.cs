@@ -16,7 +16,7 @@ namespace FAF.Domain.LobbyServer
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameType game_type { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public string rating_type { get; set; }
+        public RatingType rating_type { get; set; }
         public int team { get; set; }
 
         [JsonConverter(typeof (JsonStringEnumConverter))]

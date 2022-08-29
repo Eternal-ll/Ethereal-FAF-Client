@@ -1,19 +1,31 @@
 ﻿using FAF.Domain.LobbyServer.Enums;
+using Humanizer;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
-    public class GameInfoMessage
+    public abstract class INPC : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+    public partial class GameInfoMessage : INPC
+    {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ServerCommand Command { get; set; }
-        public GameInfoMessage[] games { get; set; }
+        [JsonPropertyName("games")]
+        public GameInfoMessage[] Games { get; set; }
         [JsonPropertyName("visibility")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameVisibility Visibility { get; set; }
-        public bool password_protected { get; set; }
-        public long uid { get; set; }
-        public string title { get; set; }
+        [JsonPropertyName("password_protected")]
+        public bool PasswordProtected { get; set; }
+        [JsonPropertyName("uid")]
+        public long Uid { get; set; }
+        [JsonPropertyName("title")]
+        public string Title { get; set; }
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameState State{ get; set; }
@@ -23,18 +35,49 @@ namespace FAF.Domain.LobbyServer
         [JsonPropertyName("featured_mod")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public FeaturedMod FeaturedMod { get; set; }
-        public Dictionary<string, string> sim_mods { get; set; }
-        public string mapname { get; set; }
-        public string map_file_path { get; set; }
-        public string host { get; set; }
-        public int num_players { get; set; }
-        public int max_players { get; set; }
-        public double? launched_at { get; set; }
+        [JsonPropertyName("sim_mods")]
+        public Dictionary<string, string> SimMods { get; set; }
+        [JsonPropertyName("mapname")]
+        public string Mapname { get; set; }
+        [JsonPropertyName("map_file_path")]
+        public string MapFilePath { get; set; }
+        [JsonPropertyName("host")]
+        public string Host { get; set; }
+        [JsonPropertyName("num_players")]
+        public int NumPlayers { get; set; }
+        [JsonPropertyName("max_players")]
+        public int MaxPlayers { get; set; }
+        [JsonPropertyName("launched_at")]
+        public double? LaunchedAt { get; set; }
         [JsonPropertyName("rating_type")]
-        public string RatingType { get; set; }
-        public double? rating_min { get; set; }
-        public double? rating_max { get; set; }
-        public bool enforce_rating_range { get; set; }
-        public Dictionary<int, string[]> teams { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public RatingType RatingType { get; set; }
+        [JsonPropertyName("rating_min")]
+        public double? RatingMin { get; set; }
+        [JsonPropertyName("rating_max")]
+        public double? RatingMax { get; set; }
+        [JsonPropertyName("enforce_rating_range")]
+        public bool EnforceRatingRange { get; set; }
+        [JsonPropertyName("teams_ids")]
+        public Team[] Teams { get; set; }
+
+
+        // Fly properties
+
+        [JsonIgnore]
+        public PreviewType PreviewType => GameType == GameType.Coop
+            ? PreviewType.Coop
+            : Mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase) ?
+                PreviewType.Neroxis :
+                PreviewType.Normal;
+
+        [JsonIgnore]
+        public object SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{Mapname}.png";
+        [JsonIgnore]
+        public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{Mapname}.png";
+        [JsonIgnore]
+        public string HumanTitle => Title.Truncate(34);
+        [JsonIgnore]
+        public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
     }
 }

@@ -1,21 +1,41 @@
-﻿using FAF.Domain.LobbyServer.Enums;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
-
-    public class PlayerInfoMessage
+    public class PlayerInfoMessage : INPC
     {
-        public ServerCommand Command { get; set; }
-        public string command { get; set; }
-        public int id { get; set; }
-        public string login { get; set; }
-        public string country { get; set; }
-        public string clan { get; set; }
-        public Dictionary<string, Rating> ratings { get; set; }
+        [JsonPropertyName("id")]
+        public long Id { get; set; }
+
+        [JsonPropertyName("login")]
+        public string Login { get; set; }
+
         [JsonPropertyName("avatar")]
         public PlayerAvatar Avatar { get; set; }
-        public PlayerInfoMessage[] players { get; set; }
+
+        [JsonPropertyName("country")]
+        public string Country { get; set; }
+
+        [JsonPropertyName("clan")]
+        public string Clan { get; set; }
+
+        [JsonPropertyName("ratings")]
+        public Ratings Ratings { get; set; }
+
+        //[JsonPropertyName("global_rating")]
+        //public double[] GlobalRating { get; set; }
+
+        //[JsonPropertyName("ladder_rating")]
+        //public double[] LadderRating { get; set; }
+
+        [JsonPropertyName("number_of_games")]
+        public long NumberOfGames { get; set; }
+
+        [JsonPropertyName("players")]
+        public PlayerInfoMessage[] Players { get; set; }
+
+        [JsonIgnore]
+        public GameInfoMessage Game { get; set; }
+
     }
 }

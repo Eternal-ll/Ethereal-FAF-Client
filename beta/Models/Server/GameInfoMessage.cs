@@ -184,17 +184,11 @@ namespace beta.Models.Server
         #endregion
 
         #region PreviewType // On fly
-        public PreviewType PreviewType
-        {
-            get
-            {
-                if (GameType == GameType.Coop)
-                    return PreviewType.Coop;
-                if (mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase))
-                    return PreviewType.Neroxis;
-                return PreviewType.Normal;
-            }
-        }
+        public PreviewType PreviewType => GameType == GameType.Coop
+            ? PreviewType.Coop
+            : mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase) ?
+                PreviewType.Neroxis :
+                PreviewType.Normal;
         #endregion
 
         #region Teams
@@ -518,7 +512,12 @@ namespace beta.Models.Server
 
         
         [JsonIgnore]
-        public string SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{mapname}.png";
+        public object SmallMapPreview => PreviewType switch
+        {
+            PreviewType.Normal => $"https://content.faforever.com/maps/previews/small/{mapname}.png",
+            PreviewType.Coop => App.Current.Resources["CoopIcon"],
+            PreviewType.Neroxis => App.Current.Resources["MapGenIcon"],
+        };
 
         [JsonIgnore]
         public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{mapname}.png";

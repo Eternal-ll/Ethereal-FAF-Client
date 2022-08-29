@@ -24,6 +24,8 @@
                     <cmd:JoinGameCommand x:Key="JoinGameCommand"/>
                     <cmd:WatchGameCommand x:Key="WatchGameCommand"/>
 
+                    <cmd:ShowPictureCommand x:Key="ShowPictureCommand"/>
+
 
                     <cmd:AddFriendCommand x:Key="AddFriendCommand"/>
                     <cmd:AddFoeCommand x:Key="AddFoeCommand"/>

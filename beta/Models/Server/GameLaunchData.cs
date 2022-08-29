@@ -21,7 +21,7 @@ namespace beta.Models.Server
         public GameInitMode init_mode { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameType game_type { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        //[JsonConverter(typeof(JsonStringEnumConverter))]
         public string rating_type { get; set; }
         public int team { get; set; }
 

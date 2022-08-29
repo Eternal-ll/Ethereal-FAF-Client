@@ -339,6 +339,8 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.1108.44" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+    <PackageReference Include="NetCoreServer" Version="6.5.0" />
+    <PackageReference Include="System.IO.Pipelines" Version="6.0.3" />
     <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
     <PackageReference Include="ZstdNet" Version="1.4.5" />
     <PackageReference Include="ZstdSharp.Port" Version="0.6.1" />
