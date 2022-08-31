@@ -14,6 +14,7 @@
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance {x:Type vm:ContainerViewModel}}"
     mc:Ignorable="d">
+    <!--Background="#ff202020"-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -49,7 +50,7 @@
             </ui:NavigationStore>
 
             <!--  We display our pages inside this element.  -->
-            <Border Grid.Column="1" Background="{DynamicResource ControlFillColorDefaultBrush}"
+            <Border Grid.Column="1" Background="#272727"
                 CornerRadius="8 0 0 0">
                 <Frame x:Name="RootFrame" Grid.Row="1" />
             </Border>
@@ -148,7 +149,8 @@
             ShowHelp="False"
             ShowMaximize="True"
             ShowMinimize="True"
-            UseSnapLayout="True">
+            UseSnapLayout="True"
+                     Title="Ethereal FAF Client">
             <!--<ui:TitleBar.Tray>
                 <ui:NotifyIcon
                     FocusOnLeftClick="True"

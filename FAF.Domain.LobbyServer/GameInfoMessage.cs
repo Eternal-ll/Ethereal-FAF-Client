@@ -75,7 +75,8 @@ namespace FAF.Domain.LobbyServer
                 PreviewType.Normal;
 
         [JsonIgnore]
-        public object SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{Mapname}.png";
+        public string SmallMapPreview { get; set; }
+        //public string SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{Mapname}.png";
         [JsonIgnore]
         public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{Mapname}.png";
         [JsonIgnore]

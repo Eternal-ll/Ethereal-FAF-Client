@@ -157,17 +157,24 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 StartInfo = new()
                 {
-                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAllianceBAC.exe",
+                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
             };
-            if (!ForgedAlliance.Start())
+            try
             {
-                Logger.LogError("Cant start game");
-                throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
+                if (!ForgedAlliance.Start())
+                {
+                    Logger.LogError("Cant start game");
+                    throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
+                }
+                await ForgedAlliance.WaitForExitAsync();
             }
-            await ForgedAlliance.WaitForExitAsync();
+            catch
+            {
+
+            }
             IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
             IceManager.IceClient.DisconnectAsync();
             IceManager.IceClient.Dispose();

@@ -20,11 +20,16 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-                <Setter Property="Background" Value="{DynamicResource ControlElevationBorderBrush}"/>
+                <Setter Property="Background" Value="#323232"/>
                 <Setter Property="Width" Value="350"/>
                 <Setter Property="Margin" Value="4"/>
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="4"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#2e2e2e" />
+                    </Trigger>
+                </Style.Triggers>
             </Style>
 
             <Style x:Key="SimModsBadge" TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
@@ -51,9 +56,10 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-            
+
+
             <DataTemplate x:Key="DefaultCard" DataType="{x:Type models:GameInfoMessage}">
-                <Border Style="{StaticResource CardBorder}" Cursor="Hand" ToolTip="Double click to do a thing">
+                <Border Style="{StaticResource CardBorder}" Cursor="Hand" ToolTip="{Binding SmallMapPreview}">
                     <Border.InputBindings>
                         <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, 
                             Path=DataContext.ViewModel.JoinGameCommand}" CommandParameter="{Binding}"/>
@@ -64,7 +70,8 @@
                             <ColumnDefinition Width="10"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding SmallMapPreview}" ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
+                        <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding SmallMapPreview}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
                         <StackPanel Grid.Column="2">
                             <WrapPanel Margin="-4 0 0 4">
                                 <TextBlock Grid.Column="2" Margin="4 2 0 0" Text="{Binding HumanTitle}" TextWrapping="Wrap" ToolTip="{Binding Title}"/>
@@ -136,20 +143,59 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <WrapPanel Margin="0 0 0 10">
-            <ComboBox SelectedItem="{Binding ViewModel.SelectedGameMode}" ItemsSource="{Binding ViewModel.GameModes}" Padding="10 6"/>
-            <Ui:ToggleSwitch Margin="10 0" IsChecked="{Binding ViewModel.IsLive}" IsEnabled="{Binding ViewModel.IsLiveInputEnabled}">
-                <Ui:ToggleSwitch.Style>
-                    <Style TargetType="Ui:ToggleSwitch" BasedOn="{StaticResource {x:Type Ui:ToggleSwitch}}">
-                        <Setter Property="Content" Value="Open games"/>
+            <ComboBox Width="100" SelectedItem="{Binding ViewModel.SelectedGameMode}" ItemsSource="{Binding ViewModel.GameModes}" Padding="10 5.5"
+                      ToolTip="Game mode"/>
+            <ComboBox Width="100" Margin="10 0 0 0" Padding="10 5.5" SelectedValue="Filter">
+                <ComboBoxItem Content="Filter"/>
+                <ComboBoxItem Content="Filter"/>
+                <ComboBoxItem Content="Filter"/>
+                <ComboBoxItem Content="Filter"/>
+                <ComboBoxItem Content="Filter"/>
+            </ComboBox>
+            <!--<Grid Width="200" Margin="10 0 0 0">
+                <ComboBox Padding="90 5.5 10 5.5">
+                    <ComboBoxItem Content="filter"/>
+                    <ComboBoxItem Padding="0 0 0 0" Margin="0" Background="Red">
+                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="0 0 0 0">
+                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="0 0 0 0">
+                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
+                    </ComboBoxItem>
+                    <ComboBoxItem Padding="0 0 0 0">
+                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
+                    </ComboBoxItem>
+                </ComboBox>
+                <ToggleButton VerticalAlignment="Stretch">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                            <Setter Property="Content" Value="Disabled"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="Enabled"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+            </Grid>-->
+            <Button Width="100" Margin="10 0" IsEnabled="{Binding ViewModel.IsLiveInputEnabled}" Command="{Binding ViewModel.ChangeLiveButton}">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Content" Value="Show live"/>
                         <Style.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Content" Value="Live games"/>
-                            </Trigger>
+                            <DataTrigger Binding="{Binding ViewModel.IsLive}" Value="True">
+                                <!--<Setter Property="Background" Value="#ff6e6e"/>-->
+                                <!--<Setter Property="Foreground" Value="White"/>-->
+                                <Setter Property="Content" Value="Show open"/>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </Ui:ToggleSwitch.Style>
-            </Ui:ToggleSwitch>
-            <Button Content="Host game" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
+                </Button.Style>
+            </Button>
+            <Button Content="Host game" Width="100" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
         </WrapPanel>
         <Ui:VirtualizingItemsControl Grid.Row="1" Margin="-4 0 -16 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
             ItemsSource="{Binding ViewModel.GamesView, Mode=OneWay}" IsTabStop="False"

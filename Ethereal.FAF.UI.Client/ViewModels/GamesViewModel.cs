@@ -1,4 +1,5 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
+using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Views;
@@ -9,10 +10,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Threading;
 using Wpf.Ui.Mvvm.Services;
 
@@ -96,6 +102,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 Players = new(e);
             }, DispatcherPriority.Background);
     }
+
+
+
+
     public class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient Lobby;
@@ -106,7 +116,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly SnackbarService SnackbarService;
         private readonly ContainerViewModel ContainerViewModel;
 
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager)
+        private readonly HttpClient HttpClient;
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient)
         {
             Lobby = lobby;
             GameLauncher = gameLauncher;
@@ -132,6 +143,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }, Application.Current.Dispatcher);
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
+            HttpClient = httpClient;
         }
 
         private void GameLauncher_LeftFromGame(object sender, EventArgs e)
@@ -170,25 +182,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         "Coop" or
                         "Custom" => RatingType.global,
-                        "Ladder 1 vs 1" => RatingType.ladder_1v1,
-                        "TMM 2 vs 2" => RatingType.tmm_2v2,
-                        "TMM 4 vs 4" => RatingType.tmm_4v4_full_share,
+                        "1 vs 1" => RatingType.ladder_1v1,
+                        "2 vs 2" => RatingType.tmm_2v2,
+                        "4 vs 4" => RatingType.tmm_4v4_full_share,
                     };
                     SelectedGameType = value switch
                     {
                         "Coop" => GameType.Coop,
                         "Custom" => GameType.Custom,
-                        "Ladder 1 vs 1" or
-                        "TMM 2 vs 2" or
-                        "TMM 4 vs 4" => GameType.MatchMaker
+                        "1 vs 1" or
+                        "2 vs 2" or
+                        "4 vs 4" => GameType.MatchMaker
                     };
                     IsLiveInputEnabled = value switch
                     {
                         "Coop" or
                         "Custom" => true,
-                        "Ladder 1 vs 1" or
-                        "TMM 2 vs 2" or
-                        "TMM 4 vs 4" => false
+                        "1 vs 1" or
+                        "2 vs 2" or
+                        "4 vs 4" => false
                     };
                     if (!IsLiveInputEnabled)
                     {
@@ -209,9 +221,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             "Coop",
             "Custom",
-            "Ladder 1 vs 1",
-            "TMM 2 vs 2",
-            "TMM 4 vs 4",
+            "1 vs 1",
+            "2 vs 2",
+            "4 vs 4",
         };
         #region IsLive
         private bool _IsLive;
@@ -256,14 +268,26 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         Source = value
                     };
+                    GamesView.CurrentChanged += GamesView_CurrentChanged;
                     GamesSource.Filter += GamesSource_Filter;
+                    IsRefresh = true;
                     OnPropertyChanged(nameof(GamesView));
+                    IsRefresh = false;
                 }
+            }
+        }
+        private async void GamesView_CurrentChanged(object sender, EventArgs e)
+        {
+            var onView = GamesView.Cast<GameInfoMessage>().Where(g => g.SmallMapPreview is null).ToList();
+            foreach (var game in onView)
+            {
+                await TrySetSmallPreviewAsync(game);
             }
         }
         #endregion
 
-        private void GamesSource_Filter(object sender, FilterEventArgs e)
+        private bool IsRefresh;
+        private async void GamesSource_Filter(object sender, FilterEventArgs e)
         {
             var game = (GameInfoMessage)e.Item;
             e.Accepted = false;
@@ -271,10 +295,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (game.RatingType != SelectedRatingType) return;
             if (IsLive && !game.LaunchedAt.HasValue) return;
             else if (!IsLive && game.LaunchedAt.HasValue) return;
+
+            if (!IsRefresh && !game.Mapname.StartsWith("neroxis") && game.SmallMapPreview is null)
+            {
+                await TrySetSmallPreviewAsync(game);
+            }
+
             e.Accepted = true;
         }
 
-        private void Lobby_GameReceived(object sender, GameInfoMessage e)
+        private async void Lobby_GameReceived(object sender, GameInfoMessage e)
         {
             var games = Games;
             if (games is null) return;
@@ -287,24 +317,128 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         if (e.State == GameState.Closed) games.RemoveAt(i);
-                        else games[i] = e;
-                    }, DispatcherPriority.Send);
+                        else
+                        {
+                            if (g.SmallMapPreview is not null)
+                            {
+                                e.SmallMapPreview = g.SmallMapPreview;
+                                e.OnPropertyChanged(nameof(e.SmallMapPreview));
+                            }
+                            games[i] = e;
+                        }
+                    }, DispatcherPriority.Background);
                     found = true;
                 }
                 else if (g.Host == e.Host || g.LaunchedAt.HasValue && g.NumPlayers == 0)
                 {
-                    Application.Current.Dispatcher.Invoke(() => games.RemoveAt(i), DispatcherPriority.Send);
+                    Application.Current.Dispatcher.Invoke(() => games.RemoveAt(i), DispatcherPriority.Background);
                 }
             }
             if (!found)
-                Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Send);
+            {
+                //await TrySetSmallPreviewAsync(e);
+                Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Background);
+            }
         }
 
-        private void Lobby_GamesReceived(object sender, GameInfoMessage[] e) =>
+        private static bool TrySetCachedImage(GameInfoMessage game, string cacheFolder, string cacheImage, bool skipCheck, out string cacheUrl)
+        {
+            if (!cacheImage.EndsWith(".png")) cacheImage += ".png";
+            cacheUrl = cacheFolder + cacheImage;
+            if (!skipCheck && !File.Exists(cacheUrl))
+            {
+                return false;
+            }
+            SetSmallPreview(game, cacheUrl);
+            return true;
+        }
+        private static void SetSmallPreview(GameInfoMessage game, string cache)
+        {
+            game.SmallMapPreview = cache;
+            game.OnPropertyChanged(nameof(game.SmallMapPreview));
+        }
+        List<string> DownloadsInWork = new List<string>();
+        private async Task<bool> DownloadAndCacheImage(string download, string cache)
+        {
+            if (DownloadsInWork.Any(d => d == download)) return true;
+            DownloadsInWork.Add(download);
+            var client = HttpClient;
+            var response = await client.GetAsync(download);
+            if (!response.IsSuccessStatusCode) return false;
+            using var fs = new FileStream(cache, FileMode.Create);
+            await response.Content.CopyToAsync(fs);
+            fs.Close();
+            await fs.DisposeAsync();
+            DownloadsInWork.Remove(download);
+            return true;
+        }
+        List<string> MapGensInWork = new List<string>();
+        private async Task<bool> TrySetSmallPreviewAsync(GameInfoMessage game)
+        {
+            if (TrySetCachedImage(game, "C:\\ProgramData\\FAForever\\cache\\maps\\small\\", game.Mapname, false, out var cache)) return true;
+            if (game.Mapname.Contains("neroxis"))
+            {
+                var mapgen = "C:\\ProgramData\\FAForever\\cache\\maps\\small\\neroxis_map_generator_preview.png";
+                if (File.Exists(mapgen))
+                {
+                    SetSmallPreview(game, mapgen);
+                    return true;
+                }
+                using var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("Ethereal.FAF.UI.Client.Resources.neroxis_map_generator_preview.png");
+                using var fs = new FileStream(mapgen, FileMode.Create);
+                await s.CopyToAsync(fs);
+                await s.FlushAsync();
+                s.Close();
+                fs.Close();
+                await s.DisposeAsync();
+                await fs.DisposeAsync();
+                SetSmallPreview(game, mapgen);
+                return true;
+                //var map = maps + game.Mapname;
+                //var preview = maps + '\\' + game.Mapname + '\\' + game.Mapname + "_preview.png";
+                //if (MapGensInWork.Any(c => c == preview) || File.Exists(preview))
+                //{
+                //    SetSmallPreview(game, preview);
+                //    return true;
+                //}
+                //MapGensInWork.Add(preview);
+                //Task.Run(async () =>
+                //{
+                //    var args = new StringBuilder();
+                //    args.Append("-jar \"C:\\ProgramData\\FAForever\\map_generator\\MapGenerator_1.8.5.jar\" ");
+                //    args.Append($"--map-name {game.Mapname} ");
+                //    args.Append($"--folder-path \"{maps}\" ");
+                //    var t = args.ToString();
+                //    var process = new Process()
+                //    {
+                //        StartInfo = new("java", args.ToString()),
+                //    };
+                //    process.Start();
+                //    await process.WaitForExitAsync();
+                //    MapGensInWork.Remove(preview);
+                //    if (!File.Exists(preview)) return;
+                //    SetSmallPreview(game, preview);
+                //}).SafeFireAndForget();
+                //return true;
+            }
+            var download = $"https://content.faforever.com/maps/previews/small/{game.Mapname}.png";
+            await DownloadAndCacheImage(download, cache);
+            SetSmallPreview(game, cache);
+            return true;
+        }
+
+        private void Lobby_GamesReceived(object sender, GameInfoMessage[] e)
+        {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Games = new(e);
-            }, DispatcherPriority.Send);
+            }, DispatcherPriority.Background);
+        }
+
+        private ICommand _ChangeLiveButton;
+        public ICommand ChangeLiveButton => _ChangeLiveButton ??= new LambdaCommand(OnChangeButton, CanChangeButton);
+        private bool CanChangeButton(object arg) => IsLiveInputEnabled;
+        private void OnChangeButton(object obj) => IsLive = !IsLive;
 
         #region HostGame
         private AsyncCommand _HostGameCommand;
@@ -372,6 +506,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             catch (Exception ex)
             {
+                GameLauncher.ForgedAlliance = null;
+                GameLauncher.LastGameUID = null;
+                await SnackbarService.ShowAsync("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
                 ContainerViewModel.SplashVisibility = Visibility.Collapsed;
                 ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
             }

@@ -211,7 +211,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         if (game.Games is not null)
                         {
                             GamesReceived?.Invoke(this, game.Games);
-                            Authorized.Invoke(this, true);
+                            Authorized?.Invoke(this, true);
                         }
                         else
                         {

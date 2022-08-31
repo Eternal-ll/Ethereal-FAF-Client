@@ -13,7 +13,6 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 .Документация/
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -22,6 +21,7 @@
 x64/
 x86/
 bld/
+!jre/bin/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
