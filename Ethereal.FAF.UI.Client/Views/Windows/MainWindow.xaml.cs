@@ -32,7 +32,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private readonly IThemeService _themeService;
         private readonly ITaskBarService _taskBarService;
         private readonly IConfiguration Configuration;
-        private readonly LobbyClient LobbyViewModel;
+        private readonly LobbyClient LobbyClient;
         private readonly ContainerViewModel Container;
         private readonly IServiceProvider ServiceProvider;
         private readonly TokenProvider TokenProvider;
@@ -48,7 +48,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IThemeService themeService,
             ITaskBarService taskBarService,
             IConfiguration configuration,
-            LobbyClient lobbyViewModel,
+            LobbyClient lobbyClient,
             IServiceProvider serviceProvider,
             TokenProvider tokenProvider,
             IHost host)
@@ -64,8 +64,8 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             Container = viewModel;
             Configuration = configuration;
-            LobbyViewModel = lobbyViewModel;
-            lobbyViewModel.Authorized += LobbyViewModel_Authorized;
+            LobbyClient = lobbyClient;
+            lobbyClient.Authorized += LobbyViewModel_Authorized;
 
             // Initial preparation of the window.
             InitializeComponent();
@@ -101,7 +101,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
                     if (Container.Content is not null) return;
                     Container.SplashVisibility = Visibility.Collapsed;
                     Container.SplashProgressVisibility = Visibility.Collapsed;
-                    SplashProgressLabel.Text = "Waiting ending of match";
+                    //Container.SplashText = "Waiting ending of match";
                     //RenderSize = new(1280, 720);
                     //Width = 1280;
                     //Height = 720;
@@ -257,7 +257,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 {
                     var user = JsonSerializer.Deserialize<Ext>(ext.ToString()).Username;
                     SplashProgress.Report($"Hi, {user} !");
-                    LobbyViewModel.ConnectAndAuthorizeAsync(result.TokenBearer.AccessToken, SplashProgress);
+                    LobbyClient.ConnectAndAuthorizeAsync(result.TokenBearer.AccessToken, SplashProgress);
                 }
             }
         }

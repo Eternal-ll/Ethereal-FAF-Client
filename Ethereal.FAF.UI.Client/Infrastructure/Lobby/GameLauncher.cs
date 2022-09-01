@@ -198,6 +198,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 if (game.Mapname.StartsWith("neroxis_map_generator_"))
                 {
+                    progress?.Report("Generating map");
                     await MapGenerator.GenerateMap(game.Mapname, MapsService.MapsFolder, cancellationToken, progress);
 
                     game.SmallMapPreview = MapsService.MapsFolder + game.Mapname + '/' + game.Mapname + "_preview.png";
@@ -213,6 +214,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
             if (cancellationToken.IsCancellationRequested) return;
             LobbyClient.SendAsync(ServerCommands.JoinGame(game.Uid.ToString()));
+            progress?.Report("Waiting ending of match");
         }
     }
 }

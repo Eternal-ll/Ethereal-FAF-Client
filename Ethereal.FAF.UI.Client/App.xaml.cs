@@ -112,7 +112,8 @@ namespace Ethereal.FAF.UI.Client
                 lobbyClient: s.GetService<LobbyClient>(),
                 javaRuntimeFile: configuration.GetValue<string>("Paths:Java:Executable"),
                 iceClientJar: configuration.GetValue<string>("Paths:IceAdapter:Executable"),
-                iceClientLogging: configuration.GetValue<string>("Paths:IceAdapter:Logs")));
+                iceClientLogging: configuration.GetValue<string>("Paths:IceAdapter:Logs"),
+                snackbarService: s.GetService<SnackbarService>()));
 
             services.AddScoped<GameLauncher>();
 

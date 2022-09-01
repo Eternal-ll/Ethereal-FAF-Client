@@ -115,6 +115,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly SnackbarService SnackbarService;
         private readonly ContainerViewModel ContainerViewModel;
 
+                
+
 
         private readonly GameLauncher GameLauncher;
 
@@ -503,30 +505,29 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ContainerViewModel.SplashVisibility = Visibility.Visible;
             ContainerViewModel.SplashText = "Confirming patch";
             IProgress<string> progress = new Progress<string>(e => ContainerViewModel.SplashText = e);
-            
-            try
-            {
-                await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token);
-            }
-            catch (Exception ex)
-            {
-                GameLauncher.Process = null;
-                GameLauncher.LastGameUID = null;
-                await SnackbarService.ShowAsync("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
-                ContainerViewModel.SplashVisibility = Visibility.Collapsed;
-                ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
-                return;
-            }
-            if (!CancellationTokenSource.IsCancellationRequested)
-            {
-                ContainerViewModel.Content = new MatchView(IceManager, game);
-                ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
-            }
-            progress.Report("Waiting ending of match");
-            //snackbar.Timeout = 5000;
-            var snackbar = SnackbarService.GetSnackbarControl();
-            var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";
-            snackbar.Show("Notification", notify);
+
+            await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token)
+                .ContinueWith(async t =>
+                {
+                    if (t.IsCanceled || t.IsFaulted)
+                    {
+                        GameLauncher.Process = null;
+                        GameLauncher.LastGameUID = null;
+                        await SnackbarService.ShowAsync("Exception", t.Exception.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
+                        ContainerViewModel.SplashVisibility = Visibility.Collapsed;
+                        ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
+                    }
+                    if (!CancellationTokenSource.IsCancellationRequested)
+                    {
+                        ContainerViewModel.Content = new MatchView(IceManager, game);
+                        ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
+                    }
+                    progress.Report("Waiting ending of match");
+                    //snackbar.Timeout = 5000;
+                    var snackbar = SnackbarService.GetSnackbarControl();
+                    var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";
+                    snackbar.Show("Notification", notify);
+                });
         } 
         #endregion
 
@@ -537,3 +538,4 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
     }
 }
+    

@@ -19,6 +19,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="path"></param>
         /// <returns></returns>
         public static string SetFolderPath(string path) => $"--folder-path \"{path}\" ";
+        public static string SetMapName(string map) => $"--map-name {map} ";
     }
     public class MapGenerator
     {
@@ -40,7 +41,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             StartInfo = new ProcessStartInfo
             {
                 FileName = JavaRuntime,
-                Arguments = $"-jar \"{Jar}\" "
+                Arguments = $"-jar \"{Jar}\" ",
+                RedirectStandardOutput = true,
             }
         };
 
@@ -49,8 +51,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             var process = GetProcess();
             var args = process.StartInfo.Arguments;
-            args += MapGeneratorArguments.SetSeed(seed);
+            args += MapGeneratorArguments.SetMapName(seed);
             args += MapGeneratorArguments.SetFolderPath(targetFolder);
+            process.StartInfo.Arguments = args;
             try
             {
                 if (!process.Start())
@@ -62,7 +65,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 return (false, ex.Message);
             }
-            process.OutputDataReceived += (s, e) => progress?.Report(e.Data);
+            while (!process.HasExited)
+            {
+                var data = await process.StandardOutput.ReadLineAsync();
+                progress?.Report(data);
+            }
             await process.WaitForExitAsync(cancellationToken);
             return (true, "");
         }

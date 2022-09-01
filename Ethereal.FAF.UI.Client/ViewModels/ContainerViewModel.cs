@@ -39,7 +39,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public string SplashText
         {
             get => _SplashText;
-            set => Set(ref _SplashText, value);
+            set
+            {
+                if (!Set(ref _SplashText, value))
+                {
+                    _SplashText = value;
+                    OnPropertyChanged(nameof(SplashText));
+                }
+            }
         }
         #endregion
         #region Content
