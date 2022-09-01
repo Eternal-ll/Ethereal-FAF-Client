@@ -67,7 +67,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             LobbyClient.DisconnectAsync(false);
             LobbyClient.Dispose();
-            IceManager.IceServer?.Process?.Kill();
+            IceManager.IceServer?.Kill();
             _notifyIconService.Unregister();
             await Task.CompletedTask;
         }

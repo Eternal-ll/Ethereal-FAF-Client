@@ -21,6 +21,8 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using System;
 using Ethereal.FAF.API.Client;
 using System.Windows.Controls;
+using static Ethereal.FAF.API.Client.BuilderExtensions;
+using System.Diagnostics;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -47,6 +49,10 @@ namespace Ethereal.FAF.UI.Client
 
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fileVersionInfo.ProductVersion;
+
             var configuration = context.Configuration;
             // App Host
             services.AddHostedService<ApplicationHostService>();
@@ -67,6 +73,9 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<INavigationWindow, MainWindow>();
             services.AddScoped<ContainerViewModel>();
 
+            services.AddScoped<SnackbarService>();
+            services.AddScoped<DialogService>();
+
             services.AddScoped(p => new FafOAuthClient(
                 clientId: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
                 scope: configuration.GetValue<string>("FAForever:OAuth:Scope"),
@@ -75,22 +84,50 @@ namespace Ethereal.FAF.UI.Client
                 httpClientFactory: p.GetRequiredService<IHttpClientFactory>(),
                 logger: p.GetRequiredService<ILogger<FafOAuthClient>>()));
 
+            services.AddSingleton(s => new UidGenerator(
+                logger: s.GetService<ILogger<UidGenerator>>(),
+                uid: configuration.GetValue<string>("Paths:UidGenerator")));
+
             services.AddScoped(p=> new LobbyClient(
                 host: configuration.GetValue<string>("FAForever:Lobby:Host"),
                 port: configuration.GetValue<int>("FAForever:Lobby:Port"),
-                logger: p.GetRequiredService<ILogger<LobbyClient>>()));
+                logger: p.GetRequiredService<ILogger<LobbyClient>>(),
+                uidGenerator: p.GetService<UidGenerator>(),
+                userAgent: configuration.GetValue<string>("OAuth:ClientId"),
+                userAgentVersion: version));
 
             services.AddSingleton<TokenProvider>();
 
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
 
-            services.AddScoped<PatchClient>();
-            services.AddScoped<IceManager>();
+            services.AddScoped(s=> new PatchClient(
+                logger: s.GetService<ILogger<PatchClient>>(),
+                serviceProvider: s,
+                patchFolder: configuration.GetValue<string>("Paths:Patch"),
+                tokenProvider: s.GetService<ITokenProvider>()));
+            
+            services.AddScoped(s=> new IceManager(
+                logger: s.GetService<ILogger<IceManager>>(),
+                lobbyClient: s.GetService<LobbyClient>(),
+                javaRuntimeFile: configuration.GetValue<string>("Paths:Java:Executable"),
+                iceClientJar: configuration.GetValue<string>("Paths:IceAdapter:Executable"),
+                iceClientLogging: configuration.GetValue<string>("Paths:IceAdapter:Logs")));
+
             services.AddScoped<GameLauncher>();
 
-            services.AddScoped<SnackbarService>();
-            services.AddScoped<DialogService>();
+            services.AddTransient(s => new MapGenerator(
+                javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
+                jar: configuration.GetValue<string>("Paths:MapGenerator:Executable"),
+                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs")));
+
+            services.AddScoped(s => new MapsService(
+                mapsFolder: configuration.GetValue<string>("Paths:Maps"),
+                baseAddress: configuration.GetValue<string>("FAForever:Content"),
+                httpClientFactory: s.GetService<IHttpClientFactory>(),
+                logger: s.GetService<ILogger<MapsService>>()));
+
+            services.AddScoped<ITokenProvider, TokenProvider>();
 
             services.AddFafApi();
 

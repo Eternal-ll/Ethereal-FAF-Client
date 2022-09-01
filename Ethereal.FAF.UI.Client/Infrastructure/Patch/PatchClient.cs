@@ -16,6 +16,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
     {
         private readonly ILogger Logger;
         private readonly IServiceProvider ServiceProvider;
+        private readonly ITokenProvider TokenProvider;
 
         private readonly FileSystemWatcher[] FolderWatchers;
         private readonly DirectoryInfo PatchDirectory;
@@ -27,9 +28,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private bool IsFilesChanged;
         private bool DownloadingFiles;
 
-        public PatchClient(ILogger<PatchClient> logger, IServiceProvider serviceProvider)
+        public PatchClient(ILogger<PatchClient> logger, IServiceProvider serviceProvider, string patchFolder, ITokenProvider tokenProvider)
         {
-            var baseDirectory = @"C:\ProgramData\FAForever\";
+            var baseDirectory = patchFolder;
             logger.LogTrace("Initializing with base directory: [{}]", baseDirectory);
             Logger = logger;
             var bin = baseDirectory + "bin";
@@ -83,10 +84,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 IsFilesChanged = true;
             }
             ServiceProvider = serviceProvider;
+            TokenProvider = tokenProvider;
         }
 
-        public async Task UpdatePatch(FeaturedMod mod, string accessToken, int version = 0, bool forceCheck = false, CancellationToken cancellationToken = default, IProgress<string> progress = null)
+        public async Task UpdatePatch(FeaturedMod mod, int version = 0, bool forceCheck = false, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
+            var accessToken = TokenProvider.GetToken();
             var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";
             Logger.LogTrace("Checking patch for [{}] version [{}] with forced confirmation [{}]", mod, version, forceCheck);
             // last patch url was the same

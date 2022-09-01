@@ -36,12 +36,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             else
             {
-                await Task.Delay(55000);
+                await Task.Delay(TimeSpan.FromMinutes(55), cancellationToken);
             }
             while (!cancellationToken.IsCancellationRequested)
             {
                 await RefreshToken(cancellationToken);
-                await Task.Delay(55000, cancellationToken);
+                await Task.Delay(TimeSpan.FromMinutes(55), cancellationToken);
             }
         }
 

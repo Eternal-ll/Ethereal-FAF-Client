@@ -109,12 +109,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient Lobby;
-        private readonly GameLauncher GameLauncher;
         private readonly DispatcherTimer Timer;
         private readonly IceManager IceManager;
 
         private readonly SnackbarService SnackbarService;
         private readonly ContainerViewModel ContainerViewModel;
+
+
+        private readonly GameLauncher GameLauncher;
 
         private readonly HttpClient HttpClient;
         public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient)
@@ -378,6 +380,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (TrySetCachedImage(game, "C:\\ProgramData\\FAForever\\cache\\maps\\small\\", game.Mapname, false, out var cache)) return true;
             if (game.Mapname.Contains("neroxis"))
             {
+                if (game.SmallMapPreview is not null) return true;
                 var mapgen = "C:\\ProgramData\\FAForever\\cache\\maps\\small\\neroxis_map_generator_preview.png";
                 if (File.Exists(mapgen))
                 {
@@ -444,7 +447,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private AsyncCommand _HostGameCommand;
         public AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
 
-        private bool CanHostGameCommand(object arg) => GameLauncher.ForgedAlliance is null;
+        private bool CanHostGameCommand(object arg) => GameLauncher.Process is null;
 
         private async Task OnHostGameCommandAsync()
         {
@@ -484,9 +487,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SnackbarService.Show("Warning", "Game is password protected", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            if (game.Mapname.Contains("neroxis"))
+            if (game.Mapname.Contains("neroxis_map_generator_") && !game.Mapname.Contains("1.8.5"))
             {
-                SnackbarService.Show("Warning", "Neroxis generator not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+                SnackbarService.Show("Warning", "Client supports only 1.8.5 version of map generator", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
             if (game.SimMods is not null && game.SimMods.Count > 0)
@@ -500,17 +503,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ContainerViewModel.SplashVisibility = Visibility.Visible;
             ContainerViewModel.SplashText = "Confirming patch";
             IProgress<string> progress = new Progress<string>(e => ContainerViewModel.SplashText = e);
+            
             try
             {
-                await GameLauncher.JoinGame(game, CancellationTokenSource.Token, progress);
+                await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
-                GameLauncher.ForgedAlliance = null;
+                GameLauncher.Process = null;
                 GameLauncher.LastGameUID = null;
                 await SnackbarService.ShowAsync("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
                 ContainerViewModel.SplashVisibility = Visibility.Collapsed;
                 ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
+                return;
             }
             if (!CancellationTokenSource.IsCancellationRequested)
             {

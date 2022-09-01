@@ -59,7 +59,22 @@
 
 
             <DataTemplate x:Key="DefaultCard" DataType="{x:Type models:GameInfoMessage}">
-                <Border Style="{StaticResource CardBorder}" Cursor="Hand" ToolTip="{Binding SmallMapPreview}">
+                <Border Style="{StaticResource CardBorder}" Cursor="Hand">
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding State}" Value="1">
+                                                <Setter Property="Text" Value="Double click to join"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </ToolTip>
+                    </Border.ToolTip>
                     <Border.InputBindings>
                         <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Grid}}, 
                             Path=DataContext.ViewModel.JoinGameCommand}" CommandParameter="{Binding}"/>
@@ -145,13 +160,13 @@
         <WrapPanel Margin="0 0 0 10">
             <ComboBox Width="100" SelectedItem="{Binding ViewModel.SelectedGameMode}" ItemsSource="{Binding ViewModel.GameModes}" Padding="10 5.5"
                       ToolTip="Game mode"/>
-            <ComboBox Width="100" Margin="10 0 0 0" Padding="10 5.5" SelectedValue="Filter">
+            <!--<ComboBox Width="100" Margin="10 0 0 0" Padding="10 5.5" SelectedValue="Filter">
                 <ComboBoxItem Content="Filter"/>
                 <ComboBoxItem Content="Filter"/>
                 <ComboBoxItem Content="Filter"/>
                 <ComboBoxItem Content="Filter"/>
                 <ComboBoxItem Content="Filter"/>
-            </ComboBox>
+            </ComboBox>-->
             <!--<Grid Width="200" Margin="10 0 0 0">
                 <ComboBox Padding="90 5.5 10 5.5">
                     <ComboBoxItem Content="filter"/>

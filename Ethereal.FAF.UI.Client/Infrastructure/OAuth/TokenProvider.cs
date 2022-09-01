@@ -1,9 +1,10 @@
 ﻿using Ethereal.FAF.UI.Client.Properties;
 using System.IdentityModel.Tokens.Jwt;
+using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {
-    public class TokenProvider
+    public class TokenProvider : ITokenProvider
     {
         // /init init_faf.lua /gpgnet 127.0.0.1:5636 /mean 1500 /deviation 500 /numgaes /country RU /clan ZFG
         public TokenBearer TokenBearer { get; private set; }
@@ -39,5 +40,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
             Settings.Default.Token = token;
             Settings.Default.Save();
         }
+
+        public string GetToken() => TokenBearer.AccessToken;
     }
 }

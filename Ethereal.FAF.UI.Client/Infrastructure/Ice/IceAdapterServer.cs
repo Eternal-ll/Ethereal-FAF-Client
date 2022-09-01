@@ -5,7 +5,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
     public class IceServer
     {
         public readonly Process Process;
-        public IceServer(string playerId, string playerLogin, int rpcPort, int gpgnetPort, string file)
+        public IceServer(string playerId, string playerLogin, int rpcPort, int gpgnetPort, string file, string java)
         {
             // load settings to show ice window
             // ...
@@ -18,7 +18,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             {
                 StartInfo = new()
                 {
-                    FileName = $"java",
+                    FileName = java,
                     Arguments = $"-jar \"{file}\" {args}",
                     UseShellExecute = false,
                     //RedirectStandardOutput = true,

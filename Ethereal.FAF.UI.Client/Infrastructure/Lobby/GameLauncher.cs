@@ -1,17 +1,15 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,25 +21,28 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         private readonly LobbyClient LobbyClient;
         private readonly PatchClient PatchClient;
+        private readonly MapsService MapsService;
+        private readonly MapGenerator MapGenerator;
         private readonly IceManager IceManager;
-        private readonly TokenProvider TokenProvider;
         private readonly ILogger Logger;
+        private readonly IConfiguration Configuration;
 
         private readonly IHttpClientFactory HttpClientFactory;
 
         public long? LastGameUID;
-        public Process ForgedAlliance;
+        public Process Process;
 
-        public GameLauncher(LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, TokenProvider tokenProvider, PatchClient patchClient, IHttpClientFactory httpClientFactory)
+        public GameLauncher(IConfiguration configuration, LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, PatchClient patchClient, IHttpClientFactory httpClientFactory, MapsService mapsService, MapGenerator mapGenerator)
         {
+            Configuration = configuration;
             LobbyClient = lobbyClient;
             IceManager = iceManager;
             Logger = logger;
 
             lobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
-            TokenProvider = tokenProvider;
             PatchClient = patchClient;
-            HttpClientFactory = httpClientFactory;
+            HttpClientFactory = httpClientFactory; MapsService = mapsService;
+            MapGenerator = mapGenerator;
         }
 
         private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e)
@@ -101,20 +102,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         {
             LastGameUID = e.uid;
             LobbyClient.LastGameUID = LastGameUID;
-            var jwt = TokenProvider.JwtSecurityToken;
-            if (jwt is null)
-            {
-                Logger.LogError("Access token is null, cant get player data");
-                return;
-            }
-            if (!jwt.Payload.TryGetValue("ext", out var ext))
-            {
-                Logger.LogError("User data not found in JWT payload [{}]", jwt.Payload);
-                return;
-            }
-            var login = JsonSerializer.Deserialize<Ext>(ext.ToString()).Username;
-            var id = jwt.Subject;
-            IceManager.Initialize(id, login);
+            var me = LobbyClient.Self;
+            IceManager.Initialize(me.Id.ToString(), me.Login);
             IceManager.IceClient.SetLobbyInitMode(e.init_mode
                 .ToString()
                 .ToLower());
@@ -147,29 +136,38 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //    arguments.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\" ");
             //}
             // append game logger
-            //bool isLogging = false;
-            //if (isLogging)
-            //{
-            //    arguments.Append($"/log \"C:\\ProgramData\\FAForever\\logs\\game.uid.{e.uid}.log\" ");
-            //}
+            bool isLogging = false;
+            if (isLogging)
+            {
+                var logs = Configuration.GetValue<string>("Paths:GameLogs");
+                if (string.IsNullOrWhiteSpace(logs))
+                {
+
+                }
+                else
+                {
+                    logs = string.Format(logs, e.uid);
+                    arguments.Append($"/log \"{logs}\" ");
+                }
+            }
             Logger.LogWarning($"Starting game with args: {arguments}");
-            ForgedAlliance = new()
+            Process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = @"C:\ProgramData\FAForever\bin\ForgedAlliance.exe",
+                    FileName = Configuration.GetValue<string>("Paths:Patch") + "bin/ForgedAlliance.exe",
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
             };
             try
             {
-                if (!ForgedAlliance.Start())
+                if (!Process.Start())
                 {
                     Logger.LogError("Cant start game");
                     throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
                 }
-                await ForgedAlliance.WaitForExitAsync();
+                await Process.WaitForExitAsync();
             }
             catch
             {
@@ -178,10 +176,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
             IceManager.IceClient.DisconnectAsync();
             IceManager.IceClient.Dispose();
-            IceManager.IceServer?.Process?.Kill();
-            ForgedAlliance.Close();
-            ForgedAlliance.Dispose();
-            ForgedAlliance = null;
+            IceManager.IceServer.Close();
+            //IceManager.IceServer?.Kill();
+            Process.Kill();
+            Process.Dispose();
+            Process = null;
             LeftFromGame?.Invoke(this, null);
             //await ice.CloseAsync();
             //ice.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
@@ -193,25 +192,24 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             LastGameUID = null;
             LobbyClient.LastGameUID = null;
         }
-        public async Task JoinGame(GameInfoMessage game, CancellationToken cancellationToken = default, IProgress<string> progress = null)
+        public async Task JoinGame(GameInfoMessage game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
-            var map = Environment.ExpandEnvironmentVariables(@"C:\Users\%username%\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance\Maps\");
-
-            if (!Directory.Exists(map + game.Mapname))
+            if (!MapsService.IsExist(game.Mapname))
             {
-                var client = HttpClientFactory.CreateClient();
-                using var fs = new FileStream(game.Mapname + ".zip", FileMode.Create);
-                var response = await client.GetAsync($"https://content.faforever.com/{game.MapFilePath}", cancellationToken);
-                progress?.Report($"Downloading map [{game.Mapname + ".zip"}]");
-                await response.Content.CopyToAsync(fs, cancellationToken);
-                fs.Close();
-                progress?.Report($"Extracting map [{game.Mapname + ".zip"}]");
-                ZipFile.ExtractToDirectory(game.Mapname + ".zip", map, true);
-                File.Delete(game.Mapname + ".zip");
+                if (game.Mapname.StartsWith("neroxis_map_generator_"))
+                {
+                    await MapGenerator.GenerateMap(game.Mapname, MapsService.MapsFolder, cancellationToken, progress);
+
+                    game.SmallMapPreview = MapsService.MapsFolder + game.Mapname + '/' + game.Mapname + "_preview.png";
+                    game.OnPropertyChanged(nameof(game.SmallMapPreview));
+                }
+                else
+                {
+                    await MapsService.DownloadAsync(game.Mapname, game.MapFilePath, progress, cancellationToken);
+                }
             }
 
-
-            await PatchClient.UpdatePatch(game.FeaturedMod, TokenProvider.TokenBearer.AccessToken, 0, false, cancellationToken, progress);
+            await PatchClient.UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
 
             if (cancellationToken.IsCancellationRequested) return;
             LobbyClient.SendAsync(ServerCommands.JoinGame(game.Uid.ToString()));

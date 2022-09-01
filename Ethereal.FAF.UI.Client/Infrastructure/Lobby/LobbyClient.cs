@@ -3,7 +3,6 @@ using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -37,7 +36,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<MatchFoundData> MatchFoundDataReceived;
 
         private readonly ILogger Logger;
+        private readonly UidGenerator UidGenerator;
         private readonly string Host;
+        private readonly string UserAgent;
+        private readonly string UserAgentVersion;
 
         private string AccessToken;
         private string Uid;
@@ -49,16 +51,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         private IProgress<string> SplashProgress;
 
-        public LobbyClient(string host, int port, ILogger logger)
+        public LobbyClient(string host, int port, ILogger logger, UidGenerator uidGenerator, string userAgent, string userAgentVersion)
             : base(address: Dns.GetHostEntry(host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork),
                   port: port)
         {
             Host = host;
             Logger = logger;
             logger.LogTrace("Initialized with host [{host}] on port [{port}]", host, port);
+            UidGenerator = uidGenerator;
+            UserAgent = userAgent;
+            UserAgentVersion = userAgentVersion;
         }
 
-        public void AskSession() => SendAsync(ServerCommands.AskSession("ethereal-faf-client", "0.0.1"));
+        public void AskSession() => SendAsync(ServerCommands.AskSession(UserAgent, UserAgentVersion));
         public override bool SendAsync(string text)
         {
             Logger.LogTrace(text);
@@ -163,7 +168,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.session:
                         if (Session is not null && Uid is not null) return;
                         var session = data.Split(':')[^1].Split('}')[0];
-                        var uid = await GenerateUID(session);
+                        var uid = await UidGenerator.GenerateUID(session, SplashProgress);
                         Session = session;
                         Uid = uid;
                         if (AccessToken is null) return;
@@ -278,34 +283,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         protected override void OnError(SocketError error)
         {
             Logger.LogError("Client caught an error with code [{error}]", @error);
-        }
-
-        public async Task<string> GenerateUID(string session, IProgress<string> progress = null)
-        {
-            Logger.LogTrace("Generating UID for session [{session}]", session);
-            SplashProgress?.Report($"Generating UID for session: {session}");
-            Process process = new()
-            {
-                StartInfo = new()
-                {
-                    FileName = "Third-party applications/faf-uid.exe",
-                    Arguments = session,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true,
-                }
-            };
-            Logger.LogTrace("Launching UID generator on [{fafuid}]", process.StartInfo.FileName);
-            process.Start();
-            Logger.LogTrace("Reading output...");
-            string result = await process.StandardOutput.ReadLineAsync();
-            Logger.LogTrace("Done reading ouput");
-            Logger.LogTrace("Generated UID: [{uid}]", result);
-            SplashProgress?.Report($"Generated UID: {result[..10]}...");
-            Logger.LogTrace("Closing UID generator...");
-            process.Close();
-            Logger.LogTrace("UID closed");
-            return result;
         }
 
         public void ConnectAndAuthorizeAsync(string accessToken, IProgress<string> progress = null)

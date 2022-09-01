@@ -3,8 +3,10 @@ using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -15,23 +17,29 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public event EventHandler Initialized;
 
         private readonly ILogger Logger;
-        private readonly TokenProvider TokenProvider;
         private readonly LobbyClient LobbyClient;
 
-        public IceServer IceServer;
+        private readonly string JavaRuntimeFile;
+        private readonly string IceClientJar;
+        private readonly string IceClientLogging;
+
+        public Process IceServer;
         public IceClient IceClient;
 
         public int RpcPort { get; private set; }
         public int GpgNetPort { get; private set; }
 
-        public IceManager(ILogger<IceManager> logger, TokenProvider tokenProvider, LobbyClient lobbyClient)
+        public IceManager(ILogger logger, LobbyClient lobbyClient, string javaRuntimeFile, string iceClientJar, string iceClientLogging)
         {
             Logger = logger;
-            TokenProvider = tokenProvider;
             LobbyClient = lobbyClient;
+            JavaRuntimeFile = javaRuntimeFile;
+            IceClientJar = iceClientJar;
+            IceClientLogging = iceClientLogging;
             lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
             lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
         }
+
         private string ice_servers;
         private void LobbyClient_IceServersDataReceived(object sender, IceServersData e)
         {
@@ -47,18 +55,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             Logger.LogTrace("GPG NET port: [{}]", GpgNetPort);
         }
 
-        public void Initialize(string id, string login)
+        public void Initialize(string playerId, string playerLogin)
         {
             InitializeNewPorts();
             Logger.LogTrace("Initializing Ice process with player id [{}], player login [{}], RPC port [{}], GPG NET port [{}]",
-                id, login, RpcPort, GpgNetPort);
-            IceServer?.Process?.Close();
-            IceServer = new(
-                playerId: id,
-                playerLogin: login,
-                rpcPort: RpcPort,
-                gpgnetPort: GpgNetPort,
-                file: "Third-party applications/faf-ice-adapter.jar");
+                playerId, playerLogin, RpcPort, GpgNetPort);
+            IceServer?.Close();
+            IceServer = GetIceServerProcess(playerId, playerLogin);
+            IceServer.Start();
             Logger.LogTrace("Ice server initialized");
             var host = "127.0.0.1";
             Logger.LogTrace("Initializing ICE client");
@@ -70,6 +74,39 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceClient.ConnectionToGpgNetServerChanged += IceClient_ConnectionToGpgNetServerChanged;
             Logger.LogTrace("Initialized ICE client on [{}:{}]", host, RpcPort);
             Initialized?.Invoke(this, null);
+        }
+        public Process GetIceServerProcess(string playerId, string playerLogin)
+        {
+            var rpc = RpcPort;
+            var gpgnet = GpgNetPort;
+            var jar = IceClientJar;
+            var java = JavaRuntimeFile;
+            var logging = IceClientLogging;
+            return GetIceServerProcess(playerId, playerLogin, rpc, gpgnet, jar, java, logging);
+        }
+        private static Process GetIceServerProcess(string playerId, string playerLogin, int rpcPort, int gpgnetPort, string jar, string java, string logging)
+        {
+            logging = null;
+            // load settings to show ice window
+            // ...
+            // delay window
+            // ...
+            var args = $"--id {playerId} --login {playerLogin} --rpc-port {rpcPort} --gpgnet-port {gpgnetPort} --log-level debug";
+            // --info-window
+            // --delay-ui time
+            Process process = new()
+            {
+                StartInfo = new()
+                {
+                    FileName = java,
+                    Arguments = $"-jar \"{jar}\" {args}",
+                    UseShellExecute = false,
+                    //RedirectStandardOutput = true,
+                    //RedirectStandardError = true,
+                    //CreateNoWindow = true,
+                }
+            };
+            return process;
         }
 
         private void IceClient_ConnectionToGpgNetServerChanged(object sender, bool e)
