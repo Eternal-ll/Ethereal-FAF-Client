@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -154,8 +156,19 @@ namespace FAF.UI.EtherealClient.Views.Windows
             _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
             Task.Run(async () =>
             {
+                await PrepareJavaRuntime();
                 await Auth();
             });
+        }
+
+        private async Task PrepareJavaRuntime()
+        {
+            if (!Directory.Exists("Exernal/jre"))
+            {
+                Container.SplashText = "Extracting portable Java runtime";
+                var process = Process.Start("External/7z.exe", "x External/jre.7z -oExternal/");
+                await process.WaitForExitAsync();
+            }
         }
 
         private void NavigationButtonTheme_OnClick(object sender, RoutedEventArgs e)
