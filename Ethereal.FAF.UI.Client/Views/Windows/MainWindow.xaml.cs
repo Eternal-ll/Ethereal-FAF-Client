@@ -5,6 +5,7 @@
 
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
+using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Humanizer;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private readonly ContainerViewModel Container;
         private readonly IServiceProvider ServiceProvider;
         private readonly TokenProvider TokenProvider;
+        private readonly PatchClient PatchClient;
 
         private readonly IHost Host;
 
@@ -53,7 +55,8 @@ namespace FAF.UI.EtherealClient.Views.Windows
             LobbyClient lobbyClient,
             IServiceProvider serviceProvider,
             TokenProvider tokenProvider,
-            IHost host)
+            IHost host,
+            PatchClient patchClient)
         {
             // Attach the theme service
             _themeService = themeService;
@@ -89,6 +92,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             ServiceProvider = serviceProvider;
             TokenProvider = tokenProvider;
             Host = host;
+            PatchClient = patchClient;
 
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
             // Wpf.Ui.Appearance.Watcher.Watch(this, Appearance.BackgroundType.Mica, true, false);
@@ -151,23 +155,31 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         private void InvokeSplashScreen()
         {
-            Container.SplashVisibility = Visibility.Visible;
-
             _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
             Task.Run(async () =>
             {
                 await PrepareJavaRuntime();
+                await InitalizePathWatchers();
                 await Auth();
             });
         }
 
+        private async Task InitalizePathWatchers()
+        {
+            Container.SplashText = "Initializing patch watcher";
+            var progress = new Progress<string>(d => Container.SplashText = d);
+            await PatchClient.InitializeWatchers(progress);
+            Container.SplashText = "Patch watcher initialized";
+        }
+
         private async Task PrepareJavaRuntime()
         {
-            if (!Directory.Exists("Exernal/jre"))
+            if (!Directory.Exists("External/jre"))
             {
                 Container.SplashText = "Extracting portable Java runtime";
                 var process = Process.Start("External/7z.exe", "x External/jre.7z -oExternal/");
                 await process.WaitForExitAsync();
+                Container.SplashText = "Poratble Java runtime extracted";
             }
         }
 
@@ -203,6 +215,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private async Task Auth()
         {
             SplashProgress = new Progress<string>(d => Container.SplashText = d);
+            SplashProgress.Report("Processing authorization");
             var token = TokenProvider.TokenBearer;
             var oauth = ServiceProvider.GetService<FafOAuthClient>();
             oauth.OAuthLinkGenerated += OnOAuthLinkGenerated;

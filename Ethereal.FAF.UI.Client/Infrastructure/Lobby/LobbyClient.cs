@@ -45,7 +45,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private string Uid;
         private string Session;
 
-        public long? LastGameUID;
+        private long? LastGameUid;
 
         public PlayerInfoMessage Self;
 
@@ -187,10 +187,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         SendAsync(ServerCommands.RequestIceServers);
                         SplashProgress?.Report("Welcome to FAForever lobby!");
 
-                        if (LastGameUID.HasValue)
+                        if (LastGameUid.HasValue)
                         {
-                            SplashProgress?.Report("Restoring session: " + LastGameUID.Value);
-                            SendAsync(ServerCommands.RestoreGameSession(LastGameUID.Value.ToString()));
+                            SplashProgress?.Report("Restoring session: " + LastGameUid.Value);
+                            SendAsync(ServerCommands.RestoreGameSession(LastGameUid.Value.ToString()));
                         }
                         break;
                     case ServerCommand.social:
@@ -277,6 +277,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     default:
                         break;
                 }
+            }
+        }
+
+        public bool CanJoinGame() => LastGameUid.HasValue;
+
+        public void JoinGame(long uid)
+        {
+            if (SendAsync(ServerCommands.JoinGame(uid.ToString())))
+            {
+                LastGameUid = uid;
             }
         }
 

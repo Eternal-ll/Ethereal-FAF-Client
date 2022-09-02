@@ -100,13 +100,13 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
 
-            services.AddScoped(s=> new PatchClient(
+            services.AddScoped(s => new PatchClient(
                 logger: s.GetService<ILogger<PatchClient>>(),
                 serviceProvider: s,
                 patchFolder: configuration.GetValue<string>("Paths:Patch"),
                 tokenProvider: s.GetService<ITokenProvider>()));
             
-            services.AddScoped(s=> new IceManager(
+            services.AddScoped(s => new IceManager(
                 logger: s.GetService<ILogger<IceManager>>(),
                 lobbyClient: s.GetService<LobbyClient>(),
                 javaRuntimeFile: configuration.GetValue<string>("Paths:Java:Executable"),
@@ -118,14 +118,17 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient(s => new MapGenerator(
                 javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
-                jar: configuration.GetValue<string>("Paths:MapGenerator:Executable"),
                 logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
-                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath")));
+                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
+                mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
+                mapGeneratorRepository: configuration.GetValue<string>("Paths:MapGenerator:Github"),
+                httpClientFactory: s.GetService<IHttpClientFactory>(),
+                logger: s.GetService<ILogger<MapGenerator>>()));
 
             var vault = configuration.GetValue<string>("Paths:Vault") + "maps/";
             if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
             {
-                vault = customVaultPath;
+                vault = customVaultPath + "maps/";
             }
             services.AddScoped(s => new MapsService(
                 mapsFolder: vault,

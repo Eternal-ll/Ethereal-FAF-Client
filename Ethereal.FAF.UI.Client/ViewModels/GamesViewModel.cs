@@ -108,7 +108,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
     public class GamesViewModel : Base.ViewModel
     {
-        private readonly LobbyClient Lobby;
+        private readonly LobbyClient LobbyClient;
         private readonly DispatcherTimer Timer;
         private readonly IceManager IceManager;
 
@@ -123,14 +123,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly HttpClient HttpClient;
         public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient)
         {
-            Lobby = lobby;
+            LobbyClient = lobby;
             GameLauncher = gameLauncher;
             SnackbarService = snackbarService;
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
             //lobby.NotificationReceived += (s, e) => snackbarService.Show("Notification from server", e.text);
 
-            GameLauncher.LeftFromGame += GameLauncher_LeftFromGame;
+            GameLauncher.StateChanged += GameLauncher_StateChanged;
 
             SelectedGameMode = "Custom";
 
@@ -150,11 +150,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             HttpClient = httpClient;
         }
 
-        private void GameLauncher_LeftFromGame(object sender, EventArgs e)
+        private void GameLauncher_StateChanged(object sender, GameLauncherState e)
         {
-            ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
-            ContainerViewModel.SplashVisibility = Visibility.Collapsed;
-            ContainerViewModel.Content = null;
+            if (e is GameLauncherState.Idle)
+            {
+                ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
+                ContainerViewModel.SplashVisibility = Visibility.Collapsed;
+                ContainerViewModel.Content = null;
+            }
         }
 
         #region SelectedRatingType
@@ -449,13 +452,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private AsyncCommand _HostGameCommand;
         public AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
 
-        private bool CanHostGameCommand(object arg) => GameLauncher.Process is null;
+        private bool CanHostGameCommand(object arg) => GameLauncher.State is GameLauncherState.Idle;
 
         private async Task OnHostGameCommandAsync()
         {
+            if (GameLauncher.State is not GameLauncherState.Idle) return;
             var host = ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001");
-            //Console.WriteLine(host);
-            Lobby.SendAsync(host);
+            LobbyClient.SendAsync(host);
         }
         #endregion
 
@@ -473,9 +476,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 return;
             }
-            if (Lobby.LastGameUID.HasValue)
+            if (GameLauncher.State is not GameLauncherState.Idle)
             {
-                SnackbarService.Show("Warning", "Game is already running", Wpf.Ui.Common.SymbolRegular.Warning24);
+                SnackbarService.Show("Warning", $"Cant join game while launcher in state [{GameLauncher.State}]", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
             if (game.GameType is GameType.MatchMaker) return;
@@ -499,8 +502,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SnackbarService.Show("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            //snackbar.Timeout = int.MaxValue;
-            //snackbar.Closed += Snackbar_Closed;
             CancellationTokenSource = new CancellationTokenSource();
             ContainerViewModel.SplashVisibility = Visibility.Visible;
             ContainerViewModel.SplashText = "Confirming patch";
@@ -511,8 +512,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     if (t.IsCanceled || t.IsFaulted)
                     {
-                        GameLauncher.Process = null;
-                        GameLauncher.LastGameUID = null;
                         await SnackbarService.ShowAsync("Exception", t.Exception.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
                         ContainerViewModel.SplashVisibility = Visibility.Collapsed;
                         ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
@@ -523,7 +522,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
                     }
                     progress.Report("Waiting ending of match");
-                    //snackbar.Timeout = 5000;
                     var snackbar = SnackbarService.GetSnackbarControl();
                     var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";
                     snackbar.Show("Notification", notify);

@@ -15,9 +15,15 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 {
+    public enum GameLauncherState
+    {
+        Idle,
+        Joining,
+        Running
+    }
     public class GameLauncher
     {
-        public event EventHandler LeftFromGame;
+        public event EventHandler<GameLauncherState> StateChanged;
 
         private readonly LobbyClient LobbyClient;
         private readonly PatchClient PatchClient;
@@ -28,9 +34,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private readonly IConfiguration Configuration;
 
         private readonly IHttpClientFactory HttpClientFactory;
+        private Process Process;
 
-        public long? LastGameUID;
-        public Process Process;
+        public GameLauncherState State { get; set; }
 
         public GameLauncher(IConfiguration configuration, LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, PatchClient patchClient, IHttpClientFactory httpClientFactory, MapsService mapsService, MapGenerator mapGenerator)
         {
@@ -100,8 +106,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private async Task RunGame(GameLaunchData e)
         {
-            LastGameUID = e.uid;
-            LobbyClient.LastGameUID = LastGameUID;
             var me = LobbyClient.Self;
             IceManager.Initialize(me.Id.ToString(), me.Login);
             IceManager.IceClient.SetLobbyInitMode(e.init_mode
@@ -188,7 +192,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Process.Kill();
             Process.Dispose();
             Process = null;
-            LeftFromGame?.Invoke(this, null);
             //await ice.CloseAsync();
             //ice.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
             //ice.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
@@ -196,8 +199,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //ice = null;
 
             LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
-            LastGameUID = null;
-            LobbyClient.LastGameUID = null;
+            OnStateChanged(GameLauncherState.Idle);
         }
         public async Task JoinGame(GameInfoMessage game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
@@ -216,12 +218,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     await MapsService.DownloadAsync(game.Mapname, game.MapFilePath, progress, cancellationToken);
                 }
             }
-
             await PatchClient.UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
-
-            if (cancellationToken.IsCancellationRequested) return;
-            LobbyClient.SendAsync(ServerCommands.JoinGame(game.Uid.ToString()));
-            progress?.Report("Waiting ending of match");
+            LobbyClient.JoinGame(game.Uid);
+        }
+        private void OnStateChanged(GameLauncherState state)
+        {
+            State = state;
+            StateChanged?.Invoke(this, state);
         }
     }
 }

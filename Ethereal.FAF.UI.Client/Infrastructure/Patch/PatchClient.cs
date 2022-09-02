@@ -23,8 +23,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         private readonly Dictionary<string, string> FilesMD5 = new();
 
-        private bool Initalized;
-
         private bool IsFilesChanged;
         private bool DownloadingFiles;
 
@@ -56,7 +54,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             finally
             {
-                Initalized = true;
                 FolderWatchers = new FileSystemWatcher[]
                 {
                     new FileSystemWatcher()
@@ -74,21 +71,28 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                         NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
                     }
                 };
-                foreach (var watcher in FolderWatchers)
-                {
-                    logger.LogTrace("File watcher initialized on [{}]", watcher.Path);
-                    Task.Run(() => ProcessPatchFiles(watcher.Path));
-                }
-                StartWatchers();
                 logger.LogTrace("Initialized with base directory: [{}]", baseDirectory);
-                IsFilesChanged = true;
             }
             ServiceProvider = serviceProvider;
             TokenProvider = tokenProvider;
         }
 
+        public async Task InitializeWatchers(IProgress<string> progress = null)
+        {
+            foreach (var watcher in FolderWatchers)
+            {
+                Logger.LogTrace("File watcher initialized on [{}]", watcher.Path);
+                await ProcessPatchFiles(watcher.Path, progress);
+                //Task.Run(() => ProcessPatchFiles(watcher.Path));
+                StartWatchers();
+                IsFilesChanged = true;
+            }
+        }
+
+
         public async Task UpdatePatch(FeaturedMod mod, int version = 0, bool forceCheck = false, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
+            progress?.Report("Confirming patch");
             var accessToken = TokenProvider.GetToken();
             var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";
             Logger.LogTrace("Checking patch for [{}] version [{}] with forced confirmation [{}]", mod, version, forceCheck);
@@ -201,13 +205,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             LastFileInWork = null;
         }
 
-        private async void ProcessPatchFiles(string path)
+        private async Task ProcessPatchFiles(string path, IProgress<string> progress = null)
         {
             var patch = new DirectoryInfo(path);
             Logger.LogTrace("Processing files in [{}]", patch.FullName);
             foreach (var file in patch.EnumerateFiles())
             {
-
                 var key = file.Directory.Name + '\\' + file.Name;
                 var md5 = await CalculateMD5(file.FullName);
                 if (!FilesMD5.TryAdd(key, md5))
@@ -216,6 +219,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                     FilesMD5[key] = md5;
                     return;
                 }
+                progress?.Report($"File added in [{key}] with MD5 [{md5[..10]}..]");
                 Logger.LogTrace("File added in [{}] [{}] with MD5 [{}]", key, file.Name, md5);
             }
         }

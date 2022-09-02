@@ -21,7 +21,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
         #region SplashVisibility
-        private Visibility _SplashVisibility;
+        private Visibility _SplashVisibility = Visibility.Visible;
         public Visibility SplashVisibility
         {
             get => _SplashVisibility;

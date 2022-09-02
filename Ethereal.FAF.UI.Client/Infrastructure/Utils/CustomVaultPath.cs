@@ -13,11 +13,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Utils
             if (File.Exists(configLua))
             {
                 var settings = File.ReadAllLines(configLua);
-                var customVaultRegex = new Regex("custom_vault_path = \"(.*)\"");
+                var customVaultRegex = new Regex("(custom_vault_path)(.*)\"(.*)\"");
                 var custom = settings.FirstOrDefault(s => customVaultRegex.IsMatch(s));
-                if (customVaultPath is not null)
+                if (custom is not null)
                 {
                     customVaultPath = customVaultRegex.Matches(custom).FirstOrDefault().Groups[^1].Value;
+                    if (customVaultPath[^1] != '/') customVaultPath += '/';
+                    return true;
                 }
             }
             return false;

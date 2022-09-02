@@ -15,11 +15,9 @@
   <ItemGroup>
     <None Remove="External\7z.dll" />
     <None Remove="External\7z.exe" />
-    <None Remove="External\faf-ice-adapter" />
     <None Remove="External\faf-ice-adapter.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
-    <None Remove="External\MapGenerator_1.8.5.jar" />
     <None Remove="Resources\logo.ico" />
     <None Remove="Resources\neroxis_map_generator_preview.png" />
     <None Remove="Resources\OAuthResult.html" />
