@@ -79,14 +79,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         public async Task InitializeWatchers(IProgress<string> progress = null)
         {
-            foreach (var watcher in FolderWatchers)
+            var tasks = new Task[FolderWatchers.Length];
+            for (int i = 0; i < FolderWatchers.Length; i++)
             {
-                Logger.LogTrace("File watcher initialized on [{}]", watcher.Path);
-                await ProcessPatchFiles(watcher.Path, progress);
-                //Task.Run(() => ProcessPatchFiles(watcher.Path));
-                StartWatchers();
-                IsFilesChanged = true;
+                var watcher = FolderWatchers[i];
+                tasks[i] = Task.Run(() => ProcessPatchFiles(watcher.Path, progress));
             }
+            Task.WaitAll(tasks);
+            StartWatchers();
+            IsFilesChanged = true;
         }
 
 

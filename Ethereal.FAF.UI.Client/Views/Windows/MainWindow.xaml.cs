@@ -177,7 +177,17 @@ namespace FAF.UI.EtherealClient.Views.Windows
             if (!Directory.Exists("External/jre"))
             {
                 Container.SplashText = "Extracting portable Java runtime";
-                var process = Process.Start("External/7z.exe", "x External/jre.7z -oExternal/");
+                var process = new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = "External/7z.exe",
+                        Arguments = "x External/jre.7z -oExternal/",
+                        UseShellExecute = false
+                    }
+
+                };
+                process.Start();
                 await process.WaitForExitAsync();
                 Container.SplashText = "Poratble Java runtime extracted";
             }
