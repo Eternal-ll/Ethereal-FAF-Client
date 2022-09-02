@@ -1,28 +1,28 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
-using Ethereal.FAF.UI.Client.Views;
+using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.Views;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.Mvvm.Services;
-using System.Configuration;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using System;
-using Ethereal.FAF.API.Client;
-using System.Windows.Controls;
 using static Ethereal.FAF.API.Client.BuilderExtensions;
-using System.Diagnostics;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -41,8 +41,7 @@ namespace Ethereal.FAF.UI.Client
                 c.ShutdownTimeout = TimeSpan.FromSeconds(30);
             })
             .ConfigureAppConfiguration(cfg => cfg
-                .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location))
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true))
+                .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)))
             .ConfigureServices(ConfigureServices)
             .Build()
             .StartAsync();
@@ -120,10 +119,16 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient(s => new MapGenerator(
                 javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
                 jar: configuration.GetValue<string>("Paths:MapGenerator:Executable"),
-                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs")));
+                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
+                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath")));
 
+            var vault = configuration.GetValue<string>("Paths:Vault") + "maps/";
+            if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
+            {
+                vault = customVaultPath;
+            }
             services.AddScoped(s => new MapsService(
-                mapsFolder: configuration.GetValue<string>("Paths:Maps"),
+                mapsFolder: vault,
                 baseAddress: configuration.GetValue<string>("FAForever:Content"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapsService>>()));

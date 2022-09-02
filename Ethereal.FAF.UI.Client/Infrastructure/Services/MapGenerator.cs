@@ -20,6 +20,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <returns></returns>
         public static string SetFolderPath(string path) => $"--folder-path \"{path}\" ";
         public static string SetMapName(string map) => $"--map-name {map} ";
+        /// <summary>
+        /// path to dump previews to
+        /// </summary>
+        public static string SetPreviewPath(string path) => $"--preview-path {path}";
     }
     public class MapGenerator
     {
@@ -28,23 +32,35 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly string JavaRuntime;
         private readonly string Jar;
         private readonly string Logging;
+        private readonly string PreviewPath;
 
-        public MapGenerator(string javaRuntime, string jar, string logging)
+        public MapGenerator(string javaRuntime, string jar, string logging, string previewPath)
         {
             JavaRuntime = javaRuntime;
             Jar = jar;
             Logging = logging;
+            PreviewPath = previewPath;
         }
 
-        private Process GetProcess() => new Process()
+        private Process GetProcess()
         {
-            StartInfo = new ProcessStartInfo
+            var process = new Process()
             {
-                FileName = JavaRuntime,
-                Arguments = $"-jar \"{Jar}\" ",
-                RedirectStandardOutput = true,
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = JavaRuntime,
+                    Arguments = $"-jar \"{Jar}\" ",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                }
+            };
+            var args = process.StartInfo.Arguments;
+            if (!string.IsNullOrWhiteSpace(PreviewPath))
+            {
+                args += MapGeneratorArguments.SetPreviewPath(PreviewPath);
             }
-        };
+            return process;
+        }
 
         public async Task<(bool Success, string Description)> GenerateMap(string seed, string targetFolder,
             CancellationToken cancellationToken = default, IProgress<string> progress = null)

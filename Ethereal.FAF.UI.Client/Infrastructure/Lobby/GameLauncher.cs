@@ -176,7 +176,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
             IceManager.IceClient.DisconnectAsync();
             IceManager.IceClient.Dispose();
-            IceManager.IceServer.Close();
+            try
+            {
+                IceManager.IceServer.Kill();
+            }
+            catch
+            {
+
+            }
             //IceManager.IceServer?.Kill();
             Process.Kill();
             Process.Dispose();
