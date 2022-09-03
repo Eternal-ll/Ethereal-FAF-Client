@@ -3,9 +3,11 @@ using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Views;
+using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -115,13 +117,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly SnackbarService SnackbarService;
         private readonly ContainerViewModel ContainerViewModel;
 
+        private readonly IServiceProvider ServiceProvider;
+
                 
 
 
         private readonly GameLauncher GameLauncher;
 
         private readonly HttpClient HttpClient;
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient)
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient, IServiceProvider serviceProvider)
         {
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
@@ -148,6 +152,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
             HttpClient = httpClient;
+            ServiceProvider = serviceProvider;
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -457,8 +462,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async Task OnHostGameCommandAsync()
         {
             if (GameLauncher.State is not GameLauncherState.Idle) return;
-            var host = ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001");
-            LobbyClient.SendAsync(host);
+            //var host = ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001");
+            //LobbyClient.SendAsync(host);
+            ContainerViewModel.Content = ServiceProvider.GetService<HostGameView>();
         }
         #endregion
 

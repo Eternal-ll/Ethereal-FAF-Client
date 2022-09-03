@@ -302,5 +302,37 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (IsConnected && Uid is not null && Session is not null) SendAuth(accessToken, Uid, Session);
             else ConnectAsync();
         }
+
+
+        public void HostGame(string title, FeaturedMod mod, string mapName, double? minRating, double? maxRating, GameVisibility visibility = GameVisibility.Public, bool isRatingResctEnforced = false, string password = null, bool isRehost = false)
+        {
+            StringBuilder sb = new();
+            sb.Append("{\"command\":\"game_host\",");
+            sb.Append($"\"title\":\"{title}\",");
+            sb.Append($"\"mod\":\"{mod.ToString().ToLower()}\",");
+            sb.Append($"\"mapname\":\"{mapName}\",");
+            sb.Append($"\"visibility\":\"{visibility.ToString().ToLower()}\",");
+
+            if (isRatingResctEnforced && (minRating.HasValue || maxRating.HasValue))
+            {
+                sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
+                if (minRating.HasValue)
+                {
+                    sb.Append($"\"rating_min\":{minRating.Value},");
+                }
+                if (maxRating.HasValue)
+                {
+                    sb.Append($"\"rating_max\":{maxRating.Value},");
+                }
+            }
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+                sb.Append($"\"password\":\"{password}\",");
+            }
+            sb[^1] = '}';
+            var command = sb.ToString();
+            Logger.LogTrace("Hosting game with args: [{}]", command);
+            SendAsync(command);
+        }
     }
 }

@@ -8,6 +8,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
+using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -97,9 +98,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddSingleton<TokenProvider>();
 
-            services.AddTransient<GamesView>();
-            services.AddScoped<GamesViewModel>();
-
             services.AddScoped(s => new PatchClient(
                 logger: s.GetService<ILogger<PatchClient>>(),
                 serviceProvider: s,
@@ -125,13 +123,17 @@ namespace Ethereal.FAF.UI.Client
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
-            var vault = configuration.GetValue<string>("Paths:Vault") + "maps/";
+            var vault = configuration.GetValue<string>("Paths:Vault");
+            vault = Environment.ExpandEnvironmentVariables(vault);
             if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
             {
-                vault = customVaultPath + "maps/";
+                vault = customVaultPath;
             }
+            var maps = vault + "maps/";
+            var mods = vault + "mods/";
+
             services.AddScoped(s => new MapsService(
-                mapsFolder: vault,
+                mapsFolder: maps,
                 baseAddress: configuration.GetValue<string>("FAForever:Content"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapsService>>()));
@@ -141,6 +143,27 @@ namespace Ethereal.FAF.UI.Client
             services.AddFafApi();
 
             services.AddHttpClient();
+
+
+
+
+            services.AddTransient<GamesView>();
+            services.AddScoped<GamesViewModel>();
+
+            services.AddTransient<HostGameView>();
+            services.AddTransient<HostGameViewModel>();
+            services.AddTransient<GenerateMapView>();
+            services.AddTransient<SelectLocalMapView>();
+            services.AddTransient<SelectCoopView>();
+
+            services.AddTransient(s => new GenerateMapsVM(
+                lobbyClient: s.GetService<LobbyClient>(),
+                mapGenerator: s.GetService<MapGenerator>(),
+                mapsFolder: maps));
+            services.AddTransient(s => new LocalMapsVM(
+                mapsDirectory: maps,
+                smallMapsPreviewsFolder: "",
+                lobbyClient: s.GetService<LobbyClient>()));
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
