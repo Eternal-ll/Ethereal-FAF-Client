@@ -32,7 +32,10 @@ namespace Ethereal.FAF.UI.Client
     /// </summary>
     public partial class App : Application
     {
-        protected override async void OnStartup(StartupEventArgs e) => await Host.CreateDefaultBuilder(e.Args)
+        public static IHost Hosting;
+        protected override async void OnStartup(StartupEventArgs e)
+        {
+            Hosting = Host.CreateDefaultBuilder(e.Args)
             .ConfigureLogging(c =>
             {
 
@@ -44,8 +47,9 @@ namespace Ethereal.FAF.UI.Client
             .ConfigureAppConfiguration(cfg => cfg
                 .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)))
             .ConfigureServices(ConfigureServices)
-            .Build()
-            .StartAsync();
+            .Build();
+            await Hosting.StartAsync();
+        }
 
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
@@ -114,15 +118,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<GameLauncher>();
 
-            services.AddTransient(s => new MapGenerator(
-                javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
-                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
-                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
-                mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
-                mapGeneratorRepository: configuration.GetValue<string>("Paths:MapGenerator:Github"),
-                httpClientFactory: s.GetService<IHttpClientFactory>(),
-                logger: s.GetService<ILogger<MapGenerator>>()));
-
             var vault = configuration.GetValue<string>("Paths:Vault");
             vault = Environment.ExpandEnvironmentVariables(vault);
             if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
@@ -131,6 +126,16 @@ namespace Ethereal.FAF.UI.Client
             }
             var maps = vault + "maps/";
             var mods = vault + "mods/";
+
+            services.AddTransient(s => new MapGenerator(
+                javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
+                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
+                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
+                mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
+                mapGeneratorRepository: configuration.GetValue<string>("Paths:MapGenerator:Github"),
+                generatedMapsFolder: maps,
+                httpClientFactory: s.GetService<IHttpClientFactory>(),
+                logger: s.GetService<ILogger<MapGenerator>>()));
 
             services.AddScoped(s => new MapsService(
                 mapsFolder: maps,
@@ -170,6 +175,7 @@ namespace Ethereal.FAF.UI.Client
         {
             new Window()
             {
+                Resources = App.Current.Resources,
                 Content = new TextBox()
                 {
                     Text = e.Exception.Message + '\n' + e.Exception.StackTrace

@@ -3,8 +3,11 @@ using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using FAF.Domain.LobbyServer.Enums;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -26,12 +29,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             set => Set(ref _Game, value);
         }
         #endregion
+
+        public CollectionViewSource MapsSource { get; private set; }
+        public ICollectionView MapsView => MapsSource?.View;
+        protected bool IsRefresh;
+
         #region LocalMaps
-        private List<LocalMap> _LocalMaps;
-        public List<LocalMap> LocalMaps
+        private ObservableCollection<LocalMap> _LocalMaps;
+        public ObservableCollection<LocalMap> LocalMaps
         {
             get => _LocalMaps;
-            set => Set(ref _LocalMaps, value);
+            set
+            {
+                if (Set(ref _LocalMaps, value))
+                {
+                    MapsSource = new()
+                    {
+                        Source = value
+                    };
+                    //MapsView.CurrentChanged += GamesView_CurrentChanged;
+                    //MapsSource.Filter += GamesSource_Filter;
+                    IsRefresh = true;
+                    OnPropertyChanged(nameof(MapsView));
+                    IsRefresh = false;
+                }
+            }
         }
         #endregion
 
@@ -64,6 +86,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             LocalMaps = null;
             LocalMap = null;
         }
+
+        protected void SetSource(IEnumerable<LocalMap> source) => App.Current.Dispatcher.Invoke(() =>
+                                               LocalMaps = new(source), System.Windows.Threading.DispatcherPriority.Background);
+        protected void AddMap(LocalMap map) => App.Current.Dispatcher.Invoke(() =>
+                                               LocalMaps.Add(map), System.Windows.Threading.DispatcherPriority.Background);
     }
     public class LocalMapsVM : MapsHostingVM
     {
@@ -96,7 +123,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     }
                     maps.Add(map);
                 }
-                LocalMaps = maps;
+                SetSource(maps);
             });
             LobbyClient = lobbyClient;
         }

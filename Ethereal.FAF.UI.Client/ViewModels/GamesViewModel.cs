@@ -265,9 +265,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Visibility.Visible :
             Visibility.Collapsed;
 
-        #region Games
         public CollectionViewSource GamesSource { get; private set; }
         public ICollectionView GamesView => GamesSource?.View;
+        private bool IsRefresh;
+        #region Games
         private ObservableCollection<GameInfoMessage> _Games;
         public ObservableCollection<GameInfoMessage> Games
         {
@@ -297,8 +298,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
         #endregion
-
-        private bool IsRefresh;
         private async void GamesSource_Filter(object sender, FilterEventArgs e)
         {
             var game = (GameInfoMessage)e.Item;
@@ -498,11 +497,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SnackbarService.Show("Warning", "Game is password protected", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            if (game.Mapname.Contains("neroxis_map_generator_") && !game.Mapname.Contains("1.8.5"))
-            {
-                SnackbarService.Show("Warning", "Client supports only 1.8.5 version of map generator", Wpf.Ui.Common.SymbolRegular.Warning24);
-                return;
-            }
+            //if (game.Mapname.Contains("neroxis_map_generator_") && !game.Mapname.Contains("1.8.5"))
+            //{
+            //    SnackbarService.Show("Warning", "Client supports only 1.8.5 version of map generator", Wpf.Ui.Common.SymbolRegular.Warning24);
+            //    return;
+            //}
             if (game.SimMods is not null && game.SimMods.Count > 0)
             {
                 SnackbarService.Show("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);

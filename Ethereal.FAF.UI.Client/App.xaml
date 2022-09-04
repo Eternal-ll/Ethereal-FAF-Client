@@ -3,13 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converter="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Converters"
+             xmlns:cmd="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Commands"
              DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
+                    <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
-
                     <Style x:Key="ClippedBorder" TargetType="Border">
                         <Setter Property="Clip">
                             <Setter.Value>
@@ -24,6 +25,7 @@
                 </ResourceDictionary>
                 <ui:ControlsDictionary />
                 <ui:ThemesDictionary Theme="Dark" />
+                <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

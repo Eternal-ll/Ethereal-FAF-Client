@@ -1,4 +1,6 @@
-﻿namespace Ethereal.FAF.UI.Client.Infrastructure.Services
+﻿using System.Globalization;
+
+namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
     internal static class MapGeneratorArguments
     {
@@ -18,7 +20,13 @@
         /// <summary>
         /// path to dump previews to
         /// </summary>
-        public static string SetPreviewPath(string path) => $"--preview-path {path}";
+        public static string SetPreviewPath(string path) => $"--preview-path \"{path}\" ";
+        /// <summary>
+        /// Visibility for the generated map. Values: TOURNAMENT, BLIND, UNEXPLORED
+        /// </summary>
+        /// <param name="visibility"></param>
+        /// <returns></returns>
+        public static string SetVisibility(string visibility) => $"--visibility {visibility} ";
 
 
         /// <summary>
@@ -61,41 +69,48 @@
         /// <returns></returns>
         public static string SetTeamsCount(int count) => $"--num-teams {count} ";
         /// <summary>
+        /// Base terrain symmetry for the map. Values: POINT2, POINT3, POINT4, POINT5, POINT6, POINT7, POINT8, POINT9, POINT10,
+        /// POINT11, POINT12, POINT13, POINT14, POINT15, POINT16, XZ, ZX, X, Z, QUAD, DIAG, NONE
+        /// </summary>
+        /// <param name="symmetry"></param>
+        /// <returns></returns>
+        public static string SetTerrainSymmetry(string symmetry) => $"--terrain-symmetry {symmetry} ";
+        /// <summary>
         /// optional, set the land density for the generated map
         /// </summary>
         /// <param name="density"></param>
         /// <returns></returns>
-        public static string SetLandDensity(double density) => $"--land-density {density} ";
+        public static string SetLandDensity(double density) => $"--land-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the plateau density for the generated map
         /// </summary>
         /// <param name="platea"></param>
         /// <returns></returns>
-        public static string SetPlateauDensity(double density) => $"--plateau-density {density} ";
+        public static string SetPlateauDensity(double density) => $"--plateau-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the mountain density for the generated map
         /// </summary>
         /// <param name="mountai"></param>
         /// <returns></returns>
-        public static string SetMountainDensity(double density) => $"--mountain-density {density} ";
+        public static string SetMountainDensity(double density) => $"--mountain-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the ramp density for the generated map
         /// </summary>
         /// <param name="ram"></param>
         /// <returns></returns>
-        public static string SetRampDensity(double density) => $"--ramp-density {density} ";
+        public static string SetRampDensity(double density) => $"--ramp-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the reclaim density for the generated map
         /// </summary>
         /// <param name="density"></param>
         /// <returns></returns>
-        public static string SetReclaimDensity(double density) => $"--reclaim-density {density} ";
+        public static string SetReclaimDensity(double density) => $"--reclaim-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the mex density for the generated map
         /// </summary>
         /// <param name="me"></param>
         /// <returns></returns>
-        public static string SetMexsDensity(double density) => $"--mex-density {density} ";
+        public static string SetMexsDensity(double density) => $"--mex-density {density.ToString(CultureInfo.InvariantCulture)} ";
         /// <summary>
         /// optional, set the mex count per player for the generated map
         /// </summary>

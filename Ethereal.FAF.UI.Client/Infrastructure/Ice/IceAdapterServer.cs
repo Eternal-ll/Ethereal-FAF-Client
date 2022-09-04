@@ -21,6 +21,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                     FileName = java,
                     Arguments = $"-jar \"{file}\" {args}",
                     UseShellExecute = false,
+                    CreateNoWindow = true,
                     //RedirectStandardOutput = true,
                     //RedirectStandardError = true,
                     //CreateNoWindow = true,

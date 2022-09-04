@@ -4,6 +4,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -26,13 +27,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly MapGenerator MapGenerator;
         private readonly string MapsFolder;
 
+        private FileSystemWatcher FileSystemWatcher;
+
         public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, string mapsFolder)
         {
             LobbyClient = lobbyClient;
             MapGenerator = mapGenerator;
             MapsFolder = mapsFolder;
+            FileSystemWatcher = new()
+            {
+                IncludeSubdirectories = true,
+                Path = mapsFolder,
+                Filter = "neroxis_map_generator_*.*.*_*_scenario.lua",
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
+            };
+            FileSystemWatcher.Changed += (s, e) =>
+            {
+                Task.Run(async () =>
+                {
+                    await Task.Delay(500);
+                    ProcessGeneratedMap(e.FullPath);
+                });
+            };
             mapGenerator.MapGenerated += MapGenerator_MapGenerated;
-            SelectedMapGeneratorVersion = "1.8.5";
+            SelectedMapGeneratorVersion = "1.8.6";
             Task.Run(() =>
             {
                 var maps = new List<LocalMap>();
@@ -53,11 +72,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     }
                     maps.Add(map);
                 }
-                LocalMaps = maps;
+                SetSource(maps);
             });
         }
 
-        private void MapGenerator_MapGenerated(object sender, string e) => ProcessGeneratedMap(e);
+        private void MapGenerator_MapGenerated(object sender, string e)
+        {
+
+        }
 
         private void ProcessGeneratedMap(string scenario)
         {
@@ -74,7 +96,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 var scmap = Scmap.FromFile(scmapPath);
             }
-            LocalMaps.Add(map);
+            AddMap(map);
         }
 
         public ObservableCollection<string> GeneratedMaps { get; set; } = new();
@@ -88,7 +110,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public string[] KnownVersions => MapGenerator.KnownVersions.ToArray();
+        public string[] KnownVersions => MapGenerator.KnownVersions.OrderByDescending(s => s).ToArray();
         #region SelectedMapGeneratorVersion
         private string _SelectedMapGeneratorVersion;
         public string SelectedMapGeneratorVersion
@@ -111,7 +133,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                             ProgressText = $"Loading biomes...";
                             Biomes = await MapGenerator.GetBiomesAsync(value);
                             ProgressText = $"Loading styles...";
-                            Styles = await MapGenerator.GetStylesAsync(value);
+                            var styles = await MapGenerator.GetStylesAsync(value);
+                            styles.Insert(0, string.Empty);
+                            Styles = styles.ToArray();
                             IsGenerating = false;
                             ProgressText = null;
                         });
@@ -130,12 +154,50 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
+        public string[] SelectedTerrainSymmetrySource => MapGenerator.TerrainSymmetries;
+        #region SelectedTerrainSymmetry
+        private string _SelectedTerrainSymmetry;
+        public string SelectedTerrainSymmetry
+        {
+            get => _SelectedTerrainSymmetry;
+            set => Set(ref _SelectedTerrainSymmetry, value);
+        }
+        #endregion
+
         #region Biomes
         private string[] _Biomes;
         public string[] Biomes
         {
             get => _Biomes;
-            set => Set(ref _Biomes, value);
+            set
+            {
+                if (Set(ref _Biomes, value))
+                {
+                    if (value is not null)
+                    {
+                        if (value.Length == 0)
+                        {
+                            _Biomes = new string[]
+                            {
+                                "Brimstone",
+                                "Desert",
+                                "EarlyAutumn",
+                                "Frithen",
+                                "Loki",
+                                "Mars",
+                                "Moonlight",
+                                "Prayer",
+                                "Stones",
+                                "Syrtis",
+                                "WindingRiver",
+                                "Wonder",
+                            };
+                            OnPropertyChanged(nameof(Biomes));
+                        }
+                        SelectedBiome = _Biomes[0];
+                    }
+                }
+            }
         }
         #endregion
 
@@ -171,7 +233,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public string SelectedStyle
         {
             get => _SelectedStyle;
-            set => Set(ref _SelectedStyle, value);
+            set
+            {
+                if (Set(ref _SelectedStyle, value))
+                {
+                    SelectedMapVisibility = !string.IsNullOrWhiteSpace(value) ? null : "Casual";
+                }
+            }
         }
         #endregion
 
@@ -205,12 +273,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
+        public int SizeInPixels => _MapSize % 1.25 != 0 ? (int)((_MapSize + 0.625) / 1.25 * 1.25) : (int)(_MapSize * 51.2);
+        public double[] MapSizeSource => new double[] { 5, 7.5, 10, 12.5, 15, 17.5, 20 };
         #region MapSize
-        private double _MapSize;
+        private double _MapSize = 10;
         public double MapSize
         {
             get => _MapSize;
-            set => Set(ref _MapSize, value);
+            set
+            {
+                if (Set(ref _MapSize, value))
+                {
+                    OnPropertyChanged(nameof(SizeInPixels));
+                }
+            }
         }
         #endregion
 
@@ -243,14 +319,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             { "Mex", new() },
         };
 
-        public static string[] GenerationStyles => new string[]
+        public static string[] MapVisibilities => new string[]
         {
-            "Casual", "Tournament", "Blind", "Unexplorer"
+            "Casual", "Tournament", "Blind", "Unexplored"
         };
 
         #region SelectedGenerationStyle
         private string _SelectedGenerationStyle;
-        public string SelectedGenerationStyle
+        public string SelectedMapVisibility
         {
             get => _SelectedGenerationStyle;
             set
@@ -258,6 +334,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (Set(ref _SelectedGenerationStyle, value))
                 {
                     BiomeEnabled = value == "Casual";
+                    SelectedStyle = !string.IsNullOrWhiteSpace(value) ? "" : SelectedStyle;
                 }
             }
         }
@@ -292,22 +369,23 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         #region GenerateCommand
-        private AsyncCommand _GenerateCommand;
-        public AsyncCommand GenerateCommand => _GenerateCommand ??= new AsyncCommand(OnGenerateCommandAsync, CanGenerateCommand);
+        private ICommand _GenerateCommand;
+        public ICommand GenerateCommand => _GenerateCommand ??= new LambdaCommand(OnGenerateCommand, CanGenerateCommand);
 
-        private bool CanGenerateCommand(object arg) => !IsGenerating;
+        private bool CanGenerateCommand(object arg) => true;
 
-        private async Task OnGenerateCommandAsync()
+        private async void OnGenerateCommand(object arg) => await Task.Run(async () =>
         {
             IsGenerating = true;
             CancellationSource = new();
-
+            ProgressText = "Generating...";
             var land = MapDensities["Land"];
             var plateau = MapDensities["Plateau"];
             var mountain = MapDensities["Mountain"];
             var ramp = MapDensities["Ramp"];
             var reclaim = MapDensities["Reclaim"];
             var mex = MapDensities["Mex"];
+            var progress = new Progress<string>(d => ProgressText = d);
 
             var maps = await MapGenerator.GenerateMapAsync(
                 version: SelectedMapGeneratorVersion,
@@ -315,6 +393,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 style: SelectedStyle,
                 biome: SelectedBiome,
                 spawns: SpawnsCount,
+                visibility: SelectedMapVisibility is not "Casual" ? SelectedMapVisibility : null,
                 teams: TeamsCount,
                 landDensity: land.IsEnabled ? land.Value : null,
                 plateauDensity: plateau.IsEnabled ? plateau.Value : null,
@@ -323,19 +402,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 reclaimDensity: reclaim.IsEnabled ? reclaim.Value : null,
                 mexDensity: mex.IsEnabled ? mex.Value : null,
                 mexsCount: MexsPerPlayer,
-                mapsize: (int)MapSize,
-                isTournament: SelectedGenerationStyle == "Tournament",
-                isBlind: SelectedGenerationStyle == "Blind",
-                isUnexplored: SelectedGenerationStyle == "Unexplored",
+                mapsize: SizeInPixels,
                 generateCount: GenerateCount,
-
-                cancellationToken : CancellationSource.Token);
+                progress: progress,
+                cancellationToken: CancellationSource.Token);
             foreach (var map in maps)
             {
-                ProcessGeneratedMap(map);
+                //if (!string.IsNullOrWhiteSpace(map))
+                    //ProcessGeneratedMap(map);
             }
+            ProgressText = null;
             IsGenerating = false;
-        }
+        }).ConfigureAwait(false);
+
         #endregion
 
         private CancellationTokenSource CancellationSource;
@@ -348,7 +427,18 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnCancelGenerationCommand(object obj)
         {
             CancellationSource?.Cancel();
-            IsGenerating = false;
+        }
+        #endregion
+
+        #region CleanCommand
+        private ICommand _CleanCommand;
+        public ICommand CleanCommand => _CleanCommand ??= new LambdaCommand(OnCleanCommand, CanCleanCommand);
+
+        private bool CanCleanCommand(object arg) => GeneratedMaps.Any();
+
+        private void OnCleanCommand(object obj)
+        {
+
         }
         #endregion
 
@@ -360,6 +450,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         protected override void OnHostGameCommand(object obj)
         {
 
+        }
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            FileSystemWatcher.Dispose();
         }
     }
 }

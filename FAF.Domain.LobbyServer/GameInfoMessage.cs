@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace FAF.Domain.LobbyServer
 {
@@ -83,5 +84,8 @@ namespace FAF.Domain.LobbyServer
         public string HumanTitle => Title.Truncate(34);
         [JsonIgnore]
         public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
+        [JsonIgnore]
+        public bool IsMapgen => MapgenRegex.IsMatch(Mapname);
+        public static Regex MapgenRegex = new Regex(@"neroxis_map_generator_(\d+\.\d+\.\d+)_(.*)");
     }
 }

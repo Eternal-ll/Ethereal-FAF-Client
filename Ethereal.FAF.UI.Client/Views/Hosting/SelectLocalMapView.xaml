@@ -7,26 +7,6 @@
              d:DataContext="{d:DesignInstance {x:Type vm:LocalMapsVM}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-
-        <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-            <Setter Property="Background" Value="#323232"/>
-            <Setter Property="Width" Value="350"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2e2e2e" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <DataTemplate DataType="{x:Type vm:LocalMap}">
-            <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="128" Height="128">
-                <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding Preview}" Width="128" Height="128" VerticalAlignment="Top"/>
-            </Border>
-        </DataTemplate>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -40,25 +20,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ListBox x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding LocalMaps}" IsTabStop="False" Background="Transparent"
-            VirtualizingPanel.CacheLengthUnit="Pixel">
-            <ListBox.Style>
-                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                    <Setter Property="ItemsPanel">
-                        <Setter.Value>
-                            <ItemsPanelTemplate>
-                                <ui:VirtualizingWrapPanel
-                                IsVirtualizing="{TemplateBinding VirtualizingPanel.IsVirtualizing}"
-                                Orientation="Vertical"
-                                SpacingMode="None"
-                                StretchItems="False"
-                                VirtualizationMode="{TemplateBinding VirtualizingPanel.VirtualizationMode}" />
-                            </ItemsPanelTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.Style>
-        </ListBox>
+            ItemsSource="{Binding LocalMaps}" Style="{StaticResource VaultMapsListBox}" ItemTemplate="{StaticResource VaultMapItem}"/>
+
         <ui:TextBox PlaceholderText="Search" Icon="Search24"/>
         <Border Grid.Column="3" Grid.RowSpan="3" Background="#272727" Padding="10" Width="400">
             <Border.Style>
@@ -71,50 +34,7 @@
                 </Style>
             </Border.Style>
             <StackPanel>
-
-                <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}">
-                    <ContentControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type vm:LocalMap}">
-                            <StackPanel>
-                                <ui:Badge Content="Name" Appearance="Secondary"/>
-                                <TextBlock Text="{Binding Scenario.Name}" FontSize="20" TextWrapping="Wrap"/>
-                                <ui:Badge Content="Description" Appearance="Secondary" Margin="0 10 0 0"/>
-                                <TextBlock Text="{Binding Scenario.Description}" FontSize="16" TextWrapping="Wrap"/>
-                                <ui:Badge Content="Information" Appearance="Secondary" Margin="0 10 0 4"/>
-                                <WrapPanel Margin="-4 -4 0 0">
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                <Run Text="Width:" FontSize="12"/>
-                                <Run Text="{Binding Scenario.Width}"/>
-                                <Run Text="Height:" FontSize="12"/>
-                                <Run Text="{Binding Scenario.Height}"/>
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Slots:"/>
-                                        <Run Text="{Binding Scenario.Armies.Count, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Version:"/>
-                                        <Run Text="{Binding Scenario.MapVersion}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Type:"/>
-                                        <Run Text="{Binding Scenario.Type}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                </WrapPanel>
-
-                                <CheckBox IsEnabled="{Binding Scenario.IsAdaptiveMap}" Content="Adaptive map" Focusable="False"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ContentControl.ContentTemplate>
-                </ContentControl>
+                <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}" ContentTemplate="{StaticResource VaultMapInformation}"/>
                 <Button Content="Host game" Command="{Binding HostGameCommand}"/>
             </StackPanel>
         </Border>

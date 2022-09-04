@@ -25,14 +25,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class HostGameViewModel : Base.ViewModel
     {
         private readonly IServiceProvider ServiceProvider;
+        private readonly ContainerViewModel Container;
 
-        public HostGameViewModel(IServiceProvider serviceProvider)
+        public HostGameViewModel(IServiceProvider serviceProvider, ContainerViewModel container)
         {
             ServiceProvider = serviceProvider;
             Game = new()
             {
                 Title = "Ethereal FAF Client 2.0 [Test]"
             };
+            Container = container;
         }
 
         #region Game
@@ -87,6 +89,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             SelectedView = null;
             SelectedView = obj?.ToString();
+        }
+        #endregion
+
+        #region BackCommand
+        private ICommand _BackCommand;
+        public ICommand BackCommand => _BackCommand ??= new LambdaCommand(OnBackCommand);
+
+        private void OnBackCommand(object obj)
+        {
+            Container.Content = null;
         }
         #endregion
     }

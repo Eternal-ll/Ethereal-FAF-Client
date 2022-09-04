@@ -9,25 +9,6 @@
              d:DataContext="{d:DesignInstance {x:Type vm:GenerateMapsVM}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-        <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-            <Setter Property="Background" Value="#323232"/>
-            <Setter Property="Width" Value="350"/>
-            <Setter Property="Margin" Value="4"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="CornerRadius" Value="4"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#2e2e2e" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <DataTemplate DataType="{x:Type vm:LocalMap}">
-            <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="128" Height="128">
-                <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding Preview}" Width="128" Height="128" VerticalAlignment="Top"/>
-            </Border>
-        </DataTemplate>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -43,24 +24,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ListBox x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding LocalMaps}" IsTabStop="False" Background="Transparent"
-            VirtualizingPanel.CacheLengthUnit="Pixel">
-            <ListBox.Style>
-                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-                    <Setter Property="ItemsPanel">
-                        <Setter.Value>
-                            <ItemsPanelTemplate>
-                                <ui:VirtualizingWrapPanel
-                                IsVirtualizing="{TemplateBinding VirtualizingPanel.IsVirtualizing}"
-                                Orientation="Vertical"
-                                SpacingMode="None"
-                                StretchItems="False"
-                                VirtualizationMode="{TemplateBinding VirtualizingPanel.VirtualizationMode}" />
-                            </ItemsPanelTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListBox.Style>
+                 ItemsSource="{Binding LocalMaps}" ItemTemplate="{StaticResource VaultMapItem}"
+                 Style="{StaticResource VaultMapsListBox}">
         </ListBox>
         <ui:TextBox PlaceholderText="Search" Icon="Search24"/>
         <Border Grid.Column="3" Grid.RowSpan="3" Background="#272727" Padding="10" Width="400">
@@ -74,139 +39,142 @@
                 </Style>
             </Border.Style>
             <StackPanel>
-
-                <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}">
-                    <ContentControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type vm:LocalMap}">
-                            <StackPanel>
-                                <ui:Badge Content="Name" Appearance="Secondary"/>
-                                <TextBlock Text="{Binding Scenario.Name}" FontSize="20" TextWrapping="Wrap"/>
-                                <ui:Badge Content="Description" Appearance="Secondary" Margin="0 10 0 0"/>
-                                <TextBlock Text="{Binding Scenario.Description}" FontSize="16" TextWrapping="Wrap"/>
-                                <ui:Badge Content="Information" Appearance="Secondary" Margin="0 10 0 4"/>
-                                <WrapPanel Margin="-4 -4 0 0">
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                <Run Text="Width:" FontSize="12"/>
-                                <Run Text="{Binding Scenario.Width}"/>
-                                <Run Text="Height:" FontSize="12"/>
-                                <Run Text="{Binding Scenario.Height}"/>
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Slots:"/>
-                                        <Run Text="{Binding Scenario.Armies.Count, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Version:"/>
-                                        <Run Text="{Binding Scenario.MapVersion}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                    <ui:Badge Appearance="Secondary" Margin="4 10 0 0">
-                                        <TextBlock>
-                                        <Run Text="Type:"/>
-                                        <Run Text="{Binding Scenario.Type}" />
-                                        </TextBlock>
-                                    </ui:Badge>
-                                </WrapPanel>
-
-                                <CheckBox IsEnabled="{Binding Scenario.IsAdaptiveMap}" Content="Adaptive map" Focusable="False"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ContentControl.ContentTemplate>
-                </ContentControl>
+                <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}" ContentTemplate="{StaticResource VaultMapInformation}"/>
                 <Button Content="Host game" Command="{Binding HostGameCommand}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="5" Grid.RowSpan="3" Background="#272727" Padding="10" Width="400">
-            <VirtualizingStackPanel>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="10"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <ui:Badge Grid.Row="0" Grid.ColumnSpan="3" Content="Map generator options" Appearance="Secondary" Padding="8"/>
-                    <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding SelectedMapGeneratorVersion}" SelectedValue="{Binding KnownVersions, Mode=OneWay}" SelectedIndex="0"
+        <Border Grid.Column="5" Grid.RowSpan="3" Background="#272727" Width="400">
+            <ScrollViewer Padding="0 0 4 0" Margin="10 0 0 0">
+                <VirtualizingStackPanel>
+                    <StackPanel Visibility="{Binding LoaderVisibility}" Margin="0 100 0 0">
+                        <ui:ProgressRing IsIndeterminate="{Binding IsGenerating}"/>
+                        <TextBlock Text="{Binding ProgressText}" HorizontalAlignment="Center" Margin="0 20 0 0" TextWrapping="Wrap"/>
+                        <Button Content="Cancel" Command="{Binding CancelGenerationCommand}" Margin="0 20 0 0" Width="100" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <Grid Margin="0 10 0 0" Visibility="{Binding FormVisibility}">
+                        <Grid.Resources>
+                            <Style x:Key="CasualTextBlock" TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style x:Key="CasualComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style x:Key="CasuaCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                            <Style x:Key="CasuaSlider" TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Resources>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <ui:Badge Grid.Row="0" Grid.ColumnSpan="3" Content="Map generator options" Appearance="Secondary" Padding="8"/>
+                        <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding KnownVersions, Mode=OneWay}" SelectedValue="{Binding SelectedMapGeneratorVersion}" SelectedIndex="0"
                               ToolTip="Map generator version"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Generation style" FontSize="12"/>
-                    <TextBlock Grid.Row="2" Grid.Column="2" Text="Map style" FontSize="12"/>
-                    <TextBlock Grid.Row="2" Grid.Column="4" Text="Map biome" FontSize="12"/>
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontSize="12" Text="Teams"/>
-                    <TextBlock Grid.Row="6" Grid.Column="2" Text="Slots" FontSize="12"/>
-                    <TextBlock Grid.Row="6" Grid.Column="4" Text="Mexs per player" FontSize="12"/>
-                    <TextBlock Grid.Row="24" Grid.Column="0" Text="Maps to generate" FontSize="12"/>
-                    <!--<TextBlock Grid.Row="10" Grid.Column="4" Text="Clean gen. maps" FontSize="12"/>-->
-                    <ComboBox Grid.Row="4" Grid.Column="0" ItemsSource="{Binding GenerationStyles}" SelectedValue="{Binding SelectedGenerationStyle, Mode=OneWay}" SelectedIndex="0"/>
-                    <ComboBox Grid.Row="4" Grid.Column="2" ItemsSource="{Binding Styles}" SelectedValue="{Binding SelectedStyle}" SelectedIndex="0"/>
-                    <ComboBox Grid.Row="4" Grid.Column="4" ItemsSource="{Binding Biomes}" SelectedValue="{Binding SelectedBiome}" SelectedIndex="0"/>
-                    <ComboBox Grid.Row="8" Grid.Column="0" ItemsSource="{Binding TeamsCountSource}" SelectedValue="{Binding TeamsCount}"/>
-                    <ComboBox Grid.Row="8" Grid.Column="2" ItemsSource="{Binding SpawnsCountSource}" SelectedValue="{Binding SpawnsCount}"/>
-                    <ComboBox Grid.Row="8" Grid.Column="4" ItemsSource="{Binding MexsPerPlayerSource}" SelectedValue="{Binding MexsPerPlayer}"/>
-
-                    <TextBlock Grid.Row="10" Grid.ColumnSpan="4" Text="Map generation density settings"/>
-                    <CheckBox Grid.Row="12" Content="Land" IsChecked="{Binding MapDensities[Land].IsEnabled}"/>
-                    <CheckBox Grid.Row="14" Content="Plateau" IsChecked="{Binding MapDensities[Plateau].IsEnabled}"/>
-                    <CheckBox Grid.Row="16" Content="Mountain" IsChecked="{Binding MapDensities[Mountain].IsEnabled}"/>
-                    <CheckBox Grid.Row="18" Content="Ramp" IsChecked="{Binding MapDensities[Ramp].IsEnabled}"/>
-                    <CheckBox Grid.Row="20" Content="Reclaim" IsChecked="{Binding MapDensities[Reclaim].IsEnabled}"/>
-                    <CheckBox Grid.Row="22" Content="Mex" IsChecked="{Binding MapDensities[Mex].IsEnabled}"/>
-
-                    <Slider Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Land].IsEnabled}" Value="{Binding MapDensities[Land].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
-                    <Slider Grid.Row="14" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Plateau].IsEnabled}" Value="{Binding MapDensities[Plateau].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
-                    <Slider Grid.Row="16" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mountain].IsEnabled}" Value="{Binding MapDensities[Mountain].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
-                    <Slider Grid.Row="18" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Ramp].IsEnabled}" Value="{Binding MapDensities[Ramp].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
-                    <Slider Grid.Row="20" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Reclaim].IsEnabled}" Value="{Binding MapDensities[Reclaim].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
-                    <Slider Grid.Row="22" Grid.Column="2" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mex].IsEnabled}" Value="{Binding MapDensities[Mex].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Visibility" FontSize="12"/>
+                        <TextBlock Grid.Row="2" Grid.Column="2" Text="Map style" FontSize="12"/>
+                        <TextBlock Grid.Row="2" Grid.Column="4" Style="{StaticResource CasualTextBlock}" Text="Map biome" FontSize="12"/>
+                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource CasualTextBlock}" Text="Teams" FontSize="12"/>
+                        <TextBlock Grid.Row="6" Grid.Column="2" Style="{StaticResource CasualTextBlock}" Text="Slots" FontSize="12"/>
+                        <!--<TextBlock Grid.Row="6" Grid.Column="4" Style="{StaticResource CasualTextBlock}" Text="Mexs per player" FontSize="12"/>-->
+                        <TextBlock Grid.Row="6" Grid.Column="0" Style="{StaticResource CasualTextBlock}" Text="Teams" FontSize="12"/>
+                        <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource CasualTextBlock}" Text="{Binding SizeInPixels, StringFormat='Map size ({0}px)'}" FontSize="12"/>
+                        <TextBlock Grid.Row="6" Grid.Column="4" Style="{StaticResource CasualTextBlock}" Text="Terrain symmetry" FontSize="12" ToolTip="Base terrain symmetry for the map"/>
+                        <!--<TextBlock Grid.Row="10" Grid.Column="4" Text="Clean gen. maps" FontSize="12"/>-->
+                        <ComboBox Grid.Row="4" Grid.Column="0" ItemsSource="{Binding MapVisibilities}" SelectedValue="{Binding SelectedMapVisibility}" SelectedIndex="0"/>
+                        <ComboBox Grid.Row="4" Grid.Column="2" ItemsSource="{Binding Styles}" SelectedValue="{Binding SelectedStyle}"/>
+                        <ComboBox Grid.Row="4" Grid.Column="4" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding Biomes}" SelectedValue="{Binding SelectedBiome}"/>
+                        <ComboBox Grid.Row="8" Grid.Column="0" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding TeamsCountSource}" SelectedValue="{Binding TeamsCount}"/>
+                        <ComboBox Grid.Row="8" Grid.Column="2" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding SpawnsCountSource}" SelectedValue="{Binding SpawnsCount}"/>
+                        <!--<ComboBox Grid.Row="8" Grid.Column="4" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding MexsPerPlayerSource}" SelectedValue="{Binding MexsPerPlayer}"/>-->
+                        <ComboBox Grid.Row="12" Grid.Column="0" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding MapSizeSource}" SelectedValue="{Binding MapSize}" ItemStringFormat="{}{0} km"/>
+                        <ComboBox Grid.Row="8" Grid.Column="4" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding SelectedTerrainSymmetrySource}" SelectedValue="{Binding SelectedTerrainSymmetry}"/>
 
 
-                    <ComboBox Grid.Row="26" Grid.Column="0" ItemsSource="{Binding GenerateCountSource}" SelectedValue="{Binding GenerateCount}"/>
-                    <Button Grid.Row="26" Grid.Column="2" Content="Generate" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                    <Button Grid.Row="26" Grid.Column="4" Content="Clean" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                </Grid>
-            </VirtualizingStackPanel>
+                        <TextBlock Grid.Row="14" Grid.ColumnSpan="4" Style="{StaticResource CasualTextBlock}" Text="Map generation density settings"/>
+                        <CheckBox Grid.Row="16" Style="{StaticResource CasuaCheckBox}" Content="Land" IsChecked="{Binding MapDensities[Land].IsEnabled}"/>
+                        <CheckBox Grid.Row="18" Style="{StaticResource CasuaCheckBox}" Content="Plateau" IsChecked="{Binding MapDensities[Plateau].IsEnabled}"/>
+                        <CheckBox Grid.Row="20" Style="{StaticResource CasuaCheckBox}" Content="Mountain" IsChecked="{Binding MapDensities[Mountain].IsEnabled}"/>
+                        <CheckBox Grid.Row="22" Style="{StaticResource CasuaCheckBox}" Content="Ramp" IsChecked="{Binding MapDensities[Ramp].IsEnabled}"/>
+                        <CheckBox Grid.Row="24" Style="{StaticResource CasuaCheckBox}" Content="Reclaim" IsChecked="{Binding MapDensities[Reclaim].IsEnabled}"/>
+                        <CheckBox Grid.Row="26" Style="{StaticResource CasuaCheckBox}" Content="Mex" IsChecked="{Binding MapDensities[Mex].IsEnabled}"/>
+
+                        <Slider Grid.Row="16" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Land].IsEnabled}" Value="{Binding MapDensities[Land].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="18" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Plateau].IsEnabled}" Value="{Binding MapDensities[Plateau].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="20" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mountain].IsEnabled}" Value="{Binding MapDensities[Mountain].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="22" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Ramp].IsEnabled}" Value="{Binding MapDensities[Ramp].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="24" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Reclaim].IsEnabled}" Value="{Binding MapDensities[Reclaim].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="26" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mex].IsEnabled}" Value="{Binding MapDensities[Mex].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+
+                        <TextBlock Grid.Row="28" Grid.Column="0" Text="Maps to generate" FontSize="12"/>
+                        <ComboBox Grid.Row="30" Grid.Column="0" ItemsSource="{Binding GenerateCountSource}" SelectedValue="{Binding GenerateCount}"/>
+                        <Button Grid.Row="30" Grid.Column="2" Content="Generate" Command="{Binding GenerateCommand}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                        <Button Grid.Row="30" Grid.Column="4" Content="Clean" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                    </Grid>
+                </VirtualizingStackPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 </UserControl>
