@@ -1,18 +1,33 @@
 ﻿using NLua;
 using System.Text.RegularExpressions;
 
-namespace Ethereal.FA.Scmap
+namespace Ethereal.FA.Vault
 {
+    public static class FAUtils
+    {
+        public static double KmFromPixels(double pixels) => pixels switch
+        {
+            2096 => 80,
+            2048 => 40,
+            1024 => 20,
+            512 => 10,
+            256 => 5,
+            _ => pixels
+        };
+    }
     public class MapScenario
     {
         public string Name { get; set; }
-        public string Description { get; set; } 
+        public string Description { get; set; }
         public string Preview { get; set; }
         public int MapVersion { get; set; }
         public bool IsAdaptiveMap { get; set; }
         public string Type { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+
+        public double WidthInKm => FAUtils.KmFromPixels(Width);
+        public double HeigthInKm => FAUtils.KmFromPixels(Height);
 
         public string PathToMap { get; set; }
         public string PathToSave { get; set; }
@@ -51,8 +66,8 @@ namespace Ethereal.FA.Scmap
             if (lua["ScenarioInfo.type"] is string type) scenario.Type = type;
             if (lua["ScenarioInfo.size"] is LuaTable sizes && sizes.Keys.Count == 2 && sizes[1] is long width && sizes[2] is long height)
             {
-                scenario.Width = (double)width;
-                scenario.Height = (double)height;
+                scenario.Width = width;
+                scenario.Height = height;
             }
             if (lua["ScenarioInfo.starts"] is bool starts) scenario.Starts = starts;
             if (lua["ScenarioInfo.map"] is string map) scenario.PathToMap = map;

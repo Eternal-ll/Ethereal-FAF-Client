@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Ethereal.FA.Scmap
+namespace Ethereal.FA.Vault
 {
     /// <summary>
     /// 
@@ -24,7 +24,7 @@ namespace Ethereal.FA.Scmap
         /// 
         /// </summary>
         /// <returns></returns>
-        public Point3D ReadVector3() => new Point3D()
+        public ScmapPoint3D ReadVector3() => new ScmapPoint3D()
         {
             X = ReadSingle(),
             Y = ReadSingle(),

@@ -9,6 +9,11 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
+                    <cmd:FafAnalyticsGlobalCommand x:Key="FafAnalyticsGlobalCommand"/>
+                    <cmd:FafAnalyticsTMMCommand x:Key="FafAnalyticsTMMCommand"/>
+                    <cmd:FafAnalyticsLadderCommand x:Key="FafAnalyticsLadderCommand"/>
+                    <cmd:FafScoreCommand x:Key="FafScoreCommand"/>
+                    
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
                     <Style x:Key="ClippedBorder" TargetType="Border">

@@ -16,6 +16,8 @@
         </Grid.RowDefinitions>
         <Border Grid.Column="1" Background="#272727" Padding="10">
             <Grid ShowGridLines="False">
+                <Grid.Resources>
+                </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition Width="10"/>
@@ -37,20 +39,32 @@
                     TextWrapping="Wrap" />
                 <StackPanel Grid.Row="3">
                     <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="Game mod" Margin="0 0 0 8"/>
-                    <ComboBox HorizontalAlignment="Left" Width="200" SelectedIndex="0">
-                        <ComboBoxItem Content="FAForever"/>
-                        <ComboBoxItem>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="FAForever"/>
-                                <ui:Badge Content="Beta" Appearance="Danger" Margin="4 0 0 0" Padding="6 0"/>
-                            </StackPanel>
-                        </ComboBoxItem>
-                        <ComboBoxItem>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="FAForever"/>
-                                <ui:Badge Content="Develop" Appearance="Danger" Margin="4 0 0 0" Padding="6 0"/>
-                            </StackPanel>
-                        </ComboBoxItem>
+                    <ComboBox HorizontalAlignment="Left" Width="200" MinWidth="200" SelectedIndex="0"
+                              SelectedValue="{Binding Game.Mod}" ItemsSource="{Binding FeaturedModSource}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Background="Transparent">
+                                    <TextBlock Text="FAForever"/>
+                                    <ui:Badge Appearance="Danger" Margin="4 0 0 -2" Padding="6 0">
+                                        <ui:Badge.Style>
+                                            <Style TargetType="ui:Badge" BasedOn="{StaticResource {x:Type ui:Badge}}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="0">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="27">
+                                                        <Setter Property="Content" Value="Beta"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="28">
+                                                        <Setter Property="Content" Value="Develop"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ui:Badge.Style>
+                                    </ui:Badge>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
                     </ComboBox>
                     <WrapPanel Margin="0 10 0 6">
                         <CheckBox Content="Friends only" IsChecked="{Binding Game.IsFriendsOnly}" Grid.Row="3" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>

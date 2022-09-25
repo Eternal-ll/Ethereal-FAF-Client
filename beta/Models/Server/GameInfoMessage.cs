@@ -1,12 +1,10 @@
-﻿using beta.Infrastructure.Utils;
-using beta.Models.Server.Base;
+﻿using beta.Models.Server.Base;
 using beta.Models.Server.Enums;
 using beta.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Windows.Media;
 
 namespace beta.Models.Server
 {

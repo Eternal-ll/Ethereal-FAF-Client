@@ -1,4 +1,5 @@
-﻿using FAF.Domain.LobbyServer;
+﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
@@ -20,8 +20,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<bool> Authorized;
         public event EventHandler<PlayerInfoMessage> PlayerReceived;
         public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
-        public event EventHandler<GameInfoMessage> GameReceived;
-        public event EventHandler<GameInfoMessage[]> GamesReceived;
+        public event EventHandler<Game> GameReceived;
+        public event EventHandler<Game[]> GamesReceived;
 
         public event EventHandler<AuthentificationFailedData> AuthentificationFailed;
         public event EventHandler<SocialData> SocialDataReceived;
@@ -212,7 +212,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         }
                         break;
                     case ServerCommand.game_info:
-                        var game = JsonSerializer.Deserialize<GameInfoMessage>(data);
+                        var game = JsonSerializer.Deserialize<Game>(data);
                         if (game.Games is not null)
                         {
                             GamesReceived?.Invoke(this, game.Games);
@@ -316,14 +316,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (isRatingResctEnforced && (minRating.HasValue || maxRating.HasValue))
             {
                 sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
-                if (minRating.HasValue)
-                {
-                    sb.Append($"\"rating_min\":{minRating.Value},");
-                }
-                if (maxRating.HasValue)
-                {
-                    sb.Append($"\"rating_max\":{maxRating.Value},");
-                }
+            }
+            if (minRating.HasValue)
+            {
+                sb.Append($"\"rating_min\":{minRating.Value},");
+            }
+            if (maxRating.HasValue)
+            {
+                sb.Append($"\"rating_max\":{maxRating.Value},");
             }
             if (!string.IsNullOrWhiteSpace(password))
             {

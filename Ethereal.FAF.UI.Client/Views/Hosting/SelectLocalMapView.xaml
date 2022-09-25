@@ -20,7 +20,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ListBox x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding LocalMaps}" Style="{StaticResource VaultMapsListBox}" ItemTemplate="{StaticResource VaultMapItem}"/>
+            ItemsSource="{Binding LocalMaps}" SelectedItem="{Binding LocalMap}" Style="{StaticResource VaultMapsListBox}"
+                 ItemTemplate="{StaticResource VaultMapItem}"/>
 
         <ui:TextBox PlaceholderText="Search" Icon="Search24"/>
         <Border Grid.Column="3" Grid.RowSpan="3" Background="#272727" Padding="10" Width="400">

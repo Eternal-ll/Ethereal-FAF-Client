@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
@@ -19,7 +20,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     {
         Idle,
         Joining,
-        Running
+        Launching,
+        Running,
+        //Updating
     }
     public class GameLauncher
     {
@@ -51,15 +54,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             MapGenerator = mapGenerator;
         }
 
-        private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e)
-        {
+        private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e) => 
             Task.Run(() => RunGame(e))
                 .ContinueWith(t =>
                 {
+                    OnStateChanged(GameLauncherState.Idle);
                     if (t.IsFaulted)
-                    LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                        LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                    Process = null;
+                    IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
+                    IceManager.IceClient.DisconnectAsync();
+                    IceManager.IceClient.Dispose();
+                    try
+                    {
+                        IceManager.IceServer.Kill();
+                    }
+                    catch{}
                 });
-        }
         private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
             // player info
             string country = "", string clan = null,
@@ -106,6 +117,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private async Task RunGame(GameLaunchData e)
         {
+            OnStateChanged(GameLauncherState.Launching);
             var me = LobbyClient.Self;
             IceManager.Initialize(me.Id.ToString(), me.Login);
             IceManager.IceClient.SetLobbyInitMode(e.init_mode
@@ -171,6 +183,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     Logger.LogError("Cant start game");
                     throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
                 }
+                OnStateChanged(GameLauncherState.Running);
                 await Process.WaitForExitAsync();
             }
             catch
@@ -201,8 +214,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
             OnStateChanged(GameLauncherState.Idle);
         }
-        public async Task JoinGame(GameInfoMessage game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
+        public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
+            OnStateChanged(GameLauncherState.Joining);
             if (!MapsService.IsExist(game.Mapname))
             {
                 if (game.Mapname.StartsWith("neroxis_map_generator_"))
@@ -219,6 +233,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 }
             }
             await PatchClient.UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
+            progress.Report("Joining game");
             LobbyClient.JoinGame(game.Uid);
         }
         private void OnStateChanged(GameLauncherState state)

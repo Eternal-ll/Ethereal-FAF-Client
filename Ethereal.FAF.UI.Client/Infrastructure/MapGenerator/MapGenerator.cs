@@ -19,12 +19,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly string JavaRuntime;
         private readonly string Logging;
         private readonly string PreviewPath;
-        private readonly string MapGeneratorsFolder;
-        private readonly string GeneratedMapsFolder;
-        private readonly string MapGeneratorRepository;
+        private readonly DirectoryInfo MapGeneratorsFolder;
+        private readonly DirectoryInfo GeneratedMapsFolder;
 
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger Logger;
+
+        public static string LatestVersion = "1.8.8";
 
         private static Regex Pattern = new Regex(@"neroxis_map_generator_(\d+\.\d+\.\d+)_(.*)");
 
@@ -35,26 +36,33 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             "POINT16", "XZ", "ZX", "X", "Z", "QUAD", "DIAG", "NONE"
         };
 
-        public MapGenerator(string javaRuntime, string logging, string previewPath, string mapGeneratorsFolder, string mapGeneratorRepository, string generatedMapsFolder, IHttpClientFactory httpClientFactory, ILogger logger)
+        public MapGenerator(string javaRuntime, string logging, string previewPath, string mapGeneratorsFolder, string generatedMapsFolder, IHttpClientFactory httpClientFactory, ILogger logger)
         {
             JavaRuntime = javaRuntime;
             Logging = logging;
             PreviewPath = previewPath;
-            MapGeneratorsFolder = mapGeneratorsFolder;
-            GeneratedMapsFolder = generatedMapsFolder;
+            MapGeneratorsFolder = new DirectoryInfo(mapGeneratorsFolder);
+            GeneratedMapsFolder = new DirectoryInfo(generatedMapsFolder);
             HttpClientFactory = httpClientFactory;
-            MapGeneratorRepository = mapGeneratorRepository;
             Logger = logger;
 
-            var files = Directory.GetFiles(mapGeneratorsFolder, "MapGenerator_*.*.*.jar", SearchOption.AllDirectories);
-            foreach (var mapgen in files)
+            Task.Run(async () =>
             {
-                var version = mapgen.Split('/')[^1].Split('_')[^1].Replace(".jar", null);
-                if (!KnownVersions.Any(v => v == version)) KnownVersions.Add(version);
-            }
+                if (!MapGeneratorsFolder.Exists)
+                {
+                    MapGeneratorsFolder.Create();
+                    await ConfirmOrDownloadAsync(LatestVersion);
+                }
+                var files = MapGeneratorsFolder.GetFiles("MapGenerator_*.*.*.jar", SearchOption.AllDirectories);
+                foreach (var mapgen in files)
+                {
+                    var version = mapgen.Name.Split('_')[^1].Replace(".jar", null);
+                    if (!KnownVersions.Any(v => v == version)) KnownVersions.Add(version);
+                }
+            });
         }
 
-        private string MapGeneratorFile(string version) => MapGeneratorsFolder + $"MapGenerator_{version}.jar";
+        private string MapGeneratorFile(string version) => MapGeneratorsFolder.FullName + $"MapGenerator_{version}.jar";
 
         private Process GetProcess(string path)
         {
@@ -89,7 +97,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var process = GetProcessByVersion(mapgenVersion);
             var args = process.StartInfo.Arguments;
             args += MapGeneratorArguments.SetMapName(map);
-            args += MapGeneratorArguments.SetFolderPath(GeneratedMapsFolder ?? targetFolder);
+            args += MapGeneratorArguments.SetFolderPath(targetFolder ?? GeneratedMapsFolder.FullName);
             if (!string.IsNullOrWhiteSpace(PreviewPath))
             {
                 args += MapGeneratorArguments.SetPreviewPath(PreviewPath);
@@ -114,7 +122,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             return (true, "");
         }
 
-        public bool IsNeroxisMap(string map) => Pattern.IsMatch(map);
+        public static bool IsGeneratedMap(string map) => Pattern.IsMatch(map);
 
         public async Task<List<string>> GetStylesAsync(string version)
         {
@@ -165,16 +173,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             progress?.Report($"Confirming map generator [{version}]");
             if (!File.Exists(mapgen))
             {
+                if (!MapGeneratorsFolder.Exists)
+                {
+                    MapGeneratorsFolder.Create();
+                }
                 var client = HttpClientFactory.CreateClient();
-                client.BaseAddress = new Uri(MapGeneratorRepository);
                 progress?.Report($"Downloading map generator [{version}]");
-                var response = await client.GetAsync($"{version}/NeroxisGen_{version}.jar");
-                //if (!response.IsSuccessStatusCode)
-                //{
-                //    return (false, null);
-                //}
+                var jarStream = await client.GetStreamAsync($"https://github.com/FAForever/Neroxis-Map-Generator/releases/download/{version}/NeroxisGen_{version}.jar");
                 var fs = new FileStream(mapgen, FileMode.Create);
-                await response.Content.CopyToAsync(fs);
+                await jarStream.CopyToAsync(fs);
+                await jarStream.FlushAsync();
+                await jarStream.DisposeAsync();
                 await fs.DisposeAsync();
                 fs.Close();
                 progress?.Report($"Map generator [{version}] downloaded");
@@ -205,6 +214,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             CancellationToken cancellationToken = default
             )
         {
+            if (mapname is not null)
+            {
+                var data = Pattern.Match(mapname);
+                version = data.Groups[1].Value;
+            }
             // TODO to other method
             await ConfirmOrDownloadAsync(version, progress);
 
@@ -250,8 +264,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             if (teams is not null) args += MapGeneratorArguments.SetTeamsCount(teams.Value);
             if (mapsize is not null && mapsize != 0) args += MapGeneratorArguments.SetMapSie(mapsize.Value);
 
-            if (folder is null) args += MapGeneratorArguments.SetFolderPath(GeneratedMapsFolder);
-            else args += MapGeneratorArguments.SetFolderPath(folder);
+            if (string.IsNullOrWhiteSpace(folder))
+            {
+                folder = GeneratedMapsFolder.FullName;
+                if (!GeneratedMapsFolder.Exists) GeneratedMapsFolder.Create();
+            }
+            args += MapGeneratorArguments.SetFolderPath(folder);
             args += MapGeneratorArguments.SetCountToGenerate(generateCount);
 
             process.StartInfo.Arguments = args;

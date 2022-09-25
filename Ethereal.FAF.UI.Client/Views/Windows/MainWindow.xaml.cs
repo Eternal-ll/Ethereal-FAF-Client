@@ -246,7 +246,14 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 var timer = new Timer((e) =>
                 {
                     if (cancellationTokenSource.IsCancellationRequested) return;
-                    SplashProgress.Report($"Waiting {TimeSpan.FromSeconds(wait).Humanize()} for response from FAForever OAuth");
+                    try
+                    {
+                        SplashProgress.Report($"Waiting {TimeSpan.FromSeconds(wait).Humanize()} for response from FAForever OAuth");
+                    }
+                    catch
+                    {
+
+                    }
                     if (wait == 0)
                     {
                         cancellationTokenSource.Cancel();
@@ -260,14 +267,23 @@ namespace FAF.UI.EtherealClient.Views.Windows
                     {
                         ClearLink();
                         timer.Dispose();
+                        var human = "";
+                        try
+                        {
+                            human = waitTimeSpan.Humanize();
+                        }
+                        catch
+                        {
+
+                        }
                         var result = new OAuthResult()
                         {
-                            ErrorDescription = $"Failed to get respone after {waitTimeSpan.Humanize()}"
+                            ErrorDescription = $"Failed to get respone after {human}"
                         };
                         if (t.IsFaulted) return result;
                         if (t.IsCanceled)
                         {
-                            result.ErrorDescription = $"Attempt was cancelled after {waitTimeSpan.Humanize()}";
+                            result.ErrorDescription = $"Attempt was cancelled after {human}";
                             return result;
                         }
                         return t.Result;
@@ -279,7 +295,14 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 var timer = new Timer((e) =>
                 {
                     if (wait == 0) return;
-                    SplashProgress.Report(result.ErrorDescription + $". Next attempt in {TimeSpan.FromSeconds(wait).Humanize()}");
+                    try
+                    {
+                        SplashProgress.Report(result.ErrorDescription + $". Next attempt in {TimeSpan.FromSeconds(wait).Humanize()}");
+                    }
+                    catch
+                    {
+
+                    }
                     wait--;
                 }, null, 0, 1000);
                 await Task.Delay(5000);

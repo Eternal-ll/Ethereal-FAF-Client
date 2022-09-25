@@ -97,7 +97,7 @@ namespace Ethereal.FAF.UI.Client
                 port: configuration.GetValue<int>("FAForever:Lobby:Port"),
                 logger: p.GetRequiredService<ILogger<LobbyClient>>(),
                 uidGenerator: p.GetService<UidGenerator>(),
-                userAgent: configuration.GetValue<string>("OAuth:ClientId"),
+                userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
                 userAgentVersion: version));
 
             services.AddSingleton<TokenProvider>();
@@ -132,7 +132,6 @@ namespace Ethereal.FAF.UI.Client
                 logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
                 previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
                 mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
-                mapGeneratorRepository: configuration.GetValue<string>("Paths:MapGenerator:Github"),
                 generatedMapsFolder: maps,
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
@@ -164,11 +163,17 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient(s => new GenerateMapsVM(
                 lobbyClient: s.GetService<LobbyClient>(),
                 mapGenerator: s.GetService<MapGenerator>(),
-                mapsFolder: maps));
+                mapsFolder: maps,
+                container: s.GetService<ContainerViewModel>(),
+                patchClient: s.GetService<PatchClient>(),
+                iceManager: s.GetService<IceManager>()));
             services.AddTransient(s => new LocalMapsVM(
                 mapsDirectory: maps,
                 smallMapsPreviewsFolder: "",
-                lobbyClient: s.GetService<LobbyClient>()));
+                lobbyClient: s.GetService<LobbyClient>(),
+                container: s.GetService<ContainerViewModel>(),
+                patchClient: s.GetService<PatchClient>(),
+                iceManager: s.GetService<IceManager>()));
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

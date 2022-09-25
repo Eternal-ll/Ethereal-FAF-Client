@@ -24,7 +24,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <ListBox x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                 ItemsSource="{Binding LocalMaps}" ItemTemplate="{StaticResource VaultMapItem}"
+                 ItemsSource="{Binding LocalMaps}" SelectedItem="{Binding LocalMap}" ItemTemplate="{StaticResource VaultMapItem}"
                  Style="{StaticResource VaultMapsListBox}">
         </ListBox>
         <ui:TextBox PlaceholderText="Search" Icon="Search24"/>

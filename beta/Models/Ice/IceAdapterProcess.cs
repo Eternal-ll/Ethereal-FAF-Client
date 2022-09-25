@@ -30,7 +30,7 @@ namespace beta.Models.Ice
                     UseShellExecute = false,
                     //RedirectStandardOutput = true,
                     //RedirectStandardError = true,
-                    //CreateNoWindow = true,
+                    CreateNoWindow = true,
                 }
             };
             Logger.LogInformation("Initializing [{}] with [{}]", file.FullName, args);

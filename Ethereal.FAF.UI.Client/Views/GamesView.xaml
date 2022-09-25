@@ -5,7 +5,7 @@
               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
            xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
-           xmlns:models="clr-namespace:FAF.Domain.LobbyServer;assembly=FAF.Domain.LobbyServer"
+           xmlns:lobby="clr-namespace:Ethereal.FAF.UI.Client.Models.Lobby"
               mc:Ignorable="d" 
               d:DesignHeight="450" d:DesignWidth="800"
               Title="GamesView"
@@ -58,7 +58,58 @@
             </Style>
 
 
-            <DataTemplate x:Key="DefaultCard" DataType="{x:Type models:GameInfoMessage}">
+            <DataTemplate DataType="{x:Type lobby:GamePlayer}">
+                <TextBlock Text="{Binding Login}">
+                        <!--<Run Text="{Binding Login}"/>-->
+                        <!--<Run Text="{Binding Id}" FontSize="12" Foreground="Gray"/>-->
+                </TextBlock>
+                <!--<StackPanel>
+                    <TextBlock Text="{Binding Login}">
+                        --><!--<Run Text="{Binding Login}"/>-->
+                        <!--<Run Text="{Binding Id}" FontSize="12" Foreground="Gray"/>--><!--
+                    </TextBlock>
+                </StackPanel>-->
+            </DataTemplate>
+
+            <Style x:Key="DefaultMenuItem" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"></Style>
+
+
+            <Style x:Key="GamePlayerMenuItem" TargetType="MenuItem">
+                <Setter Property="Header" Value="{Binding Login}"/>
+                <Setter Property="ItemContainerStyle" Value="{StaticResource DefaultMenuItem}"/>
+                <Setter Property="ItemsSource">
+                    <Setter.Value>
+                        <x:Array Type="FrameworkElement">
+                            <MenuItem Header="View profile"/>
+                            <Separator/>
+                            <MenuItem Header="Analytics">
+                                <MenuItem Header="FAF Analytics [Global + TMM]" 
+                                                                              Command="{StaticResource FafAnalyticsGlobalCommand}"
+                                                                              CommandParameter="{Binding Id}"/>
+                                <MenuItem Header="FAF Analytics [1 vs 1]" Command="{StaticResource FafAnalyticsLadderCommand}"
+                                                                              CommandParameter="{Binding Id}"/>
+                                <MenuItem Header="FAF Analytics [2 vs 2]" Command="{StaticResource FafAnalyticsTMMCommand}"
+                                                                              CommandParameter="{Binding Id}"/>
+                                <MenuItem Header="FAF Score NL" Command="{StaticResource FafScoreCommand}"
+                                                                              CommandParameter="{Binding Login}"/>
+                            </MenuItem>
+                            <Separator/>
+                            <MenuItem Header="Add to friends"/>
+                            <MenuItem Header="Add to foe"/>
+                        </x:Array>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="MapScenarioBadge" TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding MapScenario}" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <DataTemplate x:Key="DefaultCard" DataType="{x:Type lobby:Game}">
                 <Border Style="{StaticResource CardBorder}" Cursor="Hand">
                     <Border.ToolTip>
                         <ToolTip>
@@ -77,22 +128,38 @@
                     </Border.ToolTip>
                     <Border.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Generate" Command="{StaticResource GenerateGameMapCommand}"
+                            <MenuItem Command="{StaticResource GenerateGameMapCommand}"
                                       CommandParameter="{Binding}">
                                 <MenuItem.Style>
                                     <Style TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Header" Value="Generate map"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsMapgen}" Value="False">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding MapGeneratorState}" Value="1">
+                                                <Setter Property="Header" Value="Map is generating..."/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding MapGeneratorState}" Value="2">
+                                                <Setter Property="Header" Value="Map is generated"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </MenuItem.Style>
                             </MenuItem>
+                            <MenuItem Header="Players" ItemsSource="{Binding GameTeams}">
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Header" Value="{Binding HumanTitle}"/>
+                                        <Setter Property="ItemsSource" Value="{Binding Players}"/>
+                                        <Setter Property="ItemContainerStyle" Value="{StaticResource GamePlayerMenuItem}"/>
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                            </MenuItem>
                         </ContextMenu>
                     </Border.ContextMenu>
                     <Border.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, 
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type Ui:UiPage}}, 
                             Path=DataContext.ViewModel.JoinGameCommand}" CommandParameter="{Binding}"/>
                     </Border.InputBindings>
                     <Grid ShowGridLines="False">
@@ -104,10 +171,22 @@
                         <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding SmallMapPreview}"
                                ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
                         <StackPanel Grid.Column="2">
-                            <WrapPanel Margin="-4 0 0 4">
-                                <TextBlock Grid.Column="2" Margin="4 2 0 0" Text="{Binding HumanTitle}" TextWrapping="Wrap" ToolTip="{Binding Title}"/>
-                                <TextBlock Grid.Column="2" Grid.Row="1" Margin="4 2 0 0" FontWeight="Bold" Text="{Binding Host, StringFormat='by {0}'}"/>
-                            </WrapPanel>
+                            <!--<WrapPanel Margin="-4 0 0 4">-->
+                            <TextBlock Grid.Column="2" Margin="4 2 0 0" TextWrapping="Wrap" ToolTip="{Binding Title}">
+                                <Run Text="{Binding HumanTitle, Mode=OneWay}"/>
+                                <Run Text="by"/>
+                                <InlineUIContainer BaselineAlignment="Bottom" FontWeight="DemiBold">
+                                    <ContentControl Content="{Binding HostPlayer, Mode=OneWay}">
+                                        <ContentControl.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Style="{StaticResource GamePlayerMenuItem}" DataContext="{Binding HostPlayer}"/>
+                                            </ContextMenu>
+                                        </ContentControl.ContextMenu>
+                                    </ContentControl>
+                                </InlineUIContainer>
+                            </TextBlock>
+                                <!--<TextBlock Grid.Column="2" Grid.Row="1" Margin="4 2 0 0" FontWeight="Bold" Text="{Binding Host, StringFormat='by {0}'}"/>-->
+                            <!--</WrapPanel>-->
                             <WrapPanel Grid.Row="1" Margin="-4 0 0 0" VerticalAlignment="Top">
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
                                     <TextBlock>
@@ -115,6 +194,23 @@
                                         <Run Text="/"/>
                                         <Run Text="{Binding MaxPlayers}"/>
                                     </TextBlock>
+                                    <Ui:Badge.ToolTip>
+                                        <ToolTip>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding RatingType, StringFormat='Rating type: {0}'}" Margin="0 0 0 4"/>
+                                                <ItemsControl ItemsSource="{Binding GameTeams}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding HumanTitle}" Margin="0 4 0 4"/>
+                                                                <ItemsControl ItemsSource="{Binding Players}"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Ui:Badge.ToolTip>
                                 </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Content="{Binding RatingType}" Appearance="Secondary" ToolTip="Rating type"/>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding RatingMax}" ToolTip="Maxiumum rating rest. to join">
@@ -167,13 +263,26 @@
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding HumanLaunchedAt}">
                                     <TextBlock Text="{Binding StringFormat='launched {0}'}"/>
                                 </Ui:Badge>
+                                <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" Style="{StaticResource MapScenarioBadge}" ToolTip="Map size in KM">
+                                    <TextBlock>
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0}x{1} km">
+                                                <Binding Path="MapScenario.WidthInKm" />
+                                                <Binding Path="MapScenario.HeigthInKm" />
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </Ui:Badge>
+                                <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" Style="{StaticResource MapScenarioBadge}" ToolTip="Map name from scenario">
+                                    <TextBlock Text="{Binding MapScenario.Name}"/>
+                                </Ui:Badge>
                             </WrapPanel>
                         </StackPanel>
                     </Grid>
                 </Border>
             </DataTemplate>
 
-            <DataTemplate x:Key="LadderCard" DataType="{x:Type models:GameInfoMessage}">
+            <DataTemplate x:Key="LadderCard" DataType="{x:Type lobby:Game}">
                 <Border Style="{StaticResource CardBorder}">
                     <Grid>
                         <Grid.ColumnDefinitions>

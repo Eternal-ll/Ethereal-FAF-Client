@@ -62,7 +62,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                         Filter = "*.*",
                         EnableRaisingEvents = true,
                         NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
-            },
+                    },
                     new FileSystemWatcher()
                     {
                         Path = gamedata,
@@ -90,7 +90,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             IsFilesChanged = true;
         }
 
-
+        private FeaturedMod LatestFeaturedMod;
         public async Task UpdatePatch(FeaturedMod mod, int version = 0, bool forceCheck = false, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             progress?.Report("Confirming patch");
@@ -98,7 +98,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";
             Logger.LogTrace("Checking patch for [{}] version [{}] with forced confirmation [{}]", mod, version, forceCheck);
             // last patch url was the same
-            if (!IsFilesChanged && !forceCheck)
+            if (!IsFilesChanged && !forceCheck && LatestFeaturedMod == mod)
             {
                 Logger.LogTrace("All files up to date");
                 progress?.Report("All files up to date");
@@ -113,6 +113,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
                 return;
             }
+            LatestFeaturedMod = mod;
             var files = apiResponse.Content.Data;
             var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group.ToLower() + '\\' + f.Name.ToLower(), out var cached) || cached != f.MD5).ToArray();
             if (requiredFiles.Length == 0)
@@ -151,8 +152,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                     FilesMD5[p] = file.MD5;
                 }
             }
-            Logger.LogTrace($"Downloaded [{i}] of [{files.Length}]");
-            progress?.Report($"Downloaded [{i}] of [{files.Length}]");
+            Logger.LogTrace($"Downloaded [{i}] of [{requiredFiles.Length}]");
+            progress?.Report($"Downloaded [{i}] of [{requiredFiles.Length}]");
             IsFilesChanged = false;
             StartWatchers();
         }
@@ -177,10 +178,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
             Logger.LogTrace("File deleted [{}] change type [{}]", e.FullPath, e.ChangeType);
-            var data = e.FullPath.Split('\\');
+            var data = e.FullPath.Split('\\','/');
             var group = data[^2];
-            var path = group + '\\' + e.Name;   
-            FilesMD5.Remove(path);
+            var path = group + '\\' + e.Name;
+            if (FilesMD5.Remove(path.ToLower()))
+            {
+                Logger.LogTrace("File removed from MD5 dictionary [{}] as [{}]", e.FullPath, path);
+            }
+            else
+            {
+                Logger.LogWarning("File wasnt removed from MD5 dictionary [{}]", path);
+            }
             IsFilesChanged = true;
         }
 
@@ -188,7 +196,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
             Logger.LogTrace("File edited [{}] change type [{}]", e.FullPath, e.ChangeType);
-            var data = e.FullPath.Split('\\');
+            var data = e.FullPath.Split('\\','/');
             var group = data[^2];
             var path = group + '\\' + e.Name;
             path = path.ToLower();

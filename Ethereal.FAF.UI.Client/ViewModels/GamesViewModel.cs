@@ -2,11 +2,13 @@
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Utils;
+using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer;
-using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -28,20 +30,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public class PlayersViewModel : Base.ViewModel
     {
-        public event EventHandler<GameInfoMessage> NewGameReceived;
-        public event EventHandler<GameInfoMessage> GameUpdated;
-        //public event EventHandler<GameInfoMessage> GameRemoved;
+        public event EventHandler<Game> NewGameReceived;
+        public event EventHandler<Game> GameUpdated;
+        //public event EventHandler<Game> GameRemoved;
 
-        public event EventHandler<GameInfoMessage> GameLaunched;
-        public event EventHandler<GameInfoMessage> GameEnd;
-        public event EventHandler<GameInfoMessage> GameClosed;
+        public event EventHandler<Game> GameLaunched;
+        public event EventHandler<Game> GameEnd;
+        public event EventHandler<Game> GameClosed;
 
         public event EventHandler<string[]> PlayersLeftFromGame;
-        public event EventHandler<KeyValuePair<GameInfoMessage, string[]>> PlayersJoinedToGame;
+        public event EventHandler<KeyValuePair<Game, string[]>> PlayersJoinedToGame;
 
-        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersJoinedGame;
-        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersLeftGame;
-        public event EventHandler<KeyValuePair<GameInfoMessage, PlayerInfoMessage[]>> PlayersFinishedGame;
+        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersJoinedGame;
+        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersLeftGame;
+        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersFinishedGame;
 
 
         private readonly LobbyClient Lobby;
@@ -118,14 +120,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ContainerViewModel ContainerViewModel;
 
         private readonly IServiceProvider ServiceProvider;
+        private readonly IConfiguration Configuration;
 
-                
+
+        private readonly string MapsPath;
 
 
         private readonly GameLauncher GameLauncher;
 
-        private readonly HttpClient HttpClient;
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, HttpClient httpClient, IServiceProvider serviceProvider)
+        private readonly IHttpClientFactory HttpClientFactory;
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, IServiceProvider serviceProvider, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
@@ -151,8 +155,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }, Application.Current.Dispatcher);
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
-            HttpClient = httpClient;
             ServiceProvider = serviceProvider;
+            HttpClientFactory = httpClientFactory;
+            Configuration = configuration;
+
+
+            var vault = Configuration.GetValue<string>("Paths:Vault");
+            vault = Environment.ExpandEnvironmentVariables(vault);
+            if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
+                vault = customVaultPath;
+            MapsPath= vault + "maps/";
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -269,8 +281,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ICollectionView GamesView => GamesSource?.View;
         private bool IsRefresh;
         #region Games
-        private ObservableCollection<GameInfoMessage> _Games;
-        public ObservableCollection<GameInfoMessage> Games
+        private ObservableCollection<Game> _Games;
+        public ObservableCollection<Game> Games
         {
             get => _Games;
             set
@@ -289,33 +301,48 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
             }
         }
+
+        private void SetMapScenario(Game game)
+        {
+            if (game.MapScenario is not null) return;
+            var scenario = MapsPath + game.Mapname + "/" + game.Mapname.Split('.')[0] + "_scenario.lua";
+            if (File.Exists(scenario))
+            {
+                game.MapScenario = FA.Scmap.MapScenario.FromFile(scenario);
+            }
+        }
+
         private async void GamesView_CurrentChanged(object sender, EventArgs e)
         {
-            var onView = GamesView.Cast<GameInfoMessage>().Where(g => g.SmallMapPreview is null).ToList();
+            var onView = GamesView.Cast<Game>().Where(g => g.SmallMapPreview is null).ToList();
+            using var client = HttpClientFactory.CreateClient();
             foreach (var game in onView)
             {
-                await TrySetSmallPreviewAsync(game);
+                await TrySetSmallPreviewAsync(game, client);
             }
         }
         #endregion
         private async void GamesSource_Filter(object sender, FilterEventArgs e)
         {
-            var game = (GameInfoMessage)e.Item;
+            var game = (Game)e.Item;
             e.Accepted = false;
             if (game.GameType != SelectedGameType) return;
             if (game.RatingType != SelectedRatingType) return;
             if (IsLive && !game.LaunchedAt.HasValue) return;
             else if (!IsLive && game.LaunchedAt.HasValue) return;
 
-            if (!IsRefresh && !game.Mapname.StartsWith("neroxis") && game.SmallMapPreview is null)
+            if (!IsRefresh && game.SmallMapPreview is null)
             {
-                await TrySetSmallPreviewAsync(game);
+                using var client = HttpClientFactory.CreateClient();
+                await TrySetSmallPreviewAsync(game, client);
             }
+
+            SetMapScenario(game);
 
             e.Accepted = true;
         }
 
-        private async void Lobby_GameReceived(object sender, GameInfoMessage e)
+        private async void Lobby_GameReceived(object sender, Game e)
         {
             var games = Games;
             if (games is null) return;
@@ -335,6 +362,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                                 e.SmallMapPreview = g.SmallMapPreview;
                                 e.OnPropertyChanged(nameof(e.SmallMapPreview));
                             }
+                            e.MapGeneratorState = g.MapGeneratorState;
                             games[i] = e;
                         }
                     }, DispatcherPriority.Background);
@@ -352,7 +380,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        private static bool TrySetCachedImage(GameInfoMessage game, string cacheFolder, string cacheImage, bool skipCheck, out string cacheUrl)
+        private static bool TrySetCachedImage(Game game, string cacheFolder, string cacheImage, bool skipCheck, out string cacheUrl)
         {
             if (!cacheImage.EndsWith(".png")) cacheImage += ".png";
             cacheUrl = cacheFolder + cacheImage;
@@ -363,17 +391,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             SetSmallPreview(game, cacheUrl);
             return true;
         }
-        private static void SetSmallPreview(GameInfoMessage game, string cache)
+        private static void SetSmallPreview(Game game, string cache)
         {
             game.SmallMapPreview = cache;
             game.OnPropertyChanged(nameof(game.SmallMapPreview));
         }
         List<string> DownloadsInWork = new List<string>();
-        private async Task<bool> DownloadAndCacheImage(string download, string cache)
+        private async Task<bool> DownloadAndCacheImage(string download, string cache, HttpClient client)
         {
             if (DownloadsInWork.Any(d => d == download)) return true;
             DownloadsInWork.Add(download);
-            var client = HttpClient;
             var response = await client.GetAsync(download);
             if (!response.IsSuccessStatusCode) return false;
             using var fs = new FileStream(cache, FileMode.Create);
@@ -384,7 +411,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             return true;
         }
         List<string> MapGensInWork = new List<string>();
-        private async Task<bool> TrySetSmallPreviewAsync(GameInfoMessage game)
+        private async Task<bool> TrySetSmallPreviewAsync(Game game, HttpClient client)
         {
             if (TrySetCachedImage(game, "C:\\ProgramData\\FAForever\\cache\\maps\\small\\", game.Mapname, false, out var cache)) return true;
             if (game.Mapname.Contains("neroxis"))
@@ -434,12 +461,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 //return true;
             }
             var download = $"https://content.faforever.com/maps/previews/small/{game.Mapname}.png";
-            await DownloadAndCacheImage(download, cache);
+            await DownloadAndCacheImage(download, cache, client);
             SetSmallPreview(game, cache);
             return true;
         }
 
-        private void Lobby_GamesReceived(object sender, GameInfoMessage[] e)
+        private void Lobby_GamesReceived(object sender, Game[] e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -453,29 +480,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnChangeButton(object obj) => IsLive = !IsLive;
 
         #region HostGame
-        private AsyncCommand _HostGameCommand;
-        public AsyncCommand HostGameCommand => _HostGameCommand ??= new AsyncCommand(OnHostGameCommandAsync, CanHostGameCommand);
+        private ICommand _HostGameCommand;
+        public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
 
         private bool CanHostGameCommand(object arg) => GameLauncher.State is GameLauncherState.Idle;
-
-        private async Task OnHostGameCommandAsync()
+        private void OnHostGameCommand(object arg)
         {
-            if (GameLauncher.State is not GameLauncherState.Idle) return;
-            //var host = ServerCommands.HostGame("Ethereal FAF Client 2.0 [Test]", FeaturedMod.FAF.ToString(), "SCMP_001");
-            //LobbyClient.SendAsync(host);
             ContainerViewModel.Content = ServiceProvider.GetService<HostGameView>();
         }
         #endregion
 
         #region JoinGameCommand
-        private AsyncCommand<GameInfoMessage> _JoinGameCommand;
-        public AsyncCommand<GameInfoMessage> JoinGameCommand => _JoinGameCommand ??= new AsyncCommand<GameInfoMessage>(OnJoinTask, CanJoin);
+        private AsyncCommand<Game> _JoinGameCommand;
+        public AsyncCommand<Game> JoinGameCommand => _JoinGameCommand ??= new AsyncCommand<Game>(OnJoinTask, CanJoin);
 
         private bool CanJoin(object arg) => true;
 
         private CancellationTokenSource CancellationTokenSource;
 
-        private async Task OnJoinTask(GameInfoMessage game)
+        private async Task OnJoinTask(Game game)
         {
             if (game.LaunchedAt.HasValue)
             {

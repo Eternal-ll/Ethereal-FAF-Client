@@ -1,11 +1,8 @@
 ﻿using FAF.Domain.LobbyServer.Enums;
-using Humanizer;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 namespace FAF.Domain.LobbyServer
 {
@@ -13,7 +10,13 @@ namespace FAF.Domain.LobbyServer
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public virtual void OnPropertyChanged([CallerMemberName] string PropertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
-
+        public virtual bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
+        {
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(PropertyName);
+            return true;
+        }
     }
     public partial class GameInfoMessage : INPC
     {
@@ -63,29 +66,8 @@ namespace FAF.Domain.LobbyServer
         [JsonPropertyName("enforce_rating_range")]
         public bool EnforceRatingRange { get; set; }
         [JsonPropertyName("teams_ids")]
-        public Team[] Teams { get; set; }
-
-
-        // Fly properties
-
-        [JsonIgnore]
-        public PreviewType PreviewType => GameType == GameType.Coop
-            ? PreviewType.Coop
-            : Mapname.Contains("neroxis", StringComparison.OrdinalIgnoreCase) ?
-                PreviewType.Neroxis :
-                PreviewType.Normal;
-
-        [JsonIgnore]
-        public string SmallMapPreview { get; set; }
-        //public string SmallMapPreview => $"https://content.faforever.com/maps/previews/small/{Mapname}.png";
-        [JsonIgnore]
-        public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{Mapname}.png";
-        [JsonIgnore]
-        public string HumanTitle => Title.Truncate(34);
-        [JsonIgnore]
-        public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
-        [JsonIgnore]
-        public bool IsMapgen => MapgenRegex.IsMatch(Mapname);
-        public static Regex MapgenRegex = new Regex(@"neroxis_map_generator_(\d+\.\d+\.\d+)_(.*)");
+        public TeamIds[] TeamsIds { get; set; }
+        [JsonPropertyName("teams")]
+        public Dictionary<int, string[]> Teams { get; set; }
     }
 }

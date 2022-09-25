@@ -10,17 +10,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public class GameHostingModel
     {
-        public FeaturedMod Mod { get; set; }
+        public FeaturedMod FeaturedMod { get; set; }
 
         public string Title { get; set; }
         public string Password { get; set; }
         public string Visibility { get; set; }
         public int MinimumRating { get; set; }
         public int MaximumRating { get; set; }
-        public bool EnforeRating { get; set; }
+        public bool EnforceRating { get; set; }
         public bool IsFriendsOnly { get; set; }
         public string Map { get; set; }
-        public string GameMod { get; set; }
     }
     public class HostGameViewModel : Base.ViewModel
     {
@@ -32,10 +31,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ServiceProvider = serviceProvider;
             Game = new()
             {
-                Title = "Ethereal FAF Client 2.0 [Test]"
+                Title = "Ethereal FAF Client 2.0 [Test]",
             };
             Container = container;
         }
+        public FeaturedMod[] FeaturedModSource => new FeaturedMod[] { FeaturedMod.FAF, FeaturedMod.FAFBeta, FeaturedMod.FAFDevelop };
 
         #region Game
         private GameHostingModel _Game;

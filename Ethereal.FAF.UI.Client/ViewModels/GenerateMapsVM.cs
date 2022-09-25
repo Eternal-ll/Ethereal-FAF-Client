@@ -1,7 +1,9 @@
 ﻿using AsyncAwaitBestPractices.MVVM;
 using Ethereal.FA.Scmap;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using System;
@@ -23,15 +25,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     }
     public class GenerateMapsVM : MapsHostingVM
     {
-        private readonly LobbyClient LobbyClient;
         private readonly MapGenerator MapGenerator;
         private readonly string MapsFolder;
 
         private FileSystemWatcher FileSystemWatcher;
 
-        public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, string mapsFolder)
+        public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, string mapsFolder, ContainerViewModel container,
+            PatchClient patchClient, IceManager iceManager)
+            : base(lobbyClient, container, patchClient, iceManager)
         {
-            LobbyClient = lobbyClient;
             MapGenerator = mapGenerator;
             MapsFolder = mapsFolder;
             FileSystemWatcher = new()
@@ -51,7 +53,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 });
             };
             mapGenerator.MapGenerated += MapGenerator_MapGenerated;
-            SelectedMapGeneratorVersion = "1.8.6";
+            SelectedMapGeneratorVersion = MapGenerator.LatestVersion;
             Task.Run(() =>
             {
                 var maps = new List<LocalMap>();
@@ -59,7 +61,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 foreach (var file in scenarios)
                 {
                     var name = file.Split('/', '\\')[^2];
-                    if (!MapGenerator.IsNeroxisMap(name)) continue;
+                    if (!MapGenerator.IsGeneratedMap(name)) continue;
                     var map = new LocalMap();
                     map.FolderName = name;
                     map.Scenario = MapScenario.FromFile(file);
@@ -441,16 +443,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         }
         #endregion
-
-        protected override bool CanHostGameCommand(object obj)
-        {
-            return true;
-        }
-
-        protected override void OnHostGameCommand(object obj)
-        {
-
-        }
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

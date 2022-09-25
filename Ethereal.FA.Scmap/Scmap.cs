@@ -1,9 +1,15 @@
-﻿using Ethereal.FA.Vault;
-
-namespace Ethereal.FA.Scmap
+﻿namespace Ethereal.FA.Vault
 {
     public class Scmap
     {
+        public float[,] Heights;
+        public ushort[] Heightmap;
+
+
+        public int Height;
+        public int Width;
+        public float HeightScale;
+
         public static Scmap FromFile(string file, string previewTarget = null)
         {
             if (!File.Exists(file)) return null;
@@ -34,40 +40,42 @@ namespace Ethereal.FA.Scmap
             if (!File.Exists(preview)) DDSImage.ConvertToPng(previewData, preview);
             if (!string.IsNullOrWhiteSpace(previewTarget)) File.Copy(preview, previewTarget);
             var VersionMinor = stream.ReadInt32();
-            return scmap;
             #endregion
             #region Heightmap section
-            var width = stream.ReadInt32();
-            var height = stream.ReadInt32();
+            scmap.Width = stream.ReadInt32();
+            scmap.Height = stream.ReadInt32();
             //Height Scale, usually 1/128
-            var heightScale = stream.ReadSingle();
+            scmap.HeightScale = stream.ReadSingle();
+
             //heightmap dimension is always 1 more than texture dimension!
             //var heightmapData = stream.ReadInt16Array((int)((Height + 1) * (Width + 1)));
-            var len = (int)((width + 1) * (height + 1));
+            var len = (scmap.Width + 1) * (scmap.Height + 1);
             //SixLabors.ImageSharp.
 
             ushort[] g = new ushort[len];
             for (int i = 0; i < len; i++)
             {
-                g[i] = (ushort)stream.ReadInt16(); ;
+                g[i] = (ushort)stream.ReadInt16();
             }
+            scmap.Heightmap = g;
             #region werf
+            float[,] heights = new float[scmap.Height, scmap.Width];
+            float HeightWidthMultiply = scmap.Height / (float)scmap.Width;
+            for (int yy = 0; yy < scmap.Height; yy++)
+            {
+                for (int xx = 0; xx < scmap.Height; xx++)
+                {
+                    var localY = (int)((scmap.Height - 1 - yy) * HeightWidthMultiply);
+                    heights[yy, xx] = GetHeight(localY, xx, g, scmap.Width) * scmap.HeightScale;
 
-            //float[,] heights = new float[height, width];
-            //float HeightWidthMultiply = (height / (float)width);
-            //for (int yy = 0; yy < height; yy++)
-            //{
-            //    for (int xx = 0; xx < height; xx++)
-            //    {
-            //        var localY = (int)(((height - 1) - yy) * HeightWidthMultiply);
-            //        heights[yy, xx] = GetHeight(localY, xx, g, width) * heightScale;
-
-            //        //if (HeightWidthMultiply == 0.5f && y > 0 && y % 2f == 0)
-            //        //{
-            //        //	heights[y - 1, x] = Lerp(heights[y, x], heights[y - 2, x], 0.5f);
-            //        //}
-            //    }
-            //}
+                    //if (HeightWidthMultiply == 0.5f && y > 0 && y % 2f == 0)
+                    //{
+                    //	heights[y - 1, x] = Lerp(heights[y, x], heights[y - 2, x], 0.5f);
+                    //}
+                }
+            }
+            scmap.Heights = heights;
+            return scmap;
             #endregion
 
 
@@ -116,7 +124,7 @@ namespace Ethereal.FA.Scmap
             #endregion
         }
 
-        public static int HeightmapId(int x, int y, float width) => ((int)(x + y * (width + 1)));
+        public static int HeightmapId(int x, int y, float width) => (int)(x + y * (width + 1));
 
         public static ushort GetHeight(int x, int y, ushort[] heights, float width) => heights[HeightmapId(x, y, width)];
     }

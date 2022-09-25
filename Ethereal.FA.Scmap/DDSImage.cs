@@ -1,4 +1,4 @@
-﻿namespace Ethereal.FA.Scmap
+﻿namespace Ethereal.FA.Vault
 {
     public static class DDSImage
     {

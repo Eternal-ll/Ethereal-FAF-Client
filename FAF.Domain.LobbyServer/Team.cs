@@ -2,7 +2,7 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    public class Team
+    public class TeamIds
     {
         [JsonPropertyName("team_id")]
         public long TeamId { get; set; }

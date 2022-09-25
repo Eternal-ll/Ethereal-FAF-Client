@@ -74,7 +74,17 @@
                         Icon="PuzzlePiece24"
                         Message="Remember that the Heat Death of Universe is coming someday, no time to explain - let's go!"
                         Timeout="5000" />
-
+        <ContentControl Grid.Row="1" Content="{Binding Content}" Visibility="Visible">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Style.Triggers>
+                        <Trigger Property="Content" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
         <Grid x:Name="RootWelcomeGrid" Grid.Row="1" Visibility="{Binding SplashVisibility}">
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <ui:ProgressRing Visibility="{Binding SplashProgressVisibility}">
@@ -100,17 +110,7 @@
                 </StackPanel>-->
             </StackPanel>
         </Grid>
-        <ContentControl Grid.Row="1" Content="{Binding Content}" Visibility="Visible">
-            <ContentControl.Style>
-                <Style TargetType="ContentControl">
-                    <Style.Triggers>
-                        <Trigger Property="Content" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ContentControl.Style>
-        </ContentControl>
+        
 
         <!--  Dialogue is above all controls except the navigation buttons. So it covers all the content, but allows you to close or move the application.  -->
         <ui:Dialog
