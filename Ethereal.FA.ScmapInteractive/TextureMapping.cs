@@ -124,8 +124,13 @@ namespace WPFChart3D
             //ImageBrush imageBrush = new ImageBrush(imSrc);
             imageBrush.ViewportUnits = BrushMappingMode.Absolute;
             m_material = new DiffuseMaterial();
-            m_material.Brush = imageBrush;
-
+            //m_material.Brush = new ImageBrush(new BitmapImage(new Uri("C:\\Users\\Eternal\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps\\adaptive_archsimkats_valley.v0003\\Adaptive_Archsimkats_Valley.png")));
+            m_material.Brush = new SolidColorBrush(Colors.Green);
+            var image = new BitmapImage(new Uri("C:\\Users\\Eternal\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance\\maps\\adaptive_archsimkats_valley.v0003\\Adaptive_Archsimkats_Valley.png"));
+            m_material = new DiffuseMaterial(new ImageBrush(image))
+            {
+                
+            };
             m_bPseudoColor = true;
         }
 

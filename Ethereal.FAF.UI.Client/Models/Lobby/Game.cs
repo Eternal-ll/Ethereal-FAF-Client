@@ -126,8 +126,8 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         }
 
 
-        private FA.Scmap.MapScenario _MapScenario;
-        public FA.Scmap.MapScenario MapScenario
+        private FA.Vault.MapScenario _MapScenario;
+        public FA.Vault.MapScenario MapScenario
         {
             get => _MapScenario;
             set => Set(ref _MapScenario, value);

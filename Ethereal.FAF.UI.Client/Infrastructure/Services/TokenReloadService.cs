@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
-    internal class TokenReloadService : IHostedService
+    internal class TokenReloadService : BackgroundService
     {
         private readonly ILogger Logger;
         private readonly IServiceProvider ServiceProvider;
@@ -23,7 +23,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             CancellationTokenSource = new();
             TokenProvider = tokenProvider;
         }
-        public async Task StartAsync(CancellationToken cancellationToken)
+
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             var token = TokenProvider.TokenBearer;
             if (token is not null && token.AccessToken is not null && token.RefreshToken is not null)
@@ -66,12 +67,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             token = result.TokenBearer;
             Logger.LogTrace("New access token expires in [{}] seconds at [{}]", token.ExpiresIn, token.ExpiresAt);
             TokenProvider.Save(token);
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            Logger.LogTrace("Finished");
-            return Task.CompletedTask;
         }
     }
 }

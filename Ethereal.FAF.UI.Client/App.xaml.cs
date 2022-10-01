@@ -53,14 +53,18 @@ namespace Ethereal.FAF.UI.Client
 
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            var configuration = context.Configuration;
+            var paths = Client.Properties.Paths.Default;
+
+
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fileVersionInfo.ProductVersion;
 
-            var configuration = context.Configuration;
+            // Background
+            services.AddHostedService<TokenReloadService>();
             // App Host
             services.AddHostedService<ApplicationHostService>();
-            services.AddHostedService<TokenReloadService>();
             // Theme manipulation
             services.AddSingleton<IThemeService, ThemeService>();
             // Taskbar manipulation
@@ -105,7 +109,7 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped(s => new PatchClient(
                 logger: s.GetService<ILogger<PatchClient>>(),
                 serviceProvider: s,
-                patchFolder: configuration.GetValue<string>("Paths:Patch"),
+                patchFolder: paths.Patch,
                 tokenProvider: s.GetService<ITokenProvider>()));
             
             services.AddScoped(s => new IceManager(
@@ -118,26 +122,24 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<GameLauncher>();
 
-            var vault = configuration.GetValue<string>("Paths:Vault");
-            vault = Environment.ExpandEnvironmentVariables(vault);
-            if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
+            var vault = Environment.ExpandEnvironmentVariables(paths.Vault);
+            if (FaPaths.TryGetCustomVaultPath(out var customVaultPath))
             {
                 vault = customVaultPath;
             }
-            var maps = vault + "maps/";
-            var mods = vault + "mods/";
+            FaPaths.Path = vault;
 
             services.AddTransient(s => new MapGenerator(
                 javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
                 logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
                 previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
                 mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
-                generatedMapsFolder: maps,
+                generatedMapsFolder: FaPaths.Maps,
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
             services.AddScoped(s => new MapsService(
-                mapsFolder: maps,
+                mapsFolder: FaPaths.Maps,
                 baseAddress: configuration.GetValue<string>("FAForever:Content"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapsService>>()));
@@ -148,9 +150,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddHttpClient();
 
-
-
-
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
 
@@ -160,20 +159,8 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient<SelectLocalMapView>();
             services.AddTransient<SelectCoopView>();
 
-            services.AddTransient(s => new GenerateMapsVM(
-                lobbyClient: s.GetService<LobbyClient>(),
-                mapGenerator: s.GetService<MapGenerator>(),
-                mapsFolder: maps,
-                container: s.GetService<ContainerViewModel>(),
-                patchClient: s.GetService<PatchClient>(),
-                iceManager: s.GetService<IceManager>()));
-            services.AddTransient(s => new LocalMapsVM(
-                mapsDirectory: maps,
-                smallMapsPreviewsFolder: "",
-                lobbyClient: s.GetService<LobbyClient>(),
-                container: s.GetService<ContainerViewModel>(),
-                patchClient: s.GetService<PatchClient>(),
-                iceManager: s.GetService<IceManager>()));
+            services.AddTransient<GenerateMapsVM>();
+            services.AddTransient<LocalMapsVM>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

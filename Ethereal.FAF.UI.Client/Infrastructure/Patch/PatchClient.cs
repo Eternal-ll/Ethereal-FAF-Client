@@ -31,8 +31,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             var baseDirectory = patchFolder;
             logger.LogTrace("Initializing with base directory: [{}]", baseDirectory);
             Logger = logger;
-            var bin = baseDirectory + "bin";
-            var gamedata = baseDirectory + "gamedata";
+            var bin = Path.Combine(baseDirectory, "bin");
+            var gamedata = Path.Combine(baseDirectory, "gamedata");
             try
             {
                 var binDirectory = new DirectoryInfo(bin);
@@ -115,7 +115,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             LatestFeaturedMod = mod;
             var files = apiResponse.Content.Data;
-            var requiredFiles = files.Where(f=>!FilesMD5.TryGetValue(f.Group.ToLower() + '\\' + f.Name.ToLower(), out var cached) || cached != f.MD5).ToArray();
+            var requiredFiles = files
+                .Where(f => 
+                !FilesMD5.TryGetValue(Path.Combine(f.Group.ToLower(), f.Name.ToLower()), out var cached) ||
+                cached != f.MD5)
+                .ToArray();
             if (requiredFiles.Length == 0)
             {
                 Logger.LogTrace("All files up to date");
@@ -130,8 +134,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             int i = 1;
             foreach (var file in requiredFiles)
             {
-                var origP = file.Group + '\\' + file.Name;
-                var p = file.Group.ToLower() + '\\' + file.Name.ToLower();
+                var origP = Path.Combine(file.Group, file.Name);
+                var p = Path.Combine(file.Group.ToLower(), file.Name.ToLower());
                 var url = new Uri(file.CacheableUrl);
                 var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
@@ -142,7 +146,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 }
                 Logger.LogTrace($"Downloading [{origP}] [{i}] of [{requiredFiles.Length}]");
                 progress?.Report($"Downloading [{origP}] [{i}] of [{requiredFiles.Length}]");
-                using var fs = new FileStream(PatchDirectory.FullName + '\\' + origP, FileMode.Create);
+                using var fs = new FileStream(Path.Combine(PatchDirectory.FullName, origP), FileMode.Create);
                 await fileResponse.Content.CopyToAsync(fs, cancellationToken);
                 i++;
 
@@ -180,7 +184,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             Logger.LogTrace("File deleted [{}] change type [{}]", e.FullPath, e.ChangeType);
             var data = e.FullPath.Split('\\','/');
             var group = data[^2];
-            var path = group + '\\' + e.Name;
+            var path = Path.Combine(group, e.Name);
             if (FilesMD5.Remove(path.ToLower()))
             {
                 Logger.LogTrace("File removed from MD5 dictionary [{}] as [{}]", e.FullPath, path);
@@ -198,7 +202,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             Logger.LogTrace("File edited [{}] change type [{}]", e.FullPath, e.ChangeType);
             var data = e.FullPath.Split('\\','/');
             var group = data[^2];
-            var path = group + '\\' + e.Name;
+            var path = Path.Combine(group, e.Name);
             path = path.ToLower();
             if (LastFileInWork == path) return;
             LastFileInWork = path;
@@ -220,7 +224,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             Logger.LogTrace("Processing files in [{}]", patch.FullName);
             foreach (var file in patch.EnumerateFiles())
             {
-                var key = file.Directory.Name + '\\' + file.Name;
+                var key = Path.Combine(file.Directory.Name, file.Name);
                 var md5 = await CalculateMD5(file.FullName);
                 if (!FilesMD5.TryAdd(key, md5))
                 {

@@ -1,4 +1,4 @@
-﻿using Ethereal.FA.Scmap;
+﻿using Ethereal.FA.Vault;
 
 namespace Ethereal.FAF.UI.Client.Models
 {

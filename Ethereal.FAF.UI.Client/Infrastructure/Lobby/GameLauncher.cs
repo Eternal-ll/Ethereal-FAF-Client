@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -60,7 +61,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 {
                     OnStateChanged(GameLauncherState.Idle);
                     if (t.IsFaulted)
+                    {
+                        Logger.LogError(t.Exception.ToString());
                         LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                    }
                     Process = null;
                     IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
                     IceManager.IceClient.DisconnectAsync();
@@ -171,7 +175,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 StartInfo = new()
                 {
-                    FileName = Configuration.GetValue<string>("Paths:Patch") + "bin/ForgedAlliance.exe",
+                    FileName = Path.Combine(Properties.Paths.Default.Patch, "bin", "ForgedAlliance.exe"),
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }

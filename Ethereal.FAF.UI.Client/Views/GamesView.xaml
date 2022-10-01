@@ -362,6 +362,7 @@
                 </Button.Style>
             </Button>
             <Button Content="Host game" Width="100" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
+            
         </WrapPanel>
         <Ui:VirtualizingItemsControl Grid.Row="1" Margin="-4 0 -16 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
             ItemsSource="{Binding ViewModel.GamesView, Mode=OneWay}" IsTabStop="False"

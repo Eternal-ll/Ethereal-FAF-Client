@@ -6,18 +6,14 @@ using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
-using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,88 +24,6 @@ using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class PlayersViewModel : Base.ViewModel
-    {
-        public event EventHandler<Game> NewGameReceived;
-        public event EventHandler<Game> GameUpdated;
-        //public event EventHandler<Game> GameRemoved;
-
-        public event EventHandler<Game> GameLaunched;
-        public event EventHandler<Game> GameEnd;
-        public event EventHandler<Game> GameClosed;
-
-        public event EventHandler<string[]> PlayersLeftFromGame;
-        public event EventHandler<KeyValuePair<Game, string[]>> PlayersJoinedToGame;
-
-        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersJoinedGame;
-        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersLeftGame;
-        public event EventHandler<KeyValuePair<Game, PlayerInfoMessage[]>> PlayersFinishedGame;
-
-
-        private readonly LobbyClient Lobby;
-
-        public PlayersViewModel(LobbyClient lobby)
-        {
-            Lobby = lobby;
-            lobby.PlayersReceived += Lobby_PlayersReceived;
-            lobby.PlayerReceived += Lobby_PlayerReceived;
-            lobby.WelcomeDataReceived += Lobby_WelcomeDataReceived;
-        }
-
-        public PlayerInfoMessage Self;
-
-        private void Lobby_WelcomeDataReceived(object sender, WelcomeData e)
-        {
-            Self = e.me;
-        }
-
-        #region Games
-        public CollectionViewSource PlayersSource { get; private set; }
-        public ICollectionView PlayersView => PlayersSource?.View;
-        private ObservableCollection<PlayerInfoMessage> _Players;
-        public ObservableCollection<PlayerInfoMessage> Players
-        {
-            get => _Players;
-            set
-            {
-                if (Set(ref _Players, value))
-                {
-                    PlayersSource = new()
-                    {
-                        Source = value
-                    };
-                    PlayersSource.Filter += PlayersSource_Filter;
-                    OnPropertyChanged(nameof(PlayersView));
-                }
-            }
-        }
-
-        private void PlayersSource_Filter(object sender, FilterEventArgs e)
-        {
-            var player = (PlayerInfoMessage)e.Item;
-            e.Accepted = false;
-            e.Accepted = true;
-        }
-        #endregion
-
-        private void Lobby_PlayerReceived(object sender, PlayerInfoMessage e)
-        {
-            if (e.Id == Self.Id)
-            {
-                Self = e;
-            }
-        }
-
-        private void Lobby_PlayersReceived(object sender, PlayerInfoMessage[] e) =>
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                Players = new(e);
-            }, DispatcherPriority.Background);
-    }
-
-
-
-
     public class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
@@ -120,7 +34,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ContainerViewModel ContainerViewModel;
 
         private readonly IServiceProvider ServiceProvider;
-        private readonly IConfiguration Configuration;
 
 
         private readonly string MapsPath;
@@ -128,8 +41,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly GameLauncher GameLauncher;
 
-        private readonly IHttpClientFactory HttpClientFactory;
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, IServiceProvider serviceProvider, IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, IServiceProvider serviceProvider)
         {
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
@@ -156,15 +68,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
             ServiceProvider = serviceProvider;
-            HttpClientFactory = httpClientFactory;
-            Configuration = configuration;
-
-
-            var vault = Configuration.GetValue<string>("Paths:Vault");
-            vault = Environment.ExpandEnvironmentVariables(vault);
-            if (CustomVaultPath.TryGetCustomVaultPath(out var customVaultPath))
-                vault = customVaultPath;
-            MapsPath= vault + "maps/";
+            MapsPath= FaPaths.Path + "maps/";
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -293,7 +197,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         Source = value
                     };
-                    GamesView.CurrentChanged += GamesView_CurrentChanged;
                     GamesSource.Filter += GamesSource_Filter;
                     IsRefresh = true;
                     OnPropertyChanged(nameof(GamesView));
@@ -308,21 +211,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var scenario = MapsPath + game.Mapname + "/" + game.Mapname.Split('.')[0] + "_scenario.lua";
             if (File.Exists(scenario))
             {
-                game.MapScenario = FA.Scmap.MapScenario.FromFile(scenario);
-            }
-        }
-
-        private async void GamesView_CurrentChanged(object sender, EventArgs e)
-        {
-            var onView = GamesView.Cast<Game>().Where(g => g.SmallMapPreview is null).ToList();
-            using var client = HttpClientFactory.CreateClient();
-            foreach (var game in onView)
-            {
-                await TrySetSmallPreviewAsync(game, client);
+                game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
             }
         }
         #endregion
-        private async void GamesSource_Filter(object sender, FilterEventArgs e)
+        private void GamesSource_Filter(object sender, FilterEventArgs e)
         {
             var game = (Game)e.Item;
             e.Accepted = false;
@@ -331,21 +224,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (IsLive && !game.LaunchedAt.HasValue) return;
             else if (!IsLive && game.LaunchedAt.HasValue) return;
 
-            if (!IsRefresh && game.SmallMapPreview is null)
-            {
-                using var client = HttpClientFactory.CreateClient();
-                await TrySetSmallPreviewAsync(game, client);
-            }
-
             SetMapScenario(game);
 
             e.Accepted = true;
         }
 
-        private async void Lobby_GameReceived(object sender, Game e)
+        private void Lobby_GameReceived(object sender, Game e)
         {
             var games = Games;
             if (games is null) return;
+
+            e.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{e.Mapname}.png";
             var found = false;
             for (int i = 0; i < games.Count; i++)
             {
@@ -379,97 +268,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Background);
             }
         }
-
-        private static bool TrySetCachedImage(Game game, string cacheFolder, string cacheImage, bool skipCheck, out string cacheUrl)
-        {
-            if (!cacheImage.EndsWith(".png")) cacheImage += ".png";
-            cacheUrl = cacheFolder + cacheImage;
-            if (!skipCheck && !File.Exists(cacheUrl))
-            {
-                return false;
-            }
-            SetSmallPreview(game, cacheUrl);
-            return true;
-        }
         private static void SetSmallPreview(Game game, string cache)
         {
             game.SmallMapPreview = cache;
             game.OnPropertyChanged(nameof(game.SmallMapPreview));
-        }
-        List<string> DownloadsInWork = new List<string>();
-        private async Task<bool> DownloadAndCacheImage(string download, string cache, HttpClient client)
-        {
-            if (DownloadsInWork.Any(d => d == download)) return true;
-            DownloadsInWork.Add(download);
-            var response = await client.GetAsync(download);
-            if (!response.IsSuccessStatusCode) return false;
-            using var fs = new FileStream(cache, FileMode.Create);
-            await response.Content.CopyToAsync(fs);
-            fs.Close();
-            await fs.DisposeAsync();
-            DownloadsInWork.Remove(download);
-            return true;
-        }
-        List<string> MapGensInWork = new List<string>();
-        private async Task<bool> TrySetSmallPreviewAsync(Game game, HttpClient client)
-        {
-            if (TrySetCachedImage(game, "C:\\ProgramData\\FAForever\\cache\\maps\\small\\", game.Mapname, false, out var cache)) return true;
-            if (game.Mapname.Contains("neroxis"))
-            {
-                if (game.SmallMapPreview is not null) return true;
-                var mapgen = "C:\\ProgramData\\FAForever\\cache\\maps\\small\\neroxis_map_generator_preview.png";
-                if (File.Exists(mapgen))
-                {
-                    SetSmallPreview(game, mapgen);
-                    return true;
-                }
-                using var s = Assembly.GetExecutingAssembly().GetManifestResourceStream("Ethereal.FAF.UI.Client.Resources.neroxis_map_generator_preview.png");
-                using var fs = new FileStream(mapgen, FileMode.Create);
-                await s.CopyToAsync(fs);
-                await s.FlushAsync();
-                s.Close();
-                fs.Close();
-                await s.DisposeAsync();
-                await fs.DisposeAsync();
-                SetSmallPreview(game, mapgen);
-                return true;
-                //var map = maps + game.Mapname;
-                //var preview = maps + '\\' + game.Mapname + '\\' + game.Mapname + "_preview.png";
-                //if (MapGensInWork.Any(c => c == preview) || File.Exists(preview))
-                //{
-                //    SetSmallPreview(game, preview);
-                //    return true;
-                //}
-                //MapGensInWork.Add(preview);
-                //Task.Run(async () =>
-                //{
-                //    var args = new StringBuilder();
-                //    args.Append("-jar \"C:\\ProgramData\\FAForever\\map_generator\\MapGenerator_1.8.5.jar\" ");
-                //    args.Append($"--map-name {game.Mapname} ");
-                //    args.Append($"--folder-path \"{maps}\" ");
-                //    var t = args.ToString();
-                //    var process = new Process()
-                //    {
-                //        StartInfo = new("java", args.ToString()),
-                //    };
-                //    process.Start();
-                //    await process.WaitForExitAsync();
-                //    MapGensInWork.Remove(preview);
-                //    if (!File.Exists(preview)) return;
-                //    SetSmallPreview(game, preview);
-                //}).SafeFireAndForget();
-                //return true;
-            }
-            var download = $"https://content.faforever.com/maps/previews/small/{game.Mapname}.png";
-            await DownloadAndCacheImage(download, cache, client);
-            SetSmallPreview(game, cache);
-            return true;
         }
 
         private void Lobby_GamesReceived(object sender, Game[] e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                foreach (var g in e)
+                {
+                    g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
+                }
+
                 Games = new(e);
             }, DispatcherPriority.Background);
         }

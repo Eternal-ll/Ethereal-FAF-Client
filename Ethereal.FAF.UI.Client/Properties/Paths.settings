@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Ethereal.FAF.UI.Client.Properties" GeneratedClassName="Paths">
+  <Profiles />
+  <Settings>
+    <Setting Name="Patch" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\ProgramData\FAForever</Value>
+    </Setting>
+    <Setting Name="Game" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files (x86)\Steam\steamapps\common\Supreme Commander Forged Alliance</Value>
+    </Setting>
+    <Setting Name="Vault" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Users\Eternal\Documents\My Games\Gas Powered Games\Supreme Commander Forged Alliance</Value>
+    </Setting>
+    <Setting Name="Replays" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\ProgramData\FAForever\replays</Value>
+    </Setting>
+    <Setting Name="GameLogs" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\ProgramData\FAForever\logs\game.uid.{uid}.log</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

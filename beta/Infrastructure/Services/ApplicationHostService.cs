@@ -4,6 +4,7 @@ using beta.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,11 +22,10 @@ namespace beta.Infrastructure.Services
         {
             ServiceProvider = serviceProvider;
         }
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             PrepareNavigation();
-
-            await HandleActivationAsync();
+            return HandleActivationAsync();
         }
         public async Task StopAsync(CancellationToken cancellationToken)
         {
@@ -33,7 +33,7 @@ namespace beta.Infrastructure.Services
         }
         private async Task HandleActivationAsync()
         {
-            //await Task.CompletedTask;
+            await Task.CompletedTask;
 
             if (Application.Current.Windows.Count == 0)
             {

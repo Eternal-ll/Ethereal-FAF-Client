@@ -1,10 +1,10 @@
-﻿using AsyncAwaitBestPractices.MVVM;
-using Ethereal.FA.Scmap;
+﻿using Ethereal.FA.Vault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models;
 using System;
 using System.Collections.Generic;
@@ -30,16 +30,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private FileSystemWatcher FileSystemWatcher;
 
-        public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, string mapsFolder, ContainerViewModel container,
+        public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, ContainerViewModel container,
             PatchClient patchClient, IceManager iceManager)
             : base(lobbyClient, container, patchClient, iceManager)
         {
             MapGenerator = mapGenerator;
-            MapsFolder = mapsFolder;
+            MapsFolder = FaPaths.Maps;
             FileSystemWatcher = new()
             {
                 IncludeSubdirectories = true,
-                Path = mapsFolder,
+                Path = MapsFolder,
                 Filter = "neroxis_map_generator_*.*.*_*_scenario.lua",
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
@@ -57,7 +57,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Task.Run(() =>
             {
                 var maps = new List<LocalMap>();
-                string[] scenarios = Directory.GetFiles(mapsFolder, "*_scenario.lua", SearchOption.AllDirectories);
+                string[] scenarios = Directory.GetFiles(MapsFolder, "*_scenario.lua", SearchOption.AllDirectories);
                 foreach (var file in scenarios)
                 {
                     var name = file.Split('/', '\\')[^2];

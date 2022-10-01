@@ -383,7 +383,7 @@ namespace Ethereal.FA.ScmapInteractive
 
                 BitmapImage bitmap = new BitmapImage(new Uri(dialog.FileName.Replace(".scmap",".png")));
                 ImageBrush imageBrush = new ImageBrush(bitmap);
-                Material backMaterial = new DiffuseMaterial(imageBrush);
+                Material backMaterial = new DiffuseMaterial(new SolidColorBrush(Colors.Gray));
                 m_nChartModelIndex = model3d.UpdateModel(meshs, backMaterial, m_nChartModelIndex, this.mainViewport);
 
                 // 7. set projection matrix, so the data is in the display region
