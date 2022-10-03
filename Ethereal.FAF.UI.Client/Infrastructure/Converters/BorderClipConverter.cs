@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -8,6 +11,25 @@ using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
 {
+    public class ToPlayerConverter : IValueConverter
+    {
+        private PlayersViewModel Model;
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            Model ??= App.Hosting.Services.GetService<PlayersViewModel>();
+            var players = Model.Players;
+            if (value is string id && long.TryParse(id, out var idParsed))
+            {
+                return players.FirstOrDefault(p => p.Id == idParsed);
+            }
+            return players.FirstOrDefault(p => p.Login == value.ToString());
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class SmallPreviewImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

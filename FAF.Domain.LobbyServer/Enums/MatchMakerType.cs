@@ -1,6 +1,6 @@
 ﻿namespace FAF.Domain.LobbyServer.Enums
 {
-    public enum MatchMakerType : byte
+    public enum MatchmakingType : byte
     {
         ladder1v1 = 2,
         tmm2v2 = 3,

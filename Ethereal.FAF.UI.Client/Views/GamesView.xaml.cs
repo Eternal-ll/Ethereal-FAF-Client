@@ -12,6 +12,7 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = viewModel;
             InitializeComponent();
+            Resources.Add("JoinGameCommand", ViewModel.JoinGameCommand);
         }
 
         public GamesViewModel ViewModel { get; }

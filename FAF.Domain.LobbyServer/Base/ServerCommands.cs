@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace FAF.Domain.LobbyServer.Base
 {
@@ -135,7 +136,8 @@ namespace FAF.Domain.LobbyServer.Base
 
         // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
         // TODO
-        public static string SetPartyFactions() => throw new NotImplementedException();
+        public static string SetPartyFactions(params string[] factions) =>
+            $"{{\"command\": \"match_ready\", \"factions\":[{string.Join(',', factions.Select(f=>$"\"{f}\""))}]}}";
 
         /// <summary>
         /// Accept invite to MatchMaker party

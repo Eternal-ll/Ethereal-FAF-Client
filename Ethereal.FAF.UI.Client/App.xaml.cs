@@ -152,6 +152,13 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
+            services.AddScoped<MatchmakingViewModel>();
+
+            services.AddTransient<LinksView>();
+            services.AddTransient<LinksViewModel>();
+
+            services.AddScoped<PlayersView>();
+            services.AddScoped<PlayersViewModel>();
 
             services.AddTransient<HostGameView>();
             services.AddTransient<HostGameViewModel>();
@@ -165,14 +172,8 @@ namespace Ethereal.FAF.UI.Client
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            new Window()
-            {
-                Resources = App.Current.Resources,
-                Content = new TextBox()
-                {
-                    Text = e.Exception.Message + '\n' + e.Exception.StackTrace
-                }
-            }.Show();
+            var snackbar = Hosting.Services.GetService<SnackbarService>();
+            snackbar.Show("App exception", e.Exception.ToString(), Wpf.Ui.Common.SymbolRegular.ErrorCircle24);
         }
     }
 }

@@ -13,7 +13,8 @@
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance {x:Type vm:ContainerViewModel}}"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    MaxHeight="{Binding Source={x:Static SystemParameters.MaximizedPrimaryScreenHeight}}">
     <!--Background="#ff202020"-->
     <Grid>
         <Grid.RowDefinitions>
@@ -41,17 +42,40 @@
                         Cache="True"
                         Content="Play"
                         PageType="{x:Type v:GamesView}"
-                        Icon="XboxController24" />
+                        Icon="XboxController24"
+                        ToolTip="Search lobbies to play"/>
+                    <ui:NavigationItem
+                        Content="Chat"
+                        PageType="{x:Type v:LinksView}"
+                        Icon="Chat24"
+                        ToolTip="IRC chat"/>
+                    <ui:NavigationItem
+                        Content="Players"
+                        PageType="{x:Type v:PlayersView}"
+                        Icon="PeopleList24"
+                        ToolTip="IRC chat"/>
+                    <ui:NavigationItem
+                        Content="Links"
+                        Icon="Link24"
+                        ToolTip="Useful links"/>
+                    <ui:NavigationItem
+                        Content="Maps"
+                        Icon="Map24"
+                        ToolTip="Maps vault"/>
+                    <ui:NavigationItem
+                        Content="Mods"
+                        Icon="Vault24"
+                        ToolTip="Mods vault"/>
                 </ui:NavigationStore.Items>
-                <!--<ui:NavigationStore.Footer>-->
+                <ui:NavigationStore.Footer>
                     <!--  A navigation element that does not point to the page can be used as a button.  -->
-                    <!--<ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />-->
-                <!--</ui:NavigationStore.Footer>-->
+                    <ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />
+                    <ui:NavigationItem Content="Settings" Icon="Settings24" />
+                </ui:NavigationStore.Footer>
             </ui:NavigationStore>
 
             <!--  We display our pages inside this element.  -->
-            <Border Grid.Column="1" Background="#272727"
-                CornerRadius="8 0 0 0">
+            <Border Grid.Column="1" Style="{StaticResource ClippedBorder}" CornerRadius="8 0 0 0">
                 <Frame x:Name="RootFrame" Grid.Row="1" >
                     <Frame.Style>
                         <Style TargetType="Frame">
@@ -160,7 +184,96 @@
             ShowMaximize="True"
             ShowMinimize="True"
             UseSnapLayout="True"
+                     Icon="/Resources/logo.ico"
                      Title="Ethereal FAF Client">
+            <ui:TitleBar.Header>
+                <StackPanel
+                    Margin="0,0,12,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <StackPanel.Resources>
+                        <Style x:Key="BorderPopup" TargetType="Border">
+                            <Setter Property="Padding" Value="10"/>
+                            <Setter Property="CornerRadius" Value="4"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="BorderBrush">
+                                <Setter.Value>
+                                    <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Effect">
+                                <Setter.Value>
+                                    <DropShadowEffect
+                                BlurRadius="30"
+                                Direction="0"
+                                Opacity="0.4"
+                                ShadowDepth="0"
+                                Color="#202020" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </StackPanel.Resources>
+                    <ToggleButton x:Name="LobbyPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
+                        <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
+                            <Ellipse Width="6" Height="6" Fill="LimeGreen"/>
+                            <TextBlock Text="Lobby" Margin="4 0"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <Popup IsOpen="{Binding IsChecked, ElementName=LobbyPopup}" StaysOpen="False" AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=LobbyPopup}"
+                       Placement="Bottom">
+                        <Border Style="{StaticResource BorderPopup}">
+                            <StackPanel>
+                                <TextBlock Text="Lobby connecition" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                    <ToggleButton x:Name="ChatPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
+                        <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
+                            <Ellipse Width="6" Height="6" Fill="Red"/>
+                            <TextBlock Text="Chat" Margin="4 0"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <Popup IsOpen="{Binding IsChecked, ElementName=ChatPopup}" StaysOpen="False" AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=ChatPopup}"
+                       Placement="Bottom">
+                        <Border Style="{StaticResource BorderPopup}">
+                            <StackPanel>
+                                <TextBlock Text="Chat connecition" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                    <ToggleButton Name="PopupToggeButton" Margin="4 0 0 0" Padding="2" ToolTip="Notifications">
+                        <ui:SymbolIcon Symbol="Info24"/>
+                    </ToggleButton>
+                    <Popup IsOpen="{Binding IsChecked, ElementName=PopupToggeButton}" StaysOpen="False" AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=PopupToggeButton}"
+                       Placement="Bottom">
+                        <Border Style="{StaticResource BorderPopup}">
+                            <StackPanel>
+                                <!--<TextBlock Text="Notifications" FontSize="14"/>-->
+                                <Button Content="Clean all notifications" FontSize="12" Margin="0 0 0 8"/>
+                                <ItemsControl HorizontalContentAlignment="Stretch">
+                                    <ui:Badge Appearance="Caution" Content="Caution"/>
+                                    <ui:Badge Appearance="Danger" Content="Danger"/>
+                                    <ui:Badge Appearance="Info" Content="Info"/>
+                                    <ui:Badge Appearance="Success" Content="Success"/>
+                                    <ui:Badge Appearance="Secondary" Content="Secondary"/>
+                                    <ui:Badge Appearance="Light" Content="Light"/>
+                                    <ui:Badge Appearance="Transparent" Content="Transparent"/>
+                                    <ui:Badge Appearance="Dark" Content="Dark"/>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </StackPanel>
+            </ui:TitleBar.Header>
             <!--<ui:TitleBar.Tray>
                 <ui:NotifyIcon
                     FocusOnLeftClick="True"

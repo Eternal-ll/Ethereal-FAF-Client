@@ -2,7 +2,7 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    public class MatchMakerData : Base.ServerMessage
+    public class MatchmakingData : Base.ServerMessage
     {
         [JsonPropertyName("queues")]
         public QueueData[] Queues { get; set; }

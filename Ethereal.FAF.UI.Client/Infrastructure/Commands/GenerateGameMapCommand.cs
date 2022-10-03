@@ -21,6 +21,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
                 game.SmallMapPreview = generated[0].Replace("_scenario.lua", "_preview.png");
                 game.OnPropertyChanged(nameof(game.SmallMapPreview));
                 game.MapGeneratorState = MapGeneratorState.Generated;
+            })
+            .ContinueWith(async t =>
+            {
+                var game = (Game)parameter;
+                if (t.IsFaulted)
+                {
+                    game.MapGeneratorState = MapGeneratorState.Faulted;
+                    await Task.Delay(System.TimeSpan.FromSeconds(2));
+                    game.MapGeneratorState = MapGeneratorState.NotGenerated;
+                }
             });
     }
 }

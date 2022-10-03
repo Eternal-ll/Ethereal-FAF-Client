@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
@@ -18,22 +19,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     public class LobbyClient : TcpClient
     {
         public event EventHandler<bool> Authorized;
-        public event EventHandler<PlayerInfoMessage> PlayerReceived;
-        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<Player> PlayerReceived;
+        public event EventHandler<Player[]> PlayersReceived;
         public event EventHandler<Game> GameReceived;
         public event EventHandler<Game[]> GamesReceived;
 
         public event EventHandler<AuthentificationFailedData> AuthentificationFailed;
         public event EventHandler<SocialData> SocialDataReceived;
-        public event EventHandler<WelcomeData> WelcomeDataReceived;
+        public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
         //public event EventHandler<QueueData> QueueDataReceived;   
-        public event EventHandler<MatchMakerData> MatchMakerDataReceived;
+        public event EventHandler<MatchmakingData> MatchMakingDataReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
         public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
-        public event EventHandler<MatchCancelledData> MatchCancelledDataReceived;
-        public event EventHandler<MatchFoundData> MatchFoundDataReceived;
+        public event EventHandler<MatchCancelledData> MatchCancelled;
+        public event EventHandler<MatchFoundData> MatchFound;
+        public event EventHandler<int> KickedFromParty;
 
         private readonly ILogger Logger;
         private readonly UidGenerator UidGenerator;
@@ -47,7 +49,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         private long? LastGameUid;
 
-        public PlayerInfoMessage Self;
+        public Player Self;
 
         private IProgress<string> SplashProgress;
 
@@ -181,7 +183,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.irc_password:
                         break;
                     case ServerCommand.welcome:
-                        var welcome = JsonSerializer.Deserialize<WelcomeData>(data);
+                        var welcome = JsonSerializer.Deserialize<Welcome>(data);
                         Self = welcome.me;
                         WelcomeDataReceived?.Invoke(this, welcome);
                         SendAsync(ServerCommands.RequestIceServers);
@@ -197,10 +199,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         SplashProgress?.Report("Preparing app for you");
                         break;
                     case ServerCommand.player_info:
-                        var player = JsonSerializer.Deserialize<PlayerInfoMessage>(data);
+                        var player = JsonSerializer.Deserialize<Player>(data);
                         if (player.Players is not null)
                         {
-                            PlayersReceived?.Invoke(this, player.Players);
+                            if (player.Players.Length < 50)
+                            {
+                                foreach (var p in player.Players)
+                                {
+                                    PlayerReceived?.Invoke(this, p);
+                                }
+                            }
+                            else PlayersReceived?.Invoke(this, player.Players);
                         }
                         else
                         {
@@ -226,6 +235,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.game:
                         break;
                     case ServerCommand.matchmaker_info:
+                        MatchMakingDataReceived?.Invoke(this, JsonSerializer.Deserialize<MatchmakingData>(data));
                         break;
                     case ServerCommand.mapvault_info:
                         break;
@@ -243,22 +253,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.invite_to_party:
                         break;
                     case ServerCommand.kicked_from_party:
+
                         break;
                     case ServerCommand.set_party_factions:
                         break;
                     case ServerCommand.match_found:
+                        MatchFound?.Invoke(this, JsonSerializer.Deserialize<MatchFoundData>(data));
                         break;
                     case ServerCommand.match_cancelled:
+                        MatchCancelled?.Invoke(this, JsonSerializer.Deserialize<MatchCancelledData>(data));
                         break;
                     case ServerCommand.search_info:
-                        break;
-                    case ServerCommand.restore_game_session:
-                        break;
-                    case ServerCommand.game_matchmaking:
-                        break;
-                    case ServerCommand.game_host:
-                        break;
-                    case ServerCommand.game_join:
                         break;
                     case ServerCommand.ice_servers:
                         var ice = JsonSerializer.Deserialize<IceServersData>(data);
@@ -271,7 +276,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.ConnectToPeer:
                     case ServerCommand.DisconnectFromPeer:
                     case ServerCommand.IceMsg:
-                        Logger.LogTrace("RECEIVED [{}]", data);
                         IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(data));
                         break;
                     default:

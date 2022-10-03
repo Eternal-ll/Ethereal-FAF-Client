@@ -59,6 +59,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IHost host,
             PatchClient patchClient)
         {
+
             // Attach the theme service
             _themeService = themeService;
 

@@ -19,7 +19,8 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
     {
         NotGenerated,
         Generating,
-        Generated
+        Generated,
+        Faulted
     }
 
     public interface IPlayer
@@ -31,6 +32,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
     {
         public long Id { get; set; }
         public string Login { get; set; }
+        public bool IsConnected { get; set; } = true;
     }
 
     public class GameTeam

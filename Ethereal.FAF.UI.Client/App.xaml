@@ -13,8 +13,14 @@
                     <cmd:FafAnalyticsTMMCommand x:Key="FafAnalyticsTMMCommand"/>
                     <cmd:FafAnalyticsLadderCommand x:Key="FafAnalyticsLadderCommand"/>
                     <cmd:FafScoreCommand x:Key="FafScoreCommand"/>
-                    
+
+                    <cmd:NagivateUriCommand x:Key="NagivateUriCommand"/>
+
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
+
+
+                    <converter:ToPlayerConverter x:Key="ToPlayerConverter"/>
+
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
                     <Style x:Key="ClippedBorder" TargetType="Border">
                         <Setter Property="Clip">

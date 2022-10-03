@@ -7,19 +7,18 @@ using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer.Enums;
-using Microsoft.Extensions.Configuration;
+using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -27,7 +26,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
-        private readonly DispatcherTimer Timer;
+        //private readonly DispatcherTimer Timer;
         private readonly IceManager IceManager;
 
         private readonly SnackbarService SnackbarService;
@@ -41,7 +40,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly GameLauncher GameLauncher;
 
-        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, IServiceProvider serviceProvider)
+        public MatchmakingViewModel MatchmakingViewModel { get; }
+
+        public GamesViewModel(LobbyClient lobby, GameLauncher gameLauncher, SnackbarService snackbarService, ContainerViewModel containerViewModel, IceManager iceManager, IServiceProvider serviceProvider, MatchmakingViewModel matchmakingViewModel)
         {
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
@@ -54,21 +55,39 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             SelectedGameMode = "Custom";
 
-            Timer = new(interval: TimeSpan.FromSeconds(1), DispatcherPriority.Background, (s, e) =>
-            {
-                if (Games == null) return;
-                foreach (var game in Games)
-                {
-                    if (game.LaunchedAt.HasValue)
-                    {
-                        game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
-                    }
-                }
-            }, Application.Current.Dispatcher);
+            //Timer = new(interval: TimeSpan.FromSeconds(1), DispatcherPriority.Background, (s, e) =>
+            //{
+            //    if (Games == null) return;
+            //    foreach (var game in Games)
+            //    {
+            //        if (game.LaunchedAt.HasValue)
+            //        {
+            //            game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
+            //        }
+            //    }
+            //}, Application.Current.Dispatcher);
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
             ServiceProvider = serviceProvider;
-            MapsPath= FaPaths.Path + "maps/";
+            MapsPath = FaPaths.Path + "maps/";
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    var games = Games;
+                    if (games is not null)
+                        foreach (var game in games)
+                        {
+                            if (game.LaunchedAt.HasValue)
+                            {
+                                game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
+                            }
+                        }
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+            });
+            MatchmakingViewModel = matchmakingViewModel;
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -81,12 +100,37 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
+        public Visibility SearchButtonVisibility => SelectedGameType is GameType.MatchMaker ?
+            Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility LiveButtonVisibility => SelectedGameType is not GameType.MatchMaker ?
+            Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility PartyVisibility => SelectedRatingType switch
+        {
+            RatingType.global or
+            RatingType.ladder_1v1 => Visibility.Collapsed,
+            RatingType.tmm_2v2 or
+            RatingType.tmm_4v4_full_share or
+            RatingType.tmm_4v4_share_until_death => Visibility.Visible,
+        };
+
+        public Visibility InvityButtonVisibility => throw new NotImplementedException();
+
+
         #region SelectedRatingType
         private RatingType _SelectedRatingType;
         public RatingType SelectedRatingType
         {
             get => _SelectedRatingType;
-            set => Set(ref _SelectedRatingType, value);
+            set
+            {
+                if (Set(ref _SelectedRatingType, value))
+                {
+                    OnPropertyChanged(nameof(PartyVisibility));
+                    MatchmakingViewModel.RatingType = value;
+                }
+            }
         }
         #endregion
         #region SelectedGameType
@@ -94,7 +138,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public GameType SelectedGameType
         {
             get => _SelectedGameType;
-            set => Set(ref _SelectedGameType, value);
+            set
+            {
+                if (Set(ref _SelectedGameType, value))
+                {
+                    OnPropertyChanged(nameof(SearchButtonVisibility));
+                    OnPropertyChanged(nameof(LiveButtonVisibility));
+                    OnPropertyChanged(nameof(HostGameButtonVisibility));
+                }
+            }
         }
         #endregion
         #region SelectedGameMode
@@ -139,7 +191,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         _IsLive = false;
                     }
                     OnPropertyChanged(nameof(IsLive));
-                    OnPropertyChanged(nameof(HostGameButtonVisibility));
                     GamesView?.Refresh();
                 }
             }
@@ -185,8 +236,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ICollectionView GamesView => GamesSource?.View;
         private bool IsRefresh;
         #region Games
-        private ObservableCollection<Game> _Games;
-        public ObservableCollection<Game> Games
+        private ConcurrentObservableCollection<Game> _Games;
+        public ConcurrentObservableCollection<Game> Games
         {
             get => _Games;
             set
@@ -195,7 +246,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     GamesSource = new()
                     {
-                        Source = value
+                        Source = value.AsObservable
                     };
                     GamesSource.Filter += GamesSource_Filter;
                     IsRefresh = true;
@@ -241,31 +292,28 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var g = games[i];
                 if (g.Uid == e.Uid)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    if (e.State == GameState.Closed) games.RemoveAt(i);
+                    else
                     {
-                        if (e.State == GameState.Closed) games.RemoveAt(i);
-                        else
+                        if (g.SmallMapPreview is not null)
                         {
-                            if (g.SmallMapPreview is not null)
-                            {
-                                e.SmallMapPreview = g.SmallMapPreview;
-                                e.OnPropertyChanged(nameof(e.SmallMapPreview));
-                            }
-                            e.MapGeneratorState = g.MapGeneratorState;
-                            games[i] = e;
+                            e.SmallMapPreview = g.SmallMapPreview;
+                            e.OnPropertyChanged(nameof(e.SmallMapPreview));
                         }
-                    }, DispatcherPriority.Background);
+                        e.MapGeneratorState = g.MapGeneratorState;
+                        games[i] = e;
+                    }
                     found = true;
                 }
                 else if (g.Host == e.Host || g.LaunchedAt.HasValue && g.NumPlayers == 0)
                 {
-                    Application.Current.Dispatcher.Invoke(() => games.RemoveAt(i), DispatcherPriority.Background);
+                    games.RemoveAt(i);
                 }
             }
             if (!found)
             {
                 //await TrySetSmallPreviewAsync(e);
-                Application.Current.Dispatcher.Invoke(() => games.Add(e), DispatcherPriority.Background);
+                games.Add(e);
             }
         }
         private static void SetSmallPreview(Game game, string cache)
@@ -282,8 +330,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
                 }
-
-                Games = new(e);
+                var obs = new ConcurrentObservableCollection<Game>();
+                obs.AddRange(e);
+                Games = obs;
             }, DispatcherPriority.Background);
         }
 
