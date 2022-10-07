@@ -97,4 +97,6 @@
     <Resource Include="Resources\Images\Flags\*.png" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties links_1json__JsonSchema="https://appsemble.app/api.json" /></VisualStudio></ProjectExtensions>
+
 </Project>
