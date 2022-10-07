@@ -81,6 +81,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             LobbyClient.ConnectAsync();
             _serviceProvider.GetService<GamesViewModel>();
             _serviceProvider.GetService<PlayersViewModel>();
+            _serviceProvider.GetService<PartyViewModel>();
             _serviceProvider.GetService<GameLauncher>();
 
             if (!Application.Current.Windows.OfType<MainWindow>().Any())

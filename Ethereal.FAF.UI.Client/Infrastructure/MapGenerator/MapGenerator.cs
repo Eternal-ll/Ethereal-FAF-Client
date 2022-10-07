@@ -2,12 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+using static System.Net.WebRequestMethods;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
@@ -164,14 +167,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             return styles.ToArray();
         }
 
-        public bool IsMapGeneratorExist(string version) => File.Exists(MapGeneratorFile(version));
+        public bool IsMapGeneratorExist(string version) => System.IO.File.Exists(MapGeneratorFile(version));
 
         public async Task ConfirmOrDownloadAsync(string version, IProgress<string> progress = null)
         {
             if (!KnownVersions.Any(v => v == version)) KnownVersions.Add(version);
             var mapgen = MapGeneratorFile(version);
             progress?.Report($"Confirming map generator [{version}]");
-            if (!File.Exists(mapgen))
+            if (!System.IO.File.Exists(mapgen))
             {
                 if (!MapGeneratorsFolder.Exists)
                 {
@@ -289,12 +292,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     var file = Path.Combine(folder, scenario);
                     if (maps.Any(m => m == file)) continue;
                     maps.Add(file);
-                    if (latest is not null) 
+                    if (latest is not null)
+                    {
                         MapGenerated?.Invoke(this, file);
+                    }
                     latest = file;
                 }
             }
-            if (latest is not null) MapGenerated?.Invoke(this, latest);
+            if (latest is not null)
+            {
+                MapGenerated?.Invoke(this, latest);
+            }
 
             if (!process.HasExited)
             {

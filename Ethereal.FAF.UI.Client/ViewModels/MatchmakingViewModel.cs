@@ -1,9 +1,11 @@
-﻿using ABI.System;
-using AsyncAwaitBestPractices.MVVM;
+﻿using AsyncAwaitBestPractices.MVVM;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -21,38 +23,77 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         MatchFound,
         Confirming,
         Faulted,
-        Playing
+        Playing,
+        Updating,
     }
     public class MatchmakingViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
         private readonly DialogService DialogService;
+        private readonly NotificationService NotificationService;
+        private readonly PatchClient PatchClient;
+        public PartyViewModel PartyViewModel { get; }
 
-        public MatchmakingViewModel(LobbyClient lobbyClient, DialogService dialogService)
+        public MatchmakingViewModel(LobbyClient lobbyClient, DialogService dialogService, PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
         {
             LobbyClient = lobbyClient;
-
-
-            lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
             DialogService = dialogService;
+            PartyViewModel = partyViewModel;
+            NotificationService = notificationService;
 
+            lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
+            lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
+            lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
             Task.Run(async () =>
             {
                 while (true)
                 {
+                    // update queue pop time
                     var queues = Queues;
                     if (queues is not null)
-                    foreach (var queue in queues)
-                    {
-                        if (queue.queue_pop_time_delta >= 0)
+                        foreach (var queue in queues)
                         {
-                            queue.queue_pop_time_delta--;
-                            queue.OnPropertyChanged(nameof(queue.PopTimeSpan));
+                            if (queue.queue_pop_time_delta >= 0)
+                            {
+                                queue.queue_pop_time_delta--;
+                                queue.OnPropertyChanged(nameof(queue.PopTimeSpan));
+                            }
                         }
-                    }
+                    // update match confirmation expiration
+                    OnPropertyChanged(nameof(MatchConfirmation));
+
+
                     await Task.Delay(1000);
                 }
             });
+
+            SearchStates = new()
+            {
+                { MatchmakingType.ladder1v1, false },
+                { MatchmakingType.tmm2v2, false },
+                { MatchmakingType.tmm4v4_full_share, false },
+            };
+            PatchClient = patchClient;
+        }
+
+        private async void LobbyClient_MatchConfirmation(object sender, MatchConfirmation e)
+        {
+            State = MatchmakingState.Confirming; 
+            MatchConfirmation = e;
+            if (e.IsReady) return;
+            var result = await NotificationService.ShowDialog("Match confirmation", "Press \"Confirm\" button if you are ready to join the match", "Confirm", "Ignore");
+            if (!result) return;
+            LobbyClient.ReadyToJoinMatch();
+        }
+
+        private void LobbyClient_SearchInfoReceived(object sender, SearchInfo e)
+        {
+            SearchStates[e.Queue] = e.State == SearchInfoState.Start;
+            if (CurrentQueue is null) return;
+            if (CurrentQueue.Type == e.Queue)
+            {
+                State = e.State is SearchInfoState.Start ? MatchmakingState.Searching : MatchmakingState.Idle;
+            }
         }
 
         private void LobbyClient_MatchMakingDataReceived(object sender, MatchmakingData e)
@@ -72,7 +113,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
+        public ObservableDictionary<MatchmakingType, bool> SearchStates { get; set; }
+        public bool AnyActiveQueue => SearchStates.Any(s => s.Value);
+
         public ObservableCollection<QueueData> Queues = new();
+
+        #region MatchConfirmation
+        private MatchConfirmation _MatchConfirmation;
+        public MatchConfirmation MatchConfirmation { get => _MatchConfirmation; set => Set(ref _MatchConfirmation, value); }
+        #endregion
 
         #region CurrentQueue
         private QueueData _CurrentQueue;
@@ -92,12 +141,34 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _RatingType, value))
                 {
+                    OnPropertyChanged(nameof(InviteButtonVisibility));
+                    if (value is RatingType.global)
+                    {
+                        // setup any search state
+                        var active = SearchStates.FirstOrDefault(t => t.Value);
+                        if (active.Value)
+                        {
+
+                        }
+                        return;
+                    }
                     var queue = Queues.FirstOrDefault(q => q.IsGood(value));
+                    if (queue is null) return;
+                    State = SearchStates[queue.Type] ? MatchmakingState.Searching : MatchmakingState.Idle;
                     CurrentQueue = queue;
                 }
             }
         }
         #endregion
+
+
+        public Visibility InviteButtonVisibility =>
+            State is MatchmakingState.Idle &&
+            PartyViewModel.CanInvitePlayer &&
+            PartyViewModel.IsOwner &&
+            (RatingType is not RatingType.global and not RatingType.ladder_1v1 || PartyViewModel.HasMembers)?
+            Visibility.Visible :
+            Visibility.Collapsed;
 
         public bool IsProgressRingIndeterminate => ProgressRingVisibility is Visibility.Visible;
         #region ProgressRingVisibility
@@ -149,48 +220,130 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         MatchmakingState.Searching or
                         MatchmakingState.Confirming => Visibility.Visible
                     };
+                    OnPropertyChanged(nameof(InviteButtonVisibility));
                 }
             }
         }
         #endregion
 
+        private Task UpdateTask;
+        public void SetupUpdateTask()
+        {
+            if (UpdateTask is not null) return;
+            UpdateTask = Task.Run(() =>
+            {
+
+            });
+        }
         private CancellationTokenSource CancellationTokenSource;
+
+        public void LeaveFromAllQueues()
+        {
+            foreach (var key in SearchStates.Keys)
+            {
+                SearchStates[key] = false;
+                LobbyClient.UpdateQueue(key, SearchInfoState.Stop);
+            }
+            NotificationService.Notify("Matchmaking", "You left from all matchmaking queues");
+        }
+
+        public bool CanSearch =>
+            RatingType is RatingType.global ||
+            (RatingType is RatingType.ladder_1v1 && PartyViewModel.Members.Count == 1) ||
+            (RatingType is RatingType.tmm_2v2 && PartyViewModel.Members.Count <= 2) ||
+            (RatingType is RatingType.tmm_4v4_full_share && PartyViewModel.Members.Count <= 4);
 
         #region JoinQueueCommand
         private ICommand _JoinQueueCommand;
         public ICommand JoinQueueCommand => _JoinQueueCommand ??= new AsyncCommand<object>(OnJoinQueueCommand, CanJoinQueueCommand);
+        private bool CanJoinQueueCommand(object arg) => 
+            (State is MatchmakingState.Idle && CanSearch) ||
+            State is MatchmakingState.Searching;
 
-        private bool CanJoinQueueCommand(object arg) => State is MatchmakingState.Idle;
+
+        CancellationTokenSource BackgroundCancellationTokenSource;
+
         private async Task OnJoinQueueCommand(object arg)
         {
-            State = MatchmakingState.Searching;
-            CancellationTokenSource = new();
-            await Task.Delay(2000);
-            if (CancellationTokenSource.IsCancellationRequested) return;
-            State = MatchmakingState.Confirming;
-            var dialog = DialogService.GetDialogControl();
-            dialog.ButtonLeftName = "Join";
-            dialog.ButtonRightName = "Cancel";
-            var result = await dialog.ShowAndWaitAsync("Match confirmation", "Confirm to join to match", true);
-            if (result is Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Right)
+            if (BackgroundCancellationTokenSource is not null)
             {
                 State = MatchmakingState.Idle;
+                return;
             }
-            else if (result is Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Left)
+
+            var queue = CurrentQueue is not null ? CurrentQueue.Type : RatingType switch
             {
-                State = MatchmakingState.Playing;
+                RatingType.ladder_1v1 => MatchmakingType.ladder1v1,
+                RatingType.tmm_4v4_full_share => MatchmakingType.tmm4v4_full_share,
+                RatingType.tmm_2v2 => MatchmakingType.tmm2v2,
+            };
+            var startSearch = !SearchStates[queue];
+
+            if (startSearch && !SearchStates.Any(s => s.Value))
+            {
+                // first attempt to search, we can start patch confirmation and etc
+                State = MatchmakingState.Updating;
+                BackgroundCancellationTokenSource = new();
+                ProgressRingVisibility = Visibility.Visible;
+                ProgressText = "Confirming patch...";
+                var progress = new Progress<string>((d) => ProgressText = d);
+                var cancel = false;
+                await PatchClient.UpdatePatch(
+                    mod: FeaturedMod.FAF,
+                    version: 0,
+                    forceCheck: false,
+                    BackgroundCancellationTokenSource.Token,
+                    progress)
+                    .ContinueWith(t =>
+                    {
+                        if (t.IsFaulted || t.IsCanceled) cancel = true;
+                    });
+                if (cancel) return;
             }
+
+
+
+
+
+
+            SearchStates[queue] = startSearch;
+            LobbyClient.UpdateQueue(queue, startSearch ? SearchInfoState.Start : SearchInfoState.Stop);
+            if (!startSearch) return;
+            if (UpdateTask is null)
+            {
+                SetupUpdateTask();
+            }
+
+
+            return;
+            //State = MatchmakingState.Searching;
+            //CancellationTokenSource = new();
+            //await Task.Delay(2000);
+            //if (CancellationTokenSource.IsCancellationRequested) return;
+            //State = MatchmakingState.Confirming;
+            //var dialog = DialogService.GetDialogControl();
+            //dialog.ButtonLeftName = "Join";
+            //dialog.ButtonRightName = "Cancel";
+            //var result = await dialog.ShowAndWaitAsync("Match confirmation", "Confirm to join to match", true);
+            //if (result is Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Right)
+            //{
+            //    State = MatchmakingState.Idle;
+            //}
+            //else if (result is Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Left)
+            //{
+            //    State = MatchmakingState.Playing;
+            //}
         }
         #endregion
-        #region JoinQueueCommand
+        #region LeaveQueueCommand
         private ICommand _LeaveQueueCommand;
         public ICommand LeaveQueueCommand => _LeaveQueueCommand ??= new LambdaCommand(OnLeaveQueueCommand, CanLeaveQueueCommand);
 
         private bool CanLeaveQueueCommand(object arg) => State is not MatchmakingState.Idle;
         private void OnLeaveQueueCommand(object arg)
         {
-            State = MatchmakingState.Idle;
-            CancellationTokenSource.Cancel();
+            //State = MatchmakingState.Idle;
+            //CancellationTokenSource.Cancel();
         }
         #endregion
     }

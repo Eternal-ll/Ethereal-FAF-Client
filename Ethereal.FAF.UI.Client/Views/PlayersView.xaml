@@ -33,6 +33,13 @@
                     </TextBlock>
                 </ui:Badge>
             </DataTemplate>
+            <Style x:Key="InvisibleButtonCommand" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Triggers>
+                    <Trigger Property="Command" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
             <Style x:Key="RatingContentControl" TargetType="ContentControl">
                 <Setter Property="ContentTemplate" Value="{StaticResource Rating}"/>
                 <Setter Property="Margin" Value="4 0 0 0"/>
@@ -69,6 +76,12 @@
                         </Image.Style>
                     </Image>
                     <TextBlock Text="{Binding Login}" Margin="0 0 0 0"/>
+                    <Button Content="Invite"
+                            Command="{DynamicResource InvitePlayerCommand}"
+                            CommandParameter="{Binding Id}"
+                            Padding="6 0" Margin="10 0 0 0" FontSize="12"
+                            Style="{StaticResource InvisibleButtonCommand}"/>
+
                     <!--<TextBox Text="{Binding Id}" Margin="4 0 0 0" Background="Transparent" BorderBrush="Transparent"
                              Foreground="White" BorderThickness="0" Padding="0" MinHeight="0" IsReadOnly="True" FontSize="10" VerticalAlignment="Center"/>-->
                     <!--<ContentControl Content="{Binding Ratings.Global}"/>
@@ -91,17 +104,22 @@
             </DataTemplate>
 
             <DataTemplate x:Key="Country">
-                <StackPanel Margin="0 -2 0 -4">
+                <StackPanel Margin="0 -2 0 -4" ToolTip="{Binding Name}">
                     <TextBlock x:Name="Teswt" Visibility="Collapsed" Text="{Binding Name, StringFormat='/Resources/Images/Flags/{0}.png'}"/>
                     <Image Source="{Binding ElementName=Teswt, Path=Text}"
-                           Width="16" Height="16" ToolTip="{Binding Items.Count}"/>
-                    <TextBlock Text="{Binding Items.Count}" HorizontalAlignment="Center"/>
+                           Width="16" Height="16" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Items.Count}" HorizontalAlignment="Center" Opacity=".7"/>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate x:Key="RatingRange">
                 <StackPanel Margin="0 -2 0 -4">
-                    <TextBlock Text="{Binding Name,Mode=OneWay, StringFormat='≥{0}'}"/>
-                    <TextBlock Text="{Binding Items.Count}" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center"/>
+                    <StackPanel.ToolTip>
+                        <ToolTip>
+                            <TextBlock Text="{Binding Name, StringFormat='Above {0}'}"/>
+                        </ToolTip>
+                    </StackPanel.ToolTip>
+                    <TextBlock Text="{Binding Name,Mode=OneWay, StringFormat='≥{0}'}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Items.Count}" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center" Opacity=".7"/>
                 </StackPanel>
             </DataTemplate>
         </Grid.Resources>
@@ -111,32 +129,47 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="240"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <WrapPanel Grid.ColumnSpan="3">
-            <ui:AutoSuggestBox Width="230" PlaceholderText="Search player" Text="{Binding ViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox Margin="10 0 0 0" MinWidth="100"
+            <ui:AutoSuggestBox Width="230" Padding="10 6" PlaceholderText="Search player" Text="{Binding ViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}"/>
+            <ComboBox Margin="10 0 0 0" MinWidth="100" Padding="10 6"
                       ItemsSource="{Binding ViewModel.PlayersSortSource}"
                       SelectedItem="{Binding ViewModel.SelectedPlayersSort}"
                       DisplayMemberPath="Name" SelectedIndex="0"/>
-            <ComboBox Margin="10 0 0 0" MinWidth="100"
+            <ComboBox Margin="10 0 0 0" Width="124" Padding="10 6"
+                      ItemsSource="{Binding ViewModel.ListSortDirectionSource}"
+                      SelectedItem="{Binding ViewModel.ListSortDirection}"
+                      Visibility="{Binding ViewModel.ListSortDirectionVisibility}"/>
+            <ComboBox Margin="10 0 0 0" MinWidth="100" Padding="10 6"
                       ItemsSource="{Binding ViewModel.PlayersGroupSource}"
                       SelectedIndex="{Binding ViewModel.GroupIndex}"
                       SelectedItem="{Binding ViewModel.GroupBy}"
                       DisplayMemberPath="Name"/>
-            <ui:Badge  VerticalAlignment="Center" Margin="10 0 0 0" Appearance="Info">
+            <Button Margin="10 0 0 0" Width="100" Content="Back"
+                    Command="{DynamicResource BackCommand}"
+                    Style="{StaticResource InvisibleButtonCommand}"/>
+
+            <ui:Badge VerticalAlignment="Center" Margin="10 0 0 0">
+                <ui:Badge.Background>
+                    <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
+                </ui:Badge.Background>
                 <TextBlock Text="{Binding ViewModel.PlayersView.SourceCollection.Count, StringFormat='Total: {0} players'}"/>
             </ui:Badge>
-            <ui:Badge  VerticalAlignment="Center" Margin="10 0 0 0" Appearance="Info">
+            <ui:Badge VerticalAlignment="Center" Margin="10 0 0 0">
+                <ui:Badge.Background>
+                    <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
+                </ui:Badge.Background>
                 <TextBlock Text="{Binding ViewModel.PlayersView.Count, StringFormat='On view: {0} players'}"/>
             </ui:Badge>
         </WrapPanel>
-        <ListBox Grid.Row="1" Margin="0 10 10 0" 
+        <ListBox x:Name="GroupsSource" Grid.Row="1" Grid.ColumnSpan="3"  Margin="0 10 10 0" 
                  ItemsSource="{Binding ViewModel.Groups}"
                  SelectedItem="{Binding ViewModel.SelectedGroup}"
-                 VirtualizingPanel.IsVirtualizing="True" Grid.ColumnSpan="3">
+                 SelectionChanged="ListBox_SelectionChanged"
+                 VirtualizingPanel.IsVirtualizing="True">
             <ListBox.Style>
                 <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
                     <Style.Triggers>
@@ -145,6 +178,7 @@
                         </DataTrigger>
                         <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="1">
                             <Setter Property="ItemTemplate" Value="{StaticResource Country}"/>
+                            <Setter Property="Padding" Value="2 2 2 0"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="2">
                             <Setter Property="ItemTemplate" Value="{StaticResource RatingRange}"/>
@@ -158,7 +192,7 @@
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
         </ListBox>
-        <ListBox x:Name="OriginalSource" Grid.Row="2" Margin="0 10 10 10" ItemsSource="{Binding ViewModel.PlayersView}"
+        <ListBox x:Name="OriginalSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10" ItemsSource="{Binding ViewModel.PlayersView}"
                  SelectedItem="{Binding ViewModel.SelectedPlayer}"
                  SelectionChanged="OriginalSource_SelectionChanged"
                  ScrollViewer.ScrollChanged="OriginalSource_ScrollChanged"
@@ -166,7 +200,7 @@
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  VirtualizingPanel.IsVirtualizingWhenGrouping="True">
         </ListBox>
-        <ListBox x:Name="GroupedSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10"
+        <!--<ListBox x:Name="GroupedSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10"
                  SelectionChanged="GroupedSource_SelectionChanged"
                  ItemsSource="{Binding ViewModel.SelectedGroup.Items}"
                  SelectedItem="{Binding ViewModel.SelectedPlayer}"
@@ -182,6 +216,6 @@
                     </Style.Triggers>
                 </Style>
             </ListBox.Style>
-        </ListBox>
+        </ListBox>-->
     </Grid>
 </ui:UiPage>

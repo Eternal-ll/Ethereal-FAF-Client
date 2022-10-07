@@ -62,17 +62,20 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                 PreviewType.Normal;
 
         [JsonIgnore]
-        public string SmallMapPreview { get; set; }
+        public string SmallMapPreview { get; set; } = "/Resources/Images/1x1.png";
         [JsonIgnore]
         public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{Mapname}.png";
         [JsonIgnore]
         public string HumanTitle => Title.Truncate(34);
         [JsonIgnore]
         public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
+        public DateTimeOffset LaunchedAtTimeSpan => DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
 
 
         #region Map generator
         public bool IsMapgen => MapGenerator.IsGeneratedMap(Mapname);
+
+        public string MapGeneratorException { get; set; }
 
         #region MapGeneratorState
         private MapGeneratorState _MapGeneratorState;

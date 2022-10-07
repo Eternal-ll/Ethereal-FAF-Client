@@ -1,10 +1,13 @@
-﻿namespace FAF.Domain.LobbyServer.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace FAF.Domain.LobbyServer.Enums
 {
     /// <summary>
     /// Enum to represent factions. Numbers match up with faction identification
     /// ids from the game.
     /// </summary>
-    public enum Faction : byte
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum Faction : int
     {
         UEF = 1,
         AEON = 2,

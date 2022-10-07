@@ -46,7 +46,6 @@
                         ToolTip="Search lobbies to play"/>
                     <ui:NavigationItem
                         Content="Chat"
-                        PageType="{x:Type v:LinksView}"
                         Icon="Chat24"
                         ToolTip="IRC chat"/>
                     <ui:NavigationItem
@@ -56,6 +55,7 @@
                         ToolTip="IRC chat"/>
                     <ui:NavigationItem
                         Content="Links"
+                        PageType="{x:Type v:LinksView}"
                         Icon="Link24"
                         ToolTip="Useful links"/>
                     <ui:NavigationItem
@@ -75,7 +75,7 @@
             </ui:NavigationStore>
 
             <!--  We display our pages inside this element.  -->
-            <Border Grid.Column="1" Style="{StaticResource ClippedBorder}" CornerRadius="8 0 0 0">
+            <Border Grid.Column="1" CornerRadius="8 0 0 0">
                 <Frame x:Name="RootFrame" Grid.Row="1" >
                     <Frame.Style>
                         <Style TargetType="Frame">
@@ -89,15 +89,6 @@
                 </Frame>
             </Border>
         </Grid>
-        <ui:Snackbar
-                        x:Name="RootSnackbar"
-                        Title="Hello World!"
-                        Grid.Row="1"
-                        MaxWidth="600"
-                        Appearance="Secondary"
-                        Icon="PuzzlePiece24"
-                        Message="Remember that the Heat Death of Universe is coming someday, no time to explain - let's go!"
-                        Timeout="5000" />
         <ContentControl Grid.Row="1" Content="{Binding Content}" Visibility="Visible">
             <ContentControl.Style>
                 <Style TargetType="ContentControl">
@@ -134,6 +125,15 @@
                 </StackPanel>-->
             </StackPanel>
         </Grid>
+        <ui:Snackbar
+                        x:Name="RootSnackbar"
+                        Title="Hello World!"
+                        Grid.Row="1"
+                        MaxWidth="600"
+                        Appearance="Secondary"
+                        Icon="PuzzlePiece24"
+                        Message="Remember that the Heat Death of Universe is coming someday, no time to explain - let's go!"
+                        Timeout="5000" />
         
 
         <!--  Dialogue is above all controls except the navigation buttons. So it covers all the content, but allows you to close or move the application.  -->
@@ -192,33 +192,6 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Orientation="Horizontal">
-                    <StackPanel.Resources>
-                        <Style x:Key="BorderPopup" TargetType="Border">
-                            <Setter Property="Padding" Value="10"/>
-                            <Setter Property="CornerRadius" Value="4"/>
-                            <Setter Property="BorderThickness" Value="1"/>
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}" />
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="BorderBrush">
-                                <Setter.Value>
-                                    <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="Effect">
-                                <Setter.Value>
-                                    <DropShadowEffect
-                                BlurRadius="30"
-                                Direction="0"
-                                Opacity="0.4"
-                                ShadowDepth="0"
-                                Color="#202020" />
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </StackPanel.Resources>
                     <ToggleButton x:Name="LobbyPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
                         <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
                             <Ellipse Width="6" Height="6" Fill="LimeGreen"/>

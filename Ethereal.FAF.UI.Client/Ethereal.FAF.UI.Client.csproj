@@ -18,6 +18,7 @@
     <None Remove="External\faf-ice-adapter.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
+    <None Remove="Resources\Images\1x1.png" />
     <None Remove="Resources\Images\Examples\SidebarExample.png" />
     <None Remove="Resources\Images\Flags\*.png" />
     <None Remove="Resources\logo.ico" />
@@ -45,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Downloads\DesktopNotifications-master\DesktopNotifications-master\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\Ethereal.FA.Scmap\Ethereal.FA.Vault.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.API.Client\Ethereal.FAF.API.Client.csproj" />
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
@@ -90,6 +92,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Resources\Images\1x1.png" />
     <Resource Include="Resources\Images\Examples\SidebarExample.png" />
     <Resource Include="Resources\Images\Flags\*.png" />
   </ItemGroup>

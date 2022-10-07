@@ -61,6 +61,7 @@ namespace FAF.Domain.Direct.Entities
         /// 
         /// </summary>
         public int NewshubSortIndex => string.IsNullOrWhiteSpace(NewshubSortIndexStr)  ? 0 : int.Parse(NewshubSortIndexStr);
+        public int NewshubSortIndexHalf => (int)(NewshubSortIndex * .33);
         /// <summary>
         /// 
         /// </summary>

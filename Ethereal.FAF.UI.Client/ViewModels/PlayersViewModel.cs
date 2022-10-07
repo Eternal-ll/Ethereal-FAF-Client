@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -121,7 +122,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             GroupBy = PlayersGroupSource[0];
         }
 
-        public Player Self;
+        public Player Self { get; set; }
 
         private void Lobby_WelcomeDataReceived(object sender, Welcome e)
         {
@@ -159,17 +160,42 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
+        public Visibility ListSortDirectionVisibility => SelectedPlayersSort?.Property is not null ? Visibility.Visible : Visibility.Collapsed;
+        public ListSortDirection[] ListSortDirectionSource { get; set; } = new ListSortDirection[]
+        {
+            ListSortDirection.Descending,
+            ListSortDirection.Ascending
+        };
+        #region ListSortDirection
+        private ListSortDirection _ListSortDirection;
+        public ListSortDirection ListSortDirection
+        {
+            get => _ListSortDirection;
+            set
+            {
+                if (Set(ref _ListSortDirection, value))
+                {
+                    var oldsort = _SelectedPlayersSort;
+                    oldsort.ListSortDirection = value;
+                    _SelectedPlayersSort = null;
+                    SelectedPlayersSort = oldsort;
+                }
+            }
+        }
+
+        #endregion
+
         public PlayersSort[] PlayersSortSource { get; set; } = new PlayersSort[]
         {
-            new PlayersSort("Sort by", null, ListSortDirection.Ascending),
-            new PlayersSort("Sort by Id", nameof(Player.Id), ListSortDirection.Ascending),
-            new PlayersSort("Sort by Login", nameof(Player.Login), ListSortDirection.Ascending),
-            new PlayersSort("Sort by Clan", nameof(Player.Clan), ListSortDirection.Ascending),
-            new PlayersSort("Sort by Country", nameof(Player.Country), ListSortDirection.Ascending),
-            new PlayersSort("Sort by Rating Global", nameof(Player.Global), ListSortDirection.Ascending, true),
-            new PlayersSort("Sort by Rating 1 vs 1", nameof(Player.Ladder1v1), ListSortDirection.Ascending, true),
-            new PlayersSort("Sort by Rating 2 vs 2", nameof(Player.Tmm2v2), ListSortDirection.Ascending, true),
-            new PlayersSort("Sort by Rating 4 vs 4", nameof(Player.Tmm4v4), ListSortDirection.Ascending, true),
+            new PlayersSort("Sort by", null, ListSortDirection.Descending),
+            new PlayersSort("Sort by Id", nameof(Player.Id), ListSortDirection.Descending),
+            new PlayersSort("Sort by Login", nameof(Player.Login), ListSortDirection.Descending),
+            new PlayersSort("Sort by Clan", nameof(Player.Clan), ListSortDirection.Descending),
+            new PlayersSort("Sort by Country", nameof(Player.Country), ListSortDirection.Descending),
+            new PlayersSort("Sort by Rating Global", nameof(Player.Global), ListSortDirection.Descending, true),
+            new PlayersSort("Sort by Rating 1 vs 1", nameof(Player.Ladder1v1), ListSortDirection.Descending, true),
+            new PlayersSort("Sort by Rating 2 vs 2", nameof(Player.Tmm2v2), ListSortDirection.Descending, true),
+            new PlayersSort("Sort by Rating 4 vs 4", nameof(Player.Tmm4v4), ListSortDirection.Descending, true),
         };
 
         #region SelectedPlayersSort
@@ -184,16 +210,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     PlayersSource?.SortDescriptions.Clear();
                     if (value?.Property is not null)
                     {
+                        _ListSortDirection = value.ListSortDirection;
+                        OnPropertyChanged(nameof(ListSortDirection));
                         PlayersSource?.SortDescriptions.Add(new SortDescription(value.Property, value.ListSortDirection));
                         if (GroupIndex == 2)
                         {
                             GroupBy.PropertyGroupDescription.PropertyName = value.IsRating ? value.Property : nameof(Player.Ladder1v1);
-                            RatingType rating = value.Property switch
+                            RatingType rating = GroupBy.PropertyGroupDescription.PropertyName switch
                             {
                                 nameof(Player.Global) => RatingType.global,
                                 nameof(Player.Ladder1v1) => RatingType.ladder_1v1,
                                 nameof(Player.Tmm2v2) => RatingType.tmm_2v2,
                                 nameof(Player.Tmm4v4) => RatingType.tmm_4v4_full_share,
+                                _=> RatingType.ladder_1v1
                             };
                             Task.Run(() =>
                             {
@@ -205,6 +234,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                             });
                         }
                     }
+                    OnPropertyChanged(nameof(ListSortDirectionVisibility));
                     PlayersView?.Refresh();
                 }
             }
@@ -305,6 +335,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             e.Accepted = true;
         }
         #endregion
+
+        public Player GetPlayer(long id) => Players.FirstOrDefault(p => p.Id == id);
+        public Player GetPlayer(string login) => Players.FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase));
+        public bool TryGetPlayer(long id, out Player player)
+        {
+            player = GetPlayer(id);
+            return player is not null;
+        }
+        public bool TryGetPlayer(string login, out Player player)
+        {
+            player = GetPlayer(login);
+            return player is not null;
+        }
 
         private void Lobby_PlayerReceived(object sender, Player e)
         {

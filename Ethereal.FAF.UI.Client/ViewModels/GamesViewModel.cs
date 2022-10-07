@@ -18,7 +18,6 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -81,7 +80,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         {
                             if (game.LaunchedAt.HasValue)
                             {
-                                game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
+                                game.OnPropertyChanged(nameof(game.LaunchedAtTimeSpan));
                             }
                         }
                     await Task.Delay(TimeSpan.FromSeconds(1));
@@ -100,23 +99,24 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        public Visibility SearchButtonVisibility => SelectedGameType is GameType.MatchMaker ?
-            Visibility.Visible : Visibility.Collapsed;
+        public Visibility SearchButtonVisibility =>
+            (SelectedGameType is GameType.MatchMaker ||
+
+            (!IgnoreMatchmakingState && MatchmakingViewModel.State is not MatchmakingState.Idle) && MatchmakingViewModel.PartyViewModel.IsOwner)
+            ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility LiveButtonVisibility => SelectedGameType is not GameType.MatchMaker ?
             Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility PartyVisibility => SelectedRatingType switch
-        {
-            RatingType.global or
-            RatingType.ladder_1v1 => Visibility.Collapsed,
-            RatingType.tmm_2v2 or
-            RatingType.tmm_4v4_full_share or
-            RatingType.tmm_4v4_share_until_death => Visibility.Visible,
-        };
+        public Visibility PartyVisibility =>
+            (!IgnoreMatchmakingState && MatchmakingViewModel.State is MatchmakingState.Searching) ||
+            MatchmakingViewModel.PartyViewModel.HasMembers ||
+            SelectedRatingType is RatingType.ladder_1v1 or RatingType.tmm_2v2 or RatingType.tmm_4v4_full_share
+            ? Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility InvityButtonVisibility => throw new NotImplementedException();
-
+        public Visibility QueueDataVisibility =>
+            SelectedRatingType is RatingType.ladder_1v1 or RatingType.tmm_2v2 or RatingType.tmm_4v4_full_share
+            ? Visibility.Visible : Visibility.Collapsed;
 
         #region SelectedRatingType
         private RatingType _SelectedRatingType;
@@ -127,10 +127,24 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _SelectedRatingType, value))
                 {
-                    OnPropertyChanged(nameof(PartyVisibility));
                     MatchmakingViewModel.RatingType = value;
                 }
             }
+        }
+        #endregion
+
+
+        #region CancelQueuesCommand
+        private ICommand _CancelQueuesCommand;
+        public ICommand CancelQueuesCommand => _CancelQueuesCommand ??= new LambdaCommand(OnCancelQueuesCommand);
+        private bool IgnoreMatchmakingState;
+        private void OnCancelQueuesCommand(object obj)
+        {
+            MatchmakingViewModel.LeaveFromAllQueues();
+            IgnoreMatchmakingState = true;
+            OnPropertyChanged(nameof(SearchButtonVisibility));
+            OnPropertyChanged(nameof(PartyVisibility));
+            IgnoreMatchmakingState = false;
         }
         #endregion
         #region SelectedGameType
@@ -190,6 +204,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         _IsLive = false;
                     }
+                    OnPropertyChanged(nameof(PartyVisibility));
+                    OnPropertyChanged(nameof(QueueDataVisibility));
                     OnPropertyChanged(nameof(IsLive));
                     GamesView?.Refresh();
                 }
@@ -228,9 +244,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         public Visibility HostGameButtonVisibility => 
-            SelectedGameType is GameType.Custom or GameType.Coop ? 
-            Visibility.Visible :
-            Visibility.Collapsed;
+            SelectedGameType is GameType.Custom or GameType.Coop &&
+            MatchmakingViewModel.State is MatchmakingState.Idle &&
+            MatchmakingViewModel.PartyViewModel.IsOwner &&
+            !MatchmakingViewModel.PartyViewModel.HasMembers
+            ? Visibility.Visible : Visibility.Collapsed;
 
         public CollectionViewSource GamesSource { get; private set; }
         public ICollectionView GamesView => GamesSource?.View;
@@ -345,7 +363,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private ICommand _HostGameCommand;
         public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
 
-        private bool CanHostGameCommand(object arg) => GameLauncher.State is GameLauncherState.Idle;
+        private bool CanHostGameCommand(object arg) =>
+            GameLauncher.State is GameLauncherState.Idle && MatchmakingViewModel.State is MatchmakingState.Idle;
         private void OnHostGameCommand(object arg)
         {
             ContainerViewModel.Content = ServiceProvider.GetService<HostGameView>();

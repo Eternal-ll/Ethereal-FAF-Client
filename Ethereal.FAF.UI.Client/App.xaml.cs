@@ -77,12 +77,13 @@ namespace Ethereal.FAF.UI.Client
             services.AddSingleton<ITestWindowService, TestWindowService>();
             // Service containing navigation, same as INavigationWindow... but without window
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<NotificationService>();
             // Main window container with navigation
             services.AddScoped<INavigationWindow, MainWindow>();
             services.AddScoped<ContainerViewModel>();
 
-            services.AddScoped<SnackbarService>();
-            services.AddScoped<DialogService>();
+            services.AddSingleton<SnackbarService>();
+            services.AddSingleton<DialogService>();
 
             services.AddScoped(p => new FafOAuthClient(
                 clientId: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
@@ -153,6 +154,7 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
             services.AddScoped<MatchmakingViewModel>();
+            services.AddScoped<PartyViewModel>();
 
             services.AddTransient<LinksView>();
             services.AddTransient<LinksViewModel>();

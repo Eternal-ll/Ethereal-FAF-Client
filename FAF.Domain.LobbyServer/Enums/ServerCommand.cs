@@ -87,6 +87,14 @@
         /// </summary>
         set_party_factions,
         /// <summary>
+        /// Match confirmation info https://github.com/FAForever/server/issues/607
+        /// </summary>
+        match_info,
+        /// <summary>
+        /// Match confirmation to start https://github.com/FAForever/server/issues/607
+        /// </summary>
+        match_ready,
+        /// <summary>
         /// Incoming message that matchmaker match is found
         /// </summary>
         match_found,

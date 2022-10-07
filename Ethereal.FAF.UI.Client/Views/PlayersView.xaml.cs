@@ -1,8 +1,10 @@
-﻿using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands.Base;
+using Ethereal.FAF.UI.Client.ViewModels;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using Wpf.Ui.Common.Interfaces;
 
@@ -21,13 +23,42 @@ namespace Ethereal.FAF.UI.Client.Views
             OriginalScrollViewer = FindChild<ScrollViewer>(OriginalSource);
         }
 
+        public void EnableInvitePlayerCommand(ICommand inviteCommand, ICommand backCommand)
+        {
+            Resources["InvitePlayerCommand"] = inviteCommand;
+            Resources["BackCommand"] = backCommand;
+        }
+        public void DisableInvitePlayerCommand()
+        {
+            Resources.Remove("InvitePlayerCommand");
+            Resources.Remove("BackCommand");
+        }
+
         public PlayersViewModel ViewModel { get; }
 
-        private void GroupedSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //private void GroupedSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    foreach (var item in e.AddedItems)
+        //    {
+        //        OriginalSource.ScrollIntoView(item);
+        //        break;
+        //    }
+        //}
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (!GroupsSource.IsMouseCaptured || ViewModel.Groups is null) return;
             foreach (var item in e.AddedItems)
             {
-                OriginalSource.ScrollIntoView(item);
+                var group = (CollectionViewGroup)item;
+                var first = (Player)group.Items[0];
+                if (!group.Items.Cast<Player>().Any(p => p.Id == ViewModel.SelectedPlayer?.Id))
+                {
+                    ViewModel.SelectedPlayer = first;
+                }
+                //ViewModel.SelectedGroup = group;
+                //GroupedSource.ScrollIntoView(player);
+                OriginalSource.ScrollIntoView(first);
                 break;
             }
         }
@@ -41,7 +72,7 @@ namespace Ethereal.FAF.UI.Client.Views
                     .Cast<CollectionViewGroup>()
                     .First(g => g.Items.Cast<Player>().Any(p => p.Id == player.Id));
                 ViewModel.SelectedGroup = group;
-                GroupedSource.ScrollIntoView(player);
+                //GroupedSource.ScrollIntoView(player);
                 break;
             }
         }

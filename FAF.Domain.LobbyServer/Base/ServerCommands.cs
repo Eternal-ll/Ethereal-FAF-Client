@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FAF.Domain.LobbyServer.Enums;
+using System;
 using System.Linq;
 
 namespace FAF.Domain.LobbyServer.Base
@@ -80,19 +81,19 @@ namespace FAF.Domain.LobbyServer.Base
         /// Requests MatchMaker info
         /// </summary>
         /// <returns></returns>
-        public static string RequestMatchMakerInfo => "{\"command\": \"matchmaker_info\"}";
+        public const string RequestMatchMakerInfo = "{\"command\": \"matchmaker_info\"}";
 
         /// <summary>
         /// Request ICE servers for Ice Adapter
         /// </summary>
-        public static string RequestIceServers => "{\"command\": \"ice_servers\"}";
+        public const string RequestIceServers = "{\"command\": \"ice_servers\"}";
 
         /// <summary>
         /// Invite player to party
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string InviteToParty(string id) => $"{{\"command\": \"invite_to_party\", \"recipient_id\": {id}}}";
+        public static string InviteToParty(long id) => $"{{\"command\": \"invite_to_party\", \"recipient_id\": {id}}}";
         /// <summary>
         /// Restore game session
         /// </summary>
@@ -121,6 +122,15 @@ namespace FAF.Domain.LobbyServer.Base
         public static string JoinToMatchMakingQueue(string queue, params string[] factions) =>
             $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}";
         /// <summary>
+        /// Join to MatchMaking queue
+        /// </summary>
+        /// <param name="queue">Queue name</param>
+        /// <returns></returns>
+        public static string UpdateQueue(string queue, string state, params string[] factions) =>
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"{state}\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}";
+        public static string UpdateQueue(string queue, string state) =>
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"{state}\"}}";
+        /// <summary>
         /// Leave from MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
@@ -132,33 +142,33 @@ namespace FAF.Domain.LobbyServer.Base
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
         public static string LeaveMatchmakingQueue() => $"{{\"command\": \"game_matchmaking\", \"state\": \"stop\"}}";
-        public static string MatchReady() => $"{{\"command\": \"match_ready\"}}";
+        public const string MatchReady = "{\"command\": \"match_ready\"}";
 
         // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
         // TODO
         public static string SetPartyFactions(params string[] factions) =>
-            $"{{\"command\": \"match_ready\", \"factions\":[{string.Join(',', factions.Select(f=>$"\"{f}\""))}]}}";
+            $"{{\"command\": \"set_party_factions\", \"factions\":[{string.Join(',', factions.Select(f=>$"\"{f}\""))}]}}";
 
         /// <summary>
         /// Accept invite to MatchMaker party
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string AcceptPartyInvite(string id) => $"{{\"command\":\"accept_party_invite\", \"sender_id\": {id}}}";
+        public static string AcceptPartyInvite(long id) => $"{{\"command\":\"accept_party_invite\", \"sender_id\": {id}}}";
         /// <summary>
         /// Kick player from MatchMaker party
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string KickPlayerFromParty(string id) => $"{{\"command\":\"kick_player_from_party\", \"kicked_player_id\": {id}}}";
+        public static string KickPlayerFromParty(long id) => $"{{\"command\":\"kick_player_from_party\", \"kicked_player_id\": {id}}}";
         /// <summary>
         /// Leave from MatchMaker party
         /// </summary>
         /// <returns></returns>
-        public static string LeaveFromParty => "{\"command\": \"leave_party\"}";
+        public const string LeaveFromParty = "{\"command\": \"leave_party\"}";
 
-        public static string Ping => "{\"command\":\"ping\"}";
-        public static string Pong => "{\"command\":\"pong\"}";
+        public const string Ping = "{\"command\":\"ping\"}";
+        public const string Pong = "{\"command\":\"pong\"}";
 
 
         // GAME GPGNET Commands

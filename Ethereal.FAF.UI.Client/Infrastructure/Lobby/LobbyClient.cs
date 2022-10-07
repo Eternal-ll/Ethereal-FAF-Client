@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Windows.Markup;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
@@ -29,13 +30,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
         //public event EventHandler<QueueData> QueueDataReceived;   
-        public event EventHandler<MatchmakingData> MatchMakingDataReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
         public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
-        public event EventHandler<MatchCancelledData> MatchCancelled;
-        public event EventHandler<MatchFoundData> MatchFound;
-        public event EventHandler<int> KickedFromParty;
+
+        public event EventHandler<MatchmakingData> MatchMakingDataReceived;
+        public event EventHandler<MatchCancelled> MatchCancelled;
+        public event EventHandler<MatchConfirmation> MatchConfirmation;
+        public event EventHandler<MatchFound> MatchFound;
+        public event EventHandler<SearchInfo> SearchInfoReceived;
+
+        public event EventHandler KickedFromParty;
+        public event EventHandler<PartyUpdate> PartyUpdated;
+        public event EventHandler<PartyInvite> PartyInvite;
 
         private readonly ILogger Logger;
         private readonly UidGenerator UidGenerator;
@@ -72,8 +79,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             var sent = base.SendAsync(text[^1] == '\n' ? text : text + '\n');
             if (!sent)
             {
-                Logger.LogError("NOT SEND");
+                Logger.LogError("[Lobby:Outbound message:Not send] {json}", text);
             }
+            Logger.BeginScope("[Lobby:Outbound message] {json}", text);
             return sent;
         }
 
@@ -159,6 +167,58 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 switch (command)
                 {
                     case ServerCommand.auth:
+                    case ServerCommand.ask_session:
+                    case ServerCommand.authentication_failed:
+                        break;
+                    case ServerCommand.notice:
+                    case ServerCommand.party_invite:
+                    case ServerCommand.update_party:
+                    case ServerCommand.invite_to_party:
+                    case ServerCommand.kicked_from_party:
+                    case ServerCommand.set_party_factions:
+                    case ServerCommand.match_found:
+                    case ServerCommand.match_cancelled:
+                    case ServerCommand.search_info:
+                    case ServerCommand.match_info:
+                        Logger.LogInformation("[Lobby:Inbound message] {json}", data);
+                        break;
+                    case ServerCommand.session:
+                    case ServerCommand.irc_password:
+                    case ServerCommand.welcome:
+                    case ServerCommand.social:
+                    case ServerCommand.player_info:
+                    case ServerCommand.game_info:
+                    case ServerCommand.game:
+                    case ServerCommand.matchmaker_info:
+                    case ServerCommand.mapvault_info:
+                    case ServerCommand.ping:
+                    case ServerCommand.pong:
+                    case ServerCommand.game_launch:
+                    case ServerCommand.restore_game_session:
+                        break;
+                    case ServerCommand.game_matchmaking:
+                        break;
+                    case ServerCommand.game_host:
+                        break;
+                    case ServerCommand.game_join:
+                        break;
+                    case ServerCommand.ice_servers:
+                        break;
+                    case ServerCommand.invalid:
+                        break;
+                    case ServerCommand.JoinGame:
+                    case ServerCommand.HostGame:
+                    case ServerCommand.ConnectToPeer:
+                    case ServerCommand.DisconnectFromPeer:
+                    case ServerCommand.IceMsg:
+                        break;
+                    default:
+                        break;
+                }
+
+                switch (command)
+                {
+                    case ServerCommand.auth:
                         break;
                     case ServerCommand.authentication_failed:
                         break;
@@ -186,7 +246,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         var welcome = JsonSerializer.Deserialize<Welcome>(data);
                         Self = welcome.me;
                         WelcomeDataReceived?.Invoke(this, welcome);
-                        SendAsync(ServerCommands.RequestIceServers);
                         SplashProgress?.Report("Welcome to FAForever lobby!");
 
                         if (LastGameUid.HasValue)
@@ -194,6 +253,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                             SplashProgress?.Report("Restoring session: " + LastGameUid.Value);
                             SendAsync(ServerCommands.RestoreGameSession(LastGameUid.Value.ToString()));
                         }
+                        SendAsync(ServerCommands.RequestIceServers);
+                        AskQueueInfo();
                         break;
                     case ServerCommand.social:
                         SplashProgress?.Report("Preparing app for you");
@@ -247,23 +308,25 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         GameLaunchDataReceived?.Invoke(this, JsonSerializer.Deserialize<GameLaunchData>(data));
                         break;
                     case ServerCommand.party_invite:
+                        PartyInvite?.Invoke(this, JsonSerializer.Deserialize<PartyInvite>(data));
                         break;
                     case ServerCommand.update_party:
-                        break;
-                    case ServerCommand.invite_to_party:
+                        PartyUpdated?.Invoke(this, JsonSerializer.Deserialize<PartyUpdate>(data));
                         break;
                     case ServerCommand.kicked_from_party:
-
+                        KickedFromParty?.Invoke(this, null);
                         break;
-                    case ServerCommand.set_party_factions:
+                    case ServerCommand.match_info:
+                        MatchConfirmation?.Invoke(this, JsonSerializer.Deserialize<MatchConfirmation>(data));
                         break;
                     case ServerCommand.match_found:
-                        MatchFound?.Invoke(this, JsonSerializer.Deserialize<MatchFoundData>(data));
+                        MatchFound?.Invoke(this, JsonSerializer.Deserialize<MatchFound>(data));
                         break;
                     case ServerCommand.match_cancelled:
-                        MatchCancelled?.Invoke(this, JsonSerializer.Deserialize<MatchCancelledData>(data));
+                        MatchCancelled?.Invoke(this, JsonSerializer.Deserialize<MatchCancelled>(data));
                         break;
                     case ServerCommand.search_info:
+                        SearchInfoReceived?.Invoke(this, JsonSerializer.Deserialize<SearchInfo>(data));
                         break;
                     case ServerCommand.ice_servers:
                         var ice = JsonSerializer.Deserialize<IceServersData>(data);
@@ -283,6 +346,26 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 }
             }
         }
+
+        #region Matchmaking
+        public void AskQueueInfo() =>
+            SendAsync(ServerCommands.RequestMatchMakerInfo);
+        public void UpdateQueue(MatchmakingType queue, SearchInfoState state, params Faction[] factions) =>
+            SendAsync(ServerCommands.UpdateQueue(
+                queue.ToString(),
+                state.ToString().ToLower()));
+                //factions.Select(f => f.ToString()).ToArray()));
+        public void AcceptPartyInviteFromPlayer(long id) =>
+            SendAsync(ServerCommands.AcceptPartyInvite(id));
+        public void InvitePlayerToParty(long id) =>
+            SendAsync(ServerCommands.InviteToParty(id));
+        public void KickPlayerFromParty(long id) => 
+            SendAsync(ServerCommands.KickPlayerFromParty(id));
+        public void SetPartyFactions(params Faction[] factions) => 
+            SendAsync(ServerCommands.SetPartyFactions(factions.Select(f => f.ToString()).ToArray()));
+        public void ReadyToJoinMatch() =>
+            SendAsync(ServerCommands.MatchReady);
+        #endregion
 
         public bool CanJoinGame() => LastGameUid.HasValue;
 

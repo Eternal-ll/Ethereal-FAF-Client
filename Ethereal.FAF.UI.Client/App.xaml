@@ -37,6 +37,34 @@
                 <ui:ControlsDictionary />
                 <ui:ThemesDictionary Theme="Dark" />
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
+
+                <ResourceDictionary>
+                    <Style x:Key="BorderPopup" TargetType="Border">
+                        <Setter Property="Padding" Value="10"/>
+                        <Setter Property="CornerRadius" Value="4"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="BorderBrush">
+                            <Setter.Value>
+                                <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect
+                                BlurRadius="30"
+                                Direction="0"
+                                Opacity="0.4"
+                                ShadowDepth="0"
+                                Color="#202020" />
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
