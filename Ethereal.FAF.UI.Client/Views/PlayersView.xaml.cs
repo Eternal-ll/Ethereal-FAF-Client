@@ -86,8 +86,9 @@ namespace Ethereal.FAF.UI.Client.Views
             var player = (Player)latest.DataContext;
             var group = ViewModel.Groups
                 .Cast<CollectionViewGroup>()
-                .First(g => g.Items.Cast<Player>().Any(p => p.Id == player.Id));
+                .FirstOrDefault(g => g.Items.Cast<Player>().Any(p => p.Id == player.Id));
             ViewModel.SelectedGroup = group;
+            if (group is null) return;
             ViewModel.SelectedPlayer ??= (Player)group.Items.First();
         }
 

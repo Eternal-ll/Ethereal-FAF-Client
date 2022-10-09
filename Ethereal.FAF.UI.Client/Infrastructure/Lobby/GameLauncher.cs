@@ -108,7 +108,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 //    deviation = (int)rating.rating[1];
                 //    games = rating.number_of_games;
                 //}
-                var rating = me.Ratings.Global;
+                var rating = ratingType switch
+                {
+                    RatingType.global => me.Ratings.Global,
+                    RatingType.ladder_1v1 => me.Ratings.Ladder1V1,
+                    RatingType.tmm_2v2 => me.Ratings.Tmm2V2,
+                    RatingType.tmm_4v4_full_share => me.Ratings.Tmm4V4FullShare
+                };
+                if (rating is null) rating = new Rating()
+                {
+                    rating = new double[] { 1500, 500 }
+                };
                 mean = (int)rating.rating[0];
                 deviation = (int)rating.rating[1];
                 games = rating.number_of_games;

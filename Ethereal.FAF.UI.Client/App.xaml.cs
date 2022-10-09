@@ -174,6 +174,7 @@ namespace Ethereal.FAF.UI.Client
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
+            Console.WriteLine(e.Exception.ToString());
             var snackbar = Hosting.Services.GetService<SnackbarService>();
             var logger = Hosting.Services.GetService<ILogger<App>>();
             logger.LogError(e.Exception.ToString());

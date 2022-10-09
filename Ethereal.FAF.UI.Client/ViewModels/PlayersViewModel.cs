@@ -76,7 +76,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (value is int rating)
             {
                 var ceilings = new[] { 0, 300, 600, 900, 1200, 1500, 1700, 1900, 2100, 2400, 2800 };
-                var group = ceilings.First(ceiling => ceiling >= rating);
+                var group = ceilings.FirstOrDefault(ceiling => ceiling >= rating);
                 ceilings = new[] { -1000, -500, -200, 0, 300, 600, 900, 1200, 1500, 1700, 1900, 2100, 2400, 2800 };
                 group = 0;
                 foreach (var ceil in ceilings)
