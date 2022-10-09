@@ -5,6 +5,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
+using Humanizer;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -44,6 +45,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
             lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
             lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
+            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
+            lobbyClient.MatchFound += LobbyClient_MatchFound;
             Task.Run(async () =>
             {
                 while (true)
@@ -76,6 +79,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             PatchClient = patchClient;
         }
 
+        private void LobbyClient_MatchFound(object sender, MatchFound e)
+        {
+            NotificationService.Notify("Matchmaking", "Match found");
+            foreach (var queue in SearchStates.Keys)
+            {
+                SearchStates[queue] = false;
+            }
+            State = MatchmakingState.Idle;
+        }
+
+        private void LobbyClient_MatchCancelled(object sender, MatchCancelled e)
+        {
+            NotificationService.Notify("Matchmaking", "Match was cancelled");
+        }
+
         private async void LobbyClient_MatchConfirmation(object sender, MatchConfirmation e)
         {
             State = MatchmakingState.Confirming; 
@@ -106,7 +124,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     Queues.Remove(old);
                 }
                 Queues.Add(queue);
-                if (queue.IsGood(RatingType)) CurrentQueue = queue;
+                if (queue.IsGood(RatingType))
+                    CurrentQueue = queue;
                 //old.queue_pop_time = queue.queue_pop_time;
                 //old.queue_pop_time_delta = queue.queue_pop_time_delta;
                 //old.PlayersCountInQueue = queue.PlayersCountInQueue;
@@ -202,6 +221,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             get => _State;
             set
             {
+                if (BackgroundCancellationTokenSource is not null)
+                {
+                    value = MatchmakingState.Updating;
+                }
                 if (Set(ref _State, value))
                 {
                     ProgressText = value switch
@@ -211,6 +234,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         MatchmakingState.Confirming => "Confirming...",
                         MatchmakingState.Faulted => "Faulted",
                         MatchmakingState.Playing => "Playing",
+                        _=> value.ToString()
                     };
                     ProgressRingVisibility = value switch
                     {
@@ -218,7 +242,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         MatchmakingState.Faulted or
                         MatchmakingState.Playing => Visibility.Collapsed,
                         MatchmakingState.Searching or
-                        MatchmakingState.Confirming => Visibility.Visible
+                        MatchmakingState.Updating or
+                        MatchmakingState.Confirming => Visibility.Visible,
                     };
                     OnPropertyChanged(nameof(InviteButtonVisibility));
                 }
@@ -267,6 +292,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             if (BackgroundCancellationTokenSource is not null)
             {
+                BackgroundCancellationTokenSource.Cancel();
                 State = MatchmakingState.Idle;
                 return;
             }
@@ -286,7 +312,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 BackgroundCancellationTokenSource = new();
                 ProgressRingVisibility = Visibility.Visible;
                 ProgressText = "Confirming patch...";
-                var progress = new Progress<string>((d) => ProgressText = d);
+                var progress = new Progress<string>((d) =>
+                ProgressText = d.Length > 30 ? d.Truncate(30) : d);
                 var cancel = false;
                 await PatchClient.UpdatePatch(
                     mod: FeaturedMod.FAF,
@@ -299,6 +326,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         if (t.IsFaulted || t.IsCanceled) cancel = true;
                     });
                 if (cancel) return;
+
+
+                BackgroundCancellationTokenSource = null;
             }
 
 

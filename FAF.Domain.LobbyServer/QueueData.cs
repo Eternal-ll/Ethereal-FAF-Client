@@ -26,6 +26,6 @@ namespace FAF.Domain.LobbyServer
         public int[][] boundary_80s { get; set; }
         public int[][] boundary_75s { get; set; }
 
-        public bool IsGood(RatingType ratingType) => (int)ratingType == (int)Type;
+        public bool IsGood(RatingType ratingType) => (int)ratingType - 1 == (int)Type;
     }
 }

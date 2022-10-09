@@ -2,6 +2,7 @@
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
@@ -28,11 +29,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     public class GameLauncher
     {
         public event EventHandler<GameLauncherState> StateChanged;
+        public event EventHandler<Progress<string>> GameLaunching;
 
         private readonly LobbyClient LobbyClient;
         private readonly PatchClient PatchClient;
         private readonly MapsService MapsService;
         private readonly MapGenerator MapGenerator;
+        private readonly NotificationService NotificationService;
         private readonly IceManager IceManager;
         private readonly ILogger Logger;
         private readonly IConfiguration Configuration;
@@ -42,7 +45,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         public GameLauncherState State { get; set; }
 
-        public GameLauncher(IConfiguration configuration, LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, PatchClient patchClient, IHttpClientFactory httpClientFactory, MapsService mapsService, MapGenerator mapGenerator)
+        public GameLauncher(IConfiguration configuration, LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, PatchClient patchClient, IHttpClientFactory httpClientFactory, MapsService mapsService, MapGenerator mapGenerator, NotificationService notificationService)
         {
             Configuration = configuration;
             LobbyClient = lobbyClient;
@@ -50,9 +53,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Logger = logger;
 
             lobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
+            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
             PatchClient = patchClient;
             HttpClientFactory = httpClientFactory; MapsService = mapsService;
             MapGenerator = mapGenerator;
+            NotificationService = notificationService;
+        }
+        private long LastGameUid;
+
+        private void LobbyClient_MatchCancelled(object sender, MatchCancelled e)
+        {
+            //if (e.GameId != LastGameUid) return;
+            Process?.Kill();
         }
 
         private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e) => 
@@ -60,17 +72,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 .ContinueWith(t =>
                 {
                     OnStateChanged(GameLauncherState.Idle);
+                    LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
                     if (t.IsFaulted)
                     {
                         Logger.LogError(t.Exception.ToString());
-                        LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                        NotificationService.Notify("Game", $"Launch failed: {t.Exception}", ignoreOs: true);
+                        //IceManager.IceServer?.Kill();
+                        Process?.Kill();
+                        Process?.Dispose();
                     }
                     Process = null;
-                    IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
-                    IceManager.IceClient.DisconnectAsync();
-                    IceManager.IceClient.Dispose();
                     try
                     {
+                        IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
+                        IceManager.IceClient.IsStop = true;
+                        IceManager.IceClient.DisconnectAsync();
+                        IceManager.IceClient.Dispose();
+                        IceManager.IceClient = null;
                         IceManager.IceServer.Kill();
                     }
                     catch{}
@@ -99,40 +117,34 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             }
             if (country.Length > 0)
             {
-                args.Append("/country ");
-                args.Append(country);
-                args.Append(' ');
+                args.Append($"/country {country} ");
             }
             if (clan?.Length > 0)
             {
-                args.Append("/clan ");
-                args.Append(clan);
-                args.Append(' ');
+                args.Append($"/clan {clan} ");
             }
-            args.Append("/mean ");
-            args.Append(mean);
-            args.Append(' ');
-            args.Append("/deviation ");
-            args.Append(deviation);
-            args.Append(' ');
-            args.Append("/numgames ");
-            args.Append(games);
-            args.Append(' ');
+            args.Append($"/mean {mean} ");
+            args.Append($"/deviation {deviation} ");
+            args.Append($"/numgames {games} ");
         }
         private async Task RunGame(GameLaunchData e)
         {
+            LastGameUid = e.uid;
+            NotificationService.Notify("Game", "Preparing game for launch", ignoreOs: true);
+            var progressSource = new Progress<string>();
+            //GameLaunching?.Invoke(this, progressSource);
+            var progress = (IProgress<string>)progressSource;
+
             OnStateChanged(GameLauncherState.Launching);
             var me = LobbyClient.Self;
             IceManager.Initialize(me.Id.ToString(), me.Login);
-            IceManager.IceClient.SetLobbyInitMode(e.init_mode
-                .ToString()
-                .ToLower());
-
+            IceManager.IceClient.SetLobbyInitMode(e.init_mode.ToString().ToLower());
             //ice.PassIceServers(IceService.IceServers);
-
             //var me = PlayersService.Self;
             // game args
             StringBuilder arguments = new();
+            arguments.Append(string.Join(' ', e.args));
+            arguments.Append(' ');
             // hide embedded game bug report
             arguments.Append("/nobugreport ");
             arguments.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
@@ -143,6 +155,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (e.init_mode == GameInitMode.Auto)
             {
                 // matchmaker
+                arguments.Append($"/{e.faction.ToString().ToLower()} ");
                 arguments.Append($"/players {e.expected_players} ");
                 arguments.Append($"/team {e.team} ");
                 arguments.Append($"/startspot {e.map_position} ");
@@ -170,7 +183,26 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     arguments.Append($"/log \"{logs}\" ");
                 }
             }
-            Logger.LogWarning($"Starting game with args: {arguments}");
+
+            if (!string.IsNullOrWhiteSpace(e.mapname))
+            {
+                if (MapGenerator.IsGeneratedMap(e.mapname))
+                {
+                    progress?.Report("Generating map");
+                    NotificationService.Notify("Game", "Generating map", ignoreOs: true);
+                    await MapGenerator.GenerateMap(e.mapname, MapsService.MapsFolder, default, progress);
+                    NotificationService.Notify("Game", "Map is generated", ignoreOs: true);
+                }
+                else
+                {
+                    if (MapsService.IsExist(e.mapname))
+                    {
+                        await MapsService.DownloadAsync(e.mapname, MapsService.MapsFolder, progress, default);
+                    }
+                }
+            }
+            //await Task.Delay(1000);
+            Logger.LogTrace("Starting game with next arguments [{args}]", arguments);
             Process = new()
             {
                 StartInfo = new()
@@ -180,43 +212,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     UseShellExecute = true
                 }
             };
-            try
+            //try
+            //{
+            NotificationService.Notify("Game", "Launching game", ignoreOs: true);
+            if (!Process.Start())
             {
-                if (!Process.Start())
-                {
-                    Logger.LogError("Cant start game");
-                    throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
-                }
-                OnStateChanged(GameLauncherState.Running);
-                await Process.WaitForExitAsync();
+                Logger.LogError("Cant start game");
+                throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
             }
-            catch
-            {
-
-            }
-            IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
-            IceManager.IceClient.DisconnectAsync();
-            IceManager.IceClient.Dispose();
-            try
-            {
-                IceManager.IceServer.Kill();
-            }
-            catch
-            {
-
-            }
-            //IceManager.IceServer?.Kill();
-            Process.Kill();
-            Process.Dispose();
-            Process = null;
-            //await ice.CloseAsync();
-            //ice.GpgNetMessageReceived -= IceAdapterClient_GpgNetMessageReceived;
-            //ice.IceMessageReceived -= IceAdapterClient_IceMessageReceived;
-            //ice.ConnectionToGpgNetServerChanged -= IceAdapterClient_ConnectionToGpgNetServerChanged;
-            //ice = null;
-
-            LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
-            OnStateChanged(GameLauncherState.Idle);
+            OnStateChanged(GameLauncherState.Running);
+            await Process.WaitForExitAsync();
+            //}
+            //catch (Exception ex)
+            //{
+            //    NotificationService.Notify("Game", $"Launch failed: {ex}", ignoreOs: true);
+            //}
         }
         public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {

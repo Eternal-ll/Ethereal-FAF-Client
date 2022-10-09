@@ -28,16 +28,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         public PatchClient(ILogger<PatchClient> logger, IServiceProvider serviceProvider, string patchFolder, ITokenProvider tokenProvider)
         {
-            var baseDirectory = patchFolder;
-            logger.LogTrace("Initializing with base directory: [{}]", baseDirectory);
+            logger.LogTrace("Initializing on [{directory}]", patchFolder);
             Logger = logger;
-            var bin = Path.Combine(baseDirectory, "bin");
-            var gamedata = Path.Combine(baseDirectory, "gamedata");
+            var bin = Path.Combine(patchFolder, "bin");
+            var gamedata = Path.Combine(patchFolder, "gamedata");
             try
             {
                 var binDirectory = new DirectoryInfo(bin);
                 var gamedataDirectory = new DirectoryInfo(gamedata);
-                PatchDirectory = new DirectoryInfo(baseDirectory);
+                PatchDirectory = new DirectoryInfo(patchFolder);
                 if (!binDirectory.Exists)
                 {
                     binDirectory.Create();
@@ -49,7 +48,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             catch (Exception ex)
             {
-                logger.LogError("Cant initialize path folders [{}]", ex);
+                logger.LogError("Cant initialize on [{directory}] with exception \n[{exception}]", patchFolder, ex);
                 return;
             }
             finally
@@ -71,7 +70,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                         NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName,
                     }
                 };
-                logger.LogTrace("Initialized with base directory: [{}]", baseDirectory);
+                logger.LogTrace("Initialized on [{directory}]", patchFolder);
             }
             ServiceProvider = serviceProvider;
             TokenProvider = tokenProvider;
@@ -181,17 +180,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
-            Logger.LogTrace("File deleted [{}] change type [{}]", e.FullPath, e.ChangeType);
+            Logger.LogTrace("File deleted [{deleted}] change type [{changed}]", e.FullPath, e.ChangeType);
             var data = e.FullPath.Split('\\','/');
             var group = data[^2];
             var path = Path.Combine(group, e.Name);
             if (FilesMD5.Remove(path.ToLower()))
             {
-                Logger.LogTrace("File removed from MD5 dictionary [{}] as [{}]", e.FullPath, path);
+                Logger.LogTrace("File removed from MD5 dictionary [{removed}] as [{path}]", e.FullPath, path);
             }
             else
             {
-                Logger.LogWarning("File wasnt removed from MD5 dictionary [{}]", path);
+                Logger.LogWarning("File wasnt removed from MD5 dictionary [{path}]", path);
             }
             IsFilesChanged = true;
         }
@@ -199,7 +198,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private string LastFileInWork;
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            Logger.LogTrace("File edited [{}] change type [{}]", e.FullPath, e.ChangeType);
+            Logger.LogTrace("File edited [{edited}] change type [{change}]", e.FullPath, e.ChangeType);
             var data = e.FullPath.Split('\\','/');
             var group = data[^2];
             var path = Path.Combine(group, e.Name);
@@ -221,19 +220,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private async Task ProcessPatchFiles(string path, IProgress<string> progress = null)
         {
             var patch = new DirectoryInfo(path);
-            Logger.LogTrace("Processing files in [{}]", patch.FullName);
+            Logger.LogTrace("Processing files in [{file}]", patch.FullName);
             foreach (var file in patch.EnumerateFiles())
             {
                 var key = Path.Combine(file.Directory.Name, file.Name);
                 var md5 = await CalculateMD5(file.FullName);
-                if (!FilesMD5.TryAdd(key, md5))
+                if (!FilesMD5.TryAdd(key.ToLower(), md5))
                 {
-                    Logger.LogTrace("File updated in [{}] [{}] with old MD5 [{}] to [{}]", key, file.Name, FilesMD5[key], md5);
-                    FilesMD5[key] = md5;
+                    Logger.LogTrace("File updated in [{key}] with old MD5 [{md5old}] to [{md5new}]", key, FilesMD5[key], md5);
+                    FilesMD5[key.ToLower()] = md5;
                     return;
                 }
                 progress?.Report($"File added in [{key}] with MD5 [{md5[..10]}..]");
-                Logger.LogTrace("File added in [{}] [{}] with MD5 [{}]", key, file.Name, md5);
+                Logger.LogTrace("File added in [{key}] with MD5 [{ms5}]", key, md5);
             }
         }
         static async Task<string> CalculateMD5(string filename)

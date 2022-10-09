@@ -6,11 +6,38 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class ContainerViewModel : Base.ViewModel
     {
         public LobbyClient LobbyViewModel { get; }
+        private readonly GameLauncher GameLauncher;
 
-        public ContainerViewModel(LobbyClient lobbyViewModel)
+        public ContainerViewModel(LobbyClient lobbyViewModel, GameLauncher gameLauncher)
         {
             LobbyViewModel = lobbyViewModel;
+            GameLauncher = gameLauncher;
+            gameLauncher.StateChanged += GameLauncher_StateChanged;
+            gameLauncher.GameLaunching += GameLauncher_GameLaunching;
         }
+
+        private void GameLauncher_GameLaunching(object sender, System.Progress<string> e)
+        {
+            return;
+            SplashProgressVisibility = Visibility.Visible;
+            SplashVisibility = Visibility.Visible;
+            e.ProgressChanged += (s, e) => SplashText = e;
+        }
+
+        private void GameLauncher_StateChanged(object sender, GameLauncherState e)
+        {
+            return;
+            if (e is GameLauncherState.Running)
+            {
+                SplashProgressVisibility = Visibility.Collapsed;
+                SplashVisibility = Visibility.Visible;
+            }
+            if (e is GameLauncherState.Idle)
+            {
+                SplashVisibility = Visibility.Collapsed;
+            }
+        }
+
         public Visibility MainVisibility => SplashVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         #region SplashProgressVisibility
         private Visibility _SplashProgressVisibility = Visibility.Visible;

@@ -333,13 +333,24 @@
                                     <Ui:Badge.Style>
                                         <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding LaunchedAtTimeSpan}" Value="{x:Null}">
+                                                <DataTrigger Binding="{Binding LaunchedAt}" Value="{x:Null}">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Ui:Badge.Style>
-                                    <TextBlock Text="{Binding LaunchedAtTimeSpan, StringFormat='Live {0:hh:mm:ss}'}"/>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding LaunchedAtTimeSpan, StringFormat='Live {0:hh}:{0:mm}:{0:ss}'}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding LaunchedAt}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value=""/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
                                 </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" Style="{StaticResource MapScenarioBadge}" ToolTip="Map size in KM">
                                     <TextBlock>
@@ -580,6 +591,10 @@
                             <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1">
                                 <Setter Property="Command" Value="{Binding ViewModel.MatchmakingViewModel.JoinQueueCommand}"/>
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="6">
+                                <Setter Property="Command" Value="{Binding ViewModel.MatchmakingViewModel.JoinQueueCommand}"/>
+                                <Setter Property="ToolTip" Value="Cancel background downloads processes"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="2">
                                 
                             </DataTrigger>
@@ -650,6 +665,13 @@
                                             </Setter.Value>
                                         </Setter>
                                     </MultiDataTrigger>-->
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True"/>
+                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="6"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Text" Value="{Binding ViewModel.MatchmakingViewModel.ProgressText,StringFormat='Cancel? {0}'}"/>
+                                    </MultiDataTrigger>
                                     <DataTrigger Binding="{Binding ViewModel.SelectedRatingType}" Value="0">
                                         <Setter Property="Text">
                                             <Setter.Value>

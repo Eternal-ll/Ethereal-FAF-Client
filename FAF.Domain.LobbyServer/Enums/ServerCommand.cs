@@ -140,7 +140,10 @@
         HostGame,
         ConnectToPeer,
         DisconnectFromPeer,
-        IceMsg
+        IceMsg,
+        GameFull,
+        ClearSlot,
+        Chat
 
     }
 }

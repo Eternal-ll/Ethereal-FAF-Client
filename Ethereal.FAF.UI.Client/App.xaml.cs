@@ -20,7 +20,6 @@ using System.IO;
 using System.Net.Http;
 using System.Reflection;
 using System.Windows;
-using System.Windows.Controls;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.Mvvm.Services;
 using static Ethereal.FAF.API.Client.BuilderExtensions;
@@ -36,9 +35,10 @@ namespace Ethereal.FAF.UI.Client
         protected override async void OnStartup(StartupEventArgs e)
         {
             Hosting = Host.CreateDefaultBuilder(e.Args)
-            .ConfigureLogging(c =>
+            .ConfigureLogging((hostingContext, loggingBuilder) =>
             {
-
+                loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
+                loggingBuilder.AddConsole();
             })
             .ConfigureHostOptions(c =>
             {
@@ -119,7 +119,7 @@ namespace Ethereal.FAF.UI.Client
                 javaRuntimeFile: configuration.GetValue<string>("Paths:Java:Executable"),
                 iceClientJar: configuration.GetValue<string>("Paths:IceAdapter:Executable"),
                 iceClientLogging: configuration.GetValue<string>("Paths:IceAdapter:Logs"),
-                snackbarService: s.GetService<SnackbarService>()));
+                notificationService: s.GetService<NotificationService>()));
 
             services.AddScoped<GameLauncher>();
 
@@ -175,6 +175,8 @@ namespace Ethereal.FAF.UI.Client
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             var snackbar = Hosting.Services.GetService<SnackbarService>();
+            var logger = Hosting.Services.GetService<ILogger<App>>();
+            logger.LogError(e.Exception.ToString());
             snackbar.Show("App exception", e.Exception.ToString(), Wpf.Ui.Common.SymbolRegular.ErrorCircle24);
         }
     }

@@ -69,7 +69,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         public string HumanTitle => Title.Truncate(34);
         [JsonIgnore]
         public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
-        public DateTimeOffset LaunchedAtTimeSpan => DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
+        public TimeSpan LaunchedAtTimeSpan => DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
 
 
         #region Map generator

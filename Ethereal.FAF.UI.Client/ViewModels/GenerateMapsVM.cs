@@ -26,12 +26,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class GenerateMapsVM : MapsHostingVM
     {
         private readonly MapGenerator MapGenerator;
+        private readonly NotificationService NotificationService;
         private readonly string MapsFolder;
 
         private FileSystemWatcher FileSystemWatcher;
 
         public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, ContainerViewModel container,
-            PatchClient patchClient, IceManager iceManager)
+            PatchClient patchClient, IceManager iceManager, NotificationService notificationService)
             : base(lobbyClient, container, patchClient, iceManager)
         {
             MapGenerator = mapGenerator;
@@ -76,6 +77,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
                 SetSource(maps);
             });
+            NotificationService = notificationService;
         }
 
         private void MapGenerator_MapGenerated(object sender, string e)
@@ -407,7 +409,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 mapsize: SizeInPixels,
                 generateCount: GenerateCount,
                 progress: progress,
-                cancellationToken: CancellationSource.Token);
+                cancellationToken: CancellationSource.Token)
+            .ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    NotificationService.Notify("Map generator", t.Exception.ToString(), ignoreOs: true);
+                    return Array.Empty<string>();
+                }
+                return t.Result;
+            });
             foreach (var map in maps)
             {
                 //if (!string.IsNullOrWhiteSpace(map))

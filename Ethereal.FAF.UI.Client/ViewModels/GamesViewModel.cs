@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -274,6 +275,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
+        public Game GetGame(long id) => Games.FirstOrDefault(g => g.Uid == id);
+        public bool TryGetGame(long id, out Game game)
+        {
+            game = GetGame(id);
+            return game is not null;
+        }
+
         private void SetMapScenario(Game game)
         {
             if (game.MapScenario is not null) return;
@@ -401,11 +409,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SnackbarService.Show("Warning", "Game is password protected", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            //if (game.Mapname.Contains("neroxis_map_generator_") && !game.Mapname.Contains("1.8.5"))
-            //{
-            //    SnackbarService.Show("Warning", "Client supports only 1.8.5 version of map generator", Wpf.Ui.Common.SymbolRegular.Warning24);
-            //    return;
-            //}
             if (game.SimMods is not null && game.SimMods.Count > 0)
             {
                 SnackbarService.Show("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
@@ -427,9 +430,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     }
                     if (!CancellationTokenSource.IsCancellationRequested)
                     {
-                        ContainerViewModel.Content = new MatchView(IceManager, game);
+                        //ContainerViewModel.Content = new MatchView(IceManager, game);
                         ContainerViewModel.SplashProgressVisibility = Visibility.Collapsed;
                     }
+                    //ContainerViewModel.Content = null;
+                    ContainerViewModel.SplashVisibility = Visibility.Collapsed;
                     progress.Report("Waiting ending of match");
                     var snackbar = SnackbarService.GetSnackbarControl();
                     var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";

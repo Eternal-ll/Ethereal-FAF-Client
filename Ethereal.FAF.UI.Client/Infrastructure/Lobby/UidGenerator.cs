@@ -35,10 +35,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Logger.LogTrace("Reading output...");
             string result = await process.StandardOutput.ReadLineAsync();
             Logger.LogTrace("Done reading ouput");
-            Logger.LogTrace("Generated UID: [{uid}]", result);
+            Logger.LogTrace("Generated UID: [**********]");
             progress?.Report($"Generated UID: {result[..10]}...");
             Logger.LogTrace("Closing UID generator...");
             process.Close();
+            process.Dispose();
             Logger.LogTrace("UID closed");
             return result;
         }

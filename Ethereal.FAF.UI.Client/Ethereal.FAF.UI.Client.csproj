@@ -43,6 +43,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.1" />
     <PackageReference Include="WPF-UI" Version="2.0.2" />
     <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+    <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,8 +54,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.Test.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="links.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

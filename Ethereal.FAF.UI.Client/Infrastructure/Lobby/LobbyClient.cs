@@ -75,28 +75,26 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public void AskSession() => SendAsync(ServerCommands.AskSession(UserAgent, UserAgentVersion));
         public override bool SendAsync(string text)
         {
-            Logger.LogTrace(text);
             var sent = base.SendAsync(text[^1] == '\n' ? text : text + '\n');
             if (!sent)
             {
-                Logger.LogError("[Lobby:Outbound message:Not send] {json}", text);
+                Logger.LogError($"[Outbound message:Not sent] {text}");
             }
-            Logger.BeginScope("[Lobby:Outbound message] {json}", text);
+            Logger.LogTrace($"[Outbound message] {text}");
             return sent;
         }
 
         private bool _stop;
         protected override void OnConnecting()
         {
-            Logger.LogTrace("Connecting to [{host}:{port}]", Host, Port);
-            SplashProgress?.Report($"Connecting to [{Host}:{Port}]");
+            Logger.LogTrace($"Connecting to {Host}:{Port}");
+            SplashProgress?.Report($"Connecting to {Host}:{Port}");
             base.OnConnecting();
         }
         protected override void OnConnected()
         {
-            Logger.LogInformation("Reconnected in [{}]", sw.Elapsed);
             Logger.LogTrace("Connected to [{host}:{port}]", Host, Port);
-            SplashProgress?.Report($"Connected to [{Host}:{Port}]");
+            SplashProgress?.Report($"Connected to {Host}:{Port}");
             AskSession();
             //Task.Run(async() =>
             //{
@@ -155,8 +153,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private void SendAuth(string accessToken, string uid, string session)
         {
-            string auth = ServerCommands.PassAuthentication(AccessToken, uid, session);
-            SendAsync(auth);
+            base.SendAsync(ServerCommands.PassAuthentication(accessToken, uid, session) + '\n');
+            Logger.LogTrace($"[Outbound messsage] {ServerCommands.PassAuthentication("*********", "*********", "*********")}");
         }
         private async void ProcessData(string data)
         {
@@ -166,56 +164,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 switch (command)
                 {
-                    case ServerCommand.auth:
-                    case ServerCommand.ask_session:
-                    case ServerCommand.authentication_failed:
-                        break;
-                    case ServerCommand.notice:
-                    case ServerCommand.party_invite:
-                    case ServerCommand.update_party:
-                    case ServerCommand.invite_to_party:
-                    case ServerCommand.kicked_from_party:
-                    case ServerCommand.set_party_factions:
-                    case ServerCommand.match_found:
-                    case ServerCommand.match_cancelled:
-                    case ServerCommand.search_info:
-                    case ServerCommand.match_info:
-                        Logger.LogInformation("[Lobby:Inbound message] {json}", data);
-                        break;
-                    case ServerCommand.session:
-                    case ServerCommand.irc_password:
-                    case ServerCommand.welcome:
-                    case ServerCommand.social:
-                    case ServerCommand.player_info:
                     case ServerCommand.game_info:
-                    case ServerCommand.game:
-                    case ServerCommand.matchmaker_info:
-                    case ServerCommand.mapvault_info:
-                    case ServerCommand.ping:
-                    case ServerCommand.pong:
-                    case ServerCommand.game_launch:
-                    case ServerCommand.restore_game_session:
+                    case ServerCommand.player_info:
                         break;
-                    case ServerCommand.game_matchmaking:
-                        break;
-                    case ServerCommand.game_host:
-                        break;
-                    case ServerCommand.game_join:
-                        break;
-                    case ServerCommand.ice_servers:
-                        break;
-                    case ServerCommand.invalid:
-                        break;
-                    case ServerCommand.JoinGame:
-                    case ServerCommand.HostGame:
-                    case ServerCommand.ConnectToPeer:
-                    case ServerCommand.DisconnectFromPeer:
-                    case ServerCommand.IceMsg:
-                        break;
-                    default:
-                        break;
+                    default: Logger.LogTrace($"[Inbound message] {data.TrimEnd()}"); break;
                 }
-
                 switch (command)
                 {
                     case ServerCommand.auth:
@@ -223,8 +176,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.authentication_failed:
                         break;
                     case ServerCommand.notice:
+                        if (data.Contains("You are using")) return;
                         var notice = JsonSerializer.Deserialize<NotificationData>(data);
-                        Logger.LogTrace("[{host}:{port}]: Notification [{session}]", Host, Port, notice.text);
                         NotificationReceived?.Invoke(this, notice);
                         break;
                     case ServerCommand.session:
@@ -234,7 +187,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         Session = session;
                         Uid = uid;
                         if (AccessToken is null) return;
-                        Logger.LogTrace("Processing authentification on [{host}:{port}]", Host, Port);
                         SplashProgress?.Report($"Processing authentification on [{Host}:{Port}]");
                         SendAuth(AccessToken, uid, session);
                         Uid = null;
@@ -251,9 +203,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         if (LastGameUid.HasValue)
                         {
                             SplashProgress?.Report("Restoring session: " + LastGameUid.Value);
-                            SendAsync(ServerCommands.RestoreGameSession(LastGameUid.Value.ToString()));
+                            RestoreGameSession(LastGameUid.Value);
                         }
-                        SendAsync(ServerCommands.RequestIceServers);
+                        RequestIceServers();
                         AskQueueInfo();
                         break;
                     case ServerCommand.social:
@@ -264,34 +216,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         if (player.Players is not null)
                         {
                             if (player.Players.Length < 50)
-                            {
-                                foreach (var p in player.Players)
-                                {
-                                    PlayerReceived?.Invoke(this, p);
-                                }
-                            }
+                                foreach (var p in player.Players) PlayerReceived?.Invoke(this, p);
                             else PlayersReceived?.Invoke(this, player.Players);
+                            return;
                         }
-                        else
-                        {
-                            if (player.Id == Self.Id)
-                            {
-                                Self = player;
-                            }
-                            PlayerReceived?.Invoke(this, player);
-                        }
+                        if (player.Id == Self.Id) Self = player;
+                        PlayerReceived?.Invoke(this, player);
                         break;
                     case ServerCommand.game_info:
                         var game = JsonSerializer.Deserialize<Game>(data);
-                        if (game.Games is not null)
-                        {
-                            GamesReceived?.Invoke(this, game.Games);
-                            Authorized?.Invoke(this, true);
-                        }
-                        else
+                        if (game.Games is null)
                         {
                             GameReceived?.Invoke(this, game);
+                            return;
                         }
+                        GamesReceived?.Invoke(this, game.Games);
+                        Authorized?.Invoke(this, true);
+                        if (sw.IsRunning) Logger.LogInformation("Reconnected in {elapsed}", sw.Elapsed);
                         break;
                     case ServerCommand.game:
                         break;
@@ -301,6 +242,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.mapvault_info:
                         break;
                     case ServerCommand.ping:
+                        SendAsync(ServerCommands.Pong);
                         break;
                     case ServerCommand.pong:
                         break;
@@ -366,6 +308,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public void ReadyToJoinMatch() =>
             SendAsync(ServerCommands.MatchReady);
         #endregion
+
+        public void RequestIceServers() =>
+            SendAsync(ServerCommands.RequestIceServers);
+        public void RestoreGameSession(long gameId) =>
+            SendAsync(ServerCommands.RestoreGameSession(gameId.ToString()));
 
         public bool CanJoinGame() => LastGameUid.HasValue;
 

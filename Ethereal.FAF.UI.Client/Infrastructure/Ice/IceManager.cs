@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
@@ -17,7 +18,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 
         private readonly ILogger Logger;
         private readonly LobbyClient LobbyClient;
-        private readonly SnackbarService SnackbarService;
+        private readonly NotificationService NotificationService;
 
         private readonly string JavaRuntimeFile;
         private readonly string IceClientJar;
@@ -29,7 +30,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public int RpcPort { get; private set; }
         public int GpgNetPort { get; private set; }
 
-        public IceManager(ILogger logger, LobbyClient lobbyClient, string javaRuntimeFile, string iceClientJar, string iceClientLogging, SnackbarService snackbarService)
+        public IceManager(ILogger logger, LobbyClient lobbyClient, string javaRuntimeFile, string iceClientJar, string iceClientLogging, NotificationService notificationService)
         {
             Logger = logger;
             LobbyClient = lobbyClient;
@@ -38,7 +39,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceClientLogging = iceClientLogging;
             lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
             lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
-            SnackbarService = snackbarService;
+            NotificationService = notificationService;
         }
 
         private string ice_servers;
@@ -126,8 +127,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             var t = ServerCommands.UniversalGameCommand(e.Command, e.Args);
             Logger.LogInformation($"Sending GPGNetCommand to lobby: {t}");
             LobbyClient.SendAsync(t);
+            if (e.Command == "GameFull")
+            {
+                NotificationService.Notify("Game", "Game is full");
+                return;
+            }
             if (e.Command != "Chat") return;
-            SnackbarService.Show("Game chat", e.Args);
+            NotificationService.Notify("Game chat", e.Args);
         }
 
         private void LobbyClient_IceUniversalDataReceived(object sender, IceUniversalData e)

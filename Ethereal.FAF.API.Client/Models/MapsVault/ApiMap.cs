@@ -2,6 +2,8 @@
 using beta.Models.API.Universal;
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace beta.Models.API.MapsVault
 {
@@ -14,6 +16,32 @@ namespace beta.Models.API.MapsVault
         public bool IsRecommended => bool.Parse(Attributes["recommended"]);
         public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
         public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
+    }
+    public class MapPoolAssignmentParams
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("spawn")]
+        public int SpawnsCount { get; set; }
+
+        [JsonPropertyName("type")]
+        public int Size { get; set; }
+
+        [JsonPropertyName("version")]
+        public string Version { get; set; }
+    }
+    /// <summary>
+    /// https://api.faforever.com/data/mapPoolAssignment
+    /// </summary>
+    public class ApiMapPoolAssignment : Base.ApiUniversalData
+    {
+        public DateTime CreateTime => DateTime.Parse(Attributes["createTime"]);
+        public DateTime UpdateTime => DateTime.Parse(Attributes["updateTime"]);
+        public int Weight => int.Parse(Attributes["weight"]);
+        //MapPoolAssignmentParams Params => Attributes.TryGetValue("params", out var parameters) && !string.IsNullOrWhiteSpace(parameters) ?
+        //    JsonSerializer.Deserialize<MapPoolAssignmentParams>(parameters) : null;
+        public MapVersionModel LatestVersion { get; set; }
     }
     public class ApiMapModel : ApiMap
     {

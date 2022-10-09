@@ -104,30 +104,29 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             if (!sent)
             {
                 Queue.Add(text);
-                Console.WriteLine("NOT SENT TO ICE");
             }
             return sent;
         }
         protected override void OnConnected()
         {
-            Console.WriteLine("Connected to RPC Server");
-            SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
             foreach (var item in Queue)
             {
-                Console.WriteLine("FROM QUEUE");
-                SendAsync(item);
+                Send(item);
             }
+            Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
         }
+        public bool IsStop;
         protected override void OnDisconnected()
         {
-            Thread.Sleep(1000);
+            if (IsStop) return;
+            Thread.Sleep(150);
             if (IsConnecting)
             {
                 return;
             }
             try
             {
-                ConnectAsync();
+                Connect();
             }
             catch
             {
