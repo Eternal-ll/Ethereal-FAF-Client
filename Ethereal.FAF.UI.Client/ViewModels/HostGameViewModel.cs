@@ -99,6 +99,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnBackCommand(object obj)
         {
             Container.Content = null;
+            if (SelectionView is null) return;
+            ((IDisposable)SelectionView).Dispose();
         }
         #endregion
     }

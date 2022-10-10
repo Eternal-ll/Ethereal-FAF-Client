@@ -15,10 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Windows;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.Mvvm.Services;
@@ -42,10 +40,10 @@ namespace Ethereal.FAF.UI.Client
             })
             .ConfigureHostOptions(c =>
             {
-                c.ShutdownTimeout = TimeSpan.FromSeconds(30);
+                //c.ShutdownTimeout = TimeSpan.FromSeconds(30);
             })
-            .ConfigureAppConfiguration(cfg => cfg
-                .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)))
+            //.ConfigureAppConfiguration(cfg => cfg
+            //    .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)))
             .ConfigureServices(ConfigureServices)
             .Build();
             await Hosting.StartAsync();
@@ -55,11 +53,7 @@ namespace Ethereal.FAF.UI.Client
         {
             var configuration = context.Configuration;
             var paths = Client.Properties.Paths.Default;
-
-
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = fileVersionInfo.ProductVersion;
+            string version = "2.0.5";
 
             // Background
             services.AddHostedService<TokenReloadService>();
@@ -174,11 +168,16 @@ namespace Ethereal.FAF.UI.Client
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            Console.WriteLine(e.Exception.ToString());
-            var snackbar = Hosting.Services.GetService<SnackbarService>();
+            File.WriteAllText("Log.log", e.Exception.ToString());
+            if (Hosting is null) return;
             var logger = Hosting.Services.GetService<ILogger<App>>();
             logger.LogError(e.Exception.ToString());
-            snackbar.Show("App exception", e.Exception.ToString(), Wpf.Ui.Common.SymbolRegular.ErrorCircle24);
+            var snackbar = Hosting.Services.GetService<SnackbarService>();
+            try
+            {
+                snackbar.Show("App exception", e.Exception.ToString(), Wpf.Ui.Common.SymbolRegular.ErrorCircle24);
+            }
+            catch { }
         }
     }
 }

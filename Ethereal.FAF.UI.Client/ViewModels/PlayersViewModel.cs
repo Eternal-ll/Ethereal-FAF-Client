@@ -1,6 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models.Lobby;
-using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
@@ -313,14 +312,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _Players, value))
                 {
-                    PlayersSource = new()
-                    {
-                        Source = value.AsObservable
-                    };
-                    PlayersSource.Filter += PlayersSource_Filter;
-                    OnPropertyChanged(nameof(PlayersView));
                 }
             }
+        }
+        private void UpdatePlayersSource()
+        {
+            PlayersSource = new()
+            {
+                Source = Players.AsObservable
+            };
+            PlayersSource.Filter += PlayersSource_Filter;
+            OnPropertyChanged(nameof(PlayersView));
         }
 
         private void PlayersSource_Filter(object sender, FilterEventArgs e)
@@ -384,13 +386,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        private void Lobby_PlayersReceived(object sender, Player[] e) => App.Current.Dispatcher.Invoke(() =>
+        private void Lobby_PlayersReceived(object sender, Player[] e)
         {
             PrepareRatings(e);
             var obs = new ConcurrentObservableCollection<Player>();
             obs.AddRange(e);
             Players = obs;
-        }, System.Windows.Threading.DispatcherPriority.Background);
+            App.Current.Dispatcher.Invoke(UpdatePlayersSource);
+        }
     }
 }
     

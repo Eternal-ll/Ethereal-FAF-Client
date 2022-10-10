@@ -176,7 +176,7 @@
             ButtonsForeground="Aqua"
             Foreground="Red"
         -->
-        <ui:TitleBar Visibility="{Binding MainVisibility}"
+        <ui:TitleBar
             Grid.Row="0" Height="30" Padding="10 0"
             ForceShutdown="False"
             MinimizeToTray="False"

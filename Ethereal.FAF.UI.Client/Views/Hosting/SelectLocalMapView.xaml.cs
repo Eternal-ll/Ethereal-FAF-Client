@@ -23,6 +23,7 @@ namespace Ethereal.FAF.UI.Client.Views.Hosting
             Model.Dispose();
             Content = null;
             InvalidateVisual();
+            GC.Collect();
         }
 
         public void SetHostingModel(GameHostingModel model)

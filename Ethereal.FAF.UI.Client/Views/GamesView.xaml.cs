@@ -22,6 +22,7 @@ namespace Ethereal.FAF.UI.Client.Views
 
         private void Image_Initialized(object sender, System.EventArgs e)
         {
+            return;
             var image = (Image)sender;
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.LowQuality);
             if (image.Source is not null && image.Source is BitmapImage bitmap)

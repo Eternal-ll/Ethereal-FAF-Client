@@ -207,8 +207,9 @@
                     </Border.ToolTip>
                     <Border.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Command="{StaticResource OpenImageCommand}" CommandParameter="{Binding LargeMapPreview}"
+                                      Header="Show map preview"/>
                             <MenuItem Style="{StaticResource MapGeneratorMenuItem}" CommandParameter="{Binding}"/>
-
                             <MenuItem Header="Players" ItemsSource="{Binding GameTeams}">
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
@@ -836,7 +837,7 @@
         </Border>
         <Ui:VirtualizingItemsControl Grid.Row="1" Grid.ColumnSpan="2" Margin="4 8 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
             ItemsSource="{Binding ViewModel.GamesView, Mode=OneWay}" IsTabStop="False"
-            VirtualizingPanel.CacheLengthUnit="Pixel">
+            VirtualizingPanel.CacheLengthUnit="Pixel" VirtualizingPanel.ScrollUnit="Pixel">
             <Ui:VirtualizingItemsControl.Style>
                 <Style TargetType="Ui:VirtualizingItemsControl" BasedOn="{StaticResource {x:Type Ui:VirtualizingItemsControl}}">
                     <Style.Triggers>

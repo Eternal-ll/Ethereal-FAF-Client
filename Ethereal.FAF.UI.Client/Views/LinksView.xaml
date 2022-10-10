@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <ui:TextBox PlaceholderText="Search" Text="{Binding ViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}" Margin="0 10 14 4"/>
+        <ui:TextBox PlaceholderText="Search" Text="{Binding ViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}" Margin="0 0 14 4"/>
         <ScrollViewer Grid.Row="1">
             <ItemsControl VerticalAlignment="Top" ItemsSource="{Binding ViewModel.LinksGroupsView}">
                 <ItemsControl.Resources>

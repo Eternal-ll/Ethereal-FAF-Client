@@ -20,10 +20,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             MapsDirectory = FaPaths.Maps;
             //MapsDirectory = new DirectoryInfo(mapsDirectory);
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 var maps = new List<LocalMap>();
                 string[] scenarios = Directory.GetFiles(MapsDirectory, "*_scenario.lua", SearchOption.AllDirectories);
+                var i = 0;
+                SetSource(maps);
                 foreach (var file in scenarios)
                 {
                     var map = new LocalMap();
@@ -36,9 +38,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         var scmap = FA.Vault.Scmap.FromFile(scmapPath);
                     }
-                    maps.Add(map);
+                    i++;
+                    if (Disposed) break;
+                    AddMap(map);
+                    await Task.Delay(50);
                 }
-                SetSource(maps);
             });
         }
     }

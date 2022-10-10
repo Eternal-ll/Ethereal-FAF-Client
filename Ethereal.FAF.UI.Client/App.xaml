@@ -17,7 +17,7 @@
                     <cmd:NagivateUriCommand x:Key="NagivateUriCommand"/>
 
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
-
+                    <cmd:OpenImageCommand x:Key="OpenImageCommand"/>
 
                     <converter:ToPlayerConverter x:Key="ToPlayerConverter"/>
 

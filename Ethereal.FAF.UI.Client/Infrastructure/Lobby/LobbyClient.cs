@@ -174,6 +174,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case ServerCommand.auth:
                         break;
                     case ServerCommand.authentication_failed:
+                        Authorized?.Invoke(this, false);
+                        AuthentificationFailed?.Invoke(this, JsonSerializer.Deserialize<AuthentificationFailedData>(data));
                         break;
                     case ServerCommand.notice:
                         if (data.Contains("You are using")) return;

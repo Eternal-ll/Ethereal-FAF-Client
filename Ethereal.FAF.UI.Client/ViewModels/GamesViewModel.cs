@@ -4,7 +4,6 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models.Lobby;
-using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
@@ -18,7 +17,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Threading;
 using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -49,23 +47,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             SnackbarService = snackbarService;
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
-            //lobby.NotificationReceived += (s, e) => snackbarService.Show("Notification from server", e.text);
 
             GameLauncher.StateChanged += GameLauncher_StateChanged;
-
             SelectedGameMode = "Custom";
-
-            //Timer = new(interval: TimeSpan.FromSeconds(1), DispatcherPriority.Background, (s, e) =>
-            //{
-            //    if (Games == null) return;
-            //    foreach (var game in Games)
-            //    {
-            //        if (game.LaunchedAt.HasValue)
-            //        {
-            //            game.OnPropertyChanged(nameof(game.HumanLaunchedAt));
-            //        }
-            //    }
-            //}, Application.Current.Dispatcher);
             ContainerViewModel = containerViewModel;
             IceManager = iceManager;
             ServiceProvider = serviceProvider;
@@ -263,18 +247,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _Games, value))
                 {
-                    GamesSource = new()
-                    {
-                        Source = value.AsObservable
-                    };
-                    GamesSource.Filter += GamesSource_Filter;
-                    IsRefresh = true;
-                    OnPropertyChanged(nameof(GamesView));
-                    IsRefresh = false;
                 }
             }
         }
-
+        private void UpdateGamesSource()
+        {
+            GamesSource = new()
+            {
+                Source = Games.AsObservable
+            };
+            GamesSource.Filter += GamesSource_Filter;
+            IsRefresh = true;
+            OnPropertyChanged(nameof(GamesView));
+            IsRefresh = false;
+        }
         public Game GetGame(long id) => Games.FirstOrDefault(g => g.Uid == id);
         public bool TryGetGame(long id, out Game game)
         {
@@ -306,7 +292,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             e.Accepted = true;
         }
 
-        private void Lobby_GameReceived(object sender, Game e)
+        private void Lobby_GameReceived(object sender, Game e) => ProceedGame(e);
+        private void ProceedGame(Game e)
         {
             var games = Games;
             if (games is null) return;
@@ -318,7 +305,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var g = games[i];
                 if (g.Uid == e.Uid)
                 {
-                    if (e.State == GameState.Closed) games.RemoveAt(i);
+                    if (e.State == GameState.Closed)
+                    {
+                        games.RemoveAt(i);
+                    } 
                     else
                     {
                         if (g.SmallMapPreview is not null)
@@ -338,28 +328,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             if (!found)
             {
-                //await TrySetSmallPreviewAsync(e);
                 games.Add(e);
             }
-        }
-        private static void SetSmallPreview(Game game, string cache)
-        {
-            game.SmallMapPreview = cache;
-            game.OnPropertyChanged(nameof(game.SmallMapPreview));
         }
 
         private void Lobby_GamesReceived(object sender, Game[] e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            foreach (var g in e)
             {
-                foreach (var g in e)
-                {
-                    g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
-                }
-                var obs = new ConcurrentObservableCollection<Game>();
-                obs.AddRange(e);
-                Games = obs;
-            }, DispatcherPriority.Background);
+                g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
+            }
+            var obs = new ConcurrentObservableCollection<Game>();
+            obs.AddRange(e);
+            Games = obs;
+            Application.Current.Dispatcher.Invoke(UpdateGamesSource);
         }
 
         private ICommand _ChangeLiveButton;

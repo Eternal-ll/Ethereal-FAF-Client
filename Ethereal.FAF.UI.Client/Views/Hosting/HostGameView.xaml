@@ -40,7 +40,7 @@
                 <StackPanel Grid.Row="3">
                     <TextBlock Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="Game mod" Margin="0 0 0 8"/>
                     <ComboBox HorizontalAlignment="Left" Width="200" MinWidth="200" SelectedIndex="0"
-                              SelectedValue="{Binding Game.Mod}" ItemsSource="{Binding FeaturedModSource}">
+                              SelectedValue="{Binding Game.FeaturedMod}" ItemsSource="{Binding FeaturedModSource}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Background="Transparent">
@@ -85,7 +85,7 @@
                         <Slider Minimum="-1000" Maximum="3000" Value="{Binding Game.MinimumRating}" TickFrequency="10" Margin="0 8 0 0"/>
                         <Slider Minimum="-1000" Maximum="3000" Value="{Binding Game.MaximumRating}" TickFrequency="10" Margin="0 8 0 0"/>
                     </UniformGrid>
-                    <CheckBox Content="Force rating restriction" IsChecked="{Binding Game.EnforeRating}" Grid.Row="3" Grid.Column="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                    <CheckBox Content="Force rating restriction" IsChecked="{Binding Game.EnforceRating}" Grid.Row="3" Grid.Column="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="3" Grid.Column="4" Margin="0 8 0 0">
                 </StackPanel>

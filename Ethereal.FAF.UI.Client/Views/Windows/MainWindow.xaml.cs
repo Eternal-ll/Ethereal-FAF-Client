@@ -73,6 +73,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             Configuration = configuration;
             LobbyClient = lobbyClient;
             lobbyClient.Authorized += LobbyViewModel_Authorized;
+            LobbyClient.AuthentificationFailed += LobbyClient_AuthentificationFailed;
 
             // Initial preparation of the window.
             InitializeComponent();
@@ -98,6 +99,12 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
             // Wpf.Ui.Appearance.Watcher.Watch(this, Appearance.BackgroundType.Mica, true, false);
+        }
+
+        private void LobbyClient_AuthentificationFailed(object sender, Domain.LobbyServer.AuthentificationFailedData e)
+        {
+            TokenProvider.Save(null);
+            Task.Run(Auth);
         }
 
         private void LobbyViewModel_Authorized(object sender, bool e) => 

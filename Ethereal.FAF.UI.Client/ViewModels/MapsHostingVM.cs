@@ -4,9 +4,9 @@ using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer.Enums;
+using Meziantou.Framework.WPF.Collections;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,24 +46,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ICollectionView MapsView => MapsSource?.View;
         protected bool IsRefresh;
 
+        public IReadOnlyObservableCollection<LocalMap> LocalMapsReadOnly => LocalMaps?.AsObservable;
         #region LocalMaps
-        private ObservableCollection<LocalMap> _LocalMaps;
-        public ObservableCollection<LocalMap> LocalMaps
+        private ConcurrentObservableCollection<LocalMap> _LocalMaps;
+        public ConcurrentObservableCollection<LocalMap> LocalMaps
         {
             get => _LocalMaps;
             set
             {
                 if (Set(ref _LocalMaps, value))
                 {
-                    MapsSource = new()
-                    {
-                        Source = value
-                    };
-                    //MapsView.CurrentChanged += GamesView_CurrentChanged;
-                    //MapsSource.Filter += GamesSource_Filter;
-                    IsRefresh = true;
-                    OnPropertyChanged(nameof(MapsView));
-                    IsRefresh = false;
+                    OnPropertyChanged(nameof(LocalMapsReadOnly));
                 }
             }
         }
@@ -113,16 +106,39 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         });
         #endregion
 
+        public void UpdateMapsSource()
+        {
+            MapsSource = new()
+            {
+                Source = LocalMaps.AsObservable
+            };
+            //MapsView.CurrentChanged += GamesView_CurrentChanged;
+            //MapsSource.Filter += GamesSource_Filter;
+            IsRefresh = true;
+            OnPropertyChanged(nameof(MapsView));
+            IsRefresh = false;
+        }
+        protected bool Disposed;
         protected override void Dispose(bool disposing)
         {
+            if (Disposed) return;
+
+            Disposed = true;
             _HostGameCommand = null;
             LocalMaps = null;
             LocalMap = null;
         }
 
-        protected void SetSource(IEnumerable<LocalMap> source) => App.Current.Dispatcher.Invoke(() =>
-                                               LocalMaps = new(source), System.Windows.Threading.DispatcherPriority.Background);
-        protected void AddMap(LocalMap map) => App.Current.Dispatcher.Invoke(() =>
-                                               LocalMaps.Add(map), System.Windows.Threading.DispatcherPriority.Background);
+        protected void SetSource(IEnumerable<LocalMap> source)
+        {
+            LocalMaps = new();
+            LocalMaps.AddRange(source);
+            //App.Current.Dispatcher.Invoke(UpdateMapsSource, System.Windows.Threading.DispatcherPriority.Background);
+        }
+        protected void AddMap(LocalMap map)
+        {
+            if (Disposed) return;
+             LocalMaps.Add(map);
+        }
     }
 }
