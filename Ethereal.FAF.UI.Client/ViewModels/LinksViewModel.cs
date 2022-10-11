@@ -56,7 +56,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class LinksViewModel : Base.ViewModel
     {
         private readonly IHttpClientFactory HttpClientFactory;
-        public LinksViewModel(IHttpClientFactory httpClientFactory)
+        public LinksViewModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             LinksGroups = new();
             LinksGroupsSource = new();
@@ -65,16 +65,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             HttpClientFactory = httpClientFactory;
             Task.Run(async () =>
             {
-                using var client = httpClientFactory.CreateClient();
-                var groups = await client.GetFromJsonAsync<LinksGroup[]>("https://jsonblob.com/api/jsonBlob/1029400916503314432");
-                LinksGroups.AddRange(groups);
-            }).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
+                var sources = configuration.GetSection("Links").Get<Uri[]>();
+                foreach (var source in sources)
                 {
-                    var configuration = new ConfigurationBuilder().AddJsonFile("links.json").Build();
-                    var groups = configuration.GetSection("Groups").Get<LinksGroup[]>();
-                    LinksGroups.AddRange(groups);
+                    var task = Task.Run(async () =>
+                    {
+                        using var client = httpClientFactory.CreateClient();
+                        var groups = await client.GetFromJsonAsync<LinksGroup[]>(source);
+                        LinksGroups.AddRange(groups);
+                    });
+                    await task;
+                    if (task.IsCompleted && !task.IsFaulted)
+                    {
+                        break;
+                    }
                 }
             });
         }

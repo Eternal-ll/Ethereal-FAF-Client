@@ -54,7 +54,7 @@ namespace Ethereal.FAF.UI.Client
         {
             var configuration = context.Configuration;
             var paths = Client.Properties.Paths.Default;
-            string version = "2.0.5";
+            string version = "2.0.6";
 
             // Background
             services.AddHostedService<TokenReloadService>();
