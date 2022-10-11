@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Background;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
@@ -57,6 +58,7 @@ namespace Ethereal.FAF.UI.Client
 
             // Background
             services.AddHostedService<TokenReloadService>();
+            services.AddHostedService<ApiGameValidator>();
             // App Host
             services.AddHostedService<ApplicationHostService>();
             // Theme manipulation

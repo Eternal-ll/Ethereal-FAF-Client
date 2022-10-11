@@ -16,6 +16,7 @@
         mapVersionReview,
         mapVersionReviewsSummary,
 
+        featuredMod,
         featuredModFile,
 
         player,
@@ -25,7 +26,9 @@
         nameRecord,
         globalRating,
         ladder1v1Rating,
-
+        
+        
+        game,
         gamePlayerStats,
 
     }

@@ -1,4 +1,6 @@
-﻿using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;

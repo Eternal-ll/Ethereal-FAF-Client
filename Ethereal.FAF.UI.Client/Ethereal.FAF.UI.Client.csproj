@@ -96,7 +96,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Infrastructure\Background\" />
     <Folder Include="Infrastructure\Notifications\" />
   </ItemGroup>
 

@@ -12,7 +12,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
         private NotificationService Notification => App.Hosting.Services.GetService<NotificationService>();
         public override bool CanExecute(object parameter) => 
             parameter is Game game && 
-            game.PreviewType == PreviewType.Neroxis &&
+            game.IsMapgen &&
             game.MapGeneratorState is MapGeneratorState.NotGenerated;
         public override void Execute(object parameter) => 
             Task.Run(async () =>

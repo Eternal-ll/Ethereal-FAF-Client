@@ -55,6 +55,7 @@
                         ToolTip="IRC chat"/>
                     <ui:NavigationItem
                         Content="Links"
+                        Cache="False"
                         PageType="{x:Type v:LinksView}"
                         Icon="Link24"
                         ToolTip="Useful links"/>
@@ -66,6 +67,10 @@
                         Content="Mods"
                         Icon="Vault24"
                         ToolTip="Mods vault"/>
+                    <ui:NavigationItem
+                        Content="Replays"
+                        Icon="Video24"
+                        ToolTip="Replays"/>
                 </ui:NavigationStore.Items>
                 <ui:NavigationStore.Footer>
                     <!--  A navigation element that does not point to the page can be used as a button.  -->

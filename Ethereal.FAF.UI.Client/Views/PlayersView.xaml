@@ -70,6 +70,7 @@
                                     <DataTrigger Binding="{Binding Avatar}" Value="{x:Null}">
                                         <Setter Property="ToolTip" Value="{x:Null}"/>
                                         <Setter Property="Source" Value="{x:Null}"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>

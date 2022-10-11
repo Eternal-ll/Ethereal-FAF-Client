@@ -100,7 +100,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             var dialog = DialogService.GetDialogControl();
 
-
             await OSNotificationManager.ShowNotification(notification);
             var osDialog = Task.Run(async () =>
             {

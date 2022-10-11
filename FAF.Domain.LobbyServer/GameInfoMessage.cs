@@ -33,9 +33,12 @@ namespace FAF.Domain.LobbyServer
         public long Uid { get; set; }
         [JsonPropertyName("title")]
         public string Title { get; set; }
+        #region State
+        private GameState _State;
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public GameState State{ get; set; }
+        public GameState State { get => _State; set => Set(ref _State, value); } 
+        #endregion
         [JsonPropertyName("game_type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameType GameType { get; set; }
@@ -44,16 +47,31 @@ namespace FAF.Domain.LobbyServer
         public FeaturedMod FeaturedMod { get; set; }
         [JsonPropertyName("sim_mods")]
         public Dictionary<string, string> SimMods { get; set; }
+        #region Mapname
+        private string _Mapname;
         [JsonPropertyName("mapname")]
-        public string Mapname { get; set; }
+        public string Mapname { get => _Mapname; set => Set(ref _Mapname, value); }
+        #endregion
+        #region MapFilePath
+        private string _MapFilePath;
         [JsonPropertyName("map_file_path")]
-        public string MapFilePath { get; set; }
+        public string MapFilePath { get => _MapFilePath; set => Set(ref _MapFilePath, value); }
+        #endregion
+        #region Host
+        private string _Host;
         [JsonPropertyName("host")]
-        public string Host { get; set; }
+        public string Host { get => _Host; set => Set(ref _Host, value); } 
+        #endregion
+        #region NumPlayers
+        private int _NumPlayers;
         [JsonPropertyName("num_players")]
-        public int NumPlayers { get; set; }
+        public int NumPlayers { get => _NumPlayers; set => Set(ref _NumPlayers, value); }
+        #endregion
+        #region MaxPlayers
+        private int _MaxPlayers;
         [JsonPropertyName("max_players")]
-        public int MaxPlayers { get; set; }
+        public int MaxPlayers { get => _MaxPlayers; set => Set(ref _MaxPlayers, value); }
+        #endregion
         [JsonPropertyName("launched_at")]
         public double? LaunchedAt { get; set; }
         [JsonPropertyName("rating_type")]

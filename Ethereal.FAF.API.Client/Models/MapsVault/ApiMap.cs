@@ -1,8 +1,5 @@
 ﻿using beta.Models.API.Enums;
 using beta.Models.API.Universal;
-using System;
-using System.Collections.Generic;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.API.MapsVault

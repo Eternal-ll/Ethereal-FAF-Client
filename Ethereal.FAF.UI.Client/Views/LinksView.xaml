@@ -30,7 +30,7 @@
                 </ItemsControl.Resources>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ui:CardExpander Padding="0 0 14 0">
+                        <ui:CardExpander Padding="0 0 14 0" IsExpanded="{Binding IsExpanded}">
                             <ui:CardExpander.Header>
                                 <Grid Margin="12 16">
                                     <Grid.ColumnDefinitions>
@@ -46,6 +46,11 @@
                                 </Grid>
                             </ui:CardExpander.Header>
                             <ItemsControl ItemsSource="{Binding LinksView}" Margin="10">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="FrameworkElement">
+                                        <Setter Property="ToolTip" Value="{Binding Value}"/>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <ui:Hyperlink Content="{Binding Key}" NavigateUri="{Binding Value}" Margin="0"/>

@@ -9,41 +9,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class Welcome : WelcomeData
-    {
-        public new Player me { get; set; }
-    }
-    public class Player : PlayerInfoMessage
-    {
-        private string _FlagUri;
-        public string FlagUri => _FlagUri ??= "/Resources/Images/Flags/" + Country + ".png";
-
-        [JsonPropertyName("players")]
-        public new Player[] Players { get; set; }
-
-
-        public int Global => Ratings.Global is null ? 0 : Ratings.Global.DisplayedRating;
-        public int Ladder1v1 => Ratings.Ladder1V1 is null ? 0 : Ratings.Ladder1V1.DisplayedRating;
-        public int Tmm2v2 => Ratings.Tmm2V2 is null ? 0 : Ratings.Tmm2V2.DisplayedRating;
-        public int Tmm4v4 => Ratings.Tmm4V4FullShare is null ? 0 : Ratings.Tmm4V4FullShare.DisplayedRating;
-
-        public RatingType DisplayRatingType { get; set; }
-        public int UniversalRatingDisplay => DisplayRatingType switch
-        {
-            RatingType.global => Global,
-            RatingType.ladder_1v1 => Ladder1v1,
-            RatingType.tmm_4v4_full_share => Tmm4v4,
-            RatingType.tmm_4v4_share_until_death => Tmm4v4,
-            RatingType.tmm_2v2 => Tmm2v2,
-        };
-    }
     public class PlayersSort
     {
         public PlayersSort()
@@ -312,6 +283,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _Players, value))
                 {
+                    App.Current.Dispatcher.Invoke(UpdatePlayersSource);
                 }
             }
         }
@@ -372,7 +344,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     break;
                 }
             }
-            if (!found) players.Add(e);
+            if (!found)
+            {
+                players.Add(e);
+            }
         }
 
         private void PrepareRatings(params Player[] players)
@@ -392,7 +367,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var obs = new ConcurrentObservableCollection<Player>();
             obs.AddRange(e);
             Players = obs;
-            App.Current.Dispatcher.Invoke(UpdatePlayersSource);
         }
     }
 }

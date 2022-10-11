@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
@@ -23,6 +25,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public long PlayerId { get; set; }
         public Player Player { get; set; }
         public bool IsActive { get; set; }
+        public bool IsVisible { get; set; }
     }
     public class LinksGroup
     {
@@ -30,20 +33,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public string Description { get; set; }
         public Dictionary<string, Uri> Links { get; set; }
         public Dictionary<string, Uri> LinksView { get; set; }
-        public void Filter(params string[] filters)
+        public bool IsExpanded { get; set; }
+        public void Filter(params string[] words)
         {
-            if (filters.Length == 0)
+            LinksView = new(Links.Where(l =>
             {
-                LinksView = new(Links);
-                return;
-            }
-            foreach (var item in Links)
-            {
-                if (filters.Any(f => item.Key.Contains(f, StringComparison.OrdinalIgnoreCase)))
+                foreach (var word in words)
                 {
-                    LinksView.Add(item.Key, item.Value);
+                    if (l.Key.Contains(word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
                 }
-            }
+                return false;
+            }));
         }
         public void DropFilter()
         {
@@ -52,21 +55,27 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     }
     public class LinksViewModel : Base.ViewModel
     {
-        public LinksViewModel()
+        private readonly IHttpClientFactory HttpClientFactory;
+        public LinksViewModel(IHttpClientFactory httpClientFactory)
         {
             LinksGroups = new();
             LinksGroupsSource = new();
             LinksGroupsSource.Source = LinksGroups.AsObservable;
             LinksGroupsSource.Filter += LinksGroupsSource_Filter;
-            Task.Run(() =>
+            HttpClientFactory = httpClientFactory;
+            Task.Run(async () =>
             {
-                var configuration = new ConfigurationBuilder().AddJsonFile("links.json").Build();
-                var groups = configuration.GetSection("Groups").Get<LinksGroup[]>();
-                foreach (var group in groups)
+                using var client = httpClientFactory.CreateClient();
+                var groups = await client.GetFromJsonAsync<LinksGroup[]>("https://jsonblob.com/api/jsonBlob/1029400916503314432");
+                LinksGroups.AddRange(groups);
+            }).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
                 {
-                    group.LinksView = new(group.Links);
+                    var configuration = new ConfigurationBuilder().AddJsonFile("links.json").Build();
+                    var groups = configuration.GetSection("Groups").Get<LinksGroup[]>();
+                    LinksGroups.AddRange(groups);
                 }
-                LinksGroups.AddRange();
             });
         }
         private ConcurrentObservableCollection<LinksGroup> LinksGroups { get; set; }
@@ -93,7 +102,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var group = (LinksGroup)e.Item;
             e.Accepted = false;
             var filter = FilterText;
-            //group.DropFilter();
+            group.DropFilter();
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 var words = filter.Split();

@@ -21,5 +21,11 @@ namespace Ethereal.FAF.API.Client
             Task<ApiResponse<Stream>> GetFileStreamAsync(string url, [Authorize("Bearer")] string token, [Header("Verify")] string verify, CancellationToken cancellationToken = default);
 
         }
-    }
+        //public interface IGamesClient
+        //{
+        //    [Get("/game?filter=(id=in=({ids}))")]
+        //    [IFor]
+        //    Task<ApiResponse<ApiUniversalResult<>>> GetGamesAsync(CancellationToken cancellationToken);
+        //}
+    } 
 }
