@@ -180,7 +180,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         {
             Container.SplashText = "Initializing patch watcher";
             var progress = new Progress<string>(d => Container.SplashText = d);
-            //await PatchClient.InitializeWatchers(progress);
+            await PatchClient.InitializeWatchers(progress);
             Container.SplashText = "Patch watcher initialized";
         }
 
