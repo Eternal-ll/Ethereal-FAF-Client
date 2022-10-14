@@ -19,6 +19,9 @@ namespace Ethereal.FAF.API.Client
             [Get("/{url}")]
             [QueryUriFormat(UriFormat.Unescaped)]
             Task<ApiResponse<Stream>> GetFileStreamAsync(string url, [Authorize("Bearer")] string token, [Header("Verify")] string verify, CancellationToken cancellationToken = default);
+        }
+        public interface IFafApiClient
+        {
 
         }
         //public interface IGamesClient

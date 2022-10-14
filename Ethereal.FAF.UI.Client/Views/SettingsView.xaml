@@ -1,0 +1,512 @@
+﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+           d:DataContext="{d:DesignInstance {x:Type local:SettingsView}}"
+             mc:Ignorable="d"
+           Scrollable="True"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <VirtualizingStackPanel Loaded="VirtualizingStackPanel_Loaded"
+        IsVirtualizing="True"
+        VirtualizationMode="Recycling" Margin="0 0 10 0">
+        <VirtualizingStackPanel.Resources>
+            <Style TargetType="ui:CardExpander" BasedOn="{StaticResource {x:Type ui:CardExpander}}">
+                <Setter Property="Padding" Value="0 0 14 0"/>
+            </Style>
+            <Style x:Key="CardExpanderHeaderGrid" TargetType="Grid">
+                <Setter Property="Margin" Value="14 16 0 16"/>
+            </Style>
+            <Style x:Key="CardExpanderHeader" TargetType="StackPanel">
+                <Setter Property="Margin" Value="14 16 0 16"/>
+                <Setter Property="Orientation" Value="Horizontal"/>
+            </Style>
+            <Style x:Key="CardExpanderBody" TargetType="StackPanel">
+                <Setter Property="Margin" Value="14 16 0 16"/>
+            </Style>
+            <Style x:Key="SymbolTextBlock" TargetType="TextBlock">
+                <Setter Property="Margin" Value="0 0 10 0"/>
+                <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="SymbolUI" TargetType="ui:SymbolIcon" BasedOn="{StaticResource {x:Type ui:SymbolIcon}}">
+                <Setter Property="Margin" Value="0 0 13 0"/>
+                <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="DescriptionHeaderRun" TargetType="Run">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
+            </Style>
+            <Style x:Key="DescriptionHeaderTextBlock" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+            <Style TargetType="ui:CardColor" BasedOn="{StaticResource {x:Type ui:CardColor }}">
+                <Setter Property="Margin" Value="2"/>
+            </Style>
+            <Style TargetType="Separator" BasedOn="{StaticResource {x:Type Separator}}">
+                <Setter Property="Margin" Value="0 0 -7 0"/>
+            </Style>
+            <Style x:Key="InlineHyperlink" TargetType="ui:Hyperlink" BasedOn="{StaticResource {x:Type ui:Hyperlink}}">
+                <Setter Property="Margin" Value="0 -2"/>
+                <Setter Property="Padding" Value="4 2"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value>
+                        <TranslateTransform Y="3"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="CheckBoxControl" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                <Setter Property="FlowDirection" Value="RightToLeft"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Margin" Value="-14 0 -14 0"/>
+            </Style>
+        </VirtualizingStackPanel.Resources>
+        <TextBlock TextWrapping="WrapWithOverflow" Margin="0 0 0 24">
+            <Run Text="Settings" FontSize="24"/>
+            <LineBreak/>
+            <Run Text="Settings description" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </TextBlock>
+        <ui:CardExpander>
+            <ui:CardExpander.Header>
+                <StackPanel Style="{StaticResource CardExpanderHeader}">
+                    <TextBlock Text="&#xf1fc;" Style="{StaticResource SymbolTextBlock}"/>
+                    <TextBlock>
+                        <Run Text="Personalization"/>
+                        <LineBreak/>
+                        <Run Text="Select your theme, background backdrop and more" Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel>
+                <Grid Margin="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <!--<TextBlock Text="&#xf042;" Style="{StaticResource SymbolTextBlock}"/>-->
+                    <ui:SymbolIcon Symbol="DarkTheme24" Style="{StaticResource SymbolUI}"/>
+                    <TextBlock Grid.Column="1">
+                        <Run Text="Theme"/>
+                        <LineBreak/>
+                        <Run Text="Switch app theme between light and dark" Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                    <ComboBox Grid.Column="2" Width="100" ItemsSource="{Binding ViewModel.ThemeTypeSource}" SelectedItem="{Binding ViewModel.ThemeType}"/>
+                </Grid>
+                <Separator/>
+                <Grid Margin="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xf576;" Style="{StaticResource SymbolTextBlock}"/>
+                    <TextBlock Grid.Column="1">
+                        <Run Text="Backdrop"/>
+                        <LineBreak/>
+                        <Run Text="Switch backdrop effect" Style="{StaticResource DescriptionHeaderRun}"/>
+                        <ui:Hyperlink NavigateUri="https://learn.microsoft.com/en-us/windows/apps/design/style/mica" Content="Mica material"
+                                      Style="{StaticResource InlineHyperlink}"/>
+                    </TextBlock>
+                    <ComboBox Grid.Column="2" Width="100" ItemsSource="{Binding ViewModel.BackgroundTypeSource}" SelectedItem="{Binding ViewModel.BackgroundType}"/>
+                </Grid>
+                <Separator />
+                <ui:CardExpander Background="Transparent" Margin="0 0 -14 0" BorderThickness="0">
+                    <ui:CardExpander.Header>
+                        <Grid Margin="14 16 0 16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="&#xf53f;" Style="{StaticResource SymbolTextBlock}"/>
+                            <TextBlock Grid.Column="1">
+                            <Run Text="Accent color"/>
+                            <LineBreak/>
+                            <Run Text="Sync accent color with system or set your own" Style="{StaticResource DescriptionHeaderRun}"/>
+                            </TextBlock>
+                        </Grid>
+                    </ui:CardExpander.Header>
+                    <Grid Margin="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Button Content="Set system accent color" Margin="0 0 0 14" Command="{Binding ViewModel.SetSystemAccentColorCommand, Mode=OneTime}"/>
+                        <ListBox Grid.Row="1" Grid.ColumnSpan="3" Background="Transparent"
+                             ItemsSource="{Binding ViewModel.AssentColors, Mode=OneWay}"
+                             SelectedValue="{Binding ViewModel.AccentColor}"
+                             SelectedValuePath="Color"
+                             VirtualizingPanel.IsVirtualizing="True">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ui:VirtualizingWrapPanel VirtualizingPanel.IsVirtualizing="True"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="Background" Value="{Binding}"/>
+                                    <Setter Property="Width" Value="40"/>
+                                    <Setter Property="Height" Value="40"/>
+                                    <Setter Property="Content" Value="{x:Null}"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                <Border x:Name="Border" Margin="0,0,0,4"
+                                                    Padding="4,6" BorderThickness="2"
+                                                    CornerRadius="4"
+                                                Background="{TemplateBinding Background}">
+                                                    <Border.BorderBrush>
+                                                        <SolidColorBrush Opacity="0.0" Color="{Binding Path=BorderBrush, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay, Converter={StaticResource BrushToColorConverter}}" />
+                                                    </Border.BorderBrush>
+
+                                                    <ContentPresenter />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Foreground">
+                                                            <Setter.Value>
+                                                                <SolidColorBrush Color="{DynamicResource TextOnAccentFillColorPrimary}" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                        <Trigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                            Storyboard.TargetName="Border"
+                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Opacity)"
+                                            From="0.0"
+                                            To="1.0"
+                                            Duration="0:0:.16" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </Trigger.EnterActions>
+                                                        <Trigger.ExitActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                            Storyboard.TargetName="Border"
+                                            Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Opacity)"
+                                            From="1.0"
+                                            To="0.0"
+                                            Duration="0:0:.16" />
+
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </Trigger.ExitActions>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                        </ListBox>
+                    </Grid>
+                </ui:CardExpander>
+                <Separator />
+                <ui:CardExpander Background="Transparent" Margin="0 0 -14 0" BorderThickness="0">
+                    <ui:CardExpander.Header>
+                        <StackPanel Style="{StaticResource CardExpanderHeader}">
+                            <TextBlock Text="&#xf03e;" Style="{StaticResource SymbolTextBlock}"/>
+                            <TextBlock Grid.Column="1">
+                                <Run Text="Background image"/>
+                                <LineBreak/>
+                                <Run Text="Setup and configure background image" Style="{StaticResource DescriptionHeaderRun}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </ui:CardExpander.Header>
+                    <Grid Margin="14">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.ColumnSpan="2">
+                            <Run Text="Set image url or local path to image" Style="{StaticResource DescriptionHeaderRun}"/>
+                        </TextBlock>
+                        <ui:TextBox Text="{Binding ViewModel.BackgroundViewModel.ImageUrl}" Grid.Row="1" PlaceholderText="Url" Icon="Link24" Margin="0 4 0 14"/>
+                        <Button Grid.Row="1" Grid.Column="1" Content="Select image" Margin="14 4 0 14" Command="{Binding ViewModel.BackgroundViewModel.SelectImageCommand}"/>
+                        <Grid Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.ColumnSpan="2" Text="Opacity" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+
+                            <Slider Grid.Row="1" Minimum="0" Maximum="1" TickFrequency=".1" AutoToolTipPrecision="2"
+                                SmallChange=".2" LargeChange=".1" HorizontalAlignment="Left"
+                                Margin="0 8 6 0" Value="{Binding ViewModel.BackgroundViewModel.ImageOpacity}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.BackgroundViewModel.ImageOpacity, StringFormat='{}{0:0.00}'}"
+                                       Margin="0 8 0 0"/>
+                            <TextBlock Grid.Column="3" Grid.ColumnSpan="2" Text="Blur" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                            <Slider Grid.Row="1" Grid.Column="3" Minimum="0" Maximum="40" TickFrequency="1"
+                                SmallChange="1" LargeChange="5" HorizontalAlignment="Left"
+                                Margin="0 8 6 0" Value="{Binding ViewModel.BackgroundViewModel.ImageBlur}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ViewModel.BackgroundViewModel.ImageBlur, StringFormat='{}{0:0.00}'}"
+                                       Margin="0 8 0 0"/>
+                            <TextBlock Grid.Column="6" Grid.ColumnSpan="2" Text="Stretch" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                            <ComboBox Grid.Column="6" Grid.Row="1" Padding="6 6" Margin="0 0 0 -9"
+                                      SelectedItem="{Binding ViewModel.BackgroundViewModel.ImageStretch}"
+                                      ItemsSource="{Binding ViewModel.BackgroundViewModel.StretchSource, Mode=OneTime}"/>
+                            
+                            <TextBlock Grid.Column="8" Grid.ColumnSpan="2" Text="Kernel type" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                            <ComboBox MaxWidth="100" Grid.Column="8" Grid.Row="1" Padding="6 6" Margin="0 0 0 -9"
+                                      SelectedItem="{Binding ViewModel.BackgroundViewModel.ImageKernelType}"
+                                      ItemsSource="{Binding ViewModel.BackgroundViewModel.KernelTypeSource}"/>
+                            
+                            <TextBlock Grid.Column="10" Grid.ColumnSpan="2" Text="Rendering bias" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                            <ComboBox Width="100" Grid.Column="10" Grid.Row="1" Padding="6 6" Margin="0 0 0 -9"
+                                      SelectedItem="{Binding ViewModel.BackgroundViewModel.ImageRenderingBias}"
+                                      ItemsSource="{Binding ViewModel.BackgroundViewModel.RenderingBiasSource}"/>
+                        </Grid>
+                    </Grid>
+                </ui:CardExpander>
+            </StackPanel>
+        </ui:CardExpander>
+        <ui:CardExpander Margin="0 14 0 0">
+            <ui:CardExpander.Header>
+                <StackPanel Style="{StaticResource CardExpanderHeader}">
+                    <TextBlock Text="&#xf2dc;" Style="{StaticResource SymbolTextBlock}"/>
+                    <TextBlock>
+                        <Run Text="FAF ICE Adapter"/>
+                        <LineBreak/>
+                        <Run Text="A P2P connection proxy for Supreme Commander: Forged Alliance." Style="{StaticResource DescriptionHeaderRun}"/>
+                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/java-ice-adapter" Content="Github repository"
+                                      Style="{StaticResource InlineHyperlink}"/>
+                    </TextBlock>
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel Margin="14 0 14 14">
+                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceRelayForced}">
+                    <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
+                        <Run Text="Force Relay Connection"/>
+                        <LineBreak/>
+                        <Run Text="Always use a relay server instead of trying to connect to peers directly. This results in slower connections but can solve connectivity issues."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                </CheckBox>
+
+                <Separator Margin="-20 0 -14 0"/>
+
+                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceDebugEnabled}">
+                    <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
+                        <Run Text="Show ICE adapter debug window"/>
+                        <LineBreak/>
+                        <Run Text="Shows a window with connection details about other connected players"
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                </CheckBox>
+                <Separator Margin="-20 0 -14 0"/>
+                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceInfoEnabled}">
+                    <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
+                        <Run Text="Show ICE adapter info window"/>
+                        <LineBreak/>
+                        <Run Text="Shows a info window"
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                </CheckBox>
+                <!--<CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceLogsEnabled}">
+                    <Grid Margin="14" FlowDirection="LeftToRight">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="&#xe49a;" Style="{StaticResource SymbolTextBlock}"/>
+                        <TextBlock Grid.Column="1" FlowDirection="LeftToRight" TextWrapping="Wrap">
+                        <Run Text="Enable logging"/>
+                        <LineBreak/>
+                        <Run Text="Write information about the ICE adapter into an additional log file."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                        </TextBlock>
+                    </Grid>
+                </CheckBox>-->
+
+                <Separator Grid.Row="3" Margin="-20 0 -14 8" Grid.ColumnSpan="3"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Directory for logs" Margin="0 0 0 4" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                    <TextBlock Grid.Row="4" Margin="0 14 0 4" Text="Path to file" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                    <TextBlock Grid.Row="6" Margin="0 14 0 4" Style="{StaticResource DescriptionHeaderTextBlock}">
+                        <Run Text="Path to Java Runtime."/>
+                        <Run Text="Min 17.0" Foreground="{DynamicResource PaletteRedBrush}"/>
+                    </TextBlock>
+
+                    <ui:TextBox Grid.Row="2" PlaceholderText="Set the directory for log files"
+                                Text="{Binding ViewModel.PathToIceAdapterLogs}"/>
+                    <ui:TextBox Grid.Row="5" PlaceholderText="Set the path to FAF ICE Adapter"
+                                Text="{Binding ViewModel.PathToIceAdapter}"/>
+                    <ui:TextBox Grid.Row="7" PlaceholderText="Set the path to Java runtime"
+                                Text="{Binding ViewModel.PathToJavaRuntime}"/>
+
+                    <Button Grid.Row="2" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectDirectoryCommand}" CommandParameter="ice.logs"/>
+                    <Button Grid.Row="5" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectFileCommand}" CommandParameter="ice.file"/>
+                    <Button Grid.Row="7" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectFileCommand}" CommandParameter="java.runtime"/>
+                </Grid>
+
+                <Separator Margin="-20 0 -14 0"/>
+                <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="0 14 0 4"
+                           Text="Command-line arguments" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                <ui:TextBox PlaceholderText="Write arguments"/>
+                <TextBlock TextWrapping="Wrap" Text="{Binding ViewModel.IceHelper}" Style="{StaticResource DescriptionHeaderTextBlock}"
+                           Margin="0 4 0 0"/>
+                <Separator Margin="-20 0 -14 0"/>
+                <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="0 14">
+                        <Run Text="Preffered Coturns for ICE"/>
+                        <LineBreak/>
+                        <Run Text="Select the coturn servers from the regions you would like to use. This selection overrides the default selection perfomed by the ice adapter to priotize specific regions/servers you know work for you. You can select as many as you want and the ice adapter will pick the best one from the list."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+                <ListBox SelectionMode="Multiple">
+                    <ListBoxItem Content="Europe"/>
+                    <ListBoxItem Content="Germany"/>
+                    <ListBoxItem Content="US East"/>
+                    <ListBoxItem Content="Australia"/>
+                </ListBox>
+            </StackPanel>
+        </ui:CardExpander>
+        <ui:CardExpander Margin="0 14 0 0">
+            <ui:CardExpander.Header>
+                <StackPanel Style="{StaticResource CardExpanderHeader}">
+                    <TextBlock Text="&#xe3dd;" Style="{StaticResource SymbolTextBlock}"/>
+                    <TextBlock TextWrapping="Wrap" HorizontalAlignment="Stretch">
+                        <Run Text="Neroxis Map Generator"/>
+                        <LineBreak/>
+                        <Run Text="Procedurally generate Supreme Commander Maps from a seed to enable new gameplay on maps never before seen."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/Neroxis-Map-Generator" Content="Github repository"
+                                      Style="{StaticResource InlineHyperlink}"/>
+                    </TextBlock>
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel Margin="14 0 14 14">
+                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsMapGenLogsEnabled}">
+                    <Grid Margin="14" FlowDirection="LeftToRight">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="&#xe49a;" Style="{StaticResource SymbolTextBlock}"/>
+                        <TextBlock Grid.Column="1" FlowDirection="LeftToRight" TextWrapping="Wrap">
+                        <Run Text="Enable logging"/>
+                        <LineBreak/>
+                        <Run Text="Write information about the Neroxis map generator into an additional log file."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                        </TextBlock>
+                    </Grid>
+                </CheckBox>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Directory for logs" Margin="0 0 0 4" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                    <Separator Grid.Row="3" Margin="-20 10 -14 10" Grid.ColumnSpan="3"/>
+                    <TextBlock Grid.Row="4" Margin="0 0 0 4" Text="Path for versions" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                    <TextBlock Grid.Row="6" Margin="0 14 0 4" Style="{StaticResource DescriptionHeaderTextBlock}">
+                        <Run Text="Path to Java Runtime."/>
+                        <Run Text="Min 17.0" Foreground="{DynamicResource PaletteRedBrush}"/>
+                    </TextBlock>
+
+                    <ui:TextBox Grid.Row="2" PlaceholderText="Set the directory for log files" Text="{Binding ViewModel.MapGenLogsFolder}"/>
+                    <ui:TextBox Grid.Row="5" PlaceholderText="Set the path for versions" Text="{Binding ViewModel.MapGenVersionsFolder}"/>
+                    <ui:TextBox Grid.Row="7" PlaceholderText="Set the path to Java runtime" Text="{Binding ViewModel.PathToJavaRuntime}"/>
+
+                    <Button Grid.Row="2" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectDirectoryCommand}" CommandParameter="mapgen.logs"/>
+                    <Button Grid.Row="5" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectDirectoryCommand}" CommandParameter="mapgen.versions"/>
+                    <Button Grid.Row="7" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectFileCommand}" CommandParameter="java.runtime"/>
+                </Grid>
+            </StackPanel>
+        </ui:CardExpander>
+        <ui:CardExpander Margin="0 14 0 0">
+            <ui:CardExpander.Header>
+                <StackPanel Style="{StaticResource CardExpanderHeader}">
+                    <TextBlock Text="&#xe33d;" Style="{StaticResource SymbolTextBlock}" Margin="0 0 10 0"/>
+                    <TextBlock>
+                        <Run Text="FAF UID Generator"/>
+                        <LineBreak/>
+                        <Run Text="This executable collects RSA encrypted user information. It is used in the FA Forever client to prevent smurfing."
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/uid" Content="Github repository"
+                                      Style="{StaticResource InlineHyperlink}"/>
+                    </TextBlock>
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <Grid Margin="14">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="4"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Path to file" Style="{StaticResource DescriptionHeaderTextBlock}"/>
+                <ui:TextBox Grid.Row="2" PlaceholderText="Set the path to UID generator" Text="{Binding ViewModel.PathToUidGenerator}"/>
+                <Button Grid.Row="2" Grid.Column="2" Content="Select" Command="{Binding ViewModel.SelectDirectoryCommand}" CommandParameter="uid.file"/>
+            </Grid>
+        </ui:CardExpander>
+    </VirtualizingStackPanel>
+</ui:UiPage>

@@ -3,17 +3,21 @@ using System.Windows;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class ContainerViewModel : Base.ViewModel
+    public sealed class ContainerViewModel : Base.ViewModel
     {
         public LobbyClient LobbyViewModel { get; }
+        public BackgroundViewModel BackgroundViewModel { get; }
+
         private readonly GameLauncher GameLauncher;
 
-        public ContainerViewModel(LobbyClient lobbyViewModel, GameLauncher gameLauncher)
+        public ContainerViewModel(LobbyClient lobbyViewModel, GameLauncher gameLauncher, BackgroundViewModel backgroundViewModel)
         {
-            LobbyViewModel = lobbyViewModel;
-            GameLauncher = gameLauncher;
             gameLauncher.StateChanged += GameLauncher_StateChanged;
             gameLauncher.GameLaunching += GameLauncher_GameLaunching;
+
+            LobbyViewModel = lobbyViewModel;
+            GameLauncher = gameLauncher;
+            BackgroundViewModel = backgroundViewModel;
         }
 
         private void GameLauncher_GameLaunching(object sender, System.Progress<string> e)

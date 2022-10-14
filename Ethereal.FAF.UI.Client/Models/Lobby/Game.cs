@@ -7,6 +7,7 @@ using FAF.Domain.LobbyServer.Enums;
 using Humanizer;
 using System;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby
@@ -31,10 +32,14 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         public long Id { get; set; }
         public string Login { get; set; }
     }
-    public class GamePlayer : ViewModel, IPlayer
+    public sealed class GamePlayer : ViewModel, IPlayer
     {
         public long Id { get; set; }
         public string Login { get; set; }
+        public RatingType RatingType { get; set; }
+        public int Rating { get; set; }
+        public int Games { get; set; }
+        public bool IsHost { get; set; }
 
         public bool HasPlayerInstance => Player is not null;
 
@@ -48,6 +53,25 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                 if (Set(ref _Player, value))
                 {
                     OnPropertyChanged(nameof(HasPlayerInstance));
+                    if (value is not null)
+                    {
+                        Rating = RatingType switch
+                        {
+                            RatingType.global => value.Global,
+                            RatingType.ladder_1v1 => value.Ladder1v1,
+                            RatingType.tmm_4v4_full_share => value.Tmm4v4,
+                            RatingType.tmm_4v4_share_until_death => value.Tmm4v4,
+                            RatingType.tmm_2v2 => value.Tmm2v2,
+                        };
+                        Games = RatingType switch
+                        {
+                            RatingType.global => value.GlobalGames,
+                            RatingType.ladder_1v1 => value.Ladder1v1Games,
+                            RatingType.tmm_4v4_full_share => value.Tmm4v4Games,
+                            RatingType.tmm_4v4_share_until_death => value.Tmm4v4Games,
+                            RatingType.tmm_2v2 => value.Tmm2v2Games,
+                        };
+                    }
                 }
             }
         }
@@ -70,10 +94,10 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         #endregion
     }
 
-    public class GameTeam
+    public sealed class GameTeam
     {
         public int Id { get; set; }
-        public GamePlayer[] Players { get; set; }
+        public GamePlayer[] GamePlayers { get; set; }
 
         public string HumanTitle => Id switch
         {
@@ -83,7 +107,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         };
     }
 
-    public class Game : GameInfoMessage
+    public sealed class Game : GameInfoMessage
     {
         #region Mapname
         private string _Mapname;
@@ -96,7 +120,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                 if (Set(ref _Mapname, value))
                 {
                     MapGeneratorState = MapGeneratorState.NotGenerated;
-                    SmallMapPreview = string.IsNullOrWhiteSpace(value) ?
+                    SmallMapPreview = string.IsNullOrWhiteSpace(value) || IsMapgen ?
                         "/Resources/Images/1x1.png" :
                         $"https://content.faforever.com/maps/previews/small/{value}.png";
                     OnPropertyChanged(nameof(IsMapgen));
@@ -109,7 +133,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         public new Game[] Games { get; set; }
 
         [JsonIgnore]
-        private string _SmallMapPreview = "/Resources/Images/1x1.png";
+        private string _SmallMapPreview = null;
         public string SmallMapPreview
         {
             get => _SmallMapPreview;
@@ -120,8 +144,9 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         [JsonIgnore]
         public string HumanTitle => Title.Truncate(34);
         [JsonIgnore]
-        public string HumanLaunchedAt => LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
-        public TimeSpan LaunchedAtTimeSpan => DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
+        public string HumanLaunchedAt => "";//LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
+        public TimeSpan LaunchedAtTimeSpan => LaunchedAt is null ? TimeSpan.Zero :
+            DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
 
 
         #region Map generator
@@ -143,7 +168,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
 
         #endregion
 
-        public GamePlayer HostPlayer => GameTeams.SelectMany(t => t.Players).FirstOrDefault(p => p.Login == Host);
+        public Player HostPlayer { get; set; }
 
         private GameTeam[] _GameTeams;
         public GameTeam[] GameTeams
@@ -153,14 +178,14 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
             {
                 if (Set(ref _GameTeams, value))
                 {
-                    OnPropertyChanged(nameof(HostPlayer));
+
                 }
             }
         }
 
         public string[] PlayersLogins => Teams.SelectMany(t => t.Value).ToArray();
         public long[] PlayersIds => TeamsIds.SelectMany(t => t.PlayerIds).ToArray();
-        public GamePlayer[] Players => GameTeams.SelectMany(t => t.Players).ToArray();
+        public GamePlayer[] Players => GameTeams.SelectMany(t => t.GamePlayers).ToArray();
 
         public void UpdateTeams()
         {
@@ -168,16 +193,17 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
             var teamIndex = 0;
             foreach (var team in Teams)
             {
-                var gTeam = new GameTeam()
+                var gTeam = new GameTeam
                 {
-                    Id = team.Key
+                    Id = team.Key,
+                    GamePlayers = new GamePlayer[team.Value.Length]
                 };
-                gTeam.Players = new GamePlayer[team.Value.Length];
                 for (int i = 0; i < team.Value.Length; i++)
                 {
-                    gTeam.Players[i] = new GamePlayer()
+                    gTeam.GamePlayers[i] = new GamePlayer()
                     {
                         Login = team.Value[i],
+                        RatingType = RatingType
                     };
                 }
                 teams[teamIndex] = gTeam;
@@ -189,10 +215,32 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                 var gTeam = teams[teamIndex];
                 for (int i = 0; i < team.PlayerIds.Length; i++)
                 {
-                    gTeam.Players[i].Id = team.PlayerIds[i];
+                    gTeam.GamePlayers[i].Id = team.PlayerIds[i];
                 }
                 teamIndex++;
             }
+            //var teams = new GameTeam[TeamsIds.Length];
+            //foreach (var team in TeamsIds)
+            //{
+            //}
+            //for (int i = 0; i < TeamsIds.Length; i++)
+            //{
+            //    var team = TeamsIds[i];
+            //    var gTeam = new GameTeam
+            //    {
+            //        Id = team.TeamId,
+            //        Players = new GamePlayer[team.PlayerIds.Length]
+            //    };
+            //    for (int i = 0; i < team.PlayerIds.Length; i++)
+            //    {
+            //        gTeam.Players[i] = new GamePlayer()
+            //        {
+            //            Id = team.PlayerIds[i],
+            //            RatingType = RatingType
+            //        };
+            //    }
+            //    teams[teamIndex] = gTeam;
+            //}
             GameTeams = teams;
         }
 
@@ -239,6 +287,8 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         #endregion
 
         public bool IsPassedFilter { get; set; }
+        public DateTime Created { get; set; } = DateTime.Now;
+        public TimeSpan AfterCreationTimeSpan => DateTime.Now - Created;
         
     }
 }

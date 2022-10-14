@@ -1,13 +1,13 @@
-﻿using AsyncAwaitBestPractices;
-using AsyncAwaitBestPractices.MVVM;
+﻿using AsyncAwaitBestPractices.MVVM;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -18,16 +18,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Windows.UI.ViewManagement.Core;
-using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class GamesViewModel : Base.ViewModel
+    public sealed class GamesViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
         private readonly IceManager IceManager;
@@ -57,7 +54,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             IServiceProvider serviceProvider,
             MatchmakingViewModel matchmakingViewModel,
             ILogger<GamesViewModel> logger,
-            DialogService dialogService)
+            DialogService dialogService,
+            IConfiguration configuration)
         {
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
@@ -75,25 +73,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             GameLauncher.StateChanged += GameLauncher_StateChanged;
             SelectedGameMode = "Custom";
-            MapsPath = FaPaths.Path + "maps/";
-
-            Task.Run(async () =>
-            {
-                while (true)
-                {
-                    var games = Games;
-                    if (games is not null)
-                        foreach (var game in games)
-                        {
-                            if (game.LaunchedAt.HasValue)
-                            {
-                                game.OnPropertyChanged(nameof(game.LaunchedAtTimeSpan));
-                            }
-                        }
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-            });
+            MapsPath = Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps");
             DialogService = dialogService;
+
+            WatchGameCommand = new AsyncCommand<Game>(OnWatchGameCommand, CanWatchGameCommand);
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -125,6 +108,40 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             SelectedRatingType is RatingType.ladder_1v1 or RatingType.tmm_2v2 or RatingType.tmm_4v4_full_share
             ? Visibility.Visible : Visibility.Collapsed;
 
+        CancellationTokenSource BackgroundToken;
+        Task BackgroundTask;
+
+        private void SetTimeUpdater()
+        {
+            if (BackgroundToken is not null) return;
+            BackgroundToken = new();
+            BackgroundTask = Task.Run(async () =>
+            {
+                while (!BackgroundToken.IsCancellationRequested)
+                {
+                    var games = Games.Where(g =>
+                    g.State is GameState.Playing &&
+                    g.RatingType == SelectedRatingType);
+                    if (games is null || !games.Any())
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(1));
+                        continue;
+                    }
+                    foreach (var game in games)
+                    {
+                        if (game.LaunchedAt.HasValue)
+                        {
+                            game.OnPropertyChanged(nameof(game.LaunchedAtTimeSpan));
+                        }
+                        game.OnPropertyChanged(nameof(game.AfterCreationTimeSpan));
+                    }
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+                BackgroundTask = null;
+                BackgroundToken = null;
+            });
+        }
+
         #region SelectedRatingType
         private RatingType _SelectedRatingType;
         public RatingType SelectedRatingType
@@ -135,6 +152,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (Set(ref _SelectedRatingType, value))
                 {
                     MatchmakingViewModel.RatingType = value;
+                    if (value is not RatingType.global)
+                    {
+                        SetTimeUpdater();
+                    }
+                    else
+                    {
+                        BackgroundToken?.Cancel();
+                    }
                 }
             }
         }
@@ -237,6 +262,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (Set(ref _IsLive, value))
                 {
                     GamesView?.Refresh();
+                    if (value)
+                    {
+                        SetTimeUpdater();
+                    }
+                    else
+                    {
+                        BackgroundToken?.Cancel();
+                    }
                 }
             }
         }
@@ -247,6 +280,26 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             get => _IsLiveInputEnabled;
             set => Set(ref _IsLiveInputEnabled, value);
+        }
+        #endregion
+
+        #region Compact
+        private bool _Compact;
+        public bool Compact
+        {
+            get => _Compact;
+            set
+            {
+                if (Set(ref _Compact, value))
+                {
+
+                    GameTemplateSelector.LadderCompact = value;
+                    if (SelectedRatingType is RatingType.ladder_1v1)
+                    {
+                        GamesView?.Refresh();
+                    }
+                }
+            }
         }
         #endregion
 
@@ -285,16 +338,33 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             IsRefresh = false;
         }
         public Game GetGame(long id) => Games?.FirstOrDefault(g => g.Uid == id);
-        public bool TryGetGame(long id, out Game game)
+        public bool TryGetGame(long id, out Game game, out int index)
         {
-            game = GetGame(id);
+            var games = Games;
+            game = null;
+            index = 0;
+            for (int i = 0; i < games.Count; i++)
+            {
+                var g = games[i];
+                if (g.State is GameState.Closed)
+                {
+                    games.Remove(g);
+                    continue;
+                }
+                if (g.Uid == id)
+                {
+                    game = g;
+                    index = i;
+                    break;
+                }
+            }
             return game is not null;
         }
 
         private void SetMapScenario(Game game)
         {
             if (game.MapScenario is not null) return;
-            var scenario = MapsPath + game.Mapname + "/" + game.Mapname.Split('.')[0] + "_scenario.lua";
+            var scenario = Path.Combine(MapsPath, game.Mapname, game.Mapname.Split('.')[0] + "_scenario.lua");
             if (File.Exists(scenario))
             {
                 game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
@@ -308,8 +378,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             game.IsPassedFilter = false;
             if (game.GameType != SelectedGameType) return;
             if (game.RatingType != SelectedRatingType) return;
-            if (IsLive && !game.LaunchedAt.HasValue) return;
-            else if (!IsLive && game.LaunchedAt.HasValue) return;
+            if (game.RatingType is RatingType.global) 
+            {
+                if (IsLive && !game.LaunchedAt.HasValue) return;
+                else if (!IsLive && game.LaunchedAt.HasValue) return;
+            }
 
             SetMapScenario(game);
 
@@ -320,11 +393,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public bool IsBadGame(Game game)
         {
             if (game.State is GameState.Closed) return true;
-            if (!game.Teams.Any(t => t.Value.Any()))
+            if (!game.Teams.Any(t => t.Value.Any()) && game.State is GameState.Open)
             {
                 return true;
             }
-            if (!game.TeamsIds.Any(t => t.PlayerIds.Any()))
+            if (!game.TeamsIds.Any(t => t.PlayerIds.Any()) && game.State is GameState.Open)
             {
                 return true;
             }
@@ -336,31 +409,42 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             var games = Games;
             if (games is null) return;
-
-            if (!TryGetGame(e.Uid, out var cached))
+            if (!TryGetGame(e.Uid, out var cached, out var index))
             {
-                if (IsBadGame(e))
+                Logger.LogWarning($"Unique game received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
+                if (e.State is GameState.Closed) 
                 {
-                    if (e.State is GameState.Closed)
-                    {
-                        // received new closed game
-                        Logger.LogWarning("Received game [{uid}] that was [GameState.Closed] and not founded in cache", e.Uid);
-                        return;
-                    }
                     return;
                 }
+                if (e.State is GameState.Playing && e.NumPlayers == 0)
+                {
+                    return;
+                }
+                //if (e.State is GameState.Closed)
+                //{
+                //    // received new closed game
+                //    //Logger.LogWarning("Received game [{uid}] that was [GameState.Closed] and not founded in cache", e.Uid);
+                //    Logger.LogWarning($"Received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
+                //    return;
+                //}
+                //if (IsBadGame(e))
+                //{
+                //    if (e.State is GameState.Closed)
+                //    {
+                //        // received new closed game
+                //        Logger.LogWarning("Received game [{uid}] that was [GameState.Closed] and not founded in cache", e.Uid);
+                //        return;
+                //    }
+                //    return;
+                //}
                 //newGame.Host = PlayersService.GetPlayer(newGame.host);
                 //HandleTeams(newGame);
                 e.UpdateTeams();
                 FillPlayers(e);
                 games.Add(e);
+                //Logger.LogInformation(e.Title);
                 //OnNewGameReceived(newGame);
                 return;
-            }
-
-            if (cached.GameTeams is null)
-            {
-                cached.UpdateTeams();
             }
 
             var leftPlayers = cached.PlayersIds
@@ -377,9 +461,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     // host closed game
                 }
-                ProcessLeftPlayers(cached, leftPlayers);
+                //ProcessLeftPlayers(cached, leftPlayers);
                 games.Remove(cached);
-                return;
+            }
+
+            if (e.State is GameState.Playing)
+            {
+                if (cached.State is GameState.Playing)
+                {
+                    if (e.NumPlayers < cached.NumPlayers && e.NumPlayers == 0)
+                    {
+                        games.Remove(cached);
+                        return;
+                    }
+                }
             }
 
             var joinedPlayers = e.PlayersIds
@@ -391,7 +486,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             cached.Mapname = e.Mapname;
             cached.MaxPlayers = e.MaxPlayers;
             cached.NumPlayers = e.NumPlayers;
-            
+            cached.LaunchedAt = e.LaunchedAt;
+            OnPropertyChanged(nameof(cached.LaunchedAtTimeSpan));
+
             if (e.State is GameState.Playing)
             {
                 if (cached.State is GameState.Open)
@@ -428,6 +525,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (!PlayersViewModel.TryGetPlayer(player.Id, out var cache))
                 {
                     continue;
+                }
+                if (player.Login == game.Host)
+                {
+                    game.HostPlayer = cache;
+                    player.IsHost = true;
                 }
                 player.Player = cache;
                 cache.Game = game;
@@ -483,12 +585,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var badGames = new List<Game>();
             foreach (var g in e)
             {
-                if (IsBadGame(g))
-                {
-                    badGames.Add(g);
-                    continue;
-                }
-                g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
+                //if (IsBadGame(g))
+                //{
+                //    badGames.Add(g);
+                //    continue;
+                //}
+                if (!g.IsMapgen) g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
                 g.UpdateTeams();
                 FillPlayers(g);
                 //if (g.HostPlayer?.Player is null)
@@ -522,6 +624,32 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnHostGameCommand(object arg)
         {
             ContainerViewModel.Content = ServiceProvider.GetService<HostGameView>();
+        }
+        #endregion
+
+        #region WatchGameCommand
+        public ICommand WatchGameCommand { get; }
+        private bool CanWatchGameCommand(object arg) => true;
+        private async Task OnWatchGameCommand(Game game)
+        {
+            if (game.State is not GameState.Playing)
+            {
+                NotificationService.Notify("Warning", $"Cant watch [{game.State}] game", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
+            if (game.SimMods is not null && game.SimMods.Count > 0)
+            {
+                NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+                return;
+            }
+            await GameLauncher.WatchGame(game.Uid, game.Players.First().Id, game.Mapname, game.FeaturedMod)
+                .ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        NotificationService.Notify("Exception", t.Exception.ToString());
+                    }
+                });
         }
         #endregion
 

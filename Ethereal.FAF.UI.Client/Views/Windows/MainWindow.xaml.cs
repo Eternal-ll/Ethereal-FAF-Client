@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -59,7 +60,6 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IHost host,
             PatchClient patchClient)
         {
-
             // Attach the theme service
             _themeService = themeService;
 
@@ -92,13 +92,16 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             // We initialize a cute and pointless loading splash that prepares the view and navigate at the end.
             Loaded += (_, _) => InvokeSplashScreen();
+            //Container.SplashVisibility = Visibility.Collapsed;
+            //Container.SplashProgressVisibility = Visibility.Collapsed;
             ServiceProvider = serviceProvider;
             TokenProvider = tokenProvider;
             Host = host;
             PatchClient = patchClient;
 
+            MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
-            // Wpf.Ui.Appearance.Watcher.Watch(this, Appearance.BackgroundType.Mica, true, false);
+            //Wpf.Ui.Appearance.Watcher.Watch(this, Configuration.GetValue<BackgroundType>("UI:BackgroundType"), true, false);
         }
 
         private void LobbyClient_AuthentificationFailed(object sender, Domain.LobbyServer.AuthentificationFailedData e)
@@ -215,14 +218,6 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         private void RootNavigation_OnNavigated(INavigation sender, RoutedNavigationEventArgs e)
         {
-            // This funky solution allows us to impose a negative
-            // margin for Frame only for the Dashboard page, thanks
-            // to which the banner will cover the entire page nicely.
-            RootFrame.Margin = new Thickness(
-                left: 0,
-                top: sender?.Current?.PageTag == "dashboard" ? -69 : 0,
-                right: 0,
-                bottom: 0);
         }
 
         private void RootDialog_OnButtonRightClick(object sender, RoutedEventArgs e)

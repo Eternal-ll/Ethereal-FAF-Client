@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class GameHostingModel
+    public sealed class GameHostingModel
     {
         public FeaturedMod FeaturedMod { get; set; }
 
@@ -21,7 +21,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public bool IsFriendsOnly { get; set; }
         public string Map { get; set; }
     }
-    public class HostGameViewModel : Base.ViewModel
+    public sealed class HostGameViewModel : Base.ViewModel
     {
         private readonly IServiceProvider ServiceProvider;
         private readonly ContainerViewModel Container;

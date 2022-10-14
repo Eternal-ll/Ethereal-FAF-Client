@@ -5,7 +5,58 @@
     "Links": {
       "Forum": "https://forum.faforever.com/",
       "Wiki": "https://wiki.faforever.com/",
-      "Twitch": "https://www.twitch.tv/faflive"
+      "Twitch": "https://www.twitch.tv/faflive",
+      "Twitter": "https://twitter.com/FAFOfficial_",
+      "Facebook": "https://www.facebook.com/ForgedAllianceForever/",
+      "Moderation": "https://www.faforever.com/account/report",
+      "Patreon": "https://www.patreon.com/faf",
+      "Technical help (Forum)": "https://forum.faforever.com/category/4/i-need-help",
+      "Technical help (Discord)": "https://discord.gg/6W6HKfzcsj",
+      "Report a bug": "https://discord.com/channels/197033481883222026/907037442832482315"
+    }
+  },
+  {
+    "Title": "For new players",
+    "Description": "Sources for new players",
+    "Links": {
+      "FAQ": "https://forum.faforever.com/category/18/frequently-asked-questions",
+      "First time in FAF": "https://www.youtube.com/watch?v=Nks9loE96ok&feature=youtu.be",
+      "Community guides": "https://wiki.faforever.com/en/Learning-SupCom",
+      "Forum": "https://forum.faforever.com/"
+    }
+  },
+  {
+    "Title": "Trainers",
+    "Description": "Sources players that can train you",
+    "Links": {
+      "Tex [Global: 1929 | Ladder: 2100] Teaching Ladder 1v1 for players [rated 1.2K+]": "https://forum.faforever.com/topic/1112/active-trainers-contact-page"
+    }
+  },
+  {
+    "Title": "Students",
+    "Description": "Sources of players that searchs for trainer",
+    "Links": {
+      "Wainan [Global: 1018 | Ladder: 750]": "https://forum.faforever.com/topic/1112/active-trainers-contact-page"
+    }
+  },
+  {
+    "Title": "Development",
+    "Description": "Sources for development",
+    "Links": {
+      "Github": "https://github.com/FAForever/fa",
+      "Contribute": "https://faforever.com/contribution",
+      "Vault rules": "https://wiki.faforever.com/en/Vault-Rules",
+      "FA Patch (Github)": "http://github.com/faforever/fa",
+      "Official FA Client (Github": "https://github.com/faforever/downlords-faf-client",
+      "Python FA Client (Github)": "https://github.com/faforever/client"
+    }
+  },
+  {
+    "Title": "Analytics",
+    "Description": "Analytics sources",
+    "Links": {
+      "FAF-Analytics by Kazbek": "https://kazbek.github.io/FAF-Analytics/",
+      "FAF-Score by Luke Braakman": "https://fafscore.nl/"
     }
   },
   {

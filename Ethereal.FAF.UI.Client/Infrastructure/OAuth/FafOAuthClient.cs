@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {
-    public class FafOAuthClient
+    public sealed class FafOAuthClient
     {
         public event EventHandler<string> OAuthLinkGenerated;
 

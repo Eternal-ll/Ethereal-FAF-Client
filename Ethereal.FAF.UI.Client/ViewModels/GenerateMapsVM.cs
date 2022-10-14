@@ -4,13 +4,14 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
-using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,29 +19,75 @@ using System.Windows.Input;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class DensitySetting
+    public sealed class DensitySetting : JsonSettingsViewModel
     {
-        public bool IsEnabled { get; set; }
-        public double Value { get; set; }
+        public DensitySetting(string area) => Area = area;
+        public DensitySetting(){}
+        public string Area { get; set; }
+        private bool _IsEnabled;
+        public bool IsEnabled
+        {
+            get => _IsEnabled;
+            set => Set(ref _IsEnabled, value, $"MapGenerator:Config:MapDensities:{Area}:IsEnabled");
+        }
+        private double _Value;
+        public double Value
+        {
+            get => _Value;
+            set => Set(ref _Value, value, $"MapGenerator:Config:MapDensities:{Area}:Value");
+        }
     }
-    public class GenerateMapsVM : MapsHostingVM
+    public sealed class GenerateMapsVM : MapsHostingVM
     {
         private readonly MapGenerator MapGenerator;
         private readonly NotificationService NotificationService;
-        private readonly string MapsFolder;
+        private readonly IConfiguration Configuration;
 
         private FileSystemWatcher FileSystemWatcher;
 
         public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, ContainerViewModel container,
-            PatchClient patchClient, IceManager iceManager, NotificationService notificationService)
-            : base(lobbyClient, container, patchClient, iceManager)
+            PatchClient patchClient, IceManager iceManager, NotificationService notificationService,
+            IConfiguration configuration)
+            : base(lobbyClient, container, patchClient, iceManager, configuration)
         {
+            _SelectedBiome = configuration.GetValue<string>("MapGenerator:Config:SelectedBiome");
+            _SelectedMapGeneratorVersion = configuration.GetValue<string>("MapGenerator:Config:SelectedMapGeneratorVersion");
+            _SelectedTerrainSymmetry = configuration.GetValue<string>("MapGenerator:Config:SelectedTerrainSymmetry");
+            _SelectedGenerationStyle = configuration.GetValue<string>("MapGenerator:Config:SelectedGenerationStyle");
+            _TeamsCount = configuration.GetValue("MapGenerator:Config:TeamsCount", 6);
+            _SpawnsCount = configuration.GetValue("MapGenerator:Config:SpawnsCount", 8);
+            _MapSize = configuration.GetValue<double>("MapGenerator:Config:MapSize", 10);
+            var mapDensities = configuration
+                .GetSection("MapGenerator:Config:MapDensities")
+                .Get<Dictionary<string, DensitySetting>>();
+            mapDensities ??= new Dictionary<string, DensitySetting>()
+                {
+                    { "Land", new("Land") },
+                    { "Plateau", new("Plateau") },
+                    { "Mountain", new("Mountain") },
+                    { "Ramp", new("Ramp") },
+                    { "Reclaim", new("Reclaim") },
+                    { "Mex", new("Mex") },
+                };
+            if (!mapDensities.ContainsKey("Land")) mapDensities.Add("Land", new("Land"));
+            if (!mapDensities.ContainsKey("Plateau")) mapDensities.Add("Plateau", new("Plateau"));
+            if (!mapDensities.ContainsKey("Mountain")) mapDensities.Add("Mountain", new("Mountain"));
+            if (!mapDensities.ContainsKey("Ramp")) mapDensities.Add("Ramp", new("Ramp"));
+            if (!mapDensities.ContainsKey("Reclaim")) mapDensities.Add("Reclaim", new("Reclaim"));
+            if (!mapDensities.ContainsKey("Mex")) mapDensities.Add("Mex", new("Mex"));
+
+            LandDensity = mapDensities["Land"];
+            PlateauDensity = mapDensities["Plateau"];
+            MountainDensity = mapDensities["Mountain"];
+            RampDensity = mapDensities["Ramp"];
+            ReclaimDensity = mapDensities["Reclaim"];
+            MexDensity = mapDensities["Mex"];
+
             MapGenerator = mapGenerator;
-            MapsFolder = FaPaths.Maps;
             FileSystemWatcher = new()
             {
                 IncludeSubdirectories = true,
-                Path = MapsFolder,
+                Path = MapsPath,
                 Filter = "neroxis_map_generator_*.*.*_*_scenario.lua",
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
@@ -58,7 +105,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Task.Run(() =>
             {
                 var maps = new List<LocalMap>();
-                string[] scenarios = Directory.GetFiles(MapsFolder, "*_scenario.lua", SearchOption.AllDirectories);
+                string[] scenarios = Directory.GetFiles(MapsPath, "*_scenario.lua", SearchOption.AllDirectories);
                 foreach (var file in scenarios)
                 {
                     var name = file.Split('/', '\\')[^2];
@@ -78,8 +125,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SetSource(maps);
             });
             NotificationService = notificationService;
+            Configuration = configuration;
         }
-
         private void MapGenerator_MapGenerated(object sender, string e)
         {
 
@@ -241,7 +288,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _SelectedStyle, value))
                 {
-                    SelectedMapVisibility = !string.IsNullOrWhiteSpace(value) ? null : "Casual";
+                    SelectedGenerationStyle = !string.IsNullOrWhiteSpace(value) ? null : "Casual";
                 }
             }
         }
@@ -280,7 +327,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public int SizeInPixels => _MapSize % 1.25 != 0 ? (int)((_MapSize + 0.625) / 1.25 * 1.25) : (int)(_MapSize * 51.2);
         public double[] MapSizeSource => new double[] { 5, 7.5, 10, 12.5, 15, 17.5, 20 };
         #region MapSize
-        private double _MapSize = 10;
+        private double _MapSize;
         public double MapSize
         {
             get => _MapSize;
@@ -312,16 +359,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public ObservableDictionary<string, DensitySetting> MapDensities { get; set; }
-            = new ObservableDictionary<string, DensitySetting>()
-        {
-            { "Land", new() },
-            { "Plateau", new() },
-            { "Mountain", new() },
-            { "Ramp", new() },
-            { "Reclaim", new() },
-            { "Mex", new() },
-        };
+        public DensitySetting LandDensity { get; set; }
+        public DensitySetting PlateauDensity { get; set; }
+        public DensitySetting MountainDensity { get; set; }
+        public DensitySetting RampDensity { get; set; }
+        public DensitySetting ReclaimDensity { get; set; }
+        public DensitySetting MexDensity { get; set; }
+
 
         public static string[] MapVisibilities => new string[]
         {
@@ -330,7 +374,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region SelectedGenerationStyle
         private string _SelectedGenerationStyle;
-        public string SelectedMapVisibility
+        public string SelectedGenerationStyle
         {
             get => _SelectedGenerationStyle;
             set
@@ -383,21 +427,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             IsGenerating = true;
             CancellationSource = new();
             ProgressText = "Generating...";
-            var land = MapDensities["Land"];
-            var plateau = MapDensities["Plateau"];
-            var mountain = MapDensities["Mountain"];
-            var ramp = MapDensities["Ramp"];
-            var reclaim = MapDensities["Reclaim"];
-            var mex = MapDensities["Mex"];
+            var land = LandDensity;
+            var plateau = PlateauDensity;
+            var mountain = MountainDensity;
+            var ramp = RampDensity;
+            var reclaim = ReclaimDensity;
+            var mex = MexDensity;
             var progress = new Progress<string>(d => ProgressText = d);
 
             var maps = await MapGenerator.GenerateMapAsync(
                 version: SelectedMapGeneratorVersion,
-                folder: MapsFolder,
+                folder: MapsPath,
                 style: SelectedStyle,
                 biome: SelectedBiome,
                 spawns: SpawnsCount,
-                visibility: SelectedMapVisibility is not "Casual" ? SelectedMapVisibility : null,
+                visibility: SelectedGenerationStyle is not "Casual" ? SelectedGenerationStyle : null,
                 teams: TeamsCount,
                 landDensity: land.IsEnabled ? land.Value : null,
                 plateauDensity: plateau.IsEnabled ? plateau.Value : null,

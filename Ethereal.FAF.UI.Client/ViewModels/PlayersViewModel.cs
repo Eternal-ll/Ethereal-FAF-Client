@@ -15,7 +15,7 @@ using System.Windows.Data;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class PlayersSort
+    public sealed class PlayersSort
     {
         public PlayersSort()
         {
@@ -34,12 +34,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public bool IsRating { get; set; }
         public ListSortDirection ListSortDirection { get; set; }
     }
-    public class PlayersGroup
+    public sealed class PlayersGroup
     {
         public string Name { get; set; }
         public PropertyGroupDescription PropertyGroupDescription { get; set; }
     }
-    public class RatingsRangeConverter : IValueConverter
+    public sealed class RatingsRangeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -5,14 +5,24 @@ using beta.Properties;
 using Microsoft.Extensions.DependencyInjection;
 using ModernWpf.Controls;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Windows.Input;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace beta.ViewModels
 {
     public class SettingsViewModel : Base.ViewModel
     {
+        public struct Pa__one
+        {
+            public string Title { get; set; }
+            public string Subtitle { get; set; }
+            public Brush Brush { get; set; }
+            public string BrushKey { get; set; }
+        }
+
         private readonly INotificationService NotificationService;
         private readonly MainViewModel MainViewModel;
 
@@ -20,6 +30,47 @@ namespace beta.ViewModels
         {
             NotificationService = App.Services.GetService<INotificationService>();
             MainViewModel = mainViewModel;
+
+            FillTheme();
+        }
+
+        private void FillTheme()
+        {
+            var theme = new List<Pa__one> { };
+
+            foreach (var singleBrushKey in _themeResources)
+            {
+                var singleBrush = Application.Current.Resources[singleBrushKey] as Brush;
+
+                if (singleBrush == null)
+                    continue;
+
+                string description;
+
+                if (singleBrush is SolidColorBrush solidColorBrush)
+                    description =
+                        $"R: {solidColorBrush.Color.R}, G: {solidColorBrush.Color.G}, B: {solidColorBrush.Color.B}";
+                else
+                    description = "Gradient";
+
+                theme.Add(new Pa__one
+                {
+                    Title = "THEME",
+                    Subtitle = description + "\n" + singleBrushKey,
+                    Brush = singleBrush,
+                    BrushKey = singleBrushKey
+                });
+            }
+
+            ThemeBrushes = theme;
+        }
+
+
+        private IEnumerable<Pa__one> _themeBrushes = new Pa__one[] { };
+        public IEnumerable<Pa__one> ThemeBrushes
+        {
+            get => _themeBrushes;
+            set => Set(ref _themeBrushes, value);
         }
 
         #region Authorization

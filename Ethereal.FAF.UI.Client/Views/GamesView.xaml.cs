@@ -1,6 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Models.Lobby;
-using Ethereal.FAF.UI.Client.ViewModels;
-using System.Windows;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -18,13 +16,13 @@ namespace Ethereal.FAF.UI.Client.Views
             ViewModel = viewModel;
             InitializeComponent();
             Resources.Add("JoinGameCommand", ViewModel.JoinGameCommand);
+            Resources.Add("WatchGameCommand", ViewModel.WatchGameCommand);
         }
 
         public GamesViewModel ViewModel { get; }
 
         private void Image_Initialized(object sender, System.EventArgs e)
         {
-            return;
             var image = (Image)sender;
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.LowQuality);
             if (image.Source is not null && image.Source is BitmapImage bitmap)
@@ -34,6 +32,7 @@ namespace Ethereal.FAF.UI.Client.Views
                     bitmap.Freeze();
                 }
             }
+            image.Initialized -= Image_Initialized;
         }
     }
 }

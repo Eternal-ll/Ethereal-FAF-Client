@@ -2,7 +2,7 @@
 
 namespace Ethereal.FAF.UI.Client.Models
 {
-    public class LocalMap
+    public sealed class LocalMap
     {
         public string FolderName { get; set; }
         public MapScenario Scenario { get; set; }

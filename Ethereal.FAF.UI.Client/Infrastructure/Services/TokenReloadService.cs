@@ -26,6 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
+            await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
             var token = TokenProvider.TokenBearer;
             if (token is not null && token.AccessToken is not null && token.RefreshToken is not null)
             {

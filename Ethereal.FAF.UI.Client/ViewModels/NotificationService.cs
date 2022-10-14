@@ -10,7 +10,7 @@ using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class NotificationService
+    public sealed class NotificationService
     {
         private static INotificationManager CreateManager()
         {

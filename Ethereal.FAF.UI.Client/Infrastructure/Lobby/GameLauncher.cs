@@ -26,7 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         Running,
         //Updating
     }
-    public class GameLauncher
+    public sealed class GameLauncher
     {
         public event EventHandler<GameLauncherState> StateChanged;
         public event EventHandler<Progress<string>> GameLaunching;
@@ -71,7 +71,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Task.Run(() => RunGame(e))
                 .ContinueWith(t =>
                 {
-                    OnStateChanged(GameLauncherState.Idle);
+                    //OnStateChanged(GameLauncherState.Idle);
                     LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
                     if (t.IsFaulted)
                     {
@@ -145,10 +145,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //GameLaunching?.Invoke(this, progressSource);
             var progress = (IProgress<string>)progressSource;
 
-            OnStateChanged(GameLauncherState.Launching);
+            //OnStateChanged(GameLauncherState.Launching);
             var me = LobbyClient.Self;
-            IceManager.Initialize(me.Id.ToString(), me.Login);
-            IceManager.IceClient.SetLobbyInitMode(e.init_mode.ToString().ToLower());
+            IceManager.Initialize(me.Id.ToString(), me.Login, e.uid);
+            IceManager.IceClient.SetLobbyInitMode(e.game_type is GameType.MatchMaker ? "auto" : "normal");
             //ice.PassIceServers(IceService.IceServers);
             //var me = PlayersService.Self;
             // game args
@@ -201,7 +201,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     progress?.Report("Generating map");
                     NotificationService.Notify("Game", "Generating map", ignoreOs: true);
                     await MapGenerator.GenerateMap(e.mapname, MapsService.MapsFolder, default, progress);
-                    NotificationService.Notify("Game", "Map is generated", ignoreOs: true);
                 }
                 else
                 {
@@ -211,39 +210,30 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     }
                 }
             }
-            //await Task.Delay(1000);
             Logger.LogTrace("Starting game with next arguments [{args}]", arguments);
             Process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = Path.Combine(Properties.Paths.Default.Patch, "bin", "ForgedAlliance.exe"),
+                    FileName = Path.Combine(Configuration.GetValue<string>("Paths:Patch"), "bin", "ForgedAlliance.exe"),
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
             };
-            //try
-            //{
             NotificationService.Notify("Game", "Launching game", ignoreOs: true);
             if (!Process.Start())
             {
                 Logger.LogError("Cant start game");
                 throw new Exception("Can`t start \"Supreme Commander: Forged Alliance\"");
             }
-            OnStateChanged(GameLauncherState.Running);
+            //OnStateChanged(GameLauncherState.Running);
             await Process.WaitForExitAsync();
-            //}
-            //catch (Exception ex)
-            //{
-            //    NotificationService.Notify("Game", $"Launch failed: {ex}", ignoreOs: true);
-            //}
         }
         public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
-            OnStateChanged(GameLauncherState.Joining);
             if (!MapsService.IsExist(game.Mapname))
             {
-                if (game.Mapname.StartsWith("neroxis_map_generator_"))
+                if (MapGenerator.IsGeneratedMap(game.Mapname))
                 {
                     progress?.Report("Generating map");
                     await MapGenerator.GenerateMap(game.Mapname, MapsService.MapsFolder, cancellationToken, progress);
@@ -259,6 +249,41 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             await PatchClient.UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
             progress.Report("Joining game");
             LobbyClient.JoinGame(game.Uid);
+        }
+        public async Task WatchGame(long gameId, long playerId, string mapname, FeaturedMod mod)
+        {
+            if (!MapsService.IsExist(mapname))
+            {
+                if (MapGenerator.IsGeneratedMap(mapname))
+                {
+                    await MapGenerator.GenerateMap(mapname, MapsService.MapsFolder);
+                }
+                else
+                {
+                    await MapsService.DownloadAsync(mapname, $"maps/{mapname}.zip");
+                }
+            }
+            StringBuilder sb = new();
+            sb.Append("/nobugreport ");
+            sb.Append($"/init init_{mod.ToString().ToLower()}.lua ");
+            sb.Append($"/replay gpgnet://lobby.faforever.com/{gameId}/{playerId}.SCFAreplay ");
+            sb.Append($"/replayid {gameId} ");
+            if (Configuration.GetValue<bool>("Game:Replays:IsLogsEnabled"))
+            {
+                var log = string.Format(Configuration.GetValue<string>("Game:Replays:Logs"), gameId, playerId);
+                sb.Append($"/log \"{log}\"");
+            }
+            await PatchClient.UpdatePatch(mod, 0, false);
+            Process process = new()
+            {
+                StartInfo = new()
+                {
+                    FileName = Path.Combine(Configuration.GetValue<string>("Paths:Patch"), "bin", "ForgedAlliance.exe"),
+                    Arguments = sb.ToString(),
+                    UseShellExecute = true
+                }
+            };
+            process.Start();
         }
         private void OnStateChanged(GameLauncherState state)
         {

@@ -109,6 +109,79 @@
                     </Ui:SymbolIcon>
                 </StackPanel>
             </DataTemplate>
+            <Style x:Key="AvatarImage" TargetType="Image">
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
+                <Setter Property="Source" Value="{Binding Avatar.Url}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Avatar}" Value="{x:Null}">
+                        <Setter Property="ToolTip" Value="{x:Null}"/>
+                        <Setter Property="Source" Value="{x:Null}"/>
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <DataTemplate x:Key="MatchmakingGamePlayer" DataType="{x:Type lobby:GamePlayer}">
+                <Grid ShowGridLines="False" Margin="0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="2"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="2"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0" Grid.Column="0" Style="{StaticResource AvatarImage}" DataContext="{Binding Player}"/>
+                    <Image Grid.Row="2" Grid.Column="0" Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding Player.LoginWithClan}" ToolTip="{Binding Player.LoginWithClan}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="4" FontSize="10">
+                        <Run Text="{Binding Rating, StringFormat='R: {0}'}"/>
+                        <Run Text="{Binding Games, StringFormat='G: {0}'}"/>
+                    </TextBlock>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="MatchmakingGamePlayerNoAvatar" DataType="{x:Type lobby:GamePlayer}">
+                <Grid ShowGridLines="False" Margin="0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30"/>
+                        <ColumnDefinition Width="2"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="2"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Image Grid.Row="0" Grid.Column="0" Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Player.LoginWithClan}"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" FontSize="10">
+                        <Run Text="{Binding Rating, StringFormat='R: {0}'}"/>
+                        <Run Text="{Binding Games, StringFormat='G: {0}'}"/>
+                    </TextBlock>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate x:Key="PlayersWithAvatar">
+                <ItemsControl ItemsSource="{Binding GamePlayers}" ItemTemplate="{StaticResource MatchmakingGamePlayer}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="FrameworkElement">
+                            <Setter Property="Margin" Value="0 1"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </DataTemplate>
+            <DataTemplate x:Key="PlayersWithoutAvatar">
+                <ItemsControl ItemsSource="{Binding GamePlayers}" ItemTemplate="{StaticResource MatchmakingGamePlayerNoAvatar}">
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="FrameworkElement">
+                            <Setter Property="Margin" Value="0 1"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+            </DataTemplate>
+
 
             <Style x:Key="DefaultMenuItem" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"></Style>
 
@@ -216,7 +289,7 @@
             </Style>
 
             <DataTemplate x:Key="IdleGame" DataType="{x:Type lobby:Game}">
-                <Border Style="{StaticResource CardBorder}" Cursor="Hand" ToolTip="Double click to join">
+                <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="350" ToolTip="Double click to join">
                     <Border.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{StaticResource OpenImageCommand}" CommandParameter="{Binding LargeMapPreview}"
@@ -226,7 +299,7 @@
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
                                         <Setter Property="Header" Value="{Binding HumanTitle}"/>
-                                        <Setter Property="ItemsSource" Value="{Binding Players}"/>
+                                        <Setter Property="ItemsSource" Value="{Binding GamePlayers}"/>
                                         <Setter Property="ItemContainerStyle" Value="{StaticResource GamePlayerMenuItem}"/>
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
@@ -281,6 +354,15 @@
                                                 <MenuItem Style="{StaticResource GamePlayerMenuItem}" DataContext="{Binding HostPlayer}"/>
                                             </ContextMenu>
                                         </ContentControl.ContextMenu>
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Style="{StaticResource AvatarImage}"/>
+                                                    <Image Source="{Binding FlagUri}" Margin="4 0 0 0" ToolTip="{Binding Country}" Width="16" Height="16"/>
+                                                    <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0" ToolTip="{Binding LoginWithClan}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
                                     </ContentControl>
                                 </InlineUIContainer>
                             </TextBlock>
@@ -307,7 +389,7 @@
                                                         <DataTemplate>
                                                             <StackPanel Margin="8 0">
                                                                 <TextBlock Text="{Binding HumanTitle}" Margin="0 4 0 4"/>
-                                                                <ItemsControl ItemsSource="{Binding Players}"/>
+                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
@@ -316,7 +398,6 @@
                                         </ToolTip>
                                     </Ui:Badge.ToolTip>
                                 </Ui:Badge>
-                                <Ui:Badge Margin="4 4 0 0" Content="{Binding RatingType}" Appearance="Secondary" ToolTip="Rating type"/>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding RatingMax}" ToolTip="Maxiumum rating rest. to join">
                                     <TextBlock Text="{Binding StringFormat='max: {0}'}"/>
                                 </Ui:Badge>
@@ -362,7 +443,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Ui:Badge.Style>
-                                    <TextBlock Text="Protected"/>
+                                    <TextBlock Text="&#xf023;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                                 </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
                                     <Ui:Badge.Style>
@@ -420,7 +501,7 @@
                                 <MenuItem.ItemContainerStyle>
                                     <Style TargetType="MenuItem">
                                         <Setter Property="Header" Value="{Binding HumanTitle}"/>
-                                        <Setter Property="ItemsSource" Value="{Binding Players}"/>
+                                        <Setter Property="ItemsSource" Value="{Binding GamePlayers}"/>
                                         <Setter Property="ItemContainerStyle" Value="{StaticResource GamePlayerMenuItem}"/>
                                     </Style>
                                 </MenuItem.ItemContainerStyle>
@@ -479,8 +560,12 @@
                                 </InlineUIContainer>
                             </TextBlock>
                             <WrapPanel Grid.Row="1" Margin="-4 0 0 0" VerticalAlignment="Top">
-                                <TextBox Text="{Binding Uid}" Margin="4 4 0 0" Padding="3 0" VerticalAlignment="Stretch"
-                                         VerticalContentAlignment="Center" FontSize="12" MinHeight="0" ToolTip="Game id"/>
+                                <Ui:Badge Content="{Binding Uid, Mode=OneTime}" Appearance="Secondary" Margin="4 4 0 0"
+                                          ToolTip="Click to copy">
+                                    <Ui:Badge.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{StaticResource CopyCommand}" CommandParameter="{Binding Uid}"/>
+                                    </Ui:Badge.InputBindings>
+                                </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
                                     <TextBlock>
                                         <Run Text="{Binding NumPlayers}"/>
@@ -501,7 +586,7 @@
                                                         <DataTemplate>
                                                             <StackPanel Margin="8 0">
                                                                 <TextBlock Text="{Binding HumanTitle}" Margin="0 4 0 4"/>
-                                                                <ItemsControl ItemsSource="{Binding Players}"/>
+                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
@@ -510,7 +595,6 @@
                                         </ToolTip>
                                     </Ui:Badge.ToolTip>
                                 </Ui:Badge>
-                                <Ui:Badge Margin="4 4 0 0" Content="{Binding RatingType}" Appearance="Secondary" ToolTip="Rating type"/>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary" DataContext="{Binding RatingMax}" ToolTip="Maxiumum rating rest. to join">
                                     <TextBlock Text="{Binding StringFormat='max: {0}'}"/>
                                 </Ui:Badge>
@@ -556,7 +640,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Ui:Badge.Style>
-                                    <TextBlock Text="Protected"/>
+                                    <TextBlock Text="&#xf023;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                                 </Ui:Badge>
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
                                     <TextBlock Text="{Binding LaunchedAtTimeSpan, StringFormat='Live {0:hh}:{0:mm}:{0:ss}'}"/>
@@ -580,8 +664,147 @@
                 </Border>
             </DataTemplate>
 
+            <Style x:Key="MapTitleEffect" TargetType="Image">
+                <Setter Property="OpacityMask">
+                    <Setter.Value>
+                        <LinearGradientBrush StartPoint=".35 0" EndPoint=".5 1">
+                            <GradientStop Offset=".15"/>
+                            <GradientStop Color="White" Offset=".4"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding MapScenario}" Value="{x:Null}">
+                        <Setter Property="OpacityMask" Value="{x:Null}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="MapScenarioTextBlock" TargetType="TextBlock">
+                <Style.Triggers>
+                    <Trigger Property="DataContext" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+
+            <databinding:GamePlayerTemplateSelector x:Key="GamePlayerTemplateSelector"
+                        WithAvatar="{StaticResource MatchmakingGamePlayer}"
+                        WithoutAvatar="{StaticResource MatchmakingGamePlayerNoAvatar}"/>
+
+            <DataTemplate x:Key="LadderGameOne" DataType="{x:Type lobby:Game}">
+                <Border Style="{StaticResource CardBorder}" Width="128"
+                        Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource WatchGameCommand}" CommandParameter="{Binding}"/>
+                    </Border.InputBindings>
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <TextBlock Margin="4" FontWeight="DemiBold" TextWrapping="Wrap">
+                                <Run Text="{Binding State}"/>
+                                <Run Text="{Binding Mapname, StringFormat='Raw: {0}'}"/>
+                                <Run Text="{Binding MapScenario.Name, StringFormat='Scenario: {0}&#10;'}"/>
+                                <Run>
+                                    <Run.Text>
+                                        <MultiBinding StringFormat="&#10;Size: {0}x{1} km">
+                                            <Binding Path="MapScenario.WidthInKm" Mode="OneWay"/>
+                                            <Binding Path="MapScenario.HeigthInKm" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </Run.Text>
+                                </Run>
+                            </TextBlock>
+                        </ToolTip>
+                    </Border.ToolTip>
+                    <StackPanel>
+                        <Image Initialized="Image_Initialized"
+                               Source="{Binding SmallMapPreview, Mode=OneWay}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top">
+                        </Image>
+                        <Ui:Badge HorizontalAlignment="Right" Margin="4 -24 4 4" Padding="4 2" FontSize="12"
+                                  Appearance="Secondary">
+                            <TextBlock>
+                                <Run Text="•" Foreground="Red"/>
+                                <Run Text="{Binding LaunchedAtTimeSpan,Mode=OneWay, StringFormat='{}{0:hh}:{0:mm}:{0:ss}'}"/>
+                            </TextBlock>
+                        </Ui:Badge>
+                        <Button Style="{StaticResource MapGeneratorButton}" Margin="4 -128 4 4" CommandParameter="{Binding}"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
+                        <ItemsControl ItemsSource="{Binding GameTeams}" Margin="0 4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding GamePlayers}" ItemTemplateSelector="{StaticResource GamePlayerTemplateSelector}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="FrameworkElement">
+                                                <Setter Property="Margin" Value="0 1"/>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
+            <DataTemplate x:Key="LadderGameCompact" DataType="{x:Type lobby:Game}">
+                <Border Style="{StaticResource CardBorder}" Width="NaN" MinWidth="0"
+                        Cursor="Hand">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource WatchGameCommand}" CommandParameter="{Binding}"/>
+                    </Border.InputBindings>
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <TextBlock Margin="4" FontWeight="DemiBold" TextWrapping="Wrap">
+                                <Run Text="{Binding Mapname, StringFormat='Raw: {0}'}"/>
+                                <Run Text="{Binding MapScenario.Name, StringFormat='Scenario: {0}&#10;'}"/>
+                                <Run>
+                                    <Run.Text>
+                                        <MultiBinding StringFormat="&#10;Size: {0}x{1} km">
+                                            <Binding Path="MapScenario.WidthInKm" Mode="OneWay"/>
+                                            <Binding Path="MapScenario.HeigthInKm" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </Run.Text>
+                                </Run>
+                                <Run Text="&#10;&#10;•" Foreground="Red"/>
+                                <Run Text="{Binding LaunchedAtTimeSpan,Mode=OneWay, StringFormat='{}{0:hh}:{0:mm}:{0:ss}'}"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Border.ToolTip>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Initialized="Image_Initialized"
+                               Source="{Binding SmallMapPreview, Mode=OneWay}"
+                               Width="50" Height="50">
+                        </Image>
+                        <Button Style="{StaticResource MapGeneratorButton}" Margin="4" CommandParameter="{Binding}" FontSize="12"/>
+                        <ItemsControl ItemsSource="{Binding GameTeams}" Margin="10 4">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplateSelector>
+                                <databinding:MatchmakingGameTeamTemplateSelector
+                                                WithAvatarImage="{StaticResource PlayersWithAvatar}"
+                                                WithoutAvatarImage="{StaticResource PlayersWithoutAvatar}"/>
+                            </ItemsControl.ItemTemplateSelector>
+                        </ItemsControl>
+
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
             <DataTemplate x:Key="MatchmakingGame" DataType="{x:Type lobby:Game}">
-                <Border Style="{StaticResource CardBorder}" Width="NaN">
+                <Border Style="{StaticResource CardBorder}" MinWidth="400" Width="NaN" MaxWidth="1000">
+                    <Border.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource WatchGameCommand}" CommandParameter="{Binding}"/>
+                    </Border.InputBindings>
+                    <Border.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                <Run Text="{Binding AfterCreationTimeSpan, StringFormat='Created {0:ss} seconds ago', Mode=OneWay}"/>
+                            </TextBlock>
+                        </ToolTip>
+                    </Border.ToolTip>
                     <Grid ShowGridLines="False">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="128"/>
@@ -589,42 +812,35 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Button Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}"
-                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
-                        <Image Grid.RowSpan="3" Initialized="Image_Initialized"
+                        <Image Initialized="Image_Initialized"
                                Source="{Binding SmallMapPreview, Mode=OneWay}"
                                ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MapScenario.Name}" Margin="4 4 0 0" FontWeight="DemiBold" TextWrapping="Wrap"
-                                   ToolTip="{Binding MapScenario.Name}"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Margin="4 0 0 4" FontWeight="DemiBold">
-                            <TextBlock.ToolTip>
-                                <ToolTip>
-                                    <TextBlock>
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="{}{0}x{1} km">
-                                                <Binding Path="MapScenario.WidthInKm" />
-                                                <Binding Path="MapScenario.HeigthInKm" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </ToolTip>
-                            </TextBlock.ToolTip>
-                            <TextBlock.Text>
-                                <MultiBinding StringFormat="{}{0}x{1} km">
-                                    <Binding Path="MapScenario.WidthInKm" />
-                                    <Binding Path="MapScenario.HeigthInKm" />
-                                </MultiBinding>
-                            </TextBlock.Text>
+                        <Ui:Badge VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                  Padding="4 2" FontSize="12" Appearance="Secondary">
+                            <TextBlock>
+                                <Run Text="•" Foreground="Red"/>
+                                <Run Text="{Binding LaunchedAtTimeSpan,Mode=OneWay, StringFormat='{}{0:hh}:{0:mm}:{0:ss}'}"/>
+                            </TextBlock>
+                        </Ui:Badge>
+                        <Button Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Grid.RowSpan="2" Margin="4 4 0 0" FontWeight="DemiBold" TextWrapping="Wrap"
+                                   ToolTip="{Binding MapScenario.Name}">
+                            <Run Text="{Binding MapScenario.Name}"/>
+                            <Run>
+                                <Run.Text>
+                                    <MultiBinding StringFormat="{}{0}x{1} km">
+                                        <Binding Path="MapScenario.WidthInKm" Mode="OneWay"/>
+                                        <Binding Path="MapScenario.HeigthInKm" Mode="OneWay"/>
+                                    </MultiBinding>
+                                </Run.Text>
+                            </Run>
                         </TextBlock>
-
-                        <TextBlock Grid.Row="0" Grid.Column="2" Margin="4 2 0 0" TextWrapping="Wrap" ToolTip="{Binding Title}"
-                                       Text="{Binding HumanTitle, Mode=OneWay}" HorizontalAlignment="Center"/>
-                        <ItemsControl Grid.Row="1" Grid.Column="2" ItemsSource="{Binding GameTeams}"
-                                      Margin="10 0" VerticalAlignment="Center">
+                        <ItemsControl Grid.Column="2" Grid.RowSpan="2" ItemsSource="{Binding GameTeams}"
+                                      Margin="0 4 0 0" >
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <Grid>
@@ -647,12 +863,16 @@
                             </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding Players}"/>
+                                    <ItemsControl ItemsSource="{Binding GamePlayers}" ItemTemplateSelector="{StaticResource GamePlayerTemplateSelector}">
+                                        <ItemsControl.ItemContainerStyle>
+                                            <Style TargetType="FrameworkElement">
+                                                <Setter Property="Margin" Value="0 1"/>
+                                            </Style>
+                                        </ItemsControl.ItemContainerStyle>
+                                    </ItemsControl>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" Margin="0 0 4 4"
-                                   Text="{Binding LaunchedAtTimeSpan, StringFormat='Live {0:hh}:{0:mm}:{0:ss}'}"/>
                     </Grid>
                 </Border>
             </DataTemplate>
@@ -833,10 +1053,9 @@
                     </StackPanel>
                 </Border>
             </Popup>
-            
-            
-            <Button Content="Host" Width="100" Margin="10 0 0 0" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
 
+            <Button Content="Host" Width="100" Margin="10 0 0 0" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
+            <!--<CheckBox IsChecked="{Binding ViewModel.Compact}" Content="Compact"/>-->
             <Ui:Button Margin="10 0 0 0" MinWidth="100" VerticalAlignment="Stretch">
                 <Ui:Button.Style>
                     <Style TargetType="Ui:Button" BasedOn="{StaticResource {x:Type Ui:Button}}">
@@ -1099,13 +1318,16 @@
             </Border.Background>
         </Border>
         <Ui:VirtualizingItemsControl Grid.Row="1" Grid.ColumnSpan="2" Margin="4 8 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding ViewModel.GamesView, Mode=OneWay}" IsTabStop="False"
+            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False"
             VirtualizingPanel.CacheLengthUnit="Pixel" VirtualizingPanel.ScrollUnit="Pixel">
             <Ui:VirtualizingItemsControl.ItemTemplateSelector>
                 <databinding:GameTemplateSelector
                     IdleGame="{StaticResource IdleGame}"
                     LiveGame="{StaticResource LiveGame}"
-                    MatchmakingGame="{StaticResource MatchmakingGame}"/>
+                    MatchmakingGame="{StaticResource MatchmakingGame}"
+                    
+                    LadderGameOne="{StaticResource LadderGameOne}"
+                    LadderGameCompact="{StaticResource LadderGameCompact}"/>
             </Ui:VirtualizingItemsControl.ItemTemplateSelector>
             <Ui:VirtualizingItemsControl.Style>
                 <Style TargetType="Ui:VirtualizingItemsControl" BasedOn="{StaticResource {x:Type Ui:VirtualizingItemsControl}}">
@@ -1114,9 +1336,8 @@
                             <ItemsPanelTemplate>
                                 <Ui:VirtualizingWrapPanel
                                 IsVirtualizing="{TemplateBinding VirtualizingPanel.IsVirtualizing}"
-                                Orientation="Vertical"
                                 SpacingMode="None"
-                                StretchItems="False"
+                                StretchItems="True"
                                 VirtualizationMode="{TemplateBinding VirtualizingPanel.VirtualizationMode}" />
                             </ItemsPanelTemplate>
                         </Setter.Value>

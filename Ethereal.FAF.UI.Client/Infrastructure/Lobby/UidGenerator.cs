@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 {
-    public class UidGenerator
+    public sealed class UidGenerator
     {
         private readonly ILogger Logger;
         private readonly string Uid;

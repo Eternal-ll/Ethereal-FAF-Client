@@ -16,7 +16,7 @@ using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class PartyPlayer
+    public sealed class PartyPlayer
     {
         public PartyPlayer()
         {
@@ -43,7 +43,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public Faction[] SelectedFactions => Factions.Where(t => t.Value).Select(t => t.Key).ToArray();
         public bool IsOwner { get; set; }
     }
-    public class PartyViewModel : Base.ViewModel
+    public sealed class PartyViewModel : Base.ViewModel
     {
         private object _Status;
         public object Status

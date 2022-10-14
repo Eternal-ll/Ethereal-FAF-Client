@@ -134,13 +134,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             foreach (var file in requiredFiles)
             {
                 var origP = Path.Combine(file.Group, file.Name);
-                var p = Path.Combine(file.Group.ToLower(), file.Name.ToLower());
+                var p = origP.ToLower();
                 var url = new Uri(file.CacheableUrl);
                 var fileResponse = await contentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                 if (!fileResponse.IsSuccessStatusCode)
                 {
                     Logger.LogError($"Failed to download [{origP}] [{i}] of [{requiredFiles.Length}]");
-                    progress?.Report($"Failed to download [{origP}] [{i}] of [{requiredFiles.Length}]");
                     continue;
                 }
                 Logger.LogTrace($"Downloading [{origP}] [{i}] of [{requiredFiles.Length}]");
@@ -242,5 +241,37 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             var hash = await md5.ComputeHashAsync(stream);
             return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
         }
+
+        public void CopyOriginalBinFilesToPatchFolder(string gameFolder)
+        {
+            var files = FilesToCopy;
+            foreach (var file in files)
+            {
+                var source = Path.Combine(gameFolder, file);
+                if (File.Exists(source))
+                {
+                    Logger.LogError("File not exists [{file}]", source);
+                    continue;
+                }
+                var target = Path.Combine(gameFolder, file);
+                File.Copy(source, target);
+            }
+        }
+
+        public static readonly string[] FilesToCopy =
+        {
+            "bin/BsSndRpt.exe",
+            "bin/BugSplat.dll",
+            "bin/BugSplatRc.dll",
+            "bin/DbgHelp.dll",
+            "bin/GDFBinary.dll",
+            "bin/msvcm80.dll",
+            "bin/msvcp80.dll",
+            "bin/msvcr80.dll",
+            "bin/SHSMP.DLL",
+            "bin/sx32w.dll",
+            "bin/wxmsw24u-vs80.dll",
+            "bin/zlibwapi.dll"
+        };
     }
 }

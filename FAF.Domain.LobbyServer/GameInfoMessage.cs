@@ -72,8 +72,11 @@ namespace FAF.Domain.LobbyServer
         [JsonPropertyName("max_players")]
         public int MaxPlayers { get => _MaxPlayers; set => Set(ref _MaxPlayers, value); }
         #endregion
+        #region LaunchedAt
+        private double? _LaunchedAt;
         [JsonPropertyName("launched_at")]
-        public double? LaunchedAt { get; set; }
+        public double? LaunchedAt { get => _LaunchedAt; set => Set(ref _LaunchedAt, value); } 
+        #endregion
         [JsonPropertyName("rating_type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public RatingType RatingType { get; set; }

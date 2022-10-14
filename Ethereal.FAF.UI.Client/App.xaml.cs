@@ -7,6 +7,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
+using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -39,12 +41,6 @@ namespace Ethereal.FAF.UI.Client
                 loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
                 loggingBuilder.AddConsole();
             })
-            .ConfigureHostOptions(c =>
-            {
-                //c.ShutdownTimeout = TimeSpan.FromSeconds(30);
-            })
-            //.ConfigureAppConfiguration(cfg => cfg
-            //    .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)))
             .ConfigureServices(ConfigureServices)
             .Build();
             await Hosting.StartAsync();
@@ -53,12 +49,11 @@ namespace Ethereal.FAF.UI.Client
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             var configuration = context.Configuration;
-            var paths = Client.Properties.Paths.Default;
-            string version = "2.0.6";
+            string version = "2.0.7.1";
 
             // Background
             services.AddHostedService<TokenReloadService>();
-            services.AddHostedService<ApiGameValidator>();
+            //services.AddHostedService<ApiGameValidator>();
             // App Host
             services.AddHostedService<ApplicationHostService>();
             // Theme manipulation
@@ -93,7 +88,7 @@ namespace Ethereal.FAF.UI.Client
                 logger: s.GetService<ILogger<UidGenerator>>(),
                 uid: configuration.GetValue<string>("Paths:UidGenerator")));
 
-            services.AddScoped(p=> new LobbyClient(
+            services.AddScoped(p => new LobbyClient(
                 host: configuration.GetValue<string>("FAForever:Lobby:Host"),
                 port: configuration.GetValue<int>("FAForever:Lobby:Port"),
                 logger: p.GetRequiredService<ILogger<LobbyClient>>(),
@@ -106,37 +101,39 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped(s => new PatchClient(
                 logger: s.GetService<ILogger<PatchClient>>(),
                 serviceProvider: s,
-                patchFolder: paths.Patch,
+                patchFolder: configuration.GetValue<string>("Paths:Patch"),
                 tokenProvider: s.GetService<ITokenProvider>()));
             
             services.AddScoped(s => new IceManager(
                 logger: s.GetService<ILogger<IceManager>>(),
                 lobbyClient: s.GetService<LobbyClient>(),
-                javaRuntimeFile: configuration.GetValue<string>("Paths:Java:Executable"),
-                iceClientJar: configuration.GetValue<string>("Paths:IceAdapter:Executable"),
-                iceClientLogging: configuration.GetValue<string>("Paths:IceAdapter:Logs"),
+                configuration: s.GetService<IConfiguration>(),
                 notificationService: s.GetService<NotificationService>()));
 
             services.AddScoped<GameLauncher>();
 
-            var vault = Environment.ExpandEnvironmentVariables(paths.Vault);
-            if (FaPaths.TryGetCustomVaultPath(out var customVaultPath))
+            var vault = Environment.ExpandEnvironmentVariables(configuration.GetValue<string>("Paths:Vault"));
+            var customPath = FaPaths.GetCustomVaultPath(configuration.GetValue<string>("Paths:Patch"));
+            if (customPath is not null)
             {
-                vault = customVaultPath;
+                if (vault != customPath)
+                {
+                    AppSettings.Update("Paths:Vault", customPath);
+                }
             }
-            FaPaths.Path = vault;
+            else if (string.IsNullOrWhiteSpace(customPath)) FaPaths.SetCustomVaultPath(vault, configuration.GetValue<string>("Paths:Patch"));
 
             services.AddTransient(s => new MapGenerator(
-                javaRuntime: configuration.GetValue<string>("Paths:Java:Executable"),
-                logging: configuration.GetValue<string>("Paths:MapGenerator:Logs"),
-                previewPath: configuration.GetValue<string>("Paths:MapGenerator:PreviewPath"),
-                mapGeneratorsFolder: configuration.GetValue<string>("Paths:MapGenerator:Versions"),
-                generatedMapsFolder: FaPaths.Maps,
+                javaRuntime: configuration.GetValue<string>("Paths:JavaRuntime"),
+                logging: configuration.GetValue<string>("MapGenerator:Logs"),
+                previewPath: configuration.GetValue<string>("MapGenerator:PreviewPath"),
+                mapGeneratorsFolder: configuration.GetValue<string>("MapGenerator:Versions"),
+                generatedMapsFolder: Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
             services.AddScoped(s => new MapsService(
-                mapsFolder: FaPaths.Maps,
+                mapsFolder: Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps"),
                 baseAddress: configuration.GetValue<string>("FAForever:Content"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapsService>>()));
@@ -151,6 +148,11 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<GamesViewModel>();
             services.AddScoped<MatchmakingViewModel>();
             services.AddScoped<PartyViewModel>();
+
+            services.AddSingleton<BackgroundViewModel>();
+
+            services.AddTransient<SettingsView>();
+            services.AddTransient<SettingsViewModel>();
 
             services.AddTransient<LinksView>();
             services.AddTransient<LinksViewModel>();
@@ -170,8 +172,11 @@ namespace Ethereal.FAF.UI.Client
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            File.WriteAllText("Log.log", e.Exception.ToString());
-            if (Hosting is null) return;
+            if (Hosting is null)
+            {
+                File.WriteAllText($"APPLICATION_UNHANDLED_EXCEPTION.log", e.Exception.ToString());
+                return;
+            }
             var logger = Hosting.Services.GetService<ILogger<App>>();
             logger.LogError(e.Exception.ToString());
             var snackbar = Hosting.Services.GetService<SnackbarService>();

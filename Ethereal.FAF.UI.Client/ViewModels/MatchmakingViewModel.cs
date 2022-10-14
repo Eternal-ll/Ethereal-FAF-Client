@@ -27,7 +27,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         Playing,
         Updating,
     }
-    public class MatchmakingViewModel : Base.ViewModel
+    public sealed class MatchmakingViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
         private readonly DialogService DialogService;

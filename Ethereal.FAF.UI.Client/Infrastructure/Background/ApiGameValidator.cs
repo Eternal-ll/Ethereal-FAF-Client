@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Background
 {
-    internal class ApiGameValidator : BackgroundService
+    internal sealed class ApiGameValidator : BackgroundService
     {
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger Logger;
@@ -41,7 +41,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Background
                 }
                 var games = gamesView
                     .Cast<Game>()
-                    .Where(g => g.State is GameState.Playing && g.ApiGameValidatyState is ApiGameValidatyState.UNKNOWN)
+                    .Where(g => 
+                    g.State is GameState.Playing && 
+                    g.ApiGameValidatyState is ApiGameValidatyState.UNKNOWN &&
+                    g.GameType is not GameType.MatchMaker)
                     .ToArray();
                 if (games is null || !games.Any())
                 {

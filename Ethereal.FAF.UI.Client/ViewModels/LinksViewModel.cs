@@ -11,23 +11,7 @@ using System.Windows.Data;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public abstract class Link
-    {
-        public string Title { get; set; }
-        public Uri Url { get; set; }
-    }
-    public class ResourceLink : Link
-    {
-
-    }
-    public class PlayerLink : Link
-    {
-        public long PlayerId { get; set; }
-        public Player Player { get; set; }
-        public bool IsActive { get; set; }
-        public bool IsVisible { get; set; }
-    }
-    public class LinksGroup
+    public sealed class LinksGroup
     {
         public string Title { get; set; }
         public string Description { get; set; }
@@ -53,7 +37,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             LinksView = Links;
         }
     }
-    public class LinksViewModel : Base.ViewModel
+    public sealed class LinksViewModel : Base.ViewModel
     {
         private readonly IHttpClientFactory HttpClientFactory;
         public LinksViewModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
@@ -110,16 +94,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 var words = filter.Split();
+                var groupGood = false;
                 foreach (var word in words)
                 {
-                    if (!(group.Title.Contains(word, System.StringComparison.OrdinalIgnoreCase) ||
-                        group.Description.Contains(word, System.StringComparison.OrdinalIgnoreCase) ||
+                    groupGood = group.Title.Contains(word, System.StringComparison.OrdinalIgnoreCase) ||
+                        group.Description.Contains(word, System.StringComparison.OrdinalIgnoreCase);
+                    if (!(groupGood ||
                         group.Links.Any(l => l.Key.Contains(word, System.StringComparison.OrdinalIgnoreCase))))
                     {
                         return;
                     }
                 }
-                group.Filter(words);
+                if (groupGood) group.DropFilter();
+                else group.Filter(words);
             }
             e.Accepted = true;
         }

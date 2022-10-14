@@ -57,7 +57,7 @@
                             <Style x:Key="CasualTextBlock" TargetType="TextBlock">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                    <DataTrigger Binding="{Binding SelectedGenerationStyle}" Value="Casual">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -65,7 +65,7 @@
                             <Style x:Key="CasualComboBox" TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                    <DataTrigger Binding="{Binding SelectedGenerationStyle}" Value="Casual">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -73,7 +73,7 @@
                             <Style x:Key="CasuaCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                    <DataTrigger Binding="{Binding SelectedGenerationStyle}" Value="Casual">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -81,7 +81,7 @@
                             <Style x:Key="CasuaSlider" TargetType="Slider" BasedOn="{StaticResource {x:Type Slider}}">
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SelectedMapVisibility}" Value="Casual">
+                                    <DataTrigger Binding="{Binding SelectedGenerationStyle}" Value="Casual">
                                         <Setter Property="Visibility" Value="Visible"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -143,7 +143,7 @@
                         <TextBlock Grid.Row="10" Grid.Column="0" Style="{StaticResource CasualTextBlock}" Text="{Binding SizeInPixels, StringFormat='Map size ({0}px)'}" FontSize="12"/>
                         <TextBlock Grid.Row="6" Grid.Column="4" Style="{StaticResource CasualTextBlock}" Text="Terrain symmetry" FontSize="12" ToolTip="Base terrain symmetry for the map"/>
                         <!--<TextBlock Grid.Row="10" Grid.Column="4" Text="Clean gen. maps" FontSize="12"/>-->
-                        <ComboBox Grid.Row="4" Grid.Column="0" ItemsSource="{Binding MapVisibilities}" SelectedValue="{Binding SelectedMapVisibility}" SelectedIndex="0"/>
+                        <ComboBox Grid.Row="4" Grid.Column="0" ItemsSource="{Binding MapVisibilities}" SelectedValue="{Binding SelectedGenerationStyle}" SelectedIndex="0"/>
                         <ComboBox Grid.Row="4" Grid.Column="2" ItemsSource="{Binding Styles}" SelectedValue="{Binding SelectedStyle}"/>
                         <ComboBox Grid.Row="4" Grid.Column="4" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding Biomes}" SelectedValue="{Binding SelectedBiome}"/>
                         <ComboBox Grid.Row="8" Grid.Column="0" Style="{StaticResource CasualComboBox}" ItemsSource="{Binding TeamsCountSource}" SelectedValue="{Binding TeamsCount}"/>
@@ -154,19 +154,19 @@
 
 
                         <TextBlock Grid.Row="14" Grid.ColumnSpan="4" Style="{StaticResource CasualTextBlock}" Text="Map generation density settings"/>
-                        <CheckBox Grid.Row="16" Style="{StaticResource CasuaCheckBox}" Content="Land" IsChecked="{Binding MapDensities[Land].IsEnabled}"/>
-                        <CheckBox Grid.Row="18" Style="{StaticResource CasuaCheckBox}" Content="Plateau" IsChecked="{Binding MapDensities[Plateau].IsEnabled}"/>
-                        <CheckBox Grid.Row="20" Style="{StaticResource CasuaCheckBox}" Content="Mountain" IsChecked="{Binding MapDensities[Mountain].IsEnabled}"/>
-                        <CheckBox Grid.Row="22" Style="{StaticResource CasuaCheckBox}" Content="Ramp" IsChecked="{Binding MapDensities[Ramp].IsEnabled}"/>
-                        <CheckBox Grid.Row="24" Style="{StaticResource CasuaCheckBox}" Content="Reclaim" IsChecked="{Binding MapDensities[Reclaim].IsEnabled}"/>
-                        <CheckBox Grid.Row="26" Style="{StaticResource CasuaCheckBox}" Content="Mex" IsChecked="{Binding MapDensities[Mex].IsEnabled}"/>
+                        <CheckBox Grid.Row="16" Style="{StaticResource CasuaCheckBox}" Content="Land" IsChecked="{Binding LandDensity.IsEnabled}"/>
+                        <CheckBox Grid.Row="18" Style="{StaticResource CasuaCheckBox}" Content="Plateau" IsChecked="{Binding PlateauDensity.IsEnabled}"/>
+                        <CheckBox Grid.Row="20" Style="{StaticResource CasuaCheckBox}" Content="Mountain" IsChecked="{Binding MountainDensity.IsEnabled}"/>
+                        <CheckBox Grid.Row="22" Style="{StaticResource CasuaCheckBox}" Content="Ramp" IsChecked="{Binding RampDensity.IsEnabled}"/>
+                        <CheckBox Grid.Row="24" Style="{StaticResource CasuaCheckBox}" Content="Reclaim" IsChecked="{Binding ReclaimDensity.IsEnabled}"/>
+                        <CheckBox Grid.Row="26" Style="{StaticResource CasuaCheckBox}" Content="Mex" IsChecked="{Binding MexDensity.IsEnabled}"/>
 
-                        <Slider Grid.Row="16" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Land].IsEnabled}" Value="{Binding MapDensities[Land].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
-                        <Slider Grid.Row="18" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Plateau].IsEnabled}" Value="{Binding MapDensities[Plateau].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
-                        <Slider Grid.Row="20" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mountain].IsEnabled}" Value="{Binding MapDensities[Mountain].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
-                        <Slider Grid.Row="22" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Ramp].IsEnabled}" Value="{Binding MapDensities[Ramp].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
-                        <Slider Grid.Row="24" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Reclaim].IsEnabled}" Value="{Binding MapDensities[Reclaim].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
-                        <Slider Grid.Row="26" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MapDensities[Mex].IsEnabled}" Value="{Binding MapDensities[Mex].Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="16" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding LandDensity.IsEnabled}" Value="{Binding LandDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="18" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding PlateauDensity.IsEnabled}" Value="{Binding PlateauDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="20" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MountainDensity.IsEnabled}" Value="{Binding MountainDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="22" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding RampDensity.IsEnabled}" Value="{Binding RampDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="24" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding ReclaimDensity.IsEnabled}" Value="{Binding ReclaimDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
+                        <Slider Grid.Row="26" Grid.Column="2" Style="{StaticResource CasuaSlider}" Grid.ColumnSpan="4" Margin="0 6 0 0" IsEnabled="{Binding MexDensity.IsEnabled}" Value="{Binding MexDensity.Value}" Minimum="0" Maximum="1" AutoToolTipPlacement="TopLeft" TickFrequency="0.01" AutoToolTipPrecision="2" LargeChange="0.05"/>
 
                         <TextBlock Grid.Row="28" Grid.Column="0" Text="Maps to generate" FontSize="12"/>
                         <ComboBox Grid.Row="30" Grid.Column="0" ItemsSource="{Binding GenerateCountSource}" SelectedValue="{Binding GenerateCount}"/>

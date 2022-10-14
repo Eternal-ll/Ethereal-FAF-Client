@@ -5,6 +5,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,20 +18,24 @@ using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public abstract class MapsHostingVM: Base.ViewModel
+    public abstract class MapsHostingVM: JsonSettingsViewModel
     {
         private readonly LobbyClient LobbyClient;
         private readonly ContainerViewModel Container;
         private readonly PatchClient PatchClient;
         private readonly IceManager IceManager;
         private readonly SnackbarService SnackbarService;
+        private readonly IConfiguration Configuration;
 
-        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager)
+        public string MapsPath => System.IO.Path.Combine(Configuration.GetValue<string>("Paths:Vault"), "maps");
+
+        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration)
         {
             LobbyClient = lobbyClient;
             Container = container;
             PatchClient = patchClient;
             IceManager = iceManager;
+            Configuration = configuration;
         }
 
         #region Game

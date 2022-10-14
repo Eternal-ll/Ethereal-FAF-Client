@@ -6,21 +6,22 @@ using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Windows.Markup;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 {
-    public class LobbyClient : TcpClient
+    public sealed class LobbyClient : TcpClient
     {
         public event EventHandler<bool> Authorized;
         public event EventHandler<Player> PlayerReceived;
+        public event EventHandler<Player[]> PlayersRangeReceived;
         public event EventHandler<Player[]> PlayersReceived;
         public event EventHandler<Game> GameReceived;
         public event EventHandler<Game[]> GamesReceived;

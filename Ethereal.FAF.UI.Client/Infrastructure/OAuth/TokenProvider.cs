@@ -1,17 +1,19 @@
-﻿using Ethereal.FAF.UI.Client.Properties;
+﻿using Ethereal.FAF.UI.Client.Models;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {
-    public class TokenProvider : ITokenProvider
+    public sealed class TokenProvider : ITokenProvider
     {
-        // /init init_faf.lua /gpgnet 127.0.0.1:5636 /mean 1500 /deviation 500 /numgaes /country RU /clan ZFG
-        public TokenBearer TokenBearer { get; private set; }
+        public TokenBearer TokenBearer { get; 
+            private set; }
         public JwtSecurityToken JwtSecurityToken { get; private set; }
-        public TokenProvider()
+        public TokenProvider(IConfiguration configuration)
         {
-            var token = Settings.Default.Token;
+            var token = configuration.GetSection("TokenBearer").Get<TokenBearer>();
             if (token is not null)
             {
                 TokenBearer = token;
@@ -23,9 +25,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         {
             if (token.AccessToken is null)
             {
-                TokenBearer = token;
-                Settings.Default.Token = token;
-                Settings.Default.Save();
+                //    TokenBearer = null;
+                //    AppSettings.Update("TokenBearer", token);
                 return;
             }
             var handler = new JwtSecurityTokenHandler();
@@ -37,8 +38,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         {
             ProcessJwtToken(token);
             TokenBearer = token;
-            Settings.Default.Token = token;
-            Settings.Default.Save();
+            AppSettings.Update("TokenBearer", new Dictionary<string, object>()
+            {
+                { "AccessToken", token.AccessToken },
+                { "ExpiresIn", token.ExpiresIn },
+                { "IdToken", token.IdToken },
+                { "RefreshToken", token.RefreshToken },
+                { "TokenType", token.TokenType },
+                { "Scope", token.Scope },
+                { "Created", token.Created },
+            });
         }
 
         public string GetToken() => TokenBearer.AccessToken;

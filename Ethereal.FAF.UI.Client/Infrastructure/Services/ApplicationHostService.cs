@@ -2,6 +2,7 @@
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.UI.EtherealClient.Views.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -34,7 +35,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, IThemeService themeService,
-            ITaskBarService taskBarService, INotifyIconService notifyIconService, IceManager iceManager, IHostApplicationLifetime applicationLifetime, LobbyClient lobbyClient)
+            ITaskBarService taskBarService, INotifyIconService notifyIconService, IceManager iceManager,
+            IHostApplicationLifetime applicationLifetime, LobbyClient lobbyClient)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
@@ -78,7 +80,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             await Task.CompletedTask;
 
-            LobbyClient.ConnectAsync();
+            //LobbyClient.ConnectAsync();
             _serviceProvider.GetService<GamesViewModel>();
             _serviceProvider.GetService<PlayersViewModel>();
             _serviceProvider.GetService<PartyViewModel>();

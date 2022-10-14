@@ -2,7 +2,7 @@
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class Welcome : WelcomeData
+    public sealed class Welcome : WelcomeData
     {
         public new Player me { get; set; }
     }

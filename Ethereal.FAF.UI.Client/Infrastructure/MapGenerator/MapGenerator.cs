@@ -1,20 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Imaging;
-using static System.Net.WebRequestMethods;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
-    public class MapGenerator
+    public sealed class MapGenerator
     {
         public event EventHandler<string> MapGenerated;
         public List<string> KnownVersions = new List<string>();
@@ -26,6 +25,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly DirectoryInfo GeneratedMapsFolder;
 
         private readonly IHttpClientFactory HttpClientFactory;
+        private readonly IConfiguration Configuration;
         private readonly ILogger Logger;
 
         public static string LatestVersion = "1.8.8";
@@ -39,7 +39,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             "POINT16", "XZ", "ZX", "X", "Z", "QUAD", "DIAG", "NONE"
         };
 
-        public MapGenerator(string javaRuntime, string logging, string previewPath, string mapGeneratorsFolder, string generatedMapsFolder, IHttpClientFactory httpClientFactory, ILogger logger)
+        public MapGenerator(string javaRuntime, string logging, string previewPath, string mapGeneratorsFolder, string generatedMapsFolder,
+            IHttpClientFactory httpClientFactory, ILogger<MapGenerator> logger)
         {
             JavaRuntime = javaRuntime;
             Logging = logging;
@@ -64,8 +65,30 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             });
         }
+        //public MapGenerator(IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<MapGenerator> logger)
+        //{
+        //    Configuration = configuration;
+        //    HttpClientFactory = httpClientFactory;
+        //    Logger = logger;
+        //    MapGeneratorsFolder = new DirectoryInfo(configuration.GetValue<string>("MapGenerator"))
 
-        private string MapGeneratorFile(string version) => MapGeneratorsFolder.FullName + $"MapGenerator_{version}.jar";
+        //    Task.Run(async () =>
+        //    {
+        //        if (!MapGeneratorsFolder.Exists)
+        //        {
+        //            MapGeneratorsFolder.Create();
+        //            await ConfirmOrDownloadAsync(LatestVersion);
+        //        }
+        //        var files = MapGeneratorsFolder.GetFiles("MapGenerator_*.*.*.jar", SearchOption.AllDirectories);
+        //        foreach (var mapgen in files)
+        //        {
+        //            var version = mapgen.Name.Split('_')[^1].Replace(".jar", null);
+        //            if (!KnownVersions.Any(v => v == version)) KnownVersions.Add(version);
+        //        }
+        //    });
+        //}
+
+        private string MapGeneratorFile(string version) => Path.Combine(MapGeneratorsFolder.FullName, $"MapGenerator_{version}.jar");
 
         private Process GetProcess(string path)
         {

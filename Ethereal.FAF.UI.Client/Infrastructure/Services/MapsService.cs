@@ -33,6 +33,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             var client = HttpClientFactory.CreateClient();
             using var fs = new FileStream(map+ ".zip", FileMode.Create);
+            // https://content.faforever.com/maps/mayhem_of_64_acus_v2.v0002.zip 
             var response = await client.GetAsync(BaseAddress + mapFilePath, cancellationToken);
             progress?.Report($"Downloading map [{map + ".zip"}]");
             await response.Content.CopyToAsync(fs, cancellationToken);

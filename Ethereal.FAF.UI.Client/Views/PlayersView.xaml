@@ -76,7 +76,7 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBlock Text="{Binding Login}" Margin="0 0 0 0"/>
+                    <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0"/>
                     <Button Content="Invite"
                             Command="{DynamicResource InvitePlayerCommand}"
                             CommandParameter="{Binding Id}"

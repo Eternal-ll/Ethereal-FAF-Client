@@ -5,10 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class Player : PlayerInfoMessage
+    public sealed class Player : PlayerInfoMessage
     {
         private string _FlagUri;
         public string FlagUri => _FlagUri ??= "/Resources/Images/Flags/" + Country + ".png";
+
+        public string LoginWithClan => $"{(Clan is null ? null : '[' + Clan + "] ")}{Login}";
 
         [JsonPropertyName("players")]
         public new Player[] Players { get; set; }
@@ -18,6 +20,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public int Ladder1v1 => Ratings.Ladder1V1 is null ? 0 : Ratings.Ladder1V1.DisplayedRating;
         public int Tmm2v2 => Ratings.Tmm2V2 is null ? 0 : Ratings.Tmm2V2.DisplayedRating;
         public int Tmm4v4 => Ratings.Tmm4V4FullShare is null ? 0 : Ratings.Tmm4V4FullShare.DisplayedRating;
+        public int GlobalGames => Ratings.Global is null ? 0 : Ratings.Global.number_of_games;
+        public int Ladder1v1Games => Ratings.Ladder1V1 is null ? 0 : Ratings.Ladder1V1.number_of_games;
+        public int Tmm2v2Games => Ratings.Tmm2V2 is null ? 0 : Ratings.Tmm2V2.number_of_games;
+        public int Tmm4v4Games => Ratings.Tmm4V4FullShare is null ? 0 : Ratings.Tmm4V4FullShare.number_of_games;
 
         public RatingType DisplayRatingType { get; set; }
         public int UniversalRatingDisplay => DisplayRatingType switch
@@ -28,6 +34,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             RatingType.tmm_4v4_share_until_death => Tmm4v4,
             RatingType.tmm_2v2 => Tmm2v2,
         };
+
+        public int UniversalGameRatingDisplay => Game is null ? UniversalRatingDisplay :
+            Game.RatingType switch
+            {
+                RatingType.global => Global,
+                RatingType.ladder_1v1 => Ladder1v1,
+                RatingType.tmm_4v4_full_share => Tmm4v4,
+                RatingType.tmm_4v4_share_until_death => Tmm4v4,
+                RatingType.tmm_2v2 => Tmm2v2,
+            };
 
 
 
@@ -59,6 +75,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     OnPropertyChanged(nameof(IsInGame));
                     OnPropertyChanged(nameof(IsPlaying));
+                    OnPropertyChanged(nameof(UniversalGameRatingDisplay));
                 }
             }
         }

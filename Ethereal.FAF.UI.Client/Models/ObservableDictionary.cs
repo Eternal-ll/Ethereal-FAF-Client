@@ -592,7 +592,7 @@ namespace Ethereal.FAF.UI.Client.Models
             remove { PropertyChanged -= value; }
         }
 
-        protected virtual event PropertyChangedEventHandler PropertyChanged;
+        public virtual event PropertyChangedEventHandler PropertyChanged;
 
         #endregion INotifyPropertyChanged
 

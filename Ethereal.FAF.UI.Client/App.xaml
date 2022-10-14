@@ -15,6 +15,7 @@
                     <cmd:FafScoreCommand x:Key="FafScoreCommand"/>
 
                     <cmd:NagivateUriCommand x:Key="NagivateUriCommand"/>
+                    <cmd:CopyCommand x:Key="CopyCommand"/>
 
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
                     <cmd:OpenImageCommand x:Key="OpenImageCommand"/>
@@ -37,6 +38,7 @@
                 <ui:ControlsDictionary />
                 <ui:ThemesDictionary Theme="Dark" />
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/FontsDictionary.xaml"/>
 
                 <ResourceDictionary>
                     <Style x:Key="BorderPopup" TargetType="Border">

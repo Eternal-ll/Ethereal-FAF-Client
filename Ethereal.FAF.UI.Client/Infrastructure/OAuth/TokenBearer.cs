@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {
-    public class TokenBearer
+    public sealed class TokenBearer
     {
         //  "access_token": "**********",
         //    "expires_in": "**********",
@@ -19,7 +19,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         public double ExpiresIn { get; set; }
 
         [JsonIgnore]
-        public DateTimeOffset ExpiresAt => Created.AddSeconds(ExpiresIn);
+        public DateTime ExpiresAt => Created.AddSeconds(ExpiresIn);
 
         [JsonPropertyName("id_token")]
         public string IdToken { get; set; }
@@ -34,9 +34,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         public string Scope { get; set; }
 
         [JsonPropertyName("created")]
-        public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
+        public DateTime Created { get; set; } = DateTime.Now;
         [JsonIgnore]
-        public bool IsExpired => (ExpiresAt - DateTimeOffset.Now).TotalMinutes < 5;
+        public bool IsExpired => (ExpiresAt - DateTime.Now).TotalMinutes < 5;
     }
     public partial class FafJwtPayload
     {

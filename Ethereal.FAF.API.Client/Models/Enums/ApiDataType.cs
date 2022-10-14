@@ -31,5 +31,7 @@
         game,
         gamePlayerStats,
 
+        coturnServer
+
     }
 }
