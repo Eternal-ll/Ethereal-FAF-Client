@@ -66,7 +66,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             var host = "127.0.0.1";
             Logger.LogTrace("Initializing ICE client");
             IceClient = new(host, RpcPort);
-            IceClient.Connect();
+            IceClient.ConnectAsync();
             IceClient.PassIceServers(ice_servers);
             IceClient.GpgNetMessageReceived += IceClient_GpgNetMessageReceived;
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
@@ -80,7 +80,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             sb.Append($"-jar \"{Configuration.GetValue<string>("IceAdapter:Executable")}\" ");
             sb.Append($"--id {playerId} ");
             sb.Append($"--login {playerLogin} ");
-            sb.Append($"--game-id {gameId} ");
+            //sb.Append($"--game-id {gameId} ");
             sb.Append($"--rpc-port {RpcPort} ");
             sb.Append($"--gpgnet-port {GpgNetPort} ");
             //sb.Append($"--log-level {Configuration.GetValue<string>("IceAdapter:LogLevel")} ");
