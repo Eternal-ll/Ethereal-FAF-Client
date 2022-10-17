@@ -26,6 +26,7 @@ using Wpf.Ui.Common;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.TaskBar;
+using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace FAF.UI.EtherealClient.Views.Windows
 {
@@ -56,7 +57,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IConfiguration configuration,
             LobbyClient lobbyClient,
             IServiceProvider serviceProvider,
-            TokenProvider tokenProvider,
+            ITokenProvider tokenProvider,
             IHost host,
             PatchClient patchClient)
         {
@@ -95,7 +96,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             //Container.SplashVisibility = Visibility.Collapsed;
             //Container.SplashProgressVisibility = Visibility.Collapsed;
             ServiceProvider = serviceProvider;
-            TokenProvider = tokenProvider;
+            TokenProvider = (TokenProvider)tokenProvider;
             Host = host;
             PatchClient = patchClient;
 

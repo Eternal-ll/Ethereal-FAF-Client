@@ -23,6 +23,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 
         private void ProcessJwtToken(TokenBearer token)
         {
+            if (token is null) return;
             if (token.AccessToken is null)
             {
                 //    TokenBearer = null;

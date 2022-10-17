@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
@@ -15,13 +16,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly CancellationTokenSource CancellationTokenSource;
         private readonly TokenProvider TokenProvider;
 
-        public TokenReloadService(ILogger<TokenReloadService> logger, IServiceProvider serviceProvider, TokenProvider tokenProvider)
+        public TokenReloadService(ILogger<TokenReloadService> logger, IServiceProvider serviceProvider, ITokenProvider tokenProvider)
         {
             Logger = logger;
             Logger.LogTrace("Initialized");
             ServiceProvider = serviceProvider;
             CancellationTokenSource = new();
-            TokenProvider = tokenProvider;
+            TokenProvider = (TokenProvider)tokenProvider;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)

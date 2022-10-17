@@ -96,8 +96,6 @@ namespace Ethereal.FAF.UI.Client
                 userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
                 userAgentVersion: version));
 
-            services.AddSingleton<TokenProvider>();
-
             services.AddScoped(s => new PatchClient(
                 logger: s.GetService<ILogger<PatchClient>>(),
                 serviceProvider: s,
@@ -138,7 +136,7 @@ namespace Ethereal.FAF.UI.Client
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapsService>>()));
 
-            services.AddScoped<ITokenProvider, TokenProvider>();
+            services.AddSingleton<ITokenProvider, TokenProvider>();
 
             services.AddFafApi();
 
