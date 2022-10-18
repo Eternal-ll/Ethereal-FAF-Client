@@ -5,18 +5,21 @@ namespace Ethereal.FAF.API.Client
 {
     public static partial class BuilderExtensions
     {
-
-        private static void Configure(HttpClient c) => c.BaseAddress = new Uri("https://api.faforever.com/");
-
-        public static IServiceCollection AddFafApi(this IServiceCollection services) => services
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="api"></param>
+        /// <param name="content"></param>
+        /// <returns>Adds <see cref="IFafApiClient"/> and <see cref="IFafContentClient"/></returns>
+        public static IServiceCollection AddFafApi(this IServiceCollection services, Uri api, Uri content) => services
             .AddTransient<AuthHeaderHandler>()
             .AddTransient<VerifyHeaderHandler>()
-
-            .AddRefitClient<IFeaturedFilesClient>()
-            .ConfigureHttpClient(Configure)
+            .AddRefitClient<IFafApiClient>()
+            .ConfigureHttpClient(c=>c.BaseAddress = api)
             .Services
-            .AddRefitClient<IContentClient>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://content.faforever.com/"))
+            .AddRefitClient<IFafContentClient>()
+            .ConfigureHttpClient(c => c.BaseAddress = content)
             .Services;
     }
 }

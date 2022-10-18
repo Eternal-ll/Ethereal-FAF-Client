@@ -148,7 +148,9 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddSingleton<ITokenProvider, TokenProvider>();
 
-            services.AddFafApi();
+            services.AddFafApi(
+                api: configuration.GetValue<Uri>("FAForever:API"),
+                content: configuration.GetValue<Uri>("FAForever:Content"));
 
             services.AddHttpClient();
 

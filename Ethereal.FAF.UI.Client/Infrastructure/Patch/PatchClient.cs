@@ -103,7 +103,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 progress?.Report("All files up to date");
                 return;
             }
-            var apiClient = ServiceProvider.GetService<IFeaturedFilesClient>();
+            var apiClient = ServiceProvider.GetService<IFafApiClient>();
             var apiResponse = version == 0 ? 
                 await apiClient.GetLatestAsync((int)mod, accessToken, cancellationToken) :
                 await apiClient.GetAsync((int)mod, version, accessToken, cancellationToken);
@@ -127,7 +127,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             StopWatchers();
             apiClient = null;
-            var contentClient = ServiceProvider.GetService<IContentClient>();
+            var contentClient = ServiceProvider.GetService<IFafContentClient>();
             Logger.LogTrace($"[{requiredFiles.Length}] of [{files.Length}] files required to update");
             progress?.Report($"[{requiredFiles.Length}] of [{files.Length}] files required to update");
             int i = 1;
