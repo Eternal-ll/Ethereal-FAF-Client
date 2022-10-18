@@ -25,7 +25,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             if (Set(ref field, value, PropertyName: PropertyName))
             {
-                AppSettings.Update(path, asString ? value.ToString() : value);
+                UserSettings.Update(path, asString ? value.ToString() : value);
                 return true;
             }
             return false;
@@ -232,7 +232,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _ThemeType, value))
                 {
-                    AppSettings.Update("UI:ThemeType", value.ToString());
+                    UserSettings.Update("UI:ThemeType", value.ToString());
                     ThemeService.SetTheme(value);
                 }
             }
@@ -249,7 +249,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _BackgroundType, value))
                 {
-                    AppSettings.Update("UI:BackgroundType", value.ToString());
+                    UserSettings.Update("UI:BackgroundType", value.ToString());
                     if (NavigationWindow is UiWindow window)
                     {
                         window.WindowBackdropType = value;
@@ -268,7 +268,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _AccentColor, value))
                 {
-                    AppSettings.Update("UI:AccentColor", value.ToString());
+                    UserSettings.Update("UI:AccentColor", value.ToString());
                     ThemeService.SetAccent(value);
                 }
             }

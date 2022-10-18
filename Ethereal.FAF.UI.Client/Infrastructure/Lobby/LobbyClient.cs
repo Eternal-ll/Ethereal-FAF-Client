@@ -5,8 +5,8 @@ using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -20,6 +20,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     public sealed class LobbyClient : TcpClient
     {
         public event EventHandler<bool> Authorized;
+        public event EventHandler<string> IrcPasswordReceived;
         public event EventHandler<Player> PlayerReceived;
         public event EventHandler<Player[]> PlayersRangeReceived;
         public event EventHandler<Player[]> PlayersReceived;
@@ -196,6 +197,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         Session = null;
                         break;
                     case ServerCommand.irc_password:
+                        string password = JsonSerializer.Deserialize<Dictionary<string,string>>(data)["password"];
+                        IrcPasswordReceived?.Invoke(this, password);
                         break;
                     case ServerCommand.welcome:
                         var welcome = JsonSerializer.Deserialize<Welcome>(data);

@@ -411,7 +411,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (games is null) return;
             if (!TryGetGame(e.Uid, out var cached, out var index))
             {
-                Logger.LogWarning($"Unique game received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
+                //Logger.LogWarning($"Unique game received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
                 if (e.State is GameState.Closed) 
                 {
                     return;

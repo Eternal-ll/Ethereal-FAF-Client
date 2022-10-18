@@ -1,4 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Services;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,7 +1,8 @@
 ﻿using Ethereal.FAF.API.Client;
-using Ethereal.FAF.UI.Client.Infrastructure.Background;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
@@ -16,9 +17,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Windows;
 using Wpf.Ui.Mvvm.Contracts;
@@ -42,6 +43,10 @@ namespace Ethereal.FAF.UI.Client
                 loggingBuilder.AddConsole();
             })
             .ConfigureServices(ConfigureServices)
+            .ConfigureHostConfiguration(c =>
+            {
+                c.AddJsonFile("appsettings.user.json", true, true);
+            })
             .Build();
             await Hosting.StartAsync();
         }
@@ -108,6 +113,11 @@ namespace Ethereal.FAF.UI.Client
                 configuration: s.GetService<IConfiguration>(),
                 notificationService: s.GetService<NotificationService>()));
 
+            services.AddScoped(s => new IrcClient(
+                host: configuration.GetValue<string>("FAForever:IRC:Host"),
+                port: configuration.GetValue<int>("FAForever:IRC:Port"),
+                logger: s.GetService<ILogger<IrcClient>>()));
+
             services.AddScoped<GameLauncher>();
 
             var vault = Environment.ExpandEnvironmentVariables(configuration.GetValue<string>("Paths:Vault"));
@@ -116,7 +126,7 @@ namespace Ethereal.FAF.UI.Client
             {
                 if (vault != customPath)
                 {
-                    AppSettings.Update("Paths:Vault", customPath);
+                    UserSettings.Update("Paths:Vault", customPath);
                 }
             }
             else if (string.IsNullOrWhiteSpace(customPath)) FaPaths.SetCustomVaultPath(vault, configuration.GetValue<string>("Paths:Patch"));
@@ -166,6 +176,9 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient<GenerateMapsVM>();
             services.AddTransient<LocalMapsVM>();
+
+            services.AddScoped<ChatViewModel>();
+            services.AddScoped<ChatView>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

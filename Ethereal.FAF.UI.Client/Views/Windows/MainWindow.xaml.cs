@@ -172,7 +172,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             Task.Run(async () =>
             {
                 await PrepareJavaRuntime();
-                await InitalizePathWatchers();
+                //await InitalizePathWatchers();
                 await Auth();
             });
         }

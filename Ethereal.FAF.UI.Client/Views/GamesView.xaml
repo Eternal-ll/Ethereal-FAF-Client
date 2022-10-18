@@ -1055,7 +1055,7 @@
             </Popup>
 
             <Button Content="Host" Width="100" Margin="10 0 0 0" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
-            <!--<CheckBox IsChecked="{Binding ViewModel.Compact}" Content="Compact"/>-->
+            <CheckBox IsChecked="{Binding ViewModel.Compact}" Content="Compact"/>
             <Ui:Button Margin="10 0 0 0" MinWidth="100" VerticalAlignment="Stretch">
                 <Ui:Button.Style>
                     <Style TargetType="Ui:Button" BasedOn="{StaticResource {x:Type Ui:Button}}">

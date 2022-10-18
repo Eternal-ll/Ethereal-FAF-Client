@@ -68,7 +68,7 @@
                 TransitionType="FadeInWithSlide">
                 <ui:NavigationStore.Items>
                     <ui:NavigationItem
-                        Cache="True"
+                        Cache="False"
                         Content="Play"
                         PageType="{x:Type v:GamesView}"
                         Icon="XboxController24"

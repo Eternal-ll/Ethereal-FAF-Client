@@ -39,7 +39,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         {
             ProcessJwtToken(token);
             TokenBearer = token;
-            AppSettings.Update("TokenBearer", new Dictionary<string, object>()
+            UserSettings.Update("TokenBearer", new Dictionary<string, object>()
             {
                 { "AccessToken", token.AccessToken },
                 { "ExpiresIn", token.ExpiresIn },

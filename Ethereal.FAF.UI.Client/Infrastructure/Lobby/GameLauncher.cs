@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
