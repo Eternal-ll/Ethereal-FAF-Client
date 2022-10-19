@@ -132,7 +132,7 @@ namespace Ethereal.FAF.UI.Client
                 logging: configuration.GetValue<string>("MapGenerator:Logs"),
                 previewPath: configuration.GetValue<string>("MapGenerator:PreviewPath"),
                 mapGeneratorsFolder: configuration.GetValue<string>("MapGenerator:Versions"),
-                generatedMapsFolder: Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps"),
+                generatedMapsFolder: Path.Combine(vault, "maps"),
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
