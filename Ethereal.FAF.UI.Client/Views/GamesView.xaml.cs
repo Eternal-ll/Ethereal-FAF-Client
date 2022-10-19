@@ -1,7 +1,10 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
+using System;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Wpf.Ui.Common.Interfaces;
 
 namespace Ethereal.FAF.UI.Client.Views
@@ -33,6 +36,33 @@ namespace Ethereal.FAF.UI.Client.Views
                 }
             }
             image.Initialized -= Image_Initialized;
+        }
+        Task task;
+        private void Image_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is bool visible && visible) return;
+            var image = (Image)sender;
+            //var t = GC.GetGeneration(image.Source);
+            image.Source = null;
+            try
+            {
+                image.UpdateLayout();
+            }
+            catch
+            {
+            }
+            //GC.Collect(1);
+            //GC.WaitForPendingFinalizers();
+            //return;
+            if (task is not null) return;
+            task = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                Dispatcher.Invoke(UpdateLayout);
+                //task = null;
+                GC.Collect(1);
+                //GC.WaitForPendingFinalizers();
+            });
         }
     }
 }

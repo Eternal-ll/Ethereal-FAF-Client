@@ -13,8 +13,7 @@
     WindowCornerPreference="Round"
     WindowStartupLocation="CenterScreen"
     d:DataContext="{d:DesignInstance {x:Type vm:ContainerViewModel}}"
-    mc:Ignorable="d"
-    MaxHeight="{Binding Source={x:Static SystemParameters.MaximizedPrimaryScreenHeight}}">
+    mc:Ignorable="d">
     <!--Background="#ff202020"-->
     <Grid>
         <Grid.RowDefinitions>

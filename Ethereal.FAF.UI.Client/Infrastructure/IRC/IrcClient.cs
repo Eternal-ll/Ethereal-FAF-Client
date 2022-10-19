@@ -46,25 +46,44 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             Logger = logger;
         }
 
-
         string cache;
-        protected override void OnReceived(byte[] buffer, long offset, long size)
+        private bool TryParseLines(ref string data, out string message)
         {
-            var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            var messages = (cache + data).Split("\r\n");
-            var correct = data.EndsWith("\r\n");
-            for (int i = 0; i < messages.Length - 1; i++)
+            message = string.Empty;
+            if (data is null) return false;
+            var index = data.IndexOf("\r\n");
+            if (index != -1)
             {
-                ProcessData(messages[i]);
-            }
-            if (!correct)
-            {
-                cache += messages[^1];
+                message += cache;
+                message += data[..(index + 2)];
+                data = data[(index + 2)..];
+                cache = null;
             }
             else
             {
-                cache = null;
-                ProcessData(messages[^1]);
+                cache += data;
+            }
+            return message.Length != 0;
+        }
+        List<byte> Cache = new();
+        protected override void OnReceived(byte[] buffer, long offset, long size)
+        {
+            if (Cache.Count == 0 && buffer[0] == '{' && buffer[^2] == '\r' && buffer[^1] == '\n')
+            {
+                ProcessData(Encoding.UTF8.GetString(buffer, 0, (int)size));
+                return;
+            }
+            byte last = 0;
+            for (int i = (int)offset; i < (int)size; i++)
+            {
+                if (last == '\r' && buffer[i] == '\n')
+                {
+                    ProcessData(Encoding.UTF8.GetString(Cache.ToArray(), 0, Cache.Count));
+                    Cache.Clear();
+                    continue;
+                }
+                last = buffer[i];
+                Cache.Add(buffer[i]);
             }
         }
 
@@ -78,7 +97,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
 
         private void ProcessData(string data)
         {
-            if (string.IsNullOrWhiteSpace(data)) return;
             if (data == ":irc.faforever.com NOTICE * :*** Looking up your hostname...")
             {
                 PassAuthorization();

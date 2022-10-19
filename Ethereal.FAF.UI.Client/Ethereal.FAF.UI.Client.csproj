@@ -6,6 +6,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -15,8 +16,7 @@
   <ItemGroup>
     <None Remove="External\7z.dll" />
     <None Remove="External\7z.exe" />
-    <None Remove="External\faf-ice-adapter-v3.3-RC1-win.jar" />
-    <None Remove="External\faf-ice-adapter.jar" />
+    <None Remove="External\faf-ice-adapter-v3.3-RC1-nojfx.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
     <None Remove="Resources\Fonts\*.otf" />
@@ -58,9 +58,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.user.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

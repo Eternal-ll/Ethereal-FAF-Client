@@ -320,7 +320,7 @@
 
                 <Separator Margin="-20 0 -14 0"/>
 
-                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceDebugEnabled}">
+                <!--<CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceDebugEnabled}">
                     <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
                         <Run Text="Show ICE adapter debug window"/>
                         <LineBreak/>
@@ -337,7 +337,7 @@
                              Style="{StaticResource DescriptionHeaderRun}"/>
                     </TextBlock>
                 </CheckBox>
-                <Separator Margin="-20 0 -14 0"/>
+                <Separator Margin="-20 0 -14 0"/>-->
                 <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.UseIceTelemetryUI}">
                     <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
                         <Run Text="Enable web ICE UI telemetry"/>

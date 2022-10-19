@@ -4,6 +4,7 @@ using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
+using NetCoreServer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -72,6 +73,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             UidGenerator = uidGenerator;
             UserAgent = userAgent;
             UserAgentVersion = userAgentVersion;
+            OptionReceiveBufferSize = 4096;
         }
 
         public void AskSession() => SendAsync(ServerCommands.AskSession(UserAgent, UserAgentVersion));
@@ -126,23 +128,40 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 ConnectAsync();
         }
         string cache;
-        protected override void OnReceived(byte[] buffer, long offset, long size)
+        private bool TryParseLines(ref string data, out string message)
         {
-            var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            var messages = (cache + data).Split("\n");
-            var correct = data.EndsWith("\n");
-            for (int i = 0; i < messages.Length - 1; i++)
+            message = string.Empty;
+            if (data is null) return false;
+            var index = data.IndexOf('\n');
+            if (index != -1)
             {
-                ProcessData(messages[i]);
-            }
-            if (!correct)
-            {
-                cache += messages[^1];
+                message = cache + data[..(index + 1)];
+                data = data[(index + 1)..];
+                cache = null;
             }
             else
             {
-                cache = null;
-                ProcessData(messages[^1]);
+                cache += data;
+            }
+            return message.Length != 0;
+        }
+        List<byte> Cache = new();
+        protected override void OnReceived(byte[] buffer, long offset, long size)
+        {
+            if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
+            {
+                ProcessData(Encoding.UTF8.GetString(buffer, 0, (int)size));
+                return;
+            }
+            for (int i = (int)offset; i < (int)size; i++)
+            {
+                if (buffer[i] == '\n')
+                {
+                    ProcessData(Encoding.UTF8.GetString(Cache.ToArray(), 0, Cache.Count));
+                    Cache.Clear();
+                    continue;
+                }
+                Cache.Add(buffer[i]);
             }
         }
         private void SendAuth(string accessToken, string uid, string session)
@@ -152,7 +171,22 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private async void ProcessData(string data)
         {
-            if (string.IsNullOrWhiteSpace(data)) return;
+            if (!data.StartsWith('{'))
+            {
+                //data = data[1..];
+            }
+            if (!data.EndsWith('}'))
+            {
+                //data = data[..^1];
+            }
+            try
+            {
+                var t = JsonSerializer.Deserialize<Dictionary<string, object>>(data);
+            }
+            catch(Exception ex)
+            {
+
+            }
             var target = data[(data.IndexOf(':') + 2)..];
             target = target[..target.IndexOf('\"')];
             if (Enum.TryParse<ServerCommand>(target, out var command))

@@ -70,43 +70,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         {
         }
 
-        string cache;
-        private bool TryParseLines(ref string data, out string message)
-        {
-            message = string.Empty;
-            if (data is null) return false;
-            var index = data.IndexOf('\n');
-            if (index != -1)
-            {
-                message += cache;
-                message += data[..(index + 1)];
-                data = data[(index + 1)..];
-                cache = null;
-            }
-            else
-            {
-                cache += data;
-            }
-            return message.Length != 0;
-        }
-
+        List<byte> Cache = new();
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
-            var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            var messages = (cache + data).Split("\n");
-            var correct = data.EndsWith("\n");
-            for (int i = 0; i < messages.Length - 1; i++)
+            if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
             {
-                ProcessData(messages[i]);
+                ProcessData(Encoding.UTF8.GetString(buffer, 0, (int)size));
+                return;
             }
-            if (!correct)
+            for (int i = (int)offset; i < (int)size; i++)
             {
-                cache += messages[^1];
-            }
-            else
-            {
-                cache = null;
-                ProcessData(messages[^1]);
+                if (buffer[i] == '\n')
+                {
+                    ProcessData(Encoding.UTF8.GetString(Cache.ToArray(), 0, Cache.Count));
+                    Cache.Clear();
+                    continue;
+                }
+                Cache.Add(buffer[i]);
             }
         }
         public override bool SendAsync(string text)
@@ -139,7 +119,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         private bool IsInitialized = false;
         private void ProcessData(string json)
         {
-            if (string.IsNullOrWhiteSpace(json)) return;
             if (json.StartsWith("{\"me"))
             {
                 var rpc = JsonSerializer.Deserialize<RpcRequest>(json);

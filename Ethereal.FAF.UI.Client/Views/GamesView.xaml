@@ -317,9 +317,9 @@
                         </Grid.ColumnDefinitions>
                         <Button Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}"
                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
-                        <Image Grid.Row="0" Grid.RowSpan="2" Initialized="Image_Initialized"
-                               Source="{Binding SmallMapPreview, Mode=OneWay}"
-                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"
+                               IsVisibleChanged="Image_IsVisibleChanged"/>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MapScenario.Name}" Margin="4 4 0 0" FontWeight="DemiBold" TextWrapping="Wrap"
                                    ToolTip="{Binding MapScenario.Name}"/>
                         <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Margin="4 0 0 4" FontWeight="DemiBold">
@@ -468,7 +468,7 @@
                                         </TextBlock.Style>
                                     </TextBlock>
                                 </Ui:Badge>
-                                <Ui:Badge Margin="4 4 0 0" FontSize="10" Content="{Binding ApiGameValidatyState}"
+                                <!--<Ui:Badge Margin="4 4 0 0" FontSize="10" Content="{Binding ApiGameValidatyState}"
                                           VerticalContentAlignment="Center">
                                     <Ui:Badge.Style>
                                         <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
@@ -483,7 +483,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Ui:Badge.Style>
-                                </Ui:Badge>
+                                </Ui:Badge>-->
                             </WrapPanel>
                         </StackPanel>
                     </Grid>
@@ -519,9 +519,9 @@
                         </Grid.ColumnDefinitions>
                         <Button Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}"
                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
-                        <Image Grid.Row="0" Grid.RowSpan="2" Initialized="Image_Initialized"
-                               Source="{Binding SmallMapPreview, Mode=OneWay}"
-                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"
+                               IsVisibleChanged="Image_IsVisibleChanged"/>
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MapScenario.Name}" Margin="4 4 0 0" FontWeight="DemiBold" TextWrapping="Wrap"
                                    ToolTip="{Binding MapScenario.Name}"/>
                         <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Bottom" Margin="4 0 0 4" FontWeight="DemiBold">
@@ -556,6 +556,15 @@
                                                 <MenuItem Style="{StaticResource GamePlayerMenuItem}" DataContext="{Binding HostPlayer}"/>
                                             </ContextMenu>
                                         </ContentControl.ContextMenu>
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Image Style="{StaticResource AvatarImage}"/>
+                                                    <Image Source="{Binding FlagUri}" Margin="4 0 0 0" ToolTip="{Binding Country}" Width="16" Height="16"/>
+                                                    <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0" ToolTip="{Binding LoginWithClan}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
                                     </ContentControl>
                                 </InlineUIContainer>
                             </TextBlock>
@@ -717,10 +726,9 @@
                         </ToolTip>
                     </Border.ToolTip>
                     <StackPanel>
-                        <Image Initialized="Image_Initialized"
-                               Source="{Binding SmallMapPreview, Mode=OneWay}"
-                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top">
-                        </Image>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"
+                               IsVisibleChanged="Image_IsVisibleChanged"/>
                         <Ui:Badge HorizontalAlignment="Right" Margin="4 -24 4 4" Padding="4 2" FontSize="12"
                                   Appearance="Secondary">
                             <TextBlock>
@@ -728,7 +736,7 @@
                                 <Run Text="{Binding LaunchedAtTimeSpan,Mode=OneWay, StringFormat='{}{0:hh}:{0:mm}:{0:ss}'}"/>
                             </TextBlock>
                         </Ui:Badge>
-                        <Button Style="{StaticResource MapGeneratorButton}" Margin="4 -128 4 4" CommandParameter="{Binding}"
+                        <Button Style="{StaticResource MapGeneratorButton}" Margin="0 -128 0 0" CommandParameter="{Binding}"
                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontSize="12"/>
                         <ItemsControl ItemsSource="{Binding GameTeams}" Margin="0 4">
                             <ItemsControl.ItemTemplate>
@@ -772,11 +780,10 @@
                         </ToolTip>
                     </Border.ToolTip>
                     <StackPanel Orientation="Horizontal">
-                        <Image Initialized="Image_Initialized"
-                               Source="{Binding SmallMapPreview, Mode=OneWay}"
-                               Width="50" Height="50">
-                        </Image>
-                        <Button Style="{StaticResource MapGeneratorButton}" Margin="4" CommandParameter="{Binding}" FontSize="12"/>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="50" Height="50" VerticalAlignment="Top"
+                               IsVisibleChanged="Image_IsVisibleChanged"/>
+                        <Button Style="{StaticResource MapGeneratorButton}" Margin="-46 0 0 0" CommandParameter="{Binding}" FontSize="12"/>
                         <ItemsControl ItemsSource="{Binding GameTeams}" Margin="10 4">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -802,6 +809,8 @@
                         <ToolTip>
                             <TextBlock>
                                 <Run Text="{Binding AfterCreationTimeSpan, StringFormat='Created {0:ss} seconds ago', Mode=OneWay}"/>
+                                <LineBreak/>
+                                <Run Text="{Binding State}"/>
                             </TextBlock>
                         </ToolTip>
                     </Border.ToolTip>
@@ -815,9 +824,9 @@
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <Image Initialized="Image_Initialized"
-                               Source="{Binding SmallMapPreview, Mode=OneWay}"
-                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"
+                               IsVisibleChanged="Image_IsVisibleChanged"/>
                         <Ui:Badge VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                   Padding="4 2" FontSize="12" Appearance="Secondary">
                             <TextBlock>
@@ -1337,7 +1346,7 @@
                                 <Ui:VirtualizingWrapPanel
                                 IsVirtualizing="{TemplateBinding VirtualizingPanel.IsVirtualizing}"
                                 SpacingMode="None"
-                                StretchItems="True"
+                                StretchItems="false"
                                 VirtualizationMode="{TemplateBinding VirtualizingPanel.VirtualizationMode}" />
                             </ItemsPanelTemplate>
                         </Setter.Value>

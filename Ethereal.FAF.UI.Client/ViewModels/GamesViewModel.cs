@@ -510,6 +510,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 FillPlayers(cached);
                 ProcessJoinedPlayers(cached, joinedPlayers);
             }
+            cached.State = e.State;
         }
         private void UpdateTeams(Game oldGame, Game newGame)
         {

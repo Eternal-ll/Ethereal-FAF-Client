@@ -121,7 +121,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                 {
                     MapGeneratorState = MapGeneratorState.NotGenerated;
                     SmallMapPreview = string.IsNullOrWhiteSpace(value) || IsMapgen ?
-                        "/Resources/Images/1x1.png" :
+                        null :
                         $"https://content.faforever.com/maps/previews/small/{value}.png";
                     OnPropertyChanged(nameof(IsMapgen));
                 }
