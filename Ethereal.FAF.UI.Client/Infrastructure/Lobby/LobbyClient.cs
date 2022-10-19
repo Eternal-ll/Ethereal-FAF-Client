@@ -126,31 +126,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 ConnectAsync();
         }
         string cache;
-        private bool TryParseLines(ref string data, out string message)
-        {
-            message = string.Empty;
-            if (data is null) return false;
-            var index = data.IndexOf('\n');
-            if (index != -1)
-            {
-                message += cache;
-                message += data[..(index + 1)];
-                data = data[(index + 1)..];
-                cache = null;
-            }
-            else
-            {
-                cache += data;
-            }
-            return message.Length != 0;
-        }
-
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            while (TryParseLines(ref data, out var message))
+            var messages = (cache + data).Split("\n");
+            var correct = data.EndsWith("\n");
+            for (int i = 0; i < messages.Length - 1; i++)
             {
-                ProcessData(message);
+                ProcessData(messages[i]);
+            }
+            if (!correct)
+            {
+                cache += messages[^1];
+            }
+            else
+            {
+                cache = null;
+                ProcessData(messages[^1]);
             }
         }
         private void SendAuth(string accessToken, string uid, string session)
@@ -160,6 +152,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         private async void ProcessData(string data)
         {
+            if (string.IsNullOrWhiteSpace(data)) return;
             var target = data[(data.IndexOf(':') + 2)..];
             target = target[..target.IndexOf('\"')];
             if (Enum.TryParse<ServerCommand>(target, out var command))

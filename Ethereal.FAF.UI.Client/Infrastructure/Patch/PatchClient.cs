@@ -1,4 +1,5 @@
-﻿using FAF.Domain.LobbyServer.Enums;
+﻿using Ethereal.FAF.API.Client;
+using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;

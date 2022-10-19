@@ -107,11 +107,7 @@ namespace Ethereal.FAF.UI.Client
                 patchFolder: configuration.GetValue<string>("Paths:Patch"),
                 tokenProvider: s.GetService<ITokenProvider>()));
             
-            services.AddScoped(s => new IceManager(
-                logger: s.GetService<ILogger<IceManager>>(),
-                lobbyClient: s.GetService<LobbyClient>(),
-                configuration: s.GetService<IConfiguration>(),
-                notificationService: s.GetService<NotificationService>()));
+            services.AddScoped<IceManager>();
 
             services.AddScoped(s => new IrcClient(
                 host: configuration.GetValue<string>("FAForever:IRC:Host"),

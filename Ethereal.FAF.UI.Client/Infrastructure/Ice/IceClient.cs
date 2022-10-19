@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Windows.Markup;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -57,7 +58,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         List<string> Queue = new();
         
         bool IcePassed = false;
-        public void PassIceServers(string iceServers)
+        public void PassIceServersAsync(string iceServers)
         {
             if (IcePassed) return;
             var json = IceJsonRpcMethods.UniversalMethod("setIceServers", $"[{iceServers}]");
@@ -92,9 +93,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-            while (TryParseLines(ref data, out var message))
+            var messages = (cache + data).Split("\n");
+            var correct = data.EndsWith("\n");
+            for (int i = 0; i < messages.Length - 1; i++)
             {
-                ProcessData(message);
+                ProcessData(messages[i]);
+            }
+            if (!correct)
+            {
+                cache += messages[^1];
+            }
+            else
+            {
+                cache = null;
+                ProcessData(messages[^1]);
             }
         }
         public override bool SendAsync(string text)
@@ -127,6 +139,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         private bool IsInitialized = false;
         private void ProcessData(string json)
         {
+            if (string.IsNullOrWhiteSpace(json)) return;
             if (json.StartsWith("{\"me"))
             {
                 var rpc = JsonSerializer.Deserialize<RpcRequest>(json);

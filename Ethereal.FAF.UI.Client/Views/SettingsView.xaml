@@ -337,6 +337,17 @@
                              Style="{StaticResource DescriptionHeaderRun}"/>
                     </TextBlock>
                 </CheckBox>
+                <Separator Margin="-20 0 -14 0"/>
+                <CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.UseIceTelemetryUI}">
+                    <TextBlock FlowDirection="LeftToRight" TextWrapping="Wrap" Margin="14">
+                        <Run Text="Enable web ICE UI telemetry"/>
+                        <ui:Badge Content="Experimental" FontSize="12" Margin="0 -2 0 -5" Appearance="Caution" Padding="2 0 2 1"/>
+                        <ui:Badge Content="v3.3-RC1 Telemetry" FontSize="12" Margin="0 -2 0 -5" Appearance="Info" Padding="2 0 2 1"/>
+                        <LineBreak/>
+                        <Run Text="On game launch opens web page telemetry UI for current game"
+                             Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
+                </CheckBox>
                 <!--<CheckBox Style="{StaticResource CheckBoxControl}" IsChecked="{Binding ViewModel.IsIceLogsEnabled}">
                     <Grid Margin="14" FlowDirection="LeftToRight">
                         <Grid.ColumnDefinitions>

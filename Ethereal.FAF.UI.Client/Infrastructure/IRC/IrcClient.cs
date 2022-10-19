@@ -46,6 +46,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             Logger = logger;
         }
 
+
+        string cache;
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             var data = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
@@ -55,7 +57,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             {
                 ProcessData(messages[i]);
             }
-
             if (!correct)
             {
                 cache += messages[^1];
@@ -66,8 +67,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                 ProcessData(messages[^1]);
             }
         }
-
-        string cache;
 
         Timer timer = null;
         TimerCallback tm = null;

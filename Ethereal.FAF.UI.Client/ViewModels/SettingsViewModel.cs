@@ -118,9 +118,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             NavigationWindow = navigationWindow;
             BackgroundViewModel = backgroundViewModel;
 
-            _IsIceRelayForced = configuration.GetValue<bool>("IceAdapter:IsRelayForced");
+            _IsIceRelayForced = configuration.GetValue<bool>("IceAdapter:ForceRelay", false);
             _IsIceDebugEnabled = configuration.GetValue<bool>("IceAdapter:IsDebugEnabled");
             _IsIceInfoEnabled = configuration.GetValue<bool>("IceAdapter:IsIceInfoEnabled");
+            _UseIceTelemetryUI = configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true);
             //_IsIceLogsEnabled = configuration.GetValue<bool>("IceAdapter:IsLogsEnabled");
             _PathToIceAdapter = configuration.GetValue<string>("IceAdapter:Executable");
             _PathToIceAdapterLogs = configuration.GetValue<string>("IceAdapter:Logs");
@@ -291,7 +292,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public bool IsIceRelayForced
         {
             get => _IsIceRelayForced;
-            set => Set(ref _IsIceRelayForced, value);
+            set => Set(ref _IsIceRelayForced, value, "IceAdapter:ForceRelay");
         }
         #endregion
         #region IsIceDebugEnabled
@@ -309,6 +310,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             get => _IsIceInfoEnabled;
             set => Set(ref _IsIceInfoEnabled, value);
         }
+        #endregion
+        #region UseIceTelemetryUI
+        private bool _UseIceTelemetryUI;
+        public bool UseIceTelemetryUI
+        {
+            get => _UseIceTelemetryUI;
+            set => Set(ref _UseIceTelemetryUI, value, "IceAdapter:UseTelemetryUI");
+        }
+
         #endregion
         #region IsIceLogsEnabled
         // Not supported
