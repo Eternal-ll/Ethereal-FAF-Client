@@ -11,70 +11,103 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid ShowGridLines="False">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="40"/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="120" Width="Auto" MaxWidth="200"/>
+            <ColumnDefinition MinWidth="180" Width="Auto" MaxWidth="170"/>
             <ColumnDefinition/>
             <ColumnDefinition Width="200"/>
         </Grid.ColumnDefinitions>
-        <Border Grid.ColumnSpan="3" Height="40" CornerRadius="4">
+        <Border Grid.Column="1" Grid.ColumnSpan="2" CornerRadius="4">
             <Border.Background>
                 <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}"/>
             </Border.Background>
         </Border>
-        <TextBlock Grid.Column="1" Text="{Binding ViewModel.SelectedChannel.Topic}" TextWrapping="Wrap"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="1">
-            <TextBox x:Name="ChannelText" Width="200"/>
-            <Button CommandParameter="{Binding ElementName=ChannelText, Path=Text, UpdateSourceTrigger=PropertyChanged}"
-                    Command="{Binding ViewModel.JoinChannelCommand}">
-                <TextBlock>
-                    <Run Text="Join"/>
-                    <Run Text="{Binding ElementName=ChannelText,Path=Text}"/>
-                </TextBlock>
-            </Button>
-        </StackPanel>
-        <ComboBox ItemsSource="{Binding ViewModel.ChannelsView}"
+        <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2">
+            <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="10 4">
+            <Run Text="{Binding ViewModel.SelectedChannel.Title, Mode=OneWay}"/>
+            <Run Text="{Binding ViewModel.SelectedChannel.TopicChangedBy, Mode=OneWay, StringFormat='by {0}'}"/>
+            </TextBlock>
+        </ScrollViewer>
+        <!--<ComboBox ItemsSource="{Binding ViewModel.ChannelsView}"
                   SelectedItem="{Binding ViewModel.SelectedChannel}"
-                  DisplayMemberPath="Name">
-            
-        </ComboBox>
-        <ListBox Grid.Row="1" Grid.RowSpan="2"
+                  DisplayMemberPath="Name"
+                  IsEditable="True">
+        </ComboBox>-->
+        <Border Grid.RowSpan="3" CornerRadius="6" Margin="0 0 0 4">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Border.Background>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <ui:AutoSuggestBox FontSize="12" PlaceholderText="#channel" Icon="ChatAdd16"
+                                   MaxDropDownHeight="300" TextChanged="AutoSuggestBox_TextChanged"
+                                   LostFocus="AutoSuggestBox_LostFocus"
+                            Text="{Binding ViewModel.ChannelText, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Grid.Row="1" Content="Join" FontSize="12" HorizontalAlignment="Stretch" Command="{Binding ViewModel.JoinChannelCommand}"/>
+                <ListBox Grid.Row="2" Margin="0 4" Background="Transparent" BorderThickness="0"
                  ItemsSource="{Binding ViewModel.ChannelsView}"
                  SelectedItem="{Binding ViewModel.SelectedChannel}">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                    <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
-                </Style>
-            </ListBox.ItemContainerStyle>
-            <ListBox.GroupStyle>
-                <GroupStyle>
-                    
-                </GroupStyle>
-            </ListBox.GroupStyle>
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}"/>
-                        <Button Content="Leave" FontSize="10" Command="{DynamicResource LeaveChannelCommand}" CommandParameter="{Binding Name}"
-                                Padding="2" Margin="0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <ItemsControl Grid.Row="1" Grid.Column="1"
-                      ItemsSource="{Binding ViewModel.HistoryView}">
-            <ItemsControl.Resources>
-                <DataTemplate DataType="{x:Type irc:IrcUserMessage}">
-                    <TextBlock TextWrapping="Wrap">
+                    <ListBox.Resources>
+                        <Style x:Key="CloseButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.Resources>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+                            <Setter Property="Margin" Value="0 0"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0 -3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                                <Button Grid.Column="1" Content="Leave" FontSize="10" Command="{DynamicResource LeaveChannelCommand}" CommandParameter="{Binding Name}"
+                                Padding="2 0 2 1" Margin="4 -1 0 -3" Style="{StaticResource CloseButton}">
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Row="3">
+                    <Button Content="Restart" HorizontalAlignment="Stretch" Command="{Binding ViewModel.ReconnectCommand}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="4">
+            <ItemsControl ItemsSource="{Binding ViewModel.HistoryView}">
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type irc:IrcUserMessage}">
+                        <TextBlock TextWrapping="Wrap">
                         <Run Text="{Binding User, StringFormat='{}{0}:'}"/>
                         <Run Text="{Binding Text, Mode=OneWay}"/>
-                    </TextBlock>
-                </DataTemplate>
-            </ItemsControl.Resources>
-        </ItemsControl>
+                        </TextBlock>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+            </ItemsControl>
+        </ScrollViewer>
         <ui:VirtualizingItemsControl Grid.Row="1" Grid.Column="2" Grid.RowSpan="2"
                       ItemsSource="{Binding ViewModel.UsersView}">
             <ui:VirtualizingItemsControl.ItemsPanel>
@@ -83,5 +116,7 @@
                 </ItemsPanelTemplate>
             </ui:VirtualizingItemsControl.ItemsPanel>
         </ui:VirtualizingItemsControl>
+        <ui:TextBox Grid.Column="1" Grid.Row="2" Margin="4" KeyDown="TextBox_KeyDown" PlaceholderText="Message" Icon="Chat12"/>
+
     </Grid>
 </ui:UiPage>

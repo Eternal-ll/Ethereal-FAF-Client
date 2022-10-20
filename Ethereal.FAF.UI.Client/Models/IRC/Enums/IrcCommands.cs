@@ -24,11 +24,11 @@
         /// and initial user modes of the connecting client.
         /// </summary>
         /// <param name="username"></param>
-        /// <param name="readlName"></param>
+        /// <param name="realName"></param>
         /// <param name="mode"></param>
         /// <returns></returns>
-        internal static string UserInfo(string username, string readlName, IrcUserFlags mode = IrcUserFlags.NORMAL) =>
-            "USER " + username + " " + (byte)mode + " * :" + readlName;
+        internal static string UserInfo(string username, string realName, IrcUserFlags mode = IrcUserFlags.NORMAL) =>
+            "USER " + username + " " + (byte)mode + " * :" + realName;
         /// <summary>
         /// Makes the client join the channel, specifying the password, if needed.
         /// If the channel do not exist then it will be created

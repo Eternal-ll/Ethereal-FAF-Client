@@ -27,7 +27,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly SnackbarService SnackbarService;
         private readonly IConfiguration Configuration;
 
-        public string MapsPath => System.IO.Path.Combine(Configuration.GetValue<string>("Paths:Vault"), "maps");
+        public string MapsPath => System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(
+            Configuration.GetValue<string>("Paths:Vault")), "maps");
 
         protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration)
         {

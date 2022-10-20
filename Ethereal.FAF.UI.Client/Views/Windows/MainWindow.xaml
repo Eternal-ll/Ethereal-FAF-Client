@@ -75,6 +75,7 @@
                     <ui:NavigationItem
                         Content="Chat"
                         Icon="Chat24"
+                        PageType="{x:Type v:ChatView}"
                         ToolTip="IRC chat"/>
                     <ui:NavigationItem
                         Content="Players"
@@ -223,12 +224,24 @@
                      Icon="/Resources/logo.ico"
                      Title="Ethereal FAF Client">
             <ui:TitleBar.Header>
-                <StackPanel
+                <Grid
                     Margin="0,0,12,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Orientation="Horizontal">
-                    <ToggleButton x:Name="LobbyPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
+                    VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Grid.Column="8" x:Name="LobbyPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
                         <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
                             <Ellipse Width="6" Height="6" Fill="LimeGreen"/>
                             <TextBlock Text="Lobby" Margin="4 0"/>
@@ -243,7 +256,7 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-                    <ToggleButton x:Name="ChatPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
+                    <ToggleButton Grid.Column="9" x:Name="ChatPopup" Padding="2" Margin="4 0 0 0" FontSize="12">
                         <StackPanel Orientation="Horizontal" Margin="4 0 0 0">
                             <Ellipse Width="6" Height="6" Fill="Red"/>
                             <TextBlock Text="Chat" Margin="4 0"/>
@@ -258,7 +271,7 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-                    <ToggleButton Name="PopupToggeButton" Margin="4 0 0 0" Padding="2" ToolTip="Notifications">
+                    <ToggleButton Grid.Column="10" Name="PopupToggeButton" Margin="4 0 0 0" Padding="2" ToolTip="Notifications">
                         <ui:SymbolIcon Symbol="Info24"/>
                     </ToggleButton>
                     <Popup IsOpen="{Binding IsChecked, ElementName=PopupToggeButton}" StaysOpen="False" AllowsTransparency="True"
@@ -281,7 +294,7 @@
                             </StackPanel>
                         </Border>
                     </Popup>
-                </StackPanel>
+                </Grid>
             </ui:TitleBar.Header>
             <!--<ui:TitleBar.Tray>
                 <ui:NotifyIcon

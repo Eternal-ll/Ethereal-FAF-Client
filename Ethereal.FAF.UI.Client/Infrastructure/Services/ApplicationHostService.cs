@@ -85,7 +85,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _serviceProvider.GetService<PlayersViewModel>();
             _serviceProvider.GetService<PartyViewModel>();
             _serviceProvider.GetService<GameLauncher>();
-            //_serviceProvider.GetService<ChatViewModel>();
+            _serviceProvider.GetService<ChatViewModel>();
 
             if (!Application.Current.Windows.OfType<MainWindow>().Any())
             {

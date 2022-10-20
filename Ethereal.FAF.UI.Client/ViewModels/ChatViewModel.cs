@@ -5,6 +5,8 @@ using Ethereal.FAF.UI.Client.Models.IRC;
 using Meziantou.Framework.WPF.Collections;
 using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -18,8 +20,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public ChatViewModel(LobbyClient lobbyClient, IrcClient ircClient, PlayersViewModel players)
         {
-            JoinChannelCommand = new LambdaCommand(OnJoinChannelCommand);
+            JoinChannelCommand = new LambdaCommand(OnJoinChannelCommand, CanJoinChannelCommand);
             LeaveChannelCommand = new LambdaCommand(OnLeaveChannelCommand);
+            SendMessageCommand = new LambdaCommand(OnSendMessageCommand);
+            ReconnectCommand = new LambdaCommand(OnReconnectCommand, CanReconnectCommand);
 
             Channels = new();
             ChannelsSource = new()
@@ -49,6 +53,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ircClient.UserJoined += IrcClient_UserJoined;
             ircClient.UserLeft += IrcClient_UserLeft;
             ircClient.UserDisconnected += IrcClient_UserDisconnected;
+            ircClient.ChannelTopicUpdated += IrcClient_ChannelTopicUpdated;
             ircClient.ChannelTopicChangedBy += IrcClient_ChannelTopicChangedBy;
 
             LobbyClient = lobbyClient;
@@ -56,9 +61,32 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Players = players;
         }
 
-        private void IrcClient_ChannelTopicChangedBy(object sender, (string channel, string topic, string at) e)
+        #region ChannelText
+        private string _ChannelText;
+        public string ChannelText
         {
-            if (GetChannel(e.channel) is GroupChannel group) group.Title = e.topic;
+            get => _ChannelText;
+            set => Set(ref _ChannelText, value);
+        }
+        #endregion
+
+        private void IrcClient_ChannelTopicUpdated(object sender, (string channel, string topic, string by) e)
+        {
+            if (GetChannel(e.channel) is GroupChannel group)
+            {
+                group.Title = e.topic;
+                group.TopicChangedBy = e.by;
+                group.TopicChangedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            }
+        }
+
+        private void IrcClient_ChannelTopicChangedBy(object sender, (string channel, string user, string at) e)
+        {
+            if (GetChannel(e.channel) is GroupChannel group)
+            {
+                group.TopicChangedBy = e.user;
+                group.TopicChangedAt = long.Parse(e.at);
+            }
         }
 
         private void IrcClient_UserDisconnected(object sender, string e)
@@ -95,6 +123,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void IrcClient_ChannelUsersReceived(object sender, (string channel, string[] users) e)
         {
+            if (string.IsNullOrWhiteSpace(e.channel)) return;
             var channel = (GroupChannel)GetChannel(e.channel);
             channel.Users.Clear();
             channel.Users.AddRange(e.users);
@@ -179,16 +208,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
+        public async Task<(string channel, int users)[]> GetChannelsAsync()
+        {
+            if (!IrcClient.IsConnected) return null;
+            (string channel, int users)[] channels = null;
+            IrcClient.List();
+            IrcClient.AvailableChannels += (s, e) => channels = e;
+            var task = Task.Run(async () =>
+            {
+                while (channels is null)
+                {
+                    await Task.Delay(50);
+                }
+            });
+            await task.WaitAsync(TimeSpan.FromSeconds(2));
+            return channels;
+        }
+
 
         public ICommand JoinChannelCommand { get; }
-
+        private bool CanJoinChannelCommand(object arg) => !string.IsNullOrWhiteSpace(ChannelText) && !Channels.Any(c => c.Name == ChannelText);
         private void OnJoinChannelCommand(object arg)
         {
-            if (arg is not string channel) return;
-            if (string.IsNullOrWhiteSpace(channel)) return;
-            IrcClient.Join(channel);
-            return;
-            IrcClient.Restart();
+            if (!ChannelText.StartsWith('#')) ChannelText = '#' + ChannelText;
+            IrcClient.Join(ChannelText);
+            ChannelText = null;
         }
 
         private string LeftChannel = "";
@@ -208,7 +252,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (arg is not string text) return;
             if (string.IsNullOrWhiteSpace(text)) return;
             if (SelectedChannel is null) return;
-            IrcClient.SendMessage(SelectedChannel.Name, text);  
+            IrcClient.SendMessage(SelectedChannel.Name, text);
+            //IrcClient.SendAsync(text);
+        }
+
+        public ICommand ReconnectCommand { get; }
+        private bool CanReconnectCommand(object arg) => true;
+        private void OnReconnectCommand(object arg)
+        {
+            IrcClient.Restart();
         }
     }
 }

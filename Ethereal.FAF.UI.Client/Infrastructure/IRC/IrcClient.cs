@@ -25,9 +25,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public event EventHandler<(string channel, string from, string message)> ChannelMessageReceived;
 
         public event EventHandler<(string channel, string topic, string by)> ChannelTopicUpdated;
-        public event EventHandler<(string channel, string topic, string at)> ChannelTopicChangedBy;
+        public event EventHandler<(string channel, string user, string at)> ChannelTopicChangedBy;
 
         public event EventHandler<(string channel, string[] users)> ChannelUsersReceived;
+        public event EventHandler<(string channel, int users)[]> AvailableChannels;
 
         public event EventHandler<string> NotificationMessageReceived;
 
@@ -45,26 +46,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         {
             Logger = logger;
         }
-
-        string cache;
-        private bool TryParseLines(ref string data, out string message)
-        {
-            message = string.Empty;
-            if (data is null) return false;
-            var index = data.IndexOf("\r\n");
-            if (index != -1)
-            {
-                message += cache;
-                message += data[..(index + 2)];
-                data = data[(index + 2)..];
-                cache = null;
-            }
-            else
-            {
-                cache += data;
-            }
-            return message.Length != 0;
-        }
         List<byte> Cache = new();
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
@@ -76,13 +57,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             byte last = 0;
             for (int i = (int)offset; i < (int)size; i++)
             {
-                if (last == '\r' && buffer[i] == '\n')
+                if (buffer[i] == '\r')
                 {
                     ProcessData(Encoding.UTF8.GetString(Cache.ToArray(), 0, Cache.Count));
                     Cache.Clear();
+                    i++;
                     continue;
                 }
-                last = buffer[i];
+                //last = buffer[i];
                 Cache.Add(buffer[i]);
             }
         }
@@ -94,7 +76,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             Send(IrcCommands.Nickname(OriginalNick));
             User = OriginalNick;
         }
-
+        List<(string channel, int users)> Channels;
         private void ProcessData(string data)
         {
             if (data == ":irc.faforever.com NOTICE * :*** Looking up your hostname...")
@@ -126,7 +108,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                 if (data[i] == '@') break;
                 user += data[i];
             }
-            Logger.LogTrace($"{data}");
+            Logger.LogTrace($"[Inbound message] {data}");
             switch (ircCommand)
             {
                 //https://modern.ircdocs.horse/#names-message
@@ -138,12 +120,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                     break;
                 case "321": // start of list of 322
                     //AppDebugger.LOGIRC($"Start of available channels");
+                    Channels = new();
                     break;
                 case "322": // channel information after 321
                     //AppDebugger.LOGIRC($"Channel: {ircData[3]}, users count: {ircData[4]}");
+                    Channels.Add((ircData[3], int.Parse(ircData[4])));
                     break;
                 case "323": // end of list of 322
                     //AppDebugger.LOGIRC($"End of available channels");
+                    AvailableChannels?.Invoke(this, Channels.ToArray());
+                    Channels = null;
                     break;
                 case "332": // Sent to a client when joining the <channel> to inform them of the current topic of the channel.
                     //:irc.faforever.com 332 Eternal- #aeolus :FAF rules:...
@@ -153,6 +139,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                     }
                     sb.Remove(0, 1);
                     sb.Remove(sb.Length - 2, 2);
+                    ChannelTopicUpdated?.Invoke(this, (ircData[3], sb.ToString(), null));
                     break;
                 case "333": // Sent to a client to let them know who set the topic (<nick>) and when they set it (<setat> is a unix timestamp). Sent after RPL_TOPIC.
                     //:irc.faforever.com 333 Eternal- #aeolus Giebmasse_irc 1635328010
@@ -222,7 +209,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                         sb.Append(ircData[i] + ' ');
                     }
                     sb.Remove(0, 1);
-                    sb.Remove(sb.Length - 2, 2);
+                    sb.Remove(sb.Length - 1, 1);
                     ChannelTopicUpdated?.Invoke(this, (ircData[2], sb.ToString(), from));
                     break;
                 case "NICK": // someone changed their nick
@@ -293,21 +280,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public void Authorize(string login, string id, string password)
         {
             User = login;
+            OriginalNick = login;
+            UserId = id;
             Password = password;
-            ConnectAsync();
-            PassAuthorization();
         }
         public void PassAuthorization()
         {
             SendAsync(IrcCommands.Pass(Password));
-            SendAsync(IrcCommands.UserInfo(User, UserId));
+            SendAsync(IrcCommands.UserInfo(UserId, User));
             SendAsync(IrcCommands.Nickname(User));
         }
 
-        public void Restart(string login, string id, string password)
+        public void Restart()
         {
             Quit();
-            Authorize(login, id, password);
+            ConnectAsync();
         }
         public void GetChannelUsers(string channel) => Send(IrcCommands.Names(channel));
         public void Join(string channel, string key = null) => Send(IrcCommands.Join(channel, key));
@@ -315,6 +302,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public void Leave(string[] channels) => Send(IrcCommands.Leave(channels));
         public void LeaveAll() => Send(IrcCommands.LeaveAllJoinedChannels());
         public void Ping() => Send(IrcCommands.Ping());
+        public void List(int minimum = 2) => Send(IrcCommands.List(minimum));
         public void Quit(string reason = null) => Send(IrcCommands.Quit(reason));
         public void SendMessage(string channelOrUser, string message)
         {
@@ -334,19 +322,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         }
         public override bool SendAsync(string text)
         {
+            Logger.LogTrace($"[Outbound message] {text}");
             if (text[^1] != '\r') text += '\r';
             return base.SendAsync(text);
         }
         public override long Send(string text)
         {
+            Logger.LogTrace($"[Outbound message] {text}");
             if (text[^1] != '\r') text += '\r';
             return base.Send(text);
-        }
-
-        internal void Restart()
-        {
-            Disconnect();
-            ConnectAsync();
         }
     }
 }

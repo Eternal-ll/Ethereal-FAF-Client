@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using Humanizer;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,18 +50,51 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
     }
     public sealed class GroupChannel : IrcChannel, INotifyPropertyChanged
     {
-        public GroupChannel(string name, string group = "Common") : base(name)
+        public GroupChannel(string name, string group = "Channel") : base(name)
         {
             Group = group;
         }
         public override string Group { get; }
+
+        #region Title
         private string _Title;
-        public string Title { get => _Title;
+        public string Title
+        {
+            get => _Title;
             set
             {
                 _Title = value;
                 PropertyChanged?.Invoke(this, new(nameof(Title)));
-            } }
+            }
+        }
+        #endregion
+
+        #region TopicChangedBy
+        private string _TopicChangedBy;
+        public string TopicChangedBy
+        {
+            get => _TopicChangedBy;
+            set
+            {
+                _TopicChangedBy = value;
+                PropertyChanged?.Invoke(this, new(nameof(TopicChangedBy)));
+            }
+        }
+        #endregion
+        #region TopicChangedAt
+        private long _TopicChangedAt;
+        public long TopicChangedAt
+        {
+            get => _TopicChangedAt;
+            set
+            {
+                _TopicChangedAt = value;
+                PropertyChanged?.Invoke(this, new(nameof(TopicChangedAt)));
+            }
+        }
+        #endregion
+
+
 
         public List<string> Users { get; } = new();
 
