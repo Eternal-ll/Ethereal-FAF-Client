@@ -61,19 +61,28 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             NotificationService = notificationService;
         }
         private long LastGameUid;
+        private GameLaunchData LastGameLaunchData;
 
         private void LobbyClient_MatchCancelled(object sender, MatchCancelled e)
         {
-            //if (e.GameId != LastGameUid) return;
+            if (Process is null) return;
+            Process.Kill();
+            IceManager.NotifyAboutBadConnections();
+        }
+        private bool IsRestart;
+        public void RestartGame()
+        {
+            throw new NotImplementedException();
+            IsRestart = true;
             Process?.Kill();
+            LobbyClient_GameLaunchDataReceived(this, LastGameLaunchData);
         }
 
         private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e) => 
             Task.Run(() => RunGame(e))
                 .ContinueWith(t =>
                 {
-                    //OnStateChanged(GameLauncherState.Idle);
-                    LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                    if (!IsRestart) LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
                     if (t.IsFaulted)
                     {
                         Logger.LogError(t.Exception.ToString());
@@ -85,14 +94,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     Process = null;
                     try
                     {
-                        IceManager.IceClient.SendAsync(IceJsonRpcMethods.Quit());
+                        IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
                         IceManager.IceClient.IsStop = true;
-                        IceManager.IceClient.DisconnectAsync();
+                        IceManager.IceClient.Disconnect();
                         IceManager.IceClient.Dispose();
                         IceManager.IceClient = null;
                         IceManager.IceServer.Kill();
                     }
-                    catch{}
+                    catch{ }
+                    //if (IsRestart) RestartGame();
+                    IsRestart = false;
                 });
         private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
             // player info
@@ -138,10 +149,30 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             args.Append($"/deviation {deviation} ");
             args.Append($"/numgames {games} ");
         }
+        int test = 0;
         private async Task RunGame(GameLaunchData e)
         {
+            LastGameLaunchData = e;
             LastGameUid = e.uid;
-            NotificationService.Notify("Game", "Preparing game for launch", ignoreOs: true);
+
+            //if (e.game_type is GameType.Custom && test == 1)
+            //{
+            //    _ = Task.Run(async () =>
+            //    {
+            //        await Task.Delay(6000);
+            //        if (!IceManager.AllConnected)
+            //        {
+            //            IsRestart = true;
+            //            Process.Kill();
+            //            test++;
+            //        }
+            //        else
+            //        {
+
+            //        }
+            //    });
+            //}
+
             var progressSource = new Progress<string>();
             //GameLaunching?.Invoke(this, progressSource);
             var progress = (IProgress<string>)progressSource;

@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Windows.Markup;
+using Windows.Media.PlayTo;
+using Windows.Services.Store;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -185,6 +187,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             LocalPlayerId = localPlayerId;
             RemotePlayerId = remotePlayerId;
             State = state;
+        }
+        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Connected { get; private set; }
+        public TimeSpan ConnectedIn { get; private set; }
+        public void UpdateState(string state)
+        {
+            State = state;
+            if (state == "connected")
+            {
+                Connected = DateTime.Now;
+                ConnectedIn = Connected - Created;
+            }
         }
     }
 }

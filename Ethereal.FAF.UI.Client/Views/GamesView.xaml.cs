@@ -61,6 +61,7 @@ namespace Ethereal.FAF.UI.Client.Views
                 Dispatcher.Invoke(UpdateLayout);
                 //task = null;
                 GC.Collect(1);
+                task= null;
                 //GC.WaitForPendingFinalizers();
             });
         }

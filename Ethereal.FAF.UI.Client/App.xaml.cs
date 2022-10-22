@@ -39,7 +39,7 @@ namespace Ethereal.FAF.UI.Client
             Hosting = Host.CreateDefaultBuilder(e.Args)
             .ConfigureLogging((hostingContext, loggingBuilder) =>
             {
-                //loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
+                loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
                 //loggingBuilder.AddConsole();
             })
             .ConfigureServices(ConfigureServices)
@@ -101,11 +101,7 @@ namespace Ethereal.FAF.UI.Client
                 userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
                 userAgentVersion: version));
 
-            services.AddScoped(s => new PatchClient(
-                logger: s.GetService<ILogger<PatchClient>>(),
-                serviceProvider: s,
-                patchFolder: configuration.GetValue<string>("Paths:Patch"),
-                tokenProvider: s.GetService<ITokenProvider>()));
+            services.AddScoped<PatchClient>();
             
             services.AddScoped<IceManager>();
 

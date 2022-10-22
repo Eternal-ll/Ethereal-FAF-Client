@@ -664,6 +664,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private async Task OnJoinTask(Game game)
         {
+            if (game.FeaturedMod is not FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop)
+            {
+                NotificationService.Notify("Warning", $"Featured mod [{game.FeaturedMod}] not supported");
+                return;
+            }
             if (game.LaunchedAt.HasValue)
             {
                 return;

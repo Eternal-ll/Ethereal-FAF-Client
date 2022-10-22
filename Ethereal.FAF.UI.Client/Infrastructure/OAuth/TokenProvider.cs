@@ -1,8 +1,8 @@
-﻿using Ethereal.FAF.UI.Client.Models;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {

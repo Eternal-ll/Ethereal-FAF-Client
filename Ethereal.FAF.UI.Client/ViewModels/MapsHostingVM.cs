@@ -95,20 +95,28 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Container.SplashText = "Confirming patch";
             Container.Content = null;
             var progress = new Progress<string>(e => Container.SplashText = e);
-            await PatchClient.UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress);
-            Container.SplashProgressVisibility = Visibility.Collapsed;
-            Container.SplashVisibility = Visibility.Collapsed;
-            LobbyClient.HostGame(
-            title: Game.Title,
-            mod: Game.FeaturedMod,
-            mapName: LocalMap.FolderName,
-            minRating: Game.MinimumRating,
-            maxRating: Game.MaximumRating,
-            visibility: Game.IsFriendsOnly ?
-            GameVisibility.Friends :
-            GameVisibility.Public,
-            isRatingResctEnforced: Game.EnforceRating,
-            password: Game.Password);
+            await PatchClient.UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
+            .ContinueWith(t =>
+            {
+                Container.SplashProgressVisibility = Visibility.Collapsed;
+                Container.SplashVisibility = Visibility.Collapsed;
+                if (t.IsFaulted)
+                {
+                    SnackbarService.GetSnackbarControl().Show("Error", t.Exception.ToString());
+                    return;
+                }
+                LobbyClient.HostGame(
+                title: Game.Title,
+                mod: Game.FeaturedMod,
+                mapName: LocalMap.FolderName,
+                minRating: Game.MinimumRating,
+                maxRating: Game.MaximumRating,
+                visibility: Game.IsFriendsOnly ?
+                GameVisibility.Friends :
+                GameVisibility.Public,
+                isRatingResctEnforced: Game.EnforceRating,
+                password: Game.Password);
+            });
         });
         #endregion
 
