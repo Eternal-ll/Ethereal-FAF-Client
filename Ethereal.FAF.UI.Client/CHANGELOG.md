@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.0.9]() (2020-09-01)
+## [2.0.9](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.9) (2022-10-22)
 
 #### Changelog
 
@@ -33,15 +33,15 @@ Example:
 - UI: /join #channel
 - IRC: JOIN #channel
 
-**Emoji**
-
-Sample:
-1. Write :tada:
+**Emoji Sample:**
+1. Write `:tada:`
 2. Converted to 🎉
+![](https://cdn.discordapp.com/attachments/926400628803113020/1033048668187676672/Animation.gif)
 
 **How to copy message?**
 
 1. Right click on message
+![def8bd11-5516-463d-9638-5f05e3af1e23-image.png](https://forum.faforever.com/assets/uploads/files/1666426882009-def8bd11-5516-463d-9638-5f05e3af1e23-image.png) 
 2. Click on "Copy text"
 3. Done!
-
+![12357639-7b30-4ab5-b7a7-cac19f29cb10-image.png](https://forum.faforever.com/assets/uploads/files/1666426892771-12357639-7b30-4ab5-b7a7-cac19f29cb10-image.png)
