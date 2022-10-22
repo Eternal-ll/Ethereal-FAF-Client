@@ -18,7 +18,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
             if (parameter is null) return;
             Notification ??= App.Hosting.Services.GetService<NotificationService>();
             Clipboard.SetText(parameter.ToString());
-            Notification.Notify("Copy", $"Copied \"{parameter}\" !", Wpf.Ui.Common.SymbolRegular.Copy24);
+            Notification.Notify("Copied", parameter.ToString(), Wpf.Ui.Common.SymbolRegular.Copy24);
         }
     }
     internal class GenerateGameMapCommand : Base.Command

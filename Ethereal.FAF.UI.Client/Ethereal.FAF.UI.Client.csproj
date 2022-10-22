@@ -16,11 +16,11 @@
   <ItemGroup>
     <None Remove="External\7z.dll" />
     <None Remove="External\7z.exe" />
+    <None Remove="External\faf-ice-adapter-v3.2.2-nojfx.jar" />
     <None Remove="External\faf-ice-adapter-v3.3-RC1-nojfx.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
     <None Remove="Resources\Fonts\*.otf" />
-    <None Remove="Resources\Images\1x1.png" />
     <None Remove="Resources\Images\Examples\SidebarExample.png" />
     <None Remove="Resources\Images\Flags\*.png" />
     <None Remove="Resources\logo.ico" />
@@ -28,7 +28,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Resource Include="Resources\Images\1x1.png" />
     <Content Include="Resources\logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -39,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="GEmojiSharp" Version="2.0.0" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
     <PackageReference Include="Meziantou.Framework.WPF" Version="1.5.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
@@ -77,6 +77,20 @@
     <Resource Include="Resources\Fonts\*.otf" />
     <Resource Include="Resources\Images\Examples\SidebarExample.png" />
     <Resource Include="Resources\Images\Flags\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <Resource Remove="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
+    <Resource Remove="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
+    <Resource Remove="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
+    <None Include="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
+    <None Include="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
+    <None Include="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties links_1json__JsonSchema="https://appsemble.app/api.json" /></VisualStudio></ProjectExtensions>

@@ -20,6 +20,9 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = model;
             InitializeComponent();
+            Resources["OpenPrivateCommand"] = model.OpenPrivateCommand;
+
+
             OriginalScrollViewer = FindChild<ScrollViewer>(OriginalSource);
         }
 

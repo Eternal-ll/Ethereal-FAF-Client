@@ -1,8 +1,12 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+using Ethereal.FAF.UI.Client.Infrastructure.IRC;
+using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +16,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
+using Wpf.Ui.Mvvm.Contracts;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -80,16 +86,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public event EventHandler<KeyValuePair<Game, Player[]>> PlayersLeftGame;
         public event EventHandler<KeyValuePair<Game, Player[]>> PlayersFinishedGame;
 
-
+        private readonly IServiceProvider ServiceProvider;
         private readonly LobbyClient Lobby;
+        private readonly IrcClient IrcClient;
 
-        public PlayersViewModel(LobbyClient lobby)
+        public PlayersViewModel(LobbyClient lobby, IServiceProvider serviceProvider, IrcClient ircClient)
         {
-            Lobby = lobby;
+            OpenPrivateCommand = new LambdaCommand(OnOpenPrivateCommand);
+
             lobby.PlayersReceived += Lobby_PlayersReceived;
             lobby.PlayerReceived += Lobby_PlayerReceived;
             lobby.WelcomeDataReceived += Lobby_WelcomeDataReceived;
+
+            ircClient.UserDisconnected += IrcClient_UserDisconnected;
+
             GroupBy = PlayersGroupSource[0];
+
+            Lobby = lobby;
+            ServiceProvider = serviceProvider;
+            IrcClient = ircClient;
         }
 
         public Player Self { get; set; }
@@ -97,6 +112,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void Lobby_WelcomeDataReceived(object sender, Welcome e)
         {
             Self = e.me;
+        }
+
+        private void IrcClient_UserDisconnected(object sender, (string user, string id) e)
+        {
+            if (!long.TryParse(e.id, out var id)) return;
+            Players.Remove(GetPlayer(id));
         }
 
         #region SelectedPlayer
@@ -367,6 +388,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var obs = new ConcurrentObservableCollection<Player>();
             obs.AddRange(e);
             Players = obs;
+        }
+
+        public ICommand OpenPrivateCommand { get; }
+        private void OnOpenPrivateCommand(object arg)
+        {
+            if (arg is not string user) return;
+            var navigation = ServiceProvider.GetService<INavigationService>();
+            var chat = ServiceProvider.GetService<ChatViewModel>();
+            chat.OpenPrivateCommand.Execute(user);
+            navigation.Navigate(typeof(ChatView));
         }
     }
 }

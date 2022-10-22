@@ -51,6 +51,18 @@
             </Style>
             <DataTemplate DataType="{x:Type model:Player}">
                 <StackPanel Orientation="Horizontal">
+                    <StackPanel.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{DynamicResource OpenPrivateCommand}"
+                                      CommandParameter="{Binding IrcUsername}"
+                                      IsEnabled="{Binding IsIrcConnected}"
+                                      Header="Open chat">
+                                <MenuItem.Icon>
+                                    <ui:SymbolIcon Symbol="Chat12"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </StackPanel.ContextMenu>
                     <StackPanel.ToolTip>
                         <ToolTip>
                             <TextBlock>
@@ -61,7 +73,7 @@
                         </ToolTip>
                     </StackPanel.ToolTip>
                     <Image Source="{Binding FlagUri}" ToolTip="{Binding Country}" Width="16" Height="16"/>
-                    <Image ToolTip="{Binding Avatar.Tooltip}" Height="16" Margin="4 0">
+                    <Image ToolTip="{Binding Avatar.Tooltip}" Height="16" Margin="4 0 0 0">
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>

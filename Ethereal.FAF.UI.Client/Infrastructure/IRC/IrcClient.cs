@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
@@ -15,13 +16,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
     {
         //public event EventHandler<IrcState> StateChanged;
 
+        public event EventHandler<bool> Authorized;
+
         public event EventHandler<string> UserConnected;
-        public event EventHandler<string> UserDisconnected;
+        public event EventHandler<(string user, string id)> UserDisconnected;
         public event EventHandler<(string channel, string user)> UserJoined;
         public event EventHandler<(string channel, string user)> UserLeft;
         public event EventHandler<(string user, string to)> UserChangedName;
 
-        public event EventHandler<(string from, string message)> PrivateMessageReceived;
         public event EventHandler<(string channel, string from, string message)> ChannelMessageReceived;
 
         public event EventHandler<(string channel, string topic, string by)> ChannelTopicUpdated;
@@ -33,7 +35,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public event EventHandler<string> NotificationMessageReceived;
 
 
-        private string User;
+        public string User;
         private string UserId;
         private string OriginalNick;
         private string Password;
@@ -69,13 +71,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
             }
         }
 
-        Timer timer = null;
-        TimerCallback tm = null;
-        void ChangeNickName(object obj)
+        private void SetupRenameTask() => RenameTask = Task.Run(async () =>
         {
-            Send(IrcCommands.Nickname(OriginalNick));
-            User = OriginalNick;
-        }
+            await Task.Delay(15000);
+            SendAsync(IrcCommands.Nickname(OriginalNick));
+            await Task.Delay(20000);
+            if (User != OriginalNick)
+            {
+                SetupRenameTask();
+            }
+            else
+            {
+                RenameTask = null;
+            }
+        });
+
+        private Task RenameTask;
+
         List<(string channel, int users)> Channels;
         private void ProcessData(string data)
         {
@@ -117,6 +129,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                     //State = IrcState.Authorized;
                     //AppDebugger.LOGIRC(data[data.LastIndexOf(':')..data.IndexOf('!')]);
                     //Join("#aeolus");
+                    Authorized?.Invoke(this, true);
+                    break;
+                case "451":
+                    PassAuthorization();
                     break;
                 case "321": // start of list of 322
                     //AppDebugger.LOGIRC($"Start of available channels");
@@ -174,7 +190,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                 case "353": // channel users after MODE
                     //:irc.faforever.com 353 Eternal- = #aeolus :Eternal- HALEii_MHE_KBAC Stuba88 alximik F
                     string channel = ircData[4];
-                    var users = data[(data.LastIndexOf(':') + 1)..^1].Trim().Split();
+                    var users = data[(data.LastIndexOf(':') + 1)..].Trim().Split();
                     ChannelUsersCache.AddRange(users);
                     break;
                 case "366":
@@ -185,13 +201,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                     break;
                 case "433"://Nickname is unavailable: Being held for registered user
                 case "432":
-                    if (timer is null)
+                    if (RenameTask is null)
                     {
-                        tm ??= new(ChangeNickName);
-                        User += '`';
-                        Send(IrcCommands.Nickname(User));
-                        timer = new Timer(tm, null, 15000, 15000);
+                        SetupRenameTask();
                     }
+                    break;
+                case "438":
                     break;
                 case "JOIN": // someone joined
                     {
@@ -213,7 +228,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                     ChannelTopicUpdated?.Invoke(this, (ircData[2], sb.ToString(), from));
                     break;
                 case "NICK": // someone changed their nick
-                    var to = data[(data.LastIndexOf(':') + 1)..^1];
+                    var to = data[(data.LastIndexOf(':') + 1)..];
+                    if (from == User)
+                    {
+                        User = to;
+                    }
                     UserChangedName?.Invoke(this, (from, to));
                     break;
                 case "NOTICE": // someone sent a notice
@@ -256,7 +275,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                         }
                         else
                         {
-                            PrivateMessageReceived?.Invoke(this, (from, sb.ToString()));
+                            ChannelMessageReceived?.Invoke(this, (from, from, sb.ToString()));
+                            //PrivateMessageReceived?.Invoke(this, (from, sb.ToString(), from));
                         }
                     }
                     break;
@@ -269,11 +289,30 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                 case "QUIT":// someone left
                     {
                         //:Mavr390!15632@93DACFB2.4D35C09C.2CB4B448.IP QUIT :Quit: Mavr390
-                        UserDisconnected?.Invoke(this, from);
+                        UserDisconnected?.Invoke(this, (from, data.Split('!', '@')[1]));
                     }
                     break;
                 default:
                     break;
+            }
+
+
+            switch (ircCommand)
+            {
+                case "341": // invited
+                case "NOTICE":
+                case "442": // cant invite, you are not in channel
+                case "443": // cant invite, already in channel
+                case "482": // cant kick, you are not channel operator
+                case "403": // no such channel
+                case "461":
+                    for (int i = 3; i < ircData.Length; i++)
+                    {
+                        sb.Append(ircData[i] + ' ');
+                    }
+                    NotificationMessageReceived?.Invoke(this, sb.ToString());
+                    break;
+                default: break;
             }
         }
 
@@ -293,10 +332,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
 
         public void Restart()
         {
-            Quit();
+            if (IsConnected)
+            {
+                Quit();
+                DisconnectAsync();
+            }
             ConnectAsync();
         }
         public void GetChannelUsers(string channel) => Send(IrcCommands.Names(channel));
+        public void Rename(string name) => Send(IrcCommands.Nickname(name));
         public void Join(string channel, string key = null) => Send(IrcCommands.Join(channel, key));
         public void Leave(string channel) => Send(IrcCommands.Leave(channel));
         public void Leave(string[] channels) => Send(IrcCommands.Leave(channels));
@@ -307,8 +351,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public void SendMessage(string channelOrUser, string message)
         {
             Send(IrcCommands.Message(channelOrUser, message));
-            if (channelOrUser.StartsWith('#')) ChannelMessageReceived?.Invoke(this, (channelOrUser, User, message));
-            else PrivateMessageReceived?.Invoke(this, (User, message));
+            ChannelMessageReceived?.Invoke(this, (channelOrUser, User, message));
         }
         public void SetTopic(string channel, string topic = null) => Send(IrcCommands.Topic(channel, topic));
         public void SendInvite(string user, string channel) => Send(IrcCommands.Invite(user, channel));
@@ -318,6 +361,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         }
         protected override void OnDisconnected()
         {
+            User = OriginalNick;
+            Authorized?.Invoke(this, false);
             base.OnDisconnected();
         }
         public override bool SendAsync(string text)

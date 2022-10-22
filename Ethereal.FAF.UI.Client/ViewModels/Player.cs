@@ -54,9 +54,20 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public bool IsLobbyConnected { get => _IsLobbyConnected; set => Set(ref _IsLobbyConnected, value); }
         #endregion
 
-        #region IsIrcConnected
-        private bool _IsIrcConnected;
-        public bool IsIrcConnected { get => _IsIrcConnected; set => Set(ref _IsIrcConnected, value); }
+        public bool IsIrcConnected => !string.IsNullOrWhiteSpace(IrcUsername);
+        #region IrcUsername
+        private string _IrcUsername;
+        public string IrcUsername
+        {
+            get => _IrcUsername;
+            set
+            {
+                if (Set(ref _IrcUsername, value))
+                {
+                    OnPropertyChanged(nameof(IsIrcConnected));
+                }
+            }
+        }
         #endregion
 
         #region IsInGame

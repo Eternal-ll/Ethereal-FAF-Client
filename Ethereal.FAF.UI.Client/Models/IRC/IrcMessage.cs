@@ -1,11 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
-using Humanizer;
-using System;
-using System.CodeDom;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Documents;
+using System.Linq;
 
 namespace Ethereal.FAF.UI.Client.Models.IRC
 {
@@ -21,25 +17,54 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
     }
     public class IrcUserMessage : IrcMessage
     {
-        public IrcUserMessage(string text, string user) : base(text)
+        public IrcUserMessage(string text, IrcUser user) : base(text)
         {
             User = user;
         }
 
-        public string User { get; set; }
+        public IrcUser User { get; set; }
     }
-    public sealed class IrcPlayerMessage : IrcUserMessage
+    public class IrcUser : ViewModel
     {
-        public IrcPlayerMessage(string text, string user, Player player) : base(text, user)
+        public IrcUser(string name) => Name = name;
+        public IrcUser(string name, Player player) : this(name) => SetPlayer(player);
+        #region Name
+        private string _Name;
+        public string Name
+        {
+            get => _Name;
+            set
+            {
+                if (Set(ref _Name, value))
+                {
+                    if (_Player is not null) _Player.IrcUsername = value;
+                    OnPropertyChanged(nameof(DisplayedName));
+                }
+            }
+        }
+        #endregion
+
+        public string DisplayedName => Player is null ?
+            Name :
+            string.IsNullOrWhiteSpace(Player.Clan) ?
+                Name :
+                $"[{Player.Clan}] {Name}";
+
+        #region Player
+        private Player _Player;
+        public Player Player { get => _Player; set => Set(ref _Player, value); }
+        #endregion
+
+        public void SetPlayer(Player player)
         {
             Player = player;
+            player.IrcUsername = Name;
         }
-
-        public Player Player { get; set; }
     }
-    public abstract class IrcChannel
+    public abstract class IrcChannel : ViewModel
     {
-        public string Name { get; set; }
+        private string _Name;
+        public string Name { get => _Name; set => Set(ref _Name, value); }
         public abstract string Group { get; }
         public bool IsSelected { get; set; }
         protected IrcChannel(string name)
@@ -48,7 +73,7 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         }
         public List<IrcMessage> History { get; } = new();
     }
-    public sealed class GroupChannel : IrcChannel, INotifyPropertyChanged
+    public sealed class GroupChannel : IrcChannel
     {
         public GroupChannel(string name, string group = "Channel") : base(name)
         {
@@ -61,11 +86,7 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         public string Title
         {
             get => _Title;
-            set
-            {
-                _Title = value;
-                PropertyChanged?.Invoke(this, new(nameof(Title)));
-            }
+            set => Set(ref _Title, value);
         }
         #endregion
 
@@ -74,38 +95,27 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         public string TopicChangedBy
         {
             get => _TopicChangedBy;
-            set
-            {
-                _TopicChangedBy = value;
-                PropertyChanged?.Invoke(this, new(nameof(TopicChangedBy)));
-            }
+            set => Set(ref _TopicChangedBy, value);
         }
         #endregion
+
         #region TopicChangedAt
         private long _TopicChangedAt;
         public long TopicChangedAt
         {
             get => _TopicChangedAt;
-            set
-            {
-                _TopicChangedAt = value;
-                PropertyChanged?.Invoke(this, new(nameof(TopicChangedAt)));
-            }
+            set => Set(ref _TopicChangedAt, value);
         }
         #endregion
 
+        public List<IrcUser> Users { get; } = new();
 
-
-        public List<string> Users { get; } = new();
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void AddUser(string user) => Users.Add(user);
+        public void AddUser(IrcUser user) => Users.Add(user);
         public void RemoveUser(string user)
         {
             for (int i = 0; i < Users.Count; i++)
             {
-                if (Users[i] == user)
+                if (Users[i].Name == user)
                 {
                     Users.RemoveAt(i);
                     break;
@@ -116,19 +126,25 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         {
             for (int i = 0; i < Users.Count; i++)
             {
-                if (Users[i] == from)
+                if (Users[i].Name == from)
                 {
-                    Users[i] = to;
+                    Users[i].Name = to;
                     break;
                 }
             }
         }
+        public IrcUser GetUser(string user) => Users.FirstOrDefault(u => u.Name == user);
+        public bool TryGetUser(string user, out IrcUser irc)
+        {
+            irc = GetUser(user);
+            return irc is not null;
+        }
     }
     public sealed class DialogueChannel : IrcChannel
     {
-        public DialogueChannel(string name, Player receiver) : base(name)
-            => Receiver = receiver;
-        public Player Receiver { get; set; }
+        public DialogueChannel(string name) : base(name) => Receiver = new(name);
+        public DialogueChannel(string name, Player player) : this(name) => Receiver.SetPlayer(player);
+        public IrcUser Receiver { get; set; }
 
         public override string Group { get; } = "Direct";
     }

@@ -175,14 +175,15 @@ namespace FAF.UI.EtherealClient.Views.Windows
                 //await InitalizePathWatchers();
                 await Auth();
             });
+            Task.Run(InitalizePathWatchers);
         }
 
         private async Task InitalizePathWatchers()
         {
-            Container.SplashText = "Initializing patch watcher";
-            var progress = new Progress<string>(d => Container.SplashText = d);
-            await PatchClient.InitializeWatchers(progress);
-            Container.SplashText = "Patch watcher initialized";
+            //Container.SplashText = "Initializing patch watcher";
+            //var progress = new Progress<string>(d => Container.SplashText = d);
+            await PatchClient.InitializeWatchers(null);
+            //Container.SplashText = "Patch watcher initialized";
         }
 
         private async Task PrepareJavaRuntime()

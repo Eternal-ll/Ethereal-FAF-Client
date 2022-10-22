@@ -39,8 +39,8 @@ namespace Ethereal.FAF.UI.Client
             Hosting = Host.CreateDefaultBuilder(e.Args)
             .ConfigureLogging((hostingContext, loggingBuilder) =>
             {
-                loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
-                loggingBuilder.AddConsole();
+                //loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
+                //loggingBuilder.AddConsole();
             })
             .ConfigureServices(ConfigureServices)
             .ConfigureHostConfiguration(c =>
@@ -54,7 +54,7 @@ namespace Ethereal.FAF.UI.Client
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             var configuration = context.Configuration;
-            string version = "2.0.7.1";
+            string version = "2.0.9";
 
             // Background
             services.AddHostedService<TokenReloadService>();

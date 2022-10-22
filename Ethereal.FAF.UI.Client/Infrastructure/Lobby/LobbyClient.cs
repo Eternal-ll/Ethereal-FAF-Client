@@ -4,7 +4,6 @@ using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
-using NetCoreServer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -242,6 +241,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         AskQueueInfo();
                         break;
                     case ServerCommand.social:
+                        SocialDataReceived?.Invoke(this, JsonSerializer.Deserialize<SocialData>(data));
                         SplashProgress?.Report("Preparing app for you");
                         break;
                     case ServerCommand.player_info:
