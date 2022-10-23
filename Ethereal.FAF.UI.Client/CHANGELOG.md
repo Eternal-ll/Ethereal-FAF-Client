@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.10](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.9) (2022-10-22)
+
+#### Changelog
+
+- Fix game patcher
+- Fix custom map downloading on game launch
+- Added clean patch initialization (no more dependant on exist patch folder)
+
 ## [2.0.9](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.9) (2022-10-22)
 
 #### Changelog

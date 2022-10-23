@@ -20,23 +20,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public abstract class MapsHostingVM: JsonSettingsViewModel
     {
-        private readonly LobbyClient LobbyClient;
-        private readonly ContainerViewModel Container;
-        private readonly PatchClient PatchClient;
-        private readonly IceManager IceManager;
-        private readonly SnackbarService SnackbarService;
-        private readonly IConfiguration Configuration;
+        protected readonly LobbyClient LobbyClient;
+        protected readonly ContainerViewModel Container;
+        protected readonly PatchClient PatchClient;
+        protected readonly IceManager IceManager;
+        protected readonly NotificationService NotificationService;
+        protected readonly IConfiguration Configuration;
 
-        public string MapsPath => System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(
-            Configuration.GetValue<string>("Paths:Vault")), "maps");
-
-        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration)
+        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration, NotificationService notificationService)
         {
             LobbyClient = lobbyClient;
             Container = container;
             PatchClient = patchClient;
             IceManager = iceManager;
             Configuration = configuration;
+            NotificationService = notificationService;
         }
 
         #region Game
@@ -102,7 +100,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 Container.SplashVisibility = Visibility.Collapsed;
                 if (t.IsFaulted)
                 {
-                    SnackbarService.GetSnackbarControl().Show("Error", t.Exception.ToString());
+                    NotificationService.Notify("Error", t.Exception.ToString());
                     return;
                 }
                 LobbyClient.HostGame(

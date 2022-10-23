@@ -131,11 +131,7 @@ namespace Ethereal.FAF.UI.Client
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
-            services.AddScoped(s => new MapsService(
-                mapsFolder: Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps"),
-                baseAddress: configuration.GetValue<string>("FAForever:Content"),
-                httpClientFactory: s.GetService<IHttpClientFactory>(),
-                logger: s.GetService<ILogger<MapsService>>()));
+            services.AddScoped<MapsService>();
 
             services.AddSingleton<ITokenProvider, TokenProvider>();
 

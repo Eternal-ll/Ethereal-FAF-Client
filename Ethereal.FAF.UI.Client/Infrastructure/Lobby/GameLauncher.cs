@@ -1,4 +1,5 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
@@ -228,17 +229,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
             if (!string.IsNullOrWhiteSpace(e.mapname))
             {
+                var maps = Configuration.GetMapsFolder();
                 if (MapGenerator.IsGeneratedMap(e.mapname))
                 {
                     progress?.Report("Generating map");
                     NotificationService.Notify("Game", "Generating map", ignoreOs: true);
-                    await MapGenerator.GenerateMap(e.mapname, MapsService.MapsFolder, default, progress);
+                    await MapGenerator.GenerateMap(e.mapname, maps, default, progress);
                 }
                 else
                 {
                     if (MapsService.IsExist(e.mapname))
                     {
-                        await MapsService.DownloadAsync(e.mapname, MapsService.MapsFolder, progress, default);
+                        await MapsService.DownloadAsync(e.mapname, $"maps/{e.mapname}.zip", progress, default);
                     }
                 }
             }
@@ -263,15 +265,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
+            var maps = Configuration.GetMapsFolder();
             if (!MapsService.IsExist(game.Mapname))
             {
                 if (MapGenerator.IsGeneratedMap(game.Mapname))
                 {
                     progress?.Report("Generating map");
-                    await MapGenerator.GenerateMap(game.Mapname, MapsService.MapsFolder, cancellationToken, progress);
-
-                    game.SmallMapPreview = MapsService.MapsFolder + game.Mapname + '/' + game.Mapname + "_preview.png";
-                    game.OnPropertyChanged(nameof(game.SmallMapPreview));
+                    await MapGenerator.GenerateMap(game.Mapname, maps, cancellationToken, progress);
+                    game.SmallMapPreview = Path.Combine(maps, game.Mapname, game.Mapname + "_preview.png");
                 }
                 else
                 {
@@ -284,15 +285,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task WatchGame(long gameId, long playerId, string mapname, FeaturedMod mod)
         {
+            var maps = Configuration.GetMapsFolder();
             if (!MapsService.IsExist(mapname))
             {
                 if (MapGenerator.IsGeneratedMap(mapname))
                 {
-                    await MapGenerator.GenerateMap(mapname, MapsService.MapsFolder);
+                    await MapGenerator.GenerateMap(mapname, maps);
                 }
                 else
                 {
-                    await MapsService.DownloadAsync(mapname, $"maps/{mapname}.zip");
+                    await MapsService.DownloadAsync(mapname);
                 }
             }
             StringBuilder sb = new();

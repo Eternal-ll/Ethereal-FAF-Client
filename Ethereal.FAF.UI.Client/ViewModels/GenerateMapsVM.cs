@@ -1,5 +1,6 @@
 ﻿using Ethereal.FA.Vault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,37 +19,21 @@ using System.Windows.Input;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public sealed class DensitySetting : JsonSettingsViewModel
-    {
-        public DensitySetting(string area) => Area = area;
-        public DensitySetting(){}
-        public string Area { get; set; }
-        private bool _IsEnabled;
-        public bool IsEnabled
-        {
-            get => _IsEnabled;
-            set => Set(ref _IsEnabled, value, $"MapGenerator:Config:MapDensities:{Area}:IsEnabled");
-        }
-        private double _Value;
-        public double Value
-        {
-            get => _Value;
-            set => Set(ref _Value, value, $"MapGenerator:Config:MapDensities:{Area}:Value");
-        }
-    }
     public sealed class GenerateMapsVM : MapsHostingVM
     {
         private readonly MapGenerator MapGenerator;
-        private readonly NotificationService NotificationService;
-        private readonly IConfiguration Configuration;
 
         private FileSystemWatcher FileSystemWatcher;
 
         public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, ContainerViewModel container,
             PatchClient patchClient, IceManager iceManager, NotificationService notificationService,
             IConfiguration configuration)
-            : base(lobbyClient, container, patchClient, iceManager, configuration)
+            : base(lobbyClient, container, patchClient, iceManager, configuration, notificationService)
         {
+            CleanCommand = new LambdaCommand(OnCleanCommand, CanCleanCommand);
+            CancelGenerationCommand = new LambdaCommand(OnCancelGenerationCommand, CanCancelGenerationCommand);
+            GenerateCommand = new LambdaCommand(OnGenerateCommand, CanGenerateCommand);
+
             _SelectedBiome = configuration.GetValue<string>("MapGenerator:Config:SelectedBiome");
             _SelectedMapGeneratorVersion = configuration.GetValue<string>("MapGenerator:Config:SelectedMapGeneratorVersion");
             _SelectedTerrainSymmetry = configuration.GetValue<string>("MapGenerator:Config:SelectedTerrainSymmetry");
@@ -84,28 +68,34 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             MexDensity = mapDensities["Mex"];
 
             MapGenerator = mapGenerator;
+
+            var mapsFolder = configuration.GetMapsFolder();
+
             FileSystemWatcher = new()
             {
                 IncludeSubdirectories = true,
-                Path = MapsPath,
+                Path = mapsFolder,
                 Filter = "neroxis_map_generator_*.*.*_*_scenario.lua",
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
             };
             FileSystemWatcher.Changed += (s, e) =>
             {
-                Task.Run(async () =>
-                {
-                    await Task.Delay(500);
-                    ProcessGeneratedMap(e.FullPath);
-                });
+                //await Task.Delay(500);
+                Thread.Sleep(500);
+                ProcessGeneratedMap(e.FullPath);
+                //Task.Run(async () =>
+                //{
+                //    await Task.Delay(500);
+                //    ProcessGeneratedMap(e.FullPath);
+                //});
             };
             mapGenerator.MapGenerated += MapGenerator_MapGenerated;
             SelectedMapGeneratorVersion = MapGenerator.LatestVersion;
             Task.Run(() =>
             {
                 var maps = new List<LocalMap>();
-                string[] scenarios = Directory.GetFiles(MapsPath, "*_scenario.lua", SearchOption.AllDirectories);
+                string[] scenarios = Directory.GetFiles(mapsFolder, "*_scenario.lua", SearchOption.AllDirectories);
                 foreach (var file in scenarios)
                 {
                     var name = file.Split('/', '\\')[^2];
@@ -124,8 +114,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
                 SetSource(maps);
             });
-            NotificationService = notificationService;
-            Configuration = configuration;
         }
         private void MapGenerator_MapGenerated(object sender, string e)
         {
@@ -417,8 +405,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         #region GenerateCommand
-        private ICommand _GenerateCommand;
-        public ICommand GenerateCommand => _GenerateCommand ??= new LambdaCommand(OnGenerateCommand, CanGenerateCommand);
+        public ICommand GenerateCommand { get; }
 
         private bool CanGenerateCommand(object arg) => true;
 
@@ -435,9 +422,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var mex = MexDensity;
             var progress = new Progress<string>(d => ProgressText = d);
 
+            var folder = Configuration.GetMapsFolder();
+
             var maps = await MapGenerator.GenerateMapAsync(
                 version: SelectedMapGeneratorVersion,
-                folder: MapsPath,
+                folder: folder,
                 style: SelectedStyle,
                 biome: SelectedBiome,
                 spawns: SpawnsCount,
@@ -475,24 +464,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         private CancellationTokenSource CancellationSource;
+
         #region CancelGenerationCommand
-        private ICommand _CancelGenerationCommand;
-        public ICommand CancelGenerationCommand => _CancelGenerationCommand ??= new LambdaCommand(OnCancelGenerationCommand, CanCancelGenerationCommand);
-
+        public ICommand CancelGenerationCommand { get; }
         private bool CanCancelGenerationCommand(object arg) => CancellationSource is not null && !CancellationSource.IsCancellationRequested;
-
         private void OnCancelGenerationCommand(object obj)
         {
             CancellationSource?.Cancel();
         }
         #endregion
 
-        #region CleanCommand
-        private ICommand _CleanCommand;
-        public ICommand CleanCommand => _CleanCommand ??= new LambdaCommand(OnCleanCommand, CanCleanCommand);
-
+        #region CleanCommand]
+        public ICommand CleanCommand { get; }
         private bool CanCleanCommand(object arg) => GeneratedMaps.Any();
-
         private void OnCleanCommand(object obj)
         {
 

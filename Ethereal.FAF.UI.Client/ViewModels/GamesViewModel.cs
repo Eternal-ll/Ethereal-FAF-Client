@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
+using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models.Lobby;
@@ -37,7 +38,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly IServiceProvider ServiceProvider;
         private readonly IConfiguration Configuration;
-        private string Maps => Path.Combine(Configuration.GetValue<string>("Paths:Vault"), "maps");
 
         public MatchmakingViewModel MatchmakingViewModel { get; }
 
@@ -66,17 +66,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             LobbyClient = lobby;
             GameLauncher = gameLauncher;
+            IceManager = iceManager;
 
             Configuration = configuration;
-            
+            Logger = logger;
+
             NotificationService = notificationService;
             MatchmakingViewModel = matchmakingViewModel;
             PlayersViewModel = serviceProvider.GetService<PlayersViewModel>();
             ContainerViewModel = containerViewModel;
             ServiceProvider = serviceProvider;
             DialogService = dialogService;
-            IceManager = iceManager;
-            Logger = logger;
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -364,7 +364,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void SetMapScenario(Game game)
         {
             if (game.MapScenario is not null) return;
-            var scenario = Path.Combine(Maps, game.Mapname, game.Mapname.Split('.')[0] + "_scenario.lua");
+            var scenario = Configuration.GetMapFile(game.Mapname, "_scenario.lua");
             if (File.Exists(scenario))
             {
                 game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
