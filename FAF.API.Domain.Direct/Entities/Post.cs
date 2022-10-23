@@ -7,7 +7,7 @@ namespace FAF.Domain.Direct.Entities
     /// <summary>
     /// 
     /// </summary>
-    public partial class Post : Base.Entity
+    public sealed partial class Post : Base.Entity
     {
         /// <summary>
         /// 

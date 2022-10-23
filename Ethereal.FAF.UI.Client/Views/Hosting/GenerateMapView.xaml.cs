@@ -7,7 +7,7 @@ namespace Ethereal.FAF.UI.Client.Views.Hosting
     /// <summary>
     /// Interaction logic for GenerateMapView.xaml
     /// </summary>
-    public partial class GenerateMapView : UserControl, IGameHosting, IDisposable
+    public sealed partial class GenerateMapView : UserControl, IGameHosting, IDisposable
     {
         GenerateMapsVM Model;
         public GenerateMapView(GenerateMapsVM model)

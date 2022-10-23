@@ -53,9 +53,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             response.Content.Dispose();
             await fs.DisposeAsync();
             fs.Close();
-            progress?.Report($"Extracting map [{map}]");
-            ZipFile.ExtractToDirectory(map, Configuration.GetMapsFolder(), true);
-            File.Delete(map);
+            progress?.Report($"Extracting map [{zip}]");
+            ZipFile.ExtractToDirectory(zip, Configuration.GetMapsFolder(), true);
+            File.Delete(zip);
             return true;
         }
     }

@@ -32,7 +32,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
     /// <summary>
     /// Interaction logic for Container.xaml
     /// </summary>
-    public partial class MainWindow : INavigationWindow
+    public sealed partial class MainWindow : INavigationWindow
     {
         private readonly IThemeService _themeService;
         private readonly ITaskBarService _taskBarService;

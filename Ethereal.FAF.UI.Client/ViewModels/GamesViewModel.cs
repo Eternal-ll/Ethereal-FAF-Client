@@ -723,8 +723,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     //ContainerViewModel.Content = null;
                     ContainerViewModel.SplashVisibility = Visibility.Collapsed;
                     progress.Report("Waiting ending of match");
-                    var notify = CancellationTokenSource.IsCancellationRequested ? "Operation was cancelled" : "Launching game";
-                    NotificationService.Notify("Notification", notify);
                 });
         } 
         #endregion

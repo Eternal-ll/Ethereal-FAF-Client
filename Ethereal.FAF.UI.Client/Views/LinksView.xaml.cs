@@ -6,7 +6,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for LinksView.xaml
     /// </summary>
-    public partial class LinksView : INavigableView<LinksViewModel>
+    public sealed partial class LinksView : INavigableView<LinksViewModel>
     {
         public LinksView(LinksViewModel model)
         {

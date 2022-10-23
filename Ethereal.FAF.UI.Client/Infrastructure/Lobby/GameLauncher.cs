@@ -91,18 +91,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         //IceManager.IceServer?.Kill();
                         Process?.Kill();
                         Process?.Dispose();
+                        Process?.Close();
                     }
                     Process = null;
-                    try
-                    {
-                        IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
-                        IceManager.IceClient.IsStop = true;
-                        IceManager.IceClient.Disconnect();
-                        IceManager.IceClient.Dispose();
-                        IceManager.IceClient = null;
-                        IceManager.IceServer.Kill();
-                    }
-                    catch{ }
+
+                    IceManager.IceClient.IsStop = true;
+                    IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
+                    IceManager.IceClient.Disconnect();
+                    IceManager.IceClient.Dispose();
+                    IceManager.IceClient = null;
+                    IceManager.IceServer.WaitForExit();
+                    IceManager.IceServer.Dispose();
+                    IceManager.IceServer.Close();
+                    IceManager.IceServer = null;
+
                     //if (IsRestart) RestartGame();
                     IsRestart = false;
                 });

@@ -38,7 +38,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         [JsonIgnore]
         public bool IsExpired => (ExpiresAt - DateTime.Now).TotalMinutes < 5;
     }
-    public partial class FafJwtPayload
+    public sealed partial class FafJwtPayload
     {
         [JsonPropertyName("aud")]
         public object[] Aud { get; set; }

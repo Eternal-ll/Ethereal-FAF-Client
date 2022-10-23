@@ -12,7 +12,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for GamesView.xaml
     /// </summary>
-    public partial class GamesView : INavigableView<GamesViewModel>
+    public sealed partial class GamesView : INavigableView<GamesViewModel>
     {
         public GamesView(GamesViewModel viewModel)
         {

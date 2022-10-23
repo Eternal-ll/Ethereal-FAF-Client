@@ -9,7 +9,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for LoaderView.xaml
     /// </summary>
-    public partial class LoaderView : UserControl
+    public sealed partial class LoaderView : UserControl
     {
         public LoaderView() => InitializeComponent();
 

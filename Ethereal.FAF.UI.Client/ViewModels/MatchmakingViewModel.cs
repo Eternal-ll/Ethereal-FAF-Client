@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -29,12 +28,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public sealed class MatchmakingViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
-        private readonly DialogService DialogService;
         private readonly NotificationService NotificationService;
         private readonly PatchClient PatchClient;
         public PartyViewModel PartyViewModel { get; }
 
-        public MatchmakingViewModel(LobbyClient lobbyClient, DialogService dialogService, PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
+        public MatchmakingViewModel(LobbyClient lobbyClient, PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
         {
             JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
 
@@ -62,20 +60,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     // update match confirmation expiration
                     OnPropertyChanged(nameof(MatchConfirmation));
 
-
                     await Task.Delay(1000);
                 }
             });
 
-            SearchStates = new()
-            {
-                { MatchmakingType.ladder1v1, false },
-                { MatchmakingType.tmm2v2, false },
-                { MatchmakingType.tmm4v4_full_share, false },
-            };
-
             LobbyClient = lobbyClient;
-            DialogService = dialogService;
             PartyViewModel = partyViewModel;
             NotificationService = notificationService;
             PatchClient = patchClient;
@@ -134,7 +123,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        public ObservableDictionary<MatchmakingType, bool> SearchStates { get; set; }
+        public ObservableDictionary<MatchmakingType, bool> SearchStates { get; set; } = new()
+            {
+                { MatchmakingType.ladder1v1, false },
+                { MatchmakingType.tmm2v2, false },
+                { MatchmakingType.tmm4v4_full_share, false },
+            };
         public bool AnyActiveQueue => SearchStates.Any(s => s.Value);
 
         public ObservableCollection<QueueData> Queues = new();

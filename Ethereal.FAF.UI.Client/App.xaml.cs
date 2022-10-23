@@ -30,7 +30,7 @@ namespace Ethereal.FAF.UI.Client
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public sealed partial class App : Application
     {
         public static IHost Hosting;
         protected override async void OnStartup(StartupEventArgs e)
