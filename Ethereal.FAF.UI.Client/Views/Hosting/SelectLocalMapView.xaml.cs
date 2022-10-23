@@ -7,7 +7,7 @@ namespace Ethereal.FAF.UI.Client.Views.Hosting
     /// <summary>
     /// Interaction logic for SelectLocalMapView.xaml
     /// </summary>
-    public partial class SelectLocalMapView : UserControl, IGameHosting, IDisposable
+    public sealed partial class SelectLocalMapView : UserControl, IGameHosting, IDisposable
     {
         private LocalMapsVM Model;
         public SelectLocalMapView(LocalMapsVM model)

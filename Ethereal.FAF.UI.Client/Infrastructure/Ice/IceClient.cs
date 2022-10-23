@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Windows.Markup;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -44,7 +43,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// Connection status with remote player
         /// </summary>
         public event EventHandler<ConnectionState> ConnectionStateChanged;
-        private int JsonRpcId = 0;
 
         /// <summary>
         /// Normal or auto
@@ -55,9 +53,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             var json = IceJsonRpcMethods.SetLobbyInitMode(initMode);
             SendAsync(json);
         }
-        List<string> Queue = new();
-        
+
+        readonly List<string> Queue = new();
+        readonly List<byte> Cache = new();
         bool IcePassed = false;
+        public bool IsStop;
+
         public void PassIceServersAsync(string iceServers)
         {
             if (IcePassed) return;
@@ -69,8 +70,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public IceClient(string host, int port) : base(host, port)
         {
         }
-
-        List<byte> Cache = new();
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
@@ -89,6 +88,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 Cache.Add(buffer[i]);
             }
         }
+        public override long Send(string text) => base.Send(text[^1] != '\n' ? text + '\n' : text);
         public override bool SendAsync(string text)
         {
             Console.WriteLine(text);
@@ -105,9 +105,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             {
                 Send(item);
             }
-            Send(IceJsonRpcMethods.AskStatus(++JsonRpcId));
         }
-        public bool IsStop;
         protected override void OnDisconnected()
         {
             if (IsStop) return;
@@ -127,7 +125,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                     case "onConnectionStateChanged":
                         var connected = rpc.Params[0].ToString() == "Connected";
                         ConnectionToGpgNetServerChanged?.Invoke(this, connected);
-                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     case "onGpgNetMessageReceived":
                         var command = rpc.Params[0].ToString();
@@ -144,10 +141,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                         var state = rpc.Params[2].ToString();
                         Console.WriteLine($"Connection state of [{localPlayerId}] to [{remotePlayerId}] is [{state}]");
                         ConnectionStateChanged?.Invoke(this, new ConnectionState(localPlayerId, remotePlayerId, state));
-                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     case "onConnected":
-                        //SendAsync(IceJsonRpcMethods.AskStatus(++JsonRpcId));
                         break;
                     default:
                         break;
@@ -185,6 +180,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             LocalPlayerId = localPlayerId;
             RemotePlayerId = remotePlayerId;
             State = state;
+        }
+        public DateTime Created { get; set; } = DateTime.Now;
+        public DateTime Connected { get; private set; }
+        public TimeSpan ConnectedIn { get; private set; }
+        public void UpdateState(string state)
+        {
+            State = state;
+            if (state == "connected")
+            {
+                Connected = DateTime.Now;
+                ConnectedIn = Connected - Created;
+            }
         }
     }
 }

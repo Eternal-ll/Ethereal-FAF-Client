@@ -6,7 +6,7 @@ namespace FAF.Domain.Direct.Models
     /// <summary>
     /// 
     /// </summary>
-    public partial class Embedded
+    public sealed partial class Embedded
     {
         /// <summary>
         /// 

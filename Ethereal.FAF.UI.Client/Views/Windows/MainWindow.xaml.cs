@@ -4,6 +4,7 @@
 // All Rights Reserved.
 
 
+using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
@@ -13,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -26,14 +26,13 @@ using Wpf.Ui.Common;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.TaskBar;
-using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace FAF.UI.EtherealClient.Views.Windows
 {
     /// <summary>
     /// Interaction logic for Container.xaml
     /// </summary>
-    public partial class MainWindow : INavigationWindow
+    public sealed partial class MainWindow : INavigationWindow
     {
         private readonly IThemeService _themeService;
         private readonly ITaskBarService _taskBarService;
@@ -120,12 +119,6 @@ namespace FAF.UI.EtherealClient.Views.Windows
                     if (Container.Content is not null) return;
                     Container.SplashVisibility = Visibility.Collapsed;
                     Container.SplashProgressVisibility = Visibility.Collapsed;
-                    //Container.SplashText = "Waiting ending of match";
-                    //RenderSize = new(1280, 720);
-                    //Width = 1280;
-                    //Height = 720;
-                    //Navigate(typeof(.Dashboard));
-
                 }
                 else
                 {
@@ -146,23 +139,18 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         #region INavigationWindow methods
 
-        public Frame GetFrame()
-            => RootFrame;
+        public Frame GetFrame() => RootFrame;
 
-        public INavigation GetNavigation()
-            => RootNavigation;
+        public INavigation GetNavigation() => RootNavigation;
 
-        public bool Navigate(Type pageType)
-            => RootNavigation.Navigate(pageType);
+        public bool Navigate(Type pageType) => RootNavigation.Navigate(pageType);
 
-        public void SetPageService(IPageService pageService)
+        public void SetPageService(IPageService pageService) 
             => RootNavigation.PageService = pageService;
 
-        public void ShowWindow()
-            => Show();
+        public void ShowWindow() => Show();
 
-        public void CloseWindow()
-            => Close();
+        public void CloseWindow() => Close();
 
         #endregion INavigationWindow methods
 
@@ -172,20 +160,10 @@ namespace FAF.UI.EtherealClient.Views.Windows
             Task.Run(async () =>
             {
                 await PrepareJavaRuntime();
-                //await InitalizePathWatchers();
                 await Auth();
             });
-            Task.Run(InitalizePathWatchers);
+            Task.Run(PatchClient.InitializePatchWatching);
         }
-
-        private async Task InitalizePathWatchers()
-        {
-            //Container.SplashText = "Initializing patch watcher";
-            //var progress = new Progress<string>(d => Container.SplashText = d);
-            await PatchClient.InitializeWatchers(null);
-            //Container.SplashText = "Patch watcher initialized";
-        }
-
         private async Task PrepareJavaRuntime()
         {
             if (!Directory.Exists("External/jre"))

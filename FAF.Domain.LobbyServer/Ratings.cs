@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
-    public partial class Ratings
+    public sealed partial class Ratings
     {
         [JsonPropertyName("global")]
         public Rating Global { get; set; }

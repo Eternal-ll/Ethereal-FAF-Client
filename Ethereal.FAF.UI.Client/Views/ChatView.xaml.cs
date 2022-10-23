@@ -11,7 +11,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for ChatView.xaml
     /// </summary>
-    public partial class ChatView : INavigableView<ChatViewModel>
+    public sealed partial class ChatView : INavigableView<ChatViewModel>
     {
         public ChatView(ChatViewModel viewmodel)
         {

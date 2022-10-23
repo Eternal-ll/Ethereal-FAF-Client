@@ -6,10 +6,10 @@ namespace Ethereal.FAF.API.Client
 {
     public interface IFafApiClient
     {
-        [Get("/data/featuredMods/{featuredMod}/files/latest")]
+        [Get("/featuredMods/{featuredMod}/files/latest")]
         Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetLatestAsync(int featuredMod, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
 
-        [Get("/data/featuredMods/{featuredMod}/files/{version}")]
+        [Get("/featuredMods/{featuredMod}/files/{version}")]
         Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(int featuredMod, int version, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
 
         [Get("/data/coturnServer")]

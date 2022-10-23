@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.0.10](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.10) (2022-10-23)
+
+**Changelog**
+
+- Fix game patcher
+- Fix custom map downloading on game launch
+- Fix idle games list not updating on game launch
+- Fix oauth logo
+- Host page background now transparent
+- Added clean patch initialization (no more dependant on exist patch folder, but still using auto-game detect method)
+- Added game filters: OnlyGeneratedMaps / HidePrivateLobbies / EnableMapsBlacklist
+- Added players ratinsg to idle/live custom/coop games
+- Carefully closing ice adapter
+- Host page moved into navigation frame
+- Code cleanup
+
+
+**FAQ**
+
+How to hide specific map?
+
+- Right click on game card
+- Click on "Ban map"
+
+![](https://cdn.discordapp.com/attachments/378156367933997056/1033702143745605632/unknown.png)
+
+
+
+![](https://cdn.discordapp.com/attachments/926400628803113020/1033703179361198221/unknown.png)
+
 ## [2.0.9](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.9) (2022-10-22)
 
 #### Changelog

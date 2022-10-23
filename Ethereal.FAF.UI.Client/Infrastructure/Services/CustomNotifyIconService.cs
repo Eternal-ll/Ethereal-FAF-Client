@@ -53,13 +53,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             };
 
             foreach (var singleContextMenuItem in ContextMenu.Items)
-                if (singleContextMenuItem is MenuItem)
-                    ((MenuItem)singleContextMenuItem).Click += OnMenuItemClick;
+                if (singleContextMenuItem is MenuItem item)
+                    item.Click += OnMenuItemClick;
         }
 
         protected override void OnLeftClick()
         {
-            System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Tray event: {nameof(OnLeftClick)}", "Wpf.Ui.Demo");
+            //System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Tray event: {nameof(OnLeftClick)}", "Wpf.Ui.Demo");
         }
 
         private void OnMenuItemClick(object sender, RoutedEventArgs e)
@@ -67,7 +67,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             if (sender is not MenuItem menuItem)
                 return;
 
-            System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Tray clicked: {menuItem.Tag}", "Wpf.Ui.Demo");
+            //System.Diagnostics.Debug.WriteLine($"DEBUG | WPF UI Tray clicked: {menuItem.Tag}", "Wpf.Ui.Demo");
         }
     }
 }

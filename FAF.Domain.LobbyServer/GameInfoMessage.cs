@@ -18,7 +18,7 @@ namespace FAF.Domain.LobbyServer
             return true;
         }
     }
-    public partial class GameInfoMessage : INPC
+    public class GameInfoMessage : INPC
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ServerCommand Command { get; set; }

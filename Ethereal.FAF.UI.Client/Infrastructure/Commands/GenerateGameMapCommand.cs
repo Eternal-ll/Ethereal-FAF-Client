@@ -4,23 +4,9 @@ using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
 {
-    internal sealed class CopyCommand : Base.Command
-    {
-        private NotificationService Notification { get; set; }
-        public override bool CanExecute(object parameter) => true;
-
-        public override void Execute(object parameter)
-        {
-            if (parameter is null) return;
-            Notification ??= App.Hosting.Services.GetService<NotificationService>();
-            Clipboard.SetText(parameter.ToString());
-            Notification.Notify("Copied", parameter.ToString(), Wpf.Ui.Common.SymbolRegular.Copy24);
-        }
-    }
     internal class GenerateGameMapCommand : Base.Command
     {
         private NotificationService Notification => App.Hosting.Services.GetService<NotificationService>();
@@ -42,7 +28,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
                     return;
                 }
                 game.SmallMapPreview = preview;
-                game.OnPropertyChanged(nameof(game.SmallMapPreview));
                 game.MapGeneratorState = MapGeneratorState.Generated;
                 Notification.Notify("Map generator", $"Map {game.Mapname} is generated", new System.Uri(preview));
             })
@@ -58,10 +43,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
         {
             game.MapGeneratorException = exception;
             game.MapGeneratorState = MapGeneratorState.Faulted;
+            Notification.Notify("Map generator", exception);
             await Task.Delay(System.TimeSpan.FromSeconds(5));
             game.MapGeneratorState = MapGeneratorState.NotGenerated;
             game.MapGeneratorException = null;
-            Notification.Notify("Map generator", exception);
         }
     }
 }

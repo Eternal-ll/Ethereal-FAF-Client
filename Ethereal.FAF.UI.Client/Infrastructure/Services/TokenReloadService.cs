@@ -1,11 +1,11 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
@@ -58,17 +58,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 return;
             }
             using var scope = ServiceProvider.CreateScope();
-            Logger.LogTrace("Current access token expires in [{}] seconds at [{}]", token.ExpiresIn, token.ExpiresAt);
+            Logger.LogTrace("Current access token expires in [{seconds}]", token.ExpiresIn);
             var oauthClient = scope.ServiceProvider.GetRequiredService<FafOAuthClient>();
             var result = await oauthClient.RefreshToken(token.RefreshToken, cancellationToken);
             if (result.IsError)
             {
-                Logger.LogError("Error on reloading access token [{}]", result.ErrorDescription);
+                Logger.LogError("Error on reloading access token [{error}]", result.ErrorDescription);
                 return;
             }
             token = result.TokenBearer;
-            Logger.LogTrace("New access token expires in [{}] seconds at [{}]", token.ExpiresIn, token.ExpiresAt);
             TokenProvider.Save(token);
+            Logger.LogTrace("New access token expires in [{seconds}] seconds", token.ExpiresIn);
         }
     }
 }

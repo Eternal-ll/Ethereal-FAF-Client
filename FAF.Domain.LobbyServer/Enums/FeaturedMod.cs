@@ -5,7 +5,7 @@ namespace FAF.Domain.LobbyServer.Enums
     /// <summary>
     /// featured_mod
     /// </summary>
-    public enum FeaturedMod : byte
+    public enum FeaturedMod : int
     {
         [EnumMember(Value = "FAF")]
         FAF = 0,

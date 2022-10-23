@@ -20,9 +20,13 @@
     <None Remove="External\faf-ice-adapter-v3.3-RC1-nojfx.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
+    <Compile Remove="Infrastructure\Notifications\**" />
+    <EmbeddedResource Remove="Infrastructure\Notifications\**" />
+    <None Remove="Infrastructure\Notifications\**" />
     <None Remove="Resources\Fonts\*.otf" />
     <None Remove="Resources\Images\Examples\SidebarExample.png" />
     <None Remove="Resources\Images\Flags\*.png" />
+    <Page Remove="Infrastructure\Notifications\**" />
     <None Remove="Resources\logo.ico" />
     <None Remove="Resources\OAuthResult.html" />
   </ItemGroup>
@@ -46,7 +50,7 @@
     <PackageReference Include="NetCoreServer" Version="6.6.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.1" />
     <PackageReference Include="WPF-UI" Version="2.0.3" />
-    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+    <!--<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />-->
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
   </ItemGroup>
 
@@ -67,10 +71,6 @@
     <Content Include="External\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Infrastructure\Notifications\" />
   </ItemGroup>
 
   <ItemGroup>

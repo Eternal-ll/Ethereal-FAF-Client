@@ -14,29 +14,26 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public abstract class MapsHostingVM: JsonSettingsViewModel
     {
-        private readonly LobbyClient LobbyClient;
-        private readonly ContainerViewModel Container;
-        private readonly PatchClient PatchClient;
-        private readonly IceManager IceManager;
-        private readonly SnackbarService SnackbarService;
-        private readonly IConfiguration Configuration;
+        protected readonly LobbyClient LobbyClient;
+        protected readonly ContainerViewModel Container;
+        protected readonly PatchClient PatchClient;
+        protected readonly IceManager IceManager;
+        protected readonly NotificationService NotificationService;
+        protected readonly IConfiguration Configuration;
 
-        public string MapsPath => System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(
-            Configuration.GetValue<string>("Paths:Vault")), "maps");
-
-        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration)
+        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration, NotificationService notificationService)
         {
             LobbyClient = lobbyClient;
             Container = container;
             PatchClient = patchClient;
             IceManager = iceManager;
             Configuration = configuration;
+            NotificationService = notificationService;
         }
 
         #region Game
@@ -95,20 +92,28 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Container.SplashText = "Confirming patch";
             Container.Content = null;
             var progress = new Progress<string>(e => Container.SplashText = e);
-            await PatchClient.UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress);
-            Container.SplashProgressVisibility = Visibility.Collapsed;
-            Container.SplashVisibility = Visibility.Collapsed;
-            LobbyClient.HostGame(
-            title: Game.Title,
-            mod: Game.FeaturedMod,
-            mapName: LocalMap.FolderName,
-            minRating: Game.MinimumRating,
-            maxRating: Game.MaximumRating,
-            visibility: Game.IsFriendsOnly ?
-            GameVisibility.Friends :
-            GameVisibility.Public,
-            isRatingResctEnforced: Game.EnforceRating,
-            password: Game.Password);
+            await PatchClient.UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
+            .ContinueWith(t =>
+            {
+                Container.SplashProgressVisibility = Visibility.Collapsed;
+                Container.SplashVisibility = Visibility.Collapsed;
+                if (t.IsFaulted)
+                {
+                    NotificationService.Notify("Error", t.Exception.ToString());
+                    return;
+                }
+                LobbyClient.HostGame(
+                title: Game.Title,
+                mod: Game.FeaturedMod,
+                mapName: LocalMap.FolderName,
+                minRating: Game.MinimumRating,
+                maxRating: Game.MaximumRating,
+                visibility: Game.IsFriendsOnly ?
+                GameVisibility.Friends :
+                GameVisibility.Public,
+                isRatingResctEnforced: Game.EnforceRating,
+                password: Game.Password);
+            });
         });
         #endregion
 

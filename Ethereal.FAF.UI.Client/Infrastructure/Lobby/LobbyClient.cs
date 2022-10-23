@@ -6,7 +6,6 @@ using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -22,7 +21,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<bool> Authorized;
         public event EventHandler<string> IrcPasswordReceived;
         public event EventHandler<Player> PlayerReceived;
-        public event EventHandler<Player[]> PlayersRangeReceived;
         public event EventHandler<Player[]> PlayersReceived;
         public event EventHandler<Game> GameReceived;
         public event EventHandler<Game[]> GamesReceived;
@@ -31,7 +29,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<SocialData> SocialDataReceived;
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<NotificationData> NotificationReceived;
-        //public event EventHandler<QueueData> QueueDataReceived;   
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
         public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
@@ -105,10 +102,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //    DisconnectAsync();
             //});
         }
-        Stopwatch sw = new();
         internal void DisconnectAsync(bool reconnect)
         {
-            sw.Restart();
             _stop = reconnect;
             DisconnectAsync();
         }
@@ -126,25 +121,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (!_stop)
                 ConnectAsync();
         }
-        string cache;
-        private bool TryParseLines(ref string data, out string message)
-        {
-            message = string.Empty;
-            if (data is null) return false;
-            var index = data.IndexOf('\n');
-            if (index != -1)
-            {
-                message = cache + data[..(index + 1)];
-                data = data[(index + 1)..];
-                cache = null;
-            }
-            else
-            {
-                cache += data;
-            }
-            return message.Length != 0;
-        }
-        List<byte> Cache = new();
+
+        readonly List<byte> Cache = new();
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
             if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
@@ -178,14 +156,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 //data = data[..^1];
             }
-            try
-            {
-                var t = JsonSerializer.Deserialize<Dictionary<string, object>>(data);
-            }
-            catch(Exception ex)
-            {
-
-            }
             var target = data[(data.IndexOf(':') + 2)..];
             target = target[..target.IndexOf('\"')];
             if (Enum.TryParse<ServerCommand>(target, out var command))
@@ -194,6 +164,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 {
                     case ServerCommand.game_info:
                     case ServerCommand.player_info:
+                    case ServerCommand.IceMsg:
                         break;
                     default: Logger.LogTrace($"[Inbound message] {data.TrimEnd()}"); break;
                 }
@@ -265,7 +236,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         }
                         GamesReceived?.Invoke(this, game.Games);
                         Authorized?.Invoke(this, true);
-                        if (sw.IsRunning) Logger.LogInformation("Reconnected in {elapsed}", sw.Elapsed);
                         break;
                     case ServerCommand.game:
                         break;
@@ -342,12 +312,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             SendAsync(ServerCommands.MatchReady);
         #endregion
 
+        public bool CanJoinGame => LastGameUid.HasValue;
+
         public void RequestIceServers() =>
             SendAsync(ServerCommands.RequestIceServers);
         public void RestoreGameSession(long gameId) =>
             SendAsync(ServerCommands.RestoreGameSession(gameId.ToString()));
-
-        public bool CanJoinGame() => LastGameUid.HasValue;
 
         public void JoinGame(long uid)
         {
@@ -383,14 +353,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (isRatingResctEnforced && (minRating.HasValue || maxRating.HasValue))
             {
                 sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
-            }
-            if (minRating.HasValue)
-            {
-                sb.Append($"\"rating_min\":{minRating.Value},");
-            }
-            if (maxRating.HasValue)
-            {
-                sb.Append($"\"rating_max\":{maxRating.Value},");
+                if (minRating.HasValue)
+                {
+                    sb.Append($"\"rating_min\":{minRating.Value},");
+                }
+                if (maxRating.HasValue)
+                {
+                    sb.Append($"\"rating_max\":{maxRating.Value},");
+                }
             }
             if (!string.IsNullOrWhiteSpace(password))
             {
@@ -398,7 +368,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             }
             sb[^1] = '}';
             var command = sb.ToString();
-            Logger.LogTrace("Hosting game with args: [{}]", command);
             SendAsync(command);
         }
     }

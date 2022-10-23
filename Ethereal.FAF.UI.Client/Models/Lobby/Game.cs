@@ -7,7 +7,6 @@ using FAF.Domain.LobbyServer.Enums;
 using Humanizer;
 using System;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby
@@ -168,7 +167,9 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
 
         #endregion
 
-        public Player HostPlayer { get; set; }
+        private Player _HostPlayer;
+
+        public Player HostPlayer { get => _HostPlayer; set => Set(ref _HostPlayer, value); }
 
         private GameTeam[] _GameTeams;
         public GameTeam[] GameTeams
@@ -289,6 +290,9 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         public bool IsPassedFilter { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public TimeSpan AfterCreationTimeSpan => DateTime.Now - Created;
-        
+
+
+        public bool UnSupported => FeaturedMod is not (FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop or FeaturedMod.coop);
+        public bool IsDevChannel => FeaturedMod is FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop;
     }
 }

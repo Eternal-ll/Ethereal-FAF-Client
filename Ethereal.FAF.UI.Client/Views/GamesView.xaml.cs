@@ -12,14 +12,16 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for GamesView.xaml
     /// </summary>
-    public partial class GamesView : INavigableView<GamesViewModel>
+    public sealed partial class GamesView : INavigableView<GamesViewModel>
     {
         public GamesView(GamesViewModel viewModel)
         {
             ViewModel = viewModel;
             InitializeComponent();
-            Resources.Add("JoinGameCommand", ViewModel.JoinGameCommand);
-            Resources.Add("WatchGameCommand", ViewModel.WatchGameCommand);
+            Resources.Add("JoinGameCommand", viewModel.JoinGameCommand);
+            Resources.Add("WatchGameCommand", viewModel.WatchGameCommand);
+            Resources.Add("RemoveMapFromBlacklistCommand", viewModel.RemoveMapFromBlacklistCommand);
+            Resources.Add("AddMapToBlacklistCommand", viewModel.AddMapToBlacklistCommand);
         }
 
         public GamesViewModel ViewModel { get; }
@@ -61,6 +63,7 @@ namespace Ethereal.FAF.UI.Client.Views
                 Dispatcher.Invoke(UpdateLayout);
                 //task = null;
                 GC.Collect(1);
+                task= null;
                 //GC.WaitForPendingFinalizers();
             });
         }

@@ -10,7 +10,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for MatchView.xaml
     /// </summary>
-    public partial class MatchView : UserControl, INotifyPropertyChanged
+    public sealed partial class MatchView : UserControl, INotifyPropertyChanged
     {
         public ObservableCollection<ConnectionState> Connections { get; set; } = new();
         public event PropertyChangedEventHandler PropertyChanged;

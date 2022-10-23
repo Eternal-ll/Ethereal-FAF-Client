@@ -1,5 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands.Base;
-using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +12,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for PlayersView.xaml
     /// </summary>
-    public partial class PlayersView : INavigableView<PlayersViewModel>
+    public sealed partial class PlayersView : INavigableView<PlayersViewModel>
     {
         private readonly ScrollViewer OriginalScrollViewer;
         public PlayersView(PlayersViewModel model)

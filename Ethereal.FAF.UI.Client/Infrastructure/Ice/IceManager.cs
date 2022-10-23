@@ -9,6 +9,7 @@ using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -38,6 +39,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 
         public int RpcPort { get; private set; }
         public int GpgNetPort { get; private set; }
+        private long LastGameId;
+
+        public List<ConnectionState> ConnectionStates { get; set; }
+        public bool AllConnected => ConnectionStates.Where(c => c.State == "connected").Count() == ConnectionStates.Count;
 
         public IceManager(ILogger<IceManager> logger, LobbyClient lobbyClient, IConfiguration configuration, NotificationService notificationService, IFafApiClient fafApiClient)
         {
@@ -127,6 +132,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         bool HasWebUI;
         public void Initialize(string playerId, string playerLogin, long gameId)
         {
+            LastGameId = gameId;
             InitializeNewPorts();
             Logger.LogTrace("Initializing Ice process with player id [{}], player login [{}], RPC port [{}], GPG NET port [{}]",
                 playerId, playerLogin, RpcPort, GpgNetPort);
@@ -143,6 +149,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceClient.GpgNetMessageReceived += IceClient_GpgNetMessageReceived;
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
             IceClient.ConnectionToGpgNetServerChanged += IceClient_ConnectionToGpgNetServerChanged;
+            IceClient.ConnectionStateChanged += IceClient_ConnectionStateChanged;
+            ConnectionStates?.Clear();
+            ConnectionStates = null;
+            ConnectionStates = new();
             Logger.LogTrace("Initialized ICE client on [{}:{}]", host, RpcPort);
             Initialized?.Invoke(this, null);
             if (HasWebUI && Configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true))
@@ -154,6 +164,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 });
             }
         }
+
         public Process GetIceServerProcess(string playerId, string playerLogin, long gameId)
         {
             var ice = Configuration.GetValue<string>("IceAdapter:Executable");
@@ -168,7 +179,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             }
             sb.Append($"--rpc-port {RpcPort} ");
             sb.Append($"--gpgnet-port {GpgNetPort} ");
-            if (Configuration.GetValue("IceAdapter:ForceRelay", false)) sb.Append("--force-relay");
+            if (Configuration.GetValue("IceAdapter:ForceRelay", false))
+                sb.Append("--force-relay");
             //sb.Append($"--log-level {Configuration.GetValue<string>("IceAdapter:LogLevel")} ");
             //if (Configuration.GetValue<bool>("IceAdapter:IsDebugEnabled")) sb.Append("--debug-window ");
             //if (Configuration.GetValue<bool>("IceAdapter:IsInfoEnabled")) sb.Append("--info-window ");
@@ -208,26 +220,91 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             process.Kill();
             return output;
         }
+        DateTime start;
+        DateTime end;
+        private void IceClient_ConnectionStateChanged(object sender, ConnectionState e)
+        {
+            if (ConnectionStates.Count == 0) start = DateTime.Now;
+            //gathering
+            //awaitingCandidates
+            //checking
+            //connected
+            //disconnected
+            var con = ConnectionStates.FirstOrDefault(c => c.RemotePlayerId == e.RemotePlayerId);
+            if (con is not null)
+            {
+                con.UpdateState(e.State);
+            }
+            else
+            {
+                ConnectionStates.Add(e);
+            }
+
+
+            if (ConnectionStates.Where(c => c.State == "connected").Count() == ConnectionStates.Count)
+            {
+                end = DateTime.Now;
+
+
+                LogConnectionStatuses();
+                Logger.LogInformation("Connected to all players. From [{start}] to [{end}] in [{seconds}] seconds",
+                    start, end, (end - start).TotalSeconds);
+                NotificationService.Notify($"Connected to {ConnectionStates.Count} players",
+                    $"Connected in {(end - start).TotalSeconds} seconds", ignoreOs: false);
+
+                start = DateTime.Now;
+            }
+        }
+
+        public void LogConnectionStatuses()
+        {
+            Logger.LogTrace("Connection statuses from game [{gameId}] and player [{country}][{player}]:",
+                LastGameId, LobbyClient.Self.Country, LobbyClient.Self.Id);
+            var sorted = ConnectionStates
+                .OrderBy(c => c.Created)
+                .ThenBy(c => c.Connected)
+                .ToArray();
+            
+            for (int i = 1; i <= sorted.Length; i++)
+            {
+                var c = sorted[i - 1];
+                if (c.State == "connected")
+                {
+                    Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}] from [{Created:T}] to [{Connected:T}] connected in [{TotalSeconds}] seconds",
+                        c.RemotePlayerId, c.State, c.Created, c.Connected, c.ConnectedIn.TotalSeconds);
+                }
+                else
+                {
+                    Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}]",
+                        c.RemotePlayerId, c.State);
+                }
+            }
+        }
+        public void NotifyAboutBadConnections()
+        {
+            var bad = ConnectionStates.Where(c => c.State != "connected");
+            NotificationService.Notify("You were not connected to these players",
+                string.Join('\n', bad.Select(c => $"{c.RemotePlayerId} - {c.State}")),
+                ignoreOs: false);
+        }
 
         private void IceClient_ConnectionToGpgNetServerChanged(object sender, bool e)
         {
-            Logger.LogInformation("Connected to GPG Net server [{}]", e);
+            Logger.LogInformation("Connected to GPG Net server [{state}]", e);
         }
 
         private void IceClient_IceMessageReceived(object sender, string e)
         {
-            Logger.LogInformation($"Sending Ice message to lobby-server: ({e.Length} lenght)");
             LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("IceMsg", e));
         }
 
         private void IceClient_GpgNetMessageReceived(object sender, GpgNetMessage e)
         {
             var t = ServerCommands.UniversalGameCommand(e.Command, e.Args);
-            Logger.LogInformation($"Sending GPGNetCommand to lobby: {t}");
             LobbyClient.SendAsync(t);
             if (e.Command == "GameFull")
             {
-                NotificationService.Notify("Game", "Game is full");
+                NotificationService.Notify("Game is full", "", ignoreOs: false);
                 return;
             }
             if (e.Command != "Chat") return;
@@ -238,38 +315,29 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         {
             if (IceClient is null)
             {
-                Logger.LogWarning($"Received data related to Ice-Adapter, but client is closed. {@e}");
+                Logger.LogWarning("IceClient is null, message ignored");
                 return;
             }
             switch (e.Command)
             {
                 case ServerCommand.JoinGame:
-                    //'{"method": "joinGame", "params": ["BorisBritva94", 244697], "jsonrpc": "2.0"}'
-                    //{"method": "joinGame", "params": ["Stason4ik",437080], "jsonrpc": "2.0"}
-                    Logger.LogInformation($"From Server (joinGame): {e.args}");
                     var bg = IceJsonRpcMethods.UniversalMethod("joinGame", e.args);
                     IceClient.SendAsync(bg);
                     break;
                 case ServerCommand.HostGame:
-                    Logger.LogInformation($"From Server (hostGame): {e.args}");
                     IceClient.SendAsync(IceJsonRpcMethods.UniversalMethod("hostGame", e.args));
                     break;
                 case ServerCommand.ConnectToPeer:
-                    //'{"method": "connectToPeer", "params": ["Zem", 407626, true], "jsonrpc": "2.0"}'
-                    Logger.LogInformation($"From Server (connectToPeer): {e.args}");
                     IceClient.SendAsync(IceJsonRpcMethods.UniversalMethod("connectToPeer", e.args));
                     break;
                 case ServerCommand.DisconnectFromPeer:
-                    Logger.LogInformation($"From Server (disconnectFromPeer): {e.args}");
                     IceClient.SendAsync(IceJsonRpcMethods.UniversalMethod("disconnectFromPeer", e.args));
                     break;
                 case ServerCommand.IceMsg:
-                    Logger.LogInformation($"From Server (iceMsg): ({e.args.Length} lenght)");
                     IceClient.SendAsync(IceJsonRpcMethods.UniversalMethod("iceMsg", $"{e.args}"));
                     break;
                 default:
-                    Logger.LogWarning($"From Server ({e.Command}): {e.args}");
-                    //IceClient.Send(IceJsonRpcMethods.UniversalMethod("sendToGpgNet", $"[{e.Command.ToString()}, {e.args}]"));
+                    Logger.LogWarning("Unknown command GPGNet server [{Command}] args [{args}]", e.Command, e.args);
                     break;
             }
         }

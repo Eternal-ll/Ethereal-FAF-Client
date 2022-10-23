@@ -17,7 +17,7 @@ using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class ChatViewModel : Base.ViewModel
+    public sealed class ChatViewModel : Base.ViewModel
     {
         private readonly LobbyClient LobbyClient;
         private readonly IrcClient IrcClient;

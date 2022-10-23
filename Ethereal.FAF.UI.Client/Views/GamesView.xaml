@@ -288,12 +288,19 @@
                 </Style.Triggers>
             </Style>
 
+            <databinding:GamePlayerTemplateSelector x:Key="GamePlayerTemplateSelector"
+                        WithAvatar="{StaticResource MatchmakingGamePlayer}"
+                        WithoutAvatar="{StaticResource MatchmakingGamePlayerNoAvatar}"/>
+            
             <DataTemplate x:Key="IdleGame" DataType="{x:Type lobby:Game}">
                 <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="350" ToolTip="Double click to join">
                     <Border.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{StaticResource OpenImageCommand}" CommandParameter="{Binding LargeMapPreview}"
                                       Header="Show map preview"/>
+                            <MenuItem Command="{DynamicResource AddMapToBlacklistCommand}"
+                                      CommandParameter="{Binding Mapname}"
+                                      Header="Ban map"/>
                             <MenuItem Style="{StaticResource MapGeneratorMenuItem}" CommandParameter="{Binding}"/>
                             <MenuItem Header="Players" ItemsSource="{Binding GameTeams}">
                                 <MenuItem.ItemContainerStyle>
@@ -370,26 +377,27 @@
                             <!--</WrapPanel>-->
                             <WrapPanel Grid.Row="1" Margin="-4 0 0 0" VerticalAlignment="Top">
                                 <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
-                                    <TextBlock>
+                                    <TextBlock MaxWidth="1000">
                                         <Run Text="{Binding NumPlayers}"/>
                                         <Run Text="/"/>
                                         <Run Text="{Binding MaxPlayers}"/>
                                     </TextBlock>
                                     <Ui:Badge.ToolTip>
-                                        <ToolTip>
+                                        <ToolTip MaxWidth="1000">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding RatingType, StringFormat='Rating type: {0}'}" Margin="0 0 0 4"/>
-                                                <ItemsControl ItemsSource="{Binding GameTeams}" Margin="-8 0">
+                                                <ItemsControl ItemsSource="{Binding GameTeams}">
                                                     <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <WrapPanel/>
-                                                        </ItemsPanelTemplate>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel/>
+                                                    </ItemsPanelTemplate>
                                                     </ItemsControl.ItemsPanel>
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
                                                             <StackPanel Margin="8 0">
                                                                 <TextBlock Text="{Binding HumanTitle}" Margin="0 4 0 4"/>
-                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"/>
+                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"
+                                                                              ItemTemplateSelector="{StaticResource GamePlayerTemplateSelector}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
@@ -445,7 +453,37 @@
                                     </Ui:Badge.Style>
                                     <TextBlock Text="&#xf023;" FontFamily="{StaticResource FontAwesomeSolid}"/>
                                 </Ui:Badge>
-                                <Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
+                                <!--<Ui:Badge Margin="4 4 0 0" Appearance="Info">
+                                    <Ui:Badge.Style>
+                                        <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDevChannel, Mode=OneWay}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ui:Badge.Style>
+                                    <TextBlock>
+                                        <Run Text="&#xf7d9;" FontFamily="{StaticResource FontAwesomeSolid}"/>
+                                        <Run Text="{Binding FeaturedMod}"/>
+                                    </TextBlock>
+                                </Ui:Badge>
+                                <Ui:Badge Margin="4 4 0 0" Appearance="Danger">
+                                    <Ui:Badge.Style>
+                                        <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UnSupported, Mode=OneWay}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ui:Badge.Style>
+                                    <TextBlock Text="{Binding FeaturedMod}" ToolTip="Unsuported featured mod">
+                                        <Run Text="&#xf057;" FontFamily="{StaticResource FontAwesomeSolid}"/>
+                                        <Run Text="{Binding FeaturedMod}"/>
+                                    </TextBlock>
+                                </Ui:Badge>-->
+                                <!--<Ui:Badge Margin="4 4 0 0" Appearance="Secondary">
                                     <Ui:Badge.Style>
                                         <Style TargetType="Ui:Badge" BasedOn="{StaticResource {x:Type Ui:Badge}}">
                                             <Style.Triggers>
@@ -467,7 +505,7 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                </Ui:Badge>
+                                </Ui:Badge>-->
                                 <!--<Ui:Badge Margin="4 4 0 0" FontSize="10" Content="{Binding ApiGameValidatyState}"
                                           VerticalContentAlignment="Center">
                                     <Ui:Badge.Style>
@@ -496,6 +534,9 @@
                         <ContextMenu>
                             <MenuItem Command="{StaticResource OpenImageCommand}" CommandParameter="{Binding LargeMapPreview}"
                                       Header="Show map preview"/>
+                            <MenuItem Command="{DynamicResource AddMapToBlacklistCommand}"
+                                      CommandParameter="{Binding Mapname}"
+                                      Header="Ban map"/>
                             <MenuItem Style="{StaticResource MapGeneratorMenuItem}" CommandParameter="{Binding}"/>
                             <MenuItem Header="Players" ItemsSource="{Binding GameTeams}">
                                 <MenuItem.ItemContainerStyle>
@@ -582,10 +623,10 @@
                                         <Run Text="{Binding MaxPlayers}"/>
                                     </TextBlock>
                                     <Ui:Badge.ToolTip>
-                                        <ToolTip>
+                                        <ToolTip MaxWidth="1000">
                                             <StackPanel>
-                                                <TextBlock Text="{Binding RatingType, StringFormat='Rating type: {0}'}" Margin="0 0 0 4"/>
-                                                <ItemsControl ItemsSource="{Binding GameTeams}" Margin="-8 0">
+                                                <TextBlock Text="{Binding RatingType, StringFormat='Rating type: {0}'}"/>
+                                                <ItemsControl ItemsSource="{Binding GameTeams}" Margin="0 20 0 0">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>
                                                             <WrapPanel/>
@@ -595,7 +636,8 @@
                                                         <DataTemplate>
                                                             <StackPanel Margin="8 0">
                                                                 <TextBlock Text="{Binding HumanTitle}" Margin="0 4 0 4"/>
-                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"/>
+                                                                <ItemsControl ItemsSource="{Binding GamePlayers}"
+                                                                              ItemTemplateSelector="{StaticResource GamePlayerTemplateSelector}"/>
                                                             </StackPanel>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
@@ -698,9 +740,6 @@
             </Style>
 
 
-            <databinding:GamePlayerTemplateSelector x:Key="GamePlayerTemplateSelector"
-                        WithAvatar="{StaticResource MatchmakingGamePlayer}"
-                        WithoutAvatar="{StaticResource MatchmakingGamePlayerNoAvatar}"/>
 
             <DataTemplate x:Key="LadderGameOne" DataType="{x:Type lobby:Game}">
                 <Border Style="{StaticResource CardBorder}" Width="128"
@@ -979,44 +1018,6 @@
         <WrapPanel Margin="0 0 30 0" Grid.ColumnSpan="3">
             <ComboBox Width="100" SelectedItem="{Binding ViewModel.SelectedGameMode}" ItemsSource="{Binding ViewModel.GameModes}" Padding="10 5.5"
                       ToolTip="Game mode"/>
-            
-            
-            <!--<ComboBox Width="100" Margin="10 0 0 0" Padding="10 5.5" SelectedValue="Filter">
-                <ComboBoxItem Content="Filter"/>
-                <ComboBoxItem Content="Filter"/>
-                <ComboBoxItem Content="Filter"/>
-                <ComboBoxItem Content="Filter"/>
-                <ComboBoxItem Content="Filter"/>
-            </ComboBox>-->
-            <!--<Grid Width="200" Margin="10 0 0 0">
-                <ComboBox Padding="90 5.5 10 5.5">
-                    <ComboBoxItem Content="filter"/>
-                    <ComboBoxItem Padding="0 0 0 0" Margin="0" Background="Red">
-                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
-                    </ComboBoxItem>
-                    <ComboBoxItem Padding="0 0 0 0">
-                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
-                    </ComboBoxItem>
-                    <ComboBoxItem Padding="0 0 0 0">
-                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
-                    </ComboBoxItem>
-                    <ComboBoxItem Padding="0 0 0 0">
-                        <CheckBox Content="Filter" Padding="0" Margin="0"/>
-                    </ComboBoxItem>
-                </ComboBox>
-                <ToggleButton VerticalAlignment="Stretch">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                            <Setter Property="Content" Value="Disabled"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter Property="Content" Value="Enabled"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
-            </Grid>-->
             <Button Width="100" Margin="10 0 0 0" 
                     Visibility="{Binding ViewModel.LiveButtonVisibility}" Command="{Binding ViewModel.ChangeLiveButton}">
                 <Button.Style>
@@ -1052,14 +1053,46 @@
                                 ShadowDepth="0"
                                 Color="#202020" />
                     </Border.Effect>
-                    <StackPanel>
-                        <CheckBox Content="Show only lobbies with friends" IsThreeState="True" ToolTip="Will show only friends lobbies if there is any"/>
-                        <CheckBox Content="Show only generated maps"/>
-                        <CheckBox Content="Show only maps from matchmaking"/>
-                        <CheckBox Content="Hide foes lobbies"/>
-                        <CheckBox Content="Hide private lobbies"/>
-                        <CheckBox/>
-                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <CheckBox Content="Enable maps blacklist" IsChecked="{Binding ViewModel.EnableMapsBlacklist}"/>
+                            <CheckBox Content="Show only lobbies with friends" IsChecked="{Binding ViewModel.OnlyLobbiesWithFriends}"/>
+                            <CheckBox Content="Show only generated maps" IsChecked="{Binding ViewModel.OnlyGeneratedMaps}"/>
+                            <CheckBox Content="Hide foes lobbies" IsChecked="{Binding ViewModel.HideFoesLobbies}"/>
+                            <CheckBox Content="Hide private lobbies" IsChecked="{Binding ViewModel.HidePrivateLobbies}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="10 0 0 0" Width="200" Visibility="{Binding ViewModel.MapsBlacklistVisibility}">
+                            <Grid Margin="0 0 0 8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Ui:TextBox x:Name="MapToBanInput" PlaceholderText="Map to ban" FontSize="12"/>
+                                <Button Command="{Binding ViewModel.AddMapToBlacklistCommand}"
+                                        CommandParameter="{Binding ElementName=MapToBanInput, Path=Text, UpdateSourceTrigger=PropertyChanged}"
+                                        Content="Add" HorizontalAlignment="Stretch" Margin="4 0 0 0" FontSize="12"
+                                        Grid.Column="1" VerticalAlignment="Stretch"/>
+                            </Grid>
+                            <Ui:TextBox Text="{Binding ViewModel.MapsBlacklistFilter,UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="Search" FontSize="12"/>
+                            <ListBox ItemsSource="{Binding ViewModel.MapsBlacklistView}" Background="Transparent" BorderThickness="0"
+                                         MaxHeight="300" Margin="0 4 0 0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0 -2">
+                                            <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+                                            <Button HorizontalAlignment="Right" Command="{DynamicResource RemoveMapFromBlacklistCommand}"
+                                                        CommandParameter="{Binding}" Content="Remove" FontSize="12" Padding="2 0 2 1"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Grid>
                 </Border>
             </Popup>
 

@@ -7,7 +7,7 @@ namespace Ethereal.FAF.UI.Client.Views
     /// <summary>
     /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsView : INavigableView<SettingsViewModel>
+    public sealed partial class SettingsView : INavigableView<SettingsViewModel>
     {
         public SettingsView(SettingsViewModel viewmodel)
         {

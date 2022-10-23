@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -19,18 +18,6 @@ using Wpf.Ui.Mvvm.Contracts;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public abstract class JsonSettingsViewModel : Base.ViewModel
-    {
-        protected bool Set<T>(ref T field, T value, string path, bool asString = true, [CallerMemberName] string PropertyName = null)
-        {
-            if (Set(ref field, value, PropertyName: PropertyName))
-            {
-                UserSettings.Update(path, asString ? value.ToString() : value);
-                return true;
-            }
-            return false;
-        }
-    }
     public sealed class BackgroundViewModel: JsonSettingsViewModel
     {
         public BackgroundViewModel(IConfiguration configuration)

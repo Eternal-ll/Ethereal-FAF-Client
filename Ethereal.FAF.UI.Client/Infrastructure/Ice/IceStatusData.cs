@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
+﻿namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {
     public class SnapshotOptions
     {

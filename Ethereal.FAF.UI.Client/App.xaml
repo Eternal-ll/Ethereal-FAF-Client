@@ -20,8 +20,6 @@
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
                     <cmd:OpenImageCommand x:Key="OpenImageCommand"/>
 
-                    <converter:ToPlayerConverter x:Key="ToPlayerConverter"/>
-
                     <converter:UriToImageConverter x:Key="UriToImageConverter"/>
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
                     <Style x:Key="ClippedBorder" TargetType="Border">

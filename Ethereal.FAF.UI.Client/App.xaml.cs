@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Background;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
@@ -19,7 +20,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Windows;
 using Wpf.Ui.Mvvm.Contracts;
@@ -31,7 +31,7 @@ namespace Ethereal.FAF.UI.Client
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public sealed partial class App : Application
     {
         public static IHost Hosting;
         protected override async void OnStartup(StartupEventArgs e)
@@ -39,7 +39,7 @@ namespace Ethereal.FAF.UI.Client
             Hosting = Host.CreateDefaultBuilder(e.Args)
             .ConfigureLogging((hostingContext, loggingBuilder) =>
             {
-                //loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
+                loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
                 //loggingBuilder.AddConsole();
             })
             .ConfigureServices(ConfigureServices)
@@ -58,7 +58,7 @@ namespace Ethereal.FAF.UI.Client
 
             // Background
             services.AddHostedService<TokenReloadService>();
-            //services.AddHostedService<ApiGameValidator>();
+            services.AddHostedService<ApiGameValidator>();
             // App Host
             services.AddHostedService<ApplicationHostService>();
             // Theme manipulation
@@ -101,11 +101,7 @@ namespace Ethereal.FAF.UI.Client
                 userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
                 userAgentVersion: version));
 
-            services.AddScoped(s => new PatchClient(
-                logger: s.GetService<ILogger<PatchClient>>(),
-                serviceProvider: s,
-                patchFolder: configuration.GetValue<string>("Paths:Patch"),
-                tokenProvider: s.GetService<ITokenProvider>()));
+            services.AddScoped<PatchClient>();
             
             services.AddScoped<IceManager>();
 
@@ -136,11 +132,7 @@ namespace Ethereal.FAF.UI.Client
                 httpClientFactory: s.GetService<IHttpClientFactory>(),
                 logger: s.GetService<ILogger<MapGenerator>>()));
 
-            services.AddScoped(s => new MapsService(
-                mapsFolder: Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps"),
-                baseAddress: configuration.GetValue<string>("FAForever:Content"),
-                httpClientFactory: s.GetService<IHttpClientFactory>(),
-                logger: s.GetService<ILogger<MapsService>>()));
+            services.AddScoped<MapsService>();
 
             services.AddSingleton<ITokenProvider, TokenProvider>();
 

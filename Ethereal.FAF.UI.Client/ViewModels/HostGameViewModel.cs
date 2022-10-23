@@ -35,7 +35,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
             Container = container;
         }
-        public FeaturedMod[] FeaturedModSource => new FeaturedMod[] { FeaturedMod.FAF, FeaturedMod.FAFBeta, FeaturedMod.FAFDevelop };
+        public FeaturedMod[] FeaturedModSource => new FeaturedMod[]
+        {
+            FeaturedMod.FAF,
+            FeaturedMod.FAFBeta,
+            FeaturedMod.FAFDevelop,
+            FeaturedMod.coop
+        };
 
         #region Game
         private GameHostingModel _Game;
