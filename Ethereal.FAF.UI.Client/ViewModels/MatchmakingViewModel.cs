@@ -1,5 +1,4 @@
-﻿using AsyncAwaitBestPractices.MVVM;
-using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Models;
@@ -37,16 +36,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public MatchmakingViewModel(LobbyClient lobbyClient, DialogService dialogService, PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
         {
-            LobbyClient = lobbyClient;
-            DialogService = dialogService;
-            PartyViewModel = partyViewModel;
-            NotificationService = notificationService;
+            JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
 
             lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
             lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
             lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
             lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
             lobbyClient.MatchFound += LobbyClient_MatchFound;
+
             Task.Run(async () =>
             {
                 while (true)
@@ -76,6 +73,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 { MatchmakingType.tmm2v2, false },
                 { MatchmakingType.tmm4v4_full_share, false },
             };
+
+            LobbyClient = lobbyClient;
+            DialogService = dialogService;
+            PartyViewModel = partyViewModel;
+            NotificationService = notificationService;
             PatchClient = patchClient;
         }
 
@@ -279,16 +281,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             (RatingType is RatingType.tmm_4v4_full_share && PartyViewModel.Members.Count <= 4);
 
         #region JoinQueueCommand
-        private ICommand _JoinQueueCommand;
-        public ICommand JoinQueueCommand => _JoinQueueCommand ??= new AsyncCommand<object>(OnJoinQueueCommand, CanJoinQueueCommand);
+        public ICommand JoinQueueCommand { get; }
         private bool CanJoinQueueCommand(object arg) => 
             (State is MatchmakingState.Idle && CanSearch) ||
             State is MatchmakingState.Searching;
-
-
         CancellationTokenSource BackgroundCancellationTokenSource;
-
-        private async Task OnJoinQueueCommand(object arg)
+        private async void OnJoinQueueCommand(object arg)
         {
             if (BackgroundCancellationTokenSource is not null)
             {

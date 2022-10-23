@@ -1,5 +1,4 @@
-﻿using AsyncAwaitBestPractices.MVVM;
-using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
@@ -26,6 +25,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class GamesViewModel : Base.ViewModel
     {
+        private readonly GameLauncher GameLauncher;
         private readonly LobbyClient LobbyClient;
         private readonly IceManager IceManager;
         private readonly ILogger Logger;
@@ -36,12 +36,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly PlayersViewModel PlayersViewModel;
 
         private readonly IServiceProvider ServiceProvider;
-
-
-        private readonly string MapsPath;
-
-
-        private readonly GameLauncher GameLauncher;
+        private readonly IConfiguration Configuration;
+        private string Maps => Path.Combine(Configuration.GetValue<string>("Paths:Vault"), "maps");
 
         public MatchmakingViewModel MatchmakingViewModel { get; }
 
@@ -57,26 +53,30 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             DialogService dialogService,
             IConfiguration configuration)
         {
-            LobbyClient = lobby;
-            GameLauncher = gameLauncher;
-            NotificationService = notificationService;
-            MatchmakingViewModel = matchmakingViewModel;
-            ContainerViewModel = containerViewModel;
-            IceManager = iceManager;
-            ServiceProvider = serviceProvider;
-            Logger = logger;
+            ChangeLiveButton = new LambdaCommand(OnChangeButton, CanChangeButton);
+            HostGameCommand = new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
+            JoinGameCommand = new LambdaCommand(OnJoinGameCommand);
+            WatchGameCommand = new LambdaCommand(OnWatchGameCommand);
 
             lobby.GamesReceived += Lobby_GamesReceived;
             lobby.GameReceived += Lobby_GameReceived;
 
-            PlayersViewModel = serviceProvider.GetService<PlayersViewModel>();
-
-            GameLauncher.StateChanged += GameLauncher_StateChanged;
+            gameLauncher.StateChanged += GameLauncher_StateChanged;
             SelectedGameMode = "Custom";
-            MapsPath = Path.Combine(configuration.GetValue<string>("Paths:Vault"), "maps");
-            DialogService = dialogService;
 
-            WatchGameCommand = new AsyncCommand<Game>(OnWatchGameCommand, CanWatchGameCommand);
+            LobbyClient = lobby;
+            GameLauncher = gameLauncher;
+
+            Configuration = configuration;
+            
+            NotificationService = notificationService;
+            MatchmakingViewModel = matchmakingViewModel;
+            PlayersViewModel = serviceProvider.GetService<PlayersViewModel>();
+            ContainerViewModel = containerViewModel;
+            ServiceProvider = serviceProvider;
+            DialogService = dialogService;
+            IceManager = iceManager;
+            Logger = logger;
         }
 
         private void GameLauncher_StateChanged(object sender, GameLauncherState e)
@@ -364,7 +364,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void SetMapScenario(Game game)
         {
             if (game.MapScenario is not null) return;
-            var scenario = Path.Combine(MapsPath, game.Mapname, game.Mapname.Split('.')[0] + "_scenario.lua");
+            var scenario = Path.Combine(Maps, game.Mapname, game.Mapname.Split('.')[0] + "_scenario.lua");
             if (File.Exists(scenario))
             {
                 game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
@@ -611,15 +611,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Games = obs;
         }
 
-        private ICommand _ChangeLiveButton;
-        public ICommand ChangeLiveButton => _ChangeLiveButton ??= new LambdaCommand(OnChangeButton, CanChangeButton);
+        public ICommand ChangeLiveButton;
         private bool CanChangeButton(object arg) => IsLiveInputEnabled;
         private void OnChangeButton(object obj) => IsLive = !IsLive;
 
         #region HostGame
-        private ICommand _HostGameCommand;
-        public ICommand HostGameCommand => _HostGameCommand ??= new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
-
+        public ICommand HostGameCommand { get; }
         private bool CanHostGameCommand(object arg) =>
             GameLauncher.State is GameLauncherState.Idle && MatchmakingViewModel.State is MatchmakingState.Idle;
         private void OnHostGameCommand(object arg)
@@ -630,9 +627,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region WatchGameCommand
         public ICommand WatchGameCommand { get; }
-        private bool CanWatchGameCommand(object arg) => true;
-        private async Task OnWatchGameCommand(Game game)
+        private async void OnWatchGameCommand(object arg)
         {
+            if (arg is not Game game) return;
             if (game.State is not GameState.Playing)
             {
                 NotificationService.Notify("Warning", $"Cant watch [{game.State}] game", Wpf.Ui.Common.SymbolRegular.Warning24);
@@ -655,15 +652,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         #region JoinGameCommand
-        private AsyncCommand<Game> _JoinGameCommand;
-        public AsyncCommand<Game> JoinGameCommand => _JoinGameCommand ??= new AsyncCommand<Game>(OnJoinTask, CanJoin);
-
-        private bool CanJoin(object arg) => true;
-
+        public ICommand JoinGameCommand { get; }
         private CancellationTokenSource CancellationTokenSource;
-
-        private async Task OnJoinTask(Game game)
+        private async void OnJoinGameCommand(object arg)
         {
+            if (arg is not Game game) return;
             if (game.FeaturedMod is not FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop)
             {
                 NotificationService.Notify("Warning", $"Featured mod [{game.FeaturedMod}] not supported");
@@ -735,12 +728,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 });
         } 
         #endregion
-
-        private void Snackbar_Closed(Wpf.Ui.Controls.Snackbar sender, RoutedEventArgs e)
-        {
-            CancellationTokenSource.Cancel();
-            sender.Closed -= Snackbar_Closed;
-        }
     }
 }
     

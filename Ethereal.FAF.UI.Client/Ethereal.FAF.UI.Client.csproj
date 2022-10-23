@@ -46,7 +46,7 @@
     <PackageReference Include="NetCoreServer" Version="6.6.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.1" />
     <PackageReference Include="WPF-UI" Version="2.0.3" />
-    <PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />
+    <!--<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />-->
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
   </ItemGroup>
 
