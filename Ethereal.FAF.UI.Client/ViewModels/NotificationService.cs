@@ -6,6 +6,7 @@ using Wpf.Ui.Mvvm.Services;
 using DesktopNotifications;
 using DesktopNotifications.Windows;
 using System.Threading.Tasks;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {

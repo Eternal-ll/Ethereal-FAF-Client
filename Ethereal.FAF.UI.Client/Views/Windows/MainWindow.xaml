@@ -7,6 +7,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
     xmlns:v="clr-namespace:Ethereal.FAF.UI.Client.Views"
+    xmlns:vh="clr-namespace:Ethereal.FAF.UI.Client.Views.Hosting"
     Title="Ethereal FAF Client" WindowStyle="None"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
@@ -89,17 +90,25 @@
                         Icon="Link24"
                         ToolTip="Useful links"/>
                     <ui:NavigationItem
+                        Content="Vault"
+                        Icon="Vault24"
+                        ToolTip="Maps and mods vault"/>
+                    <!--<ui:NavigationItem
                         Content="Maps"
                         Icon="Map24"
                         ToolTip="Maps vault"/>
                     <ui:NavigationItem
                         Content="Mods"
                         Icon="Vault24"
-                        ToolTip="Mods vault"/>
+                        ToolTip="Mods vault"/>-->
                     <ui:NavigationItem
                         Content="Replays"
                         Icon="Video24"
                         ToolTip="Replays"/>
+                    <ui:NavigationItem
+                        Content="API"
+                        Icon="DataPie20"
+                        ToolTip="API"/>
                 </ui:NavigationStore.Items>
                 <ui:NavigationStore.Footer>
                     <!--  A navigation element that does not point to the page can be used as a button.  -->

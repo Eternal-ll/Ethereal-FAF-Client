@@ -18,8 +18,10 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = viewModel;
             InitializeComponent();
-            Resources.Add("JoinGameCommand", ViewModel.JoinGameCommand);
-            Resources.Add("WatchGameCommand", ViewModel.WatchGameCommand);
+            Resources.Add("JoinGameCommand", viewModel.JoinGameCommand);
+            Resources.Add("WatchGameCommand", viewModel.WatchGameCommand);
+            Resources.Add("RemoveMapFromBlacklistCommand", viewModel.RemoveMapFromBlacklistCommand);
+            Resources.Add("AddMapToBlacklistCommand", viewModel.AddMapToBlacklistCommand);
         }
 
         public GamesViewModel ViewModel { get; }

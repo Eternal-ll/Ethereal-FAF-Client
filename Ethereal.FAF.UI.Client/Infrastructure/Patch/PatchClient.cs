@@ -170,7 +170,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             Logger.LogTrace("Downloading [{required}] out of [{total}] files", requiredFiles.Length, files.Length);
             for (int i = 1; i <= requiredFiles.Length; i++)
             {
-                var file = requiredFiles[i];
+                var file = requiredFiles[i - 1];
                 var groupfile = Path.Combine(file.Group, file.Name);
                 var url = new Uri(file.CacheableUrl);
                 var fileResponse = await ContentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);

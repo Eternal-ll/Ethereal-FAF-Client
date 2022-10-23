@@ -353,14 +353,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             if (isRatingResctEnforced && (minRating.HasValue || maxRating.HasValue))
             {
                 sb.Append($"\"enforce_rating_range\":{isRatingResctEnforced},");
-            }
-            if (minRating.HasValue)
-            {
-                sb.Append($"\"rating_min\":{minRating.Value},");
-            }
-            if (maxRating.HasValue)
-            {
-                sb.Append($"\"rating_max\":{maxRating.Value},");
+                if (minRating.HasValue)
+                {
+                    sb.Append($"\"rating_min\":{minRating.Value},");
+                }
+                if (maxRating.HasValue)
+                {
+                    sb.Append($"\"rating_max\":{maxRating.Value},");
+                }
             }
             if (!string.IsNullOrWhiteSpace(password))
             {

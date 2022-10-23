@@ -67,8 +67,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 return;
             }
             token = result.TokenBearer;
-            Logger.LogTrace("New access token expires in [{{seconds}] seconds", token.ExpiresIn);
             TokenProvider.Save(token);
+            Logger.LogTrace("New access token expires in [{seconds}] seconds", token.ExpiresIn);
         }
     }
 }

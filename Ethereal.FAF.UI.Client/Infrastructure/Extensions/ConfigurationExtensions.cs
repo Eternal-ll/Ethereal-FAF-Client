@@ -25,9 +25,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         /// <param name="version">version</param>
         /// <param name="maps">specific maps folder</param>
         /// <returns>Full path to required file</returns>
-        public static string GetMapFile(this IConfiguration configuration, string mapname, string extension, string version = null,
+        public static string GetMapFile(this IConfiguration configuration, string mapname, string extension,
             string maps = null) =>
-        Path.Combine(maps ?? configuration.GetMapsFolder(), mapname, version ?? mapname.Split('.')[^1], mapname.Split('.')[0], extension);
+        Path.Combine(maps ?? configuration.GetMapsFolder(), mapname, mapname.Split('.')[0] + extension);
         /// <summary>
         /// Get path to user mods folder
         /// </summary>
