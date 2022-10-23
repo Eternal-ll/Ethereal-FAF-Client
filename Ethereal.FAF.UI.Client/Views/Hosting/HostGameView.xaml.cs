@@ -1,5 +1,4 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
-using System;
 using System.Windows.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views.Hosting

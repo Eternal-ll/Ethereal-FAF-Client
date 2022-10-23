@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Windows.Input;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Commands.Base

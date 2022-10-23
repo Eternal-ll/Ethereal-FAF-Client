@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Windows.Markup;
-using Windows.Media.PlayTo;
-using Windows.Services.Store;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice

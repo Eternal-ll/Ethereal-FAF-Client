@@ -7,7 +7,6 @@ using FAF.Domain.LobbyServer.Enums;
 using Humanizer;
 using System;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby

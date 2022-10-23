@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {

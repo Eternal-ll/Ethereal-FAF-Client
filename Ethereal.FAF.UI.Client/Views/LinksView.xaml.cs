@@ -1,5 +1,4 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
-using Ethereal.FAF.UI.Client.ViewModels.Base;
 using Wpf.Ui.Common.Interfaces;
 
 namespace Ethereal.FAF.UI.Client.Views

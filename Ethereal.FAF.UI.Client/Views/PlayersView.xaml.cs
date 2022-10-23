@@ -1,5 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands.Base;
-using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;

@@ -5,7 +5,6 @@
 
 #nullable enable
 
-using Ethereal;
 using System;
 using System.Windows;
 using Wpf.Ui.Mvvm.Contracts;

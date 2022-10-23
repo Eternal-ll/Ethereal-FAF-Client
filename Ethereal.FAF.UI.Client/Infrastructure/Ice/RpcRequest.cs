@@ -1,5 +1,4 @@
-﻿using FAF.Domain.LobbyServer;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
