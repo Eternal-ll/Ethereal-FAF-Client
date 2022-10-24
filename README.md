@@ -155,10 +155,66 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [ ] Games page (Lobby)
+    - [ ]
+    - [ ] Sort
+        - [ ]
+    - [ ] Filter
+        - [ ] Hide foes lobbies
+        - [ ] Hide lobbies with foes
+        - [ ] Show only friends lobbies
+        - [ ] Show only lobbies with friends
+        - [X] Hide private lobbies
+        - [ ] Hide lobbies with SIM mods
+        - [X] Show only lobbies with generated maps
+        - [ ] Show lobbies with maps from TMM map pool
+        - [ ] 
+- [ ] Players page (Lobby)
+    - [ ] Filter
+        - Group by
+            - [X] Rating ranges
+            - [X] Country
+            - [ ] Social connection
+            - [ ] Clans 
+    - [ ] Sort by
+        - [X] Login
+        - [ ] Clan
+        - [ ] Login & clan
+        - [X] Ratings
+- [ ] Chat page (IRC)
+    - [X] Connect & Authorize
+    - [X] Support IRC raw commands
+    - [X] Search available channels
+    - [X] Support private messages
+    - [X] Sync IRC-users with lobby players
+    - ...
+- [ ] Links page (API)
+    - [X] Filter
+    - [ ] Support difference sources
+- [ ] Vault page (API)
+    - [ ] Maps
+        - [ ] Search
+        - [ ] Map information
+            - [ ] Support _scenario.lua
+            - [ ] Support .scmap
+            - [ ] 3D interaction
+            - ...
+    - [ ] Mods
+        - [ ] Search
+        - [ ] Mod information
+            - [ ] Support mod_info.lua
+            - [ ] View dependencies
+            - [ ] View conflicts
+            - [ ] Download
+            - [ ] Update
+            - [ ] Upload
+- [ ] Replays page (API)
+    - [ ] ...
+- [ ] Clan page (API)
+    - [ ] Create/Edit/Delete clan
+    - [ ] Clan information
+    - [ ] Invites support
+
 
 See the [open issues](https://github.com/Eternal-ll/Ethereal-FAF-Client/issues) for a full list of proposed features (and known issues).
 
