@@ -1,6 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Models;
 using Microsoft.Extensions.Configuration;
-using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -18,6 +18,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Configuration = configuration;
             NotificationService = notificationService;
 
+            if (Configuration.GetValue<bool>("Client:Updated", false))
+            {
+                UserSettings.Update("Client:Updated", false);
+            }
+
             LoadChangelog();
         }
 
@@ -31,11 +36,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (t.IsFaulted)
                 {
                     var error = $"Failed to get changelog from {changelogUrl}";
-                    NotificationService.Notify("Exception", error);
+                    //NotificationService.Notify("Exception", error);
                     error += $"\nException:\n{t.Exception}";
                     return error;
                 }
-                NotificationService.Notify("Changelog", "Changelog loaded");
+                //NotificationService.Notify("Changelog", "Changelog loaded");
                 return t.Result;
             });
             Changelog = changelog;

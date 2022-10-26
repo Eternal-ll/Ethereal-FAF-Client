@@ -19,8 +19,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             "https://raw.githubusercontent.com/" +
             configuration.GetGithubUser() + '/' +
             configuration.GetGithubProject() + '/' +
-            configuration.GetGithubBranch() + '/' +
-            "CHANGELOG.md";
+            configuration.GetGithubBranch() +
+            "/CHANGELOG.md";
+
+        public static string GetUpdateUrl(this IConfiguration configuration) =>
+            "https://raw.githubusercontent.com/" +
+            configuration.GetGithubUser() + '/' +
+            configuration.GetGithubProject() +
+            "/update.json";
+
+
+        public static string GetVersion(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Version");
 
         /// <summary>
         /// Get path to user maps folder

@@ -39,7 +39,7 @@
   <ItemGroup>
     <PackageReference Include="GEmojiSharp" Version="2.0.0" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
-    <PackageReference Include="Markdown.Xaml" Version="1.0.0" />
+    <!--<PackageReference Include="Markdown.Xaml" Version="1.0.0" />-->
     <PackageReference Include="Meziantou.Framework.WPF" Version="1.5.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
@@ -51,6 +51,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Downloads\DesktopNotifications-master\DesktopNotifications-master\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
+    <ProjectReference Include="..\..\..\..\Downloads\Markdown.XAML-master\src\Markdown.Xaml\Markdown.Xaml.csproj" />
     <ProjectReference Include="..\Ethereal.FA.Scmap\Ethereal.FA.Vault.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.API.Client\Ethereal.FAF.API.Client.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj" />

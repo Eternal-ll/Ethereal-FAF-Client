@@ -5,9 +5,11 @@
 
 
 using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using Humanizer;
@@ -17,6 +19,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +45,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private readonly LobbyClient LobbyClient;
         private readonly ContainerViewModel Container;
         private readonly IServiceProvider ServiceProvider;
+        private readonly IHttpClientFactory HttpClientFactory;
         private readonly TokenProvider TokenProvider;
         private readonly PatchClient PatchClient;
 
@@ -59,7 +64,8 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IServiceProvider serviceProvider,
             ITokenProvider tokenProvider,
             IHost host,
-            PatchClient patchClient)
+            PatchClient patchClient,
+            IHttpClientFactory httpClientFactory)
         {
             // Attach the theme service
             _themeService = themeService;
@@ -101,6 +107,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             PatchClient = patchClient;
 
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
+            HttpClientFactory = httpClientFactory;
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
             //Wpf.Ui.Appearance.Watcher.Watch(this, Configuration.GetValue<BackgroundType>("UI:BackgroundType"), true, false);
         }
@@ -155,15 +162,26 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         #endregion INavigationWindow methods
 
-        private void InvokeSplashScreen()
+        private async void InvokeSplashScreen()
         {
             _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
-            Task.Run(async () =>
+            await Task.Run(async () =>
+            {
+                using var client = HttpClientFactory.CreateClient();
+                var update = await client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl());
+                if (Configuration.GetVersion() != update.Version && update.ForceUpdate)
+                {
+                    Close();
+                    UserSettings.Update("Client:Updated", true);
+                    Process.Start("Ethereal.FAF.Client.Updater.exe" + update.UpdateUrl);
+                }
+            });
+            _ = Task.Run(async () =>
             {
                 await PrepareJavaRuntime();
                 await Auth();
             });
-            Task.Run(PatchClient.InitializePatchWatching);
+            _ = Task.Run(PatchClient.InitializePatchWatching);
         }
         private async Task PrepareJavaRuntime()
         {

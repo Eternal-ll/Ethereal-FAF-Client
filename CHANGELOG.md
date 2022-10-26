@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.1.0](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.1.0) (2022-10-23)
+## [2.1.0](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.1.0) (2022-10-31)
 
 **Changelog**
 
