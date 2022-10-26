@@ -312,6 +312,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             SendAsync(ServerCommands.MatchReady);
         #endregion
 
+        public void GameEnded() => SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+
         public bool CanJoinGame => LastGameUid.HasValue;
 
         public void RequestIceServers() =>
