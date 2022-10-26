@@ -70,14 +70,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             using var client = new HttpClient();
             var update = client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl()).Result;
             var version = Configuration.GetVersion();
-            if (version != update.Version && update.ForceUpdate)
+            if (version != update.Version)
             {
-                updating = true;
-                Process.Start(new ProcessStartInfo()
+                if (update.ForceUpdate)
                 {
-                    FileName = "Ethereal.FAF.Client.Updater.exe",
-                    UseShellExecute = false,
-                });
+                    updating = true;
+                    Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = "Ethereal.FAF.Client.Updater.exe",
+                        UseShellExecute = false,
+                    });
+                }
             }
             if (updating)
             {
