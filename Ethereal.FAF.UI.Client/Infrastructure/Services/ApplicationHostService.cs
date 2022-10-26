@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.Views;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -101,6 +102,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
                 // NOTICE: In the case of this window, we navigate to the Dashboard after loading with Container.InitializeUi()
                 // _navigationWindow.Navigate(typeof(Views.Pages.Dashboard));
+
+                _navigationWindow.Navigate(typeof(ChangelogView));
             }
 
             var notifyIcon = _serviceProvider.GetService<INotifyIconService>();

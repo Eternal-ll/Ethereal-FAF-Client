@@ -1,12 +1,14 @@
 # Changelog
 
-## [2.0.11](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.11) (2022-10-23)
+## [2.1.0](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.1.0) (2022-10-23)
 
 **Changelog**
 
+- Added client updater
 - Added safe handler in patcher for busy files
 - Added game logs on 'C:\ProgramData\FAForever\logs\game_{uid}.log'
 - Fixed background when hosting
+- Moved fonts to separate DLL (ligher updates)
 
 ## [2.0.10](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.10) (2022-10-23)
 

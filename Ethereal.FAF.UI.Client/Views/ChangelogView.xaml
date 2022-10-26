@@ -5,9 +5,24 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+           xmlns:markdown="clr-namespace:Markdown.Xaml;assembly=Markdown.Xaml"
+           xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
              mc:Ignorable="d" 
+           d:DataContext="{d:DesignInstance {x:Type vm:ChangelogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-            
+        <Grid.Resources>
+            <markdown:Markdown x:Key="Markdown"
+                        AssetPathRoot="{x:Static system:Environment.CurrentDirectory}"/>
+
+            <markdown:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" 
+                                           Markdown="{StaticResource Markdown}"/>
+        </Grid.Resources>
+        <FlowDocumentScrollViewer
+                                  VerticalAlignment="Stretch"
+                                  HorizontalAlignment="Stretch"
+                                  Margin="5"
+                                  Document="{Binding Changelog, Converter={StaticResource TextToFlowDocumentConverter}}" />
     </Grid>
 </ui:UiPage>
