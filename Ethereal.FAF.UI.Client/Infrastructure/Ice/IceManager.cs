@@ -151,7 +151,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 {
                     throw new Exception("Faulted to connect to Ice adapter after 10 attempts");
                 }
-                Thread.Sleep(50);
+                Thread.Sleep(150);
                 IceClient.ConnectAsync();
                 i++;
             }
