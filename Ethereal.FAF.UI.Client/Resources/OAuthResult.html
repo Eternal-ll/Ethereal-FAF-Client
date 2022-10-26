@@ -123,7 +123,10 @@
             </svg>
         </div>
         <h1>Login successful</h1>
-        <p>Close page and go back to <b>Ethereal FAF Client</b>.</p>
+        <div onclick="ClosePage">
+            <p>Close page and go back to <b>Ethereal FAF Client</b>.</p>
+        </div>
+        <button onclick="ClosePage()">Back</button>
         <!--<p>Page will close in <b id="Label"></b> seconds. Go back to <b>Ethereal FAF Client</b>.</p>-->
         <!--<script>
          let i = 6;
@@ -135,6 +138,11 @@
             label.innerText = i;
         }, 1000);
         </script>-->
+        <script>
+            function ClosePage(){
+                window.close();
+            }
+        </script>
     </div>
 </body>
 </html>

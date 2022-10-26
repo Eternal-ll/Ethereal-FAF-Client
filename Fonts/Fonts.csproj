@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Fonts\Font Awesome 6 Pro-Light-300.otf" />
+    <None Remove="Fonts\Font Awesome 6 Pro-Solid-900.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\Font Awesome 6 Pro-Light-300.otf" />
+    <Resource Include="Fonts\Font Awesome 6 Pro-Solid-900.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="FontsDictionary.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

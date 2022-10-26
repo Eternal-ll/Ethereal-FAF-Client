@@ -78,6 +78,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             _HidePrivateLobbies = configuration.GetValue<bool>("Lobby:Games:HidePrivateLobbies");
             _EnableMapsBlacklist = configuration.GetValue<bool>("Lobby:Games:EnableMapsBlacklist");
             var banned = configuration.GetSection("Lobby:Games:MapsBlacklist").Get<string[]>();
+            if (banned is not null)
             MapsBlacklist.AddRange(banned);
 
 

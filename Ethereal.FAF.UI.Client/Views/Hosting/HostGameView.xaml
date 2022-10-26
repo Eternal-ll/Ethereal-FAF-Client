@@ -128,7 +128,10 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <ContentControl Content="{Binding SelectionView}" Grid.ColumnSpan="2" Margin="0 0 0 0"/>
-            <Border Grid.Column="2" Background="#272727" Padding="10" Width="400" Margin="10 0 0 0">
+            <Border Grid.Column="2" Padding="10" Width="400" Margin="10 0 0 0">
+                <Border.Background>
+                    <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+                </Border.Background>
                 <Border.Style>
                     <Style TargetType="Border">
                         <Style.Triggers>

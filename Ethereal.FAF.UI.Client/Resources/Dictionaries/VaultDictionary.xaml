@@ -17,6 +17,9 @@
     </Style>
     <DataTemplate x:Key="VaultMapItem" DataType="{x:Type model:LocalMap}">
         <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="128" Height="128">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Border.Background>
             <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding Preview}" Width="128" Height="128" VerticalAlignment="Top"/>
         </Border>
     </DataTemplate>

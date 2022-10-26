@@ -34,6 +34,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VisualStateTests", "VisualStateTests\VisualStateTests.csproj", "{DF8E8E15-5B3B-4DA3-BBFA-16AA22C8343D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{FA2E7343-CD16-496C-8D31-16ADBAF6BC0E}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{211DF6C3-3586-4E19-AC7C-A0470646D7E2}"
 EndProject
@@ -55,7 +58,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masonry.Example", "..\..\..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Masonry", "..\..\..\Downloads\WPF-Masonry-master\WPF-Masonry-master\Masonry\Masonry.csproj", "{E2BA75BF-C535-46B9-A180-E10533A1C1D1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ethereal.FAF.Client.Updater", "Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj", "{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ethereal.FAF.Client.Updater", "Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj", "{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fonts", "Fonts\Fonts.csproj", "{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -423,6 +428,26 @@ Global
 		{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2}.Release|x64.Build.0 = Release|Any CPU
 		{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2}.Release|x86.ActiveCfg = Release|Any CPU
 		{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2}.Release|x86.Build.0 = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|ARM.Build.0 = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|x64.Build.0 = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|ARM.ActiveCfg = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|ARM.Build.0 = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|ARM64.Build.0 = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|x64.ActiveCfg = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|x64.Build.0 = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -450,6 +475,7 @@ Global
 		{0ACC6BCC-EEC0-4E97-AF52-060FDB7E4DC2} = {F812ECE7-0FE9-4761-977C-0F570E126A9E}
 		{E2BA75BF-C535-46B9-A180-E10533A1C1D1} = {F812ECE7-0FE9-4761-977C-0F570E126A9E}
 		{BB9DEC4E-A9FC-4956-A224-9E6F1735ACA2} = {211DF6C3-3586-4E19-AC7C-A0470646D7E2}
+		{ED0A8A05-7AF2-4774-A070-17B89EE5C86B} = {F812ECE7-0FE9-4761-977C-0F570E126A9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D823C4A6-807C-4F0A-A520-932433831D10}

@@ -109,6 +109,10 @@
                         Content="API"
                         Icon="DataPie20"
                         ToolTip="API"/>
+                    <!--<ui:NavigationItem
+                        Content="Changelog"
+                        Icon="History16"
+                        ToolTip="API"/>-->
                 </ui:NavigationStore.Items>
                 <ui:NavigationStore.Footer>
                     <!--  A navigation element that does not point to the page can be used as a button.  -->

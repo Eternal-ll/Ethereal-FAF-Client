@@ -54,7 +54,7 @@ namespace Ethereal.FAF.UI.Client
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             var configuration = context.Configuration;
-            string version = "2.0.9";
+            string version = "2.0.11";
 
             // Background
             services.AddHostedService<TokenReloadService>();

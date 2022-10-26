@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.11](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.11) (2022-10-23)
+
+**Changelog**
+
+- Added safe handler in patcher for busy files
+- Added game logs on 'C:\ProgramData\FAForever\logs\game_{uid}.log'
+- Fixed background when hosting
+
 ## [2.0.10](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.10) (2022-10-23)
 
 **Changelog**
@@ -25,8 +33,6 @@ How to hide specific map?
 - Click on "Ban map"
 
 ![](https://cdn.discordapp.com/attachments/378156367933997056/1033702143745605632/unknown.png)
-
-
 
 ![](https://cdn.discordapp.com/attachments/926400628803113020/1033703179361198221/unknown.png)
 
