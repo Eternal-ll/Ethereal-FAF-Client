@@ -9,7 +9,6 @@ using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
-using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using Humanizer;
@@ -20,7 +19,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -127,6 +125,11 @@ namespace FAF.UI.EtherealClient.Views.Windows
                     if (Container.Content is not null) return;
                     Container.SplashVisibility = Visibility.Collapsed;
                     Container.SplashProgressVisibility = Visibility.Collapsed;
+
+                    if (Configuration.IsClientUpdated())
+                    {
+                        Navigate(typeof(ChangelogView));
+                    }
                 }
                 else
                 {
@@ -162,26 +165,14 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         #endregion INavigationWindow methods
 
-        private async void InvokeSplashScreen()
+        private void InvokeSplashScreen()
         {
-            _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
-            await Task.Run(async () =>
-            {
-                using var client = HttpClientFactory.CreateClient();
-                var update = await client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl());
-                if (Configuration.GetVersion() != update.Version && update.ForceUpdate)
-                {
-                    Close();
-                    UserSettings.Update("Client:Updated", true);
-                    Process.Start("Ethereal.FAF.Client.Updater.exe" + update.UpdateUrl);
-                }
-            });
-            _ = Task.Run(async () =>
+            Task.Run(async () =>
             {
                 await PrepareJavaRuntime();
                 await Auth();
             });
-            _ = Task.Run(PatchClient.InitializePatchWatching);
+            Task.Run(PatchClient.InitializePatchWatching);
         }
         private async Task PrepareJavaRuntime()
         {

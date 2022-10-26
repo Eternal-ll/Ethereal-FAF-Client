@@ -1,15 +1,23 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.UI.EtherealClient.Views.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.Mvvm.Services;
 
@@ -27,6 +35,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly ITaskBarService _taskBarService;
         private readonly INotifyIconService _notifyIconService;
         private readonly IHostApplicationLifetime ApplicationLifetime;
+        private readonly IConfiguration Configuration;
 
         private readonly IceManager IceManager;
         private readonly LobbyClient LobbyClient;
@@ -36,7 +45,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, IThemeService themeService,
             ITaskBarService taskBarService, INotifyIconService notifyIconService, IceManager iceManager,
-            IHostApplicationLifetime applicationLifetime, LobbyClient lobbyClient)
+            IHostApplicationLifetime applicationLifetime, LobbyClient lobbyClient, IConfiguration configuration)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
@@ -48,6 +57,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             IceManager = iceManager;
             ApplicationLifetime = applicationLifetime;
             LobbyClient = lobbyClient;
+            Configuration = configuration;
         }
 
         /// <summary>
@@ -56,6 +66,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            var updating = false;
+            using var client = new HttpClient();
+            var update = client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl()).Result;
+            var version = Configuration.GetVersion();
+            if (version != update.Version && update.ForceUpdate)
+            {
+                updating = true;
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = "Ethereal.FAF.Client.Updater.exe",
+                    UseShellExecute = false,
+                });
+            }
+            if (updating)
+            {
+                return _serviceProvider.GetService<IHost>().StopAsync();
+            }
             PrepareNavigation();
             return HandleActivationAsync();
         }
@@ -90,6 +117,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             if (!Application.Current.Windows.OfType<MainWindow>().Any())
             {
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
+
                 _navigationWindow!.ShowWindow();
 
                 var snackbarService = _serviceProvider.GetService<SnackbarService>();
@@ -103,7 +131,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 // NOTICE: In the case of this window, we navigate to the Dashboard after loading with Container.InitializeUi()
                 // _navigationWindow.Navigate(typeof(Views.Pages.Dashboard));
 
-                _navigationWindow.Navigate(typeof(ChangelogView));
+                //_navigationWindow.Navigate(typeof(ChangelogView));
             }
 
             var notifyIcon = _serviceProvider.GetService<INotifyIconService>();

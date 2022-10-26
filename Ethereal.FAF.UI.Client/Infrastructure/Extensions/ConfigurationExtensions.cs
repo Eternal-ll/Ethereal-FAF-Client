@@ -25,12 +25,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         public static string GetUpdateUrl(this IConfiguration configuration) =>
             "https://raw.githubusercontent.com/" +
             configuration.GetGithubUser() + '/' +
-            configuration.GetGithubProject() +
+            configuration.GetGithubProject() + '/' +
+            configuration.GetGithubBranch() +
             "/update.json";
 
 
         public static string GetVersion(this IConfiguration configuration) =>
             configuration.GetValue<string>("Client:Version");
+
+        public static bool IsClientUpdated(this IConfiguration configuration) =>
+            configuration.GetValue<bool>("Client:IsUpdated", true);
 
         /// <summary>
         /// Get path to user maps folder

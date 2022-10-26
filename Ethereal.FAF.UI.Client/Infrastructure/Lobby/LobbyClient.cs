@@ -107,6 +107,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             _stop = reconnect;
             DisconnectAsync();
         }
+        public override bool ConnectAsync()
+        {
+            return base.ConnectAsync();
+        }
 
         protected override void OnDisconnected()
         {
