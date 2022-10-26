@@ -243,9 +243,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             var group = data[^2];
             var path = Path.Combine(group, e.Name);
             path = path.ToLower();
-            var md5 = await CalculateMD5(e.FullPath);
-            AddOrUpdate(path, md5);
-            IsFilesChanged = true;
+            try
+            {
+                var md5 = await CalculateMD5(e.FullPath);
+                AddOrUpdate(path, md5);
+            }
+            catch(Exception ex)
+            {
+                Logger.LogError(ex.ToString());
+            }
+            finally
+            {
+                AddOrUpdate(path, null);
+                IsFilesChanged = true;
+            }
         }
 
         private async Task ProcessPatchFiles(string path)
