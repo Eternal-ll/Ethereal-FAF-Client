@@ -54,7 +54,6 @@ namespace Ethereal.FAF.UI.Client
         private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             var configuration = context.Configuration;
-            string version = "2.0.9";
 
             // Background
             services.AddHostedService<TokenReloadService>();
@@ -99,7 +98,7 @@ namespace Ethereal.FAF.UI.Client
                 logger: p.GetRequiredService<ILogger<LobbyClient>>(),
                 uidGenerator: p.GetService<UidGenerator>(),
                 userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
-                userAgentVersion: version));
+                userAgentVersion: configuration.GetValue("Client:Version", "2.1.0")));
 
             services.AddScoped<PatchClient>();
             
@@ -166,6 +165,9 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient<GenerateMapsVM>();
             services.AddTransient<LocalMapsVM>();
+
+            services.AddScoped<ChangelogViewModel>();
+            services.AddScoped<ChangelogView>();
 
             services.AddScoped<ChatViewModel>();
             services.AddScoped<ChatView>();

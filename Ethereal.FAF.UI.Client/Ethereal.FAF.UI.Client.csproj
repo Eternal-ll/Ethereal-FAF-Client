@@ -20,13 +20,8 @@
     <None Remove="External\faf-ice-adapter-v3.3-RC1-nojfx.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
-    <Compile Remove="Infrastructure\Notifications\**" />
-    <EmbeddedResource Remove="Infrastructure\Notifications\**" />
-    <None Remove="Infrastructure\Notifications\**" />
-    <None Remove="Resources\Fonts\*.otf" />
     <None Remove="Resources\Images\Examples\SidebarExample.png" />
     <None Remove="Resources\Images\Flags\*.png" />
-    <Page Remove="Infrastructure\Notifications\**" />
     <None Remove="Resources\logo.ico" />
     <None Remove="Resources\OAuthResult.html" />
   </ItemGroup>
@@ -44,21 +39,24 @@
   <ItemGroup>
     <PackageReference Include="GEmojiSharp" Version="2.0.0" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
+    <!--<PackageReference Include="Markdown.Xaml" Version="1.0.0" />-->
     <PackageReference Include="Meziantou.Framework.WPF" Version="1.5.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="NetCoreServer" Version="6.6.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.1" />
     <PackageReference Include="WPF-UI" Version="2.0.3" />
-    <!--<PackageReference Include="AsyncAwaitBestPractices.MVVM" Version="6.0.5" />-->
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Downloads\DesktopNotifications-master\DesktopNotifications-master\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
+    <ProjectReference Include="..\..\..\..\Downloads\Markdown.XAML-master\src\Markdown.Xaml\Markdown.Xaml.csproj" />
     <ProjectReference Include="..\Ethereal.FA.Scmap\Ethereal.FA.Vault.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.API.Client\Ethereal.FAF.API.Client.csproj" />
+    <ProjectReference Include="..\Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj" />
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
+    <ProjectReference Include="..\Fonts\Fonts.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,7 +64,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="links.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="External\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -74,25 +72,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Fonts\*.otf" />
     <Resource Include="Resources\Images\Examples\SidebarExample.png" />
     <Resource Include="Resources\Images\Flags\*.png" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Resource Remove="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
-    <Resource Remove="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
-    <Resource Remove="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
-    <Resource Remove="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Resources\Fonts\Font Awesome 6 Brands-Regular-400.otf" />
-    <None Include="Resources\Fonts\Font Awesome 6 Duotone-Solid-900.otf" />
-    <None Include="Resources\Fonts\Font Awesome 6 Pro-Regular-400.otf" />
-    <None Include="Resources\Fonts\Font Awesome 6 Pro-Thin-100.otf" />
-  </ItemGroup>
-
-  <ProjectExtensions><VisualStudio><UserProperties links_1json__JsonSchema="https://appsemble.app/api.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

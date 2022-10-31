@@ -37,7 +37,7 @@
                 <ui:ControlsDictionary />
                 <ui:ThemesDictionary Theme="Dark" />
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
-                <ResourceDictionary Source="Resources/Dictionaries/FontsDictionary.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Fonts;component/FontsDictionary.xaml"/>
 
                 <ResourceDictionary>
                     <Style x:Key="BorderPopup" TargetType="Border">

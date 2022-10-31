@@ -6,7 +6,6 @@ using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
-using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -83,27 +82,31 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             Task.Run(() => RunGame(e))
                 .ContinueWith(t =>
                 {
-                    if (!IsRestart) LobbyClient.SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
+                    if (!IsRestart) LobbyClient.GameEnded();
                     if (t.IsFaulted)
                     {
                         Logger.LogError(t.Exception.ToString());
                         NotificationService.Notify("Game", $"Launch failed: {t.Exception}", ignoreOs: true);
-                        //IceManager.IceServer?.Kill();
                         Process?.Kill();
                         Process?.Dispose();
                         Process?.Close();
+                        Process = null;
                     }
-                    Process = null;
-
-                    IceManager.IceClient.IsStop = true;
-                    IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
-                    IceManager.IceClient.Disconnect();
+                    if (IceManager.IceClient.IsConnected)
+                    {
+                        IceManager.IceClient.IsStop = true;
+                        IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
+                        IceManager.IceClient.Disconnect();
+                    }
                     IceManager.IceClient.Dispose();
                     IceManager.IceClient = null;
-                    IceManager.IceServer.WaitForExit();
-                    IceManager.IceServer.Dispose();
-                    IceManager.IceServer.Close();
-                    IceManager.IceServer = null;
+                    if (IceManager.IceServer is not null) 
+                    {
+                        IceManager.IceServer.WaitForExit();
+                        IceManager.IceServer.Dispose();
+                        IceManager.IceServer.Close();
+                        IceManager.IceServer = null;
+                    }
 
                     //if (IsRestart) RestartGame();
                     IsRestart = false;
@@ -213,21 +216,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //    var replayPort = ReplayServerService.StartReplayServer();
             //    arguments.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\" ");
             //}
-            // append game logger
-            bool isLogging = false;
-            if (isLogging)
-            {
-                var logs = Configuration.GetValue<string>("Paths:GameLogs");
-                if (string.IsNullOrWhiteSpace(logs))
-                {
-
-                }
-                else
-                {
-                    logs = string.Format(logs, e.uid);
-                    arguments.Append($"/log \"{logs}\" ");
-                }
-            }
+            var logs = Configuration.GetValue<string>("Paths:GameSession").Replace("{uid}", e.uid.ToString());
+            arguments.Append($"/log \"{logs}\" ");
 
             if (!string.IsNullOrWhiteSpace(e.mapname))
             {

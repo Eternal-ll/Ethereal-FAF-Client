@@ -77,8 +77,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             var ports = GetFreePort(2);
             RpcPort = ports[0];
             GpgNetPort = ports[1];
-            Logger.LogTrace("RPC port: [{}]", RpcPort);
-            Logger.LogTrace("GPG NET port: [{}]", GpgNetPort);
+            Logger.LogTrace("RPC port: [{rpc}]", RpcPort);
+            Logger.LogTrace("GPG NET port: [{gpg}]", GpgNetPort);
         }
         static string HMACHASH(string str, string key)
         {
@@ -134,17 +134,27 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         {
             LastGameId = gameId;
             InitializeNewPorts();
-            Logger.LogTrace("Initializing Ice process with player id [{}], player login [{}], RPC port [{}], GPG NET port [{}]",
+            Logger.LogTrace("Initializing Ice process with player id [{id}], player login [{login}], RPC port [{rpc}], GPG NET port [{gpg}]",
                 playerId, playerLogin, RpcPort, GpgNetPort);
-            IceServer?.Close();
+            IceServer?.Kill();
             IceServer = GetIceServerProcess(playerId, playerLogin, gameId);
             IceServer.Start();
             Logger.LogTrace("Ice server initialized");
             var host = "127.0.0.1";
             Logger.LogTrace("Initializing ICE client");
             IceClient = new(host, RpcPort);
-            Thread.Sleep(250);
             IceClient.ConnectAsync();
+            var i = 0;
+            while (!IceClient.IsConnected)
+            {
+                if (i > 10)
+                {
+                    throw new Exception("Faulted to connect to Ice adapter after 10 attempts");
+                }
+                Thread.Sleep(150);
+                IceClient.ConnectAsync();
+                i++;
+            }
             IceClient.PassIceServersAsync(ice_servers);
             IceClient.GpgNetMessageReceived += IceClient_GpgNetMessageReceived;
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
@@ -153,7 +163,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             ConnectionStates?.Clear();
             ConnectionStates = null;
             ConnectionStates = new();
-            Logger.LogTrace("Initialized ICE client on [{}:{}]", host, RpcPort);
+            Logger.LogTrace("Initialized ICE client on [{host}:{port}]", host, RpcPort);
             Initialized?.Invoke(this, null);
             if (HasWebUI && Configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true))
             {
@@ -194,9 +204,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                     FileName = Configuration.GetValue<string>("Paths:JavaRuntime"),
                     Arguments = sb.ToString(),
                     UseShellExecute = false,
-                    //RedirectStandardOutput = true,
-                    //RedirectStandardError = true,
-                    //CreateNoWindow = true,
                 }
             };
             if (!string.IsNullOrWhiteSpace(logs))

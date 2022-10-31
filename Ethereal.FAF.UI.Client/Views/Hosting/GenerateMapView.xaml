@@ -28,7 +28,10 @@
                  Style="{StaticResource VaultMapsListBox}">
         </ListBox>
         <ui:TextBox PlaceholderText="Search" Icon="Search24"/>
-        <Border Grid.Column="3" Grid.RowSpan="3" Background="#272727" Padding="10" Width="400">
+        <Border Grid.Column="3" Grid.RowSpan="3" Padding="10" Width="400">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Border.Background>
             <Border.Style>
                 <Style TargetType="Border">
                     <Style.Triggers>
@@ -44,7 +47,10 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="5" Grid.RowSpan="3" Background="#272727" Width="400">
+        <Border Grid.Column="5" Grid.RowSpan="3" Width="400">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Border.Background>
             <ScrollViewer Padding="0 0 4 0" Margin="10 0 0 0">
                 <VirtualizingStackPanel>
                     <StackPanel Visibility="{Binding LoaderVisibility}" Margin="0 100 0 0">

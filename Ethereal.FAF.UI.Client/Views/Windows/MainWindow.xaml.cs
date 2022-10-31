@@ -5,10 +5,12 @@
 
 
 using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.Views;
 using Humanizer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +43,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         private readonly LobbyClient LobbyClient;
         private readonly ContainerViewModel Container;
         private readonly IServiceProvider ServiceProvider;
+        private readonly IHttpClientFactory HttpClientFactory;
         private readonly TokenProvider TokenProvider;
         private readonly PatchClient PatchClient;
 
@@ -58,7 +62,8 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IServiceProvider serviceProvider,
             ITokenProvider tokenProvider,
             IHost host,
-            PatchClient patchClient)
+            PatchClient patchClient,
+            IHttpClientFactory httpClientFactory)
         {
             // Attach the theme service
             _themeService = themeService;
@@ -100,6 +105,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
             PatchClient = patchClient;
 
             MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
+            HttpClientFactory = httpClientFactory;
             // We register a window in the Watcher class, which changes the application's theme if the system theme changes.
             //Wpf.Ui.Appearance.Watcher.Watch(this, Configuration.GetValue<BackgroundType>("UI:BackgroundType"), true, false);
         }
@@ -119,6 +125,11 @@ namespace FAF.UI.EtherealClient.Views.Windows
                     if (Container.Content is not null) return;
                     Container.SplashVisibility = Visibility.Collapsed;
                     Container.SplashProgressVisibility = Visibility.Collapsed;
+
+                    if (Configuration.IsClientUpdated())
+                    {
+                        Navigate(typeof(ChangelogView));
+                    }
                 }
                 else
                 {
@@ -156,7 +167,6 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         private void InvokeSplashScreen()
         {
-            _taskBarService.SetState(this, TaskBarProgressState.Indeterminate);
             Task.Run(async () =>
             {
                 await PrepareJavaRuntime();

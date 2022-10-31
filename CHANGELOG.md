@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.11](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.11) (2022-10-31)
+
+**Changelog**
+
+- Added client updater
+- Added safe handler in patcher for busy files
+- Added game logs on 'C:\ProgramData\FAForever\logs\game_{uid}.log'
+- Fixed background when hosting
+- Moved fonts to separate DLL (ligher updates)
+
 ## [2.0.10](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.10) (2022-10-23)
 
 **Changelog**
@@ -23,12 +33,6 @@ How to hide specific map?
 
 - Right click on game card
 - Click on "Ban map"
-
-![](https://cdn.discordapp.com/attachments/378156367933997056/1033702143745605632/unknown.png)
-
-
-
-![](https://cdn.discordapp.com/attachments/926400628803113020/1033703179361198221/unknown.png)
 
 ## [2.0.9](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.9) (2022-10-22)
 
@@ -66,12 +70,9 @@ Example:
 **Emoji Sample:**
 1. Write `:tada:`
 2. Converted to 🎉
-![](https://cdn.discordapp.com/attachments/926400628803113020/1033048668187676672/Animation.gif)
 
 **How to copy message?**
 
 1. Right click on message
-![def8bd11-5516-463d-9638-5f05e3af1e23-image.png](https://forum.faforever.com/assets/uploads/files/1666426882009-def8bd11-5516-463d-9638-5f05e3af1e23-image.png) 
 2. Click on "Copy text"
 3. Done!
-![12357639-7b30-4ab5-b7a7-cac19f29cb10-image.png](https://forum.faforever.com/assets/uploads/files/1666426892771-12357639-7b30-4ab5-b7a7-cac19f29cb10-image.png)

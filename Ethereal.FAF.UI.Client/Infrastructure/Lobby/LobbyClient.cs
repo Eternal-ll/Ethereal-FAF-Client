@@ -107,6 +107,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             _stop = reconnect;
             DisconnectAsync();
         }
+        public override bool ConnectAsync()
+        {
+            return base.ConnectAsync();
+        }
 
         protected override void OnDisconnected()
         {
@@ -311,6 +315,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public void ReadyToJoinMatch() =>
             SendAsync(ServerCommands.MatchReady);
         #endregion
+
+        public void GameEnded() => SendAsync(ServerCommands.UniversalGameCommand("GameState", "[\"Ended\"]"));
 
         public bool CanJoinGame => LastGameUid.HasValue;
 

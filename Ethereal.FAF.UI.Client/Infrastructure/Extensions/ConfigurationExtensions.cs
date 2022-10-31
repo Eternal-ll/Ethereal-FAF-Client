@@ -9,6 +9,33 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
     /// </summary>
     internal static class IConfigurationExtensions
     {
+        public static string GetGithubUser(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Github:User");
+        public static string GetGithubProject(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Github:Project");
+        public static string GetGithubBranch(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Github:Branch");
+        public static string GetChangelogUrl(this IConfiguration configuration) =>
+            "https://raw.githubusercontent.com/" +
+            configuration.GetGithubUser() + '/' +
+            configuration.GetGithubProject() + '/' +
+            configuration.GetGithubBranch() +
+            "/CHANGELOG.md";
+
+        public static string GetUpdateUrl(this IConfiguration configuration) =>
+            "https://raw.githubusercontent.com/" +
+            configuration.GetGithubUser() + '/' +
+            configuration.GetGithubProject() + '/' +
+            configuration.GetGithubBranch() +
+            "/update.json";
+
+
+        public static string GetVersion(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Version");
+
+        public static bool IsClientUpdated(this IConfiguration configuration) =>
+            configuration.GetValue<bool>("Client:IsUpdated", true);
+
         /// <summary>
         /// Get path to user maps folder
         /// </summary>
