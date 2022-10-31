@@ -1,5 +1,4 @@
-﻿
-using Ethereal.FAF.Client.Updater;
+﻿using Ethereal.FAF.Client.Updater;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Net.Http.Headers;
@@ -40,8 +39,5 @@ Console.WriteLine("Removing archive");
 File.Delete(updateArchive);
 UserSettings.Update("Client:Version", updateData.Version);
 UserSettings.Update("Client:Updated", true, "appsettings.user.json");
-Process.Start(new ProcessStartInfo()
-{
-    FileName = "Ethereal.FAF.UI.Client.exe"
-});
+Process.Start("Ethereal.FAF.UI.Client.exe");
 Environment.Exit(0);
