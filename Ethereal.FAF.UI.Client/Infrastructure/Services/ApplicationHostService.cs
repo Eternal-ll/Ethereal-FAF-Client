@@ -66,7 +66,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var updating = false;
             using var client = new HttpClient();
             var update = client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl()).Result;
             var version = Configuration.GetVersion();
@@ -74,17 +73,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 if (update.ForceUpdate)
                 {
-                    updating = true;
                     Process.Start(new ProcessStartInfo()
                     {
                         FileName = "Ethereal.FAF.Client.Updater.exe",
                         UseShellExecute = false,
                     });
+                    Environment.Exit(0);
                 }
-            }
-            if (updating)
-            {
-                return _serviceProvider.GetService<IHost>().StopAsync();
             }
             PrepareNavigation();
             return HandleActivationAsync();

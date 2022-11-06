@@ -142,6 +142,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             Logger.LogTrace("Ice server initialized");
             var host = "127.0.0.1";
             Logger.LogTrace("Initializing ICE client");
+            Thread.Sleep(500);
             IceClient = new(host, RpcPort);
             IceClient.ConnectAsync();
             var i = 0;
@@ -152,7 +153,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                     throw new Exception("Faulted to connect to Ice adapter after 10 attempts");
                 }
                 Thread.Sleep(150);
-                IceClient.ConnectAsync();
+                IceClient.Connect();
                 i++;
             }
             IceClient.PassIceServersAsync(ice_servers);
