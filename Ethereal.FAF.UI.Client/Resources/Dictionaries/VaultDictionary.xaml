@@ -1,0 +1,76 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
+                    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                    xmlns:model="clr-namespace:Ethereal.FAF.UI.Client.Models">
+    <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
+        <Setter Property="Background" Value="#323232"/>
+        <Setter Property="Width" Value="350"/>
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#2e2e2e" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <DataTemplate x:Key="VaultMapItem" DataType="{x:Type model:LocalMap}">
+        <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="128" Height="128">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Border.Background>
+            <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding Preview}" Width="128" Height="128" VerticalAlignment="Top"/>
+        </Border>
+    </DataTemplate>
+    <Style x:Key="VaultMapsListBox" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <ui:VirtualizingWrapPanel
+                                IsVirtualizing="{TemplateBinding VirtualizingPanel.IsVirtualizing}"
+                                Orientation="Vertical"
+                                SpacingMode="None"
+                                StretchItems="False"
+                                VirtualizationMode="{TemplateBinding VirtualizingPanel.VirtualizationMode}" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <DataTemplate x:Key="VaultMapInformation" DataType="{x:Type model:LocalMap}">
+        <StackPanel>
+            <ui:Badge Grid.Row="0" Grid.ColumnSpan="3" Content="Map information" Appearance="Secondary" Padding="8" Margin="0 0 0 10"/>
+            <TextBlock Margin="0 0 0 10" Text="Map name" FontSize="12"/>
+            <TextBox Margin="0 0 0 10" Text="{Binding Scenario.Name}" TextWrapping="Wrap" IsReadOnly="True"/>
+            <TextBlock Margin="0 0 0 10" Text="Map description" FontSize="12"/>
+            <TextBox Margin="0 0 0 10" Text="{Binding Scenario.Description}" TextWrapping="Wrap" IsReadOnly="True"/>
+            <TextBlock Margin="0 0 0 10" Text="Additional information" FontSize="12"/>
+            <WrapPanel Margin="-4 -4 0 20">
+                <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
+                    <TextBlock Text="{Binding Scenario.Width,StringFormat='Map size: {0}px'}"/>
+                </ui:Badge>
+                <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
+                    <TextBlock Text="{Binding Scenario.Armies.Count, Mode=OneWay, StringFormat='Slots: {0}'}"/>
+                </ui:Badge>
+                <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
+                    <TextBlock Text="{Binding Scenario.MapVersion, StringFormat='Version: {0}'}"/>
+                </ui:Badge>
+                <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
+                    <TextBlock Text="{Binding Scenario.Type, StringFormat='Type: {0}'}"/>
+                </ui:Badge>
+                <ui:Badge Appearance="Success" Margin="4 6 0 0" Content="Adaptive">
+                    <ui:Badge.Style>
+                        <Style TargetType="ui:Badge" BasedOn="{StaticResource {x:Type ui:Badge}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Scenario.IsAdaptiveMap}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ui:Badge.Style>
+                </ui:Badge>
+            </WrapPanel>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

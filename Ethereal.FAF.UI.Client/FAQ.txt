@@ -1,0 +1,6 @@
+﻿Update process
+
+1. Мердч
+2. Сделать релиз
+3. Обновить update.json
+4. Обновить CHANGELOG.md
