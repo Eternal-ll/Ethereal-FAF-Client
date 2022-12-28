@@ -1,0 +1,211 @@
+﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.ChatView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+           xmlns:irc="clr-namespace:Ethereal.FAF.UI.Client.Models.IRC"
+           d:DataContext="{d:DesignInstance {x:Type local:ChatView}}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="44"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="180" Width="Auto" MaxWidth="170"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="180"/>
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style x:Key="CloseButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="False">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <DataTemplate x:Key="ChatUser" DataType="{x:Type irc:IrcUser}">
+                <Grid>
+                    <Grid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Command="{DynamicResource OpenPrivateCommand}"
+                                      CommandParameter="{Binding Name}"
+                                      Header="Open chat">
+                                <MenuItem.Icon>
+                                    <ui:SymbolIcon Symbol="Chat12"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </Grid.ContextMenu>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Image ToolTip="{Binding Player.Avatar.Tooltip}" Height="16" Margin="4 0">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="ToolTip" Value="{Binding Player.Avatar.Tooltip}"/>
+                                <Setter Property="Source" Value="{Binding Player.Avatar.Url}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Player.Avatar}" Value="{x:Null}">
+                                        <Setter Property="ToolTip" Value="{x:Null}"/>
+                                        <Setter Property="Source" Value="{x:Null}"/>
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="1" Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <TextBlock Grid.Column="2" Text="{Binding DisplayedName, Mode=OneWay}" Margin="4 0 0 0"/>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="MessageUser" DataType="{x:Type irc:IrcUserMessage}">
+                <TextBlock TextWrapping="Wrap">
+                    <TextBlock.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Copy text" Command="{StaticResource CopyCommand}" CommandParameter="{Binding Text, Mode=OneWay}">
+                                <MenuItem.Icon>
+                                    <ui:SymbolIcon Symbol="Copy16"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </TextBlock.ContextMenu>
+                    <ContentControl Content="{Binding User}" ContentTemplate="{StaticResource ChatUser}"
+                                    Margin="0 -2 -2 -3"/>
+                    <Run Text="{Binding Text, Mode=OneWay,StringFormat=': {0}'}"/>
+                </TextBlock>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type irc:GroupChannel}">
+                <Grid Margin="0 -3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                    <Button Grid.Column="1" Content="Leave" FontSize="10" Command="{DynamicResource LeaveChannelCommand}" CommandParameter="{Binding Name}"
+                                Padding="2 0 2 1" Margin="4 -1 0 -3" Style="{StaticResource CloseButton}">
+                    </Button>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type irc:DialogueChannel}">
+                <Grid Margin="0 -3">
+                    <!--<TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>-->
+                    <ContentControl Content="{Binding Receiver}" ContentTemplate="{StaticResource ChatUser}"
+                                    Margin="-2 0 0 0"/>
+                    <Button Grid.Column="1" Content="Leave" FontSize="10" Command="{DynamicResource LeaveChannelCommand}" CommandParameter="{Binding Name}"
+                                Padding="2 0 2 1" Margin="4 -1 0 -3" Style="{StaticResource CloseButton}"
+                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                    </Button>
+                </Grid>
+            </DataTemplate>
+        </Grid.Resources>
+        <Border Grid.Column="1" Grid.Row="1" CornerRadius="4" Margin="4 -32 4 0">
+            <Border.Background>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}"/>
+            </Border.Background>
+            <ScrollViewer Grid.Column="1" MaxHeight="80">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="10 4">
+                    <Run Text="{Binding ViewModel.SelectedChannel.Title, Mode=OneWay}"/>
+                    <Run Text="{Binding ViewModel.SelectedChannel.TopicChangedBy, Mode=OneWay, StringFormat='by {0}'}"/>
+                </TextBlock>
+            </ScrollViewer>
+        </Border>
+        <ui:AutoSuggestBox FontSize="12" PlaceholderText="#channel or user" Icon="ChatAdd16"
+                                   MaxDropDownHeight="300" TextChanged="AutoSuggestBox_TextChanged"
+                                   LostFocus="AutoSuggestBox_LostFocus" KeyDown="AutoSuggestBox_KeyDown"/>
+
+        <ListBox Grid.Row="1" Grid.RowSpan="2" Margin="0 4"
+                 ItemsSource="{Binding ViewModel.ChannelsView}"
+                 SelectedItem="{Binding ViewModel.SelectedChannel}">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+                    <Setter Property="Margin" Value="0 0"/>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.GroupStyle>
+                <GroupStyle>
+
+                </GroupStyle>
+            </ListBox.GroupStyle>
+        </ListBox>
+        <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0 0 0 4">
+            <!--<Button Content="Change name" HorizontalAlignment="Stretch" Margin="0 0 0 4" Command="{Binding ViewModel.RenameCommand}"/>-->
+            <Button Content="Restart" HorizontalAlignment="Stretch" Command="{Binding ViewModel.ReconnectCommand}"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="2" Grid.Column="1" Margin="4">
+            <ItemsControl ItemsSource="{Binding ViewModel.HistoryView}"
+                          ItemTemplate="{StaticResource MessageUser}">
+            </ItemsControl>
+        </ScrollViewer>
+        <ui:VirtualizingItemsControl Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3"
+                      ItemsSource="{Binding ViewModel.UsersView}"
+                                     ItemTemplate="{StaticResource ChatUser}">
+            <ui:VirtualizingItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ui:VirtualizingWrapPanel Orientation="Vertical" StretchItems="False" ItemSize="200 20"/>
+                </ItemsPanelTemplate>
+            </ui:VirtualizingItemsControl.ItemsPanel>
+            <!--<ui:VirtualizingItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding }">
+                        <TextBlock.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Command="{DynamicResource OpenPrivateCommand}" CommandParameter="{Binding}"
+                                          Header="Open chat">
+                                    <MenuItem.Icon>
+                                        <ui:SymbolIcon Symbol="Chat12"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </TextBlock.ContextMenu>
+                    </TextBlock>
+                </DataTemplate>
+            </ui:VirtualizingItemsControl.ItemTemplate>-->
+        </ui:VirtualizingItemsControl>
+        <ui:TextBox Grid.Column="1" Grid.Row="3" Margin="4" KeyDown="TextBox_KeyDown" PlaceholderText="Message" Icon="Chat12"
+                    TextChanged="InputTextChanged" VerticalAlignment="Bottom"
+                    PreviewKeyDown="TextBox_PreviewKeyDown"/>
+
+        <ui:TextBox Grid.Column="3" Margin="4 0" PlaceholderText="Search" FontSize="12"
+                    Text="{Binding ViewModel.UsersFilterText, UpdateSourceTrigger=PropertyChanged}"/>
+        
+        <ToggleButton x:Name="SettingsToggleButton" Grid.Column="2" Padding="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ui:SymbolIcon Symbol="Settings24"/>
+        </ToggleButton>
+
+        <Popup IsOpen="{Binding IsChecked, ElementName=SettingsToggleButton}" StaysOpen="False" AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=SettingsToggleButton}"
+                       Placement="Left">
+            <Border Padding="10" BorderThickness="1">
+                <Border.Background>
+                    <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}"/>
+                </Border.Background>
+                <Border.BorderBrush>
+                    <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
+                </Border.BorderBrush>
+                <Border.Effect>
+                    <DropShadowEffect
+                                BlurRadius="30"
+                                Direction="0"
+                                Opacity="0.4"
+                                ShadowDepth="0"
+                                Color="#202020" />
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="Group by"/>
+                    <ComboBox Padding="10 6" Width="100" Margin="0 4 0 0" FontSize="12"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+    </Grid>
+</ui:UiPage>
