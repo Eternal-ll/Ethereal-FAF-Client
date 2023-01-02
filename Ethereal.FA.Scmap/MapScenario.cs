@@ -57,7 +57,6 @@ namespace Ethereal.FA.Vault
             if (lua["ScenarioInfo.name"] is string name) scenario.Name = name;
             if (lua["ScenarioInfo.description"] is string description)
             {
-
                 scenario.Description = description;
             }
             if (lua["ScenarioInfo.preview"] is string preview) scenario.Preview = preview;
