@@ -16,24 +16,20 @@ namespace Ethereal.FAF.API.Client
     }
     public class Sorting
     {
-        public ListSortDirection SortDirection { get; set; }
-        private string _Sort;
+        public ListSortDirection SortDirection;
         [AliasAs("sort")]
         public string Sort
         {
             get
             {
+                if (string.IsNullOrWhiteSpace(Parameter) || Parameter is "None") return null;
                 return
-                    SortDirection is ListSortDirection.Descending ?
-                    "-" : string.Empty +
+                    (SortDirection is ListSortDirection.Descending ?
+                    "-" : string.Empty) +
                     Parameter;
             }
-            set
-            {
-                _Sort = value;
-            }
         }
-        public string Parameter { get; set; }
+        public string Parameter;
     }
     public class Filtration
     {
@@ -48,7 +44,7 @@ namespace Ethereal.FAF.API.Client
         Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(int featuredMod, int version, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
 
         [Get("/data/coturnServer")]
-        Task<ApiResponse<ApiUniversalResult<CoturnServer[]>>> GetCoturnServersAsync([Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
+        Task<ApiResponse<ApiUniversalResult<CoturnServer[]>>> GetCoturnServersAsync(CancellationToken cancellationToken = default);
 
         [Get("/data/map")]
         Task<ApiResponse<ApiMapsResult>> GetMapsAsync(
@@ -59,12 +55,17 @@ namespace Ethereal.FAF.API.Client
             Pagination? pagination = null,
             [AliasAs("include")]
             [Query(CollectionFormat.Csv)]
-            params string[] include);
+            string[] include = null,
+            CancellationToken cancellationToken = default);
     }
     public interface IFafContentClient
     {
         [Get("/{url}")]
         [QueryUriFormat(UriFormat.Unescaped)]
         Task<ApiResponse<Stream>> GetFileStreamAsync(string url, [Authorize("Bearer")] string token, [Header("Verify")] string verify, CancellationToken cancellationToken = default);
+
+        [Get("/{url}")]
+        [QueryUriFormat(UriFormat.Unescaped)]
+        Task<ApiResponse<Stream>> GetFileStreamAsync(string url, CancellationToken cancellationToken = default);
     }
 }

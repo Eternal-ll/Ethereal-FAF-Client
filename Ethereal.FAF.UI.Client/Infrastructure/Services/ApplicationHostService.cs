@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
@@ -35,15 +36,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IHostApplicationLifetime ApplicationLifetime;
         private readonly IConfiguration Configuration;
 
-        private readonly IceManager IceManager;
-        private readonly LobbyClient LobbyClient;
+        private readonly ServersManagement ServersManagement;
 
         private INavigationWindow _navigationWindow;
 
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, IThemeService themeService,
-            ITaskBarService taskBarService, INotifyIconService notifyIconService, IceManager iceManager,
-            IHostApplicationLifetime applicationLifetime, LobbyClient lobbyClient, IConfiguration configuration)
+            ITaskBarService taskBarService, INotifyIconService notifyIconService,
+            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, ServersManagement serversManagement)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
@@ -52,10 +52,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _themeService = themeService;
             _taskBarService = taskBarService;
             _notifyIconService = notifyIconService;
-            IceManager = iceManager;
             ApplicationLifetime = applicationLifetime;
-            LobbyClient = lobbyClient;
             Configuration = configuration;
+            ServersManagement = serversManagement;
         }
 
         /// <summary>
@@ -64,21 +63,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            using var client = new HttpClient();
-            var update = client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl()).Result;
-            var version = Configuration.GetVersion();
-            if (version != update.Version)
-            {
-                if (update.ForceUpdate)
-                {
-                    Process.Start(new ProcessStartInfo()
-                    {
-                        FileName = "Ethereal.FAF.Client.Updater.exe",
-                        UseShellExecute = false,
-                    });
-                    Environment.Exit(0);
-                }
-            }
+            //using var client = new HttpClient();
+            //var update = client.GetFromJsonAsync<Ethereal.FAF.Client.Updater.Update>(Configuration.GetUpdateUrl()).Result;
+            //var version = Configuration.GetVersion();
+            //if (version != update.Version)
+            //{
+            //    if (update.ForceUpdate)
+            //    {
+            //        Process.Start(new ProcessStartInfo()
+            //        {
+            //            FileName = "Ethereal.FAF.Client.Updater.exe",
+            //            UseShellExecute = false,
+            //        });
+            //        Environment.Exit(0);
+            //    }
+            //}
             PrepareNavigation();
             return HandleActivationAsync();
         }
@@ -89,9 +88,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            LobbyClient.DisconnectAsync(false);
-            LobbyClient.Dispose();
-            IceManager.IceServer?.Kill();
+            ServersManagement.Dispose();
             _notifyIconService.Unregister();
             await Task.CompletedTask;
         }
@@ -102,16 +99,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private async Task HandleActivationAsync()
         {
             await Task.CompletedTask;
-
-            //LobbyClient.ConnectAsync();
-            _serviceProvider.GetService<GamesViewModel>();
-            _serviceProvider.GetService<PlayersViewModel>();
-            _serviceProvider.GetService<PartyViewModel>();
-            _serviceProvider.GetService<GameLauncher>();
-            _serviceProvider.GetService<ChatViewModel>();
-
             if (!Application.Current.Windows.OfType<MainWindow>().Any())
             {
+                _serviceProvider.GetRequiredService<PlayersViewModel>();
+                _serviceProvider.GetRequiredService<GamesViewModel>();
+                _serviceProvider.GetRequiredService<ChatViewModel>();
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
 
                 var notifyIcon = _serviceProvider.GetService<INotifyIconService>();

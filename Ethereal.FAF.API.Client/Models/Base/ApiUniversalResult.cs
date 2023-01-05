@@ -2,6 +2,7 @@
 using beta.Models.API.MapsVault;
 using beta.Models.API.Universal;
 using System.Collections.Generic;
+using System.Data;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.API.Base
@@ -20,26 +21,51 @@ namespace beta.Models.API.Base
         [JsonPropertyName("meta")]
         public ApiVaultMeta Meta { get; set; }
 
-        public virtual void ParseIncluded() { }
+        public virtual void ParseIncluded()
+        {
+
+        }
+        public virtual void ParseIncluded(out SortedDictionary<string, string[]> entityProperties)
+        {
+            entityProperties = null;
+        }
     }
     public class ApiMapsResult : ApiUniversalResult<ApiMapModel[]>
     {
         public override void ParseIncluded()
         {
+            this.ParseIncluded(out var data);
+        }
+        public override void ParseIncluded(out SortedDictionary<string, string[]> entityProperties)
+        {
+            entityProperties = null;
             var included = Included;
             var data = Data;
             if (included is null || data is null) return;
             if (included.Length == 0 || data.Length == 0) return;
-
+            entityProperties = new();
+            var first = data.FirstOrDefault();
+            if (first is not null)
+            {
+                entityProperties.Add("map", first.Attributes.Keys.ToArray());
+            }
             foreach (var map in data)
             {
                 try
                 {
-                    var relations = map.GetRelations();
-                    foreach (var relation in relations)
+                    if (map.Relations is null) continue;
+                    foreach (var relation in map.Relations)
                     {
-                        var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Key, relation.Value);
-                        switch (relation.Key)
+                        if (relation.Value.Data is null) continue;
+                        if (relation.Value.Data.Count == 0) continue;
+                        var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Value.Data[0].Type, relation.Value.Data[0].Id);
+                        if (entity is null) continue;
+                        if (entity is not null)
+                        {
+                            entityProperties.TryAdd(relation.Key, entity.Attributes.Keys.ToArray());
+                        }
+
+                        switch (relation.Value.Data[0].Type)
                         {
                             case ApiDataType.mapVersion:
                                 map.LatestVersion = entity.CastTo<MapVersionModel>();
@@ -49,10 +75,13 @@ namespace beta.Models.API.Base
                                 //}
                                 continue;
                             case ApiDataType.player:
-                                map.Author = entity.Attributes["login"];
+                                map.Author = entity?.Attributes["login"];
                                 continue;
                             case ApiDataType.mapReviewsSummary:
-                                map.ReviewsSummary = entity.CastTo<ApiUniversalSummary>();
+                                map.ReviewsSummary = entity?.CastTo<ApiUniversalSummary>();
+                                continue;
+                            case ApiDataType.mapStatistics:
+                                map.StatisticsSummary = entity.CastTo<ApiUniversalStatistics>();
                                 continue;
                         }
                     }

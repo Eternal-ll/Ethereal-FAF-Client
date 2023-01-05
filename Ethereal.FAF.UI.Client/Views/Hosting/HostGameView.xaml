@@ -96,6 +96,8 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <TextBlock Text="Server" Margin="0 0 0 8"/>
+                    <ComboBox ItemsSource="{Binding SelectedView}"/>
                     <WrapPanel Margin="0 10 0 6">
                         <CheckBox Content="Friends only" IsChecked="{Binding Game.IsFriendsOnly}" Grid.Row="3" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                         <CheckBox x:Name="SimMods" Content="Enable SIM mods" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>

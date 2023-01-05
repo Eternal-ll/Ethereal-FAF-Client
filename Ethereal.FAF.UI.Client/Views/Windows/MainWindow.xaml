@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
-    Title="Ethereal FAF Client" WindowStyle="None"
+    Title="Ethereal Multiverse Client" WindowStyle="None"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
     WindowCornerPreference="Round"
@@ -91,8 +91,7 @@
             ShowMaximize="True"
             ShowMinimize="True"
             UseSnapLayout="True"
-                     Icon="/Resources/logo.ico"
-                     Title="Ethereal FAF Client">
+                     Title="Ethereal Multiverse Client">
             <ui:TitleBar.Header>
                 <Grid
                     Margin="0,0,12,0"

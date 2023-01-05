@@ -4,6 +4,7 @@ using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Win32;
 using System.IO;
+using System.Threading;
 using Wpf.Ui.Common.Interfaces;
 using Wpf.Ui.Mvvm.Services;
 
@@ -51,6 +52,7 @@ namespace Ethereal.FAF.UI.Client.Views
                 SnackbarService.Show("Success", $"I like it! It`s time to fill your directory \"{location}\" with some NSFW content!", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             }
             UserSettings.Update(ConfigurationConstants.ForgedAlliancePatchLocation, location);
+            Thread.Sleep(500);
             await LoaderViewModel.TryPassChecksAndLetsSelectServer();
         }
     }

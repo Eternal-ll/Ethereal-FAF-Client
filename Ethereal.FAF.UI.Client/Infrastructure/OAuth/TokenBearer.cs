@@ -15,17 +15,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }
 
-        [JsonPropertyName("expires_in")]
-        public double ExpiresIn { get; set; }
-
-        [JsonIgnore]
-        public DateTime ExpiresAt => Created.AddSeconds(ExpiresIn);
+        [JsonPropertyName("refresh_token")]
+        public string RefreshToken { get; set; }
 
         [JsonPropertyName("id_token")]
         public string IdToken { get; set; }
-
-        [JsonPropertyName("refresh_token")]
-        public string RefreshToken { get; set; }
 
         [JsonPropertyName("token_type")]
         public string TokenType { get; set; }
@@ -35,8 +29,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 
         [JsonPropertyName("created")]
         public DateTime Created { get; set; } = DateTime.Now;
+
+        [JsonPropertyName("expires_in")]
+        public double ExpiresIn { get; set; }
+
         [JsonIgnore]
-        public bool IsExpired => (ExpiresAt - DateTime.Now).TotalMinutes < 5;
+        public DateTime ExpiresAt => Created.AddSeconds(ExpiresIn);
+        public bool IsExpired() => (ExpiresAt - DateTime.Now).TotalMinutes < 5;
     }
     public sealed partial class FafJwtPayload
     {

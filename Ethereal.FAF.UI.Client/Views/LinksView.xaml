@@ -20,7 +20,7 @@
                     <Style TargetType="ui:CardExpander" BasedOn="{StaticResource {x:Type ui:CardExpander}}">
                         <Setter Property="HorizontalAlignment" Value="Stretch"/>
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Margin" Value="0 4"/>
+                        <Setter Property="Margin" Value="0 6 0 0"/>
                     </Style>
                     <Style TargetType="ui:Hyperlink" BasedOn="{StaticResource {x:Type ui:Hyperlink}}">
                         <Setter Property="HorizontalAlignment" Value="Stretch"/>

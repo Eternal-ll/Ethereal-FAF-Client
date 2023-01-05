@@ -1,4 +1,5 @@
-﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+﻿using beta.Models.API.MapsVault;
+using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer.Enums;
 using System.Linq;
 using System.Windows;
@@ -6,6 +7,25 @@ using System.Windows.Controls;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors
 {
+    public class MapTemplateSelector : DataTemplateSelector
+    {
+        public DataTemplate OpenTemplate { get; set; }
+        public DataTemplate HiddenTemplate { get; set; }
+        public DataTemplate NoVersionTemplate { get; set; }
+        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        {
+            if (item is ApiMapModel map)
+            {
+                return 
+                    map.LatestVersion is null ?
+                        NoVersionTemplate :
+                        map.LatestVersion.IsHidden ?
+                            HiddenTemplate :
+                            OpenTemplate;
+            }
+            return base.SelectTemplate(item, container);
+        }
+    }
     public class GamePlayerTemplateSelector : DataTemplateSelector
     {
         public DataTemplate WithAvatar { get; set; }

@@ -12,7 +12,20 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = vm;
             DataContext = vm;
+            this.IsVisibleChanged += SelectServerView_IsVisibleChanged;
             InitializeComponent();
+        }
+
+        private void SelectServerView_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is true) 
+            {
+                ViewModel.StartApiCalls();
+            }
+            else
+            {
+                ViewModel.StopApiCalls();
+            }
         }
 
         public SelectServerVM ViewModel { get; }

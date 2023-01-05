@@ -18,4 +18,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
             }
         }
     }
+    internal class NavigateRootViewCommand : Base.Command
+    {
+        private INavigationWindow NavigationWindow;
+        public override bool CanExecute(object parameter) => parameter is System.Type;
+
+        public override void Execute(object parameter)
+        {
+            NavigationWindow ??= App.Hosting.Services.GetService<INavigationWindow>();
+            NavigationWindow.Navigate((System.Type)parameter);
+        }
+    }
 }

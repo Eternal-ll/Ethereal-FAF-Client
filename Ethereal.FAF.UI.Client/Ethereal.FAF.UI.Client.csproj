@@ -18,6 +18,7 @@
     <None Remove="External\7z.exe" />
     <None Remove="External\faf-ice-adapter-v3.2.2-nojfx.jar" />
     <None Remove="External\faf-ice-adapter-v3.3-RC1-nojfx.jar" />
+    <None Remove="External\faf-ice-adapter-v3.3.0-nojfx.jar" />
     <None Remove="External\faf-uid.exe" />
     <None Remove="External\jre.7z" />
     <None Remove="Resources\Images\Examples\SidebarExample.png" />

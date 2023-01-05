@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
@@ -17,6 +18,14 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
         }
         public ObservableCollection<Server> Servers { get; set; }
     }
+    public enum ServerState : byte
+    {
+        Idle,
+        Authorizing,
+        Authorized,
+        Connecting,
+        Connected,
+    }
     public partial class Server : ViewModels.Base.ViewModel
     {
         [JsonPropertyName("ShortName")]
@@ -34,6 +43,8 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
 
         [JsonPropertyName("IsVisible")]
         public bool IsVisible { get; set; }
+        [JsonPropertyName("AutoJoin")]
+        public bool AutoJoin { get; set; }
 
         [JsonPropertyName("Lobby")]
         public ServerAddress Lobby { get; set; }
@@ -52,18 +63,31 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
 
         [JsonPropertyName("Content")]
         public Uri Content { get; set; }
+        [JsonPropertyName("ConfigurationFile")]
+        public string ConfigurationFile { get; set; }
 
         [JsonPropertyName("OAuth")]
         public OAuth OAuth { get; set; }
 
         [JsonPropertyName("Cloudfare")]
         public Cloudfare Cloudfare { get; set; }
-        [JsonIgnore]
+
+
+
+
+        #region 
+
+        private ServerState _ServerState;
+        public ServerState ServerState { get => _ServerState; set => Set(ref _ServerState, value); }
+
+        #endregion
+
         public int _PlayersCount;
+        [JsonIgnore]
         public int PlayersCount { get => _PlayersCount; private set => Set(ref _PlayersCount, value); }
         public void SetPlayersCount(int count) => PlayersCount = count;
-        [JsonIgnore]
         private int _GamesCount;
+        [JsonIgnore]
         public int GamesCount { get => _GamesCount; private set => Set(ref _GamesCount, value); }
         public void SetGamesCount(int count) => GamesCount = count;
     }
@@ -98,7 +122,7 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
         public Uri BaseAddress { get; set; }
 
         [JsonPropertyName("ResponseSeconds")]
-        public long ResponseSeconds { get; set; }
+        public int ResponseSeconds { get; set; }
 
         [JsonPropertyName("ClientId")]
         public string ClientId { get; set; }
@@ -107,6 +131,9 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
         public string Scope { get; set; }
 
         [JsonPropertyName("RedirectPorts")]
-        public long[] RedirectPorts { get; set; }
+        public int[] RedirectPorts { get; set; }
+
+        [JsonPropertyName("Token")]
+        public TokenBearer Token { get; set; }
     }
 }

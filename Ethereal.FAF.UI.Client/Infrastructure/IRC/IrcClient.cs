@@ -42,7 +42,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         private readonly ILogger Logger;
 
         public IrcClient(string host, int port, ILogger logger)
-            : base(address: Dns.GetHostEntry(host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork),
+            : base(address: IPAddress.TryParse(host, out var address) ? address : Dns.GetHostEntry(host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork),
                   port: port)
         {
             Logger = logger;
@@ -314,19 +314,33 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
                 default: break;
             }
         }
-
-        public void Authorize(string login, string id, string password)
+        public void SetPassword(string password)
+        {
+            Password = password;
+        }
+        public void SetCredentials(string login, string id)
         {
             User = login;
             OriginalNick = login;
             UserId = id;
-            Password = password;
         }
         public void PassAuthorization()
         {
             SendAsync(IrcCommands.Pass(Password));
             SendAsync(IrcCommands.UserInfo(UserId, User));
             SendAsync(IrcCommands.Nickname(User));
+        }
+        protected override void OnConnecting()
+        {
+            base.OnConnecting();
+        }
+        protected override void OnError(SocketError error)
+        {
+            base.OnError(error);
+        }
+        protected override void OnDisconnecting()
+        {
+            base.OnDisconnecting();
         }
 
         public void Restart()

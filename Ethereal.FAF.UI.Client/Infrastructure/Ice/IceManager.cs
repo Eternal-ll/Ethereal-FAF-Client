@@ -1,7 +1,9 @@
 ﻿using beta.Models.API;
 using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models;
+using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
@@ -17,6 +19,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,13 +29,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
     {
         public event EventHandler Initialized;
 
-        private readonly LobbyClient LobbyClient;
         private readonly NotificationService NotificationService;
         private readonly IConfiguration Configuration;
-        private readonly IFafApiClient FafApiClient;
         private readonly ILogger Logger;
 
+        private LobbyClient LobbyClient;
+        private IFafApiClient FafApiClient;
+        private Server Server;
+
         public CoturnServer[] CoturnServers { get; set; }
+
+        private List<IceCoturnServer> IceCoturnServers;
 
         public Process IceServer;
         public IceClient IceClient;
@@ -44,115 +51,105 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public List<ConnectionState> ConnectionStates { get; set; }
         public bool AllConnected => ConnectionStates.Where(c => c.State == "connected").Count() == ConnectionStates.Count;
 
-        public IceManager(ILogger<IceManager> logger, LobbyClient lobbyClient, IConfiguration configuration, NotificationService notificationService, IFafApiClient fafApiClient)
+        public IceManager(ILogger<IceManager> logger, IConfiguration configuration, NotificationService notificationService)
         {
-            lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
-            lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
             Configuration = configuration;
             Logger = logger;
-            LobbyClient = lobbyClient;
             NotificationService = notificationService;
+        }
+        public void Initialize(Server server, LobbyClient lobbyClient, IFafApiClient fafApiClient)
+        {
+            LobbyClient = lobbyClient;
             FafApiClient = fafApiClient;
+            Server = server;
+
+            lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
+            lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
+        }
+        private void LobbyClient_IceServersDataReceived(object sender, IceServersData e)
+        {
+            if (Server.Api.Host is "api.faforever.ru")
+            {
+                foreach (var server in e.ice_servers)
+                {
+                    for (int i = 0; i < server.Urls.Length; i++)
+                    {
+                        server.Urls[i] = server.Urls[i].Replace("http://", null);
+                    }
+                }
+            }
+            IceCoturnServers = e.ice_servers.ToList();
         }
 
-        public async Task<CoturnServer[]> GetCoturnServersAsync(string token)
+        public async Task<CoturnServer[]> GetCoturnServersAsync()
         {
             if (CoturnServers is not null) return CoturnServers;
-            var result = await FafApiClient.GetCoturnServersAsync(token);
-            CoturnServers = result.Content.Data;
-            return result.Content.Data;
+            var response = await FafApiClient.GetCoturnServersAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                return Array.Empty<CoturnServer>();
+            }
+            CoturnServers = response.Content.Data;
+            return response.Content.Data;
         }
 
         public void SelectCoturnServers(params int[] ids) =>
             UserSettings.Update("IceAdapter:SelectedCoturnServers", ids);
 
-        private string ice_servers;
-        private void LobbyClient_IceServersDataReceived(object sender, IceServersData e)
-        {
-            ice_servers = e.ice_servers;
-        }
 
         public void InitializeNewPorts()
         {
+            Logger.LogInformation("Searching free ports...");
             var ports = GetFreePort(2);
             RpcPort = ports[0];
             GpgNetPort = ports[1];
-            Logger.LogTrace("RPC port: [{rpc}]", RpcPort);
-            Logger.LogTrace("GPG NET port: [{gpg}]", GpgNetPort);
+            Logger.LogInformation("RPC server port: [{rpc}]", RpcPort);
+            Logger.LogInformation("GPGNetServer port: [{gpg}]", GpgNetPort);
         }
-        static string HMACHASH(string str, string key)
+        public async Task<IceCoturnServer[]> GetIceCoturnServersAsync(long playerId)
         {
-            byte[] bkey = Encoding.Default.GetBytes(key);
-            using (var hmac = new HMACSHA256(bkey))
+            var coturnServers = await GetCoturnServersAsync();
+            if (coturnServers.Length is 0)
             {
-                byte[] bstr = Encoding.Default.GetBytes(str);
-                var bhash = hmac.ComputeHash(bstr);
-                return BitConverter.ToString(bhash).Replace("-", string.Empty).ToLower();
+
             }
-        }
-        static string SignHMACSHA1Fomate(string str, string key)
-        {
-            var encoding = Encoding.GetEncoding("UTF-8");
-
-            var hmacsha1 = new HMACSHA1(encoding.GetBytes(key));
-            byte[] hashBytes = hmacsha1.ComputeHash(encoding.GetBytes(str));
-            string Sign = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-            return Sign; //de4cbb63e690f2d18fa5e15d400f7608203dd863
+            var selected = Configuration.GetSection("IceAdapter:SelectedCoturnServers").Get<int[]>() ?? Array.Empty<int>();
+            return null;
         }
 
-        private bool TryGetCoturnServers(long playerId,out string servers)
+        private bool TryGetCoturnServers(long playerId,out List<IceCoturnServer> servers)
         {
-            servers = null;
             var selected = Configuration.GetSection("IceAdapter:SelectedCoturnServers").Get<int[]>();
-            if (selected.Length == 0) return false;
-            var ttl = Configuration.GetValue<int>("IceAdapter:TTL");
-            servers = JsonSerializer.Serialize(CoturnServers
-                .Where(c => selected.Contains(c.Id))
-                .Select(c => new
-                {
-                    urls = new string[]
-                    {
-                        $"turn:{c.Host}?transport=tcp",
-                        $"turn:{c.Host}?transport=udp",
-                        $"turn:{c.Host}"
-                    },
-                    username = $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000 + ttl}:{playerId}",
-                    //credential = 
-                }));
-            return false;
-    //             "urls": [
-    //  "turn:coturn-eu-1.supcomhub.org?transport=tcp",
-    //  "turn:coturn-eu-1.supcomhub.org?transport=udp",
-    //  "stun:coturn-eu-1.supcomhub.org"
-    //],
-    //"username": "1666207812:302176",
-    //"credential": "84/VQrEl/ztCjFeQClu4PHwuPkA=",
-    //"credentialType": "token"
+            selected ??= Array.Empty<int>();
+            var ttl = Configuration.GetIceAdapterTtl();
+            servers = GetCoturnServersAsync().Result
+                .Where(c => selected.Length == 0 || selected.Contains(c.Id))
+                .Select(c => new IceCoturnServer(c.Key, c.Host, c.Port, ttl, playerId))
+                .ToList();
+            return !servers.Any();
         }
-        bool HasWebUI;
-        public void Initialize(string playerId, string playerLogin, long gameId)
+        public void Initialize(long playerId, string playerLogin, long gameId, string initMode)
         {
             LastGameId = gameId;
             InitializeNewPorts();
-            Logger.LogTrace("Initializing Ice process with player id [{id}], player login [{login}], RPC port [{rpc}], GPG NET port [{gpg}]",
-                playerId, playerLogin, RpcPort, GpgNetPort);
             IceServer?.Kill();
             IceServer = GetIceServerProcess(playerId, playerLogin, gameId);
             IceServer.Start();
-            Logger.LogTrace("Ice server initialized");
-            var host = "127.0.0.1";
-            Logger.LogTrace("Initializing ICE client");
-            Thread.Sleep(500);
-            IceClient = new(host, RpcPort);
+            IceClient = new("127.0.0.1", RpcPort);
+            IceClient.SetIceCoturnServers(TryGetCoturnServers(playerId, out var servers) ? servers.ToArray() : IceCoturnServers.ToArray());
+            IceClient.SetInitMode(initMode);
             IceClient.ConnectAsync();
-            var i = 0;
+            var t = 0;
             while (!IceClient.IsConnected)
             {
-                Thread.Sleep(300);
+                if (t is 30)
+                {
+                    throw new Exception("Failed to connect to Ice adapter");
+                }
+                Thread.Sleep(100);
                 IceClient.Connect();
-                i++;
+                t++;
             }
-            IceClient.PassIceServersAsync(ice_servers);
             IceClient.GpgNetMessageReceived += IceClient_GpgNetMessageReceived;
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
             IceClient.ConnectionToGpgNetServerChanged += IceClient_ConnectionToGpgNetServerChanged;
@@ -160,49 +157,48 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             ConnectionStates?.Clear();
             ConnectionStates = null;
             ConnectionStates = new();
-            Logger.LogTrace("Initialized ICE client on [{host}:{port}]", host, RpcPort);
             Initialized?.Invoke(this, null);
-            if (HasWebUI && Configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true))
+            if (Configuration.IceAdapterHasWebUiSupport() && Configuration.IceAdapterUseTelemetryUI())
             {
                 Process.Start(new ProcessStartInfo()
                 {
-                    FileName = Configuration.GetValue<string>("IceAdapter:Telemetry") + $"?gameId={gameId}&playerId={playerId}",
+                    FileName = Configuration.GetIceAdapterTelemtryUrl() + $"?gameId={gameId}&playerId={playerId}",
                     UseShellExecute = true
                 });
             }
         }
 
-        public Process GetIceServerProcess(string playerId, string playerLogin, long gameId)
+        private void IceServer_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            var ice = Configuration.GetValue<string>("IceAdapter:Executable");
-            StringBuilder sb = new();
-            sb.Append($"-jar \"{ice}\" ");
-            sb.Append($"--id {playerId} ");
-            sb.Append($"--login {playerLogin} ");
-            HasWebUI = ice.Contains("3.3");
-            if (HasWebUI)
-            {
-                sb.Append($"--game-id {gameId} ");
-            }
-            sb.Append($"--rpc-port {RpcPort} ");
-            sb.Append($"--gpgnet-port {GpgNetPort} ");
-            if (Configuration.GetValue("IceAdapter:ForceRelay", false))
-                sb.Append("--force-relay");
+            Logger.LogWarning(e.Data);
+        }
+
+        public Process GetIceServerProcess(long playerId, string playerLogin, long gameId)
+        {
             //sb.Append($"--log-level {Configuration.GetValue<string>("IceAdapter:LogLevel")} ");
             //if (Configuration.GetValue<bool>("IceAdapter:IsDebugEnabled")) sb.Append("--debug-window ");
             //if (Configuration.GetValue<bool>("IceAdapter:IsInfoEnabled")) sb.Append("--info-window ");
             //sb.Append($"--delay-ui {Configuration.GetValue<long>("IceAdapter:DelayUI")} ");
             //sb.Append(Configuration.GetValue<string>("IceAdapter:Args"));
-            var logs = Configuration.GetValue<string>("IceAdapter:Logs");
             Process process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = Configuration.GetValue<string>("Paths:JavaRuntime"),
-                    Arguments = sb.ToString(),
+                    FileName = Configuration.GetJavaRuntimeExecutable(),
+                    Arguments = IceAdapterArguments.Generate(Configuration.GetIceAdapterExecutable())
+                        .WithPlayerId(playerId)
+                        .WithPlayerLogin(playerLogin)
+                        .WithRpcPort(RpcPort)
+                        .WithGPGNetPort(GpgNetPort)
+                        .WithGameId(gameId, Configuration.IceAdapterHasWebUiSupport())
+                        .WithForcedRelay(Configuration.IceAdapterForceRelay())
+                        .ToString(),
                     UseShellExecute = false,
+                    CreateNoWindow = true
                 }
             };
+            Logger.LogInformation("Prepared FAF Ice Adapter process with arguments: [{args}]", process.StartInfo.Arguments);
+            var logs = Configuration.GetValue<string>("IceAdapter:Logs");
             if (!string.IsNullOrWhiteSpace(logs))
                 process.StartInfo.Environment.Add("LOG_DIR", logs);
             return process;
@@ -213,10 +209,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             {
                 StartInfo = new()
                 {
-                    FileName = Configuration.GetValue<string>("Paths:JavaRuntime"),
-                    Arguments = $"-jar \"{Configuration.GetValue<string>("IceAdapter:Executable")}\" --help",
+                    FileName = Configuration.GetJavaRuntimeExecutable(),
+                    Arguments = $"-jar \"{Configuration.GetIceAdapterExecutable()}\" --help",
                     UseShellExecute = false,
-                    RedirectStandardOutput = true,
+                    //CreateNoWindow = true,
+                    //RedirectStandardOutput = true,
                 }
             };
             process.Start();
@@ -304,8 +301,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 
         private void IceClient_GpgNetMessageReceived(object sender, GpgNetMessage e)
         {
-            var t = ServerCommands.UniversalGameCommand(e.Command, e.Args);
-            LobbyClient.SendAsync(t);
+            LobbyClient.SendAsync(ServerCommands.UniversalGameCommand(e.Command, e.Args));
             if (e.Command == "GameFull")
             {
                 NotificationService.Notify("Game is full", "", ignoreOs: false);

@@ -2,6 +2,7 @@
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
@@ -97,21 +98,55 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly IConfiguration Configuration;
         private readonly LobbyClient Lobby;
         private readonly IrcClient IrcClient;
+        private readonly ServersManagement ServersManagement;
 
-        public PlayersViewModel(LobbyClient lobby, IServiceProvider serviceProvider, IrcClient ircClient, IConfiguration configuration)
+        public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, ServersManagement serversManagement)
         {
+            Players = new();
             OpenPrivateCommand = new LambdaCommand(OnOpenPrivateCommand);
-
-            lobby.PlayersReceived += Lobby_PlayersReceived;
-            lobby.PlayerReceived += Lobby_PlayerReceived;
-            lobby.WelcomeDataReceived += Lobby_WelcomeDataReceived;
-
-            ircClient.UserDisconnected += IrcClient_UserDisconnected;
-
-
-            Lobby = lobby;
+            serversManagement.ServerManagerAdded += (s, server) =>
+            {
+                var lobby = server.GetLobbyClient();
+                var ircClient = server.GetIrcClient();
+                lobby.Authorized += (s, authorized) =>
+                {
+                    if (authorized) return;
+                    Selfs.Remove(Selfs.FirstOrDefault(s => s.ServerManager.Equals(server)));
+                    lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
+                    lobby.PlayerReceived -= server.PlayerReceived;
+                    lobby.PlayersReceived -= server.PlayersReceived;
+                    ircClient.UserDisconnected -= server.IrcUserDisconnected;
+                };
+                server.WelcomeDataReceived = (s, data) =>
+                {
+                    data.me.SetServerManager(server);
+                    Selfs.Add(data.me);
+                };
+                server.PlayerReceived = (s, player) =>
+                {
+                    player.SetServerManager(server);
+                    Lobby_PlayerReceived(s, player);
+                };
+                server.PlayersReceived = (s, players) =>
+                {
+                    foreach (var player in players)
+                    {
+                        player.SetServerManager(server);
+                    }
+                    Lobby_PlayersReceived(s, players);
+                };
+                server.IrcUserDisconnected = (s, data) =>
+                {
+                    if (!long.TryParse(data.id, out var id)) return;
+                    var player = Players.FirstOrDefault(p => p.Id == id && p.ServerManager.Equals(server));
+                    Players.Remove(player);
+                };
+                ircClient.UserDisconnected += server.IrcUserDisconnected;
+                lobby.WelcomeDataReceived += server.WelcomeDataReceived;
+                lobby.PlayerReceived += server.PlayerReceived;
+                lobby.PlayersReceived += server.PlayersReceived;
+            };
             ServiceProvider = serviceProvider;
-            IrcClient = ircClient;
             Configuration = configuration;
 
             PlayersGroupSource = new PlayersGroup[]
@@ -129,23 +164,18 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     Name = "Group by ratings ranges",
                     PropertyGroupDescription = new PropertyGroupDescription(nameof(Player.Global), new RatingsRangeConverter(configuration))
+                },
+                new PlayersGroup()
+                {
+                    Name = "Group by server",
+                    PropertyGroupDescription = new (nameof(Player.ServerManager))
                 }
             };
             GroupBy = PlayersGroupSource[0];
+            ServersManagement = serversManagement;
         }
 
-        public Player Self { get; set; }
-
-        private void Lobby_WelcomeDataReceived(object sender, Welcome e)
-        {
-            Self = e.me;
-        }
-
-        private void IrcClient_UserDisconnected(object sender, (string user, string id) e)
-        {
-            if (!long.TryParse(e.id, out var id)) return;
-            Players.Remove(GetPlayer(id));
-        }
+        public List<Player> Selfs { get; set; } = new();
 
         #region SelectedPlayer
         private Player _SelectedPlayer;
@@ -342,24 +372,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public Player GetPlayer(long id) => Players.FirstOrDefault(p => p.Id == id);
-        public Player GetPlayer(string login) => Players.FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase));
-        public bool TryGetPlayer(long id, out Player player)
+        public Player GetPlayer(long id, ServerManager serverManager) => Players.FirstOrDefault(p => p.Id == id && p.ServerManager.Equals(serverManager));
+        public Player GetPlayer(string login, ServerManager manager) => Players
+            .FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase) && p.ServerManager.Equals(manager));
+        public bool TryGetPlayer(long id, ServerManager serverManager, out Player player)
         {
-            player = GetPlayer(id);
+            player = GetPlayer(id, serverManager);
             return player is not null;
         }
-        public bool TryGetPlayer(string login, out Player player)
+        public bool TryGetPlayer(string login, ServerManager manager, out Player player)
         {
-            player = GetPlayer(login);
+            player = GetPlayer(login, manager);
             return player is not null;
         }
 
         private void Lobby_PlayerReceived(object sender, Player e)
         {
-            if (e.Id == Self.Id)
+            for (int i = 0; i < Selfs.Count; i++)
             {
-                Self = e;
+                if (Selfs[i].Id == e.Id) Selfs[i] = e;
             }
             
             PrepareRatings(e);

@@ -16,6 +16,7 @@
 
                     <cmd:NagivateUriCommand x:Key="NagivateUriCommand"/>
                     <cmd:NavigateViewCommand x:Key="NavigateViewCommand"/>
+                    <cmd:NavigateRootViewCommand x:Key="NavigateRootViewCommand"/>
                     <cmd:CopyCommand x:Key="CopyCommand"/>
 
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>

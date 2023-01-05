@@ -5,6 +5,8 @@ using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Wpf.Ui.Common.Interfaces;
 using Wpf.Ui.Mvvm.Services;
 
@@ -53,6 +55,7 @@ namespace Ethereal.FAF.UI.Client.Views
                 SnackbarService.Show("Success", $"Pretty loose! It`s time to fill this place \"{location}\" with some huge maps and mods!", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             }
             UserSettings.Update(ConfigurationConstants.ForgedAllianceVaultLocation, location);
+            Thread.Sleep(500);
             await LoaderViewModel.TryPassChecksAndLetsSelectServer();
         }
     }

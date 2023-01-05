@@ -4,6 +4,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Utils
 {
     internal static class ForgedAllianceHelper
     {
+        public const string BinFolder = "bin";
+        public const string GamedataFolder = "gamedata";
+        public const string Executable = "ForgedAlliance.exe";
+
         public const string DefaultInstallationLocation = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Supreme Commander Forged Alliance";
         public const string DefaultVaultLocation = "C:\\Users\\%username%\\Documents\\My Games\\Gas Powered Games\\Supreme Commander Forged Alliance";
         /// <summary>

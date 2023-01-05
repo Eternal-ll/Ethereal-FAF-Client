@@ -9,11 +9,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Utils
     {
         public static bool HasJavaRuntime()
         {
-            return !Directory.Exists("External/jre");
+            return Directory.Exists("External/jre");
         }
         public static async Task PrepareJavaRuntime(IProgress<string>? progress = null)
         {
-            if (HasJavaRuntime())
+            if (!HasJavaRuntime())
             {
                 progress?.Report("Extracting portable Java runtime");
                 var process = new Process()
@@ -28,7 +28,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Utils
                 };
                 process.Start();
                 await process.WaitForExitAsync();
-                progress.Report("Poratble Java runtime extracted");
+                progress?.Report("Poratble Java runtime extracted");
             }
         }
     }

@@ -67,9 +67,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly INavigationService INavigationService;
         private readonly ILogger Logger;
 
-        public PartyViewModel(LobbyClient lobbyClient, PlayersViewModel playersVM, ILogger<PartyViewModel> logger, DialogService dialogService, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService)
+        public PartyViewModel(PlayersViewModel playersVM, ILogger<PartyViewModel> logger, DialogService dialogService, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService)
         {
-            LobbyClient = lobbyClient;
+            //LobbyClient = lobbyClient;
             PlayersVM = playersVM;
             DialogService = dialogService;
             ServiceProvider = serviceProvider;
@@ -77,10 +77,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             INavigationService = iNavigationService;
             Logger = logger;
 
-            lobbyClient.KickedFromParty += LobbyClient_KickedFromParty;
-            lobbyClient.PartyInvite += LobbyClient_PartyInvite;
-            lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
-            lobbyClient.Authorized += LobbyClient_Authorized;
+            //lobbyClient.KickedFromParty += LobbyClient_KickedFromParty;
+            //lobbyClient.PartyInvite += LobbyClient_PartyInvite;
+            //lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
+            //lobbyClient.Authorized += LobbyClient_Authorized;
 
             Factions = new()
             {
@@ -106,7 +106,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _OwnerId, value))
                 {
-                    IsOwner = value == PlayersVM.Self.Id;
+                    IsOwner = PlayersVM.Selfs.Any(s=>s.Id == value);
                 }
             }
         }
@@ -137,7 +137,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             foreach (var member in e.Members)
             {
-                if (PlayersVM.TryGetPlayer(member.PlayerId, out var player))
+                // ADD server manager
+                if (PlayersVM.TryGetPlayer(member.PlayerId, null, out var player))
                 {
                     var playerMember = Members.FirstOrDefault(m => m.Player.Id == member.PlayerId);
                     var partyPlayer = new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId);
@@ -152,7 +153,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     }
                     Members.Add(new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId));
                     Logger.LogTrace("[Party] Player [{id}] joined to party", member.PlayerId);
-                    if (member.PlayerId == PlayersVM.Self.Id) continue;
+                    // TODO Notify by server
+                    if (PlayersVM.Selfs.Any(s => s.Id == member.PlayerId)) continue;
                     NotificationService.Notify("Party", $"Player [{member.PlayerId}] joined to party with these factions [{string.Join(',', partyPlayer.SelectedFactions)}]");
                 }
             }
@@ -177,7 +179,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             Logger.LogTrace("[Party] Party invite from player [{id}]", e.SenderId);
             var dialog = DialogService.GetDialogControl();
-            if (PlayersVM.TryGetPlayer(e.SenderId, out var sender))
+            // TODO add server maanger
+            if (PlayersVM.TryGetPlayer(e.SenderId, null, out var sender))
             {
                 var accepted = await NotificationService.ShowDialog("Party", $"Player {sender.Login} invites you to party", "Accept", "Ignore");
                 if (accepted)

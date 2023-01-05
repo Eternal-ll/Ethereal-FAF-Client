@@ -1,9 +1,12 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Ice.Base;
+using FAF.Domain.LobbyServer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Windows.Input;
 using TcpClient = NetCoreServer.TcpClient;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -53,26 +56,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             var json = IceJsonRpcMethods.SetLobbyInitMode(initMode);
             SendAsync(json);
         }
-
-        readonly List<string> Queue = new();
         readonly List<byte> Cache = new();
-        bool IcePassed = false;
         public bool IsStop;
 
-        public void PassIceServersAsync(string iceServers)
-        {
-            if (IcePassed) return;
-            var json = IceJsonRpcMethods.UniversalMethod("setIceServers", $"[{iceServers}]");
-            SendAsync(json);
-            IcePassed = true;
-        }
+        private IceCoturnServer[] IceCoturnServers;
+        private string InitMode;
+
+        public void SetInitMode(string mode) => InitMode = mode;
+        public void SetIceCoturnServers(IceCoturnServer[] iceServers) => IceCoturnServers = iceServers;
 
         public IceClient(string host, int port) : base(host, port)
         {
         }
         protected override void OnReceived(byte[] buffer, long offset, long size)
         {
-            if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
+            if (Cache.Count is 0 && buffer[0] == '{' && buffer[^1] == '\n')
             {
                 ProcessData(Encoding.UTF8.GetString(buffer, 0, (int)size));
                 return;
@@ -91,20 +89,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public override long Send(string text) => base.Send(text[^1] != '\n' ? text + '\n' : text);
         public override bool SendAsync(string text)
         {
+            text += "\r\n";
             Console.WriteLine(text);
-            var sent = base.SendAsync(text[^1] == '\n' ? text : text + '\n'); ;
-            if (!sent)
-            {
-                Queue.Add(text);
-            }
+            var sent = base.SendAsync(text[^1] == '\n' ? text : text + '\n');
             return sent;
         }
         protected override void OnConnected()
         {
-            foreach (var item in Queue)
+            if (IceCoturnServers is not null && IceCoturnServers.Length is not 0)
             {
-                Send(item);
+                Send(IceJsonRpcMethods.UniversalMethod("setIceServers", $"[{JsonSerializer.Serialize(IceCoturnServers)}]"));
             }
+            Send(IceJsonRpcMethods.SetLobbyInitMode(InitMode));
         }
         protected override void OnDisconnected()
         {
@@ -123,8 +119,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 switch (rpc.Method)
                 {
                     case "onConnectionStateChanged":
-                        var connected = rpc.Params[0].ToString() == "Connected";
-                        ConnectionToGpgNetServerChanged?.Invoke(this, connected);
+                        ConnectionToGpgNetServerChanged?.Invoke(this, rpc.Params[0].ToString() is "Connected");
                         break;
                     case "onGpgNetMessageReceived":
                         var command = rpc.Params[0].ToString();

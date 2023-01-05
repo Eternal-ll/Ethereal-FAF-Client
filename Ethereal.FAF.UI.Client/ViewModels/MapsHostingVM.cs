@@ -1,7 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
@@ -9,9 +9,9 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -19,22 +19,36 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public abstract class MapsHostingVM: JsonSettingsViewModel
     {
-        protected readonly LobbyClient LobbyClient;
+        //protected readonly LobbyClient LobbyClient;
         protected readonly ContainerViewModel Container;
-        protected readonly PatchClient PatchClient;
-        protected readonly IceManager IceManager;
+        //protected readonly PatchClient PatchClient;
+        //protected readonly IceManager IceManager;
         protected readonly NotificationService NotificationService;
         protected readonly IConfiguration Configuration;
+        public ServersManagement ServersManagement { get; }
 
-        protected MapsHostingVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient, IceManager iceManager, IConfiguration configuration, NotificationService notificationService)
+        protected MapsHostingVM(ContainerViewModel container, IConfiguration configuration, NotificationService notificationService, ServersManagement serversManagement)
         {
-            LobbyClient = lobbyClient;
+            //LobbyClient = lobbyClient;
             Container = container;
-            PatchClient = patchClient;
-            IceManager = iceManager;
+            //PatchClient = patchClient;
+            //IceManager = iceManager;
             Configuration = configuration;
             NotificationService = notificationService;
+            ServersManagement = serversManagement;
+            SelectedServer = serversManagement.ServersManagers.FirstOrDefault();
         }
+
+        #region SelectedServer
+        private ServerManager _SelectedServer;
+        public ServerManager SelectedServer
+        {
+            get => _SelectedServer;
+            set => Set(ref _SelectedServer, value);
+        }
+        #endregion
+
+        
 
         #region Game
         private GameHostingModel _Game;
@@ -92,7 +106,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //Container.SplashText = "Confirming patch";
             //Container.Content = null;
             var progress = new Progress<string>();
-            await PatchClient.UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
+            await SelectedServer?.GetPatchClient().UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
             .ContinueWith(t =>
             {
                 //Container.SplashProgressVisibility = Visibility.Collapsed;
@@ -102,7 +116,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     NotificationService.Notify("Error", t.Exception.ToString());
                     return;
                 }
-                LobbyClient.HostGame(
+                SelectedServer.GetLobbyClient().HostGame(
                 title: Game.Title,
                 mod: Game.FeaturedMod,
                 mapName: LocalMap.FolderName,

@@ -3,6 +3,8 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Utils;
+using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
@@ -32,57 +34,60 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<GameLauncherState> StateChanged;
         public event EventHandler<Progress<string>> GameLaunching;
 
-        private readonly LobbyClient LobbyClient;
-        private readonly PatchClient PatchClient;
+        //private readonly LobbyClient LobbyClient;
+        //private readonly PatchClient PatchClient;
         private readonly MapsService MapsService;
         private readonly MapGenerator MapGenerator;
         private readonly NotificationService NotificationService;
-        private readonly IceManager IceManager;
         private readonly ILogger Logger;
         private readonly IConfiguration Configuration;
+        private readonly PatchWatcher PatchWatcher;
 
-        private readonly IHttpClientFactory HttpClientFactory;
         private Process Process;
 
         public GameLauncherState State { get; set; }
 
-        public GameLauncher(IConfiguration configuration, LobbyClient lobbyClient, ILogger<GameLauncher> logger, IceManager iceManager, PatchClient patchClient, IHttpClientFactory httpClientFactory, MapsService mapsService, MapGenerator mapGenerator, NotificationService notificationService)
+        public GameLauncher(
+            IConfiguration configuration,
+            ILogger<GameLauncher> logger,
+            //IceManager iceManager,
+            //PatchClient patchClient,
+            MapsService mapsService,
+            MapGenerator mapGenerator,
+            NotificationService notificationService,
+            PatchWatcher patchWatcher)
         {
             Configuration = configuration;
-            LobbyClient = lobbyClient;
-            IceManager = iceManager;
+            //LobbyClient = lobbyClient;
+            //IceManager = iceManager;
             Logger = logger;
 
-            lobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
-            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
-            PatchClient = patchClient;
-            HttpClientFactory = httpClientFactory; MapsService = mapsService;
+            //lobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
+            //lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
+            //PatchClient = patchClient;
+            MapsService = mapsService;
             MapGenerator = mapGenerator;
             NotificationService = notificationService;
+            PatchWatcher = patchWatcher;
         }
         private long LastGameUid;
         private GameLaunchData LastGameLaunchData;
 
-        private void LobbyClient_MatchCancelled(object sender, MatchCancelled e)
+        public void LobbyClient_MatchCancelled(object sender, MatchCancelled e)
         {
             if (Process is null) return;
             Process.Kill();
-            IceManager.NotifyAboutBadConnections();
+            //IceManager.NotifyAboutBadConnections();
         }
-        private bool IsRestart;
-        public void RestartGame()
+        private bool Joining;
+        public void LobbyClient_GameLaunchDataReceived(GameLaunchData e, Player self, IceManager iceManager, Server server,
+            LobbyClient lobbyClient)
         {
-            throw new NotImplementedException();
-            IsRestart = true;
-            Process?.Kill();
-            LobbyClient_GameLaunchDataReceived(this, LastGameLaunchData);
-        }
-
-        private void LobbyClient_GameLaunchDataReceived(object sender, GameLaunchData e) => 
-            Task.Run(() => RunGame(e))
+            Task.Run(() => RunGame(e, self, iceManager, server))
                 .ContinueWith(t =>
                 {
-                    if (!IsRestart) LobbyClient.GameEnded();
+                    Joining = false;
+                    lobbyClient.GameEnded();
                     if (t.IsFaulted)
                     {
                         Logger.LogError(t.Exception.ToString());
@@ -92,32 +97,31 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                         Process?.Close();
                         Process = null;
                     }
-                    if (IceManager.IceClient.IsConnected)
+                    if (iceManager.IceClient?.IsConnected is true)
                     {
-                        IceManager.IceClient.IsStop = true;
-                        IceManager.IceClient.Send(IceJsonRpcMethods.Quit());
-                        IceManager.IceClient.Disconnect();
+                        iceManager.IceClient.IsStop = true;
+                        iceManager.IceClient.Send(IceJsonRpcMethods.Quit());
+                        iceManager.IceClient.Disconnect();
                     }
-                    IceManager.IceClient.Dispose();
-                    IceManager.IceClient = null;
-                    if (IceManager.IceServer is not null) 
+                    iceManager.IceClient?.Dispose();
+                    iceManager.IceClient = null;
+                    if (iceManager.IceServer is not null)
                     {
-                        IceManager.IceServer.WaitForExit();
-                        IceManager.IceServer.Dispose();
-                        IceManager.IceServer.Close();
-                        IceManager.IceServer = null;
+                        //iceManager.IceServer.WaitForExit();
+                        iceManager.IceServer.Dispose();
+                        iceManager.IceServer.Close();
+                        iceManager.IceServer = null;
                     }
-
-                    //if (IsRestart) RestartGame();
-                    IsRestart = false;
+                    State = GameLauncherState.Idle;
                 });
-        private void FillPlayerArgs(StringBuilder args, RatingType ratingType,
+        }
+        private void FillPlayerArgs(StringBuilder args, RatingType ratingType, Player self,
             // player info
             string country = "", string clan = null,
             // player rating
             int mean = 1500, int deviation = 500, int games = 0)
         {
-            var me = LobbyClient.Self;
+            var me = self;
             if (me is not null)
             {
                 //if (me.Ratings.TryGetValue(ratingType, out var rating))
@@ -155,8 +159,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             args.Append($"/deviation {deviation} ");
             args.Append($"/numgames {games} ");
         }
-        int test = 0;
-        private async Task RunGame(GameLaunchData e)
+        private async Task RunGame(GameLaunchData e, Player self, IceManager iceManager, Server server)
         {
             LastGameLaunchData = e;
             LastGameUid = e.uid;
@@ -184,9 +187,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             var progress = (IProgress<string>)progressSource;
 
             //OnStateChanged(GameLauncherState.Launching);
-            var me = LobbyClient.Self;
-            IceManager.Initialize(me.Id.ToString(), me.Login, e.uid);
-            IceManager.IceClient.SetLobbyInitMode(e.game_type is GameType.MatchMaker ? "auto" : "normal");
+            iceManager.Initialize(self.Id, self.Login, e.uid, e.game_type is GameType.MatchMaker ? "auto" : "normal");
             //ice.PassIceServers(IceService.IceServers);
             //var me = PlayersService.Self;
             // game args
@@ -197,9 +198,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             arguments.Append("/nobugreport ");
             arguments.Append($"/init init_{e.mod.ToString().ToLower()}.lua ");
             // port from Ice-Adapter status message ["gpgnet"]["local_port"]
-            arguments.Append($"/gpgnet 127.0.0.1:{IceManager.GpgNetPort} ");
+            arguments.Append($"/gpgnet 127.0.0.1:{iceManager.GpgNetPort} ");
 
-            FillPlayerArgs(arguments, e.rating_type);
+            FillPlayerArgs(arguments, e.rating_type, self);
             if (e.init_mode == GameInitMode.Auto)
             {
                 // matchmaker
@@ -216,12 +217,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //    var replayPort = ReplayServerService.StartReplayServer();
             //    arguments.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\" ");
             //}
-            var logs = Configuration.GetValue<string>("Paths:GameSession").Replace("{uid}", e.uid.ToString());
-            arguments.Append($"/log \"{logs}\" ");
+            //var logs = Configuration.GetValue<string>("Paths:GameSession").Replace("{uid}", e.uid.ToString());
+            //arguments.Append($"/log \"{logs}\" ");
 
             if (!string.IsNullOrWhiteSpace(e.mapname))
             {
-                var maps = Configuration.GetMapsFolder();
+                var maps = Configuration.GetMapsLocation();
                 if (MapGenerator.IsGeneratedMap(e.mapname))
                 {
                     progress?.Report("Generating map");
@@ -232,7 +233,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 {
                     if (MapsService.IsExist(e.mapname))
                     {
-                        await MapsService.DownloadAsync(e.mapname, $"maps/{e.mapname}.zip", progress, default);
+                        await MapsService.DownloadAsync(e.mapname, server.Content.ToString(), $"maps/{e.mapname}.zip", progress, default);
                     }
                 }
             }
@@ -241,7 +242,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             {
                 StartInfo = new()
                 {
-                    FileName = Path.Combine(Configuration.GetValue<string>("Paths:Patch"), "bin", "ForgedAlliance.exe"),
+                    FileName = Path.Combine(Configuration.GetForgedAlliancePatchLocation(), ForgedAllianceHelper.BinFolder, ForgedAllianceHelper.Executable),
                     Arguments = arguments.ToString(),
                     UseShellExecute = true
                 }
@@ -257,27 +258,38 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
-            var maps = Configuration.GetMapsFolder();
-            if (!MapsService.IsExist(game.Mapname))
+            if (Joining) return;
+            Joining = true;
+            try
             {
-                if (MapGenerator.IsGeneratedMap(game.Mapname))
+                var maps = Configuration.GetMapsLocation();
+                if (!MapsService.IsExist(game.Mapname))
                 {
-                    progress?.Report("Generating map");
-                    await MapGenerator.GenerateMap(game.Mapname, maps, cancellationToken, progress);
-                    game.SmallMapPreview = Path.Combine(maps, game.Mapname, game.Mapname + "_preview.png");
+                    if (MapGenerator.IsGeneratedMap(game.Mapname))
+                    {
+                        progress?.Report("Generating map");
+                        await MapGenerator.GenerateMap(game.Mapname, maps, cancellationToken, progress);
+                        game.SmallMapPreview = Path.Combine(maps, game.Mapname, game.Mapname + "_preview.png");
+                    }
+                    else
+                    {
+                        await MapsService.DownloadAsync(game.Mapname,
+                            game.ServerManager.GetServer().Content.ToString(),
+                            game.MapFilePath, progress, cancellationToken);
+                    }
                 }
-                else
-                {
-                    await MapsService.DownloadAsync(game.Mapname, game.MapFilePath, progress, cancellationToken);
-                }
+                await game.ServerManager.GetPatchClient().UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
+                progress.Report("Joining game");
+                game.ServerManager.GetLobbyClient().JoinGame(game.Uid);
             }
-            await PatchClient.UpdatePatch(game.FeaturedMod, 0, false, cancellationToken, progress);
-            progress.Report("Joining game");
-            LobbyClient.JoinGame(game.Uid);
+            catch
+            {
+                Joining = false;
+            }
         }
-        public async Task WatchGame(long gameId, long playerId, string mapname, FeaturedMod mod)
+        public async Task WatchGame(long gameId, long playerId, string mapname, FeaturedMod mod, PatchClient patchClient, Server server)
         {
-            var maps = Configuration.GetMapsFolder();
+            var maps = Configuration.GetMapsLocation();
             if (!MapsService.IsExist(mapname))
             {
                 if (MapGenerator.IsGeneratedMap(mapname))
@@ -286,7 +298,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 }
                 else
                 {
-                    await MapsService.DownloadAsync(mapname);
+                    await MapsService.DownloadAsync(mapname, server.Content.ToString());
                 }
             }
             StringBuilder sb = new();
@@ -299,12 +311,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 var log = string.Format(Configuration.GetValue<string>("Game:Replays:Logs"), gameId, playerId);
                 sb.Append($"/log \"{log}\"");
             }
-            await PatchClient.UpdatePatch(mod, 0, false);
+            await patchClient.UpdatePatch(mod, 0, false);
             Process process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = Path.Combine(Configuration.GetValue<string>("Paths:Patch"), "bin", "ForgedAlliance.exe"),
+                    FileName = Path.Combine(Configuration.GetForgedAlliancePatchLocation(), ForgedAllianceHelper.BinFolder, ForgedAllianceHelper.Executable),
                     Arguments = sb.ToString(),
                     UseShellExecute = true
                 }

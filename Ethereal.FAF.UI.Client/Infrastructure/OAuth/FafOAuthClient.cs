@@ -15,32 +15,43 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
     {
         public event EventHandler<string> OAuthLinkGenerated;
 
-        private readonly string ClientId;
-        private readonly string Scope;
-        private readonly int[] RedirectPorts;
-        private readonly string BaseAddress;
+        private string ClientId;
+        private string Scope;
+        private int[] RedirectPorts;
+        private Uri BaseAddress;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger Logger;
 
-        public FafOAuthClient(string clientId, string scope, int[] redirectPorts, string baseAddress, IHttpClientFactory httpClientFactory, ILogger<FafOAuthClient> logger)
+        public FafOAuthClient(IHttpClientFactory httpClientFactory, ILogger<FafOAuthClient> logger)
+        {
+            HttpClientFactory = httpClientFactory;
+            Logger = logger;
+        }
+
+        public FafOAuthClient(string clientId, string scope, int[] redirectPorts, Uri baseAddress, IHttpClientFactory httpClientFactory, ILogger<FafOAuthClient> logger)
+        {
+            HttpClientFactory = httpClientFactory;
+            Logger = logger;
+            logger.LogTrace("Initialized with client id [{clientId}], scope [{scope}], redirect ports [{redirect}]", clientId, scope, @redirectPorts);
+        }
+        public void Initialize(string clientId, string scope, int[] redirectPorts, Uri baseAddress)
         {
             ClientId = clientId;
             Scope = scope;
             RedirectPorts = redirectPorts;
             BaseAddress = baseAddress;
-            HttpClientFactory = httpClientFactory;
-            Logger = logger;
-            logger.LogTrace("Initialized with client id [{clientId}], scope [{scope}], redirect ports [{redirect}]", clientId, scope, @redirectPorts);
         }
+
         public async Task<OAuthResult> RefreshToken(string refreshToken, CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             progress?.Report("Refreshing access token");
             var result = new OAuthResult()
             {
+                IsError = true,
                 ErrorDescription = "Something went wrong"
             };
             var token = await FetchOAuthToken(refreshToken, true, 0, cancellationToken);
-            if (token is not null)
+            if (token is not null && token.AccessToken is not null && token.RefreshToken is not null)
             {
                 progress?.Report("Access token refreshed");
                 result.IsError = false;
@@ -88,7 +99,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
             Logger.LogTrace("Generated state: [{state}]", generatedState);
             Logger.LogTrace("Generating url");
             var sb = new StringBuilder()
-                .Append($"{BaseAddress}auth?")
+                .Append($"{BaseAddress.ToString()}oauth2/auth?")
                 .Append($"response_type=code&client_id={ClientId}&scope={Scope}&state={generatedState}&redirect_uri=http://localhost:{freePort}");
             OAuthLinkGenerated?.Invoke(this, sb.ToString());
             Logger.LogTrace("Generated url: [{url}]", sb.ToString());
@@ -141,7 +152,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
             Logger.LogTrace("Fetching token using {schema} [{code}]", refreshing ? $"refresh token" : $"code", code);
             using var client = HttpClientFactory.CreateClient();
             Logger.LogTrace("Base address [{}]", BaseAddress);
-            client.BaseAddress = new Uri(BaseAddress);
+            client.BaseAddress = BaseAddress;
             string parameters =
                 (refreshing ?
                     "grant_type=refresh_token&refresh_token=" :
@@ -151,7 +162,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
             Logger.LogTrace("Generated content form [{}]", parameters);
             ByteArrayContent byteArrayContent = new(Encoding.UTF8.GetBytes(parameters));
             byteArrayContent.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-            var response = await client.PostAsync("token", byteArrayContent, cancellationToken);
+            var response = await client.PostAsync("oauth2/token", byteArrayContent, cancellationToken);
             return await JsonSerializer.DeserializeAsync<TokenBearer>(await response.Content.ReadAsStreamAsync(cancellationToken), cancellationToken: cancellationToken);
         }
     }
