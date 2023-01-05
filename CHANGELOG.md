@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.0.2](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.2-beta.1) (2023-01-03)
+
+**Changelog**
+
+- [x] Support of multiple connected servers
+- [x] Fixed Ice related problems
+- [x] Fixed patch related problems
+- [x] Added startup pages
+- [x] Added vault page
+- [x] Added maps vault page
+- [x] Added [3.3.0 Ice Adapter](https://github.com/FAForever/java-ice-adapter/releases/tag/v3.3.0)
+
+**FAQ**
+
+Instructions:
+1. Select server
+2. Press "Connect" (authorize etc)
+3. Press "Continue"
+
 ## [2.0.11](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.11) (2022-10-31)
 
 **Changelog**
