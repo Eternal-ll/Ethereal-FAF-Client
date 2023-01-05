@@ -16,7 +16,7 @@ namespace Ethereal.FAF.API.Client
             .AddTransient<AuthHeaderHandler>()
             .AddTransient<VerifyHeaderHandler>()
             .AddRefitClient<IFafApiClient>()
-            .ConfigureHttpClient(c=>c.BaseAddress = api)
+            .ConfigureHttpClient(c => c.BaseAddress = api)
             .Services
             .AddRefitClient<IFafContentClient>()
             .ConfigureHttpClient(c => c.BaseAddress = content)

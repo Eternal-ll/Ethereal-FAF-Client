@@ -1,9 +1,13 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Views;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System.Data.OracleClient;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using Wpf.Ui.Mvvm.Contracts;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
@@ -11,12 +15,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class LoaderViewModel : Base.ViewModel
     {
         private readonly INavigationWindow NavigationWindow;
+        private readonly MapGenerator MapGenerator;
         private readonly IConfiguration Configuration;
+        private readonly ILogger<LoaderViewModel> Logger;
 
-        public LoaderViewModel(INavigationWindow navigationWindow, IConfiguration configuration)
+        public LoaderViewModel(INavigationWindow navigationWindow, IConfiguration configuration, MapGenerator mapGenerator, ILogger<LoaderViewModel> logger)
         {
             NavigationWindow = navigationWindow;
             Configuration = configuration;
+            MapGenerator = mapGenerator;
+            Logger = logger;
         }
 
         #region SplashText
@@ -48,7 +56,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 UserSettings.Update(ConfigurationConstants.ForgedAllianceLocation, game);
             }
             var patch = Configuration.GetForgedAlliancePatchLocation();
-            if (!ForgedAllianceHelper.DirectoryHasAnyGameFile(patch))
+            if (string.IsNullOrWhiteSpace(patch))
             {
                 if (!ForgedAllianceHelper.DirectoryHasAnyGameFile(FaPaths.DefaultConfigLocation))
                 {
@@ -60,14 +68,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var vault = Configuration.GetForgedAllianceVaultLocation();
             if (string.IsNullOrWhiteSpace(vault))
             {
+                Logger.LogWarning("Vault location is empty");
                 NavigationWindow.Navigate(typeof(SelectVaultLocationView));
                 return false;
             }
+            await MapGenerator.InitializeAsync();
             return true;
         }
         public async Task TryPassChecksAndLetsSelectServer()
         {
-            if (!await RunChecks()) return;
+            if (!await RunChecks())
+                return;
             NavigationWindow.Navigate(typeof(SelectServerView));
         }
     }

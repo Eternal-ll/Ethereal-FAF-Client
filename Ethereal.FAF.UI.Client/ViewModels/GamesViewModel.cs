@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views.Hosting;
@@ -29,8 +30,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public sealed class GamesViewModel : JsonSettingsViewModel
     {
         private readonly GameLauncher GameLauncher;
-        private readonly LobbyClient LobbyClient;
-        private readonly IceManager IceManager;
+        private readonly ServersManagement ServersManagement;
 
         private readonly NotificationService NotificationService;
         private readonly INavigationService NavigationService;
@@ -45,17 +45,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public MatchmakingViewModel MatchmakingViewModel { get; }
 
         public GamesViewModel(
-            LobbyClient lobby,
             GameLauncher gameLauncher,
             NotificationService notificationService,
             ContainerViewModel containerViewModel,
-            IceManager iceManager,
             IServiceProvider serviceProvider,
             MatchmakingViewModel matchmakingViewModel,
             ILogger<GamesViewModel> logger,
             DialogService dialogService,
             IConfiguration configuration,
-            INavigationService navigationService)
+            INavigationService navigationService,
+            ServersManagement serversManagement)
         {
             ChangeLiveButton = new LambdaCommand(OnChangeButton, CanChangeButton);
             HostGameCommand = new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
@@ -79,10 +78,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             _EnableMapsBlacklist = configuration.GetValue<bool>("Lobby:Games:EnableMapsBlacklist");
             var banned = configuration.GetSection("Lobby:Games:MapsBlacklist").Get<string[]>();
             if (banned is not null)
-            MapsBlacklist.AddRange(banned);
+                MapsBlacklist.AddRange(banned);
 
 
-             Games = new();
+            Games = new();
             //Games.SupportRangeNotifications = true;
             GamesSource = new()
             {
@@ -90,17 +89,44 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
             GamesSource.Filter += GamesSource_Filter;
 
-
-            lobby.Authorized += Lobby_Authorized;
-            lobby.GamesReceived += Lobby_GamesReceived;
-            lobby.GameReceived += Lobby_GameReceived;
+            serversManagement.ServerManagerAdded += (s, e) =>
+            {
+                var lobby = e.GetLobbyClient();
+                e.LobbyAuthorized = (s, authorized) =>
+                {
+                    if (authorized) return;
+                    lobby.Authorized -= e.LobbyAuthorized;
+                    lobby.GamesReceived -= e.GamesReceived;
+                    lobby.GameReceived -= e.GameReceived;
+                    foreach (var game in Games)
+                    {
+                        if (game.ServerManager.Equals(s))
+                        {
+                            Games.Remove(game);
+                        }
+                    }
+                };
+                e.GameReceived = (s, game) =>
+                {
+                    game.SetServerManager(e);
+                    Lobby_GameReceived(s, game);
+                };
+                e.GamesReceived = (s, games) =>
+                {
+                    foreach (var game in games)
+                    {
+                        game.SetServerManager(e);
+                    }
+                    Lobby_GamesReceived(s, games);
+                };
+                lobby.Authorized += e.LobbyAuthorized;
+                lobby.GamesReceived += e.GamesReceived;
+                lobby.GameReceived += e.GameReceived;
+            };
 
             SelectedGameMode = "Custom";
 
-            LobbyClient = lobby;
             GameLauncher = gameLauncher;
-            IceManager = iceManager;
-
             Configuration = configuration;
             Logger = logger;
 
@@ -111,6 +137,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ServiceProvider = serviceProvider;
             DialogService = dialogService;
             NavigationService = navigationService;
+            ServersManagement = serversManagement;
         }
 
         public Visibility SearchButtonVisibility =>
@@ -327,16 +354,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public Visibility HostGameButtonVisibility => 
-            SelectedGameType is GameType.Custom or GameType.Coop &&
+        public Visibility HostGameButtonVisibility =>
+            (SelectedGameType is GameType.Custom or GameType.Coop &&
             MatchmakingViewModel.State is MatchmakingState.Idle &&
             MatchmakingViewModel.PartyViewModel.IsOwner &&
-            !MatchmakingViewModel.PartyViewModel.HasMembers
+            !MatchmakingViewModel.PartyViewModel.HasMembers) || true
             ? Visibility.Visible : Visibility.Collapsed;
 
         private readonly ConcurrentObservableCollection<Game> Games;
         public CollectionViewSource GamesSource { get; private set; }
         public ICollectionView GamesView => GamesSource.View;
+
+        #region SelectedGame
+        private Game _SelectedGame;
+        public Game SelectedGame
+        {
+            get => _SelectedGame;
+            set
+            {
+                if (Set(ref _SelectedGame, value))
+                {
+
+                }
+            }
+        }
+        #endregion
 
         public Game GetGame(long id) => Games?.FirstOrDefault(g => g.Uid == id);
         public bool TryGetGame(long id, out Game game, out int index)
@@ -414,14 +456,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             return false;
         }
 
-        private void Lobby_Authorized(object sender, bool e)
-        {
-            if (e)
-            {
-                return;
-            }
-            Games.Clear();
-        }
         private void Lobby_GamesReceived(object sender, Game[] e)
         {
             var badGames = new List<Game>();
@@ -550,7 +584,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     //Logger.LogTrace("Game [{title}] [{mod}] [{rating}] launched, updating list on index",
                     //    e.Title, e.FeaturedMod, e.RatingType);
                     e.GameTeams = cached.GameTeams;
-                    e.MapGeneratorState = cached.MapGeneratorState;
+                    if (cached.MapGeneratorState is MapGeneratorState.Generated)
+                    {
+                        e.SmallMapPreview = cached.SmallMapPreview;
+                        e.MapGeneratorState = cached.MapGeneratorState;
+                    }
                     e.HostPlayer = cached.HostPlayer;
                     Games[index] = e;
                 }
@@ -567,11 +605,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             foreach (var player in game.Players)
             {
-                if (!PlayersViewModel.TryGetPlayer(player.Id, out var cache))
+                if (!PlayersViewModel.TryGetPlayer(player.Id, game.ServerManager, out var cache))
                 {
                     continue;
                 }
-                if(game.HostPlayer is null)
+                if (game.HostPlayer is null)
                 {
 
                 }
@@ -601,7 +639,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 Player cached;
                 if (!game.TryGetPlayer(left, out var player))
                 {
-                    if (!PlayersViewModel.TryGetPlayer(left, out cached))
+                    if (!PlayersViewModel.TryGetPlayer(left, game.ServerManager, out cached))
                     {
                         // welp... GG
                     }
@@ -658,7 +696,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            await GameLauncher.WatchGame(game.Uid, game.Players.First().Id, game.Mapname, game.FeaturedMod)
+            await GameLauncher.WatchGame(game.Uid, game.Players.First().Id, game.Mapname, game.FeaturedMod,
+                game.ServerManager.GetPatchClient(), game.ServerManager.GetServer())
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
@@ -672,6 +711,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #region JoinGameCommand
         public ICommand JoinGameCommand { get; }
         private CancellationTokenSource CancellationTokenSource;
+        private Game LastGame;
         private async void OnJoinGameCommand(object arg)
         {
             if (arg is not Game game) return;
@@ -682,6 +722,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             if (game.LaunchedAt.HasValue)
             {
+                WatchGameCommand.Execute(arg);
                 return;
             }
             if (GameLauncher.State is not GameLauncherState.Idle)
@@ -720,25 +761,48 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             CancellationTokenSource = new CancellationTokenSource();
+            var dialogg = DialogService.GetDialogControl();
+            dialogg.Title = "Joining game";
+            dialogg.Content = null;
+            dialogg.ButtonLeftName = "Cancel";
+            dialogg.ButtonRightName = "Cancel";
+            dialogg.Closed += Dialog_Closed;
+            dialogg.Show();
             // todo
-            IProgress<string> progress = new Progress<string>();
+            IProgress<string> progress = new Progress<string>(d => dialogg.Content = d);
+            try
+            {
+                await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token);
+                LastGame = null;
+            }
+            catch (TaskCanceledException canceled)
+            {
+                LastGame = null;
+                NotificationService.Notify("Exception", canceled.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
+                GameLauncher.State = GameLauncherState.Idle;
+            }
+            catch (Exception ex)
+            {
+                LastGame = null;
+                NotificationService.Notify("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
+                GameLauncher.State = GameLauncherState.Idle;
+            }
+            finally
+            {
+                dialogg.Closed -= Dialog_Closed;
+                dialogg.Hide();
+            }
+        }
 
-            await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token)
-                .ContinueWith(t =>
-                {
-                    if (t.IsCanceled || t.IsFaulted)
-                    {
-                        NotificationService.Notify("Exception", t.Exception.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
-                        return;
-                    }
-                    progress.Report("Waiting ending of match");
-                });
+        private void Dialog_Closed([System.Diagnostics.CodeAnalysis.NotNull] Wpf.Ui.Controls.Dialog sender, RoutedEventArgs e)
+        {
+            CancellationTokenSource.Cancel();
         }
         #endregion
 
         #region Filters
 
-        #region OnlyGeneratedMaps
+        #region OnlyGeneratedMapsd
         private bool _OnlyGeneratedMaps;
         public bool OnlyGeneratedMaps
         {

@@ -2,6 +2,7 @@
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
@@ -12,14 +13,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class LocalMapsVM : MapsHostingVM
     {
-        public LocalMapsVM(LobbyClient lobbyClient, ContainerViewModel container, PatchClient patchClient,
-            IceManager iceManager, NotificationService notificationService, IConfiguration configuration)
-            : base(lobbyClient, container, patchClient, iceManager, configuration, notificationService)
+        public LocalMapsVM(ContainerViewModel container, ServersManagement serversManagement, NotificationService notificationService, IConfiguration configuration)
+            : base(container, configuration, notificationService, serversManagement)
         {
             Task.Run(async () =>
             {
                 var maps = new List<LocalMap>();
-                string[] scenarios = Directory.GetFiles(Configuration.GetMapsFolder(), "*_scenario.lua", SearchOption.AllDirectories);
+                string[] scenarios = Directory.GetFiles(Configuration.GetMapsLocation(), "*_scenario.lua", SearchOption.AllDirectories);
                 var i = 0;
                 SetSource(maps);
                 foreach (var file in scenarios)

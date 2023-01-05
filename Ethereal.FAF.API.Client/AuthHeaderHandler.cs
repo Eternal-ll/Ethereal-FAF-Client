@@ -2,7 +2,7 @@
 
 namespace Ethereal.FAF.API.Client
 {
-    class AuthHeaderHandler : DelegatingHandler
+    public class AuthHeaderHandler : DelegatingHandler
     {
         private readonly ITokenProvider TokenProvider;
 
@@ -14,7 +14,7 @@ namespace Ethereal.FAF.API.Client
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var token = TokenProvider.GetToken();
+            var token = await TokenProvider.GetTokenAsync(request.RequestUri.Host);
 
             //potentially refresh token here if it has expired etc.
 
@@ -23,7 +23,7 @@ namespace Ethereal.FAF.API.Client
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }
-    internal class VerifyHeaderHandler : DelegatingHandler
+    public class VerifyHeaderHandler : DelegatingHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {

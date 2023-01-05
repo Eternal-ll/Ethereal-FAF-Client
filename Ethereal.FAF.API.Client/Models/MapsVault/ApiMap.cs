@@ -42,7 +42,13 @@ namespace beta.Models.API.MapsVault
     }
     public class ApiMapModel : ApiMap
     {
-        public string Author { get; set; }
+        public string Author { get; set; } = "Unknown";
+
+        public string SmallPreviewUrl => LatestVersion is null ?
+            $"https://via.placeholder.com/468x60?text={DisplayedName}.png" :
+            LatestVersion.ThumbnailUrlLarge.Replace("faforever.ru", "content.faforever.ru");
+
+
         public ApiUniversalStatistics StatisticsSummary { get; set; }
         public ApiUniversalSummary ReviewsSummary { get; set; }
         public MapVersionModel LatestVersion { get; set; }
@@ -78,8 +84,7 @@ namespace beta.Models.API.MapsVault
                     var data = relation.Value.Data;
                     if (data is null) continue;
                     if (data.Count == 0) continue;
-                    if (dic.ContainsKey(data[0].Type)) continue;
-                    dic.Add(data[0].Type, data[0].Id);
+                    dic.TryAdd(data[0].Type, data[0].Id);
                 }
             }
             return dic;

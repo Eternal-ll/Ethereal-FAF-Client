@@ -1,4 +1,5 @@
 ﻿using FAF.Domain.LobbyServer;
+using System.Globalization;
 
 namespace beta.Models.API.Universal
 {
@@ -31,12 +32,19 @@ namespace beta.Models.API.Universal
     }
     public class ApiUniversalSummary : Base.ApiUniversalData
     {
-        public double LowerBound => double.Parse(Attributes["lowerBound"].Replace('.',','));
-        public double Negative => double.Parse(Attributes["negative"].Replace('.', ','));
-        public double Positive => double.Parse(Attributes["positive"].Replace('.', ','));
-        public int ReviewsCount => int.Parse(Attributes["reviews"]);
-        public double Score => double.Parse(Attributes["score"].Replace('.', ','));
+        public double LowerBound => double.Parse(Attributes["lowerBound"], CultureInfo.InvariantCulture);
+        public double Negative => double.Parse(Attributes["negative"], CultureInfo.InvariantCulture);
+        public double Positive => double.Parse(Attributes["positive"], CultureInfo.InvariantCulture);
+        public int ReviewsCount => int.Parse(Attributes["reviews"], CultureInfo.InvariantCulture);
+        public double Score => double.Parse(Attributes["score"], CultureInfo.InvariantCulture);
         public double Average => Score / ReviewsCount;
+        public double AverageRounded => Math.Round(Average);
+        private static double WilsonAlgorithm(double positive, double negative)
+        {
+            return ((positive + 1.9208) / (positive + negative) -
+                    1.96 * Math.Sqrt((positive * negative) / (positive + negative) + 0.9604) /
+                    (positive + negative)) / (1 + 3.8416 / (positive + negative));
+        }
     }
     public class ApiUniversalStatistics : Base.ApiUniversalData
     {

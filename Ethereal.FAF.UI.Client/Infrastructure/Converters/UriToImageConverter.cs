@@ -26,7 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
             var image = (BitmapImage)sender;
             image.DownloadCompleted -= Image_DownloadCompleted;
             image.Freeze();
-        }
+        }   
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {

@@ -4,6 +4,7 @@ using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Win32;
 using System.IO;
+using System.Threading;
 using Wpf.Ui.Common.Interfaces;
 using Wpf.Ui.Mvvm.Services;
 
@@ -57,6 +58,7 @@ namespace Ethereal.FAF.UI.Client.Views
             }
             SnackbarService.Show("Success", $"There we go! Directory \"{directory}\" will be used as source for original game files.", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             UserSettings.Update(ConfigurationConstants.ForgedAllianceLocation, directory);
+            Thread.Sleep(500);
             await LoaderViewModel.TryPassChecksAndLetsSelectServer();
         }
     }

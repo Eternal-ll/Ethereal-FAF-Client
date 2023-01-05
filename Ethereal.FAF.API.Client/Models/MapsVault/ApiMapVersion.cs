@@ -41,7 +41,7 @@ namespace beta.Models.API.MapsVault
         //    FolderName.ToUpper());
 
         public bool IsLatestVersion { get; set; }
-        
+
         /// <summary>
         /// Local state of map <see cref="LocalMapState"/>
         /// </summary>
@@ -70,6 +70,7 @@ namespace beta.Models.API.MapsVault
         ///// 
         ///// </summary>
         //public ImageSource MapLargePreview => _MapLargePreview ??= ImageTools.InitializeLazyBitmapImage(ThumbnailUrlLarge);
+        public string IsRankedLabel => IsRanked ? "Ranked" : "Not ranked";
         /// <summary>
         /// <seealso cref="Tools.CalculateMapSizeToPixels(int)"/>
         /// </summary>

@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="44"/>
         </Grid.RowDefinitions>
@@ -121,8 +122,33 @@
         <ui:AutoSuggestBox FontSize="12" PlaceholderText="#channel or user" Icon="ChatAdd16"
                                    MaxDropDownHeight="300" TextChanged="AutoSuggestBox_TextChanged"
                                    LostFocus="AutoSuggestBox_LostFocus" KeyDown="AutoSuggestBox_KeyDown"/>
+        <ComboBox Grid.Row="2" Margin="0 4"
+                  ItemsSource="{Binding ViewModel.ServersManagement.ServersManagers}"
+                  SelectedValue="{Binding ViewModel.SelectedServerManager}"
+                  Padding="8 6">
+            <ComboBox.ItemTemplate>
+                <DataTemplate> 
+                    <StackPanel Orientation="Horizontal">
+                        <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
+                        <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" FontSize="12" Margin="4 0 0 0"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Label Grid.Row="2" Content="Select server" Padding="10" FontSize="12" IsHitTestVisible="False">
+            <Label.Style>
+                <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ViewModel.SelectedServerManager}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Label.Style>
+        </Label>
 
-        <ListBox Grid.Row="1" Grid.RowSpan="2" Margin="0 4"
+        <ListBox Grid.Row="3" Margin="0 4"
                  ItemsSource="{Binding ViewModel.ChannelsView}"
                  SelectedItem="{Binding ViewModel.SelectedChannel}">
             <ListBox.ItemContainerStyle>
@@ -133,20 +159,27 @@
             </ListBox.ItemContainerStyle>
             <ListBox.GroupStyle>
                 <GroupStyle>
-
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="4 6">
+                                <Image Height="20" Width="20" Source="{Binding Name.Server.Logo}"/>
+                                <TextBlock Text="{Binding Name.Server.ShortName}" VerticalAlignment="Center" FontSize="12" Margin="4 0 0 0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
                 </GroupStyle>
             </ListBox.GroupStyle>
         </ListBox>
-        <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0 0 0 4">
+        <StackPanel Grid.Row="4" VerticalAlignment="Bottom" Margin="0 0 0 4">
             <!--<Button Content="Change name" HorizontalAlignment="Stretch" Margin="0 0 0 4" Command="{Binding ViewModel.RenameCommand}"/>-->
             <Button Content="Restart" HorizontalAlignment="Stretch" Command="{Binding ViewModel.ReconnectCommand}"/>
         </StackPanel>
-        <ScrollViewer Grid.Row="2" Grid.Column="1" Margin="4">
+        <ScrollViewer Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" Margin="4">
             <ItemsControl ItemsSource="{Binding ViewModel.HistoryView}"
                           ItemTemplate="{StaticResource MessageUser}">
             </ItemsControl>
         </ScrollViewer>
-        <ui:VirtualizingItemsControl Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="3"
+        <ui:VirtualizingItemsControl Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="4"
                       ItemsSource="{Binding ViewModel.UsersView}"
                                      ItemTemplate="{StaticResource ChatUser}">
             <ui:VirtualizingItemsControl.ItemsPanel>
@@ -171,7 +204,7 @@
                 </DataTemplate>
             </ui:VirtualizingItemsControl.ItemTemplate>-->
         </ui:VirtualizingItemsControl>
-        <ui:TextBox Grid.Column="1" Grid.Row="3" Margin="4" KeyDown="TextBox_KeyDown" PlaceholderText="Message" Icon="Chat12"
+        <ui:TextBox Grid.Column="1" Grid.Row="4" Margin="4" KeyDown="TextBox_KeyDown" PlaceholderText="Message" Icon="Chat12"
                     TextChanged="InputTextChanged" VerticalAlignment="Bottom"
                     PreviewKeyDown="TextBox_PreviewKeyDown"/>
 

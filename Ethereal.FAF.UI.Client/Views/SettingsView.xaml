@@ -27,6 +27,7 @@
                 <Setter Property="Margin" Value="14 16 0 16"/>
             </Style>
             <Style x:Key="SymbolTextBlock" TargetType="TextBlock">
+                <Setter Property="Width" Value="26"/>
                 <Setter Property="Margin" Value="0 0 10 0"/>
                 <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
                 <Setter Property="FontSize" Value="20"/>
@@ -295,7 +296,7 @@
                 </ui:CardExpander>
             </StackPanel>
         </ui:CardExpander>
-        <ui:CardExpander Margin="0 14 0 0">
+        <ui:CardExpander Margin="0 6">
             <ui:CardExpander.Header>
                 <StackPanel Style="{StaticResource CardExpanderHeader}">
                     <TextBlock Text="&#xf2dc;" Style="{StaticResource SymbolTextBlock}"/>
@@ -416,6 +417,21 @@
                              Style="{StaticResource DescriptionHeaderRun}"/>
                 </TextBlock>
                 <ListBox SelectionMode="Multiple">
+                    <ListBox.Template>
+                        <ControlTemplate>
+                            <Border
+                        x:Name="Border"
+                        Margin="0,0,0,4"
+                        Padding="4,6"
+                        BorderThickness="1"
+                        CornerRadius="4">
+                                <Border.Background>
+                                    <SolidColorBrush Opacity="1" Color="{Binding Path=Background, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay, Converter={StaticResource BrushToColorConverter}}" />
+                                </Border.Background>
+                                <ItemsPresenter />
+                            </Border>
+                        </ControlTemplate>
+                    </ListBox.Template>
                     <ListBoxItem Content="Europe"/>
                     <ListBoxItem Content="Germany"/>
                     <ListBoxItem Content="US East"/>
@@ -423,7 +439,7 @@
                 </ListBox>
             </StackPanel>
         </ui:CardExpander>
-        <ui:CardExpander Margin="0 14 0 0">
+        <ui:CardExpander>
             <ui:CardExpander.Header>
                 <StackPanel Style="{StaticResource CardExpanderHeader}">
                     <TextBlock Text="&#xe3dd;" Style="{StaticResource SymbolTextBlock}"/>
@@ -489,7 +505,7 @@
                 </Grid>
             </StackPanel>
         </ui:CardExpander>
-        <ui:CardExpander Margin="0 14 0 0">
+        <ui:CardExpander Margin="0 6">
             <ui:CardExpander.Header>
                 <StackPanel Style="{StaticResource CardExpanderHeader}">
                     <TextBlock Text="&#xe33d;" Style="{StaticResource SymbolTextBlock}" Margin="0 0 10 0"/>

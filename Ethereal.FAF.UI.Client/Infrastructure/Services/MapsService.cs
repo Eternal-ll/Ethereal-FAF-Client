@@ -25,7 +25,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public bool IsExist(string map)
         {
-            var folder = Path.Combine(Configuration.GetMapsFolder(), map);
+            var folder = Path.Combine(Configuration.GetMapsLocation(), map);
             var data = map.Split('.');
             var mapname = data[0];
             if (!Directory.Exists(folder)) return false;
@@ -40,21 +40,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             return true;
         } 
-        public async Task<bool> DownloadAsync(string map, string filePath = null, IProgress<string> progress = null, CancellationToken cancellationToken = default)
+        public async Task<bool> DownloadAsync(string map, string contentUrl, string filePath = null, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
             using var client = HttpClientFactory.CreateClient();
             var zip = map + ".zip";
             using var fs = new FileStream(zip, FileMode.Create);
             // https://content.faforever.com/maps/mayhem_of_64_acus_v2.v0002.zip 
             // TODO create faf content httpclient?
-            var response = await client.GetAsync(Configuration.GetContentUrl() + filePath ?? $"maps/{map}.zip", cancellationToken);
+            var response = await client.GetAsync(contentUrl + (filePath ?? $"/maps/{map}.zip"), cancellationToken);
             progress?.Report($"Downloading map [{zip}]");
             await response.Content.CopyToAsync(fs, cancellationToken);
             response.Content.Dispose();
             await fs.DisposeAsync();
             fs.Close();
             progress?.Report($"Extracting map [{zip}]");
-            ZipFile.ExtractToDirectory(zip, Configuration.GetMapsFolder(), true);
+            ZipFile.ExtractToDirectory(zip, Configuration.GetMapsLocation(), true);
             File.Delete(zip);
             return true;
         }

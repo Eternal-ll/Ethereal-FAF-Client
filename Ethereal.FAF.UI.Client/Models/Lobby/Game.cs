@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.API.Client.Models.Game;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.Domain.LobbyServer;
@@ -100,10 +101,24 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
 
         public string HumanTitle => Id switch
         {
-            > 0 => Id - 1 == 0 ? "No team" : "Team " + (Id - 1),
+            > 0 => Id - 1 == 0 ? "FFA" : "Team " + (Id - 1),
             -1 => "Observers",
             _ => "Unknown",
         };
+
+        public int TeamRating
+        {
+            get
+            {
+                if (GamePlayers is null) return 0;
+                var sum = 0;
+                foreach (var player in GamePlayers)
+                {
+                    sum += player.Rating;
+                }
+                return sum;
+            }
+        }
     }
 
     public sealed class Game : GameInfoMessage
@@ -294,5 +309,8 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
 
         public bool UnSupported => FeaturedMod is not (FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop or FeaturedMod.coop);
         public bool IsDevChannel => FeaturedMod is FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop;
+
+        public ServerManager ServerManager { get; private set; }
+        public void SetServerManager(ServerManager serverManager) => ServerManager = serverManager;
     }
 }

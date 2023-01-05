@@ -1,24 +1,29 @@
 ﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 {
     public sealed class TokenProvider : ITokenProvider
     {
-        public TokenBearer TokenBearer { get; 
-            private set; }
+        public TokenBearer TokenBearer { get; private set; }
         public JwtSecurityToken JwtSecurityToken { get; private set; }
-        public TokenProvider(IConfiguration configuration)
+
+        private readonly ServersManagement ServersManagement;
+        public TokenProvider(IConfiguration configuration, ServersManagement serversManagement)
         {
-            var token = configuration.GetSection("TokenBearer").Get<TokenBearer>();
-            if (token is not null)
-            {
-                TokenBearer = token;
-                ProcessJwtToken(token);
-            }
+            //var token = configuration.GetSection("TokenBearer").Get<TokenBearer>();
+            //if (token is not null)
+            //{
+            //    TokenBearer = token;
+            //    ProcessJwtToken(token);
+            //}
+            ServersManagement = serversManagement;
         }
 
         private void ProcessJwtToken(TokenBearer token)
@@ -52,5 +57,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         }
 
         public string GetToken() => TokenBearer.AccessToken;
+
+        public async Task<string> GetTokenAsync(string host)
+        {
+            var server = ServersManagement.ServersManagers.First(s => s.GetServer().Api.Host == host);
+            var token = await server.GetOauthTokenAsync();
+            return token.AccessToken;
+        }
     }
 }

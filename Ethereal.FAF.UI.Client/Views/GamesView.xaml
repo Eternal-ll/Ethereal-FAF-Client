@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:lobby="clr-namespace:Ethereal.FAF.UI.Client.Models.Lobby"
     xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
+    xmlns:services="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Services"
     xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views" xmlns:databinding="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors"
     mc:Ignorable="d" 
               d:DesignHeight="450" d:DesignWidth="800"
@@ -74,7 +75,7 @@
             <DataTemplate DataType="{x:Type lobby:GamePlayer}">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
-                    <Image Height="16" Margin="4 0 0 0">
+                    <Image Height="16" Width="32" Margin="4 0 0 0">
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Setter Property="ToolTip" Value="{Binding Player.Avatar.Tooltip}"/>
@@ -83,14 +84,14 @@
                                     <DataTrigger Binding="{Binding Player.Avatar}" Value="{x:Null}">
                                         <Setter Property="ToolTip" Value="{x:Null}"/>
                                         <Setter Property="Source" Value="{x:Null}"/>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <!--<Setter Property="Visibility" Value="Collapsed"/>-->
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBlock Text="{Binding Login}" Margin="4 0 0 0"/>
-                    <Ui:SymbolIcon Margin="4 0 0 0">
+                    <TextBlock Text="{Binding Login}" Width="140" Margin="4 -2 0 0"/>
+                    <Ui:SymbolIcon Margin="4 0" Width="14">
                         <Ui:SymbolIcon.Style>
                             <Style TargetType="Ui:SymbolIcon" BasedOn="{StaticResource {x:Type Ui:SymbolIcon}}">
                                 <Setter Property="Filled" Value="True"/>
@@ -102,12 +103,14 @@
                                     </DataTrigger>-->
                                     <DataTrigger Binding="{Binding IsConnected}" Value="True">
                                         <!--<Setter Property="Symbol" Value="PlugDisconnected20"/>-->
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Hidden"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Ui:SymbolIcon.Style>
                     </Ui:SymbolIcon>
+                    <TextBlock Text="{Binding Rating, StringFormat='R: {0}'}" Width="48" Margin="0 -2 0 0"/>
+                    <TextBlock Text="{Binding Games, StringFormat='G: {0}'}" Width="48" Margin="4 -2 0 0"/>
                 </StackPanel>
             </DataTemplate>
             <Style x:Key="AvatarImage" TargetType="Image">
@@ -184,11 +187,19 @@
             </DataTemplate>
 
 
-            <Style x:Key="DefaultMenuItem" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"></Style>
+            <Style x:Key="DefaultMenuItem" TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                
+            </Style>
 
+            <DataTemplate DataType="{x:Type services:ServerManager}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
+                    <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" Margin="4 0 0 0" FontSize="14"/>
+                </StackPanel>
+            </DataTemplate>
 
             <Style x:Key="GamePlayerMenuItem" TargetType="MenuItem">
-                <Setter Property="Header" Value="{Binding Login}"/>
+                <Setter Property="Header" Value="{Binding}"/>
                 <Setter Property="ItemContainerStyle" Value="{StaticResource DefaultMenuItem}"/>
                 <Setter Property="ItemsSource">
                     <Setter.Value>
@@ -258,7 +269,7 @@
 
             <Style x:Key="MapGeneratorButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="Command" Value="{StaticResource GenerateGameMapCommand}"/>
-                <Setter Property="Content" Value="Generate map"/>
+                <Setter Property="Content" Value="Generate"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsMapgen}" Value="False">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -288,6 +299,15 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
+
+
+            <ContextMenu x:Key="GameContextMenu" d:DataContext="{d:DesignInstance {x:Type lobby:Game}}">
+                <MenuItem Style="{StaticResource MapGeneratorMenuItem}" CommandParameter="{Binding}"/>
+                <MenuItem Header="Show map preview" Command="{StaticResource OpenImageCommand}" CommandParameter="{Binding LargeMapPreview}"/>
+                <MenuItem ItemsSource="{Binding Players}" Header="Players"
+                          ItemContainerStyle="{StaticResource GamePlayerMenuItem}">
+                </MenuItem>
+            </ContextMenu>
 
             <databinding:GamePlayerTemplateSelector x:Key="GamePlayerTemplateSelector"
                         WithAvatar="{StaticResource MatchmakingGamePlayer}"
@@ -605,13 +625,16 @@
             </Style>
 
             <DataTemplate x:Key="AlternativeCard" DataType="{x:Type lobby:Game}">
-                <Border Style="{StaticResource CardBorder}" Width="NaN" Height="60" Margin="0">
+                <Border Style="{StaticResource CardBorder}" Width="NaN" Height="60" Margin="0"
+                        ContextMenu="{StaticResource GameContextMenu}">
                     <Border.InputBindings>
                         <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource JoinGameCommand}" CommandParameter="{Binding}"/>
                     </Border.InputBindings>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
                                ToolTip="{Binding Mapname}" Width="60" Height="60"/>
+                        <Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
+                                Style="{StaticResource MapGeneratorButton}" TextElement.FontSize="10" CommandParameter="{Binding}"/>
                         <!--<Border Style="{StaticResource CardBorder}" Width="NaN" MaxWidth="180" Padding="4"  VerticalAlignment="Top" Margin="10 0 0 0">
                             <TextBlock Text="{Binding Title, Mode=OneTime}" TextWrapping="Wrap"/>
                         </Border>-->
@@ -621,7 +644,8 @@
                             <Run Text="{Binding NumPlayers, Mode=OneWay}"/>
                             <Run Text="{Binding MaxPlayers, Mode=OneWay, StringFormat='/ {0}'}"/>
                         </TextBlock>
-                        <ContentControl Content="{Binding HostPlayer}" VerticalAlignment="Center" Margin="10 0"/>
+                        <ContentControl Content="{Binding HostPlayer, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>
+                        <!--<ContentControl Content="{Binding ServerManager}"/>-->
                         <!--<TextBlock Text="{Binding Host, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>-->
                     </StackPanel>
                 </Border>
@@ -633,7 +657,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto" MinWidth="300"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <WrapPanel Margin="0 0 30 0" Grid.ColumnSpan="3">
@@ -981,7 +1005,8 @@
             </Border.Background>
         </Border>
         <ListView Grid.Row="1" Grid.ColumnSpan="2" Margin="4 8 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False">
+            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False"
+                  SelectedValue="{Binding ViewModel.SelectedGame}">
             <ListView.ItemTemplateSelector>
                 <databinding:GameTemplateSelector
                     IdleGame="{StaticResource AlternativeCard}"
@@ -1037,9 +1062,10 @@
         <ScrollViewer x:Name="SidebarScrollViewer" Grid.Column="2" Grid.Row="1">
             <ScrollViewer.Style>
                 <Style TargetType="ScrollViewer" BasedOn="{StaticResource {x:Type ScrollViewer}}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=SidebarToggleButton, Path=IsChecked}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                        <DataTrigger Binding="{Binding ElementName=SidebarToggleButton, Path=IsChecked}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                         <Trigger Property="CanContentScroll" Value="False">
                             <Setter Property="Padding" Value="0 0 -16 0"/>
@@ -1047,10 +1073,121 @@
                     </Style.Triggers>
                 </Style>
             </ScrollViewer.Style>
-            <Border Style="{StaticResource CardBorder}">
-                <StackPanel>
-                    
-                </StackPanel>
+            <Border Style="{StaticResource CardBorder}" Width="360">
+                <ContentControl Content="{Binding ViewModel.SelectedGame}">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate DataType="{x:Type lobby:Game}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Style="{StaticResource CardBorder}" Margin="0 8 0 0" Padding="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="120"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.ColumnSpan="3" Text="{Binding Mapname}" TextWrapping="Wrap"
+                                                   Margin="0 0 0 10" FontSize="14">
+                                            <TextBlock.Style>
+                                                <Style TargetType="FrameworkElement">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding MapScenario}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0" Padding="0" Width="120" VerticalAlignment="Top">
+                                            <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                                               ToolTip="{Binding Mapname}" Width="120" Height="120"/>
+                                        </Border>
+                                        <Button Grid.Row="2" Height="120" Width="120" Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}">
+                                            
+                                        </Button>
+                                        <ContentControl Grid.Row="2" Grid.Column="2" Content="{Binding MapScenario}">
+                                            <ContentControl.ContentTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel TextBlock.FontSize="14">
+                                                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" FontWeight="DemiBold"/>
+                                                        <TextBlock Text="{Binding Type, StringFormat='Type: {0}'}"/>
+                                                        <TextBlock Text="{Binding IsAdaptiveMap, StringFormat='Adaptive: {0}'}"/>
+                                                        <TextBlock Text="{Binding MapVersion, StringFormat='Version: {0}'}" TextWrapping="Wrap"/>
+                                                        <TextBlock TextWrapping="Wrap">
+                                                            <Run Text="{Binding Height, Mode=OneWay, StringFormat='Heigth: {0} px'}"/>
+                                                            <Run Text="{Binding HeigthInKm, Mode=OneWay, StringFormat='- {0} km'}"/>
+                                                        </TextBlock>
+                                                        <TextBlock TextWrapping="Wrap">
+                                                            <Run Text="{Binding Width, Mode=OneWay, StringFormat='Width:  {0} px'}"/>
+                                                            <Run Text="{Binding WidthInKm, Mode=OneWay, StringFormat='- {0} km'}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ContentControl.ContentTemplate>
+                                        </ContentControl>
+                                    </Grid>
+                                </Border>
+                                <StackPanel Grid.Row="1">
+                                    <Border Style="{StaticResource CardBorder}" Margin="0 8 0 0" Padding="10" TextElement.FontSize="14">
+                                        <StackPanel>
+                                            <Label Content="Rating"/>
+                                            <UniformGrid Rows="1">
+                                                <TextBlock Text="{Binding RatingType, StringFormat='Type: {0}'}"/>
+                                                <TextBlock Text="{Binding RatingMin, StringFormat='Min: {0}'}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding RatingMing}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding RatingMax, StringFormat='Max: {0}'}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding RatingMing}" Value="{x:Null}">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                                <ItemsControl Grid.Row="3" ItemsSource="{Binding GameTeams}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardBorder}" TextElement.FontSize="14" Padding="10" Margin="0 10 0 0">
+                                                <StackPanel>
+                                                    <Label Content="{Binding HumanTitle}"/>
+                                                    <ItemsControl ItemsSource="{Binding GamePlayers}"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
             </Border>
         </ScrollViewer>
     </Grid>

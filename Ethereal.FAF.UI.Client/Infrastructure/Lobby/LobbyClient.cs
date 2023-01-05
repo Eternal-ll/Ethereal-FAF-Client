@@ -60,7 +60,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private IProgress<string> SplashProgress;
 
         public LobbyClient(string host, int port, ILogger logger, UidGenerator uidGenerator, string userAgent, string userAgentVersion)
-            : base(address: Dns.GetHostEntry(host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork),
+            : base(address: IPAddress.TryParse(host, out var address) ? address : Dns.GetHostEntry(host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork),
                   port: port)
         {
             Host = host;

@@ -11,9 +11,23 @@ namespace Ethereal.FAF.UI.Client.Views
         public MapsView(MapsViewModel model)
         {
             ViewModel = model;
+
+            Resources.Add("DownloadMapCommand", model.DownloadMapCommand);
+
+            Initialized += MapsView_Initialized;
             InitializeComponent();
         }
 
+        private void MapsView_Initialized(object sender, System.EventArgs e)
+        {
+            ViewModel.RunRequest();
+        }
+
         public MapsViewModel ViewModel { get; }
+
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            ViewModel.RunRequest();
+        }
     }
 }

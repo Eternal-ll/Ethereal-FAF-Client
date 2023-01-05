@@ -1,10 +1,16 @@
-﻿using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Ethereal.FAF.UI.Client.Models.IRC
 {
+    public interface IServerIrcChannel
+    {
+        public string Name { get; }
+        public ServerManager ServerManager { get; }
+    }
     public abstract class IrcMessage
     {
         public IrcMessage(string text)
@@ -67,15 +73,17 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         public string Name { get => _Name; set => Set(ref _Name, value); }
         public abstract string Group { get; }
         public bool IsSelected { get; set; }
-        protected IrcChannel(string name)
+        public ServerManager ServerManager {get; }
+        protected IrcChannel(string name, ServerManager serverManager)
         {
             Name = name;
+            ServerManager = serverManager;
         }
         public List<IrcMessage> History { get; } = new();
     }
     public sealed class GroupChannel : IrcChannel
     {
-        public GroupChannel(string name, string group = "Channel") : base(name)
+        public GroupChannel(string name, ServerManager serverManager, string group = "Channel") : base(name, serverManager)
         {
             Group = group;
         }
@@ -142,8 +150,8 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
     }
     public sealed class DialogueChannel : IrcChannel
     {
-        public DialogueChannel(string name) : base(name) => Receiver = new(name);
-        public DialogueChannel(string name, Player player) : this(name) => Receiver.SetPlayer(player);
+        public DialogueChannel(string name, ServerManager serverManager) : base(name, serverManager) => Receiver = new(name);
+        public DialogueChannel(string name, Player player, ServerManager serverManager) : this(name, serverManager) => Receiver.SetPlayer(player);
         public IrcUser Receiver { get; set; }
 
         public override string Group { get; } = "Direct";

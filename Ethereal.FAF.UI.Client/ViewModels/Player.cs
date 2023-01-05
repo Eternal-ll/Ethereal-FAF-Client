@@ -1,4 +1,5 @@
-﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using System.Text.Json.Serialization;
@@ -91,6 +92,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
         #endregion
+
+        public ServerManager ServerManager { get; private set; }
+        public void SetServerManager(ServerManager serverManager)
+        {
+            if (ServerManager is not null)
+            {
+
+            }
+            ServerManager = serverManager;
+        }
     }
 }
     

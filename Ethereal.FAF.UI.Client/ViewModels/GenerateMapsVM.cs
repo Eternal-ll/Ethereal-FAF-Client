@@ -1,10 +1,8 @@
 ﻿using Ethereal.FA.Vault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
-using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -25,10 +23,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private FileSystemWatcher FileSystemWatcher;
 
-        public GenerateMapsVM(LobbyClient lobbyClient, MapGenerator mapGenerator, ContainerViewModel container,
-            PatchClient patchClient, IceManager iceManager, NotificationService notificationService,
-            IConfiguration configuration)
-            : base(lobbyClient, container, patchClient, iceManager, configuration, notificationService)
+        public GenerateMapsVM(MapGenerator mapGenerator, ContainerViewModel container,
+            NotificationService notificationService,
+            IConfiguration configuration, ServersManagement serversManagement)
+            : base(container, configuration, notificationService, serversManagement)
         {
             CleanCommand = new LambdaCommand(OnCleanCommand, CanCleanCommand);
             CancelGenerationCommand = new LambdaCommand(OnCancelGenerationCommand, CanCancelGenerationCommand);
@@ -69,7 +67,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             MapGenerator = mapGenerator;
 
-            var mapsFolder = configuration.GetMapsFolder();
+            var mapsFolder = configuration.GetMapsLocation();
 
             FileSystemWatcher = new()
             {
@@ -422,7 +420,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var mex = MexDensity;
             var progress = new Progress<string>(d => ProgressText = d);
 
-            var folder = Configuration.GetMapsFolder();
+            var folder = Configuration.GetMapsLocation();
 
             var maps = await MapGenerator.GenerateMapAsync(
                 version: SelectedMapGeneratorVersion,

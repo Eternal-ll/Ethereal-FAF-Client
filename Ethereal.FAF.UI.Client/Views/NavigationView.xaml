@@ -4,10 +4,27 @@
            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+           xmlns:services="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Services"
            xmlns:v="clr-namespace:Ethereal.FAF.UI.Client.Views"
            mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <ui:UiPage.Resources>
+        <DataTemplate DataType="{x:Type services:ServerManager}">
+            <StackPanel Orientation="Horizontal">
+                <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
+                <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" Margin="4 0 0 0" FontSize="14"/>
+            </StackPanel>
+        </DataTemplate>
+        <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
+            <Setter Property="Padding" Value="10 6"/>
+            <Setter Property="MinWidth" Value="100"/>
+        </Style>
+    </ui:UiPage.Resources>
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
         <!--  This is the main navigation of the application.  -->
         <ui:NavigationStore
                 x:Name="RootNavigation"
@@ -19,6 +36,15 @@
                 TransitionDuration="200"
                 TransitionType="FadeInWithSlide">
             <ui:NavigationStore.Items>
+                <!--<ui:NavigationItem IsActive="True">
+                    <ui:NavigationItem.Resources>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="Opacity" Value="1"/>
+                        </Style>
+                    </ui:NavigationItem.Resources>
+                    <TextBlock Text="Test"/>
+                </ui:NavigationItem>-->
+                <!--<ui:NavigationHeader Text="Main"/>-->
                 <ui:NavigationItem
                         Cache="False"
                         Content="Play"
@@ -41,11 +67,6 @@
                         PageType="{x:Type v:LinksView}"
                         Icon="Link24"
                         ToolTip="Useful links"/>
-                <ui:NavigationItem
-                        Content="Vault"
-                        Icon="Vault24"
-                        PageType="{x:Type v:VaultView}"
-                        ToolTip="Maps and mods vault"/>
                 <!--<ui:NavigationItem
                         Content="Maps"
                         Icon="Map24"
@@ -54,21 +75,31 @@
                         Content="Mods"
                         Icon="Vault24"
                         ToolTip="Mods vault"/>-->
+                <!--<ui:NavigationHeader Text="API"/>-->
                 <ui:NavigationItem
+                        Content="Vault"
+                        Icon="Vault24"
+                        PageType="{x:Type v:VaultView}"
+                        ToolTip="Maps and mods vault"/>
+                <ui:NavigationItem IsEnabled="False" Opacity=".7"
                         Content="Replays"
                         Icon="Video24"
                         ToolTip="Replays"/>
-                <ui:NavigationItem
+                <ui:NavigationItem IsEnabled="False" Opacity=".7"
                         Content="API"
                         Icon="DataPie20"
                         ToolTip="API"/>
+                <ui:NavigationItem
+                    PageType="{x:Type v:SelectServerView}"
+                    Content="Servers"
+                    Icon="Server20"/>
+            </ui:NavigationStore.Items>
+            <ui:NavigationStore.Footer>
                 <ui:NavigationItem
                         Content="Changelog"
                         PageType="{x:Type v:ChangelogView}"
                         Icon="History16"
                         ToolTip="API"/>
-            </ui:NavigationStore.Items>
-            <ui:NavigationStore.Footer>
                 <!--  A navigation element that does not point to the page can be used as a button.  -->
                 <!--<ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />-->
                 <ui:NavigationItem

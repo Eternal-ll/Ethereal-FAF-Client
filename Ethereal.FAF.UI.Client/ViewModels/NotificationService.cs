@@ -36,13 +36,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly LobbyClient LobbyClient;
         private readonly INotificationManager OSNotificationManager;
 
-        public NotificationService(SnackbarService snackbarService, LobbyClient lobbyClient, DialogService dialogService)
+        public NotificationService(SnackbarService snackbarService, DialogService dialogService)
         {
             SnackbarService = snackbarService;
-            LobbyClient = lobbyClient;
+            //LobbyClient = lobbyClient;
             OSNotificationManager = CreateManager();
 
-            lobbyClient.NotificationReceived += LobbyClient_NotificationReceived;
+            //lobbyClient.NotificationReceived += LobbyClient_NotificationReceived;
             DialogService = dialogService;
         }
 

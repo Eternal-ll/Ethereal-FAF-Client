@@ -1,7 +1,10 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,6 +13,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
     internal class GenerateGameMapCommand : Base.Command
     {
         private NotificationService Notification => App.Hosting.Services.GetService<NotificationService>();
+        private IConfiguration Configuration => App.Hosting.Services.GetService<IConfiguration>();
         public override bool CanExecute(object parameter) => 
             parameter is Game game && 
             game.IsMapgen &&
@@ -29,6 +33,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
                 }
                 game.SmallMapPreview = preview;
                 game.MapGeneratorState = MapGeneratorState.Generated;
+                var scenario = Configuration.GetMapFile(game.Mapname, "_scenario.lua");
+                if (File.Exists(scenario))
+                {
+                    game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
+                }
                 Notification.Notify("Map generator", $"Map {game.Mapname} is generated", new System.Uri(preview));
             })
             .ContinueWith(async t =>

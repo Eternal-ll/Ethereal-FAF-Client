@@ -1,14 +1,11 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
-using Ethereal.FAF.UI.Client.Infrastructure.Utils;
-using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Servers;
 using Ethereal.FAF.UI.Client.Views;
@@ -18,13 +15,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
 using System.IO;
-using System.Net.Http;
 using System.Windows;
 using Wpf.Ui.Mvvm.Contracts;
 using Wpf.Ui.Mvvm.Services;
-using static Ethereal.FAF.API.Client.BuilderExtensions;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -55,7 +49,7 @@ namespace Ethereal.FAF.UI.Client
         {
             var configuration = context.Configuration;
             // Background
-            services.AddHostedService<TokenReloadService>();
+            //services.AddHostedService<TokenReloadService>();
             //services.AddHostedService<ApiGameValidator>();
             // App Host
             services.AddHostedService<ApplicationHostService>();
@@ -79,66 +73,22 @@ namespace Ethereal.FAF.UI.Client
             services.AddSingleton<SnackbarService>();
             services.AddSingleton<DialogService>();
 
-            services.AddScoped(p => new FafOAuthClient(
-                clientId: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
-                scope: configuration.GetValue<string>("FAForever:OAuth:Scope"),
-                redirectPorts: configuration.GetSection("FAForever:OAuth:RedirectPorts").Get<int[]>(),
-                baseAddress: configuration.GetValue<string>("FAForever:OAuth:BaseAddress"),
-                httpClientFactory: p.GetRequiredService<IHttpClientFactory>(),
-                logger: p.GetRequiredService<ILogger<FafOAuthClient>>()));
+            services.AddTransient<ServerOauthTokenProvider>();
+            services.AddScoped<ServersManagement>();
+            services.AddTransient<ServerManager>();
 
             services.AddSingleton(s => new UidGenerator(
                 logger: s.GetService<ILogger<UidGenerator>>(),
                 uid: configuration.GetValue<string>("Paths:UidGenerator")));
-            services.AddScoped(p => new LobbyClient(
-                host: configuration.GetValue<string>("FAForever:Lobby:Host"),
-                port: configuration.GetValue<int>("FAForever:Lobby:Port"),
-                logger: p.GetRequiredService<ILogger<LobbyClient>>(),
-                uidGenerator: p.GetService<UidGenerator>(),
-                userAgent: configuration.GetValue<string>("FAForever:OAuth:ClientId"),
-                userAgentVersion: configuration.GetValue("Client:Version", "2.1.0")));
-
-            services.AddScoped<PatchClient>();
-            
-            services.AddScoped<IceManager>();
-
-            services.AddScoped(s =>
-            {
-                    return new IrcClient(
-                host: configuration.GetValue<string>("FAForever:IRC:Host"),
-                port: configuration.GetValue<int>("FAForever:IRC:Port"),
-                logger: s.GetService<ILogger<IrcClient>>());
-            });
-
+            services.AddTransient<PatchClient>();
+            services.AddTransient<IceManager>();
+            services.AddTransient<FafOAuthClient>();
+            services.AddScoped<PatchWatcher>();
             services.AddScoped<GameLauncher>();
-
-            var vault = Environment.ExpandEnvironmentVariables(configuration.GetValue<string>("Paths:Vault"));
-            var customPath = FaPaths.GetCustomVaultPath(configuration.GetValue<string>("Paths:Patch"));
-            //if (customPath is not null)
-            //{
-            //    if (vault != customPath)
-            //    {
-            //        UserSettings.Update("Paths:Vault", customPath);
-            //    }
-            //}
-            //else if (string.IsNullOrWhiteSpace(customPath)) FaPaths.SetCustomVaultPath(vault, configuration.GetValue<string>("Paths:Patch"));
-
-            services.AddTransient(s => new MapGenerator(
-                javaRuntime: configuration.GetValue<string>("Paths:JavaRuntime"),
-                logging: configuration.GetValue<string>("MapGenerator:Logs"),
-                previewPath: configuration.GetValue<string>("MapGenerator:PreviewPath"),
-                mapGeneratorsFolder: configuration.GetValue<string>("MapGenerator:Versions"),
-                generatedMapsFolder: Path.Combine(vault, "maps"),
-                httpClientFactory: s.GetService<IHttpClientFactory>(),
-                logger: s.GetService<ILogger<MapGenerator>>()));
-
+            services.AddScoped<MapGenerator>();
             services.AddScoped<MapsService>();
 
             services.AddSingleton<ITokenProvider, TokenProvider>();
-
-            services.AddFafApi(
-                api: configuration.GetValue<Uri>("FAForever:API"),
-                content: configuration.GetValue<Uri>("FAForever:Content"));
 
             services.AddHttpClient();
 
@@ -176,6 +126,9 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<MapsViewModel>();
             services.AddScoped<MapsView>();
 
+            services.AddScoped<ModsViewModel>();
+            services.AddScoped<ModsView>();
+
             services.AddScoped<VaultViewModel>();
             services.AddScoped<VaultView>();
 
@@ -191,8 +144,6 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<SelectGameLocationView>();
             services.AddScoped<SelectFaPatchLocationView>();
             services.AddScoped<SelectVaultLocationView>();
-
-
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)

@@ -32,15 +32,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly PatchClient PatchClient;
         public PartyViewModel PartyViewModel { get; }
 
-        public MatchmakingViewModel(LobbyClient lobbyClient, PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
+        public MatchmakingViewModel(PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
         {
             JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
 
-            lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
-            lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
-            lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
-            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
-            lobbyClient.MatchFound += LobbyClient_MatchFound;
+            //lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
+            //lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
+            //lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
+            //lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
+            //lobbyClient.MatchFound += LobbyClient_MatchFound;
 
             Task.Run(async () =>
             {
@@ -64,7 +64,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
             });
 
-            LobbyClient = lobbyClient;
+            //LobbyClient = lobbyClient;
             PartyViewModel = partyViewModel;
             NotificationService = notificationService;
             PatchClient = patchClient;

@@ -5,6 +5,7 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels.Servers"
+           xmlns:view="clr-namespace:Ethereal.FAF.UI.Client.Views"
            d:DataContext="{d:DesignInstance {x:Type vm:SelectServerVM}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -12,9 +13,9 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="10"/>
-            <ColumnDefinition MaxWidth="330"/>
+            <ColumnDefinition MinWidth="330" Width="Auto"/>
             <ColumnDefinition Width="10"/>
-            <ColumnDefinition/>
+            <ColumnDefinition MinWidth="100"/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
@@ -22,6 +23,13 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
+            <ListView ItemsSource="{Binding OAuthLinks}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ui:Hyperlink Content="{Binding server.ShortName, StringFormat='{}{0} OAuth link'}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
             <ListView ItemsSource="{Binding Servers}" SelectedValue="{Binding SelectedServer}" VerticalAlignment="Center" Margin="0 -4 0 0">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
@@ -38,33 +46,54 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="4"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="10"/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition Height="4"/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
                                 <!--<TextBlock Grid.Column="2" TextWrapping="Wrap">
                                 <InlineUIContainer>
                                     <Image Grid.RowSpan="3" Source="{Binding Logo}" Width="18" Height="18"/>
                                 </InlineUIContainer>
                                 <Run Text="{Binding ShortName}" BaselineAlignment="Center"/>
                             </TextBlock>-->
-                                <Image Grid.RowSpan="3" Grid.ColumnSpan="3" HorizontalAlignment="Left" VerticalAlignment="Top"
-                                   Source="{Binding Logo}" Width="44" Height="44" Margin="-18 -18 0 0"/>
-                                <ui:Hyperlink Grid.Column="2" Margin="26 0 0 0" Content="{Binding ShortName}" Foreground="White" FontWeight="DemiBold"
-                                          Padding="6 2 10 2"/>
-
-                                <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Description}" FontSize="12" TextWrapping="Wrap" MaxWidth="280"/>
+                                <Image HorizontalAlignment="Left" VerticalAlignment="Top"
+                                   Source="{Binding Logo}" Width="44" Height="44"/>
+                                <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                              Foreground="White" FontWeight="DemiBold">
+                                    <Run Text="{Binding Name}"  FontSize="14"/>
+                                    <LineBreak/>
+                                    <Run Text="{Binding ServerState}"/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <Run Text="{Binding PlayersCount, Mode=OneWay, StringFormat='Players: {0}'}"/>
+                                    <LineBreak/>
+                                    <Run Text="{Binding GamesCount, Mode=OneWay, StringFormat='Games: {0}'}"/>
+                                </TextBlock>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
-            <Button Grid.Row="2" Padding="10" MinHeight="60" HorizontalAlignment="Stretch" Margin="5 0" VerticalAlignment="Top">
+            <UniformGrid Grid.Row="2" Rows="1" Margin="5 0">
+                <Button Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="Add server" IsEnabled="False"/>
+                <Button Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Content="Continue" Margin="14 0 0 0"
+                        Command="{StaticResource NavigateRootViewCommand}" CommandParameter="{x:Type view:NavigationView}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ServersManagement.ServersManagers.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </UniformGrid>
+
+            <!--<Button Grid.Row="2" Padding="10" MinHeight="56" HorizontalAlignment="Stretch" Margin="5 0" VerticalAlignment="Top"
+                    IsEnabled="False">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -73,7 +102,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Add server"/>
                 </Grid>
-            </Button>
+            </Button>-->
         </Grid>
         <Grid Grid.Column="4">
             <Grid.Style>
@@ -113,8 +142,21 @@
                     </DataTemplate>
                 </ContentControl.ContentTemplate>
             </ContentControl>
-            <Button Grid.Row="2" Grid.Column="0" Content="Connect" HorizontalAlignment="Stretch"/>
-            <Button Grid.Row="2" Grid.Column="2" Content="Connect" HorizontalAlignment="Stretch"/>
+            <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Command" Value="{Binding CancelConnectAndAuthorizeOnServerCommand}"/>
+                        <Setter Property="Content" Value="Cancel"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedServer.ServerState}" Value="0">
+                                <Setter Property="Command" Value="{Binding ConnectAndAuthorizeOnServerCommand}"/>
+                                <Setter Property="Content" Value="Connect"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <!--<Button Grid.Row="2" Grid.Column="2" Content="Connect" HorizontalAlignment="Stretch"/>-->
         </Grid>
     </Grid>
 </ui:UiPage>
