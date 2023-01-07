@@ -46,6 +46,10 @@
                 </ui:NavigationItem>-->
                 <!--<ui:NavigationHeader Text="Main"/>-->
                 <ui:NavigationItem
+                    Content="Profile"
+                    Icon="Person20"
+                        PageType="{x:Type v:ProfileView}"/>
+                <ui:NavigationItem
                         Cache="False"
                         Content="Play"
                         PageType="{x:Type v:GamesView}"
@@ -76,19 +80,30 @@
                         Icon="Vault24"
                         ToolTip="Mods vault"/>-->
                 <!--<ui:NavigationHeader Text="API"/>-->
-                <ui:NavigationItem
+                <!--<ui:NavigationItem
                         Content="Vault"
                         Icon="Vault24"
                         PageType="{x:Type v:VaultView}"
-                        ToolTip="Maps and mods vault"/>
-                <ui:NavigationItem IsEnabled="False" Opacity=".7"
+                        ToolTip="Maps and mods vault"/>-->
+                <!--<ui:NavigationItem IsEnabled="False" Opacity=".7"
                         Content="Replays"
                         Icon="Video24"
-                        ToolTip="Replays"/>
-                <ui:NavigationItem IsEnabled="False" Opacity=".7"
-                        Content="API"
-                        Icon="DataPie20"
+                        ToolTip="Replays"/>-->
+                <ui:NavigationItem
+                        Content="Data"
+                        Icon="Database20"
+                        PageType="{x:Type v:DataView}"
                         ToolTip="API"/>
+                <ui:NavigationItem IsEnabled="False" Opacity=".7"
+                        Content="Clan"
+                        ToolTip="Clan"
+                                   Icon="PeopleTeam20"/>
+                <ui:NavigationItem
+                    IsEnabled="False" Opacity=".7"
+                    Content="Report"
+                    ToolTip="Report player"
+                    Icon="MailAlert20"/>
+
                 <ui:NavigationItem
                     PageType="{x:Type v:SelectServerView}"
                     Content="Servers"

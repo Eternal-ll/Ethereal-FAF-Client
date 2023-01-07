@@ -10,7 +10,8 @@
            xmlns:dt="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors"
            mc:Ignorable="d" 
            d:DataContext="{d:DesignInstance {x:Type local:MapsView}}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+           IsEnabled="{Binding ViewModel.IsEnabled}">
     <Grid>
         <Grid.Resources>
             <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
@@ -104,38 +105,34 @@
                 </TextBlock>
             </DataTemplate>
             <DataTemplate x:Key="OpenMap" DataType="{x:Type api:ApiMapModel}">
-                <Border Style="{StaticResource CardBorder}" Width="NaN" Margin="0">
-                    <Border.Background>
-                        <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-                    </Border.Background>
-                    <Border.ContextMenu>
+                <Grid ShowGridLines="False" Margin="-4">
+                    <Grid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Download from browser"
                                       Command="{StaticResource NagivateUriCommand}"
                                       CommandParameter="{Binding LatestVersion.DownloadUrl}"/>
                         </ContextMenu>
-                    </Border.ContextMenu>
-                    <Grid ShowGridLines="False">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="60"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition MinWidth="70" Width="Auto" />
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition MinWidth="90" Width="Auto" />
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="10"/>
-                        </Grid.ColumnDefinitions>
-                        <Image Source="{Binding SmallPreviewUrl,Mode=OneWay}" Width="60" Height="60"/>
-                        <TextBlock Grid.Column="2" MaxWidth="200" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    </Grid.ContextMenu>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="120"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition MinWidth="70" Width="Auto" />
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition MinWidth="90" Width="Auto" />
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="10"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Source="{Binding SmallPreviewUrl,Mode=OneWay}" Width="60" Height="60"/>
+                    <TextBlock Grid.Column="2" MaxWidth="200" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <Run Text="{Binding DisplayedName, Mode=OneWay}" FontSize="14" />
                             <LineBreak/>
                             <Run Text="{Binding CreateTime, Mode=OneWay, StringFormat='dd.MM.yyyy'}" FontSize="10" ToolTip="Created at">
@@ -148,35 +145,35 @@
                                     <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
                                 </Run.Foreground>
                             </Run>
-                        </TextBlock>
-                        <TextBlock Grid.Column="4" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="14" ToolTip="Map author">
+                    </TextBlock>
+                    <TextBlock Grid.Column="4" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="14" ToolTip="Map author">
                                 <Run Text="&#xf4ff;" FontFamily="{StaticResource FontAwesomeLight}"/>
                                 <Run Text="{Binding Author, Mode=OneWay}"/>
-                        </TextBlock>
-                        <TextBlock Grid.Column="6" ToolTip="Count of matches with this map" FontSize="14" VerticalAlignment="Center">
+                    </TextBlock>
+                    <TextBlock Grid.Column="6" ToolTip="Count of matches with this map" FontSize="14" VerticalAlignment="Center">
                                 <Run Text="&#xf11b;" FontFamily="{StaticResource FontAwesomeLight}"/>
                                 <Run Text="{Binding GamesPlayed, Mode=OneWay}"/>
-                        </TextBlock>
-                        <TextBlock Grid.Column="8" VerticalAlignment="Center" FontSize="14">
-                            <TextBlock.Foreground>
-                                <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
-                            </TextBlock.Foreground>
+                    </TextBlock>
+                    <TextBlock Grid.Column="8" VerticalAlignment="Center" FontSize="14">
+                        <TextBlock.Foreground>
+                            <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                        </TextBlock.Foreground>
                                 <Run Text="&#xf30f;" FontFamily="{StaticResource FontAwesomeLight}"/>
                                 <Run Text="{Binding BattleType, Mode=OneWay}" ToolTip="Battle type"/>
                                 <Run Text="{Binding MapType, Mode=OneWay, StringFormat='- {0}'}" ToolTip="Map type"/>
-                        </TextBlock>
-                        <ContentControl Grid.Column="10" Content="{Binding LatestVersion}" VerticalAlignment="Center"/>
-                        <ContentControl Grid.Column="12" Content="{Binding ReviewsSummary}" VerticalAlignment="Center"/>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="14" HorizontalAlignment="Right">
-                            <ui:Button 
+                    </TextBlock>
+                    <ContentControl Grid.Column="10" Content="{Binding LatestVersion}" VerticalAlignment="Center"/>
+                    <ContentControl Grid.Column="12" Content="{Binding ReviewsSummary}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="14" HorizontalAlignment="Right">
+                        <ui:Button 
                                    ToolTipService.ShowOnDisabled="True"
                                 Command="{StaticResource NagivateUriCommand}"
                                 CommandParameter="{Binding LatestVersion.DownloadUrl}">
-                                <ui:Button.Style>
-                                    <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
-                                        <Setter Property="Content" Value="Direct download"/>
-                                        <Style.Triggers>
-                                            <!--<DataTrigger Binding="{Binding LatestVersion}" Value="{x:Null}">
+                            <ui:Button.Style>
+                                <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                    <Setter Property="Content" Value="Direct download"/>
+                                    <Style.Triggers>
+                                        <!--<DataTrigger Binding="{Binding LatestVersion}" Value="{x:Null}">
                                             <Setter Property="IsEnabled" Value="False"/>
                                             <Setter Property="ToolTip" Value="Download url not found"/>
                                         </DataTrigger>
@@ -186,32 +183,21 @@
                                             <Setter Property="IsEnabled" Value="False"/>
                                             <Setter Property="ToolTip" Value="Map cant be downloaded"/>
                                         </DataTrigger>-->
-                                        </Style.Triggers>
-                                    </Style>
-                                </ui:Button.Style>
-                            </ui:Button>
-                            <ui:Button Content="Download" Appearance="Success"
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+                        <ui:Button Content="Download" Appearance="Success"
                                        Command="{DynamicResource DownloadMapCommand}"
                                        CommandParameter="{Binding}"/>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+                    </StackPanel>
+                </Grid>
             </DataTemplate>
             <DataTemplate x:Key="HiddenMap" DataType="{x:Type api:ApiMapModel}">
-                <Border Style="{StaticResource CardBorder}" Width="NaN" Margin="0" Height="60">
-                    <Border.Background>
-                        <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-                    </Border.Background>
-                    <Label Content="Map is hidden by vault team" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Border>
+                <Label Content="Map is hidden by vault team" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </DataTemplate>
             <DataTemplate x:Key="BrokenMap" DataType="{x:Type api:ApiMapModel}">
-                <Border Style="{StaticResource CardBorder}" Width="NaN" Margin="0" Height="60">
-                    <Border.Background>
-                        <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-                    </Border.Background>
-                    <Label Content="Map is broken, dont have any version" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Border>
+                <Label Content="Map is broken, dont have any version" VerticalAlignment="Center" HorizontalAlignment="Center"/>
             </DataTemplate>
             <dt:MapTemplateSelector x:Key="MapTemplateSelector"
                                     OpenTemplate="{StaticResource OpenMap}"
@@ -225,14 +211,15 @@
         <WrapPanel>
             <ui:AutoSuggestBox Text="{Binding ViewModel.MapName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Map" Icon="Search20" Padding="6" Width="220"
                                ToolTip="Use * at the start/end to expand search algorithm"/>
-            <ui:AutoSuggestBox Text="{Binding ViewModel.Author, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Author" Icon="Search20" Padding="6" Width="140" Margin="10 0"
+            <ui:AutoSuggestBox Text="{Binding ViewModel.Author, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Author" Icon="Search20" Padding="6" Width="140"
+                               Margin="4 0"
                                ToolTip="Use * at the start/end to expand search algorithm"/>
             <ComboBox MinWidth="140"
                       ItemsSource="{Binding ViewModel.SortDescriptionsSource}"
                       SelectedValue="{Binding ViewModel.SelectedSortDescription}"
                       DisplayMemberPath="PropertyName"
                       ToolTip="Sorting field"/>
-            <Button VerticalAlignment="Stretch" Margin="10 0"
+            <Button VerticalAlignment="Stretch" Margin="4 0"
                     Command="{Binding ViewModel.ChangeSortDirectionCommand}"
                     CommandParameter="{Binding ViewModel.SelectedSortDirection}"
                     ToolTip="Sorting direction">
@@ -276,16 +263,28 @@
                 </Border>
             </Popup>
             <ComboBox ItemsSource="{Binding ViewModel.AvailablePages}"
-                      SelectedValue="{Binding ViewModel.CurrentPage}" Margin="10 0"/>
+                      SelectedValue="{Binding ViewModel.CurrentPage}" Margin="4 0"/>
             <ComboBox ItemsSource="{Binding ViewModel.PageSizeSource}"
                       SelectedValue="{Binding ViewModel.PageSize}"/>
-            <Button Content="Run" Click="Button_Click" Margin="10 0"/>
+            <Button Content="Run" Click="Button_Click" Margin="4 0"/>
         </WrapPanel>
-        <ListView Grid.Row="1" Margin="-5 6 0 0"
+        <ListView Grid.Row="1" Margin="0 4 0 0"
                   ItemsSource="{Binding ViewModel.MapsView}"
                   VirtualizingPanel.CacheLengthUnit="Pixel"
                  VirtualizingPanel.IsVirtualizing="True"
-                  ItemTemplateSelector="{StaticResource MapTemplateSelector}"/>
+                  ItemTemplateSelector="{StaticResource MapTemplateSelector}">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
+                    <Setter Property="Height" Value="62"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+        </ListView>
 
     </Grid>
 </ui:UiPage>

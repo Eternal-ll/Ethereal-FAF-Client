@@ -129,9 +129,6 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<ModsViewModel>();
             services.AddScoped<ModsView>();
 
-            services.AddScoped<VaultViewModel>();
-            services.AddScoped<VaultView>();
-
             services.AddTransient<SelectServerVM>();
             services.AddTransient<SelectServerView>();
 
@@ -140,6 +137,11 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<LoaderViewModel>();
             services.AddScoped<LoaderView>();
+
+            services.AddScoped<ProfileView>();
+
+            services.AddScoped<DataView>();
+            services.AddScoped<DataViewModel>();
 
             services.AddScoped<SelectGameLocationView>();
             services.AddScoped<SelectFaPatchLocationView>();

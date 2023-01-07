@@ -5,72 +5,256 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:api="clr-namespace:beta.Models.API.MapsVault;assembly=Ethereal.FAF.API.Client"
-           xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+           xmlns:apiUniversal="clr-namespace:beta.Models.API.Universal;assembly=Ethereal.FAF.API.Client"
+           xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views" xmlns:dt="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors"
            mc:Ignorable="d" 
-           d:DataContext="{d:DesignInstance {x:Type local:MapsView}}"
-             d:DesignHeight="450" d:DesignWidth="800">
+           d:DataContext="{d:DesignInstance {x:Type local:ModsView}}"
+             d:DesignHeight="450" d:DesignWidth="800"
+           IsEnabled="{Binding ViewModel.IsEnabled}">
     <Grid>
         <Grid.Resources>
             <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
                 <Setter Property="Padding" Value="10 6"/>
                 <Setter Property="MinWidth" Value="100"/>
             </Style>
-            <DataTemplate DataType="{x:Type api:MapVersionModel}">
-                <Grid>
-                    <TextBlock Text="{Binding Filename}"/>
-                </Grid>
+            <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
+                <TextBlock>
+                    <ui:Rating Value="{Binding AverageRounded, Mode=OneWay,StringFormat='{}{0:0}'}">
+                        <ui:Rating.ToolTip>
+                            <ToolTip>
+                                <TextBlock>
+                                    <TextBlock.Foreground>
+                                        <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                                    </TextBlock.Foreground>
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Score: {0}&#13;Reviews: {1}&#13;5-star: {0}/{1}={2}">
+                                            <MultiBinding.Bindings>
+                                                <Binding Path="Score" Mode="OneWay"/>
+                                                <Binding Path="ReviewsCount" Mode="OneWay"/>
+                                                <Binding Path="Average" Mode="OneWay" StringFormat="#,##"/>
+                                            </MultiBinding.Bindings>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                        <!--<Run Text="{Binding Score, Mode=OneWay,StringFormat='Score: {0}'}"/>
+                                    <LineBreak/>
+                                    <Run Text="{Binding ReviewsCount, Mode=OneWay, StringFormat='Reviews: {0}'}"/>
+                                    <LineBreak/>
+                                    <Run/>-->
+                                </TextBlock>
+                            </ToolTip>
+                        </ui:Rating.ToolTip>
+                    </ui:Rating>
+                    <LineBreak/>
+                    <Run Text="&#xf4ae;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                    <Run Text="{Binding ReviewsCount, Mode=OneWay}"/>
+                    <Run Foreground="#B3FFAE" Text="&#xf058;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                    <Run Foreground="#B3FFAE" Text="{Binding Positive, Mode=OneWay}"/>
+                    <Run Foreground="#FF6464" Text="&#xf057;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                    <Run Foreground="#FF6464" Text="{Binding Negative, Mode=OneWay}"/>
+                </TextBlock>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type api:ApiMapModel}">
-                <Border Style="{StaticResource ClippedBorder}">
-                    <Border.ContextMenu>
+            <DataTemplate x:Key="OpenMap" DataType="{x:Type api:Mod}">
+                <Grid ShowGridLines="False" Margin="-4">
+                    <Grid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Download from browser"
                                       Command="{StaticResource NagivateUriCommand}"
                                       CommandParameter="{Binding LatestVersion.DownloadUrl}"/>
                         </ContextMenu>
-                    </Border.ContextMenu>
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <Image Source="{Binding SmallPreviewUrl,Mode=OneWay}"
-                               Width="200"
-                               Height="200"/>
+                    </Grid.ContextMenu>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="10"/>
+                    </Grid.ColumnDefinitions>
+                    <Image Width="60" Height="60" Source="{Binding LatestVersion.ThumbnailUrl}"/>
 
-                        <!--<ContentControl Grid.Row="1" Content="{Binding LatestVersion}">
-                            
-                        </ContentControl>-->
-                    </Grid>
-                </Border>
+                    <TextBlock Grid.Column="2" MaxWidth="200" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Run Text="{Binding Name, Mode=OneWay}" FontSize="14" />
+                        <Run Text="{Binding LatestVersion.Version, Mode=OneWay, StringFormat='v.{0}'}"/>
+                        <LineBreak/>
+                        <Run Text="{Binding CreateTime, Mode=OneWay, StringFormat='dd.MM.yyyy'}" FontSize="10" ToolTip="Created at">
+                            <Run.Foreground>
+                                <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                            </Run.Foreground>
+                        </Run>
+                        <Run Text="{Binding UpdateTime, Mode=OneWay, StringFormat='- {0:dd.MM.yyyy}'}" FontSize="10" ToolTip="Last update">
+                            <Run.Foreground>
+                                <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                            </Run.Foreground>
+                        </Run>
+                    </TextBlock>
+                    <TextBlock Grid.Column="4" VerticalAlignment="Center" TextWrapping="Wrap" ToolTip="Mod author/s">
+                                <Run Text="&#xf4fe;" FontFamily="{StaticResource FontAwesomeLight}" FontSize="14"/>
+                                <Run Text="{Binding Author, Mode=OneWay}"/>
+                    </TextBlock>
+                    <TextBlock Grid.Column="6" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="14" ToolTip="Uploader">
+                                <Run Text="&#xf4ff;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                                <Run Text="{Binding Uploader, Mode=OneWay}"/>
+                    </TextBlock>
+                    <!--<TextBlock Grid.Column="8" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#FF6464"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding LatestVersion.IsRanked}" Value="True">
+                                        <Setter Property="Foreground" Value="#B3FFAE"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run FontFamily="{StaticResource FontAwesomeLight}">
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding LatestVersion.IsRanked}" Value="True">
+                                            <Setter Property="Text" Value="&#xf14a;"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LatestVersion.IsRanked}" Value="FAlse">
+                                            <Setter Property="Text" Value="&#xf0c8;"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                        <Run Text="Ranked"/>
+                    </TextBlock>-->
+                    <ContentControl Grid.Column="8" Content="{Binding ReviewsSummary}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="12" HorizontalAlignment="Right">
+                        <ui:Button 
+                                   ToolTipService.ShowOnDisabled="True"
+                                Command="{StaticResource NagivateUriCommand}"
+                                CommandParameter="{Binding LatestVersion.DownloadUrl}">
+                            <ui:Button.Style>
+                                <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
+                                    <Setter Property="Content" Value="Direct download"/>
+                                    <Style.Triggers>
+                                        <!--<DataTrigger Binding="{Binding LatestVersion}" Value="{x:Null}">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="ToolTip" Value="Download url not found"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding LatestVersion.IsHidden}" Value="True">
+                                            <Setter Property="Appearance" Value="Danger"/>
+                                            <Setter Property="Content" Value="Map is hidden by vault team"/>
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="ToolTip" Value="Map cant be downloaded"/>
+                                        </DataTrigger>-->
+                                    </Style.Triggers>
+                                </Style>
+                            </ui:Button.Style>
+                        </ui:Button>
+                        <!--<ui:Button Content="Download" Appearance="Success"
+                                       Command="{DynamicResource DownloadMapCommand}"
+                                       CommandParameter="{Binding}"/>-->
+                    </StackPanel>
+                </Grid>
             </DataTemplate>
+            <DataTemplate x:Key="HiddenMap" DataType="{x:Type api:ApiMapModel}">
+                <Label Content="Mod is hidden by vault team" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </DataTemplate>
+            <DataTemplate x:Key="BrokenMap" DataType="{x:Type api:ApiMapModel}">
+                <Label Content="Mod is broken, dont have any version" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </DataTemplate>
+            <dt:MapTemplateSelector x:Key="MapTemplateSelector"
+                                    OpenTemplate="{StaticResource OpenMap}"
+                                    HiddenTemplate="{StaticResource HiddenMap}"
+                                    NoVersionTemplate="{StaticResource BrokenMap}"/>
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <WrapPanel>
-            <!--<Button Content="Vault" Width="100" Margin="10 10 0 0" Command="{StaticResource NavigateViewCommand}" CommandParameter="{x:Type views:VaultView}"/>-->
-            <ComboBox ItemsSource="{Binding ViewModel.ServersManagement.ServersManagers}"
-                      SelectedValue="{Binding ViewModel.SelectedServerManager}">
-
-            </ComboBox>
-            <Button Content="Run" Click="Button_Click"/>
+            <ui:AutoSuggestBox Text="{Binding ViewModel.ModName, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Mod name" Icon="Search20" Padding="6" Width="220"
+                               ToolTip="Use * at the start/end to expand search algorithm"/>
+            <ui:AutoSuggestBox Text="{Binding ViewModel.Uploder, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Uploader" Icon="Search20" Padding="6" Width="140"
+                               Margin="4 0"
+                               ToolTip="Use * at the start/end to expand search algorithm"/>
+            <ComboBox MinWidth="140"
+                      ItemsSource="{Binding ViewModel.ModTypeSource}"
+                      SelectedValue="{Binding ViewModel.SelectedModType}" Margin="0 0 4 0"
+                      ToolTip="Mod type"/>
+            <ComboBox MinWidth="140" SelectedIndex="0"
+                      ItemsSource="{Binding ViewModel.SortDescriptionSource}"
+                      SelectedValue="{Binding ViewModel.SelectedSortDescription}"
+                      ToolTip="Sorting field"/>
+            <Button VerticalAlignment="Stretch" Margin="4 0"
+                    Command="{Binding ViewModel.ChangeSortDirectionCommand}"
+                    CommandParameter="{Binding ViewModel.SelectedSortDirection}"
+                    ToolTip="Sorting direction">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ViewModel.SelectedSortDirection}" Value="0">
+                                <Setter Property="Content" Value="&#xf884;"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.SelectedSortDirection}" Value="1">
+                                <Setter Property="Content" Value="&#xf160;"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <ToggleButton Name="PopupToggeButton" Width="100" Content="Filter" VerticalAlignment="Stretch"/>
+            <Popup IsOpen="{Binding IsChecked, ElementName=PopupToggeButton}" StaysOpen="False" AllowsTransparency="True"
+                       PlacementTarget="{Binding ElementName=PopupToggeButton}"
+                       Placement="Bottom">
+                <Border Style="{StaticResource CardBorder}" Padding="10" BorderThickness="1">
+                    <Border.Background>
+                        <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}" />
+                    </Border.Background>
+                    <Border.BorderBrush>
+                        <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
+                    </Border.BorderBrush>
+                    <Border.Effect>
+                        <DropShadowEffect
+                                BlurRadius="30"
+                                Direction="0"
+                                Opacity="0.4"
+                                ShadowDepth="0"
+                                Color="#202020" />
+                    </Border.Effect>
+                    <UniformGrid>
+                        <CheckBox Content="Only ranked" IsChecked="{Binding ViewModel.OnlyRanked}"/>
+                        <CheckBox Content="Only visible" IsChecked="{Binding ViewModel.IsOnlyVisible}"/>
+                    </UniformGrid>
+                </Border>
+            </Popup>
             <ComboBox ItemsSource="{Binding ViewModel.AvailablePages}"
-                      SelectedValue="{Binding ViewModel.CurrentPage}"/>
+                      SelectedValue="{Binding ViewModel.CurrentPage}" Margin="4 0"/>
             <ComboBox ItemsSource="{Binding ViewModel.PageSizeSource}"
                       SelectedValue="{Binding ViewModel.PageSize}"/>
+            <Button Content="Run" Click="Button_Click" Margin="4 0"/>
         </WrapPanel>
-        <!--<ListView Grid.Row="1" ItemsSource="{Binding ViewModel.MapsView}"
-                  VirtualizingPanel.IsVirtualizing="True">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ui:VirtualizingWrapPanel ItemSize="70 70"/>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-        </ListView>-->
-        <ui:VirtualizingItemsControl Grid.Row="1" ItemsSource="{Binding ViewModel.MapsView}"
-                                     VirtualizingPanel.CacheLengthUnit="Pixel">
-        </ui:VirtualizingItemsControl>
+        <ListView Grid.Row="1" Margin="0 4 0 0"
+                  ItemsSource="{Binding ViewModel.ModsView}"
+                  VirtualizingPanel.CacheLengthUnit="Pixel"
+                 VirtualizingPanel.IsVirtualizing="True"
+                  ItemTemplateSelector="{StaticResource MapTemplateSelector}">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
+                    <Setter Property="Height" Value="62"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+        </ListView>
+
     </Grid>
 </ui:UiPage>

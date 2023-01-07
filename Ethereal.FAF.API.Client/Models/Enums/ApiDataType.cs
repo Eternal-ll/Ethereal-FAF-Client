@@ -3,10 +3,14 @@
     public enum ApiDataType : byte
     {
         mod,
-        modVersion,
+        modStatistics,
         modReviewsSummary,
 
-        
+        modVersion,
+        modVersionStatistics,
+        modVersionReview,
+        modVersionReviewsSummary,
+
         map,
         mapStatistics,
         mapReviewsSummary,
@@ -21,13 +25,17 @@
 
         player,
         clanMembership,
+
         avatar,
         avatarAssignment,
+
         nameRecord,
         globalRating,
         ladder1v1Rating,
-        
-        
+
+        accountLink,
+
+
         game,
         gamePlayerStats,
 

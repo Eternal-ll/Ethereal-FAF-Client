@@ -57,6 +57,12 @@ namespace Ethereal.FAF.API.Client
             [Query(CollectionFormat.Csv)]
             string[] include = null,
             CancellationToken cancellationToken = default);
+        [Get("/data/mod")]
+        Task<ApiResponse<ModsResult>> GetModsAsync(string filter = null, Sorting sorting = null, Pagination pagination = null,
+            [AliasAs("include")]
+            [Query(CollectionFormat.Csv)]
+            string[] include = null,
+            CancellationToken cancellationToken = default);
     }
     public interface IFafContentClient
     {

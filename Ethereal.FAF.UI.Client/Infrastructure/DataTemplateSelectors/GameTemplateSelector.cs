@@ -14,14 +14,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors
         public DataTemplate NoVersionTemplate { get; set; }
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if (item is ApiMapModel map)
+            if (item is IVaultEntity entity)
             {
-                return 
-                    map.LatestVersion is null ?
-                        NoVersionTemplate :
-                        map.LatestVersion.IsHidden ?
-                            HiddenTemplate :
-                            OpenTemplate;
+                return
+                    entity.HasVersion ?
+                        entity.IsHidden ? HiddenTemplate : OpenTemplate :
+                        NoVersionTemplate;
             }
             return base.SelectTemplate(item, container);
         }

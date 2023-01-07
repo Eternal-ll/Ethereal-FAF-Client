@@ -179,31 +179,10 @@
                           ItemTemplate="{StaticResource MessageUser}">
             </ItemsControl>
         </ScrollViewer>
-        <ui:VirtualizingItemsControl Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="4"
-                      ItemsSource="{Binding ViewModel.UsersView}"
-                                     ItemTemplate="{StaticResource ChatUser}">
-            <ui:VirtualizingItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ui:VirtualizingWrapPanel Orientation="Vertical" StretchItems="False" ItemSize="200 20"/>
-                </ItemsPanelTemplate>
-            </ui:VirtualizingItemsControl.ItemsPanel>
-            <!--<ui:VirtualizingItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding }">
-                        <TextBlock.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Command="{DynamicResource OpenPrivateCommand}" CommandParameter="{Binding}"
-                                          Header="Open chat">
-                                    <MenuItem.Icon>
-                                        <ui:SymbolIcon Symbol="Chat12"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </TextBlock.ContextMenu>
-                    </TextBlock>
-                </DataTemplate>
-            </ui:VirtualizingItemsControl.ItemTemplate>-->
-        </ui:VirtualizingItemsControl>
+        <ListView Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="4"
+                  ItemsSource="{Binding ViewModel.UsersView}"
+                  ItemTemplate="{StaticResource ChatUser}">
+        </ListView>
         <ui:TextBox Grid.Column="1" Grid.Row="4" Margin="4" KeyDown="TextBox_KeyDown" PlaceholderText="Message" Icon="Chat12"
                     TextChanged="InputTextChanged" VerticalAlignment="Bottom"
                     PreviewKeyDown="TextBox_PreviewKeyDown"/>

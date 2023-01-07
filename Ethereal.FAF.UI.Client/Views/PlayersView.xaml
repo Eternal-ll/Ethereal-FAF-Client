@@ -11,7 +11,7 @@
            d:DataContext="{d:DesignInstance {x:Type local:PlayersView}}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid ShowGridLines="False">
         <Grid.Resources>
             <!--<ResourceDictionary x:Key="Test">
                 <Style TargetType="ContentControl">
@@ -51,7 +51,7 @@
                 </Style.Triggers>
             </Style>
             <DataTemplate DataType="{x:Type model:Player}">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Margin="4">
                     <StackPanel.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{DynamicResource OpenPrivateCommand}"
@@ -73,8 +73,7 @@
                             </TextBlock>
                         </ToolTip>
                     </StackPanel.ToolTip>
-                    <Image Source="{Binding FlagUri}" ToolTip="{Binding Country}" Width="16" Height="16"/>
-                    <Image ToolTip="{Binding Avatar.Tooltip}" Height="16" Margin="4 0 0 0">
+                    <Image ToolTip="{Binding Avatar.Tooltip}" Height="16" Width="32">
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Setter Property="ToolTip" Value="{Binding Avatar.Tooltip}"/>
@@ -83,13 +82,13 @@
                                     <DataTrigger Binding="{Binding Avatar}" Value="{x:Null}">
                                         <Setter Property="ToolTip" Value="{x:Null}"/>
                                         <Setter Property="Source" Value="{x:Null}"/>
-                                        <Setter Property="Visibility" Value="Collapsed"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Image.Style>
                     </Image>
-                    <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0"/>
+                    <Image Source="{Binding FlagUri}" ToolTip="{Binding Country}" Width="16" Height="16" Margin="4 0"/>
+                    <TextBlock Text="{Binding LoginWithClan}" Width="120"/>
                     <Button Content="Invite"
                             Command="{DynamicResource InvitePlayerCommand}"
                             CommandParameter="{Binding Id}"
@@ -185,7 +184,7 @@
                 <TextBlock Text="{Binding ViewModel.PlayersView.Count, StringFormat='On view: {0} players'}"/>
             </ui:Badge>
         </WrapPanel>
-        <ListBox x:Name="GroupsSource" Grid.Row="1" Grid.ColumnSpan="3"  Margin="0 10 10 0" 
+        <ListBox x:Name="GroupsSource" Grid.Row="1" Grid.ColumnSpan="3" Margin="0 10 10 0" 
                  ItemsSource="{Binding ViewModel.Groups}"
                  SelectedItem="{Binding ViewModel.SelectedGroup}"
                  SelectionChanged="ListBox_SelectionChanged"
@@ -212,14 +211,23 @@
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
         </ListBox>
-        <ListBox x:Name="OriginalSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10" ItemsSource="{Binding ViewModel.PlayersView}"
+        <ListView x:Name="OriginalSource" Grid.Row="2" Grid.ColumnSpan="3" Margin="0 4 -4 10"
+                  ItemsSource="{Binding ViewModel.PlayersView}"
                  SelectedItem="{Binding ViewModel.SelectedPlayer}"
                  SelectionChanged="OriginalSource_SelectionChanged"
-                 ScrollViewer.ScrollChanged="OriginalSource_ScrollChanged"
                  VirtualizingPanel.IsVirtualizing="True"
                  VirtualizingPanel.VirtualizationMode="Recycling"
                  VirtualizingPanel.IsVirtualizingWhenGrouping="True">
-        </ListBox>
+            <ListView.Resources>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+        </ListView>
         <!--<ListBox x:Name="GroupedSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10"
                  SelectionChanged="GroupedSource_SelectionChanged"
                  ItemsSource="{Binding ViewModel.SelectedGroup.Items}"

@@ -7,7 +7,7 @@ namespace Ethereal.FA.Vault
     {
         public static double KmFromPixels(double pixels) => pixels switch
         {
-            2096 => 80,
+            4096 => 80,
             2048 => 40,
             1024 => 20,
             512 => 10,
@@ -29,15 +29,20 @@ namespace Ethereal.FA.Vault
         public double WidthInKm => FAUtils.KmFromPixels(Width);
         public double HeigthInKm => FAUtils.KmFromPixels(Height);
 
+        public string SizeLabelKm => $"{WidthInKm}x{WidthInKm} km";
+
         public string PathToMap { get; set; }
         public string PathToSave { get; set; }
         public string PathToScript { get; set; }
+        public string PathToScenario { get; set; }
+        public string PathToDirectory { get; set; }
 
         public double NoRushRadius { get; set; }
 
         public bool Starts { get; set; }
 
         public List<string> Armies { get; set; }
+        public string BattleType { get; set; }
 
         /// <summary>
         /// 
@@ -47,7 +52,11 @@ namespace Ethereal.FA.Vault
         public static MapScenario FromFile(string file)
         {
             if (!File.Exists(file)) return null;
-            var scenario = new MapScenario();
+            var scenario = new MapScenario()
+            {
+                PathToScenario = file,
+                PathToDirectory = Path.GetDirectoryName(file)
+            };
             var test = File.ReadAllText(file);
             var regex = new Regex(@"STRING\( (.*) \)");
             var match = regex.Match(test);
@@ -83,6 +92,7 @@ namespace Ethereal.FA.Vault
                         {
                             if (teams[1] is LuaTable data)
                             {
+                                scenario.BattleType = data["name"].ToString();
                                 if (data["armies"] is LuaTable armiesTable)
                                 {
                                     var armies = new List<string>();

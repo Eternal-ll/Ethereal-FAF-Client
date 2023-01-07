@@ -5,29 +5,27 @@ using System.Linq;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class VaultViewModel : Base.ViewModel
+    public class DataViewModel : Base.ViewModel
     {
         private readonly IConfiguration Configuration;
-
+        public ServersManagement ServersManagement { get; }
         private readonly MapsViewModel MapsViewModel;
         private readonly ModsViewModel ModsViewModel;
 
-        public ServersManagement ServersManagement { get; }
-        public string VaultLocation => Configuration.GetForgedAllianceVaultLocation();
-
-        public VaultViewModel(ServersManagement serversManagement, MapsViewModel mapsViewModel, ModsViewModel modsViewModel, IConfiguration configuration)
+        public DataViewModel(ServersManagement serversManagement, MapsViewModel mapsViewModel, ModsViewModel modsViewModel, IConfiguration configuration)
         {
             serversManagement.ServerManagerAdded += ServersManagement_ServerManagerAdded;
             serversManagement.ServerManagerRemoved += ServersManagement_ServerManagerRemoved;
 
-            MapsViewModel = mapsViewModel;
             ServersManagement = serversManagement;
+            MapsViewModel = mapsViewModel;
             ModsViewModel = modsViewModel;
 
             SelectedServerManager = serversManagement.ServersManagers.FirstOrDefault();
-
             Configuration = configuration;
         }
+
+        public string VaultLocation => Configuration.GetForgedAllianceVaultLocation();
 
         private void ServersManagement_ServerManagerRemoved(object sender, ServerManager e)
         {
@@ -41,7 +39,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             OnPropertyChanged(nameof(CanSelectServer));
         }
 
-        #region MyRegion
+        public bool CanSelectServer => ServersManagement.ServersManagers.Count > 1;
+        #region SelectedServerManager
         private ServerManager _SelectedServerManager;
         public ServerManager SelectedServerManager
         {
@@ -50,14 +49,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _SelectedServerManager, value))
                 {
-                    ModsViewModel.SetFafApiClient(value?.GetApiClient());
+                    ModsViewModel.SetServerManager(value);
                     MapsViewModel.SetFafApiClient(value?.GetApiClient());
                     MapsViewModel.SetContentUrl(value?.GetServer().Content.ToString());
                 }
             }
         }
         #endregion
-
-        public bool CanSelectServer => ServersManagement.ServersManagers.Count > 1;
     }
 }

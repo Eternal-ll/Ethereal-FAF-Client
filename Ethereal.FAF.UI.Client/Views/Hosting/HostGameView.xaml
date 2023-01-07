@@ -10,7 +10,7 @@
     <Grid Margin="0 0 10 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="10"/>
+            <RowDefinition Height="4"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Border Grid.Column="1" Padding="10" CornerRadius="4">
@@ -130,7 +130,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <ContentControl Content="{Binding SelectionView}" Grid.ColumnSpan="2" Margin="0 0 0 0"/>
-            <Border Grid.Column="2" Padding="10" Width="400" Margin="10 0 0 0">
+            <Border Grid.Column="2" Padding="10" Width="400" Margin="4 0 0 0">
                 <Border.Background>
                     <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
                 </Border.Background>

@@ -12,65 +12,6 @@
     <VirtualizingStackPanel Loaded="VirtualizingStackPanel_Loaded"
         IsVirtualizing="True"
         VirtualizationMode="Recycling" Margin="0 0 10 0">
-        <VirtualizingStackPanel.Resources>
-            <Style TargetType="ui:CardExpander" BasedOn="{StaticResource {x:Type ui:CardExpander}}">
-                <Setter Property="Padding" Value="0 0 14 0"/>
-            </Style>
-            <Style x:Key="CardExpanderHeaderGrid" TargetType="Grid">
-                <Setter Property="Margin" Value="14 16 0 16"/>
-            </Style>
-            <Style x:Key="CardExpanderHeader" TargetType="StackPanel">
-                <Setter Property="Margin" Value="14 16 0 16"/>
-                <Setter Property="Orientation" Value="Horizontal"/>
-            </Style>
-            <Style x:Key="CardExpanderBody" TargetType="StackPanel">
-                <Setter Property="Margin" Value="14 16 0 16"/>
-            </Style>
-            <Style x:Key="SymbolTextBlock" TargetType="TextBlock">
-                <Setter Property="Width" Value="26"/>
-                <Setter Property="Margin" Value="0 0 10 0"/>
-                <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
-            </Style>
-            <Style x:Key="SymbolUI" TargetType="ui:SymbolIcon" BasedOn="{StaticResource {x:Type ui:SymbolIcon}}">
-                <Setter Property="Margin" Value="0 0 13 0"/>
-                <Setter Property="FontFamily" Value="{StaticResource FontAwesomeLight}"/>
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
-            </Style>
-            <Style x:Key="DescriptionHeaderRun" TargetType="Run">
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
-            </Style>
-            <Style x:Key="DescriptionHeaderTextBlock" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
-                <Setter Property="TextWrapping" Value="Wrap"/>
-            </Style>
-            <Style TargetType="ui:CardColor" BasedOn="{StaticResource {x:Type ui:CardColor }}">
-                <Setter Property="Margin" Value="2"/>
-            </Style>
-            <Style TargetType="Separator" BasedOn="{StaticResource {x:Type Separator}}">
-                <Setter Property="Margin" Value="0 0 -7 0"/>
-            </Style>
-            <Style x:Key="InlineHyperlink" TargetType="ui:Hyperlink" BasedOn="{StaticResource {x:Type ui:Hyperlink}}">
-                <Setter Property="Margin" Value="0 -2"/>
-                <Setter Property="Padding" Value="4 2"/>
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="RenderTransform">
-                    <Setter.Value>
-                        <TranslateTransform Y="3"/>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-            <Style x:Key="CheckBoxControl" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-                <Setter Property="FlowDirection" Value="RightToLeft"/>
-                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                <Setter Property="Margin" Value="-14 0 -14 0"/>
-            </Style>
-        </VirtualizingStackPanel.Resources>
         <TextBlock TextWrapping="WrapWithOverflow" Margin="0 0 0 24">
             <Run Text="Settings" FontSize="24"/>
             <LineBreak/>
@@ -296,7 +237,7 @@
                 </ui:CardExpander>
             </StackPanel>
         </ui:CardExpander>
-        <ui:CardExpander Margin="0 6">
+        <ui:CardExpander Margin="0 4">
             <ui:CardExpander.Header>
                 <StackPanel Style="{StaticResource CardExpanderHeader}">
                     <TextBlock Text="&#xf2dc;" Style="{StaticResource SymbolTextBlock}"/>
@@ -505,7 +446,7 @@
                 </Grid>
             </StackPanel>
         </ui:CardExpander>
-        <ui:CardExpander Margin="0 6">
+        <ui:CardExpander Margin="0 4">
             <ui:CardExpander.Header>
                 <StackPanel Style="{StaticResource CardExpanderHeader}">
                     <TextBlock Text="&#xe33d;" Style="{StaticResource SymbolTextBlock}" Margin="0 0 10 0"/>

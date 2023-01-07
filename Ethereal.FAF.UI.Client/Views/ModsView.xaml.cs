@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
+using System;
 using Wpf.Ui.Common.Interfaces;
 
 namespace Ethereal.FAF.UI.Client.Views
@@ -8,10 +9,19 @@ namespace Ethereal.FAF.UI.Client.Views
     /// </summary>
     public partial class ModsView : INavigableView<ModsViewModel>
     {
-        public ModsView(ModsViewModel vm)
+        public ModsView(ModsViewModel model)
         {
-            ViewModel = vm;
+            ViewModel = model;
+
+            //Resources.Add("DownloadMapCommand", model.DownloadMapCommand);
+
+            Initialized += MapsView_Initialized;
             InitializeComponent();
+        }
+
+        private void MapsView_Initialized(object sender, EventArgs e)
+        {
+            ViewModel.RunRequest();
         }
 
         public ModsViewModel ViewModel { get; }

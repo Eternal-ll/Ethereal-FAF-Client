@@ -39,7 +39,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
             var servers = Configuration.GetSection("Servers").Get<List<Server>>();
 
-            var gapforeverAddresses = Dns.GetHostEntry("gapforever.com").AddressList.Select(p => p.ToString());
+            var gapforeverAddresses = Array.Empty<string>();
+            try
+            {
+                gapforeverAddresses = Dns.GetHostEntry("gapforever.com").AddressList.Select(p => p.ToString()).ToArray();
+            }
+            catch
+            {
+
+            }
 
             var client = httpClientFactory.CreateClient();
 
