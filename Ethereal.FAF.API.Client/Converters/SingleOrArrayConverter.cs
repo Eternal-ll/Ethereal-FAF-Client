@@ -15,21 +15,29 @@ namespace beta.Infrastructure.Converters.JSON
 
         public override TCollection Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            switch (reader.TokenType)
+            try
             {
-                case JsonTokenType.Null:
-                    return null;
-                case JsonTokenType.StartArray:
-                    var list = new TCollection();
-                    while (reader.Read())
-                    {
-                        if (reader.TokenType == JsonTokenType.EndArray)
-                            break;
-                        list.Add(JsonSerializer.Deserialize<TItem>(ref reader, options));
-                    }
-                    return list;
-                default:
-                    return new TCollection { JsonSerializer.Deserialize<TItem>(ref reader, options) };
+
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.Null:
+                        return null;
+                    case JsonTokenType.StartArray:
+                        var list = new TCollection();
+                        while (reader.Read())
+                        {
+                            if (reader.TokenType == JsonTokenType.EndArray)
+                                break;
+                            list.Add(JsonSerializer.Deserialize<TItem>(ref reader, options));
+                        }
+                        return list;
+                    default:
+                        return new TCollection { JsonSerializer.Deserialize<TItem>(ref reader, options) };
+                }
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
 

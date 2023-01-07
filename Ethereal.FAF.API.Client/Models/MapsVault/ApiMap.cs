@@ -1,9 +1,13 @@
-﻿using beta.Models.API.Enums;
-using beta.Models.API.Universal;
+﻿using beta.Models.API.Universal;
 using System.Text.Json.Serialization;
 
 namespace beta.Models.API.MapsVault
 {
+    public interface IVaultEntity
+    {
+        public bool IsHidden { get; }
+        public bool HasVersion { get; }
+    }
     public class ApiMap : Base.ApiUniversalData
     {
         public string DisplayedName => Attributes["displayName"];
@@ -40,12 +44,12 @@ namespace beta.Models.API.MapsVault
         //    JsonSerializer.Deserialize<MapPoolAssignmentParams>(parameters) : null;
         public MapVersionModel LatestVersion { get; set; }
     }
-    public class ApiMapModel : ApiMap
+    public class ApiMapModel : ApiMap, IVaultEntity
     {
         public string Author { get; set; } = "Unknown";
 
         public string SmallPreviewUrl => LatestVersion is null ?
-            $"https://via.placeholder.com/468x60?text={DisplayedName}.png" :
+            $"https://via.placeholder.com/60x60?text={DisplayedName}.png" :
             LatestVersion.ThumbnailUrlLarge.Replace("faforever.ru", "content.faforever.ru");
 
 
@@ -54,40 +58,7 @@ namespace beta.Models.API.MapsVault
         public MapVersionModel LatestVersion { get; set; }
         public MapVersionModel[] Versions { get; set; }
 
-
-
-        public bool TryGetRelationId(ApiDataType type, out int id)
-        {
-            id = -1;
-            var relations = Relations;
-            if (relations is not null && relations.Count > 0)
-            {
-                foreach (var relation in relations)
-                {
-                    if (relation.Value.Data[0].Type == type)
-                    {
-                        id = relation.Value.Data[0].Id;
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        public Dictionary<ApiDataType, int> GetRelations()
-        {
-            var dic = new Dictionary<ApiDataType, int>();
-            var relations = Relations;
-            if (relations is not null)
-            {
-                foreach (var relation in relations)
-                {
-                    var data = relation.Value.Data;
-                    if (data is null) continue;
-                    if (data.Count == 0) continue;
-                    dic.TryAdd(data[0].Type, data[0].Id);
-                }
-            }
-            return dic;
-        }
+        public bool IsHidden => HasVersion && LatestVersion.IsHidden;
+        public bool HasVersion => LatestVersion is not null;
     }
 }

@@ -1,0 +1,174 @@
+﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.DataView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+           xmlns:views="clr-namespace:Ethereal.FAF.UI.Client.Views"
+           d:DataContext="{d:DesignInstance {x:Type views:DataView}}"
+           mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+           Scrollable="True">
+    <VirtualizingStackPanel Margin="0 0 20 0" Loaded="VirtualizingStackPanel_Loaded">
+        <TextBlock TextWrapping="WrapWithOverflow" Margin="0 0 0 24">
+            <Run Text="Data" FontSize="24"/>
+            <LineBreak/>
+            <Run Text="Data description" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+        </TextBlock>
+        <ui:Card>
+            <Grid Style="{StaticResource CardExpanderHeaderGrid}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xf233;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock Grid.Column="1">
+                        <Run Text="Data source"/>
+                        <LineBreak/>
+                        <Run Text="Select data source that will be used for requests." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding ViewModel.ServersManagement.ServersManagers}"
+                          SelectedValue="{Binding ViewModel.SelectedServerManager}"
+                          IsEnabled="{Binding ViewModel.CanSelectServer}"/>
+            </Grid>
+        </ui:Card>
+        <TextBlock Text="Vault" Style="{StaticResource HeaderSectionTextBlock}"/>
+
+        <ui:Card Margin="0 4">
+            <Grid Style="{StaticResource CardExpanderHeaderGrid}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xf660;" Style="{StaticResource SymbolTextBlock}" VerticalAlignment="Top" Margin="0 10 10 0"/>
+                <TextBlock Grid.Column="1">
+                        <Run Text="Local vault"/>
+                        <LineBreak/>
+                        <Run Text="Place where all maps and mods will be downloaded." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+                <Button Grid.Column="2" HorizontalAlignment="Right"
+                        Command="{StaticResource NagivateUriCommand}"
+                        CommandParameter="{Binding ViewModel.VaultLocation}"
+                        ToolTip="{Binding ViewModel.VaultLocation}"
+                        Content="Show in explorer"/>
+            </Grid>
+        </ui:Card>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" CommandParameter="{x:Type views:MapsView}">
+            <Grid Style="{StaticResource CardExpanderHeaderGrid}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xf279;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock Grid.Column="1">
+                        <Run Text="Maps"/>
+                        <LineBreak/>
+                        <Run Text="In the map vault, you will find every map available for Forged Alliance." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </Grid>
+        </ui:CardAction>
+        <ui:CardAction Margin="0 4 0 0" Command="{StaticResource NavigateViewCommand}" CommandParameter="{x:Type views:ModsView}">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xf7d9;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Mods"/>
+                        <LineBreak/>
+                        <Run Text="In the mod vault, you will find every mod available for Forged Alliance." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <TextBlock Text="Replays" Style="{StaticResource HeaderSectionTextBlock}"/>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xf03d;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Replays"/>
+                        <LineBreak/>
+                        <Run Text="Watch replays" Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <TextBlock Text="Matchmaking" Style="{StaticResource HeaderSectionTextBlock}"/>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xf091;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Best of the seasons"/>
+                        <LineBreak/>
+                        <Run Text="Explore most powerful players of current matchmaking season" Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" Margin="0 4 0 0"
+                         IsEnabled="False" Opacity=".7">
+            <Grid Style="{StaticResource CardExpanderHeaderGrid}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="&#xf279;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock Grid.Column="1">
+                        <Run Text="Queue map pool"/>
+                        <LineBreak/>
+                        <Run Text="..." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+                <ComboBox Grid.Column="2" SelectedIndex="0">
+                    <ComboBoxItem Content="1 vs 1"/>
+                </ComboBox>
+            </Grid>
+        </ui:CardAction>
+        <TextBlock Text="Players" Style="{StaticResource HeaderSectionTextBlock}"/>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xe594;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Leaderboards"/>
+                        <LineBreak/>
+                        <Run Text="Explore top players" Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <TextBlock Text="Clans" Style="{StaticResource HeaderSectionTextBlock}"/>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xe594;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Zero Fucks Given"/>
+                        <LineBreak/>
+                        <Run Text="Open clan page." Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <ui:CardAction Margin="0 4" Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xf002;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Clans"/>
+                        <LineBreak/>
+                        <Run Text="Explore clans and find your new friends to fight" Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+        <ui:CardAction Command="{StaticResource NavigateViewCommand}" 
+                         IsEnabled="False" Opacity=".7">
+            <StackPanel Style="{StaticResource CardExpanderHeader}">
+                <TextBlock Text="&#xf0fe;" Style="{StaticResource SymbolTextBlock}"/>
+                <TextBlock>
+                        <Run Text="Create clan"/>
+                        <LineBreak/>
+                        <Run Text="Create your own clan and rule the world" Style="{StaticResource DescriptionHeaderRun}"/>
+                </TextBlock>
+            </StackPanel>
+        </ui:CardAction>
+    </VirtualizingStackPanel>
+</ui:UiPage>

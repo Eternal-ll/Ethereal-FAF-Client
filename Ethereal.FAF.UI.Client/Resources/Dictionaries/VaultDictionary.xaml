@@ -4,24 +4,73 @@
                     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                     xmlns:model="clr-namespace:Ethereal.FAF.UI.Client.Models">
     <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource ClippedBorder}">
-        <Setter Property="Background" Value="#323232"/>
+        <Setter Property="Background">
+            <Setter.Value>
+                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+            </Setter.Value>
+        </Setter>
         <Setter Property="Width" Value="350"/>
         <Setter Property="Margin" Value="4"/>
         <Setter Property="Padding" Value="0"/>
         <Setter Property="CornerRadius" Value="4"/>
-        <Style.Triggers>
+        <!--<Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#2e2e2e" />
             </Trigger>
-        </Style.Triggers>
+        </Style.Triggers>-->
     </Style>
     <DataTemplate x:Key="VaultMapItem" DataType="{x:Type model:LocalMap}">
-        <Border Style="{StaticResource CardBorder}" Cursor="Hand" Width="128" Height="128">
-            <Border.Background>
-                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-            </Border.Background>
-            <Image Grid.Row="0" Grid.RowSpan="2" Source="{Binding Preview}" Width="128" Height="128" VerticalAlignment="Top"/>
-        </Border>
+        <Grid ShowGridLines="False" Margin="-4">
+            <Grid.ContextMenu>
+                <ContextMenu>
+                </ContextMenu>
+            </Grid.ContextMenu>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition MinWidth="70" Width="Auto" />
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition MinWidth="90" Width="Auto" />
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="10"/>
+            </Grid.ColumnDefinitions>
+            <Image Source="{Binding Preview, Mode=OneWay}" Width="60" Height="60"/>
+            <TextBlock Grid.Column="2" MaxWidth="200" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
+                <Run Text="{Binding Scenario.Name, Mode=OneWay}" FontSize="14" />
+                <LineBreak/>
+                <Run Text="{Binding Downloaded, Mode=OneWay, StringFormat='Downloaded {0:dd.MM.yyyy}'}" FontSize="10" ToolTip="Downloaded at">
+                    <Run.Foreground>
+                        <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                    </Run.Foreground>
+                </Run>
+            </TextBlock>
+
+            <TextBlock Grid.Column="4" ToolTip="Max players on map" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <Run Text="&#xe533;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        <Run Text="{Binding Scenario.Armies.Count, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Grid.Column="6" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <Run Text="&#xf546;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        <Run Text="{Binding Scenario.SizeLabelKm, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Grid.Column="8" VerticalAlignment="Center" FontSize="14">
+                <TextBlock.Foreground>
+                    <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
+                </TextBlock.Foreground>
+                                <Run Text="&#xf30f;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                                <Run Text="{Binding Scenario.BattleType, Mode=OneWay}" ToolTip="Battle type"/>
+                                <Run Text="{Binding Scenario.Type, Mode=OneWay, StringFormat='- {0}'}" ToolTip="Map type"/>
+            </TextBlock>
+        </Grid>
     </DataTemplate>
     <Style x:Key="VaultMapsListBox" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
         <Setter Property="ItemsPanel">
@@ -40,6 +89,7 @@
 
     <DataTemplate x:Key="VaultMapInformation" DataType="{x:Type model:LocalMap}">
         <StackPanel>
+            <Image Source="{Binding Preview}"/>
             <ui:Badge Grid.Row="0" Grid.ColumnSpan="3" Content="Map information" Appearance="Secondary" Padding="8" Margin="0 0 0 10"/>
             <TextBlock Margin="0 0 0 10" Text="Map name" FontSize="12"/>
             <TextBox Margin="0 0 0 10" Text="{Binding Scenario.Name}" TextWrapping="Wrap" IsReadOnly="True"/>

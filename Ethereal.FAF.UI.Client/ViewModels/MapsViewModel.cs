@@ -31,7 +31,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, SnackbarService snackbarService)
         {
             ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
-            DownloadMapCommand = new LambdaCommand(OnDownloadMapCommand, CanDownloadMapCommand);
+            DownloadMapCommand = new LambdaCommand(OnDownloadMapCommand);
 
             Maps = new();
             MapsViewSource = new()
@@ -107,16 +107,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-
-
+        #region SortDescriptionsSource
         private SortDescription[] _SortDescriptionsSource;
         public SortDescription[] SortDescriptionsSource
         {
             get => _SortDescriptionsSource;
             set => Set(ref _SortDescriptionsSource, value);
-        }
-
-        public SortDescription _SelectedSortDescription;
+        } 
+        #endregion
+        #region SelectedSortDescription
+        public SortDescription _SelectedSortDescription = new("None", ListSortDirection.Descending);
         public SortDescription SelectedSortDescription
         {
             get => _SelectedSortDescription;
@@ -129,7 +129,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     RunRequest();
                 }
             }
-        }
+        } 
+        #endregion
+        #region SelectedSortDirection
         private ListSortDirection _SelectedSortDirection;
         public ListSortDirection SelectedSortDirection
         {
@@ -142,7 +144,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     RunRequest();
                 }
             }
-        }
+        } 
+        #endregion
 
         #region MapName
         private string _MapName;
@@ -204,6 +207,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
+        public bool IsEnabled => CancellationTokenSource is null;
+
         private string BuildQuery()
         {
             StringBuilder filter = new();
@@ -234,7 +239,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public void RunRequest()
         {
-            Task.Run(RequestTask);
+            Task.Run(RequestTask)
+                .ContinueWith(t =>
+                {
+                    CancellationTokenSource = null;
+                    OnPropertyChanged(nameof(IsEnabled));
+                });
         }
 
         private CancellationTokenSource CancellationTokenSource;
@@ -314,10 +324,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region DownloadMap
         public ICommand DownloadMapCommand { get; }
-        private bool CanDownloadMapCommand(object arg) => arg is ApiMapModel map && map.LatestVersion is not null;
+        //private bool CanDownloadMapCommand(object arg) => arg is ApiMapModel map && map.LatestVersion is not null;
         private async void OnDownloadMapCommand(object arg)
         {
-            var map = (ApiMapModel)arg;
+            if (arg is not ApiMapModel map)
+            {
+                return;
+            }
+            if (map.LatestVersion is null)
+            {
+                return;
+            }
             try
             {
                 await MapsService.DownloadAsync(Path.GetFileNameWithoutExtension(map.LatestVersion.Filename), ContentUrl);

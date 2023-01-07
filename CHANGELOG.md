@@ -1,16 +1,28 @@
 # Changelog
 
+## [2.0.3](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.3)
+
+** Changelog **
+
+- Added search support by map name in Hosting tab
+- Added Mods vault tab
+- Changed list views in Players/Games/Maps/Hosting tab
+- Fixed error when grouping by rating ranges in Players tab
+- Fixed Changelog tab
+- Preview of Profile tab
+- Preview of Data tab
+
 ## [2.0.2](https://github.com/Eternal-ll/Ethereal-FAF-Client/releases/tag/2.0.2-beta.1) (2023-01-03)
 
 **Changelog**
 
-- [x] Support of multiple connected servers
-- [x] Fixed Ice related problems
-- [x] Fixed patch related problems
-- [x] Added startup pages
-- [x] Added vault page
-- [x] Added maps vault page
-- [x] Added [3.3.0 Ice Adapter](https://github.com/FAForever/java-ice-adapter/releases/tag/v3.3.0)
+- Support of multiple connected servers
+- Fixed Ice related problems
+- Fixed patch related problems
+- Added startup pages
+- Added vault page
+- Added maps vault page
+- Added [3.3.0 Ice Adapter](https://github.com/FAForever/java-ice-adapter/releases/tag/v3.3.0)
 
 **FAQ**
 

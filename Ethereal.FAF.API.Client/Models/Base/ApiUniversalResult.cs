@@ -30,6 +30,43 @@ namespace beta.Models.API.Base
             entityProperties = null;
         }
     }
+    public class ModsResult : ApiUniversalResult<Mod[]>
+    {
+        public override void ParseIncluded()
+        {
+            var included = Included;
+            if (included is null || Data is null) return;
+            if (included.Length == 0 || Data.Length == 0) return;
+            foreach (var mod in Data)
+            {
+                if (mod.Relations is null) continue;
+                foreach (var relation in mod.Relations)
+                {
+                    if (relation.Value.Data is null) continue;
+                    if (relation.Value.Data.Count == 0) continue;
+                    var entity = ApiUniversalTools.GetDataFromIncluded(included, relation.Value.Data[0].Type, relation.Value.Data[0].Id);
+                    if (entity is null) continue;
+
+                    switch (relation.Value.Data[0].Type)
+                    {
+                        case ApiDataType.modVersion:
+                            mod.LatestVersion = entity.CastTo<ModVersion>();
+                            //if (map.LatestVersion.IsLegacyMap)
+                            //{
+                            //    map.LatestVersion.Attributes["hidden"] = "false";
+                            //}
+                            continue;
+                        case ApiDataType.player:
+                            mod.Uploader = entity?.Attributes["login"];
+                            continue;
+                        case ApiDataType.modReviewsSummary:
+                            mod.ReviewsSummary = entity?.CastTo<ApiUniversalSummary>();
+                            continue;
+                    }
+                }
+            }
+        }
+    }
     public class ApiMapsResult : ApiUniversalResult<ApiMapModel[]>
     {
         public override void ParseIncluded()

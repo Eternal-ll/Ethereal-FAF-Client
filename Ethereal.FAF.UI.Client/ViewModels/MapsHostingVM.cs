@@ -1,6 +1,5 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+﻿using beta.Models.API.MapsVault;
+using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer.Enums;
@@ -29,6 +28,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         protected MapsHostingVM(ContainerViewModel container, IConfiguration configuration, NotificationService notificationService, ServersManagement serversManagement)
         {
+            LocalMaps = new();
+            MapsSource = new()
+            {
+                Source = LocalMaps.AsObservable
+            };
+            MapsSource.Filter += MapsSource_Filter;
             //LobbyClient = lobbyClient;
             Container = container;
             //PatchClient = patchClient;
@@ -37,6 +42,30 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             NotificationService = notificationService;
             ServersManagement = serversManagement;
             SelectedServer = serversManagement.ServersManagers.FirstOrDefault();
+        }
+
+        #region FilterText
+        private string _FilterText;
+        public string FilterText
+        {
+            get => _FilterText;
+            set
+            {
+                if (Set(ref _FilterText, value))
+                {
+                    MapsView.Refresh();
+                }
+            }
+        }
+        #endregion
+
+        private void MapsSource_Filter(object sender, FilterEventArgs e)
+        {
+            var map = (LocalMap)e.Item;
+            if (!string.IsNullOrWhiteSpace(FilterText))
+            {
+                e.Accepted = map.Scenario.Name.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         #region SelectedServer
@@ -59,25 +88,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public CollectionViewSource MapsSource { get; private set; }
+        private readonly CollectionViewSource MapsSource;
         public ICollectionView MapsView => MapsSource?.View;
         protected bool IsRefresh;
 
-        public IReadOnlyObservableCollection<LocalMap> LocalMapsReadOnly => LocalMaps?.AsObservable;
-        #region LocalMaps
-        private ConcurrentObservableCollection<LocalMap> _LocalMaps;
-        public ConcurrentObservableCollection<LocalMap> LocalMaps
-        {
-            get => _LocalMaps;
-            set
-            {
-                if (Set(ref _LocalMaps, value))
-                {
-                    OnPropertyChanged(nameof(LocalMapsReadOnly));
-                }
-            }
-        }
-        #endregion
+        protected ConcurrentObservableCollection<LocalMap> LocalMaps;
 
         #region LocalMap
         private LocalMap _LocalMap;
@@ -131,18 +146,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         });
         #endregion
 
-        public void UpdateMapsSource()
-        {
-            MapsSource = new()
-            {
-                Source = LocalMaps.AsObservable
-            };
-            //MapsView.CurrentChanged += GamesView_CurrentChanged;
-            //MapsSource.Filter += GamesSource_Filter;
-            IsRefresh = true;
-            OnPropertyChanged(nameof(MapsView));
-            IsRefresh = false;
-        }
         protected bool Disposed;
         protected override void Dispose(bool disposing)
         {
@@ -156,7 +159,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         protected void SetSource(IEnumerable<LocalMap> source)
         {
-            LocalMaps = new();
+            LocalMaps.Clear();
             LocalMaps.AddRange(source);
             //App.Current.Dispatcher.Invoke(UpdateMapsSource, System.Windows.Threading.DispatcherPriority.Background);
         }
@@ -164,6 +167,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             if (Disposed) return;
              LocalMaps.Add(map);
+        }
+        protected void AddRange(IEnumerable<LocalMap> maps)
+        {
+            if (Disposed) return;
+            LocalMaps.AddRange(maps);
         }
     }
 }

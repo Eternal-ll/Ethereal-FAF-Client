@@ -77,5 +77,11 @@
     <Resource Include="Resources\Images\Flags\*.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Views\DataView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
 
 </Project>

@@ -38,8 +38,8 @@
                 </ResourceDictionary>
                 <ui:ControlsDictionary />
                 <ui:ThemesDictionary Theme="Dark" />
-                <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/Fonts;component/FontsDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
 
                 <ResourceDictionary>
                     <Style x:Key="BorderPopup" TargetType="Border">
@@ -68,6 +68,8 @@
                         </Setter>
                     </Style>
                 </ResourceDictionary>
+
+                <ResourceDictionary Source="Resources/Dictionaries/CardsDictionary.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

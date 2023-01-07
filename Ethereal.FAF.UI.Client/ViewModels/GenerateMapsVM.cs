@@ -36,7 +36,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             _SelectedMapGeneratorVersion = configuration.GetValue<string>("MapGenerator:Config:SelectedMapGeneratorVersion");
             _SelectedTerrainSymmetry = configuration.GetValue<string>("MapGenerator:Config:SelectedTerrainSymmetry");
             _SelectedGenerationStyle = configuration.GetValue<string>("MapGenerator:Config:SelectedGenerationStyle");
-            _TeamsCount = configuration.GetValue("MapGenerator:Config:TeamsCount", 6);
+            _TeamsCount = configuration.GetValue("MapGenerator:Config:TeamsCount", 2);
             _SpawnsCount = configuration.GetValue("MapGenerator:Config:SpawnsCount", 8);
             _MapSize = configuration.GetValue<double>("MapGenerator:Config:MapSize", 10);
             var mapDensities = configuration
@@ -77,17 +77,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 EnableRaisingEvents = true,
                 NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
             };
-            FileSystemWatcher.Changed += (s, e) =>
-            {
-                //await Task.Delay(500);
-                Thread.Sleep(500);
-                ProcessGeneratedMap(e.FullPath);
-                //Task.Run(async () =>
-                //{
-                //    await Task.Delay(500);
-                //    ProcessGeneratedMap(e.FullPath);
-                //});
-            };
+            FileSystemWatcher.Changed += FileSystemWatcher_Changed;
             mapGenerator.MapGenerated += MapGenerator_MapGenerated;
             SelectedMapGeneratorVersion = MapGenerator.LatestVersion;
             Task.Run(() =>
@@ -96,9 +86,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 string[] scenarios = Directory.GetFiles(mapsFolder, "*_scenario.lua", SearchOption.AllDirectories);
                 foreach (var file in scenarios)
                 {
-                    var name = file.Split('/', '\\')[^2];
+                    var name = Path.GetFileName(Path.GetDirectoryName(file));
                     if (!MapGenerator.IsGeneratedMap(name)) continue;
                     var map = new LocalMap();
+                    map.Downloaded = File.GetCreationTime(file);
                     map.FolderName = name;
                     map.Scenario = MapScenario.FromFile(file);
                     var preview = file.Replace("_scenario.lua", ".png");
@@ -113,6 +104,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 SetSource(maps);
             });
         }
+
+        private void FileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (e.ChangeType is WatcherChangeTypes.Deleted or WatcherChangeTypes.Changed) return;
+            Thread.Sleep(500);
+            ProcessGeneratedMap(e.FullPath);
+        }
+
         private void MapGenerator_MapGenerated(object sender, string e)
         {
 
@@ -120,7 +119,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void ProcessGeneratedMap(string scenario)
         {
-            var name = scenario.Split('/', '\\')[^2];
+            var name = Path.GetFileName(Path.GetDirectoryName(scenario));
             if (GeneratedMaps.Any(m => m == name)) return;
             GeneratedMaps.Add(name);
             var map = new LocalMap();
@@ -327,7 +326,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public int[] GenerateCountSource => Enumerable.Range(0, 10).ToArray();
+        public int[] GenerateCountSource => Enumerable.Range(1, 10).ToArray();
         #region GenerateCount
         private int _GenerateCount = 1;
         public int GenerateCount
@@ -483,7 +482,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+            FileSystemWatcher.Changed -= FileSystemWatcher_Changed;
             FileSystemWatcher.Dispose();
+            FileSystemWatcher = null;
         }
     }
 }

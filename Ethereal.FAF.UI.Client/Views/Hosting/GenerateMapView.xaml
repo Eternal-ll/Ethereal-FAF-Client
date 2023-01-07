@@ -23,12 +23,21 @@
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <ListBox x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                 ItemsSource="{Binding LocalMaps}" SelectedItem="{Binding LocalMap}" ItemTemplate="{StaticResource VaultMapItem}"
-                 Style="{StaticResource VaultMapsListBox}">
-        </ListBox>
-        <ui:TextBox PlaceholderText="Search" Icon="Search24"/>
-        <Border Grid.Column="3" Grid.RowSpan="3" Padding="10" Width="400">
+        <ListView x:Name="Maps" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                 ItemsSource="{Binding MapsView}" SelectedItem="{Binding LocalMap}" ItemTemplate="{StaticResource VaultMapItem}">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
+                    <Setter Property="Height" Value="60"/>
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
+        </ListView>
+        <ui:TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Search" Icon="Search24"/>
+        <Border Grid.Column="3" Grid.RowSpan="3" Padding="10 10 0 10"  Width="400">
             <Border.Background>
                 <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
             </Border.Background>
@@ -41,10 +50,12 @@
                     </Style.Triggers>
                 </Style>
             </Border.Style>
-            <StackPanel>
-                <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}" ContentTemplate="{StaticResource VaultMapInformation}"/>
-                <Button Content="Host game" Command="{Binding HostGameCommand}"/>
-            </StackPanel>
+            <ScrollViewer>
+                <StackPanel>
+                    <ContentControl Content="{Binding ElementName=Maps, Path=SelectedValue}" ContentTemplate="{StaticResource VaultMapInformation}"/>
+                    <Button Content="Host game" Command="{Binding HostGameCommand}"/>
+                </StackPanel>
+            </ScrollViewer>
         </Border>
 
         <Border Grid.Column="5" Grid.RowSpan="3" Width="400">
