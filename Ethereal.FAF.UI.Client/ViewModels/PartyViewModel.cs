@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
@@ -43,6 +44,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public Faction[] SelectedFactions => Factions.Where(t => t.Value).Select(t => t.Key).ToArray();
         public bool IsOwner { get; set; }
     }
+    /// <summary>
+    /// Matchmaking party view-model
+    /// </summary>
     public sealed class PartyViewModel : Base.ViewModel
     {
         private object _Status;
@@ -59,7 +63,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        private readonly LobbyClient LobbyClient;
+        private ServerManager ServerManager;
+        private LobbyClient LobbyClient;
         private readonly PlayersViewModel PlayersVM;
         private readonly DialogService DialogService;
         private readonly NotificationService NotificationService;
@@ -69,18 +74,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public PartyViewModel(PlayersViewModel playersVM, ILogger<PartyViewModel> logger, DialogService dialogService, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService)
         {
-            //LobbyClient = lobbyClient;
             PlayersVM = playersVM;
             DialogService = dialogService;
             ServiceProvider = serviceProvider;
             NotificationService = notificationService;
             INavigationService = iNavigationService;
             Logger = logger;
-
-            //lobbyClient.KickedFromParty += LobbyClient_KickedFromParty;
-            //lobbyClient.PartyInvite += LobbyClient_PartyInvite;
-            //lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
-            //lobbyClient.Authorized += LobbyClient_Authorized;
 
             Factions = new()
             {
@@ -92,9 +91,21 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Members = new();
         }
 
-        private void LobbyClient_Authorized(object sender, bool e)
+        public void Initialize(ServerManager serverManager, LobbyClient lobbyClient)
         {
-            if (!e) return;
+            ServerManager = serverManager;
+            LobbyClient = lobbyClient;
+
+            lobbyClient.KickedFromParty += LobbyClient_KickedFromParty;
+            lobbyClient.PartyInvite += LobbyClient_PartyInvite;
+            lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
+            lobbyClient.StateChanged += LobbyClient_StateChanged;
+        }
+
+        private void LobbyClient_StateChanged(object sender, LobbyState e)
+        {
+            if (e is not LobbyState.Authorized) return;
+            LobbyClient.RequestUpdateOnQueue();
             LobbyClient.SetPartyFactions(SelectedFactions);
         }
 
@@ -106,7 +117,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (Set(ref _OwnerId, value))
                 {
-                    IsOwner = PlayersVM.Selfs.Any(s=>s.Id == value);
+                    IsOwner = ServerManager.Self.Id == value;
                 }
             }
         }
@@ -137,8 +148,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             foreach (var member in e.Members)
             {
-                // ADD server manager
-                if (PlayersVM.TryGetPlayer(member.PlayerId, null, out var player))
+                if (PlayersVM.TryGetPlayer(member.PlayerId, ServerManager, out var player))
                 {
                     var playerMember = Members.FirstOrDefault(m => m.Player.Id == member.PlayerId);
                     var partyPlayer = new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId);
@@ -190,7 +200,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        private async void LobbyClient_KickedFromParty(object sender, System.EventArgs e)
+        private void LobbyClient_KickedFromParty(object sender, System.EventArgs e)
         {
             //NotificationService.Notify("Notification", "You were kicked from party");
             Logger.LogTrace("[Party] Kicked from party of player [{id}]", OwnerId);

@@ -26,8 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public bool IsExist(string map)
         {
             var folder = Path.Combine(Configuration.GetMapsLocation(), map);
-            var data = map.Split('.');
-            var mapname = data[0];
+            var mapname = MapGen.MapGenerator.IsGeneratedMap(map) ? map : Path.GetFileNameWithoutExtension(map);
             if (!Directory.Exists(folder)) return false;
             var scenario = Configuration.GetMapFile(mapname, "_scenario.lua", maps: folder);
             var scmap    = Configuration.GetMapFile(mapname, ".scmap", maps: folder);

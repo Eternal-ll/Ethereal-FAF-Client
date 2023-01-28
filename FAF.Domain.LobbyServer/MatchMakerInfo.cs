@@ -2,7 +2,10 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    public enum SearchInfoState : int
+    /// <summary>
+    /// State of queue search
+    /// </summary>
+    public enum QueueSearchState : int
     {
         Start,
         Stop

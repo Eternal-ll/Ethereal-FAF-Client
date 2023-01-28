@@ -1,6 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
@@ -96,8 +95,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly IServiceProvider ServiceProvider;
         private readonly IConfiguration Configuration;
-        private readonly LobbyClient Lobby;
-        private readonly IrcClient IrcClient;
         private readonly ServersManagement ServersManagement;
 
         public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, ServersManagement serversManagement)
@@ -108,9 +105,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 var lobby = server.GetLobbyClient();
                 var ircClient = server.GetIrcClient();
-                lobby.Authorized += (s, authorized) =>
+                lobby.StateChanged += (s, state) =>
                 {
-                    if (authorized) return;
+                    if (state is not LobbyState.Disconnected) return;
                     Selfs.Remove(Selfs.FirstOrDefault(s => s.ServerManager.Equals(server)));
                     lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
                     lobby.PlayerReceived -= server.PlayerReceived;

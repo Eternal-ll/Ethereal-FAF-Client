@@ -141,8 +141,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 {
                     rating = new double[] { 1500, 500 }
                 };
-                mean = (int)rating.rating[0];
-                deviation = (int)rating.rating[1];
+                mean = 1900;//(int)rating.rating[0];
+                deviation = 50;// (int)rating.rating[1];
                 games = rating.number_of_games;
                 country = me.Country;
                 clan = me.Clan;
@@ -201,7 +201,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             arguments.Append($"/gpgnet 127.0.0.1:{iceManager.GpgNetPort} ");
 
             FillPlayerArgs(arguments, e.rating_type, self);
-            if (e.init_mode == GameInitMode.Auto)
+            if (e.game_type is GameType.MatchMaker)
             {
                 // matchmaker
                 arguments.Append($"/{e.faction.ToString().ToLower()} ");
@@ -258,8 +258,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         }
         public async Task JoinGame(Game game, IProgress<string> progress = null, CancellationToken cancellationToken = default)
         {
-            if (Joining) return;
-            Joining = true;
             try
             {
                 var maps = Configuration.GetMapsLocation();
@@ -284,7 +282,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             }
             catch
             {
-                Joining = false;
             }
         }
         public async Task WatchGame(long gameId, long playerId, string mapname, FeaturedMod mod, PatchClient patchClient, Server server)

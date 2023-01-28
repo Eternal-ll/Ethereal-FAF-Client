@@ -244,7 +244,7 @@
                     <TextBlock>
                         <Run Text="FAF ICE Adapter"/>
                         <LineBreak/>
-                        <Run Text="A P2P connection proxy for Supreme Commander: Forged Alliance." Style="{StaticResource DescriptionHeaderRun}"/>
+                        <Run Text="A P2P connection proxy for Supreme Commander: Forged Alliance. Or An ice (RFC 5245) based network bridge between FAF client and ForgedAlliance.exe" Style="{StaticResource DescriptionHeaderRun}"/>
                         <ui:Hyperlink NavigateUri="https://github.com/FAForever/java-ice-adapter" Content="Github repository"
                                       Style="{StaticResource InlineHyperlink}"/>
                     </TextBlock>
