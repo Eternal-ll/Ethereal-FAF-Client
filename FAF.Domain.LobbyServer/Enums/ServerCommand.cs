@@ -1,27 +1,31 @@
-﻿namespace FAF.Domain.LobbyServer.Enums
+﻿using System;
+
+namespace FAF.Domain.LobbyServer.Enums
 {
     public enum ServerCommand : byte
     {
+        [Obsolete("Use API instead")]
         /// <summary>
         /// Auth
         /// </summary>
         auth,
         /// <summary>
+        /// Authentification false.
+        /// </summary>
+        authentication_failed,
+
+        /// <summary>
         /// Authentification
         /// </summary>
         ask_session,
         /// <summary>
-        /// Authentification failse.
+        /// Incoming session id
         /// </summary>
-        authentication_failed,
+        session,
         /// <summary>
         /// Incoming notification
         /// </summary>
         notice,
-        /// <summary>
-        /// Incoming session id
-        /// </summary>
-        session,
         /// <summary>
         /// Incoming IRC password
         /// </summary>
@@ -125,6 +129,7 @@
         /// <summary>
         /// Incoming/Outgoing message for ICE servers
         /// </summary>
+        [Obsolete("Use API instead")]
         ice_servers,
         /// <summary>
         /// Incoming message that we did something wrong and the lobby-server will disconnect

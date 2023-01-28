@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using Windows.Devices.I2c.Provider;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 {
@@ -16,6 +17,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         public const string IceAdapterUseTelemetryUI = "IceAdapter:UseTelemetryUI";
         public const string IceAdapterTelemetry = "IceAdapter:Telemetry";
         public const string IceAdapterTtl = "IceAdapter:Ttl";
+
+
+        public const string UidGeneratorExecutable = "Paths:UidGenerator";
     }
     /// <summary>
     /// User config
@@ -43,11 +47,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             "/update.json";
 
 
-        public static string GetVersion(this IConfiguration configuration) =>
-            configuration.GetValue<string>("Client:Version");
+        public static string GetClientVersion(this IConfiguration configuration) =>
+            configuration.GetValue<string>("Client:Version", "2.0.3");
 
         public static bool IsClientUpdated(this IConfiguration configuration) =>
             configuration.GetValue<bool>("Client:IsUpdated", true);
+
+        public static string GetUidGeneratorExecutable(this IConfiguration configuration)
+            => configuration.GetValue<string>(ConfigurationConstants.UidGeneratorExecutable);
 
         /// <summary>
         /// Get path to user maps folder

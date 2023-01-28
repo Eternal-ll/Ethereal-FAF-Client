@@ -35,21 +35,22 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly NotificationService NotificationService;
         private readonly INavigationService NavigationService;
         private readonly DialogService DialogService;
-        private readonly ContainerViewModel ContainerViewModel;
         private readonly PlayersViewModel PlayersViewModel;
 
         private readonly ILogger Logger;
-        private readonly IServiceProvider ServiceProvider;
         private readonly IConfiguration Configuration;
 
-        public MatchmakingViewModel MatchmakingViewModel { get; }
+        private MatchmakingViewModel _MatchmakingViewModel;
+        public MatchmakingViewModel MatchmakingViewModel
+        {
+            get => _MatchmakingViewModel;
+            set => Set(ref _MatchmakingViewModel, value);
+        }
 
         public GamesViewModel(
             GameLauncher gameLauncher,
             NotificationService notificationService,
-            ContainerViewModel containerViewModel,
-            IServiceProvider serviceProvider,
-            MatchmakingViewModel matchmakingViewModel,
+            PlayersViewModel playersViewModel,
             ILogger<GamesViewModel> logger,
             DialogService dialogService,
             IConfiguration configuration,
@@ -91,11 +92,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             serversManagement.ServerManagerAdded += (s, e) =>
             {
+                MatchmakingViewModel = e.GetMatchmakingViewModel();
+
                 var lobby = e.GetLobbyClient();
-                e.LobbyAuthorized = (s, authorized) =>
+                lobby.StateChanged += (s, state) =>
                 {
-                    if (authorized) return;
-                    lobby.Authorized -= e.LobbyAuthorized;
+                    if (state is not LobbyState.Disconnecting) return;
                     lobby.GamesReceived -= e.GamesReceived;
                     lobby.GameReceived -= e.GameReceived;
                     foreach (var game in Games)
@@ -119,7 +121,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     }
                     Lobby_GamesReceived(s, games);
                 };
-                lobby.Authorized += e.LobbyAuthorized;
                 lobby.GamesReceived += e.GamesReceived;
                 lobby.GameReceived += e.GameReceived;
             };
@@ -131,10 +132,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Logger = logger;
 
             NotificationService = notificationService;
-            MatchmakingViewModel = matchmakingViewModel;
-            PlayersViewModel = serviceProvider.GetService<PlayersViewModel>();
-            ContainerViewModel = containerViewModel;
-            ServiceProvider = serviceProvider;
+            PlayersViewModel = playersViewModel;
             DialogService = dialogService;
             NavigationService = navigationService;
             ServersManagement = serversManagement;
@@ -677,7 +675,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             NavigationService.GetNavigationControl().SelectedPageIndex = 0;
             //NavigationService.Navigate(-1);
             NavigationService.Navigate(typeof(HostGameView));
-            //ContainerViewModel.Content = ServiceProvider.GetService<HostGameView>();
         }
         #endregion
 

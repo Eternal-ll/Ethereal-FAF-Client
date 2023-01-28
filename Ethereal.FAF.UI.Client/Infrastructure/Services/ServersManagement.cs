@@ -1,4 +1,6 @@
-﻿using Ethereal.FAF.UI.Client.Models.Configuration;
+﻿using beta.Models.API;
+using Ethereal.FAF.UI.Client.Models.Configuration;
+using Ethereal.FAF.UI.Client.ViewModels.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -8,12 +10,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
-    public class ServersManagement : IDisposable
+    public class ServersManagement : ViewModel
     {
         public event EventHandler<ServerManager> ServerManagerAdded;
         public event EventHandler<ServerManager> ServerManagerRemoved;
@@ -26,6 +29,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly ILogger Logger;
 
         public ObservableCollection<ServerManager> ServersManagers { get; set; }
+
+        #region SelectedServerManager
+        private ServerManager _SelectedServerManager;
+        /// <summary>
+        /// Selected server
+        /// </summary>
+        public ServerManager SelectedServerManager
+        {
+            get => SelectedServerManager;
+            set => Set(ref _SelectedServerManager, value);
+        } 
+        #endregion
         public ObservableCollection<Server> Servers { get; }
 
         public ServersManagement(IServiceProvider serviceProvider, IConfiguration configuration, IHttpClientFactory httpClientFactory,
@@ -65,62 +80,62 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     continue;
                 }
                 newServers.Add(server);
-                //if (!string.IsNullOrWhiteSpace(server.ConfigurationFile))
-                //{
-                //    DownlordClientConfiguration downlordConfiguration = null!;
-                //    try
-                //    {
-                //        downlordConfiguration = client.GetFromJsonAsync<DownlordClientConfiguration>(server.Content.ToString() + server.ConfigurationFile).Result;
-                //    }
-                //    catch
-                //    {
-                //        logger.LogWarning("Failed to get Downlord`s client configuration from [{host}]", server.Content.ToString() + server.ConfigurationFile);
-                //        continue;
-                //    }
-                //    foreach (var endpoint in downlordConfiguration.Endpoints.Where(e => e.Lobby.Host != server.Lobby.Host))
-                //    {
-                //        var serverFromConfig = new Server()
-                //        {
-                //            Name = $"[{server.Name}] {endpoint.Name}",
-                //            ShortName = $"[{server.Name}] {endpoint.Name}",
-                //            //Site = server.Site,
-                //            Cloudfare = server.Cloudfare,
-                //            Content = server.Content,
-                //            Lobby = new()
-                //            {
-                //                Host = endpoint.Lobby.Host,
-                //                Port = endpoint.Lobby.Port
-                //            },
-                //            Irc = new()
-                //            {
-                //                Host = endpoint.Irc.Host,
-                //                Port = endpoint.Irc.Port
-                //            },
-                //            Api = endpoint.Api.Url,
-                //            OAuth = new()
-                //            {
-                //                BaseAddress = endpoint.Oauth.Url,
-                //                ClientId = "faf-java-client",
-                //                RedirectPorts = server.OAuth.RedirectPorts,
-                //                ResponseSeconds = server.OAuth.ResponseSeconds,
-                //                Scope = server.OAuth.Scope
-                //            },
-                //            Logo = server.Logo,
-                //            Relay = new()
-                //            {
-                //                Host = endpoint.Lobby.Host,
-                //                Port = server.Relay.Port
-                //            },
-                //            Replay = new()
-                //            {
-                //                Host = endpoint.LiveReplay.Host,
-                //                Port = endpoint.LiveReplay.Port
-                //            },
-                //            IsVisible = true,
-                //        };
-                //        newServers.Add(serverFromConfig);
-                //    }
-                //}
+                if (!string.IsNullOrWhiteSpace(server.ConfigurationFile))
+                {
+                    DownlordClientConfiguration downlordConfiguration = null!;
+                    try
+                    {
+                        downlordConfiguration = client.GetFromJsonAsync<DownlordClientConfiguration>(server.Content.ToString() + server.ConfigurationFile).Result;
+                    }
+                    catch
+                    {
+                        logger.LogWarning("Failed to get Downlord`s client configuration from [{host}]", server.Content.ToString() + server.ConfigurationFile);
+                        continue;
+                    }
+                    foreach (var endpoint in downlordConfiguration.Endpoints.Where(e => e.Lobby.Host != server.Lobby.Host))
+                    {
+                        var serverFromConfig = new Server()
+                        {
+                            Name = $"{endpoint.Name}",
+                            ShortName = $"{endpoint.Name}",
+                            //Site = server.Site,
+                            Cloudfare = server.Cloudfare,
+                            Content = server.Content,
+                            Lobby = new()
+                            {
+                                Host = endpoint.Lobby.Host,
+                                Port = 8002
+                            },
+                            Irc = new()
+                            {
+                                Host = endpoint.Irc.Host,
+                                Port = endpoint.Irc.Port
+                            },
+                            Api = endpoint.Api.Url,
+                            OAuth = new()
+                            {
+                                BaseAddress = endpoint.Oauth.Url,
+                                ClientId = "faf-java-client",
+                                RedirectPorts = server.OAuth.RedirectPorts,
+                                ResponseSeconds = server.OAuth.ResponseSeconds,
+                                Scope = server.OAuth.Scope
+                            },
+                            Logo = server.Logo,
+                            Relay = new()
+                            {
+                                Host = endpoint.Lobby.Host,
+                                Port = server.Relay.Port
+                            },
+                            Replay = new()
+                            {
+                                Host = endpoint.LiveReplay.Host,
+                                Port = endpoint.LiveReplay.Port
+                            },
+                            IsVisible = true,
+                        };
+                        newServers.Add(serverFromConfig);
+                    }
+                }
             }
 
             Servers = new(newServers);
@@ -129,17 +144,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public async Task AuthorizeAndConnectToServerAsync(Server server, CancellationToken cancellationToken)
         {
             var serverManager = ServiceProvider.GetRequiredService<ServerManager>();
-            serverManager.GetOauthProvider().OAuthRequired += ServersManagement_OAuthRequired;
-            serverManager.GetOauthProvider().OAuthUrlExpired += ServersManagement_OAuthUrlExpired;
-            serverManager.GetOauthProvider().ErrorOccuried += ServersManagement_ErrorOccuried;
-            serverManager.SetServer(server, Configuration.GetValue<string>("Client:Version"));
+            serverManager.GetOAuthProvider().OAuthRequired += ServersManagement_OAuthRequired;
+            serverManager.GetOAuthProvider().OAuthUrlExpired += ServersManagement_OAuthUrlExpired;
+            serverManager.GetOAuthProvider().ErrorOccuried += ServersManagement_ErrorOccuried;
+            serverManager.SetServer(server);
             await serverManager.AuthorizeAndConnectAsync(server, cancellationToken);
             ServersManagers.Add(serverManager);
+            SelectedServerManager = serverManager;
             ServerManagerAdded?.Invoke(this, serverManager);
 
-            serverManager.GetOauthProvider().OAuthRequired -= ServersManagement_OAuthRequired;
-            serverManager.GetOauthProvider().OAuthUrlExpired -= ServersManagement_OAuthUrlExpired;
-            serverManager.GetOauthProvider().ErrorOccuried -= ServersManagement_ErrorOccuried;
+            serverManager.GetOAuthProvider().OAuthRequired -= ServersManagement_OAuthRequired;
+            serverManager.GetOAuthProvider().OAuthUrlExpired -= ServersManagement_OAuthUrlExpired;
+            serverManager.GetOAuthProvider().ErrorOccuried -= ServersManagement_ErrorOccuried;
         }
 
         private void ServersManagement_ErrorOccuried(object sender, (Server server, string error, string description) e)
@@ -160,11 +176,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public async Task DisconnectedFromServer(ServerManager serverManager)
         {
             ServerManagerRemoved?.Invoke(this, serverManager);
-        }
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
         }
     }
 }

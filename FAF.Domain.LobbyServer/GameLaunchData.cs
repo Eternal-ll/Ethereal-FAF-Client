@@ -1,4 +1,5 @@
 ﻿using FAF.Domain.LobbyServer.Enums;
+using System;
 using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
@@ -11,8 +12,6 @@ namespace FAF.Domain.LobbyServer
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public FeaturedMod mod { get; set; }
         public string name { get; set; }
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public GameInitMode init_mode { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameType game_type { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]

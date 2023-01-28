@@ -46,8 +46,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             DialogService = dialogService;
         }
 
-        private void LobbyClient_NotificationReceived(object sender, global::FAF.Domain.LobbyServer.NotificationData e) => 
-            Notify("Server", e.text);
+        private void LobbyClient_NotificationReceived(object sender, global::FAF.Domain.LobbyServer.Notification e) => 
+            Notify("Server", e.Text);
 
         public void Notify(string title, string message, SymbolRegular symbol = SymbolRegular.Info24, bool ignoreOs = true)
         {

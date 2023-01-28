@@ -10,7 +10,7 @@ namespace FAF.Domain.LobbyServer.Base
     public static class ServerCommands
     {
         public static string AskSession(string agent, string version) =>
-            $"{{\"command\": \"ask_session\", \"version\": \"{version}\", \"user_agent\": \"{agent}\"}}";
+            $"{{\"command\": \"ask_session\", \"version\": \"{version}\", \"user_agent\": \"{agent}\"}}\n";
         /// <summary>
         /// JSON for authentication on lobby-server
         /// </summary>
@@ -19,7 +19,7 @@ namespace FAF.Domain.LobbyServer.Base
         /// <param name="session">Session id from lobby-server</param>
         /// <returns></returns>
         public static string PassAuthentication(string accessToken, string uid, string session) =>
-            $"{{\"command\":\"auth\", \"token\": \"{accessToken}\", \"unique_id\": \"{uid}\", \"session\": {session}}}";
+            $"{{\"command\":\"auth\", \"token\": \"{accessToken}\", \"unique_id\": \"{uid}\", \"session\": {session}}}\n";
         /// <summary>
         /// Join game
         /// </summary>
@@ -27,7 +27,7 @@ namespace FAF.Domain.LobbyServer.Base
         /// <param name="gamePort">Port for Ice?</param>
         /// <returns></returns>
         public static string JoinGame(string uid, string gamePort = "0") => 
-            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort}}}";
+            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort}}}\n";
         /// <summary>
         /// Join to game with password
         /// </summary>
@@ -36,7 +36,7 @@ namespace FAF.Domain.LobbyServer.Base
         /// <param name="gamePort">Port for Ice?</param>
         /// <returns></returns>
         public static string JoinGame(string uid, string password, string gamePort = "0") =>
-            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort} {(!string.IsNullOrWhiteSpace(password) ? $"\"password\":{password}" : "")}}}";
+            $"{{\"command\":\"game_join\", \"uid\": {uid}, \"gameport\":{gamePort} {(!string.IsNullOrWhiteSpace(password) ? $"\"password\":{password}" : "")}}}\n";
 
         /// <summary>
         /// JSON command for hosting game
@@ -50,32 +50,32 @@ namespace FAF.Domain.LobbyServer.Base
         /// <returns></returns>
         public static string HostGame(string title, string gameMod, string mapName, string visibility = "public", string password = null, bool isRehost = false) =>
             $"{{\"command\":\"game_host\", \"title\": \"{title}\", \"mod\":\"{gameMod}\", \"visibility\": \"{visibility}\", \"mapname\":\"{mapName}\", \"password\":" +
-            (password is null ? "null" : $"\"{password}\"") + $", \"is_rehost\":{isRehost.ToString().ToLower()} }}";
+            (password is null ? "null" : $"\"{password}\"") + $", \"is_rehost\":{isRehost.ToString().ToLower()} }}\n";
 
         /// <summary>
         /// Add to friends
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string AddFriend(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
+        public static string AddFriend(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}\n";
         /// <summary>
         /// Remove from friends
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string RemoveFriend(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
+        public static string RemoveFriend(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}\n";
         /// <summary>
         /// Add to foes
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string AddFoe(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}";
+        public static string AddFoe(int id) => $"{{\"command\": \"social_add\", \"friend\": {id}}}\n";
         /// <summary>
         /// Remove from foes
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string RemoveFoe(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}";
+        public static string RemoveFoe(int id) => $"{{\"command\": \"social_remove\", \"friend\": {id}}}\n";
 
         /// <summary>
         /// Requests MatchMaker info
@@ -93,41 +93,41 @@ namespace FAF.Domain.LobbyServer.Base
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string InviteToParty(long id) => $"{{\"command\": \"invite_to_party\", \"recipient_id\": {id}}}";
+        public static string InviteToParty(long id) => $"{{\"command\": \"invite_to_party\", \"recipient_id\": {id}}}\n";
         /// <summary>
         /// Restore game session
         /// </summary>
         /// <param name="uid">Game uid</param>
         /// <returns></returns>
-        public static string RestoreGameSession(string uid) => $"{{\"command\": \"restore_game_session\", \"game_id\": {uid}}}";
+        public static string RestoreGameSession(string uid) => $"{{\"command\": \"restore_game_session\", \"game_id\": {uid}}}\n";
 
         /// <summary>
         /// Join to MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
-        public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\"}}";
+        public static string JoinToMatchMakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\"}}\n";
         /// <summary>
         /// Join to MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
         public static string JoinToMatchMakingQueue(string queue, string faction) =>
-            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": \"{faction}\"}}";
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": \"{faction}\"}}\n";
         /// <summary>
         /// Join to MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
         public static string JoinToMatchMakingQueue(string queue, params string[] factions) =>
-            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}";
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"start\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}\n";
         /// <summary>
         /// Join to MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
         public static string UpdateQueue(string queue, string state, params string[] factions) =>
-            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"{state}\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}";
+            $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"{state}\", \"faction\": [\"{string.Join("\",\"", factions)}\"]}}\n";
         public static string UpdateQueue(string queue, string state) =>
             $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"{state}\"}}";
         /// <summary>
@@ -135,32 +135,30 @@ namespace FAF.Domain.LobbyServer.Base
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
-        public static string LeaveMatchmakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"stop\"}}";
+        public static string LeaveMatchmakingQueue(string queue) => $"{{\"command\": \"game_matchmaking\", \"queue_name\": \"{queue}\", \"state\": \"stop\"}}\n";
         /// <summary>
         /// Leave from MatchMaking queue
         /// </summary>
         /// <param name="queue">Queue name</param>
         /// <returns></returns>
-        public static string LeaveMatchmakingQueue() => $"{{\"command\": \"game_matchmaking\", \"state\": \"stop\"}}";
+        public static string LeaveMatchmakingQueue() => $"{{\"command\": \"game_matchmaking\", \"state\": \"stop\"}}\n";
         public const string MatchReady = "{\"command\": \"match_ready\"}";
 
-        // #"{{\"command\": \"set_party_factions\", \"factions\": }}";
-        // TODO
         public static string SetPartyFactions(params string[] factions) =>
-            $"{{\"command\": \"set_party_factions\", \"factions\":[{string.Join(',', factions.Select(f=>$"\"{f}\""))}]}}";
+            $"{{\"command\": \"set_party_factions\", \"factions\":[{string.Join(',', factions.Select(f=>$"\"{f}\""))}]}}\n";
 
         /// <summary>
         /// Accept invite to MatchMaker party
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static string AcceptPartyInvite(long id) => $"{{\"command\":\"accept_party_invite\", \"sender_id\": {id}}}";
+        public static string AcceptPartyInvite(long id) => $"{{\"command\":\"accept_party_invite\", \"sender_id\": {id}}}\n";
         /// <summary>
         /// Kick player from MatchMaker party
         /// </summary>
         /// <param name="id">Player id</param>
         /// <returns></returns>
-        public static string KickPlayerFromParty(long id) => $"{{\"command\":\"kick_player_from_party\", \"kicked_player_id\": {id}}}";
+        public static string KickPlayerFromParty(long id) => $"{{\"command\":\"kick_player_from_party\", \"kicked_player_id\": {id}}}\n";
         /// <summary>
         /// Leave from MatchMaker party
         /// </summary>
@@ -172,7 +170,7 @@ namespace FAF.Domain.LobbyServer.Base
 
 
         // GAME GPGNET Commands
-        public static string UniversalGameCommand(string command, string args) => $"{{\"command\": \"{command}\", \"target\": \"game\", \"args\": {args}}}";
+        public static string UniversalGameCommand(string command, string args) => $"{{\"command\": \"{command}\", \"target\": \"game\", \"args\": {args}}}\n";
 
         // ICE
 

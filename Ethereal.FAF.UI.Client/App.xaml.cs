@@ -77,9 +77,7 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<ServersManagement>();
             services.AddTransient<ServerManager>();
 
-            services.AddSingleton(s => new UidGenerator(
-                logger: s.GetService<ILogger<UidGenerator>>(),
-                uid: configuration.GetValue<string>("Paths:UidGenerator")));
+            services.AddSingleton<UidGenerator>();
             services.AddTransient<PatchClient>();
             services.AddTransient<IceManager>();
             services.AddTransient<FafOAuthClient>();
@@ -94,8 +92,8 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient<GamesView>();
             services.AddScoped<GamesViewModel>();
-            services.AddScoped<MatchmakingViewModel>();
-            services.AddScoped<PartyViewModel>();
+            services.AddTransient<MatchmakingViewModel>();
+            services.AddTransient<PartyViewModel>();
 
             services.AddSingleton<BackgroundViewModel>();
 

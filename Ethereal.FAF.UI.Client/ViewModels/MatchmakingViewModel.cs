@@ -27,24 +27,39 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     }
     public sealed class MatchmakingViewModel : Base.ViewModel
     {
-        private readonly LobbyClient LobbyClient;
         private readonly NotificationService NotificationService;
-        private readonly PatchClient PatchClient;
-        public PartyViewModel PartyViewModel { get; }
 
-        public MatchmakingViewModel(PartyViewModel partyViewModel, NotificationService notificationService, PatchClient patchClient)
+        private LobbyClient LobbyClient;
+        private PatchClient PatchClient;
+
+        public PartyViewModel PartyViewModel { get; private set; }
+
+        public MatchmakingViewModel(NotificationService notificationService)
         {
             JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
+            NotificationService = notificationService;
+        }
 
-            //lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
-            //lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
-            //lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
-            //lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
-            //lobbyClient.MatchFound += LobbyClient_MatchFound;
+        public void Initialize(LobbyClient lobbyClient, PatchClient patchClient,  PartyViewModel partyViewModel)
+        {
+            LobbyClient = lobbyClient;
+            PartyViewModel = partyViewModel;
+            PatchClient = patchClient;
 
+            lobbyClient.StateChanged += LobbyClient_StateChanged;
+            lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
+            lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
+            lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
+            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
+            lobbyClient.MatchFound += LobbyClient_MatchFound;
+        }
+
+        private void LobbyClient_StateChanged(object sender, LobbyState e)
+        {
+            if (e is not LobbyState.Authorized) return;
             Task.Run(async () =>
             {
-                while (true)
+                while (LobbyClient.State is LobbyState.Authorized)
                 {
                     // update queue pop time
                     var queues = Queues;
@@ -63,11 +78,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     await Task.Delay(1000);
                 }
             });
-
-            //LobbyClient = lobbyClient;
-            PartyViewModel = partyViewModel;
-            NotificationService = notificationService;
-            PatchClient = patchClient;
         }
 
         private void LobbyClient_MatchFound(object sender, MatchFound e)
@@ -97,11 +107,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void LobbyClient_SearchInfoReceived(object sender, SearchInfo e)
         {
-            SearchStates[e.Queue] = e.State == SearchInfoState.Start;
+            SearchStates[e.Queue] = e.State == QueueSearchState.Start;
             if (CurrentQueue is null) return;
             if (CurrentQueue.Type == e.Queue)
             {
-                State = e.State is SearchInfoState.Start ? MatchmakingState.Searching : MatchmakingState.Idle;
+                State = e.State is QueueSearchState.Start ? MatchmakingState.Searching : MatchmakingState.Idle;
             }
         }
 
@@ -263,7 +273,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             foreach (var key in SearchStates.Keys)
             {
                 SearchStates[key] = false;
-                LobbyClient.UpdateQueue(key, SearchInfoState.Stop);
+                LobbyClient.UpdateQueue(key, QueueSearchState.Stop);
             }
             NotificationService.Notify("Matchmaking", "You left from all matchmaking queues");
         }
@@ -329,7 +339,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
 
             SearchStates[queue] = startSearch;
-            LobbyClient.UpdateQueue(queue, startSearch ? SearchInfoState.Start : SearchInfoState.Stop);
+            LobbyClient.UpdateQueue(queue, startSearch ? QueueSearchState.Start : QueueSearchState.Stop);
             if (!startSearch) return;
             if (UpdateTask is null)
             {

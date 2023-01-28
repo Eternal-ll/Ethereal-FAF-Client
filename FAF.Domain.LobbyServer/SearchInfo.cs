@@ -10,6 +10,6 @@ namespace FAF.Domain.LobbyServer
         public MatchmakingType Queue { get; set; }
         [JsonPropertyName("state")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
-        public SearchInfoState State { get; set; }
+        public QueueSearchState State { get; set; }
     }
 }

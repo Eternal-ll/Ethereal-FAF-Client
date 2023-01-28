@@ -64,12 +64,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         public async Task<OAuthResult> AuthByBrowser(CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             var result = new OAuthResult();
-            Logger.LogTrace("Processing OAuth authorization by browser");
+            Logger.LogInformation("Processing OAuth authorization by browser");
             using var httpListener = new HttpListener();
             var ports = RedirectPorts;
             var freePort = 0;
 
-            Logger.LogTrace("Searching free ports for redirect in given range [{ports}]", ports);
+            Logger.LogInformation("Searching free ports for redirect in given range [{ports}]", ports);
             foreach (var port in ports)
             {
                 try
@@ -79,11 +79,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
                     httpListener.Prefixes.Add($"http://localhost:{port}/");
                     httpListener.Start();
                     freePort = port;
-                    Logger.LogTrace("Port [{port}] is free", port);
+                    Logger.LogInformation("Port [{port}] is free", port);
                     break;
                 }
                 catch
                 {
+                    httpListener.Close();
                     Logger.LogWarning("Port [{port}] is busy", port);
                 }
             }
@@ -94,16 +95,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
                 result.ErrorDescription = $"All ports are busy in given range [{string.Join(',', ports)}]";
                 return result;
             }
-            Logger.LogTrace("Generating unique state for OAuth");
+            Logger.LogInformation("Generating unique state for OAuth");
             string generatedState = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            Logger.LogTrace("Generated state: [{state}]", generatedState);
-            Logger.LogTrace("Generating url");
+            Logger.LogInformation("Generated state: [{state}]", generatedState);
+            Logger.LogInformation("Generating OAuth url...");
             var sb = new StringBuilder()
                 .Append($"{BaseAddress.ToString()}oauth2/auth?")
                 .Append($"response_type=code&client_id={ClientId}&scope={Scope}&state={generatedState}&redirect_uri=http://localhost:{freePort}");
             OAuthLinkGenerated?.Invoke(this, sb.ToString());
-            Logger.LogTrace("Generated url: [{url}]", sb.ToString());
-            Logger.LogTrace("Starting process to open OAuth page");
+            Logger.LogInformation("Generated Oauth url: [{url}]", sb.ToString());
+            Logger.LogInformation("Starting process to open OAuth page");
             Process.Start(new ProcessStartInfo
             {
                 FileName = sb.ToString(),
@@ -120,12 +121,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
                 return result;
             }
             var context = task.Result;
-            Logger.LogTrace("Get response from [{url}]", context.Request.RawUrl);
+            Logger.LogInformation("Get response from [{url}]", context.Request.RawUrl);
             var response = context.Response;
             var request = context.Request;
             if (response.StatusCode == 200)
             {
-                Logger.LogTrace("Getting code from query parameters", @request.QueryString);
+                Logger.LogInformation("Getting code from query parameters", @request.QueryString);
                 var code = request.QueryString["code"];
                 if (code is null)
                 {
@@ -133,7 +134,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
                     result.ErrorDescription = "Code not found in OAuth response";
                     return result;
                 }
-                Logger.LogTrace("Code: [{code}]", code);
+                Logger.LogInformation("Code: [{code}]", code);
                 Logger.LogTrace("Sending response page");
                 System.Windows.Application.ResourceAssembly
                     .GetManifestResourceStream("Ethereal.FAF.UI.Client.Resources.OAuthResult.html")

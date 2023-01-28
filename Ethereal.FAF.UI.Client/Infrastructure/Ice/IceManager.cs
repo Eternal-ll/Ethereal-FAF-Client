@@ -16,10 +16,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -126,7 +122,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 .Where(c => selected.Length == 0 || selected.Contains(c.Id))
                 .Select(c => new IceCoturnServer(c.Key, c.Host, c.Port, ttl, playerId))
                 .ToList();
-            return !servers.Any();
+            return servers.Any();
         }
         public void Initialize(long playerId, string playerLogin, long gameId, string initMode)
         {
@@ -136,20 +132,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceServer = GetIceServerProcess(playerId, playerLogin, gameId);
             IceServer.Start();
             IceClient = new("127.0.0.1", RpcPort);
-            IceClient.SetIceCoturnServers(TryGetCoturnServers(playerId, out var servers) ? servers.ToArray() : IceCoturnServers.ToArray());
+            IceClient.SetIceCoturnServers(TryGetCoturnServers(playerId, out var servers) ? servers.ToArray() : IceCoturnServers?.ToArray());
             IceClient.SetInitMode(initMode);
             IceClient.ConnectAsync();
             var t = 0;
             while (!IceClient.IsConnected)
             {
-                if (t is 30)
+                if (t is 50)
                 {
                     throw new Exception("Failed to connect to Ice adapter");
                 }
                 Thread.Sleep(100);
                 IceClient.Connect();
                 t++;
-            }
+            }            
+
             IceClient.GpgNetMessageReceived += IceClient_GpgNetMessageReceived;
             IceClient.IceMessageReceived += IceClient_IceMessageReceived;
             IceClient.ConnectionToGpgNetServerChanged += IceClient_ConnectionToGpgNetServerChanged;
@@ -193,7 +190,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                         .WithGameId(gameId, Configuration.IceAdapterHasWebUiSupport())
                         .WithForcedRelay(Configuration.IceAdapterForceRelay())
                         .ToString(),
-                    UseShellExecute = false,
                     CreateNoWindow = true
                 }
             };
@@ -210,10 +206,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 StartInfo = new()
                 {
                     FileName = Configuration.GetJavaRuntimeExecutable(),
-                    Arguments = $"-jar \"{Configuration.GetIceAdapterExecutable()}\" --help",
-                    UseShellExecute = false,
-                    //CreateNoWindow = true,
-                    //RedirectStandardOutput = true,
+                    Arguments = $"-jar \"{Configuration.GetIceAdapterExecutable()}\" --help"
                 }
             };
             process.Start();
@@ -250,8 +243,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                 LogConnectionStatuses();
                 Logger.LogInformation("Connected to all players. From [{start}] to [{end}] in [{seconds}] seconds",
                     start, end, (end - start).TotalSeconds);
-                NotificationService.Notify($"Connected to {ConnectionStates.Count} players",
-                    $"Connected in {(end - start).TotalSeconds} seconds", ignoreOs: false);
+                //NotificationService.Notify($"Connected to {ConnectionStates.Count} players",
+                //    $"Connected in {(end - start).TotalSeconds} seconds", ignoreOs: false);
 
                 start = DateTime.Now;
             }
@@ -259,27 +252,27 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 
         public void LogConnectionStatuses()
         {
-            Logger.LogTrace("Connection statuses from game [{gameId}] and player [{country}][{player}]:",
-                LastGameId, LobbyClient.Self.Country, LobbyClient.Self.Id);
-            var sorted = ConnectionStates
-                .OrderBy(c => c.Created)
-                .ThenBy(c => c.Connected)
-                .ToArray();
+            //Logger.LogTrace("Connection statuses from game [{gameId}] and player [{country}][{player}]:",
+            //    LastGameId, LobbyClient.Self.Country, LobbyClient.Self.Id);
+            //var sorted = ConnectionStates
+            //    .OrderBy(c => c.Created)
+            //    .ThenBy(c => c.Connected)
+            //    .ToArray();
             
-            for (int i = 1; i <= sorted.Length; i++)
-            {
-                var c = sorted[i - 1];
-                if (c.State == "connected")
-                {
-                    Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}] from [{Created:T}] to [{Connected:T}] connected in [{TotalSeconds}] seconds",
-                        c.RemotePlayerId, c.State, c.Created, c.Connected, c.ConnectedIn.TotalSeconds);
-                }
-                else
-                {
-                    Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}]",
-                        c.RemotePlayerId, c.State);
-                }
-            }
+            //for (int i = 1; i <= sorted.Length; i++)
+            //{
+            //    var c = sorted[i - 1];
+            //    if (c.State == "connected")
+            //    {
+            //        Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}] from [{Created:T}] to [{Connected:T}] connected in [{TotalSeconds}] seconds",
+            //            c.RemotePlayerId, c.State, c.Created, c.Connected, c.ConnectedIn.TotalSeconds);
+            //    }
+            //    else
+            //    {
+            //        Logger.LogTrace("[{RemotePlayerId:#######}] - [{State}]",
+            //            c.RemotePlayerId, c.State);
+            //    }
+            //}
         }
         public void NotifyAboutBadConnections()
         {
