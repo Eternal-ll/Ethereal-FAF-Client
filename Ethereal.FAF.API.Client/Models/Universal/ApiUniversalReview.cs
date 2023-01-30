@@ -1,7 +1,7 @@
 ﻿using FAF.Domain.LobbyServer;
 using System.Globalization;
 
-namespace beta.Models.API.Universal
+namespace Ethereal.FAF.API.Client.Models.Universal
 {
     public class ApiUniversalReview : Base.ApiUniversalData
     {

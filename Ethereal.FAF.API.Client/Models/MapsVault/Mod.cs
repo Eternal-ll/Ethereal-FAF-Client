@@ -1,6 +1,6 @@
-﻿using beta.Models.API.Universal;
+﻿using Ethereal.FAF.API.Client.Models.Universal;
 
-namespace beta.Models.API.MapsVault
+namespace Ethereal.FAF.API.Client.Models.MapsVault
 {
     public class Mod : Base.ApiUniversalData, IVaultEntity
     {

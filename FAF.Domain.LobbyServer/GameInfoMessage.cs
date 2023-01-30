@@ -18,17 +18,29 @@ namespace FAF.Domain.LobbyServer
             return true;
         }
     }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <example>{"command":"game_info","visibility":"public","password_protected":true,"uid":19113763,"title":"Mark","state":"open","game_type":"custom","featured_mod":"faf","sim_mods":{},"mapname":"neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa","map_file_path":"maps/neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa.zip","host":"nthunter32","num_players":1,"max_players":12,"launched_at":null,"rating_type":"global","rating_min":null,"rating_max":null,"enforce_rating_range":false,"teams_ids":[{"team_id":2,"player_ids":[391628]}],"teams":{"2":["nthunter32"]}}</example>
     public class GameInfoMessage : INPC
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ServerCommand Command { get; set; }
         [JsonPropertyName("games")]
         public GameInfoMessage[] Games { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <example>public</example>
         [JsonPropertyName("visibility")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public GameVisibility Visibility { get; set; }
         [JsonPropertyName("password_protected")]
         public bool PasswordProtected { get; set; }
+        /// <summary>
+        /// Game unique ID
+        /// </summary>
+        /// <example>19113763</example>
         [JsonPropertyName("uid")]
         public long Uid { get; set; }
         [JsonPropertyName("title")]
@@ -49,11 +61,19 @@ namespace FAF.Domain.LobbyServer
         public Dictionary<string, string> SimMods { get; set; }
         #region Mapname
         private string _Mapname;
+        /// <summary>
+        /// Map name. Example: x1ca_coop_002.v0023 / neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa
+        /// </summary>
+        /// <example>neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa</example>
         [JsonPropertyName("mapname")]
         public string Mapname { get => _Mapname; set => Set(ref _Mapname, value); }
         #endregion
         #region MapFilePath
         private string _MapFilePath;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <example>maps/neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa.zip</example>
         [JsonPropertyName("map_file_path")]
         public string MapFilePath { get => _MapFilePath; set => Set(ref _MapFilePath, value); }
         #endregion

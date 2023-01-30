@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace beta.Models.API.Base
+﻿namespace Ethereal.FAF.API.Client.Models.Base
 {
     internal static class ApiUniversalDataExtensions
     {

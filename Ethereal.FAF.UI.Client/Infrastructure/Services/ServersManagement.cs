@@ -1,4 +1,4 @@
-﻿using beta.Models.API;
+﻿using Ethereal.FAF.API.Client.Models;
 using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using Microsoft.Extensions.Configuration;
@@ -37,7 +37,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// </summary>
         public ServerManager SelectedServerManager
         {
-            get => SelectedServerManager;
+            get => _SelectedServerManager;
             set => Set(ref _SelectedServerManager, value);
         } 
         #endregion

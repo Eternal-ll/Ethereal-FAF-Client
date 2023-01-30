@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace beta.Models.API.Forum
+namespace Ethereal.FAF.API.Client.Models.Forum
 {
     public class ForumPagination
     {

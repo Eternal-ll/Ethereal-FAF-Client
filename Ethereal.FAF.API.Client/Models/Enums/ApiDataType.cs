@@ -1,4 +1,4 @@
-﻿namespace beta.Models.API.Enums
+﻿namespace Ethereal.FAF.API.Client.Models.Enums
 {
     public enum ApiDataType : byte
     {
@@ -20,6 +20,8 @@
         mapVersionReview,
         mapVersionReviewsSummary,
 
+        moderationReport,
+
         featuredMod,
         featuredModFile,
 
@@ -38,6 +40,8 @@
 
         game,
         gamePlayerStats,
+        gameReview,
+        gameReviewsSummary,
 
         coturnServer
 

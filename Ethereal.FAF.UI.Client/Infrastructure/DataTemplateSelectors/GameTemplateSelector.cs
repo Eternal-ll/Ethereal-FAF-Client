@@ -1,4 +1,4 @@
-﻿using beta.Models.API.MapsVault;
+﻿using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer.Enums;
 using System.Linq;

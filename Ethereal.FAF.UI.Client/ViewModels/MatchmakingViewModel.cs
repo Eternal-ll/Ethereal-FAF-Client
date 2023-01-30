@@ -317,7 +317,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var progress = new Progress<string>((d) =>
                 ProgressText = d.Length > 30 ? d.Truncate(30) : d);
                 var cancel = false;
-                await PatchClient.UpdatePatch(
+                await PatchClient.ConfirmPatchAsync(
                     mod: FeaturedMod.FAF,
                     version: 0,
                     forceCheck: false,

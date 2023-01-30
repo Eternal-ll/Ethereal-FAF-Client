@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Utils;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Configuration;
 using System.IO;
 using Windows.Devices.I2c.Provider;
 
@@ -119,7 +121,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             => configuration.GetValue<Uri>("MapGenerator:Versions:Repository");
         #endregion
 
-
+        public static string GetForgedAllianceExecutable(this IConfiguration configuration) =>
+            Path.Combine(configuration.GetForgedAlliancePatchLocation(), ForgedAllianceHelper.BinFolder, ForgedAllianceHelper.Executable);
         public static string GetForgedAllianceLocation(this IConfiguration configuration) =>
             configuration.GetValue<string>(ConfigurationConstants.ForgedAllianceLocation);
         public static string GetForgedAlliancePatchLocation(this IConfiguration configuration) =>

@@ -17,4 +17,8 @@
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Game\" />
+  </ItemGroup>
+
 </Project>

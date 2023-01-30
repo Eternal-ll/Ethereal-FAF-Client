@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.API.Base
+namespace Ethereal.FAF.API.Client.Models.Base
 {
     /// <summary>
     /// Contains <see cref="ApiUniversalTypeId.Id"/>, <see cref="ApiUniversalTypeId.Type"/>, <see cref="Attributes"/>

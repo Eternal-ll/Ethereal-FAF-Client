@@ -1,7 +1,7 @@
-﻿using beta.Models.API.Enums;
+﻿using Ethereal.FAF.API.Client.Models.Enums;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.API.Base
+namespace Ethereal.FAF.API.Client.Models.Base
 {
     /// <summary>
     /// Contains <see cref="Id"/>, <see cref="Type"/>

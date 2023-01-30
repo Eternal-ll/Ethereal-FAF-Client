@@ -60,7 +60,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
 
         public async Task<string> GetTokenAsync(string host)
         {
-            var server = ServersManagement.ServersManagers.First(s => s.GetServer().Api.Host == host);
+            var server = ServersManagement.ServersManagers
+                .First(s =>
+                    s.Server.Api.Host == host || 
+                    s.Server.Content.Host == host);
             var token = await server.GetOauthTokenAsync();
             return token.AccessToken;
         }

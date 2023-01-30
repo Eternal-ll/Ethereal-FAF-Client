@@ -1,5 +1,4 @@
-﻿using beta.Models.API.MapsVault;
-using Ethereal.FAF.UI.Client.Infrastructure.Commands;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer.Enums;
@@ -121,7 +120,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //Container.SplashText = "Confirming patch";
             //Container.Content = null;
             var progress = new Progress<string>();
-            await SelectedServer?.GetPatchClient().UpdatePatch(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
+            await SelectedServer?.GetPatchClient().ConfirmPatchAsync(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
             .ContinueWith(t =>
             {
                 //Container.SplashProgressVisibility = Visibility.Collapsed;
