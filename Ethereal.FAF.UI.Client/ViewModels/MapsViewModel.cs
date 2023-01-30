@@ -1,5 +1,5 @@
-﻿using beta.Models.API.MapsVault;
-using Ethereal.FAF.API.Client;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Meziantou.Framework.WPF.Collections;

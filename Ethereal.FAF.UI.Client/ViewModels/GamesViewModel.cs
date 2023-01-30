@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -36,6 +37,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly INavigationService NavigationService;
         private readonly DialogService DialogService;
         private readonly PlayersViewModel PlayersViewModel;
+        private readonly MapsService MapsService;
 
         private readonly ILogger Logger;
         private readonly IConfiguration Configuration;
@@ -55,7 +57,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             DialogService dialogService,
             IConfiguration configuration,
             INavigationService navigationService,
-            ServersManagement serversManagement)
+            ServersManagement serversManagement,
+            MapsService mapsService)
         {
             ChangeLiveButton = new LambdaCommand(OnChangeButton, CanChangeButton);
             HostGameCommand = new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
@@ -136,6 +139,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             DialogService = dialogService;
             NavigationService = navigationService;
             ServersManagement = serversManagement;
+            MapsService = mapsService;
         }
 
         public Visibility SearchButtonVisibility =>
@@ -680,7 +684,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region WatchGameCommand
         public ICommand WatchGameCommand { get; }
-        private async void OnWatchGameCommand(object arg)
+        private void OnWatchGameCommand(object arg)
         {
             if (arg is not Game game) return;
             if (game.State is not GameState.Playing)
@@ -693,15 +697,28 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            await GameLauncher.WatchGame(game.Uid, game.Players.First().Id, game.Mapname, game.FeaturedMod,
-                game.ServerManager.GetPatchClient(), game.ServerManager.GetServer())
+            Task.Run(async () => await MapsService
+                .EnsureMapExistAsync(game.Mapname, game.ServerManager.GetContentClient())
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
-                        NotificationService.Notify("Exception", t.Exception.ToString());
+                        Logger.LogError(t.Exception.ToString());
+                        return;
                     }
-                });
+                    t.ContinueWith(t => game.ServerManager
+                    .GetPatchClient()
+                    .ConfirmPatchAsync(game.FeaturedMod)
+                    .ContinueWith(t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            Logger.LogError(t.Exception.ToString());
+                            return;
+                        }
+                        t.ContinueWith(t => GameLauncher.WatchGame(game));
+                    }));
+                }));
         }
         #endregion
 
@@ -712,7 +729,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async void OnJoinGameCommand(object arg)
         {
             if (arg is not Game game) return;
-            if (game.FeaturedMod is not FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop)
+            if (game.FeaturedMod is not FeaturedMod.coop or FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop)
             {
                 NotificationService.Notify("Warning", $"Featured mod [{game.FeaturedMod}] not supported");
                 return;
@@ -758,6 +775,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             CancellationTokenSource = new CancellationTokenSource();
+
             var dialogg = DialogService.GetDialogControl();
             dialogg.Title = "Joining game";
             dialogg.Content = null;
@@ -765,30 +783,66 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             dialogg.ButtonRightName = "Cancel";
             dialogg.Closed += Dialog_Closed;
             dialogg.Show();
-            // todo
-            IProgress<string> progress = new Progress<string>(d => dialogg.Content = d);
-            try
+
+            await Task.Run(async () =>
             {
-                await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token);
-                LastGame = null;
-            }
-            catch (TaskCanceledException canceled)
-            {
-                LastGame = null;
-                NotificationService.Notify("Exception", canceled.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
-                GameLauncher.State = GameLauncherState.Idle;
-            }
-            catch (Exception ex)
-            {
-                LastGame = null;
-                NotificationService.Notify("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
-                GameLauncher.State = GameLauncherState.Idle;
-            }
-            finally
-            {
-                dialogg.Closed -= Dialog_Closed;
-                dialogg.Hide();
-            }
+                // todo
+                IProgress<string> progress = new Progress<string>(d => dialogg.Content = d);
+
+                // TODO reverse MapsService injection from game
+                await MapsService
+                    .EnsureMapExistAsync(game.Mapname, game.ServerManager.GetContentClient())
+                    .ContinueWith(async t =>
+                    {
+                        if (t.IsFaulted)
+                        {
+                            Logger.LogError(t.Exception.ToString());
+                            return;
+                        }
+                        await game.ServerManager
+                        .GetPatchClient()
+                        .ConfirmPatchAsync(game.FeaturedMod)
+                        .ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                            {
+                                Logger.LogError(t.Exception.ToString());
+                                return;
+                            }
+                            game.ServerManager.GetLobbyClient().JoinGame(game.Uid);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                dialogg.Closed -= Dialog_Closed;
+                                dialogg.Hide();
+                            });
+                        });
+                    });
+            });
+
+
+            //try
+            //{
+            //    await MapsService.EnsureMapExistAsync(game.Mapname, game.ServerManager.GetContentClient(), CancellationTokenSource.Token);
+            //    await GameLauncher.JoinGame(game, progress, CancellationTokenSource.Token);
+            //    LastGame = null;
+            //}
+            //catch (TaskCanceledException canceled)
+            //{
+            //    LastGame = null;
+            //    NotificationService.Notify("Exception", canceled.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
+            //    GameLauncher.State = GameLauncherState.Idle;
+            //}
+            //catch (Exception ex)
+            //{
+            //    LastGame = null;
+            //    NotificationService.Notify("Exception", ex.Message, Wpf.Ui.Common.SymbolRegular.Warning24);
+            //    GameLauncher.State = GameLauncherState.Idle;
+            //}
+            //finally
+            //{
+            //    dialogg.Closed -= Dialog_Closed;
+            //    dialogg.Hide();
+            //}
         }
 
         private void Dialog_Closed([System.Diagnostics.CodeAnalysis.NotNull] Wpf.Ui.Controls.Dialog sender, RoutedEventArgs e)

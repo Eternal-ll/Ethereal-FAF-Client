@@ -1,11 +1,9 @@
-﻿using beta.Models.API.Enums;
-using beta.Models.API.MapsVault;
-using beta.Models.API.Universal;
-using System.Collections.Generic;
-using System.Data;
+﻿using Ethereal.FAF.API.Client.Models.Enums;
+using Ethereal.FAF.API.Client.Models.MapsVault;
+using Ethereal.FAF.API.Client.Models.Universal;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.API.Base
+namespace Ethereal.FAF.API.Client.Models.Base
 {
     public class ApiUniversalResult<T> where T : class
     {

@@ -1,7 +1,7 @@
-﻿using beta.Models.API.Universal;
+﻿using Ethereal.FAF.API.Client.Models.Universal;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.API.MapsVault
+namespace Ethereal.FAF.API.Client.Models.MapsVault
 {
     public interface IVaultEntity
     {

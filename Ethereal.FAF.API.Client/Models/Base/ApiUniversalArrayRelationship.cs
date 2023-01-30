@@ -1,7 +1,7 @@
 ﻿using beta.Infrastructure.Converters.JSON;
 using System.Text.Json.Serialization;
 
-namespace beta.Models.API.Base
+namespace Ethereal.FAF.API.Client.Models.Base
 {
     public class ApiUniversalArrayRelationship
     {

@@ -1,7 +1,7 @@
-﻿using beta.Models.API.Base;
+﻿using Ethereal.FAF.API.Client.Models.Base;
 using System;
 
-namespace beta.Models.API
+namespace Ethereal.FAF.API.Client.Models
 {
     public class ApiPlayerNameRecord : ApiUniversalData
     {

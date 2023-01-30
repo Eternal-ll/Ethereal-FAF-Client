@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace beta.Models.API.Base
+namespace Ethereal.FAF.API.Client.Models.Base
 {
     public class ApiVaultMeta
     {

@@ -1,4 +1,4 @@
-﻿namespace beta.Models.API
+﻿namespace Ethereal.FAF.API.Client.Models
 {
     public class FeaturedModFile : Base.ApiUniversalData
     {

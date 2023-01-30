@@ -1,25 +1,19 @@
-﻿using beta.Models.API.Base;
-using beta.Models.API.MapsVault;
-using Ethereal.FAF.API.Client;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
 using Wpf.Ui.Mvvm.Services;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {

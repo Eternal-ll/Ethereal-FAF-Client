@@ -1,5 +1,5 @@
-﻿using beta.Models.API;
-using Ethereal.FAF.API.Client;
+﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.API.Client.Models;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models;

@@ -188,9 +188,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async void LobbyClient_PartyInvite(object s, PartyInvite e)
         {
             Logger.LogTrace("[Party] Party invite from player [{id}]", e.SenderId);
-            var dialog = DialogService.GetDialogControl();
-            // TODO add server maanger
-            if (PlayersVM.TryGetPlayer(e.SenderId, null, out var sender))
+            if (PlayersVM.TryGetPlayer(e.SenderId, ServerManager, out var sender))
             {
                 var accepted = await NotificationService.ShowDialog("Party", $"Player {sender.Login} invites you to party", "Accept", "Ignore");
                 if (accepted)

@@ -70,7 +70,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         private static FeaturedMod LatestFeaturedMod;
         private static string LatestHost;
-        public async Task UpdatePatch(FeaturedMod mod, int version = 0, bool forceCheck = false,
+        public async Task ConfirmPatchAsync(FeaturedMod mod, int version = 0, bool forceCheck = false,
             CancellationToken cancellationToken = default, IProgress<string> progress = null)
         {
             var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";

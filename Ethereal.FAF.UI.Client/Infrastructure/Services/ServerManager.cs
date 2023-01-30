@@ -86,10 +86,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Server GetServer() => Server;
         public LobbyClient GetLobbyClient() => LobbyClient;
         public IrcClient GetIrcClient() => IrcClient;
+        public IceManager GetIceManager() => IceManager;
         public PatchClient GetPatchClient() => PatchClient;
         public IFafApiClient GetApiClient() => FafApiClient;
         public IFafContentClient GetContentClient() => FafContentClient;
         public MatchmakingViewModel GetMatchmakingViewModel() => MatchmakingViewModel;
+        public ReportViewModel GetReportViewModel()
+        {
+            var model = ServiceProvider.GetRequiredService<ReportViewModel>();
+            model.Initialize(FafApiClient, Self);
+            return model;
+        }
 
 
         public void SetServer(Server server)
@@ -212,7 +219,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void LobbyClient_GameLaunchDataReceived(object sender, global::FAF.Domain.LobbyServer.GameLaunchData e)
         {
-            GameLauncher.LobbyClient_GameLaunchDataReceived(e, Self, IceManager, Server, LobbyClient);
+            GameLauncher.LobbyClient_GameLaunchDataReceived(e, this);
         }
 
         public Task<TokenBearer> GetOauthTokenAsync(CancellationToken cancellationToken = default) =>

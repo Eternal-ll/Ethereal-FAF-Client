@@ -99,9 +99,9 @@
                         ToolTip="Clan"
                                    Icon="PeopleTeam20"/>
                 <ui:NavigationItem
-                    IsEnabled="False" Opacity=".7"
-                    Content="Report"
-                    ToolTip="Report player"
+                    PageType="{x:Type v:ReportsView}"
+                    Content="Reports"
+                    ToolTip="My reports"
                     Icon="MailAlert20"/>
 
                 <ui:NavigationItem

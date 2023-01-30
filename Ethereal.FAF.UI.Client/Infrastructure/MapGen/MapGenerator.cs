@@ -91,10 +91,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
             var process = GetProcess(mapgen);
             return process;
         }
-
-        public async Task<(bool Success, string Description)> GenerateMap(string map, string targetFolder,
-            CancellationToken cancellationToken = default, IProgress<string> progress = null)
+        /// <summary>
+        /// Generate map using map name with seed
+        /// </summary>
+        /// <param name="map">Generated map name with seed</param>
+        /// <param name="folder">Target folder for generated map. Default value taken from congifuration</param>
+        /// <param name="progress"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task GenerateMapAsync(
+            string map,
+            string folder = null,
+            IProgress<string> progress = null,
+            CancellationToken cancellationToken = default)
         {
+            folder ??= Configuration.GetMapsLocation();
+            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
             var data = Pattern.Match(map);
             var mapgenVersion = data.Groups[1].Value;
             await ConfirmOrDownloadAsync(mapgenVersion, progress);
@@ -102,29 +115,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
             var process = GetProcessByVersion(mapgenVersion);
             var args = process.StartInfo.Arguments;
             args += MapGeneratorArguments.SetMapName(map);
-            args += MapGeneratorArguments.SetFolderPath(targetFolder ?? GetMapGeneratorVersionsLocation());
+            args += MapGeneratorArguments.SetFolderPath(folder);
             //if (!string.IsNullOrWhiteSpace(PreviewPath))
             //{
             //    args += MapGeneratorArguments.SetPreviewPath(PreviewPath);
             //}
             process.StartInfo.Arguments = args;
-            try
-            {
-                if (!process.Start())
-                {
-                    return (false, "");
-                }
-            }
-            catch (Exception ex)
-            {
-                return (false, ex.Message);
-            }
             while (!process.HasExited)
             {
                 progress?.Report(await process.StandardOutput.ReadLineAsync());
             }
             await process.WaitForExitAsync(cancellationToken);
-            return (true, "");
         }
 
         public static bool IsGeneratedMap(string map) => Pattern.IsMatch(map);

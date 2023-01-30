@@ -1,9 +1,9 @@
 ﻿using beta.Infrastructure.Utils;
-using beta.Models.API.Base;
-using beta.Models.API.Universal;
+using Ethereal.FAF.API.Client.Models.Base;
+using Ethereal.FAF.API.Client.Models.Universal;
 using System.Drawing;
 
-namespace beta.Models.API.MapsVault
+namespace Ethereal.FAF.API.Client.Models.MapsVault
 {
     /// <summary>
     /// API entity of mapVersion table

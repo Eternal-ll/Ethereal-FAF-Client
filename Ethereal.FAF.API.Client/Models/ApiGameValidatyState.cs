@@ -1,4 +1,4 @@
-﻿namespace Ethereal.FAF.API.Client.Models.Game
+﻿namespace Ethereal.FAF.API.Client.Models
 {
     /// <summary>
     /// Game validaty state 

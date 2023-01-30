@@ -1,5 +1,5 @@
-﻿using beta.Models.API;
-using beta.Models.API.Base;
+﻿using Ethereal.FAF.API.Client.Models;
+using Ethereal.FAF.API.Client.Models.Base;
 using Refit;
 using System.ComponentModel;
 
@@ -63,6 +63,34 @@ namespace Ethereal.FAF.API.Client
             [Query(CollectionFormat.Csv)]
             string[] include = null,
             CancellationToken cancellationToken = default);
+
+        #region ModerationReport
+        /// <summary>
+        /// Get all reports
+        /// </summary>
+        /// <returns></returns>
+        [Get("/data/moderationReport")]
+        Task<ApiResponse<Response<ModerationReport>>> GetModerationReportAsync();
+        #endregion
+
+
+
+        #region Games
+        [Get("/data/game")]
+        Task<ApiResponse<Response<Model<Game>[]>>> GetGamesAsync(string filter, Sorting sorting = default, Pagination pagination = default,
+            [AliasAs("include")] [Query(CollectionFormat.Csv)]
+            string[] include = null,
+            CancellationToken cancellationToken = default);
+
+        Task<ApiResponse<Response<Model<Game>[]>>> GetPlayerGamesAsync(string login, Sorting sorting = default, Pagination pagination = default,
+            string[] include = null, CancellationToken cancellationToken = default)
+            => GetGamesAsync($"playerStats.player.login=={login}", sorting, pagination, include, cancellationToken);
+
+        Task<ApiResponse<Response<Model<Game>[]>>> GetPlayerGamesAsync(long id, Sorting sorting = default, Pagination pagination = default,
+            string[] include = null, CancellationToken cancellationToken = default)
+            => GetGamesAsync($"playerStats.player.id=={id}", sorting, pagination, include, cancellationToken);
+
+        #endregion
     }
     public interface IFafContentClient
     {
@@ -73,5 +101,14 @@ namespace Ethereal.FAF.API.Client
         [Get("/{url}")]
         [QueryUriFormat(UriFormat.Unescaped)]
         Task<ApiResponse<Stream>> GetFileStreamAsync(string url, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <example>https://content.faforever.com/maps/astro_crater_battles_4x4_rich_huge.v0004.zip</example>
+        /// <param name="map">Map name</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [Get("/maps/{map}.zip")]
+        Task<ApiResponse<Stream>> GetMapStreamAsync(string map, CancellationToken cancellationToken = default);
     }
 }

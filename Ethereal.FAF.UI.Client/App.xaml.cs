@@ -144,6 +144,11 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<SelectGameLocationView>();
             services.AddScoped<SelectFaPatchLocationView>();
             services.AddScoped<SelectVaultLocationView>();
+
+
+            services.AddTransient<ReportViewModel>();
+            services.AddTransient<ReportsViewModel>();
+            services.AddTransient<ReportsView>();
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
