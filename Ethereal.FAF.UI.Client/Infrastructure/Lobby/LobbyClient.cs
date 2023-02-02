@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
@@ -203,6 +204,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         /// </summary>
         /// <param name="gameId">Game id</param>
         public void JoinGame(long gameId) => SendAsync(ServerCommands.JoinGame(gameId.ToString()));
+        /// <summary>
+        /// Join game
+        /// </summary>
+        /// <param name="gameId">Game id</param>
+        /// <param name="password">Password</param>
+        public void JoinGame(long gameId, string password) => SendAsync(ServerCommands.JoinGame(gameId.ToString(), password: password));
         /// <summary>
         /// Host game
         /// </summary>

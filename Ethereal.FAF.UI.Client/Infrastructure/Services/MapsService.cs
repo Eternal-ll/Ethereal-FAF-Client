@@ -14,18 +14,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
     public class MapsService
     {
+        private readonly IFafContentClient FafContentClient;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly IConfiguration Configuration;
         private readonly ILogger Logger;
 
         private readonly MapGenerator MapGenerator;
 
-        public MapsService(IHttpClientFactory httpClientFactory, ILogger<MapsService> logger, IConfiguration configuration, MapGenerator mapGenerator)
+        public MapsService(IHttpClientFactory httpClientFactory, ILogger<MapsService> logger, IConfiguration configuration, MapGenerator mapGenerator, IFafContentClient fafContentClient)
         {
             HttpClientFactory = httpClientFactory;
             Configuration = configuration;
             Logger = logger;
             MapGenerator = mapGenerator;
+            FafContentClient = fafContentClient;
         }
 
         public bool IsExist(string map)
@@ -79,7 +81,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="contentClient">Content client</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task EnsureMapExistAsync(string map, IFafContentClient contentClient, CancellationToken cancellationToken = default)
+        public async Task EnsureMapExistAsync(string map, CancellationToken cancellationToken = default)
         {
             if (IsExist(map)) return;
             if (MapGenerator.IsGeneratedMap(map))
@@ -91,7 +93,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             Logger.LogInformation("[{map}] Preparing temp file [{temp}]", map, temp);
             using (var fs = new FileStream(temp, FileMode.Create))
             {
-                using var response = await contentClient.GetMapStreamAsync(map, cancellationToken);
+                using var response = await FafContentClient.GetMapStreamAsync(map, cancellationToken);
                 await response.EnsureSuccessStatusCodeAsync();
                 Logger.LogInformation("[{map}] Downloading map archive...", map);
                 await response.Content.CopyToAsync(fs, cancellationToken);

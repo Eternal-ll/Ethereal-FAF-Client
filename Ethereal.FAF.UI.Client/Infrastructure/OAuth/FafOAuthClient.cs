@@ -15,31 +15,22 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
     {
         public event EventHandler<string> OAuthLinkGenerated;
 
-        private string ClientId;
-        private string Scope;
-        private int[] RedirectPorts;
-        private Uri BaseAddress;
+        private readonly string ClientId;
+        private readonly string Scope;
+        private readonly int[] RedirectPorts;
+        private readonly Uri BaseAddress;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly ILogger Logger;
 
-        public FafOAuthClient(IHttpClientFactory httpClientFactory, ILogger<FafOAuthClient> logger)
-        {
-            HttpClientFactory = httpClientFactory;
-            Logger = logger;
-        }
-
         public FafOAuthClient(string clientId, string scope, int[] redirectPorts, Uri baseAddress, IHttpClientFactory httpClientFactory, ILogger<FafOAuthClient> logger)
-        {
-            HttpClientFactory = httpClientFactory;
-            Logger = logger;
-            logger.LogTrace("Initialized with client id [{clientId}], scope [{scope}], redirect ports [{redirect}]", clientId, scope, @redirectPorts);
-        }
-        public void Initialize(string clientId, string scope, int[] redirectPorts, Uri baseAddress)
         {
             ClientId = clientId;
             Scope = scope;
             RedirectPorts = redirectPorts;
             BaseAddress = baseAddress;
+            HttpClientFactory = httpClientFactory;
+            Logger = logger;
+            logger.LogTrace("Initialized with client id [{clientId}], scope [{scope}], redirect ports [{redirect}]", clientId, scope, @redirectPorts);
         }
 
         public async Task<OAuthResult> RefreshToken(string refreshToken, CancellationToken cancellationToken = default, IProgress<string> progress = null)

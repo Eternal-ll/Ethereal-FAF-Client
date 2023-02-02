@@ -13,8 +13,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class LocalMapsVM : MapsHostingVM
     {
-        public LocalMapsVM(ContainerViewModel container, ServersManagement serversManagement, NotificationService notificationService, IConfiguration configuration)
-            : base(container, configuration, notificationService, serversManagement)
+        public LocalMapsVM(ContainerViewModel container, ServerManager serverManager, NotificationService notificationService, IConfiguration configuration)
+            : base(container, configuration, notificationService, serverManager)
         {
             Task.Run(async () =>
             {

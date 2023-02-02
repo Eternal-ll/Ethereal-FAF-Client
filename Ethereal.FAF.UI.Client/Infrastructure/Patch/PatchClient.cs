@@ -1,8 +1,10 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -17,26 +19,24 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         private readonly ILogger Logger;
         private readonly ITokenProvider TokenProvider;
         private readonly IConfiguration Configuration;
+        private readonly IFafApiClient FafApiClient;
+        private readonly IFafContentClient FafContentClient;
         private readonly PatchWatcher PatchWatcher;
 
-        private string Host;
-        private IFafApiClient ApiClient;
-        private IFafContentClient ContentClient;
-
-        public PatchClient(ILogger<PatchClient> logger, ITokenProvider tokenProvider,
-            IConfiguration configuration, PatchWatcher patchWatcher)
+        public PatchClient(
+            ILogger<PatchClient> logger,
+            IConfiguration configuration,
+            IFafApiClient fafApiClient,
+            IFafContentClient fafContentClient,
+            ITokenProvider tokenProvider,
+            PatchWatcher patchWatcher)
         {
             Logger = logger;
-            TokenProvider = tokenProvider;
             Configuration = configuration;
             PatchWatcher = patchWatcher;
-        }
-
-        public void Initialize(string host, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
-        {
-            Host = host;
-            ApiClient = fafApiClient;
-            ContentClient = fafContentClient;
+            FafApiClient = fafApiClient;
+            FafContentClient = fafContentClient;
+            TokenProvider = tokenProvider;
         }
 
         public bool CopyOriginalFilesToFAForeverPatch(string game = null)
@@ -77,23 +77,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             Logger.LogTrace("Patch confirmation...");
             Logger.LogTrace("Latest  featured mod: [{mod}]", LatestFeaturedMod);
             Logger.LogTrace("Current featured mod: [{mod}]", mod);
-            Logger.LogTrace("Latest   host server: [{host}]", LatestHost);
-            Logger.LogTrace("Current  host server: [{host}]", Host);
             Logger.LogTrace("Force patch confirmation: [{force}]", forceCheck);
             Logger.LogTrace("Files changed: [{changed}]", PatchWatcher.IsFilesChanged);
-            if (!PatchWatcher.IsFilesChanged && !forceCheck && LatestFeaturedMod == mod && LatestHost == Host)
+            if (!PatchWatcher.IsFilesChanged && !forceCheck && LatestFeaturedMod == mod)
             {
                 Logger.LogTrace("Confirmation skipped. All files up to date");
                 progress?.Report("Confirmation skipped. All files up to date");
                 return;
             }
-            LatestHost = Host;
             CopyOriginalFilesToFAForeverPatch();
             progress?.Report("Confirming patch from API");
-            var accessToken = await TokenProvider.GetTokenAsync(Host);
+            var accessToken = await TokenProvider.GetAccessTokenAsync();
             var apiResponse = version == 0 ? 
-                await ApiClient.GetLatestAsync((int)mod, accessToken, cancellationToken) :
-                await ApiClient.GetAsync((int)mod, version, accessToken, cancellationToken);
+                await FafApiClient.GetLatestAsync((int)mod, accessToken, cancellationToken) :
+                await FafApiClient.GetAsync((int)mod, version, accessToken, cancellationToken);
             if (!apiResponse.IsSuccessStatusCode)
             {
                 throw apiResponse.Error;
@@ -122,7 +119,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 var md5 = !File.Exists(fileDown) ? null :  await PatchWatcher.CalculateMD5(Path.Combine(Configuration.GetForgedAlliancePatchLocation(), groupfile));
                 if (!File.Exists(fileDown) || md5 != file.MD5)
                 {
-                    var fileResponse = await ContentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
+                    var fileResponse = await FafContentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                     if (!fileResponse.IsSuccessStatusCode)
                     {
                         Logger.LogError($"[{fileResponse.StatusCode}] Failed to download [{groupfile}] [{i}] of [{requiredFiles.Length}]");

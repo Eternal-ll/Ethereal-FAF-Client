@@ -25,8 +25,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public GenerateMapsVM(MapGenerator mapGenerator, ContainerViewModel container,
             NotificationService notificationService,
-            IConfiguration configuration, ServersManagement serversManagement)
-            : base(container, configuration, notificationService, serversManagement)
+            IConfiguration configuration, ServerManager serverManager)
+            : base(container, configuration, notificationService, serverManager)
         {
             CleanCommand = new LambdaCommand(OnCleanCommand, CanCleanCommand);
             CancelGenerationCommand = new LambdaCommand(OnCancelGenerationCommand, CanCancelGenerationCommand);

@@ -92,16 +92,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
         #endregion
-
-        public ServerManager ServerManager { get; private set; }
-        public void SetServerManager(ServerManager serverManager)
-        {
-            if (ServerManager is not null)
-            {
-
-            }
-            ServerManager = serverManager;
-        }
     }
 }
     

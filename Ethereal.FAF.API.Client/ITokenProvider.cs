@@ -2,7 +2,6 @@
 {
     public interface ITokenProvider
     {
-        public string GetToken();
-        public Task<string> GetTokenAsync(string host);
+        public Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);
     }
 }

@@ -78,7 +78,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
                     Arguments = $"-jar \"{path}\" ",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    CreateNoWindow = false,
+                    CreateNoWindow = true,
                 }
             };
             process.StartInfo.EnvironmentVariables.Add(LogsEnvironmentVariable, Configuration.GetMapGeneratorLoggingLocation());

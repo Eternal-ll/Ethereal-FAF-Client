@@ -122,19 +122,6 @@
         <ui:AutoSuggestBox FontSize="12" PlaceholderText="#channel or user" Icon="ChatAdd16"
                                    MaxDropDownHeight="300" TextChanged="AutoSuggestBox_TextChanged"
                                    LostFocus="AutoSuggestBox_LostFocus" KeyDown="AutoSuggestBox_KeyDown"/>
-        <ComboBox Grid.Row="2" Margin="0 4"
-                  ItemsSource="{Binding ViewModel.ServersManagement.ServersManagers}"
-                  SelectedValue="{Binding ViewModel.SelectedServerManager}"
-                  Padding="8 6">
-            <ComboBox.ItemTemplate>
-                <DataTemplate> 
-                    <StackPanel Orientation="Horizontal">
-                        <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
-                        <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" FontSize="12" Margin="4 0 0 0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ComboBox.ItemTemplate>
-        </ComboBox>
         <Label Grid.Row="2" Content="Select server" Padding="10" FontSize="12" IsHitTestVisible="False">
             <Label.Style>
                 <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">

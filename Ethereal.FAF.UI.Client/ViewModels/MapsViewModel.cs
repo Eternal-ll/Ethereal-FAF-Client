@@ -24,11 +24,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly MapsService MapsService;
         private readonly SnackbarService SnackbarService;
 
-        private IFafApiClient FafApiClient;
-        private IFafContentClient FafContentClient;
-        private string ContentUrl;
+        private readonly IFafApiClient FafApiClient;
+        private readonly IFafContentClient FafContentClient;
 
-        public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, SnackbarService snackbarService)
+        public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, SnackbarService snackbarService, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
         {
             ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
             DownloadMapCommand = new LambdaCommand(OnDownloadMapCommand);
@@ -42,15 +41,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Logger = logger;
             MapsService = mapsService;
             SnackbarService = snackbarService;
-        }
-
-        public void SetFafApiClient(IFafApiClient fafApiClient)
-        {
             FafApiClient = fafApiClient;
-        }
-        public void SetContentUrl(string content)
-        {
-            ContentUrl = content;
+            FafContentClient = fafContentClient;
         }
 
         private readonly ConcurrentObservableCollection<ApiMapModel> Maps;
@@ -337,7 +329,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             try
             {
-                await MapsService.DownloadAsync(Path.GetFileNameWithoutExtension(map.LatestVersion.Filename), ContentUrl);
+                await MapsService.EnsureMapExistAsync(Path.GetFileNameWithoutExtension(map.LatestVersion.Filename));
             }
             catch (Exception ex)
             {

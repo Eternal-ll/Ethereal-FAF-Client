@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
@@ -23,9 +22,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         //protected readonly IceManager IceManager;
         protected readonly NotificationService NotificationService;
         protected readonly IConfiguration Configuration;
-        public ServersManagement ServersManagement { get; }
 
-        protected MapsHostingVM(ContainerViewModel container, IConfiguration configuration, NotificationService notificationService, ServersManagement serversManagement)
+        protected MapsHostingVM(ContainerViewModel container, IConfiguration configuration, NotificationService notificationService,
+            ServerManager serverManager)
         {
             LocalMaps = new();
             MapsSource = new()
@@ -39,8 +38,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //IceManager = iceManager;
             Configuration = configuration;
             NotificationService = notificationService;
-            ServersManagement = serversManagement;
-            SelectedServer = serversManagement.ServersManagers.FirstOrDefault();
+            SelectedServer = serverManager;
         }
 
         #region FilterText
