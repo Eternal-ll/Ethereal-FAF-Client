@@ -29,9 +29,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         private readonly IConfiguration Configuration;
         private readonly ILogger Logger;
 
-        private LobbyClient LobbyClient;
-        private IFafApiClient FafApiClient;
-        private Server Server;
+        private readonly LobbyClient LobbyClient;
+        private readonly IFafApiClient FafApiClient;
 
         public CoturnServer[] CoturnServers { get; set; }
 
@@ -47,33 +46,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         public List<ConnectionState> ConnectionStates { get; set; }
         public bool AllConnected => ConnectionStates.Where(c => c.State == "connected").Count() == ConnectionStates.Count;
 
-        public IceManager(ILogger<IceManager> logger, IConfiguration configuration, NotificationService notificationService)
+        public IceManager(ILogger<IceManager> logger, IConfiguration configuration, NotificationService notificationService, LobbyClient lobbyClient, IFafApiClient fafApiClient)
         {
             Configuration = configuration;
             Logger = logger;
             NotificationService = notificationService;
-        }
-        public void Initialize(Server server, LobbyClient lobbyClient, IFafApiClient fafApiClient)
-        {
             LobbyClient = lobbyClient;
             FafApiClient = fafApiClient;
-            Server = server;
 
             lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
             lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
         }
         private void LobbyClient_IceServersDataReceived(object sender, IceServersData e)
         {
-            if (Server.Api.Host is "api.faforever.ru")
-            {
-                foreach (var server in e.ice_servers)
-                {
-                    for (int i = 0; i < server.Urls.Length; i++)
-                    {
-                        server.Urls[i] = server.Urls[i].Replace("http://", null);
-                    }
-                }
-            }
             IceCoturnServers = e.ice_servers.ToList();
         }
 

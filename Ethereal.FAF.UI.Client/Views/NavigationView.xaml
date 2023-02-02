@@ -103,11 +103,6 @@
                     Content="Reports"
                     ToolTip="My reports"
                     Icon="MailAlert20"/>
-
-                <ui:NavigationItem
-                    PageType="{x:Type v:SelectServerView}"
-                    Content="Servers"
-                    Icon="Server20"/>
             </ui:NavigationStore.Items>
             <ui:NavigationStore.Footer>
                 <ui:NavigationItem

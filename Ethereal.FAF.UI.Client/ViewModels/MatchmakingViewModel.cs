@@ -1,10 +1,12 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Humanizer;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -34,10 +36,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public PartyViewModel PartyViewModel { get; private set; }
 
-        public MatchmakingViewModel(NotificationService notificationService)
+        public MatchmakingViewModel(NotificationService notificationService, PartyViewModel partyViewModel, IServiceProvider serviceProvider)
         {
             JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
             NotificationService = notificationService;
+            var serverManager = serviceProvider.GetRequiredService<ServerManager>();
+            Initialize(serverManager.GetLobbyClient(), serverManager.GetPatchClient(), partyViewModel);
         }
 
         public void Initialize(LobbyClient lobbyClient, PatchClient patchClient,  PartyViewModel partyViewModel)

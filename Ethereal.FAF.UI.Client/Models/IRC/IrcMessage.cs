@@ -9,7 +9,6 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
     public interface IServerIrcChannel
     {
         public string Name { get; }
-        public ServerManager ServerManager { get; }
     }
     public abstract class IrcMessage
     {
@@ -73,17 +72,15 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
         public string Name { get => _Name; set => Set(ref _Name, value); }
         public abstract string Group { get; }
         public bool IsSelected { get; set; }
-        public ServerManager ServerManager {get; }
-        protected IrcChannel(string name, ServerManager serverManager)
+        protected IrcChannel(string name)
         {
             Name = name;
-            ServerManager = serverManager;
         }
         public List<IrcMessage> History { get; } = new();
     }
     public sealed class GroupChannel : IrcChannel
     {
-        public GroupChannel(string name, ServerManager serverManager, string group = "Channel") : base(name, serverManager)
+        public GroupChannel(string name, string group = "Channel") : base(name)
         {
             Group = group;
         }
@@ -150,8 +147,8 @@ namespace Ethereal.FAF.UI.Client.Models.IRC
     }
     public sealed class DialogueChannel : IrcChannel
     {
-        public DialogueChannel(string name, ServerManager serverManager) : base(name, serverManager) => Receiver = new(name);
-        public DialogueChannel(string name, Player player, ServerManager serverManager) : this(name, serverManager) => Receiver.SetPlayer(player);
+        public DialogueChannel(string name) : base(name) => Receiver = new(name);
+        public DialogueChannel(string name, Player player) : this(name) => Receiver.SetPlayer(player);
         public IrcUser Receiver { get; set; }
 
         public override string Group { get; } = "Direct";

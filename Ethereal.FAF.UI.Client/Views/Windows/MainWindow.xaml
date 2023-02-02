@@ -91,7 +91,8 @@
             ShowMaximize="True"
             ShowMinimize="True"
             UseSnapLayout="True"
-                     Title="Ethereal Multiverse Client">
+            Icon="/Resources/logo.ico"
+            Title="Ethereal FAF Client">
             <ui:TitleBar.Header>
                 <Grid
                     Margin="0,0,12,0"

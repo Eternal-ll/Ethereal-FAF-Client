@@ -84,6 +84,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         public void StopWatchers()
         {
+            if (PatchWatchers is null)
+            {
+                InitializePatchWatchers();
+            }
             foreach (var watcher in PatchWatchers)
             {
                 watcher.Changed -= OnFileChanged;
@@ -93,6 +97,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
         }
         public void StartWatchers()
         {
+            if (PatchWatchers is null)
+            {
+                InitializePatchWatchers();
+            }
             foreach (var watcher in PatchWatchers)
             {
                 watcher.Changed += OnFileChanged;

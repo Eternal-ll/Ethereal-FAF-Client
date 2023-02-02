@@ -95,54 +95,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly IServiceProvider ServiceProvider;
         private readonly IConfiguration Configuration;
-        private readonly ServersManagement ServersManagement;
 
-        public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, ServersManagement serversManagement)
+        public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, ServerManager serverManager)
         {
             Players = new();
             OpenPrivateCommand = new LambdaCommand(OnOpenPrivateCommand);
-            serversManagement.ServerManagerAdded += (s, server) =>
+            var server = serverManager;
+            var lobby = server.GetLobbyClient();
+            var ircClient = server.GetIrcClient();
+            lobby.StateChanged += (s, state) =>
             {
-                var lobby = server.GetLobbyClient();
-                var ircClient = server.GetIrcClient();
-                lobby.StateChanged += (s, state) =>
-                {
-                    if (state is not LobbyState.Disconnected) return;
-                    Selfs.Remove(Selfs.FirstOrDefault(s => s.ServerManager.Equals(server)));
-                    lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
-                    lobby.PlayerReceived -= server.PlayerReceived;
-                    lobby.PlayersReceived -= server.PlayersReceived;
-                    ircClient.UserDisconnected -= server.IrcUserDisconnected;
-                };
-                server.WelcomeDataReceived = (s, data) =>
-                {
-                    data.me.SetServerManager(server);
-                    Selfs.Add(data.me);
-                };
-                server.PlayerReceived = (s, player) =>
-                {
-                    player.SetServerManager(server);
-                    Lobby_PlayerReceived(s, player);
-                };
-                server.PlayersReceived = (s, players) =>
-                {
-                    foreach (var player in players)
-                    {
-                        player.SetServerManager(server);
-                    }
-                    Lobby_PlayersReceived(s, players);
-                };
-                server.IrcUserDisconnected = (s, data) =>
-                {
-                    if (!long.TryParse(data.id, out var id)) return;
-                    var player = Players.FirstOrDefault(p => p.Id == id && p.ServerManager.Equals(server));
-                    Players.Remove(player);
-                };
-                ircClient.UserDisconnected += server.IrcUserDisconnected;
-                lobby.WelcomeDataReceived += server.WelcomeDataReceived;
-                lobby.PlayerReceived += server.PlayerReceived;
-                lobby.PlayersReceived += server.PlayersReceived;
+                if (state is not LobbyState.Disconnected) return;
+                lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
+                lobby.PlayerReceived -= server.PlayerReceived;
+                lobby.PlayersReceived -= server.PlayersReceived;
+                ircClient.UserDisconnected -= server.IrcUserDisconnected;
             };
+            ircClient.UserDisconnected += (s, data) =>
+            {
+                if (!long.TryParse(data.id, out var id)) return;
+                var player = Players.FirstOrDefault(p => p.Id == id);
+                Players.Remove(player);
+            };
+            lobby.WelcomeDataReceived += (s, self) => Self = self.me;
+            lobby.PlayerReceived += Lobby_PlayerReceived;
+            lobby.PlayersReceived += Lobby_PlayersReceived;
             ServiceProvider = serviceProvider;
             Configuration = configuration;
 
@@ -161,18 +138,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     Name = "Group by ratings ranges",
                     PropertyGroupDescription = new PropertyGroupDescription(nameof(Player.Global), new RatingsRangeConverter(configuration))
-                },
-                new PlayersGroup()
-                {
-                    Name = "Group by server",
-                    PropertyGroupDescription = new (nameof(Player.ServerManager))
                 }
             };
             GroupBy = PlayersGroupSource[0];
-            ServersManagement = serversManagement;
         }
 
-        public List<Player> Selfs { get; set; } = new();
+        public Player Self { get; set; }
 
         #region SelectedPlayer
         private Player _SelectedPlayer;
@@ -369,25 +340,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public Player GetPlayer(long id, ServerManager serverManager) => Players.FirstOrDefault(p => p.Id == id && p.ServerManager.Equals(serverManager));
-        public Player GetPlayer(string login, ServerManager manager) => Players
-            .FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase) && p.ServerManager.Equals(manager));
-        public bool TryGetPlayer(long id, ServerManager serverManager, out Player player)
+        public Player GetPlayer(long id) => Players.FirstOrDefault(p => p.Id == id);
+        public Player GetPlayer(string login) => Players
+            .FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase));
+        public bool TryGetPlayer(long id, out Player player)
         {
-            player = GetPlayer(id, serverManager);
+            player = GetPlayer(id);
             return player is not null;
         }
-        public bool TryGetPlayer(string login, ServerManager manager, out Player player)
+        public bool TryGetPlayer(string login, out Player player)
         {
-            player = GetPlayer(login, manager);
+            player = GetPlayer(login);
             return player is not null;
         }
 
         private void Lobby_PlayerReceived(object sender, Player e)
         {
-            for (int i = 0; i < Selfs.Count; i++)
+            if (Self?.Id == e.Id)
             {
-                if (Selfs[i].Id == e.Id) Selfs[i] = e;
+                Self = e;
             }
             
             PrepareRatings(e);

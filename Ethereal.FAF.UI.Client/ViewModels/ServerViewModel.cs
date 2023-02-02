@@ -1,60 +1,96 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.IRC;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Models.Configuration;
+using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
+using Ethereal.FAF.UI.Client.Views;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class ServerViewModel : Base.ViewModel
     {
-        private readonly string Name;
-
+        private readonly TokenProvider TokenProvider;
+        private readonly UidGenerator UidGenerator;
         private readonly LobbyClient LobbyClient;
         private readonly IrcClient IrcClient;
 
+        private readonly SnackbarService SnackbarService;
+
         private readonly IConfiguration Configuration;
-        private readonly IOptionsMonitor<Server> ServerOptionsMonitor;
-        private readonly IDisposable ServerConfigurationListener;
+        private readonly INavigationWindow NavigationWindow;
 
-        public ServerViewModel(string server, IConfiguration configuration, IOptionsMonitor<Server> serverOptionsMonitor)
+        public ServerViewModel(TokenProvider tokenProvider, LobbyClient lobbyClient, IrcClient ircClient, INavigationWindow navigationWindow, SnackbarService snackbarService, UidGenerator uidGenerator, IConfiguration configuration)
         {
-            Name = server;
-
-            ServerConfigurationListener = serverOptionsMonitor.OnChange(OnServerConfigurationChange);
-
-
+            TokenProvider = tokenProvider;
+            LobbyClient = lobbyClient;
+            IrcClient = ircClient;
+            NavigationWindow = navigationWindow;
+            SnackbarService = snackbarService;
+            UidGenerator = uidGenerator;
             Configuration = configuration;
-            ServerOptionsMonitor = serverOptionsMonitor;
+
+            lobbyClient.StateChanged += LobbyClient_StateChanged;
+            lobbyClient.SessionReceived += LobbyClient_SessionReceived;
+            lobbyClient.AuthentificationFailed += LobbyClient_AuthentificationFailed;
         }
 
-        public void OnServerConfigurationChange(Server server, string data)
+        private void LobbyClient_AuthentificationFailed(object sender, global::FAF.Domain.LobbyServer.AuthentificationFailedData e)
         {
-            Server = server;
+            LobbyClient.Disconnect();
+            LobbyClient.ConnectAsync();
         }
 
-        #region Server
-        private Server _Server;
-        public Server Server
+        private CancellationTokenSource CancellationTokenSource;
+
+        private void LobbyClient_SessionReceived(object sender, string session)
         {
-            get => _Server;
-            set
+            RunAuthorizationTask(session);
+        }
+
+        private void RunAuthorizationTask(string session)
+        {
+            if (!LobbyClient.IsConnected)
             {
-                if (Set(ref _Server, value))
-                {
-
-                }
+                LobbyClient.ConnectAsync();
+                return;
             }
-        }
-        #endregion
-
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
+            CancellationTokenSource = new();
+            Task.Run(async () =>
             {
-                ServerConfigurationListener.Dispose();
+                var uid = await UidGenerator.GenerateAsync(session);
+                var token = await TokenProvider.GetAccessTokenAsync(CancellationTokenSource.Token);
+                LobbyClient.Authenticate(token, uid, session);
+            }, CancellationTokenSource.Token);
+        }
+
+        private void LobbyClient_StateChanged(object sender, LobbyState e)
+        {
+            App.Current.Dispatcher.BeginInvoke(() =>
+            SnackbarService.Show("Lobby", $"Lobby connection state changed to [{e}]", Wpf.Ui.Common.SymbolRegular.NetworkCheck20), System.Windows.Threading.DispatcherPriority.Background);
+            switch (e)
+            {
+                case LobbyState.None:
+                    break;
+                case LobbyState.Connecting:
+                    break;
+                case LobbyState.Connected:
+                    LobbyClient.AskSession(Configuration.GetValue<string>("Server:OAuth:ClientId"), Configuration.GetClientVersion());
+                    break;
+                case LobbyState.Authorizing:
+                    break;
+                case LobbyState.Authorized:
+                    App.Current.Dispatcher.BeginInvoke(() => NavigationWindow.Navigate(typeof(NavigationView)), System.Windows.Threading.DispatcherPriority.Background);
+                    break;
+                case LobbyState.Disconnecting:
+                    break;
+                case LobbyState.Disconnected:
+                    CancellationTokenSource.Cancel();
+                    App.Current.Dispatcher.BeginInvoke(() => NavigationWindow.Navigate(typeof(LoaderView)), System.Windows.Threading.DispatcherPriority.Background);
+                    break;
             }
         }
     }

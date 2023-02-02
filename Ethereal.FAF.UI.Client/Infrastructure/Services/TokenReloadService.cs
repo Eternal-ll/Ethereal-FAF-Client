@@ -12,87 +12,6 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
-    public class ServerOauthTokenProvider
-    {
-        public event EventHandler<(Server server, string error, string description)> ErrorOccuried;
-        public event EventHandler<(Server server, string OAuthUrl)> OAuthRequired;
-        public event EventHandler<Server> OAuthUrlExpired;
-
-        private readonly FafOAuthClient FafOAuthClient;
-
-        private Server Server;
-        private TokenBearer Token;
-
-        public ServerOauthTokenProvider(FafOAuthClient fafOAuthClient)
-        {
-            FafOAuthClient = fafOAuthClient;
-            FafOAuthClient.OAuthLinkGenerated += (s, link) => OAuthRequired?.Invoke(this, (Server, link));
-        }
-
-        public void SetServer(Server server)
-        {
-            Server = server;
-            FafOAuthClient.Initialize(server.OAuth.ClientId, server.OAuth.Scope, server.OAuth.RedirectPorts, server.OAuth.BaseAddress);
-            if (server.OAuth.Token is not null && server.OAuth.Token.AccessToken is not null && server.OAuth.Token.RefreshToken is not null)
-            {
-                Token = server.OAuth.Token;
-            };
-        }
-        public Server GetServer()
-        {
-            return Server;
-        }
-
-        public async Task<TokenBearer> GetTokenAsync(CancellationToken cancellationToken)
-        {
-            if (Token is not null && !Token.IsExpired())
-            {
-                return Token;
-            }
-
-            var task = Token is not null ?
-                FafOAuthClient.RefreshToken(Token.RefreshToken, cancellationToken) :
-                FafOAuthClient.AuthByBrowser(cancellationToken);
-            try
-            {
-                var response = await task.WaitAsync(TimeSpan.FromSeconds(Server.OAuth.ResponseSeconds), cancellationToken);
-                if (response.IsError)
-                {
-                    ErrorOccuried?.Invoke(this, (Server, response.Error, response.ErrorDescription));
-                    throw new Exception();
-                }
-                Token = response.TokenBearer;
-                UserSettings.Update($"Servers:{Server.ShortName}:OAuth:Token", new Dictionary<string, object>()
-                {
-                    { "AccessToken", Token.AccessToken },
-                    { "RefreshToken", Token.RefreshToken },
-                    { "IdToken", Token.IdToken },
-                    { "TokenType", Token.TokenType },
-                    { "Scope", Token.Scope },
-                    { "Created", Token.Created },
-                    { "ExpiresIn", Token.ExpiresIn },
-                });
-                return response.TokenBearer;
-            }
-            catch (OperationCanceledException canceled)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return null;
-                }
-                OAuthUrlExpired?.Invoke(this, Server);
-            }
-            catch (Exception ex)
-            {
-                await Task.Delay(5000, cancellationToken);
-            }
-            if (Token is not null)
-            {
-                Token = null;
-            }
-            return await GetTokenAsync(cancellationToken);
-        }
-    }
     internal class TokenReloadService : BackgroundService
     {
         private readonly ILogger Logger;
@@ -112,7 +31,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             await Task.Delay(TimeSpan.FromMinutes(1), cancellationToken);
-            var token = TokenProvider.TokenBearer;
+            var token = TokenProvider.Token;
             if (token is not null && token.AccessToken is not null && token.RefreshToken is not null)
             {
                 if (!token.IsExpired())
@@ -135,7 +54,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private async Task RefreshToken(CancellationToken cancellationToken)
         {
             Logger.LogTrace("Initializing token refreshing process");
-            var token = TokenProvider.TokenBearer;
+            var token = TokenProvider.Token;
             if (token is null || token.RefreshToken is null)
             {
                 Logger.LogTrace("Token is not installed");

@@ -48,7 +48,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             configuration.GetGithubBranch() +
             "/update.json";
 
-
         public static string GetClientVersion(this IConfiguration configuration) =>
             configuration.GetValue<string>("Client:Version", "2.0.3");
 

@@ -137,8 +137,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 {
                     rating = new double[] { 1500, 500 }
                 };
-                mean = 1900;//(int)rating.rating[0];
-                deviation = 50;// (int)rating.rating[1];
                 games = rating.number_of_games;
                 country = me.Country;
                 clan = me.Clan;
@@ -181,12 +179,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             //        }
             //    });
             //}
-
-            var progressSource = new Progress<string>();
-            //GameLaunching?.Invoke(this, progressSource);
-            var progress = (IProgress<string>)progressSource;
-
-            //OnStateChanged(GameLauncherState.Launching);
             iceManager.Initialize(self.Id, self.Login, e.GameUid, e.GameType is GameType.MatchMaker ? "auto" : "normal");
             //ice.PassIceServers(IceService.IceServers);
             //var me = PlayersService.Self;
@@ -222,7 +214,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
             if (!string.IsNullOrWhiteSpace(e.mapname))
             {
-                await MapsService.EnsureMapExistAsync(e.mapname, serverManager.GetContentClient());
+                await MapsService.EnsureMapExistAsync(e.mapname);
             }
             Logger.LogTrace("Starting game with next arguments [{args}]", arguments);
             Process = new()

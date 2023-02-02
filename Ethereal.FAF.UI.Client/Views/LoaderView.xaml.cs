@@ -15,10 +15,5 @@ namespace Ethereal.FAF.UI.Client.Views
             ViewModel = vm;
             InitializeComponent();
         }
-
-        private void LinkTextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

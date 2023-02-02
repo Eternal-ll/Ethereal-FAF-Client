@@ -22,9 +22,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ILogger<MapsViewModel> Logger;
         private readonly SnackbarService SnackbarService;
         private readonly IHttpClientFactory HttpClientFactory;
-        private ServerManager ServerManager;
+        private readonly IFafApiClient FafApiClient;
 
-        public ModsViewModel(ILogger<MapsViewModel> logger, SnackbarService snackbarService, IHttpClientFactory httpClientFactory)
+        public ModsViewModel(ILogger<MapsViewModel> logger, SnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient)
         {
             ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
             Mods = new();
@@ -36,15 +36,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Logger = logger;
             SnackbarService = snackbarService;
             HttpClientFactory = httpClientFactory;
+            FafApiClient = fafApiClient;
         }
-
-        public void SetServerManager(ServerManager serverManager)
-        {
-            ServerManager = serverManager;
-        }
-
-
-
         private readonly ConcurrentObservableCollection<Mod> Mods;
         private readonly CollectionViewSource ModsViewSource;
         public ICollectionView ModsView => ModsViewSource.View;
@@ -283,15 +276,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             CancellationTokenSource?.Cancel();
             CancellationTokenSource = new();
-            var api = ServerManager?.GetApiClient();
-            if (api is null) return;
 
             Sorting sorting = new()
             {
                 SortDirection = SelectedSortDirection,
                 Parameter = SelectedSortDescription
             };
-            var response = await api.GetModsAsync(BuildQuery(), sorting, new Pagination()
+            var response = await FafApiClient.GetModsAsync(BuildQuery(), sorting, new Pagination()
             {
                 PageNumber = _CurrentPage,
                 PageSize = _PageSize,

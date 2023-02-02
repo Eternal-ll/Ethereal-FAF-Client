@@ -1,8 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
-using Ethereal.FAF.UI.Client.Infrastructure.Utils;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.UI.EtherealClient.Views.Windows;
@@ -10,10 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,14 +29,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IHostApplicationLifetime ApplicationLifetime;
         private readonly IConfiguration Configuration;
 
-        private readonly ServersManagement ServersManagement;
-
         private INavigationWindow _navigationWindow;
 
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, IThemeService themeService,
             ITaskBarService taskBarService, INotifyIconService notifyIconService,
-            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, ServersManagement serversManagement)
+            IHostApplicationLifetime applicationLifetime, IConfiguration configuration)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
@@ -54,7 +45,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _notifyIconService = notifyIconService;
             ApplicationLifetime = applicationLifetime;
             Configuration = configuration;
-            ServersManagement = serversManagement;
         }
 
         /// <summary>
@@ -88,7 +78,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            ServersManagement.Dispose();
             _notifyIconService.Unregister();
             await Task.CompletedTask;
         }
@@ -123,12 +112,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 dialogService.SetDialogControl(((MainWindow)_navigationWindow).RootDialog);
                 // NOTICE: You can set this service directly in the window 
                 _navigationWindow.SetPageService(_pageService);
-
-                // NOTICE: In the case of this window, we navigate to the Dashboard after loading with Container.InitializeUi()
                 _navigationWindow.Navigate(typeof(LoaderView));
 
                 var loaderVM = _serviceProvider.GetService<LoaderViewModel>();
                 await loaderVM.TryPassChecksAndLetsSelectServer();
+                _serviceProvider.GetService<ServerViewModel>();
+
+                if (JavaHelper.HasJavaRuntime())
+                {
+                    JavaHelper.PrepareJavaRuntime();
+                }
             }
 
             await Task.CompletedTask;

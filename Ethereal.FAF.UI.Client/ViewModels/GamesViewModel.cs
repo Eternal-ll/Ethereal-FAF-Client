@@ -1,7 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models;
@@ -15,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -31,7 +29,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public sealed class GamesViewModel : JsonSettingsViewModel
     {
         private readonly GameLauncher GameLauncher;
-        private readonly ServersManagement ServersManagement;
+        private readonly ServerManager ServerManager;
 
         private readonly NotificationService NotificationService;
         private readonly INavigationService NavigationService;
@@ -57,14 +55,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             DialogService dialogService,
             IConfiguration configuration,
             INavigationService navigationService,
-            ServersManagement serversManagement,
-            MapsService mapsService)
+            MapsService mapsService,
+            IServiceProvider serviceProvider,
+            MatchmakingViewModel matchmakingViewModel)
         {
             ChangeLiveButton = new LambdaCommand(OnChangeButton, CanChangeButton);
             HostGameCommand = new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
             JoinGameCommand = new LambdaCommand(OnJoinGameCommand);
             WatchGameCommand = new LambdaCommand(OnWatchGameCommand);
-
 
             AddMapToBlacklistCommand = new LambdaCommand(OnAddMapToBlacklistCommand);
             RemoveMapFromBlacklistCommand = new LambdaCommand(OnRemoveMapFromBlacklistCommand);
@@ -93,53 +91,31 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
             GamesSource.Filter += GamesSource_Filter;
 
-            serversManagement.ServerManagerAdded += (s, e) =>
+            var serverManager = serviceProvider.GetRequiredService<ServerManager>();
+
+            var lobby = serverManager.GetLobbyClient();
+            lobby.StateChanged += (s, state) =>
             {
-                MatchmakingViewModel = e.GetMatchmakingViewModel();
-
-                var lobby = e.GetLobbyClient();
-                lobby.StateChanged += (s, state) =>
+                if (state is not LobbyState.Disconnecting) return;
+                foreach (var game in Games)
                 {
-                    if (state is not LobbyState.Disconnecting) return;
-                    lobby.GamesReceived -= e.GamesReceived;
-                    lobby.GameReceived -= e.GameReceived;
-                    foreach (var game in Games)
-                    {
-                        if (game.ServerManager.Equals(s))
-                        {
-                            Games.Remove(game);
-                        }
-                    }
-                };
-                e.GameReceived = (s, game) =>
-                {
-                    game.SetServerManager(e);
-                    Lobby_GameReceived(s, game);
-                };
-                e.GamesReceived = (s, games) =>
-                {
-                    foreach (var game in games)
-                    {
-                        game.SetServerManager(e);
-                    }
-                    Lobby_GamesReceived(s, games);
-                };
-                lobby.GamesReceived += e.GamesReceived;
-                lobby.GameReceived += e.GameReceived;
+                    Games.Remove(game);
+                }
             };
-
+            lobby.GamesReceived += Lobby_GamesReceived;
+            lobby.GameReceived += Lobby_GameReceived;
             SelectedGameMode = "Custom";
 
             GameLauncher = gameLauncher;
             Configuration = configuration;
             Logger = logger;
-
+            MatchmakingViewModel = matchmakingViewModel;
             NotificationService = notificationService;
             PlayersViewModel = playersViewModel;
             DialogService = dialogService;
             NavigationService = navigationService;
-            ServersManagement = serversManagement;
             MapsService = mapsService;
+            ServerManager = serverManager;
         }
 
         public Visibility SearchButtonVisibility =>
@@ -607,7 +583,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             foreach (var player in game.Players)
             {
-                if (!PlayersViewModel.TryGetPlayer(player.Id, game.ServerManager, out var cache))
+                if (!PlayersViewModel.TryGetPlayer(player.Id, out var cache))
                 {
                     continue;
                 }
@@ -641,7 +617,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 Player cached;
                 if (!game.TryGetPlayer(left, out var player))
                 {
-                    if (!PlayersViewModel.TryGetPlayer(left, game.ServerManager, out cached))
+                    if (!PlayersViewModel.TryGetPlayer(left, out cached))
                     {
                         // welp... GG
                     }
@@ -698,7 +674,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             Task.Run(async () => await MapsService
-                .EnsureMapExistAsync(game.Mapname, game.ServerManager.GetContentClient())
+                .EnsureMapExistAsync(game.Mapname)
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
@@ -706,7 +682,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         Logger.LogError(t.Exception.ToString());
                         return;
                     }
-                    t.ContinueWith(t => game.ServerManager
+                    t.ContinueWith(t => ServerManager
                     .GetPatchClient()
                     .ConfirmPatchAsync(game.FeaturedMod)
                     .ContinueWith(t =>
@@ -729,7 +705,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async void OnJoinGameCommand(object arg)
         {
             if (arg is not Game game) return;
-            if (game.FeaturedMod is not FeaturedMod.coop or FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop)
+            var allowed = new[] { FeaturedMod.coop, FeaturedMod.FAF, FeaturedMod.FAFBeta, FeaturedMod.FAFDevelop };
+            if (!allowed.Contains(game.FeaturedMod))
             {
                 NotificationService.Notify("Warning", $"Featured mod [{game.FeaturedMod}] not supported");
                 return;
@@ -750,6 +727,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 NotificationService.Notify("Warning", "Game is empty, possibly broken", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
+            var password = string.Empty;
             if (game.PasswordProtected)
             {
                 var textbox = new System.Windows.Controls.PasswordBox
@@ -765,9 +743,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var result = await dialog.ShowAndWaitAsync(true);
                 if (result is not Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Left) return;
                 dialog.Hide();
-                var password = textbox.Password;
-                //NotificationService.Notify("Warning", "Game is password protected", Wpf.Ui.Common.SymbolRegular.Warning24);
-                return;
+                password = textbox.Password;
             }
             if (game.SimMods is not null && game.SimMods.Count > 0)
             {
@@ -791,7 +767,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
                 // TODO reverse MapsService injection from game
                 await MapsService
-                    .EnsureMapExistAsync(game.Mapname, game.ServerManager.GetContentClient())
+                    .EnsureMapExistAsync(game.Mapname)
                     .ContinueWith(async t =>
                     {
                         if (t.IsFaulted)
@@ -799,7 +775,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                             Logger.LogError(t.Exception.ToString());
                             return;
                         }
-                        await game.ServerManager
+                        await ServerManager
                         .GetPatchClient()
                         .ConfirmPatchAsync(game.FeaturedMod)
                         .ContinueWith(t =>
@@ -809,7 +785,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                                 Logger.LogError(t.Exception.ToString());
                                 return;
                             }
-                            game.ServerManager.GetLobbyClient().JoinGame(game.Uid);
+                            var lobby = ServerManager.GetLobbyClient();
+                            if (game.PasswordProtected) lobby.JoinGame(game.Uid, password);
+                            else lobby.JoinGame(game.Uid);
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 dialogg.Closed -= Dialog_Closed;

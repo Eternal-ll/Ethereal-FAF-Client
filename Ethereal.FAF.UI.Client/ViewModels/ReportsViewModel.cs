@@ -104,16 +104,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     /// </summary>
     public class ReportsViewModel : Base.ViewModel
     {
-        private readonly ServersManagement ServersManagement;
-
-        public ReportsViewModel(ServersManagement serversManagement)
+        public ReportsViewModel(ReportViewModel reportViewModel)
         {
-            ServersManagement = serversManagement;
-            serversManagement.ServerManagerAdded += (s, e) =>
-            {
-                ReportViewModel = e.GetReportViewModel();
-            };
-            ReportViewModel ??= serversManagement.SelectedServerManager?.GetReportViewModel();
+            ReportViewModel = reportViewModel;
         }
 
         #region ReportViewModel

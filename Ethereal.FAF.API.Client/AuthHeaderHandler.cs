@@ -9,17 +9,12 @@ namespace Ethereal.FAF.API.Client
         public AuthHeaderHandler(ITokenProvider tenantProvider)
         {
             this.TokenProvider = tenantProvider ?? throw new ArgumentNullException(nameof(tenantProvider));
-            InnerHandler = new HttpClientHandler();
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var token = await TokenProvider.GetTokenAsync(request.RequestUri.Host);
-
-            //potentially refresh token here if it has expired etc.
-
+            var token = await TokenProvider.GetAccessTokenAsync(cancellationToken);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
         }
     }

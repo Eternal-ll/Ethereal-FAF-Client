@@ -15,7 +15,7 @@
             <LineBreak/>
             <Run Text="Data description" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
         </TextBlock>
-        <ui:Card>
+        <ui:Card Visibility="Collapsed">
             <Grid Style="{StaticResource CardExpanderHeaderGrid}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -28,14 +28,13 @@
                         <LineBreak/>
                         <Run Text="Select data source that will be used for requests." Style="{StaticResource DescriptionHeaderRun}"/>
                 </TextBlock>
-                <ComboBox Grid.Column="2"
+                <!--<ComboBox Grid.Column="2"
                           ItemsSource="{Binding ViewModel.ServersManagement.ServersManagers}"
                           SelectedValue="{Binding ViewModel.SelectedServerManager}"
-                          IsEnabled="{Binding ViewModel.CanSelectServer}"/>
+                          IsEnabled="{Binding ViewModel.CanSelectServer}"/>-->
             </Grid>
         </ui:Card>
-        <TextBlock Text="Vault" Style="{StaticResource HeaderSectionTextBlock}"/>
-
+        <TextBlock Text="Vault" Style="{StaticResource HeaderSectionTextBlock}" Margin="0 0 0 6"/>
         <ui:Card Margin="0 4">
             <Grid Style="{StaticResource CardExpanderHeaderGrid}">
                 <Grid.ColumnDefinitions>
