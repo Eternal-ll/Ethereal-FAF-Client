@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
+    <ProjectReference Include="..\Markdown.Xaml\Markdown.Xaml\Markdown.Xaml.csproj" />
   </ItemGroup>
 
   <ItemGroup>
