@@ -1147,7 +1147,7 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RatingMing}" Value="{x:Null}">
+                                                                <DataTrigger Binding="{Binding RatingMin}" Value="{x:Null}">
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -1158,7 +1158,7 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RatingMing}" Value="{x:Null}">
+                                                                <DataTrigger Binding="{Binding RatingMin}" Value="{x:Null}">
                                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>

@@ -36,6 +36,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             lobbyClient.StateChanged += LobbyClient_StateChanged;
             lobbyClient.SessionReceived += LobbyClient_SessionReceived;
             lobbyClient.AuthentificationFailed += LobbyClient_AuthentificationFailed;
+            lobbyClient.ConnectAsync();
         }
 
         private void LobbyClient_AuthentificationFailed(object sender, global::FAF.Domain.LobbyServer.AuthentificationFailedData e)

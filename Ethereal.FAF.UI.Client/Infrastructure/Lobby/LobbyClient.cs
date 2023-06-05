@@ -279,6 +279,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 Logger.LogWarning("[{command}] Unsupported command", target);
                 return;
             }
+            if (command == ServerCommand.matchmaker_info)
+            {
+
+            }
             if (!(command is ServerCommand.game_info or ServerCommand.player_info or ServerCommand.matchmaker_info))
             {
                 Logger.LogTrace("[Inbound messsage] {json}", json);

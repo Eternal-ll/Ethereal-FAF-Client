@@ -773,6 +773,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         if (t.IsFaulted)
                         {
                             Logger.LogError(t.Exception.ToString());
+                            NotificationService.Notify("Exception", t.Exception.ToString());
+                            Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
                             return;
                         }
                         await ServerManager
@@ -783,6 +785,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                             if (t.IsFaulted)
                             {
                                 Logger.LogError(t.Exception.ToString());
+                                NotificationService.Notify("Exception", t.Exception.ToString());
+                                Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
                                 return;
                             }
                             var lobby = ServerManager.GetLobbyClient();

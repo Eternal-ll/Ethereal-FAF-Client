@@ -121,6 +121,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
             //    args += MapGeneratorArguments.SetPreviewPath(PreviewPath);
             //}
             process.StartInfo.Arguments = args;
+            process.Start();
             while (!process.HasExited)
             {
                 progress?.Report(await process.StandardOutput.ReadLineAsync());

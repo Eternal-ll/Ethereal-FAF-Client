@@ -10,6 +10,7 @@
         tmm4v4_full_share = 3,
         tmm4v4_share_until_death = 4,
         dualgap_alpha,
-        tmm4v4
+        tmm4v4,
+        tmm3v3 = 5
     }
 }
