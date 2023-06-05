@@ -75,7 +75,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         /// <returns>Full path to required file</returns>
         public static string GetMapFile(this IConfiguration configuration, string mapname, string extension,
             string maps = null) =>
-        Path.Combine(maps ?? configuration.GetMapsLocation(), mapname, mapname.Split('.')[0] + extension);
+        Path.Combine(maps ?? (Path.Combine(configuration.GetMapsLocation(), mapname)), mapname + extension);
         /// <summary>
         /// Get path to user mods folder
         /// </summary>

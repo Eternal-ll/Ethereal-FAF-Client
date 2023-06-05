@@ -62,6 +62,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                             RatingType.tmm_4v4_full_share => value.Tmm4v4,
                             RatingType.tmm_4v4_share_until_death => value.Tmm4v4,
                             RatingType.tmm_2v2 => value.Tmm2v2,
+                            RatingType.tmm_3v3 => value.Ladder1v1,
                         };
                         Games = RatingType switch
                         {
@@ -70,6 +71,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
                             RatingType.tmm_4v4_full_share => value.Tmm4v4Games,
                             RatingType.tmm_4v4_share_until_death => value.Tmm4v4Games,
                             RatingType.tmm_2v2 => value.Tmm2v2Games,
+                            RatingType.tmm_3v3 => value.Ladder1v1,
                         };
                     }
                 }

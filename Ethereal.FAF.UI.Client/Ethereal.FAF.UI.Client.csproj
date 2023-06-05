@@ -51,8 +51,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Downloads\DesktopNotifications-master\DesktopNotifications-master\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\..\..\..\Downloads\Markdown.XAML-master\src\Markdown.Xaml\Markdown.Xaml.csproj" />
+    <ProjectReference Include="..\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\Ethereal.FA.Scmap\Ethereal.FA.Vault.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.API.Client\Ethereal.FAF.API.Client.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj" />

@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
     {
         private NotificationService Notification => App.Hosting.Services.GetService<NotificationService>();
         private IConfiguration Configuration => App.Hosting.Services.GetService<IConfiguration>();
+        private MapsService MapsService;
         public override bool CanExecute(object parameter) => 
             parameter is Game game && 
             game.IsMapgen &&
@@ -23,9 +25,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
             {
                 var game = (Game)parameter;
                 game.MapGeneratorState = MapGeneratorState.Generating;
-                var mapgen = App.Hosting.Services.GetService<MapGenerator>();
-                var generated = await mapgen.GenerateMapAsync(mapname: game.Mapname);
-                var preview = generated[0].Replace("_scenario.lua", "_preview.png");
+                MapsService ??= App.Hosting.Services.GetService<MapsService>();
+
+                await MapsService.EnsureMapExistAsync(game.Mapname);
+
+                var preview = Path.Combine(Configuration.GetMapsLocation(), game.Mapname, game.Mapname + "_preview.png");
                 if (!File.Exists(preview))
                 {
                     await Exception(game, $"Generated map preview not exists. Path: {preview}");
