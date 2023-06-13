@@ -119,6 +119,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 var md5 = !File.Exists(fileDown) ? null :  await PatchWatcher.CalculateMD5(Path.Combine(Configuration.GetForgedAlliancePatchLocation(), groupfile));
                 if (!File.Exists(fileDown) || md5 != file.MD5)
                 {
+                    // /legacy-featured-mod-files/updates_faf_files/ForgedAlliance.3757.exe
+                    // eyJhbGciOiJSUzI1NiIsImtpZCI6InB1YmxpYzo5N2U2ZmQxMy0zNDcxLTQ4ZDgtYTA3OC1jYzVhMWIzNTZiMzYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOltdLCJjbGllbnRfaWQiOiJldGhlcmVhbC1mYWYtY2xpZW50IiwiZXhwIjoxNjg2MTYzNDQ3LCJleHQiOnsicm9sZXMiOlsiVVNFUiJdLCJ1c2VybmFtZSI6IkV0ZXJuYWwtIn0sImlhdCI6MTY4NjE1OTg0NywiaXNzIjoiaHR0cHM6Ly9oeWRyYS5mYWZvcmV2ZXIuY29tLyIsImp0aSI6ImM1YTU5Y2I0LTllZGUtNDZiMS1hZDRmLTRjZjJmYjM5YTQ0MiIsIm5iZiI6MTY4NjE1OTg0Nywic2NwIjpbIm9wZW5pZCIsIm9mZmxpbmUiLCJwdWJsaWNfcHJvZmlsZSIsImxvYmJ5IiwidXBsb2FkX21hcCIsInVwbG9hZF9tb2QiXSwic3ViIjoiMzAyMTc2In0.mNyT5RbRvTETTbrg_ssDG99EzUcvAn6W2rlV2LOes7E-b88CfrprRYq9t2u-yCFHecOIFbMm5dXLSJIt4l_om4vnBQcWeuecSHI0x84ABksf1KvXQJP2izG9OskVVF236Nxg4neZlByC_7ayzV1j6PIfwKyxEFECQSugGnGF_iyRmeO1RczLLmzn2E1Q-qvDgBbCpuisOpsDdyM1hsPGN7hb8el8V7lRbIulKgJ3FinHG06SXIu71o5XTwc4Vm3xRlLFRAo7r3gi8M1tM3YxpIQWM9Md-XAfCZfWJAOEDRRold8znI-dYG8WIQGW91ks3ubbEdSnt_-SUxr9ls4qRT7pfhdVzUfXrycdcM708tAvsf30j88kMr8254xLNe3A8IuFT-plbOtVbzfYNxDoIv3YYk0azmdIGuySylcUxiYNL5eKF2iHnCkxksfQhp-1HPH0niX3ZD8ryCp-krQYOEOEBOL6Ts7tCccLmQQ-WbOzNvkCp1YRtLrORqvaNm_YkS9IpGRIQQuOl9adfas0HfsiI2sKBFPLmq-qSLawc9B4clIuAdPed4xInbCz4YqnfIuD5HZgXZ21FW8LMJKQvd4WaRNxnJ0EtAvswY6QOXIln4zy04H8wRhacK7dTjoD9ex2SB-s0JsZnRctqGypY0xUNxPn-1btiE70-Cc9yAM
+                    // 1686162440-Ky4XsNgKgolC8hr5kpe4Y8V7R2%2Bf1RaDViwPOBavJwo%3D
                     var fileResponse = await FafContentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
                     if (!fileResponse.IsSuccessStatusCode)
                     {

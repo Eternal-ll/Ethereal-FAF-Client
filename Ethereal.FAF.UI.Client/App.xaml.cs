@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
+using Ethereal.FAF.UI.Client.Infrastructure.Mediator;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
@@ -12,6 +13,7 @@ using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.UI.EtherealClient.Views.Windows;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -82,6 +84,9 @@ namespace Ethereal.FAF.UI.Client
             services.AddSingleton<SnackbarService>();
             services.AddSingleton<DialogService>();
 
+            services.AddSingleton<IDialogService, DialogService>(sp => sp.GetService<DialogService>());
+            services.AddSingleton<ISnackbarService, SnackbarService>(sp => sp.GetService<SnackbarService>());
+
             services.AddScoped<ServerManager>();
 
             services.AddSingleton<UidGenerator>();
@@ -105,6 +110,10 @@ namespace Ethereal.FAF.UI.Client
                     host: configuration.GetValue<string>("Server:Irc:Host"),
                     port: configuration.GetValue<int>("Server:Irc:Port"),
                     s.GetService<ILogger<IrcClient>>()));
+
+            services.AddRefitClient<IFafUserService>()
+                .ConfigureHttpClient(c => c.BaseAddress = configuration.GetValue<Uri>("Server:API"))
+                .AddHttpMessageHandler<AuthHeaderHandler>();
 
             services.AddRefitClient<IFafApiClient>()
                 .ConfigureHttpClient(c => c.BaseAddress = configuration.GetValue<Uri>("Server:API"))
@@ -170,7 +179,8 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<LoaderViewModel>();
             services.AddScoped<LoaderView>();
-
+            
+            services.AddTransient<ProfileViewModel>();
             services.AddScoped<ProfileView>();
 
             services.AddScoped<DataView>();
@@ -183,6 +193,15 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient<ReportViewModel>();
             services.AddTransient<ReportsViewModel>();
             services.AddTransient<ReportsView>();
+
+            services.AddTransient<DownloadsView>();
+            services.AddTransient<DownloadsViewModel>();
+
+            services
+                .AddTransient<ChangeEmailView>()
+                .AddTransient<ChangeEmailViewModel>();
+
+            services.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(App).Assembly));
         }
 
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
