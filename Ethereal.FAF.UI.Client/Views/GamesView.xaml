@@ -625,18 +625,19 @@
             </Style>
 
             <DataTemplate x:Key="AlternativeCard" DataType="{x:Type lobby:Game}">
-                <StackPanel Orientation="Horizontal" Margin="-3" ContextMenu="{StaticResource GameContextMenu}">
-                    <StackPanel.InputBindings>
-                        <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource JoinGameCommand}" CommandParameter="{Binding}"/>
-                    </StackPanel.InputBindings>
-                    <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="-3" ContextMenu="{StaticResource GameContextMenu}">
+                        <StackPanel.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{DynamicResource JoinGameCommand}" CommandParameter="{Binding}"/>
+                        </StackPanel.InputBindings>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
                                ToolTip="{Binding Mapname}" Width="60" Height="60"/>
-                    <Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
+                        <Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
                                 Style="{StaticResource MapGeneratorButton}" TextElement.FontSize="10" CommandParameter="{Binding}"/>
-                    <!--<Border Style="{StaticResource CardBorder}" Width="NaN" MaxWidth="180" Padding="4"  VerticalAlignment="Top" Margin="10 0 0 0">
+                        <!--<Border Style="{StaticResource CardBorder}" Width="NaN" MaxWidth="180" Padding="4"  VerticalAlignment="Top" Margin="10 0 0 0">
                             <TextBlock Text="{Binding Title, Mode=OneTime}" TextWrapping="Wrap"/>
                         </Border>-->
-                    <TextBlock  TextWrapping="Wrap" Width="300" Padding="4"  VerticalAlignment="Center" 
+                        <TextBlock  TextWrapping="Wrap" Width="300" Padding="4"  VerticalAlignment="Center" 
                                    Margin="10 0">
                         <Run Text="{Binding Title, Mode=OneWay}"/>
                         <LineBreak/>
@@ -645,14 +646,28 @@
                         <SolidColorBrush Color="{DynamicResource TextFillColorTertiary}" />
                     </Run.Foreground>
                         </Run>
-                    </TextBlock>
-                    <TextBlock VerticalAlignment="Center" FontSize="16" Width="50" TextAlignment="Center">
+                        </TextBlock>
+                        <TextBlock VerticalAlignment="Center" FontSize="16" Width="50" TextAlignment="Center">
                             <Run Text="{Binding NumPlayers, Mode=OneWay}"/>
                             <Run Text="{Binding MaxPlayers, Mode=OneWay, StringFormat='/ {0}'}"/>
-                    </TextBlock>
-                    <ContentControl Content="{Binding HostPlayer, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>
-                    <!--<ContentControl Content="{Binding ServerManager}"/>-->
-                    <!--<TextBlock Text="{Binding Host, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>-->
+                        </TextBlock>
+                        <ContentControl Content="{Binding HostPlayer, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>
+                        <!--<ContentControl Content="{Binding ServerManager}"/>-->
+                        <!--<TextBlock Text="{Binding Host, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>-->
+                    </StackPanel>
+                    <StackPanel Height="200">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
+                                                 Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
         </Grid.Resources>

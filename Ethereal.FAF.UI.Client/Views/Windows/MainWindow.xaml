@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
+    xmlns:models="clr-namespace:Ethereal.FAF.UI.Client.Models"
     Title="Ethereal Multiverse Client" WindowStyle="None"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
@@ -50,6 +51,35 @@
 
         <Frame x:Name="RootFrame" Grid.Row="1"/>
 
+        <!--  Dialogue is above all controls except the navigation buttons. So it covers all the content, but allows you to close or move the application.  -->
+        <ui:Dialog
+            x:Name="RootDialog"
+            Grid.Row="0"
+            Grid.RowSpan="2"
+            ButtonRightClick="RootDialog_OnButtonRightClick"
+            DialogHeight="NaN"
+            VerticalAlignment="Stretch"
+            VerticalContentAlignment="Bottom">
+            <ui:Dialog.Resources>
+                <!--<Style TargetType="Grid">
+                    <Setter Property="Margin" Value="0"/>
+                </Style>-->
+                <Style TargetType="Border" >
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+                <!--<Style TargetType="ScrollViewer" BasedOn="{StaticResource {x:Type ScrollViewer}}">
+                    <Style.Resources>
+                    </Style.Resources>
+                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Background" Value="Gray"/>
+                </Style>-->
+                <!--<Style TargetType="{x:Type ui:Dialog}" BasedOn="{StaticResource {x:Type ui:Dialog}}">
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>-->
+            </ui:Dialog.Resources>
+        </ui:Dialog>
+
         <ui:Snackbar
                         x:Name="RootSnackbar"
                         Title="Hello World!"
@@ -59,25 +89,6 @@
                         Icon="PuzzlePiece24"
                         Message="Remember that the Heat Death of Universe is coming someday, no time to explain - let's go!"
                         Timeout="5000" />
-
-        <!--  Dialogue is above all controls except the navigation buttons. So it covers all the content, but allows you to close or move the application.  -->
-        <ui:Dialog
-            x:Name="RootDialog"
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            ButtonLeftName="Click me if you can!"
-            ButtonRightClick="RootDialog_OnButtonRightClick">
-            <Grid>
-                <StackPanel>
-                    <TextBlock FontWeight="Medium" Text="WPF UI" />
-                    <TextBlock
-                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                        Text="What is it like to be a scribe? Is it good? In my opinion it's not about being good or not good. If I were to say what I esteem the most in life, I would say - people. People, who gave me a helping hand when I was a mess, when I was alone. And what's interesting, the chance meetings are the ones that influence our lives. The point is that when you profess certain values, even those seemingly universal, you may not find any understanding which, let me say, which helps us to develop. I had luck, let me say, because I found it. And I'd like to thank life. I'd like to thank it - life is singing, life is dancing, life is love. Many people ask me the same question, but how do you do that? where does all your happiness come from? And i replay that it's easy, it's cherishing live, that's what makes me build machines today, and tomorrow... who knows, why not, i would dedicate myself to do some community working and i would be, wham, not least... planting .... i mean... carrots."
-                        TextAlignment="Justify"
-                        TextWrapping="WrapWithOverflow" />
-                </StackPanel>
-            </Grid>
-        </ui:Dialog>
 
         <!--
             ButtonsForeground="Aqua"

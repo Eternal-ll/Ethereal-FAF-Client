@@ -102,6 +102,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         private void RootDialog_OnButtonRightClick(object sender, RoutedEventArgs e)
         {
+            MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
             RootDialog.Hide();
         }
     }

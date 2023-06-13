@@ -3,7 +3,6 @@ using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Enums;
-using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
