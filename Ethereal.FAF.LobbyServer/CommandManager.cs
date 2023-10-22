@@ -64,17 +64,17 @@ namespace Ethereal.FAF.LobbyServer
                 Command = ServerCommand.welcome,
                 me = new()
                 {
-                    login = data.unique_id[..10],
-                    id = new Random().Next(0, 1000000),
-                    ratings = new Dictionary<string, Rating>()
-                     {
-                         { "global", new Rating()
-                         {
-                             name = "global",
-                              number_of_games = 500,
-                              rating= new double[]{1500, 500}
-                         }}
-                     }
+                    Login = data.unique_id[..10],
+                    Id = new Random().Next(0, 1000000),
+                    Ratings = new()
+                    {
+                        Global = new Rating()
+						{
+							name = "global",
+							number_of_games = 500,
+							rating = new double[] { 1500, 500 }
+						}
+					}
                 },
                 id = new Random().Next(0, 1000000),
                 login = data.unique_id[..10]

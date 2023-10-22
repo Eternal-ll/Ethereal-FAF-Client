@@ -26,7 +26,6 @@
         featuredModFile,
 
         player,
-        clanMembership,
 
         avatar,
         avatarAssignment,
@@ -43,7 +42,11 @@
         gameReview,
         gameReviewsSummary,
 
-        coturnServer
+        coturnServer,
 
-    }
+        clan,
+        clanMembership,
+
+		license
+	}
 }

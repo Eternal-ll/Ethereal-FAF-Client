@@ -7,7 +7,7 @@ using System;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
 {
-    public interface ITestWindowService
+	public interface ITestWindowService
     {
         public void Show(Type windowType);
 

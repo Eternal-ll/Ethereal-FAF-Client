@@ -8,10 +8,9 @@ namespace Ethereal.FAF.API.Client.Models.Base
     /// </summary>
     public class ApiUniversalTypeId
     {
-        [JsonPropertyName("id")]
-        public string _IdString { get; set; }
-        [JsonIgnore]
-        public int Id => int.Parse(_IdString);
+		[JsonPropertyName("id")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+		public int Id { get; set; }
 
         [JsonPropertyName("type")]
         [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -79,7 +79,31 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="10"/>
                     </Grid.ColumnDefinitions>
-                    <Image Width="60" Height="60" Source="{Binding LatestVersion.ThumbnailUrl}"/>
+                    <ContentControl>
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{Binding LatestVersion.ThumbnailUrl}" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <Image Width="60" Height="60" Source="{Binding LatestVersion.ThumbnailUrl}"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Content}" Value="{x:Null}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate>
+                                                    <Border Width="60" Height="60" Background="Gray"/>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
 
                     <TextBlock Grid.Column="2" MaxWidth="200" TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Run Text="{Binding Name, Mode=OneWay}" FontSize="14" />
@@ -241,7 +265,6 @@
         </WrapPanel>
         <ListView Grid.Row="1" Margin="0 4 0 0"
                   ItemsSource="{Binding ViewModel.ModsView}"
-                  VirtualizingPanel.CacheLengthUnit="Pixel"
                  VirtualizingPanel.IsVirtualizing="True"
                   ItemTemplateSelector="{StaticResource MapTemplateSelector}">
             <ListView.Resources>

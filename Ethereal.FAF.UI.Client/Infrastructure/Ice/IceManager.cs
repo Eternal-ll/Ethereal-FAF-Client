@@ -1,5 +1,7 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.API.Client.Models;
+using Ethereal.FAF.API.Client.Models.Attributes;
+using Ethereal.FAF.API.Client.Models.Base;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models;
@@ -32,9 +34,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         private readonly LobbyClient LobbyClient;
         private readonly IFafApiClient FafApiClient;
 
-        public CoturnServer[] CoturnServers { get; set; }
-
-        private List<IceCoturnServer> IceCoturnServers;
+        public IceCoturnServer[] CoturnServers { get; set; }
 
         public Process IceServer;
         public IceClient IceClient;
@@ -54,25 +54,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             LobbyClient = lobbyClient;
             FafApiClient = fafApiClient;
 
-            lobbyClient.IceServersDataReceived += LobbyClient_IceServersDataReceived;
             lobbyClient.IceUniversalDataReceived += LobbyClient_IceUniversalDataReceived;
-        }
-        private void LobbyClient_IceServersDataReceived(object sender, IceServersData e)
-        {
-            IceCoturnServers = e.ice_servers.ToList();
-        }
+			CoturnServers = Array.Empty<IceCoturnServer>();
 
-        public async Task<CoturnServer[]> GetCoturnServersAsync()
-        {
-            if (CoturnServers is not null) return CoturnServers;
-            var response = await FafApiClient.GetCoturnServersAsync();
-            if (!response.IsSuccessStatusCode)
-            {
-                return Array.Empty<CoturnServer>();
-            }
-            CoturnServers = response.Content.Data;
-            return response.Content.Data;
-        }
+		}
 
         public void SelectCoturnServers(params int[] ids) =>
             UserSettings.Update("IceAdapter:SelectedCoturnServers", ids);
@@ -87,28 +72,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             Logger.LogInformation("RPC server port: [{rpc}]", RpcPort);
             Logger.LogInformation("GPGNetServer port: [{gpg}]", GpgNetPort);
         }
-        public async Task<IceCoturnServer[]> GetIceCoturnServersAsync(long playerId)
-        {
-            var coturnServers = await GetCoturnServersAsync();
-            if (coturnServers.Length is 0)
-            {
-
-            }
-            var selected = Configuration.GetSection("IceAdapter:SelectedCoturnServers").Get<int[]>() ?? Array.Empty<int>();
-            return null;
-        }
-
-        private bool TryGetCoturnServers(long playerId,out List<IceCoturnServer> servers)
-        {
-            var selected = Configuration.GetSection("IceAdapter:SelectedCoturnServers").Get<int[]>();
-            selected ??= Array.Empty<int>();
-            var ttl = Configuration.GetIceAdapterTtl();
-            servers = GetCoturnServersAsync().Result
-                .Where(c => selected.Length == 0 || selected.Contains(c.Id))
-                .Select(c => new IceCoturnServer(c.Key, c.Host, c.Port, ttl, playerId))
-                .ToList();
-            return servers.Any();
-        }
+        private IceCoturnServer[] GetSelectedCoturnServers()
+		{
+			var selected = Configuration.GetSection("IceAdapter:SelectedCoturnServers").Get<int[]>();
+            return CoturnServers.Where(x => selected.Contains(x.Id)).ToArray();
+		}
         public void Initialize(long playerId, string playerLogin, long gameId, string initMode)
         {
             LastGameId = gameId;
@@ -117,7 +85,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             IceServer = GetIceServerProcess(playerId, playerLogin, gameId);
             IceServer.Start();
             IceClient = new("127.0.0.1", RpcPort);
-            IceClient.SetIceCoturnServers(TryGetCoturnServers(playerId, out var servers) ? servers.ToArray() : IceCoturnServers?.ToArray());
+            IceClient.SetIceCoturnServers(GetSelectedCoturnServers());
             IceClient.SetInitMode(initMode);
             IceClient.ConnectAsync();
             var t = 0;
@@ -194,10 +162,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
                     Arguments = $"-jar \"{Configuration.GetIceAdapterExecutable()}\" --help"
                 }
             };
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            process.Kill();
-            return output;
+            try
+            {
+				process.Start();
+				string output = process.StandardOutput.ReadToEnd();
+				process.Kill();
+				return output;
+			}
+            catch
+            {
+                return null;
+            }
         }
         DateTime start;
         DateTime end;

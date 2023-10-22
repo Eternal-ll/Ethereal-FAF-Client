@@ -1,63 +1,13 @@
 ﻿using Ethereal.FAF.API.Client.Models;
+using Ethereal.FAF.API.Client.Models.Attributes;
 using Ethereal.FAF.API.Client.Models.Base;
 using Refit;
-using System.ComponentModel;
 
 namespace Ethereal.FAF.API.Client
 {
-    public class Pagination
-    {
-        [AliasAs("page[totals]")]
-        public bool PageTotals { get; set; } = true;
-        [AliasAs("page[size]")]
-        public int PageSize { get; set; }
-        [AliasAs("page[number]")]
-        public int PageNumber { get; set; }
-    }
-    public class Sorting
-    {
-        public ListSortDirection SortDirection;
-        [AliasAs("sort")]
-        public string Sort
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(Parameter) || Parameter is "None") return null;
-                return
-                    (SortDirection is ListSortDirection.Descending ?
-                    "-" : string.Empty) +
-                    Parameter;
-            }
-        }
-        public string Parameter;
-    }
     public class Filtration
     {
 
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    public interface IFafUserService
-    {
-        /// <summary>
-        /// Update account password
-        /// </summary>
-        /// <param name="currentPassword">Current Password</param>
-        /// <param name="newPassword">New password</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        [Post("/users/changePassword")]
-        public Task<ApiResponse<object>> ChangePassword(string currentPassword, string newPassword, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Update account email
-        /// </summary>
-        /// <param name="newEmail">New Email</param>
-        /// <param name="currentPassword">Current password</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        [Post("/users/changeEmail")]
-        public Task<HttpResponseMessage> ChangeEmail(string newEmail, string currentPassword, CancellationToken cancellationToken = default);
     }
     public interface IFafApiClient
     {
@@ -68,7 +18,7 @@ namespace Ethereal.FAF.API.Client
         Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(int featuredMod, int version, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
 
         [Get("/data/coturnServer")]
-        Task<ApiResponse<ApiUniversalResult<CoturnServer[]>>> GetCoturnServersAsync(CancellationToken cancellationToken = default);
+        Task<FafApiResult<Entity<CoturnServerAttributes>[]>> GetCoturnServersAsync(CancellationToken cancellationToken = default);
 
         [Get("/data/map")]
         Task<ApiResponse<ApiMapsResult>> GetMapsAsync(

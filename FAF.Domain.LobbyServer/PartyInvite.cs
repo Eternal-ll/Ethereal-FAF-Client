@@ -2,7 +2,7 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    public class PartyInvite : Base.ServerMessage
+	public class PartyInvite : Base.ServerMessage
     {
         [JsonPropertyName("sender")]
         public long SenderId { get; set; }

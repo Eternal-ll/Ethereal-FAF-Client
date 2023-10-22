@@ -1,31 +1,15 @@
 ﻿using FAF.Domain.LobbyServer.Enums;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
-    public abstract class INPC : INotifyPropertyChanged
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <example>{"command":"game_info","visibility":"public","password_protected":true,"uid":19113763,"title":"Mark","state":"open","game_type":"custom","featured_mod":"faf","sim_mods":{},"mapname":"neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa","map_file_path":"maps/neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa.zip","host":"nthunter32","num_players":1,"max_players":12,"launched_at":null,"rating_type":"global","rating_min":null,"rating_max":null,"enforce_rating_range":false,"teams_ids":[{"team_id":2,"player_ids":[391628]}],"teams":{"2":["nthunter32"]}}</example>
+	public class GameInfoMessage : INPC
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-        public virtual void OnPropertyChanged([CallerMemberName] string PropertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(PropertyName));
-        public virtual bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
-        {
-            if (Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(PropertyName);
-            return true;
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <example>{"command":"game_info","visibility":"public","password_protected":true,"uid":19113763,"title":"Mark","state":"open","game_type":"custom","featured_mod":"faf","sim_mods":{},"mapname":"neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa","map_file_path":"maps/neroxis_map_generator_1.8.8_gnau2dr2nxbuk_bqeaiaa.zip","host":"nthunter32","num_players":1,"max_players":12,"launched_at":null,"rating_type":"global","rating_min":null,"rating_max":null,"enforce_rating_range":false,"teams_ids":[{"team_id":2,"player_ids":[391628]}],"teams":{"2":["nthunter32"]}}</example>
-    public class GameInfoMessage : INPC
-    {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ServerCommand Command { get; set; }
         [JsonPropertyName("games")]
         public GameInfoMessage[] Games { get; set; }
         /// <summary>

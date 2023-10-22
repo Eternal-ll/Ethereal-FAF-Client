@@ -89,9 +89,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 case LobbyState.Disconnecting:
                     break;
                 case LobbyState.Disconnected:
-                    CancellationTokenSource.Cancel();
+                    CancellationTokenSource?.Cancel();
                     App.Current.Dispatcher.BeginInvoke(() => NavigationWindow.Navigate(typeof(LoaderView)), System.Windows.Threading.DispatcherPriority.Background);
-                    break;
+					LobbyClient.Disconnect();
+					LobbyClient.ConnectAsync();
+					break;
             }
         }
     }

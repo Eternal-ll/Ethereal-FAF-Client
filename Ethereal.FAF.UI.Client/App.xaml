@@ -24,6 +24,7 @@
 
                     <converter:UriToImageConverter x:Key="UriToImageConverter"/>
                     <converter:BorderClipConverter x:Key="BorderClipConverter"/>
+                    <converter:CacheImageConverter x:Key="CacheImageConverter"/>
                     <Style x:Key="ClippedBorder" TargetType="Border">
                         <Setter Property="Clip">
                             <Setter.Value>

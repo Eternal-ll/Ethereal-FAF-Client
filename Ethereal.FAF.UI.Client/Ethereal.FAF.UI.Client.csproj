@@ -7,6 +7,7 @@
     <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -54,13 +55,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Downloads\Markdown.XAML-master\src\Markdown.Xaml\Markdown.Xaml.csproj" />
     <ProjectReference Include="..\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\Ethereal.FA.Scmap\Ethereal.FA.Vault.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.API.Client\Ethereal.FAF.API.Client.csproj" />
     <ProjectReference Include="..\Ethereal.FAF.Client.Updater\Ethereal.FAF.Client.Updater.csproj" />
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
     <ProjectReference Include="..\Fonts\Fonts.csproj" />
+    <ProjectReference Include="..\Markdown.Xaml\Markdown.Xaml\Markdown.Xaml.csproj" />
   </ItemGroup>
 
   <ItemGroup>

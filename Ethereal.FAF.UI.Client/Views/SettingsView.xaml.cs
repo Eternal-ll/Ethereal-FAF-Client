@@ -16,8 +16,15 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = viewmodel;
             InitializeComponent();
+			this.Unloaded += SettingsView_Unloaded;
         }
-        public SettingsViewModel ViewModel { get; }
+
+		private void SettingsView_Unloaded(object sender, System.Windows.RoutedEventArgs e)
+		{
+            ViewModel.Dispose();
+		}
+
+		public SettingsViewModel ViewModel { get; }
 
         private void VirtualizingStackPanel_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
 {
-    public class UriToImageConverter : IValueConverter
+	public class UriToImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

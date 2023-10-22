@@ -2,10 +2,12 @@
 using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -23,27 +25,29 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly SnackbarService SnackbarService;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly IFafApiClient FafApiClient;
+        private readonly IFileCacheService _fileCacheService;
 
-        public ModsViewModel(ILogger<MapsViewModel> logger, SnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient)
-        {
-            ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
-            Mods = new();
-            ModsViewSource = new()
-            {
-                Source = Mods.AsObservable
-            };
+		public ModsViewModel(ILogger<MapsViewModel> logger, SnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient, IFileCacheService fileCacheService)
+		{
+			ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
+			Mods = new();
+			ModsViewSource = new()
+			{
+				Source = Mods.AsObservable
+			};
 
-            Logger = logger;
-            SnackbarService = snackbarService;
-            HttpClientFactory = httpClientFactory;
-            FafApiClient = fafApiClient;
-        }
-        private readonly ConcurrentObservableCollection<Mod> Mods;
+			Logger = logger;
+			SnackbarService = snackbarService;
+			HttpClientFactory = httpClientFactory;
+			FafApiClient = fafApiClient;
+			_fileCacheService = fileCacheService;
+		}
+		private readonly ConcurrentObservableCollection<Mod> Mods;
         private readonly CollectionViewSource ModsViewSource;
         public ICollectionView ModsView => ModsViewSource.View;
 
         #region PageSize
-        private int _PageSize = 50;
+        private int _PageSize = 15;
         public int PageSize
         {
             get => _PageSize;
@@ -299,19 +303,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             response.Content.ParseIncluded();
 
-            if (response.Content.Data.Length > 0)
+            //         if (response.Content.Data.Length > 0)
+            //{
+            foreach (var mod in response.Content.Data)
             {
-                var client = HttpClientFactory.CreateClient();
-                foreach (var mod in response.Content.Data)
-                {
-                    var msg = new HttpRequestMessage(new HttpMethod("HEAD"), mod.LatestVersion.ThumbnailUrl);
-                    var rsp = await client.SendAsync(msg, CancellationTokenSource.Token);
-                    if (!rsp.IsSuccessStatusCode)
-                    {
-                        mod.LatestVersion.Attributes["thumbnailUrl"] = "https://via.placeholder.com/60x60.png?text=Not%20Found";
-                    }
-                }
+                //var file = await _fileCacheService.Cache(mod.LatestVersion.ThumbnailUrl);
+                mod.LatestVersion.Attributes["thumbnailUrl"] = null;
             }
+            //}
 
             Pages = response.Content.Meta.Page.AvaiablePagesCount;
 

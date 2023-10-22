@@ -28,6 +28,20 @@ namespace Ethereal.FAF.API.Client.Models.Base
             entityProperties = null;
         }
     }
+    public class ApiListResult<T>
+    {
+        [JsonPropertyName("data")]
+        public List<ApiUniversalData<T>> Data { get; set; }
+
+        [JsonPropertyName("included")]
+        public ApiUniversalData[] Included { get; set; }
+
+        [JsonPropertyName("relationships")]
+        public Dictionary<string, ApiUniversalArrayRelationship> Relations { get; set; }
+
+        [JsonPropertyName("meta")]
+        public ApiVaultMeta Meta { get; set; }
+    }
     public class ModsResult : ApiUniversalResult<Mod[]>
     {
         public override void ParseIncluded()

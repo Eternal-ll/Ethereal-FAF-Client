@@ -4,6 +4,7 @@ namespace FAF.Domain.LobbyServer.Enums
 {
     public enum ServerCommand : byte
     {
+        unknown,
         [Obsolete("Use API instead")]
         /// <summary>
         /// Auth

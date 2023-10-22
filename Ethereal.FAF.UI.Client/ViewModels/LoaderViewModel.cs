@@ -6,14 +6,12 @@ using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Data.OracleClient;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using Wpf.Ui.Mvvm.Contracts;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class LoaderViewModel : Base.ViewModel
+	public class LoaderViewModel : Base.ViewModel
     {
         private readonly INavigationWindow NavigationWindow;
         private readonly MapGenerator MapGenerator;

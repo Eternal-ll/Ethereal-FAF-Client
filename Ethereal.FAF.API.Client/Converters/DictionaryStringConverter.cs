@@ -51,7 +51,7 @@ namespace beta.Infrastructure.Converters.JSON
             Dictionary<string, string> dictionary,
             JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

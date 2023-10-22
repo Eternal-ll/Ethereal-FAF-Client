@@ -1,6 +1,6 @@
 ﻿namespace FAF.Domain.LobbyServer
 {
-    public class AuthentificationFailedData : Base.ServerMessage
+	public class AuthentificationFailedData : Base.ServerMessage
     {
         public string text { get; set; }
 

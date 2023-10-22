@@ -1,16 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using Ethereal.FAF.API.Client.Models.Attributes;
+using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.API.Client.Models
 {
-    public class CoturnServer : Base.ApiUniversalData
-    {
-        public bool Active => bool.Parse(Attributes["active"]);
-        public string Host => Attributes["host"];
-        public string Key => Attributes["key"];
-        public int Port => int.Parse(Attributes["port"]);
-        public string Region => Attributes["region"];
-    }
-    public partial class DownlordClientConfiguration
+	public partial class DownlordClientConfiguration
     {
         [JsonPropertyName("gitHubRepo")]
         public GitHubRepo GitHubRepo { get; set; }

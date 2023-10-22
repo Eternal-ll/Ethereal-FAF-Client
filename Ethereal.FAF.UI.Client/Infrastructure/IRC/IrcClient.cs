@@ -326,9 +326,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         }
         public void PassAuthorization()
         {
-            SendAsync(IrcCommands.Pass(Password));
-            SendAsync(IrcCommands.UserInfo(UserId, User));
-            SendAsync(IrcCommands.Nickname(User));
+			//SendAsync(IrcCommands.Pass(Password));
+			SendAsync(IrcCommands.UserInfo(UserId, User));
+			SendAsync(IrcCommands.Nickname(User));
+            Ping();
         }
         protected override void OnConnecting()
         {
@@ -381,14 +382,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.IRC
         public override bool SendAsync(string text)
         {
             Logger.LogTrace($"[Outbound message] {text}");
-            if (text[^1] != '\r') text += '\r';
-            return base.SendAsync(text);
+            return base.SendAsync(text + "\r\n");
         }
         public override long Send(string text)
         {
             Logger.LogTrace($"[Outbound message] {text}");
-            if (text[^1] != '\r') text += '\r';
-            return base.Send(text);
+            return base.Send(text + "\r\n");
         }
     }
 }

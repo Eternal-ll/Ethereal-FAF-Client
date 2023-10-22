@@ -2,7 +2,7 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    public class PlayerInfoMessage : INPC
+	public class PlayerInfoMessage : INPC
     {
         [JsonPropertyName("id")]
         public long Id { get; set; }
@@ -33,9 +33,6 @@ namespace FAF.Domain.LobbyServer
 
         [JsonPropertyName("players")]
         public PlayerInfoMessage[] Players { get; set; }
-
-        [JsonIgnore]
-        public GameInfoMessage Game { get; set; }
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.API.Client;
+using Ethereal.FAF.API.Client.Models.Clans;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
@@ -9,6 +10,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Configuration;
+using Ethereal.FAF.UI.Client.Models.Configurations;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
@@ -20,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Refit;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -111,7 +114,14 @@ namespace Ethereal.FAF.UI.Client
                     port: configuration.GetValue<int>("Server:Irc:Port"),
                     s.GetService<ILogger<IrcClient>>()));
 
+            services.AddScoped<IFafApi<ClanDto>, IFafClansService>(sp =>
+            sp.GetRequiredService<IFafClansService>());
+
             services.AddRefitClient<IFafUserService>()
+                .ConfigureHttpClient(c => c.BaseAddress = configuration.GetValue<Uri>("Server:API"))
+                .AddHttpMessageHandler<AuthHeaderHandler>();
+
+            services.AddRefitClient<IFafClansService>()
                 .ConfigureHttpClient(c => c.BaseAddress = configuration.GetValue<Uri>("Server:API"))
                 .AddHttpMessageHandler<AuthHeaderHandler>();
 
@@ -122,6 +132,12 @@ namespace Ethereal.FAF.UI.Client
                 .ConfigureHttpClient(c => c.BaseAddress = configuration.GetValue<Uri>("Server:Content"))
                 .AddHttpMessageHandler<AuthHeaderHandler>()
                 .AddHttpMessageHandler<VerifyHeaderHandler>();
+
+            services.AddTransient<IRequestHandler<GetDataCommand<ClanDto>, PaginationDto<ClanDto>>, GetDataCommandHandler<ClanDto>>();
+
+            services.Configure<IceAdapterConfiguration>(configuration.GetSection("IceAdapter"));
+            services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
+            services.AddScoped<IFileCacheService, FileCacheService>();
 
             services.AddScoped<PatchWatcher>();
             services.AddScoped<GameLauncher>();
@@ -196,6 +212,10 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddTransient<DownloadsView>();
             services.AddTransient<DownloadsViewModel>();
+
+            services
+                .AddTransient<ClansView>()
+                .AddTransient<ClansViewModel>();
 
             services
                 .AddTransient<ChangeEmailView>()

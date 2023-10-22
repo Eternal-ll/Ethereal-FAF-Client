@@ -1,4 +1,7 @@
-﻿namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
 {
     internal interface IExecutable
     {

@@ -2,7 +2,7 @@
 
 namespace FAF.Domain.LobbyServer
 {
-    /*
+	/*
     
     {
         "command":"JoinGame",
@@ -11,7 +11,7 @@ namespace FAF.Domain.LobbyServer
     }
 
     */
-    public class IceUniversalData : Base.ServerMessage
+	public class IceUniversalData : Base.ServerMessage
     {
         [JsonConverter(typeof(RawStringConverter))]
         public string args { get; set; }

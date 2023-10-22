@@ -9,6 +9,7 @@ using Wpf.Ui.Mvvm.Contracts;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Mediator
 {
+
     internal record ApiNotification(string Title, string Detail, bool Success = true) : INotification;
     internal class SnackBarNotification : INotificationHandler<ApiNotification>
     {

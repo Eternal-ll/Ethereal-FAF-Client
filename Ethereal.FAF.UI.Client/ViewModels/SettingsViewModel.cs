@@ -1,20 +1,28 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+using Ethereal.FAF.UI.Client.Infrastructure.Queries.GetCoturnServers;
 using Ethereal.FAF.UI.Client.Models;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net;
 using System.Reflection;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
+using Windows.Media.Core;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Contracts;
+using System.Threading;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -92,110 +100,162 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly IThemeService ThemeService;
         private readonly INavigationWindow NavigationWindow;
+        private readonly IMediator _mediator;
 
         public BackgroundViewModel BackgroundViewModel { get; }
+        private readonly BackgroundWorker _backgroundWorker;
 
-        public SettingsViewModel(IThemeService themeService,
-            INavigationWindow navigationWindow,
-            BackgroundViewModel backgroundViewModel,
-            IConfiguration configuration,
-            IceManager iceManager)
-        {
-            ThemeService = themeService;
-            NavigationWindow = navigationWindow;
-            BackgroundViewModel = backgroundViewModel;
+		public SettingsViewModel(IThemeService themeService,
+			INavigationWindow navigationWindow,
+			BackgroundViewModel backgroundViewModel,
+			IConfiguration configuration,
+			IceManager iceManager,
+			IMediator mediator)
+		{
+			ThemeService = themeService;
+			NavigationWindow = navigationWindow;
+			BackgroundViewModel = backgroundViewModel;
 
-            _IsIceRelayForced = configuration.GetValue<bool>("IceAdapter:ForceRelay", false);
-            _IsIceDebugEnabled = configuration.GetValue<bool>("IceAdapter:IsDebugEnabled");
-            _IsIceInfoEnabled = configuration.GetValue<bool>("IceAdapter:IsIceInfoEnabled");
-            _UseIceTelemetryUI = configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true);
-            //_IsIceLogsEnabled = configuration.GetValue<bool>("IceAdapter:IsLogsEnabled");
-            _PathToIceAdapter = configuration.GetValue<string>("IceAdapter:Executable");
-            _PathToIceAdapterLogs = configuration.GetValue<string>("IceAdapter:Logs");
+			_IsIceRelayForced = configuration.GetValue<bool>("IceAdapter:ForceRelay", false);
+			_IsIceDebugEnabled = configuration.GetValue<bool>("IceAdapter:IsDebugEnabled");
+			_IsIceInfoEnabled = configuration.GetValue<bool>("IceAdapter:IsIceInfoEnabled");
+			_UseIceTelemetryUI = configuration.GetValue<bool>("IceAdapter:UseTelemetryUI", true);
+			//_IsIceLogsEnabled = configuration.GetValue<bool>("IceAdapter:IsLogsEnabled");
+			_PathToIceAdapter = configuration.GetValue<string>("IceAdapter:Executable");
+			_PathToIceAdapterLogs = configuration.GetValue<string>("IceAdapter:Logs");
 
-            _MapGenLogsFolder = configuration.GetValue<string>("MapGenerator:Logs");
-            _MapGenVersionsFolder = configuration.GetValue<string>("MapGenerator:Versions");
-            _IsMapGenLogsEnabled = configuration.GetValue<bool>("MapGenerator:IsLogsEnabled");
-            _MapGenLogsFolder = configuration.GetValue<string>("MapGenerator:Logs");
+			_MapGenLogsFolder = configuration.GetValue<string>("MapGenerator:Logs");
+			_MapGenVersionsFolder = configuration.GetValue<string>("MapGenerator:Versions");
+			_IsMapGenLogsEnabled = configuration.GetValue<bool>("MapGenerator:IsLogsEnabled");
+			_MapGenLogsFolder = configuration.GetValue<string>("MapGenerator:Logs");
 
-            _PathToUidGenerator = configuration.GetValue<string>("Paths:UidGenerator");
-            _PathToJavaRuntime = configuration.GetValue<string>("Paths:JavaRuntime");
+			_PathToUidGenerator = configuration.GetValue<string>("Paths:UidGenerator");
+			_PathToJavaRuntime = configuration.GetValue<string>("Paths:JavaRuntime");
 
 
-            _BackgroundType = configuration.GetValue<BackgroundType>("UI:BackgroundType");
-            _AccentColor = (Color)ColorConverter.ConvertFromString(configuration.GetValue<string>("UI:AccentColor"));
-            _ThemeType = configuration.GetValue<ThemeType>("UI:ThemeType");
+			_BackgroundType = configuration.GetValue<BackgroundType>("UI:BackgroundType");
+			_AccentColor = (Color)ColorConverter.ConvertFromString(configuration.GetValue<string>("UI:AccentColor"));
+			_ThemeType = configuration.GetValue<ThemeType>("UI:ThemeType");
 
-            Task.Run(() =>
+			Task.Run(async () =>
+			{
+				IceHelper = iceManager.GetIceHelpMessage();
+                CoturnServers = await _mediator.Send(new GetCoturnServersQuery());
+			});
+
+			SetSystemAccentColorCommand = new LambdaCommand(arg => AccentColor = Accent.GetColorizationColor());
+			SelectDirectoryCommand = new LambdaCommand(arg =>
+			{
+				var target = arg.ToString();
+				var dialog = new OpenFileDialog
+				{
+					Title = "Select any file, parent directory will be chosen",
+					InitialDirectory = target switch
+					{
+						"ice.logs" => PathToIceAdapterLogs,
+						"mapgen.logs" => MapGenLogsFolder,
+						"mapgen.versions" => MapGenVersionsFolder,
+						_ => null,
+					}
+				};
+				dialog.ShowDialog();
+				if (!string.IsNullOrWhiteSpace(dialog.FileName))
+				{
+					var path = Directory.GetDirectoryRoot(dialog.FileName);
+					switch (target)
+					{
+						case "ice.logs": PathToIceAdapterLogs = path; break;
+						case "mapgen.logs": MapGenLogsFolder = path; break;
+						case "mapgen.versions": MapGenVersionsFolder = path; break;
+					}
+				}
+			});
+			SelectFileCommand = new LambdaCommand(arg =>
+			{
+				var target = arg.ToString();
+				var file = target switch
+				{
+					"java.runtime" => "Java Runtime",
+					"ice.file" => "FAF ICE Adapter",
+					"uid.file" => "FAF UID Generator"
+				};
+				var dialog = new OpenFileDialog
+				{
+					Title = $"Select {file} file",
+					Filter = target switch
+					{
+						"java.runtime" => "Java Runtime|java.exe",
+						"ice.file" => "FAF ICE Adapter|*.jar",
+						"uid.file" => "FAF UID Generator|*.exe"
+					},
+					InitialDirectory = target switch
+					{
+						"java.runtime" => PathToJavaRuntime,
+						"ice.file" => PathToIceAdapter,
+						"uid.file" => PathToUidGenerator
+					}
+				};
+				dialog.ShowDialog();
+				if (!string.IsNullOrWhiteSpace(dialog.FileName))
+				{
+					switch (target)
+					{
+						case "java.runtime": PathToJavaRuntime = dialog.FileName; break;
+						case "ice.file": PathToIceAdapter = dialog.FileName; break;
+						case "uid.file": PathToUidGenerator = dialog.FileName; break;
+					}
+				}
+			});
+			_mediator = mediator;
+            _backgroundWorker = new()
             {
-                IceHelper = iceManager.GetIceHelpMessage();
+				WorkerSupportsCancellation = true
+			};
+			_backgroundWorker.DoWork += _backgroundWorker_DoWork;
+            _backgroundWorker.RunWorkerAsync();
+		}
 
-            });
+		private void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+		{
+            while (!_backgroundWorker.CancellationPending)
+            {
+                Thread.Sleep(1000);
+                CalculateCoturnServersPing();
+			}
+		}
+        private void CalculateCoturnServersPing()
+		{
+            if (CoturnServers == null) return;
+			using var pingSender = new Ping();
+            foreach (var coturnServer in CoturnServers)
+			{
+				var host = coturnServer.Urls?.FirstOrDefault();
+				if (string.IsNullOrWhiteSpace(host))
+				{
+					coturnServer.RoundtripTime = 0;
+					return;
+				}
+				var ub = new UriBuilder(host);
+				IPAddress address = Dns.GetHostEntry(ub.Host).AddressList.FirstOrDefault();
+				if (address == null)
+				{
+					coturnServer.RoundtripTime = 0;
+					return;
+				}
+				PingReply reply = pingSender.Send(address);
 
-            SetSystemAccentColorCommand = new LambdaCommand(arg => AccentColor = Accent.GetColorizationColor());
-            SelectDirectoryCommand = new LambdaCommand(arg =>
-            {
-                var target = arg.ToString();
-                var dialog = new OpenFileDialog
-                {
-                    Title = "Select any file, parent directory will be chosen",
-                    InitialDirectory = target switch
-                    {
-                        "ice.logs" => PathToIceAdapterLogs,
-                        "mapgen.logs" => MapGenLogsFolder,
-                        "mapgen.versions" => MapGenVersionsFolder,
-                    }
-                };
-                dialog.ShowDialog();
-                if (!string.IsNullOrWhiteSpace(dialog.FileName))
-                {
-                    var path = Directory.GetDirectoryRoot(dialog.FileName);
-                    switch (target)
-                    {
-                        case "ice.logs": PathToIceAdapterLogs = path; break;
-                        case "mapgen.logs": MapGenLogsFolder = path; break;
-                        case "mapgen.versions": MapGenVersionsFolder = path; break;
-                    }
-                }
-            });
-            SelectFileCommand = new LambdaCommand(arg =>
-            {
-                var target = arg.ToString();
-                var file = target switch
-                {
-                    "java.runtime" => "Java Runtime",
-                    "ice.file" => "FAF ICE Adapter",
-                    "uid.file" => "FAF UID Generator"
-                };
-                var dialog = new OpenFileDialog
-                {
-                    Title = $"Select {file} file",
-                    Filter = target switch
-                    {
-                        "java.runtime" => "Java Runtime|java.exe",
-                        "ice.file" => "FAF ICE Adapter|*.jar",
-                        "uid.file" => "FAF UID Generator|*.exe"
-                    },
-                    InitialDirectory = target switch
-                    {
-                        "java.runtime" => PathToJavaRuntime,
-                        "ice.file" => PathToIceAdapter,
-                        "uid.file" => PathToUidGenerator
-                    }
-                };
-                dialog.ShowDialog();
-                if (!string.IsNullOrWhiteSpace(dialog.FileName))
-                {
-                    switch (target)
-                    {
-                        case "java.runtime": PathToJavaRuntime = dialog.FileName; break;
-                        case "ice.file": PathToIceAdapter = dialog.FileName; break;
-                        case "uid.file": PathToUidGenerator = dialog.FileName; break;
-                    }
-                }
-            });
-        }
-        public ICommand SetSystemAccentColorCommand { get; }
+				if (reply.Status == IPStatus.Success)
+				{
+					coturnServer.RoundtripTime = reply.RoundtripTime;
+				}
+				else
+				{
+					coturnServer.RoundtripTime = 0;
+				}
+			}
+		}
+
+		public ICommand SetSystemAccentColorCommand { get; }
         public ICommand SelectDirectoryCommand { get; }
         public ICommand SelectFileCommand { get; }
 
@@ -334,12 +394,18 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        #endregion
+        #region CoturnServers
+        private CoturnServer[] _CoturnServers;
+        public CoturnServer[] CoturnServers
+        { get => _CoturnServers; set => Set(ref _CoturnServers, value); }
+		#endregion
 
-        #region Neroxis Map Generator
+		#endregion
 
-        #region IsMapGenLogsEnabled
-        private bool _IsMapGenLogsEnabled;
+		#region Neroxis Map Generator
+
+		#region IsMapGenLogsEnabled
+		private bool _IsMapGenLogsEnabled;
         public bool IsMapGenLogsEnabled
         {
             get => _IsMapGenLogsEnabled;
@@ -383,6 +449,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             get => _PathToJavaRuntime;
             set => Set(ref _PathToJavaRuntime, value);
         }
-        #endregion
-    }
+		#endregion
+
+		protected override void Dispose(bool disposing)
+		{
+            if (disposing)
+            {
+                _backgroundWorker.CancelAsync();
+				_backgroundWorker.Dispose();
+
+			}
+			base.Dispose(disposing);
+		}
+	}
 }

@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:models="clr-namespace:Ethereal.FAF.UI.Client.Models"
            xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
            d:DataContext="{d:DesignInstance {x:Type local:SettingsView}}"
              mc:Ignorable="d"
@@ -357,7 +358,7 @@
                         <Run Text="Select the coturn servers from the regions you would like to use. This selection overrides the default selection perfomed by the ice adapter to priotize specific regions/servers you know work for you. You can select as many as you want and the ice adapter will pick the best one from the list."
                              Style="{StaticResource DescriptionHeaderRun}"/>
                 </TextBlock>
-                <ListBox SelectionMode="Multiple">
+                <ListBox SelectionMode="Multiple" ItemsSource="{Binding ViewModel.CoturnServers}">
                     <ListBox.Template>
                         <ControlTemplate>
                             <Border
@@ -373,10 +374,65 @@
                             </Border>
                         </ControlTemplate>
                     </ListBox.Template>
-                    <ListBoxItem Content="Europe"/>
-                    <ListBoxItem Content="Germany"/>
-                    <ListBoxItem Content="US East"/>
-                    <ListBoxItem Content="Australia"/>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="IsEnabled" Value="{Binding Active}"/>
+                            <!--<Style.Triggers>
+                                <DataTrigger Binding="{Binding Active}">
+                                    <Setter Property="Opacity" Value="0.2"/>
+                                </DataTrigger>
+                            </Style.Triggers>-->
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.Resources>
+                        <DataTemplate DataType="{x:Type models:CoturnServer}">
+                            <Grid ShowGridLines="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="10"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Region}"/>
+                                <TextBlock Grid.Column="2" Text="Active"
+                                           FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="Red"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Active}" Value="True">
+                                                    <Setter Property="Foreground" Value="LimeGreen"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <ui:ProgressRing Grid.Column="10" Progress="{Binding Progress, Mode=OneWay}">
+                                    <ui:ProgressRing.LayoutTransform>
+                                        <ScaleTransform ScaleX=".3" ScaleY=".3"/>
+                                    </ui:ProgressRing.LayoutTransform>
+                                    <ui:ProgressRing.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Text="{Binding RoundtripTime, StringFormat='{}{0}ms'}"/>
+                                        </ToolTip>
+                                    </ui:ProgressRing.ToolTip>
+                                </ui:ProgressRing>
+                                <!--<TextBlock Grid.Column="8" Text="{Binding Progress}"/>-->
+                                <TextBlock Grid.Column="8" Text="{Binding RoundtripTime, StringFormat='{}{0}ms'}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="10"/>
+                                <!--<Button Grid.Column="10" Command="{Binding Ping}" Content="Ping"/>-->
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.Resources>
                 </ListBox>
             </StackPanel>
         </ui:CardExpander>

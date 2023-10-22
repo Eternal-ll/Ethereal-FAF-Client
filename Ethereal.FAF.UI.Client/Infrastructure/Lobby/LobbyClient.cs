@@ -1,7 +1,9 @@
-﻿using Ethereal.FAF.UI.Client.Models.Lobby;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
+using FAF.Domain.LobbyServer.Converters;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
@@ -47,64 +49,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<PartyUpdate> PartyUpdated;
         public event EventHandler<PartyInvite> PartyInvite;
 
-        private readonly Dictionary<ServerCommand, Action<string>> ServerCommandHandlers;
         private readonly List<byte> Cache = new();
         private readonly ILogger Logger;
 
         public LobbyState State { get; private set; }
 
+		JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
         public LobbyClient(IPAddress address, int port, ILogger logger) : base(address, port)
-        {
-            Logger = logger;
+		{
+			_jsonSerializerOptions.Converters.Add(new LobbyMessageJsonConverter());
+			Logger = logger;
             logger.LogTrace("[Lobby] Initialized [{address}]:[{port}]", Address, port);
-            base.OptionReceiveBufferSize = 4096;
-
-            ServerCommandHandlers = new()
-            {
-                { ServerCommand.ping, (json) => SendAsync(ServerCommands.Pong) },
-
-                { ServerCommand.session, (json) => SessionReceived?.Invoke(this, json.Split(':')[^1].Split('}')[0]) },
-                { ServerCommand.authentication_failed, (json) => AuthentificationFailed?.Invoke(this, JsonSerializer.Deserialize<AuthentificationFailedData>(json)) },
-                { ServerCommand.notice, (json) => NotificationReceived?.Invoke(this, JsonSerializer.Deserialize<Notification>(json)) },
-                { ServerCommand.irc_password, (json) => IrcPasswordReceived?.Invoke(this, JsonSerializer.Deserialize<Dictionary<string,string>>(json)["password"]) },
-                { ServerCommand.welcome, (json) =>
-                    {
-                        var welcome = JsonSerializer.Deserialize<Welcome>(json);
-                        WelcomeDataReceived?.Invoke(this, welcome);
-                        PlayerReceived?.Invoke(this, welcome.me);
-                        UpdateState(LobbyState.Authorized);
-                    }
-                },
-                { ServerCommand.social, (json) => SocialDataReceived?.Invoke(this, JsonSerializer.Deserialize<SocialData>(json)) },
-                { ServerCommand.player_info, (json) =>
-                    {
-                        var player = JsonSerializer.Deserialize<Player>(json);
-                        if (player.Players is null) PlayerReceived?.Invoke(this, player);
-                        else PlayersReceived.Invoke(this, player.Players);
-                    }
-                },
-                { ServerCommand.game_info, (json) =>
-                    {
-                        var game = JsonSerializer.Deserialize<Game>(json);
-                        if (game.Games is null) GameReceived?.Invoke(this, game);
-                        else GamesReceived.Invoke(this, game.Games);
-                    }
-                },
-                { ServerCommand.game_launch, (json) => GameLaunchDataReceived?.Invoke(this, JsonSerializer.Deserialize<GameLaunchData>(json)) },
-                { ServerCommand.party_invite, (json) => PartyInvite?.Invoke(this, JsonSerializer.Deserialize<PartyInvite>(json)) },
-                { ServerCommand.update_party, (json) => PartyUpdated?.Invoke(this, JsonSerializer.Deserialize<PartyUpdate>(json)) },
-                { ServerCommand.kicked_from_party, (json) => KickedFromParty?.Invoke(this, null) },
-                { ServerCommand.matchmaker_info, (json) => MatchMakingDataReceived?.Invoke(this, JsonSerializer.Deserialize<MatchmakingData>(json)) },
-                { ServerCommand.match_info, (json) => MatchConfirmation?.Invoke(this, JsonSerializer.Deserialize<MatchConfirmation>(json)) },
-                { ServerCommand.match_found, (json) => MatchFound?.Invoke(this, JsonSerializer.Deserialize<MatchFound>(json)) },
-                { ServerCommand.match_cancelled, (json) => MatchCancelled?.Invoke(this, JsonSerializer.Deserialize<MatchCancelled>(json)) },
-                { ServerCommand.search_info, (json) => SearchInfoReceived?.Invoke(this, JsonSerializer.Deserialize<SearchInfo>(json)) },
-                { ServerCommand.IceMsg, (json) => IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(json)) },
-                { ServerCommand.JoinGame, (json) => IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(json)) },
-                { ServerCommand.HostGame, (json) => IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(json)) },
-                { ServerCommand.ConnectToPeer, (json) => IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(json)) },
-                { ServerCommand.DisconnectFromPeer, (json) => IceUniversalDataReceived?.Invoke(this, JsonSerializer.Deserialize<IceUniversalData>(json)) },
-            };
+            OptionReceiveBufferSize = 4096;
         }
         protected override void OnConnecting() => UpdateState(LobbyState.Connecting);
         protected override void OnConnected() => UpdateState(LobbyState.Connected);
@@ -254,52 +210,68 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         {
             if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
             {
-                ProcessData(Encoding.UTF8.GetString(buffer, 0, (int)size));
-                return;
+				ProcessData(buffer);
+				return;
             }
             for (int i = (int)offset; i < (int)size; i++)
             {
                 if (buffer[i] == '\n')
-                {
-                    ProcessData(Encoding.UTF8.GetString(Cache.ToArray(), 0, Cache.Count));
-                    Cache.Clear();
+				{
+					ProcessData(Cache.ToArray());
+					Cache.Clear();
                     continue;
                 }
                 Cache.Add(buffer[i]);
             }
-        }
-
-
-        private void ProcessData(string json)
+		}
+        private void ProcessData(byte[] data)
         {
-            var target = json[12..json.IndexOf('\"', 12)];
-            if (!Enum.TryParse<ServerCommand>(target, out var command))
-            {
-                Logger.LogWarning("[{command}] Unsupported command", target);
-                return;
-            }
-            if (command == ServerCommand.matchmaker_info)
-            {
-
-            }
-            if (!(command is ServerCommand.game_info or ServerCommand.player_info or ServerCommand.matchmaker_info))
-            {
-                Logger.LogTrace("[Inbound messsage] {json}", json);
-            }
-            if (!ServerCommandHandlers.TryGetValue(command, out var handler))
-            {
-                Logger.LogWarning("[{command}] Handler not registered, ignored.", target);
-                return;
-            }
             try
             {
-                handler.Invoke(json);
-            }
+				var command = JsonSerializer.Deserialize<ServerMessage>(data, _jsonSerializerOptions);
+                switch (command)
+                {
+                    case PingMessage msg: SendAsync(ServerCommands.Pong); break;
+                    case SessionMessage msg: SessionReceived?.Invoke(this, msg.Session.ToString()); break;
+                    case AuthentificationFailedData msg: AuthentificationFailed?.Invoke(this, msg); break;
+                    case Notification msg: NotificationReceived?.Invoke(this, msg); break;
+                    case IrcPassword msg: IrcPasswordReceived?.Invoke(this, msg.Password); break;
+                    case WelcomeData msg:
+                        {
+                            var welcome = msg.MapToViewModel();
+							WelcomeDataReceived?.Invoke(this, welcome);
+							PlayerReceived?.Invoke(this, welcome.me);
+							UpdateState(LobbyState.Authorized);
+							break;
+                        }
+                    case SocialData msg: SocialDataReceived?.Invoke(this, msg); break;
+                    case PlayerInfoMessage msg: PlayerReceived?.Invoke(this, msg.MapToViewModel()); break;
+                    case LobbyPlayers msg: PlayersReceived?
+                            .Invoke(this, msg.Players.Select(x => x.MapToViewModel()).ToArray()); break;
+                    case GameInfoMessage msg: GameReceived?.Invoke(this, msg.MapToViewModel()); break;
+                    case LobbyGames msg: GamesReceived?
+                            .Invoke(this, msg.Games.Select(x => x.MapToViewModel()).ToArray()); break;
+                    case GameLaunchData msg: GameLaunchDataReceived?.Invoke(this, msg); break;
+                    case PartyInvite msg: PartyInvite?.Invoke(this, msg); break;
+                    case PartyUpdate msg: PartyUpdated?.Invoke(this, msg); break;
+					case PartyKick msg: KickedFromParty?.Invoke(this, null); break;
+                    case MatchmakingData msg: MatchMakingDataReceived?.Invoke(this, msg); break;
+                    case MatchConfirmation msg: MatchConfirmation?.Invoke(this, msg); break;
+                    case MatchFound msg: MatchFound?.Invoke(this, msg); break;
+                    case MatchCancelled msg: MatchCancelled?.Invoke(this, msg); break;
+                    case SearchInfo msg: SearchInfoReceived?.Invoke(this, msg); break;
+                    case IceUniversalData msg: IceUniversalDataReceived?.Invoke(this, msg); break;
+                    default:
+                        {
+                            Logger.LogWarning("Not handled command [{cmd}]", command.GetType());
+                            break;
+                        }
+				}
+			}
             catch(Exception ex)
-            {
-                Logger.LogError("Caught an error when processed lobby message");
+			{
                 Logger.LogError(ex.ToString());
-            }
-        }
+			}
+		}
     }
 }

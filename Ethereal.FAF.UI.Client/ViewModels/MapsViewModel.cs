@@ -50,7 +50,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ICollectionView MapsView => MapsViewSource.View;
 
         #region PageSize
-        private int _PageSize = 50;
+        private int _PageSize = 15;
         public int PageSize
         {
             get => _PageSize;

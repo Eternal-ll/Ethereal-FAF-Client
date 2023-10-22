@@ -1,9 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Configuration;
 using System.IO;
-using Windows.Devices.I2c.Provider;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 {

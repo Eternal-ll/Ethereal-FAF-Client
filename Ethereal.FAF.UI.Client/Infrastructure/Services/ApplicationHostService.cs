@@ -15,10 +15,10 @@ using Wpf.Ui.Mvvm.Services;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
-    /// <summary>
-    /// Managed host of the application.
-    /// </summary>
-    internal class ApplicationHostService : IHostedService
+	/// <summary>
+	/// Managed host of the application.
+	/// </summary>
+	internal class ApplicationHostService : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly INavigationService _navigationService;
@@ -118,9 +118,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 await loaderVM.TryPassChecksAndLetsSelectServer();
                 _serviceProvider.GetService<ServerViewModel>();
 
-                if (JavaHelper.HasJavaRuntime())
+                if (!JavaHelper.HasJavaRuntime())
                 {
-                    JavaHelper.PrepareJavaRuntime();
+                    await JavaHelper.PrepareJavaRuntime();
                 }
             }
 

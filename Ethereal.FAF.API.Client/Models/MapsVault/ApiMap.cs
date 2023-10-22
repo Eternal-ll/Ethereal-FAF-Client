@@ -1,4 +1,5 @@
-﻿using Ethereal.FAF.API.Client.Models.Universal;
+﻿using Ethereal.FAF.API.Client.Models.Attributes;
+using Ethereal.FAF.API.Client.Models.Universal;
 using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.API.Client.Models.MapsVault
