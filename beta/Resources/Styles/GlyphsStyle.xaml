@@ -1,9 +1,0 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Style TargetType="Glyphs">
-        <Setter Property="FontUri" Value="C:\WINDOWS\Fonts\segoeui.TTF"/>
-        <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-        <Setter Property="FontRenderingEmSize" Value="14"/>
-        <Setter Property="UnicodeString" Value=" "/>
-    </Style>
-</ResourceDictionary>

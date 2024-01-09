@@ -33,10 +33,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             UidGenerator = uidGenerator;
             Configuration = configuration;
 
+            TokenProvider.TokenReceived += TokenProvider_TokenReceived;
             lobbyClient.StateChanged += LobbyClient_StateChanged;
             lobbyClient.SessionReceived += LobbyClient_SessionReceived;
             lobbyClient.AuthentificationFailed += LobbyClient_AuthentificationFailed;
-            lobbyClient.ConnectAsync();
+        }
+
+        private void TokenProvider_TokenReceived(object sender, TokenBearer e)
+        {
+            LobbyClient.Authorization = $"Bearer {e.AccessToken}";
+            LobbyClient.ConnectAsync();
         }
 
         private void LobbyClient_AuthentificationFailed(object sender, global::FAF.Domain.LobbyServer.AuthentificationFailedData e)

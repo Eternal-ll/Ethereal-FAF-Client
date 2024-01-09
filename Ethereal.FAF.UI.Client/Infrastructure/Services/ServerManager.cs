@@ -144,6 +144,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var token = await TokenProvider.GetTokenBearerAsync(cancellationToken);
             if (token is null) return;
             server.ServerState = ServerState.Authorized;
+            LobbyClient.Authorization = $"Bearer {token.AccessToken}";
             LobbyClient.ConnectAsync();
         }
 

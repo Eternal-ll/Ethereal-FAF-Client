@@ -213,6 +213,8 @@ namespace Ethereal.FAF.UI.Client
             services.AddTransient<DownloadsView>();
             services.AddTransient<DownloadsViewModel>();
 
+            services.AddTransient<AuthView>().AddTransient<AuthViewModel>();
+
             services
                 .AddTransient<ClansView>()
                 .AddTransient<ClansViewModel>();

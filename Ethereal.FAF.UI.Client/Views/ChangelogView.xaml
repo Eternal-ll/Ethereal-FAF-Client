@@ -5,8 +5,6 @@
            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
-           xmlns:markdown="clr-namespace:Markdown.Xaml;assembly=Markdown.Xaml"
-           xmlns:system="clr-namespace:System;assembly=mscorlib"
            mc:Ignorable="d" 
            d:DataContext="{d:DesignInstance {x:Type vm:ChangelogViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
@@ -104,21 +102,6 @@
                 <Setter Property="FontWeight" Value="DemiBold"/>
                 <Setter Property="Background" Value="LightGray"/>
             </Style>
-            <markdown:Markdown x:Key="Markdown"
-                        DocumentStyle="{StaticResource DocumentStyle}"
-                        Heading1Style="{StaticResource H1Style}"
-                        Heading2Style="{StaticResource H2Style}"
-                        Heading3Style="{StaticResource H3Style}"
-                        Heading4Style="{StaticResource H4Style}"
-                        LinkStyle="{StaticResource LinkStyle}"
-                        ImageStyle="{StaticResource ImageStyle}"
-                        SeparatorStyle="{StaticResource SeparatorStyle}"
-                        TableStyle="{StaticResource TableStyle}"
-                        TableHeaderStyle="{StaticResource TableHeaderStyle}"
-                        AssetPathRoot="{x:Static system:Environment.CurrentDirectory}"/>
-
-            <markdown:TextToFlowDocumentConverter x:Key="TextToFlowDocumentConverter" 
-                                           Markdown="{StaticResource Markdown}"/>
         </Grid.Resources>
         <FlowDocumentScrollViewer
                                   VerticalAlignment="Stretch"

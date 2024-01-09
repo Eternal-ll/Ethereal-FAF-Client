@@ -6,6 +6,7 @@ using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Converters;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
+using NetCoreServer;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     /// <summary>
     /// 
     /// </summary>
-    public sealed class LobbyClient : NetCoreServer.TcpClient
+    public sealed class LobbyClient : NetCoreServer.WsClient
     {
         public event EventHandler<LobbyState> StateChanged;
 
@@ -53,6 +54,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private readonly ILogger Logger;
 
         public LobbyState State { get; private set; }
+        public string Authorization { get; set; }
 
 		JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
         public LobbyClient(IPAddress address, int port, ILogger logger) : base(address, port)
@@ -62,10 +64,25 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             logger.LogTrace("[Lobby] Initialized [{address}]:[{port}]", Address, port);
             OptionReceiveBufferSize = 4096;
         }
-        protected override void OnConnecting() => UpdateState(LobbyState.Connecting);
-        protected override void OnConnected() => UpdateState(LobbyState.Connected);
-        protected override void OnDisconnecting() => UpdateState(LobbyState.Disconnecting);
+        public override void OnWsConnecting(HttpRequest request)
+        {
+            UpdateState(LobbyState.Connecting);
+            request.SetBegin("GET", "/");
+            request.SetHeader("Host", "localhost");
+            request.SetHeader("Origin", "http://localhost");
+            request.SetHeader("Upgrade", "websocket");
+            request.SetHeader("Connection", "Upgrade");
+            if (!string.IsNullOrWhiteSpace(Authorization))
+                request.SetHeader("Authorization", Authorization);
+            request.SetHeader("Sec-WebSocket-Key", Convert.ToBase64String(WsNonce));
+            request.SetHeader("Sec-WebSocket-Version", "13");
+            request.SetBody();
+            base.OnWsConnecting(request);
+        }
+        public override void OnWsConnected(HttpResponse response) => UpdateState(LobbyState.Connected);
+        public override void OnWsDisconnecting() => UpdateState(LobbyState.Disconnecting);
         protected override void OnDisconnected() => UpdateState(LobbyState.Disconnected);
+        public override void OnWsDisconnected() => UpdateState(LobbyState.Disconnected);
         private void UpdateState(LobbyState state)
         {
             Logger.LogInformation("[Lobby] [{address}]:[{port}] state changed from [{old}] to [{to}]", Address, Port, State, state);
@@ -206,7 +223,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             var command = sb.ToString();
             SendAsync(command);
         }        
-        protected override void OnReceived(byte[] buffer, long offset, long size)
+        public override void OnWsReceived(byte[] buffer, long offset, long size)
         {
             if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
             {

@@ -15,17 +15,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly INavigationWindow NavigationWindow;
         private readonly MapGenerator MapGenerator;
-        private readonly PatchWatcher PatchWatcher;
         private readonly IConfiguration Configuration;
         private readonly ILogger<LoaderViewModel> Logger;
 
-        public LoaderViewModel(INavigationWindow navigationWindow, IConfiguration configuration, MapGenerator mapGenerator, ILogger<LoaderViewModel> logger, PatchWatcher patchWatcher)
+        public LoaderViewModel(INavigationWindow navigationWindow, IConfiguration configuration, MapGenerator mapGenerator, ILogger<LoaderViewModel> logger)
         {
             NavigationWindow = navigationWindow;
             Configuration = configuration;
             MapGenerator = mapGenerator;
             Logger = logger;
-            PatchWatcher = patchWatcher;
         }
 
         #region SplashText
@@ -80,6 +78,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             if (!await RunChecks())
                 return;
+            NavigationWindow.Navigate(typeof(AuthView));
         }
     }
 }

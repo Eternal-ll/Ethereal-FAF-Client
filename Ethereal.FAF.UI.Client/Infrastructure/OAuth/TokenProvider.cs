@@ -18,6 +18,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
         public event EventHandler<(string error, string description)> ErrorOccuried;
         public event EventHandler<string> OAuthRequired;
         public event EventHandler OAuthUrlExpired;
+        public event EventHandler<TokenBearer> TokenReceived;
 
         private readonly FafOAuthClient FafOAuthClient;
         private readonly Server Server;
@@ -59,6 +60,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.OAuth
             var handler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = handler.ReadToken(token.AccessToken) as JwtSecurityToken;
             JwtSecurityToken = jwtSecurityToken;
+            TokenReceived?.Invoke(this, token);
         }
 
         public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)

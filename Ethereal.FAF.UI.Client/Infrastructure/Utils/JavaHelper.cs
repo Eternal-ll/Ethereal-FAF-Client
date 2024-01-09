@@ -21,7 +21,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Utils
                     StartInfo = new ProcessStartInfo()
                     {
                         FileName = "External/7z.exe",
-                        Arguments = "x External/jre.7z -oExternal/",
+                        Arguments = "x External/jre.7z -o External/",
                         UseShellExecute = false
                     }
 
