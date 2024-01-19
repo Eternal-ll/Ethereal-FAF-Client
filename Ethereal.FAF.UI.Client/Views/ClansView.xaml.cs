@@ -1,13 +1,7 @@
-﻿using beta.Infrastructure.Utils;
-using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.ViewModels;
-using System;
-using System.Diagnostics;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {

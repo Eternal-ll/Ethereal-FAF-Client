@@ -1,11 +1,7 @@
 ﻿using Ethereal.FAF.API.Client;
-using Ethereal.FAF.API.Client.Models;
-using Ethereal.FAF.API.Client.Models.Attributes;
-using Ethereal.FAF.API.Client.Models.Base;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Models;
-using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
@@ -19,7 +15,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 {

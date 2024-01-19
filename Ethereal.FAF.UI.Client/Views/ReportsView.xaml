@@ -1,4 +1,4 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.ReportsView"
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.ReportsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,8 +6,7 @@
              xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
            d:DataContext="{d:DesignInstance {x:Type local:ReportsView}}"
-             mc:Ignorable="d" 
-            Scrollable="True"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <VirtualizingStackPanel IsVirtualizing="True"
         VirtualizationMode="Recycling" Margin="0 0 10 0">
@@ -29,7 +28,7 @@
             <StackPanel>
                 <TextBlock Margin="12" Style="{StaticResource DescriptionHeaderTextBlock}" TextWrapping="Wrap">
                     <Run Text="Examples of reportable behaviour: "/>
-                    <ui:Hyperlink NavigateUri="https://faforever.com/rules" Content="Breaking any of the rules" Padding="0" Margin="0 0 0 -3"
+                    <ui:HyperlinkButton NavigateUri="https://faforever.com/rules" Content="Breaking any of the rules" Padding="0" Margin="0 0 0 -3"
                                   FontSize="12"/>
                     <Run Text="/ Teamkilling"/>
                     <Run Text="/ Griefing (e.g. reclaiming friendly units or structures)"/>
@@ -94,10 +93,10 @@
                     <ui:TextBox Margin="0 4 0 0"  TextWrapping="Wrap" MinHeight="100"/>
                     <TextBlock Style="{StaticResource DescriptionHeaderTextBlock}">
                         <Run  Text="Please provide a short but thorough description of the incident you are reporting. If there are no records available of the incident (e.g. not something that happened in #aeolus or in-game), please provide us a screenshot of it. You can use any image hosting site, e.g."/>
-                        <ui:Hyperlink NavigateUri="https://imgur.com/" Content="https://imgur.com/" Margin="0 0 0 -4" Padding="0" FontSize="12"/>
+                        <ui:HyperlinkButton NavigateUri="https://imgur.com/" Content="https://imgur.com/" Margin="0 0 0 -4" Padding="0" FontSize="12"/>
                     </TextBlock>
                 </StackPanel>
             </StackPanel>
         </ui:CardExpander>
     </VirtualizingStackPanel>
-</ui:UiPage>
+</local:PageBase>

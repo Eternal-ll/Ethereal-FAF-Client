@@ -1,6 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Windows.Controls;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {
@@ -19,7 +19,7 @@ namespace Ethereal.FAF.UI.Client.Views
         private void VirtualizingStackPanel_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             var root = (VirtualizingStackPanel)sender;
-            root.ScrollOwner = ScrollHost;
+            //root.ScrollOwner = ScrollHost;
         }
     }
 }

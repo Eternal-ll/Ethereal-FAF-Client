@@ -1,24 +1,97 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.AuthView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
-             mc:Ignorable="d" 
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.AuthView"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance {x:Type local:AuthView}}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid ShowGridLines="True">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width=".1*"/>
-            <ColumnDefinition/>
-            <ColumnDefinition Width=".1*"/>
-            <ColumnDefinition Width=".6*"/>
-            <ColumnDefinition Width=".1*"/>
-        </Grid.ColumnDefinitions>
-        <Border CornerRadius="10" Grid.Column="3">
-            <Border.Background>
-                <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-            </Border.Background>
-        </Border>
-    </Grid>
-</ui:UiPage>
+    <Page.Resources>
+        <DataTemplate x:Key="AuthView">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="Margin" Value="0 10 0 0"/>
+                    </Style>
+                </Grid.Resources>
+                <StackPanel Visibility="{Binding IsAuthenticating, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"
+                            VerticalAlignment="Center">
+                    <Grid>
+                        <ui:Card Padding="10 5 10 6">
+                            <TextBlock>
+                <Run Text="Server" Style="{StaticResource DescriptionHeaderRun}"/>
+                <LineBreak/>
+                <Run Text="{Binding SelectedServer.Name}"/>
+                            </TextBlock>
+                        </ui:Card>
+                        <Button Grid.Column="2" Content="Select" HorizontalAlignment="Right" Margin="0 0 10 0"
+                Command="{Binding GoToSelectServerViewCommand}"/>
+                    </Grid>
+                    <UniformGrid Rows="1">
+                        <Button Padding="11 5 11 6" HorizontalAlignment="Stretch" Content="Login"
+                    Command="{Binding LoginCommand}"/>
+                        <Button Visibility="{Binding IsAuthorized, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Grid.Column="1" Margin="10 10 0 0" Padding="20 5 20 6"
+            HorizontalAlignment="Stretch"
+                    Command="{Binding LoginAsLastUserCommand}">
+                            <TextBlock Text="{Binding AuthorizedUserName, StringFormat='Login as {0}'}"/>
+                        </Button>
+                    </UniformGrid>
+                    <Button Margin="0 10 0 0" Content="Offline mode" IsEnabled="False" HorizontalAlignment="Stretch"/>
+                    <ui:Button Content="Update available" HorizontalAlignment="Stretch"
+                               Margin="0 10 0 0" Appearance="Success"
+                               Visibility="{Binding UpdateVM.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               Command="{Binding OpenUpdateClientViewCommand}"/>
+
+                </StackPanel>
+                <StackPanel Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"
+                VerticalAlignment="Top" Margin="0 100 0 0">
+                    <!--<ui:ProgressRing IsIndeterminate="True" Width="100" Height="100"/>-->
+                    <TextBlock HorizontalAlignment="Center" Margin="0 40 0 0" FontSize="14">
+            <Run Text="{Binding SplashText}"/>
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"
+                VerticalAlignment="Bottom">
+                    <Button Content="Open browser" Command="{Binding AuthByBrowserCommand}"
+                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button Content="Open popup" Command="{Binding AuthByPopupBrowserCommand}"
+                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button Content="Copy link" Command="{Binding CopyAuthUrlCommand}"
+                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button Content="Cancel" Command="{Binding CancelAuthenticatingCommand}"/>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="WideLayoutTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition MinWidth="400" MaxWidth="500"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <ContentControl IsTabStop="False" Grid.Column="1" Content="{Binding}" ContentTemplate="{StaticResource AuthView}"/>
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="NarrowLayoutTemplate">
+            <ContentControl Content="{Binding}" ContentTemplate="{StaticResource AuthView}"/>
+        </DataTemplate>
+        <Style x:Key="AuthViewContentControlStyle" TargetType="ContentControl">
+            <Setter Property="ContentTemplate" Value="{StaticResource WideLayoutTemplate}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding
+                    RelativeSource={RelativeSource Self},
+                    Path=ActualWidth,
+                    Converter={StaticResource IsValueLessThanParameterConverter},
+                    ConverterParameter=460}" Value="True">
+                    <Setter Property="ContentTemplate" Value="{StaticResource NarrowLayoutTemplate}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    <ContentControl IsTabStop="False" Margin="20" Content="{Binding ViewModel}" Style="{StaticResource AuthViewContentControlStyle}"/>
+</local:PageBase>

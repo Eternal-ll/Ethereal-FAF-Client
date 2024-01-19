@@ -6,13 +6,10 @@ using FAF.Domain.LobbyServer.Base;
 using FAF.Domain.LobbyServer.Converters;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
-using NetCoreServer;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 
@@ -21,7 +18,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     /// <summary>
     /// 
     /// </summary>
-    public sealed class LobbyClient : NetCoreServer.WsClient
+    public sealed class LobbyClient
     {
         public event EventHandler<LobbyState> StateChanged;
 
@@ -50,52 +47,61 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<PartyUpdate> PartyUpdated;
         public event EventHandler<PartyInvite> PartyInvite;
 
-        private readonly List<byte> Cache = new();
+        private ITransportClient _transportClient;
+        private readonly List<byte> _cache = new();
         private readonly ILogger Logger;
 
         public LobbyState State { get; private set; }
         public string Authorization { get; set; }
 
 		JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
-        public LobbyClient(IPAddress address, int port, ILogger logger) : base(address, port)
-		{
-			_jsonSerializerOptions.Converters.Add(new LobbyMessageJsonConverter());
-			Logger = logger;
-            logger.LogTrace("[Lobby] Initialized [{address}]:[{port}]", Address, port);
-            OptionReceiveBufferSize = 4096;
-        }
-        public override void OnWsConnecting(HttpRequest request)
+        public LobbyClient()
         {
-            UpdateState(LobbyState.Connecting);
-            request.SetBegin("GET", "/");
-            request.SetHeader("Host", "localhost");
-            request.SetHeader("Origin", "http://localhost");
-            request.SetHeader("Upgrade", "websocket");
-            request.SetHeader("Connection", "Upgrade");
-            if (!string.IsNullOrWhiteSpace(Authorization))
-                request.SetHeader("Authorization", Authorization);
-            request.SetHeader("Sec-WebSocket-Key", Convert.ToBase64String(WsNonce));
-            request.SetHeader("Sec-WebSocket-Version", "13");
-            request.SetBody();
-            base.OnWsConnecting(request);
+            _jsonSerializerOptions.Converters.Add(new LobbyMessageJsonConverter());
         }
-        public override void OnWsConnected(HttpResponse response) => UpdateState(LobbyState.Connected);
-        public override void OnWsDisconnecting() => UpdateState(LobbyState.Disconnecting);
-        protected override void OnDisconnected() => UpdateState(LobbyState.Disconnected);
-        public override void OnWsDisconnected() => UpdateState(LobbyState.Disconnected);
+        public void Initialize(ITransportClient transportClient)
+        {
+            _transportClient = transportClient;
+            _transportClient.OnData += _transportClient_DataReceived;
+            _transportClient.OnState += _transportClient_ConnectionStateChange;
+        }
+
+        private void _transportClient_ConnectionStateChange(object sender, ConnectionState e)
+        {
+            LobbyState state = e switch
+            {
+                ConnectionState.NotConnected => LobbyState.None,
+                ConnectionState.Connecting => LobbyState.Connecting,
+                ConnectionState.Connected => LobbyState.Connected,
+                ConnectionState.Disconnected => LobbyState.Disconnected,
+                ConnectionState.Disconnecting => LobbyState.Disconnecting,
+            };
+            StateChanged?.Invoke(this, state);
+        }
+
+        public bool Disconnect()
+        {
+            throw new NotImplementedException();
+        }
+        public bool Connect()
+        {
+            throw new NotImplementedException();
+        }
+
+        //public override void OnWsConnected(HttpResponse response) => UpdateState(LobbyState.Connected);
+        //public override void OnWsDisconnecting() => UpdateState(LobbyState.Disconnecting);
+        //protected override void OnDisconnected() => UpdateState(LobbyState.Disconnected);
+        //public override void OnWsDisconnected() => UpdateState(LobbyState.Disconnected);
         private void UpdateState(LobbyState state)
         {
-            Logger.LogInformation("[Lobby] [{address}]:[{port}] state changed from [{old}] to [{to}]", Address, Port, State, state);
+            Logger.LogInformation("[Lobby] Connection state changed from [{old}] to [{to}]", State, state);
             State = state;
             StateChanged?.Invoke(this, state);
         }
-        protected override void OnError(SocketError error)
+        public bool SendAsync(string json)
         {
-            Logger.LogError("[Lobby] [{address}]:[{port}] socket caught an error [{error}]", Address, Port, error);
-        }
-        public override bool SendAsync(string json)
-        {
-            var sent = base.SendAsync(json[^1] is not '\n' ? json + '\n' : json);
+            if (!json.EndsWith('\n')) json += '\n';
+            var sent = _transportClient.Send(Encoding.UTF8.GetBytes(json));
             if (!sent) Logger.LogError($"[Outbound message:Not send] {json}");
             else Logger.LogTrace($"[Outbound message] {json}");
             return sent;
@@ -115,7 +121,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public void Authenticate(string accessToken, string uid, string session)
         {
             UpdateState(LobbyState.Authorizing);
-            base.SendAsync(ServerCommands.PassAuthentication(accessToken, uid, session));
+            SendAsync(ServerCommands.PassAuthentication(accessToken, uid, session));
             Logger.LogTrace($"[Outbound messsage] {ServerCommands.PassAuthentication("*********", "*********", "*********")}");
         }
         #region Matchmaking
@@ -222,25 +228,26 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             sb[^1] = '}';
             var command = sb.ToString();
             SendAsync(command);
-        }        
-        public override void OnWsReceived(byte[] buffer, long offset, long size)
+        }
+
+        private void _transportClient_DataReceived(object sender, byte[] e)
         {
-            if (Cache.Count == 0 && buffer[0] == '{' && buffer[^1] == '\n')
+            if (_cache.Count == 0 && e[^1] == '\n')
             {
-				ProcessData(buffer);
-				return;
+                ProcessData(e);
+                return;
             }
-            for (int i = (int)offset; i < (int)size; i++)
+            for (int i = 0; i < e.Length; i++)
             {
-                if (buffer[i] == '\n')
-				{
-					ProcessData(Cache.ToArray());
-					Cache.Clear();
+                if (e[i] == '\n')
+                {
+                    ProcessData(_cache.ToArray());
+                    _cache.Clear();
                     continue;
                 }
-                Cache.Add(buffer[i]);
+                _cache.Add(e[i]);
             }
-		}
+        }
         private void ProcessData(byte[] data)
         {
             try

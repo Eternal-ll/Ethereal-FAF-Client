@@ -1,6 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Windows.Controls;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views.Hosting
 {

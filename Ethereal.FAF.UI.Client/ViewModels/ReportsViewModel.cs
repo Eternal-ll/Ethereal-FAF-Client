@@ -1,9 +1,7 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.API.Client.Models;
 using Ethereal.FAF.API.Client.Models.Base;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Meziantou.Framework.WPF.Collections;
-using Serilog;
 using System.Linq;
 using System.Timers;
 

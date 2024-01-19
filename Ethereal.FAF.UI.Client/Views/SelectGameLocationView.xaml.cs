@@ -1,12 +1,11 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Microsoft.Win32;
 using System.IO;
 using System.Threading;
-using Wpf.Ui.Common.Interfaces;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {
@@ -16,8 +15,8 @@ namespace Ethereal.FAF.UI.Client.Views
     public partial class SelectGameLocationView : INavigableView<object>
     {
         private readonly LoaderViewModel LoaderViewModel;
-        private readonly SnackbarService SnackbarService;
-        public SelectGameLocationView(LoaderViewModel loaderVM, SnackbarService snackbarService)
+        private readonly ISnackbarService SnackbarService;
+        public SelectGameLocationView(LoaderViewModel loaderVM, ISnackbarService snackbarService)
         {
             LoaderViewModel = loaderVM;
             InitializeComponent();
@@ -45,18 +44,18 @@ namespace Ethereal.FAF.UI.Client.Views
             var selectedFile = dialog.FileName;
             var directory = Path.GetDirectoryName(Path.GetDirectoryName(selectedFile));
             LastLocation = directory;
-            SnackbarService.Timeout = 5000;
-            if (File.Exists(Path.Combine(directory, FaPaths.DefaultConfigFile)))
-            {
-                SnackbarService.Show("Warning", "You little sly, you must select executable from original game folder.", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
-                return;
-            }
-            if (!ForgedAllianceHelper.DirectoryHasAnyGameFile(directory))
-            {
-                SnackbarService.Show("Warning", $"Yo, your location \"{directory}\" failed validation for required files.", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
-                return;
-            }
-            SnackbarService.Show("Success", $"There we go! Directory \"{directory}\" will be used as source for original game files.", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
+            //SnackbarService.Timeout = 5000;
+            //if (File.Exists(Path.Combine(directory, FaPaths.DefaultConfigFile)))
+            //{
+            //    SnackbarService.Show("Warning", "You little sly, you must select executable from original game folder.", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
+            //    return;
+            //}
+            //if (!ForgedAllianceHelper.DirectoryHasAnyGameFile(directory))
+            //{
+            //    SnackbarService.Show("Warning", $"Yo, your location \"{directory}\" failed validation for required files.", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
+            //    return;
+            //}
+            //SnackbarService.Show("Success", $"There we go! Directory \"{directory}\" will be used as source for original game files.", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             UserSettings.Update(ConfigurationConstants.ForgedAllianceLocation, directory);
             Thread.Sleep(500);
             await LoaderViewModel.TryPassChecksAndLetsSelectServer();

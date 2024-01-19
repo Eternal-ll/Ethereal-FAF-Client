@@ -1,21 +1,15 @@
 ﻿using Ethereal.FAF.API.Client;
-using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Api;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
-using FAF.Domain.LobbyServer;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Refit;
 using System;
-using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,13 +42,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public EventHandler<string> IrcNotificationMessageReceived;
         #endregion
 
-        private readonly IConfiguration Configuration;
         private readonly ILogger<ServerManager> Logger;
         private readonly PatchClient PatchClient;
         private readonly GameLauncher GameLauncher;
         private readonly IceManager IceManager;
         private readonly UidGenerator UidGenerator;
-        private readonly TokenProvider TokenProvider;
+        private readonly ClientManager _clientManager;
+        private readonly IServiceProvider _serviceProvider;
 
         private readonly LobbyClient LobbyClient;
         private readonly IrcClient IrcClient;
@@ -63,24 +57,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Server Server { get; private set; }
         public Player Self { get; private set; }
 
-        public ServerManager(PatchClient patchClient, IceManager iceManager, GameLauncher gameLauncher, UidGenerator uidGenerator, ILogger<ServerManager> logger, IConfiguration configuration, IrcClient ircClient, LobbyClient lobbyClient, TokenProvider tokenProvider)
+        public ServerManager(PatchClient patchClient, IceManager iceManager, GameLauncher gameLauncher, UidGenerator uidGenerator, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
         {
             PatchClient = patchClient;
             IceManager = iceManager;
             GameLauncher = gameLauncher;
             UidGenerator = uidGenerator;
             Logger = logger;
-            Configuration = configuration;
             IrcClient = ircClient;
             LobbyClient = lobbyClient;
-
 
             LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived1;
             LobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
             LobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
             LobbyClient.IrcPasswordReceived += LobbyClient_IrcPasswordReceived;
             LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived;
-            TokenProvider = tokenProvider;
+            _clientManager = clientManager;
+            _serviceProvider = serviceProvider;
         }
 
         public string GetApiDomain() => Server?.Api?.Host;
@@ -93,11 +86,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public IFafContentClient GetContentClient() => FafContentClient;
 
 
-        public void SetServer(Server server)
+        public async Task SetServer(Server server)
         {
             Server = server;
-            //OAuthTokenProvider.SetServer(server);
-            //LobbyClient = new(DetermineIPAddress(server.Lobby.Host), server.Lobby.Port, lobbyLogger);
+            _clientManager.SetServer(server);
+            //if (server.Lobby.IsWss) await InitializeWssLobbyClient();
+            //else InitializeTcpLobbyClient(Server);
             //IrcClient = new(server.Irc.Host, server.Irc.Port, ircLogger);
             //FafApiClient = RestService.For<IFafApiClient>(
             //    new System.Net.Http.HttpClient(new AuthHeaderHandler(new TokenProvider(this)))
@@ -136,16 +130,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private void LobbyClient_GameLaunchDataReceived(object sender, global::FAF.Domain.LobbyServer.GameLaunchData e)
         {
             GameLauncher.LobbyClient_GameLaunchDataReceived(e, this);
-        }
-
-        public async Task AuthorizeAndConnectAsync(Server server, CancellationToken cancellationToken = default)
-        {
-            server.ServerState = ServerState.Authorizing;
-            var token = await TokenProvider.GetTokenBearerAsync(cancellationToken);
-            if (token is null) return;
-            server.ServerState = ServerState.Authorized;
-            LobbyClient.Authorization = $"Bearer {token.AccessToken}";
-            LobbyClient.ConnectAsync();
         }
 
         public void Dispose()

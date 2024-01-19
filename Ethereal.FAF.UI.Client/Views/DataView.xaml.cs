@@ -1,6 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System.Windows.Controls;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {
@@ -24,7 +24,7 @@ namespace Ethereal.FAF.UI.Client.Views
             //var property = ScrollHost.GetType().GetProperty("ScrollInfo", BindingFlags.NonPublic | BindingFlags.Instance);
             //property.SetValue(ScrollHost, new ScrollInfoAdapter((IScrollInfo)property.GetValue(ScrollHost)));
 
-            root.ScrollOwner = ScrollHost;
+            //root.ScrollOwner = ScrollHost;
         }
     }
 }

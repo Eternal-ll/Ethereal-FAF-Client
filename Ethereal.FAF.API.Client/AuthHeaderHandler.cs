@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Web;
 
 namespace Ethereal.FAF.API.Client
 {

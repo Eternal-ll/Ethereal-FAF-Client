@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {
@@ -29,7 +29,7 @@ namespace Ethereal.FAF.UI.Client.Views
 
         private void TextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            var textbox = (TextBox)sender;
+            var textbox = (System.Windows.Controls.TextBox)sender;
             if (e.Key is System.Windows.Input.Key.Enter)
             {
                 if (!ViewModel.SendMessageCommand.CanExecute(textbox.Text)) return;
@@ -42,7 +42,7 @@ namespace Ethereal.FAF.UI.Client.Views
         }
         (string channel, int users)[] Channels;
         bool waitingChannels;
-        private void AutoSuggestBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs e)
         {
             if (waitingChannels) return;
             var box = (Wpf.Ui.Controls.AutoSuggestBox)sender;
@@ -82,11 +82,11 @@ namespace Ethereal.FAF.UI.Client.Views
             //        .OrderByDescending(c => c.users)
             //        .Select(c => $"{c.channel} ({c.users})");
             //}
-            if (string.IsNullOrWhiteSpace(text) && e.Changes.Any(t => t.RemovedLength > 0))
-            {
-                box.ItemsSource = null;
-                box.IsSuggestionListOpen = false;
-            }
+            //if (string.IsNullOrWhiteSpace(text) && e.Text.Any(t => t.RemovedLength > 0))
+            //{
+            //    box.ItemsSource = null;
+            //    box.IsSuggestionListOpen = false;
+            //}
             //var founded = Channels.Where(c => c.channel.Contains(text, System.StringComparison.OrdinalIgnoreCase));
         }
 

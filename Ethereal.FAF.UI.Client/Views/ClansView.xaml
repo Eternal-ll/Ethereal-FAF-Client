@@ -1,4 +1,4 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.ClansView"
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.ClansView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -99,4 +99,4 @@
             </ListView.ItemTemplate>
         </ListView>
     </Grid>
-</ui:UiPage>
+</local:PageBase>

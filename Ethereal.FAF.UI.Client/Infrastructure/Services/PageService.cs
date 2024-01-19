@@ -7,7 +7,7 @@
 
 using System;
 using System.Windows;
-using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {

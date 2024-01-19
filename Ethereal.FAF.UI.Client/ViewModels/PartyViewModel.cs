@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
@@ -12,8 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Contracts;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -65,17 +65,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly ServerManager ServerManager;
         private readonly LobbyClient LobbyClient;
-        private readonly PlayersViewModel PlayersVM;
-        private readonly DialogService DialogService;
+        private readonly IFafPlayersService _fafPlayersService;
         private readonly NotificationService NotificationService;
         private readonly IServiceProvider ServiceProvider;
         private readonly INavigationService INavigationService;
         private readonly ILogger Logger;
 
-        public PartyViewModel(PlayersViewModel playersVM, ILogger<PartyViewModel> logger, DialogService dialogService, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService, ServerManager serverManager)
+        public PartyViewModel(PlayersViewModel playersVM, ILogger<PartyViewModel> logger, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService, ServerManager serverManager, IFafPlayersService fafPlayersService)
         {
-            PlayersVM = playersVM;
-            DialogService = dialogService;
             ServiceProvider = serviceProvider;
             NotificationService = notificationService;
             INavigationService = iNavigationService;
@@ -96,6 +93,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             lobbyClient.PartyInvite += LobbyClient_PartyInvite;
             lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
             lobbyClient.StateChanged += LobbyClient_StateChanged;
+            _fafPlayersService = fafPlayersService;
         }
 
         private void LobbyClient_StateChanged(object sender, LobbyState e)
@@ -144,7 +142,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             foreach (var member in e.Members)
             {
-                if (PlayersVM.TryGetPlayer(member.PlayerId, out var player))
+                if (_fafPlayersService.TryGetPlayer(member.PlayerId, out var player))
                 {
                     var playerMember = Members.FirstOrDefault(m => m.Player.Id == member.PlayerId);
                     var partyPlayer = new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId);
@@ -160,7 +158,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     Members.Add(new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId));
                     Logger.LogTrace("[Party] Player [{id}] joined to party", member.PlayerId);
                     // TODO Notify by server
-                    if (PlayersVM.Self.Id == member.PlayerId) continue;
+                    // TODO SELF ignore
+                    //if (PlayersVM.Self.Id == member.PlayerId) continue;
                     NotificationService.Notify("Party", $"Player [{member.PlayerId}] joined to party with these factions [{string.Join(',', partyPlayer.SelectedFactions)}]");
                 }
             }
@@ -184,7 +183,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async void LobbyClient_PartyInvite(object s, PartyInvite e)
         {
             Logger.LogTrace("[Party] Party invite from player [{id}]", e.SenderId);
-            if (PlayersVM.TryGetPlayer(e.SenderId, out var sender))
+            if (_fafPlayersService.TryGetPlayer(e.SenderId, out var sender))
             {
                 var accepted = await NotificationService.ShowDialog("Party", $"Player {sender.Login} invites you to party", "Accept", "Ignore");
                 if (accepted)
@@ -208,8 +207,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             var playersView = ServiceProvider.GetService<PlayersView>();
             playersView.DisableInvitePlayerCommand();
-            var frame = INavigationService.GetFrame();
-            INavigationService.Navigate(0);
+            // TODO
+            //INavigationService.Navigate()
         }
         #endregion
 
@@ -221,7 +220,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             var playersView = ServiceProvider.GetService<PlayersView>();
             playersView.EnableInvitePlayerCommand(InvitePlayerCommand, BackCommand);
-            INavigationService.Navigate(2);
+            // TODO
+            //INavigationService.Navigate(2);
         }
         #endregion
 

@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -22,12 +22,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly ILogger<MapsViewModel> Logger;
         private readonly MapsService MapsService;
-        private readonly SnackbarService SnackbarService;
+        private readonly ISnackbarService SnackbarService;
 
         private readonly IFafApiClient FafApiClient;
         private readonly IFafContentClient FafContentClient;
 
-        public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, SnackbarService snackbarService, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
+        public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, ISnackbarService snackbarService, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
         {
             ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
             DownloadMapCommand = new LambdaCommand(OnDownloadMapCommand);
@@ -265,7 +265,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             if (response.Error is not null)
             {
-                SnackbarService.Show("Warning", response.Error?.Content, Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
+                //SnackbarService.Show("Warning", response.Error?.Content, Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
                 return;
             }
             response.Content.ParseIncluded(out var entityData);
@@ -333,11 +333,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             catch (Exception ex)
             {
-                SnackbarService.Timeout = 10000;
-                SnackbarService.Show("Exception", $"Failed to download map with exception:\n{ex}", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Secondary);
+                //SnackbarService.Timeout = 10000;
+                //SnackbarService.Show("Exception", $"Failed to download map with exception:\n{ex}", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Secondary);
                 return;
             }
-            SnackbarService.Show("Notification", "Downloaded", Wpf.Ui.Common.SymbolRegular.Check20);
+            //SnackbarService.Show("Notification", "Downloaded", Wpf.Ui.Common.SymbolRegular.Check20);
         }
         #endregion
     }

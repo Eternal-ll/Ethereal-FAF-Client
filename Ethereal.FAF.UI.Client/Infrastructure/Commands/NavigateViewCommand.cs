@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Commands
 {

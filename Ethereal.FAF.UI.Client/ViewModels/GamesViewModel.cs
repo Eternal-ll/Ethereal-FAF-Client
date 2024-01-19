@@ -1,40 +1,38 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.DataTemplateSelectors;
-using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Contracts;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class GamesViewModel : JsonSettingsViewModel
     {
         private readonly GameLauncher GameLauncher;
-        private readonly ServerManager ServerManager;
 
         private readonly NotificationService NotificationService;
         private readonly INavigationService NavigationService;
-        private readonly DialogService DialogService;
-        private readonly PlayersViewModel PlayersViewModel;
+        //private readonly DialogService DialogService;
+        private readonly IFafPlayersService _fafPlayersService;
+        private readonly IFafGamesService _fafGamesService;
+        private readonly IFafGamesEventsService _fafGamesEventsService;
         private readonly MapsService MapsService;
 
         private readonly ILogger Logger;
@@ -50,14 +48,15 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public GamesViewModel(
             GameLauncher gameLauncher,
             NotificationService notificationService,
-            PlayersViewModel playersViewModel,
             ILogger<GamesViewModel> logger,
-            DialogService dialogService,
             IConfiguration configuration,
             INavigationService navigationService,
             MapsService mapsService,
             IServiceProvider serviceProvider,
-            MatchmakingViewModel matchmakingViewModel)
+            MatchmakingViewModel matchmakingViewModel,
+            IFafPlayersService fafPlayersService,
+            IFafGamesService fafGamesService,
+            IFafGamesEventsService fafGamesEventsService)
         {
             ChangeLiveButton = new LambdaCommand(OnChangeButton, CanChangeButton);
             HostGameCommand = new LambdaCommand(OnHostGameCommand, CanHostGameCommand);
@@ -82,28 +81,18 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (banned is not null)
                 MapsBlacklist.AddRange(banned);
 
+            fafGamesEventsService.GamesAdded += FafGamesService_GamesAdded;
+            fafGamesEventsService.GamesRemoved += FafGamesService_GamesRemoved;
+            fafGamesEventsService.GameStateChanged += FafGamesEventsService_GameStateChanged;
 
             Games = new();
+            Games.AddRange(fafGamesService.GetGames());
             //Games.SupportRangeNotifications = true;
             GamesSource = new()
             {
                 Source = Games.AsObservable
             };
             GamesSource.Filter += GamesSource_Filter;
-
-            var serverManager = serviceProvider.GetRequiredService<ServerManager>();
-
-            var lobby = serverManager.GetLobbyClient();
-            lobby.StateChanged += (s, state) =>
-            {
-                if (state is not LobbyState.Disconnecting) return;
-                foreach (var game in Games)
-                {
-                    Games.Remove(game);
-                }
-            };
-            lobby.GamesReceived += Lobby_GamesReceived;
-            lobby.GameReceived += Lobby_GameReceived;
             SelectedGameMode = "Custom";
 
             GameLauncher = gameLauncher;
@@ -111,11 +100,54 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             Logger = logger;
             MatchmakingViewModel = matchmakingViewModel;
             NotificationService = notificationService;
-            PlayersViewModel = playersViewModel;
-            DialogService = dialogService;
+            //DialogService = dialogService;
             NavigationService = navigationService;
             MapsService = mapsService;
-            ServerManager = serverManager;
+            _fafPlayersService = fafPlayersService;
+            _fafGamesService = fafGamesService;
+            _fafGamesEventsService = fafGamesEventsService;
+        }
+
+        private void FafGamesEventsService_GameStateChanged(object sender, (Game game, GameState newest, GameState latest) e)
+        {
+
+            var refreshView = false;
+            if (e.game.GameType == GameType.Custom
+                && SelectedGameMode == "Custom"
+                && e.latest == GameState.Playing
+                && IsLive)
+            {
+                refreshView = true;
+            }
+            if (e.game.GameType == GameType.Custom
+                && SelectedGameMode == "Custom"
+                && e.latest == GameState.Open
+                && !IsLive)
+            {
+                refreshView = true;
+            }
+            if (refreshView)
+            {
+                Application.Current.Dispatcher.BeginInvoke(() => GamesView.Refresh());
+            }
+        }
+
+        private void FafGamesService_GamesRemoved(object sender, Game[] e)
+        {
+            foreach (var game in e)
+            {
+                Games.Remove(game);
+                if (SelectedGameMode == "Custom"
+                    && game.State == GameState.Closed)
+                {
+                    //Application.Current.Dispatcher.BeginInvoke(() => GamesView.Refresh());
+                }
+            }
+        }
+
+        private void FafGamesService_GamesAdded(object sender, Game[] e)
+        {
+            Games.AddRange(e);
         }
 
         public Visibility SearchButtonVisibility =>
@@ -385,11 +417,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void SetMapScenario(Game game)
         {
             if (game.MapScenario is not null) return;
-            var scenario = Configuration.GetMapFile(game.Mapname, "_scenario.lua");
-            if (File.Exists(scenario))
-            {
-                game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
-            }
+            //var scenario = Configuration.GetMapFile(game.Mapname, "_scenario.lua");
+            //if (File.Exists(scenario))
+            //{
+            //    game.MapScenario = FA.Vault.MapScenario.FromFile(scenario);
+            //}
         }
         private void GamesSource_Filter(object sender, FilterEventArgs e)
         {
@@ -420,228 +452,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             game.IsPassedFilter = true;
         }
 
-        public bool IsBadGame(Game game)
-        {
-            if (game.State is GameState.Closed) return true;
-            if (!game.Teams.Any(t => t.Value.Any()) && game.State is GameState.Open)
-            {
-                return true;
-            }
-            if (!game.TeamsIds.Any(t => t.PlayerIds.Any()) && game.State is GameState.Open)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private void Lobby_GamesReceived(object sender, Game[] e)
-        {
-            var badGames = new List<Game>();
-            foreach (var g in e)
-            {
-                //if (IsBadGame(g))
-                //{
-                //    badGames.Add(g);
-                //    continue;
-                //}
-                if (!g.IsMapgen) g.SmallMapPreview = $"https://content.faforever.com/maps/previews/small/{g.Mapname}.png";
-                g.UpdateTeams();
-                FillPlayers(g);
-                //if (g.HostPlayer?.Player is null)
-                //{
-                //    badGames.Add(g);
-                //}
-            }
-            //using var defer = GamesView.DeferRefresh();
-            Games.AddRange(e);
-        }
-        private void Lobby_GameReceived(object sender, Game e) => ProceedGame(e);
-        private void ProceedGame(Game e)
-        {
-            var games = Games;
-            if (games is null) return;
-            if (!TryGetGame(e.Uid, out var cached, out var index))
-            {
-                //Logger.LogWarning($"Unique game received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
-                if (e.State is GameState.Closed) 
-                {
-                    return;
-                }
-                if (e.State is GameState.Playing && e.NumPlayers == 0)
-                {
-                    return;
-                }
-                //if (e.State is GameState.Closed)
-                //{
-                //    // received new closed game
-                //    //Logger.LogWarning("Received game [{uid}] that was [GameState.Closed] and not founded in cache", e.Uid);
-                //    Logger.LogWarning($"Received [{e.Uid}] [{e.NumPlayers}] [{e.MaxPlayers}] [{e.State}]");
-                //    return;
-                //}
-                //if (IsBadGame(e))
-                //{
-                //    if (e.State is GameState.Closed)
-                //    {
-                //        // received new closed game
-                //        Logger.LogWarning("Received game [{uid}] that was [GameState.Closed] and not founded in cache", e.Uid);
-                //        return;
-                //    }
-                //    return;
-                //}
-                //newGame.Host = PlayersService.GetPlayer(newGame.host);
-                //HandleTeams(newGame);
-                e.UpdateTeams();
-                FillPlayers(e);
-                games.Add(e);
-                //Logger.LogInformation(e.Title);
-                //OnNewGameReceived(newGame);
-                return;
-            }
-
-            var leftPlayers = cached.PlayersIds
-                .Except(e.PlayersIds)
-                .ToArray();
-
-            if (e.State is GameState.Closed)
-            {
-                if (cached.State is GameState.Playing)
-                {
-                    // game is end
-                }
-                else
-                {
-                    // host closed game
-                }
-                //ProcessLeftPlayers(cached, leftPlayers);
-                games.Remove(cached);
-            }
-
-            if (e.State is GameState.Playing)
-            {
-                if (cached.State is GameState.Playing)
-                {
-                    if (e.NumPlayers < cached.NumPlayers && e.NumPlayers == 0)
-                    {
-                        games.Remove(cached);
-                        return;
-                    }
-                }
-            }
-
-            var joinedPlayers = e.PlayersIds
-                .Except(cached.PlayersIds)
-                .ToArray();
-
-            // lets update cached game
-            cached.Title = e.Title;
-            cached.Mapname = e.Mapname;
-            cached.MaxPlayers = e.MaxPlayers;
-            cached.NumPlayers = e.NumPlayers;
-            cached.LaunchedAt = e.LaunchedAt;
-            OnPropertyChanged(nameof(cached.LaunchedAtTimeSpan));
-
-
-            if (e.State is GameState.Playing && cached.State is GameState.Playing)
-            {
-                // update playing game
-                ProcessDiedPlayers(cached, leftPlayers);
-            }
-            else
-            {
-                // game updated
-                ProcessLeftPlayers(cached, leftPlayers);
-                UpdateTeams(cached, e);
-                FillPlayers(cached);
-                ProcessJoinedPlayers(cached, joinedPlayers);
-            }
-
-            if (e.State is GameState.Playing)
-            {
-                if (cached.State is GameState.Open)
-                {
-                    //Logger.LogTrace("Game [{title}] [{mod}] [{rating}] launched, updating list on index",
-                    //    e.Title, e.FeaturedMod, e.RatingType);
-                    e.GameTeams = cached.GameTeams;
-                    if (cached.MapGeneratorState is MapGeneratorState.Generated)
-                    {
-                        e.SmallMapPreview = cached.SmallMapPreview;
-                        e.MapGeneratorState = cached.MapGeneratorState;
-                    }
-                    e.HostPlayer = cached.HostPlayer;
-                    Games[index] = e;
-                }
-            }
-            cached.State = e.State;
-        }
-        private void UpdateTeams(Game oldGame, Game newGame)
-        {
-            oldGame.Teams = newGame.Teams;
-            oldGame.TeamsIds = newGame.TeamsIds;
-            oldGame.UpdateTeams();
-        }
-        private void FillPlayers(Game game)
-        {
-            foreach (var player in game.Players)
-            {
-                if (!PlayersViewModel.TryGetPlayer(player.Id, out var cache))
-                {
-                    continue;
-                }
-                if (game.HostPlayer is null)
-                {
-
-                }
-                if (player.Login == game.Host)
-                {
-                    game.HostPlayer = cache;
-                    player.IsHost = true;
-                }
-                player.Player = cache;
-                cache.Game = game;
-            }
-        }
-        private void ProcessJoinedPlayers(Game game, params long[] joinedPlayers)
-        {
-            foreach (var joined in joinedPlayers)
-            {
-                if (!game.TryGetPlayer(joined, out var player))
-                {
-                    continue;
-                }
-            }
-        }
-        private void ProcessLeftPlayers(Game game, params long[] leftPlayers)
-        {
-            foreach (var left in leftPlayers)
-            {
-                Player cached;
-                if (!game.TryGetPlayer(left, out var player))
-                {
-                    if (!PlayersViewModel.TryGetPlayer(left, out cached))
-                    {
-                        // welp... GG
-                    }
-                }
-                else
-                {
-                    cached = player.Player;
-                }
-                if (cached is not null)
-                    cached.Game = null;
-            }
-        }
-        private void ProcessDiedPlayers(Game game, params long[] diedPlayers)
-        {
-            foreach (var died in diedPlayers)
-            {
-                if (!game.TryGetPlayer(died, out var player))
-                {
-                    continue;
-                }
-                player.IsConnected = false;
-            }
-        }
-
         public ICommand ChangeLiveButton { get; }
         private bool CanChangeButton(object arg) => IsLiveInputEnabled;
         private void OnChangeButton(object obj) => IsLive = !IsLive;
@@ -652,7 +462,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             GameLauncher.State is GameLauncherState.Idle && MatchmakingViewModel.State is MatchmakingState.Idle;
         private void OnHostGameCommand(object arg)
         {
-            NavigationService.GetNavigationControl().SelectedPageIndex = 0;
+            //NavigationService.GetNavigationControl().SelectedPageIndex = 0;
             //NavigationService.Navigate(-1);
             NavigationService.Navigate(typeof(HostGameView));
         }
@@ -665,12 +475,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (arg is not Game game) return;
             if (game.State is not GameState.Playing)
             {
-                NotificationService.Notify("Warning", $"Cant watch [{game.State}] game", Wpf.Ui.Common.SymbolRegular.Warning24);
+                //NotificationService.Notify("Warning", $"Cant watch [{game.State}] game", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
             if (game.SimMods is not null && game.SimMods.Count > 0)
             {
-                NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+                //NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
             Task.Run(async () => await MapsService
@@ -682,18 +492,18 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         Logger.LogError(t.Exception.ToString());
                         return;
                     }
-                    t.ContinueWith(t => ServerManager
-                    .GetPatchClient()
-                    .ConfirmPatchAsync(game.FeaturedMod)
-                    .ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            Logger.LogError(t.Exception.ToString());
-                            return;
-                        }
-                        t.ContinueWith(t => GameLauncher.WatchGame(game));
-                    }));
+                    //t.ContinueWith(t => ServerManager
+                    //.GetPatchClient()
+                    //.ConfirmPatchAsync(game.FeaturedMod)
+                    //.ContinueWith(t =>
+                    //{
+                    //    if (t.IsFaulted)
+                    //    {
+                    //        Logger.LogError(t.Exception.ToString());
+                    //        return;
+                    //    }
+                    //    t.ContinueWith(t => GameLauncher.WatchGame(game));
+                    //}));
                 }));
         }
         #endregion
@@ -718,88 +528,88 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
             if (GameLauncher.State is not GameLauncherState.Idle)
             {
-                NotificationService.Notify("Warning", $"Cant join game while launcher in state [{GameLauncher.State}]", Wpf.Ui.Common.SymbolRegular.Warning24);
+                NotificationService.Notify("Warning", $"Cant join game while launcher in state [{GameLauncher.State}]", SymbolRegular.Warning24);
                 return;
             }
             if (game.GameType is GameType.MatchMaker) return;
             if (game.NumPlayers == 0)
             {
-                NotificationService.Notify("Warning", "Game is empty, possibly broken", Wpf.Ui.Common.SymbolRegular.Warning24);
+                NotificationService.Notify("Warning", "Game is empty, possibly broken", SymbolRegular.Warning24);
                 return;
             }
             var password = string.Empty;
-            if (game.PasswordProtected)
-            {
-                var textbox = new System.Windows.Controls.PasswordBox
-                {
-                    Margin = new Thickness(10, 20, 10, 0),
-                    Padding = new Thickness(10, 4, 10, 4)
-                };
-                var dialog = DialogService.GetDialogControl();
-                dialog.Content = textbox;
-                dialog.Title = "Game password protected";
-                dialog.ButtonLeftName = "Enter password";
-                dialog.ButtonRightName = "Cancel";
-                var result = await dialog.ShowAndWaitAsync(true);
-                if (result is not Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Left) return;
-                dialog.Hide();
-                password = textbox.Password;
-            }
-            if (game.SimMods is not null && game.SimMods.Count > 0)
-            {
-                NotificationService.Notify("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
-                return;
-            }
+            //if (game.PasswordProtected)
+            //{
+            //    var textbox = new System.Windows.Controls.PasswordBox
+            //    {
+            //        Margin = new Thickness(10, 20, 10, 0),
+            //        Padding = new Thickness(10, 4, 10, 4)
+            //    };
+            //    var dialog = DialogService.GetDialogControl();
+            //    dialog.Content = textbox;
+            //    dialog.Title = "Game password protected";
+            //    dialog.ButtonLeftName = "Enter password";
+            //    dialog.ButtonRightName = "Cancel";
+            //    var result = await dialog.ShowAndWaitAsync(true);
+            //    if (result is not Wpf.Ui.Controls.Interfaces.IDialogControl.ButtonPressed.Left) return;
+            //    dialog.Hide();
+            //    password = textbox.Password;
+            //}
+            //if (game.SimMods is not null && game.SimMods.Count > 0)
+            //{
+            //    NotificationService.Notify("Warning", "SIM mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
+            //    return;
+            //}
             CancellationTokenSource = new CancellationTokenSource();
 
-            var dialogg = DialogService.GetDialogControl();
-            dialogg.Title = "Joining game";
-            dialogg.Content = null;
-            dialogg.ButtonLeftName = "Cancel";
-            dialogg.ButtonRightName = "Cancel";
-            dialogg.Closed += Dialog_Closed;
-            dialogg.Show();
+            //var dialogg = DialogService.GetDialogControl();
+            //dialogg.Title = "Joining game";
+            //dialogg.Content = null;
+            //dialogg.ButtonLeftName = "Cancel";
+            //dialogg.ButtonRightName = "Cancel";
+            //dialogg.Closed += Dialog_Closed;
+            //dialogg.Show();
 
-            await Task.Run(async () =>
-            {
-                // todo
-                IProgress<string> progress = new Progress<string>(d => dialogg.Content = d);
+            //await Task.Run(async () =>
+            //{
+            //    // todo
+            //    IProgress<string> progress = new Progress<string>(d => dialogg.Content = d);
 
-                // TODO reverse MapsService injection from game
-                await MapsService
-                    .EnsureMapExistAsync(game.Mapname)
-                    .ContinueWith(async t =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            Logger.LogError(t.Exception.ToString());
-                            NotificationService.Notify("Exception", t.Exception.ToString());
-                            Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
-                            return;
-                        }
-                        await ServerManager
-                        .GetPatchClient()
-                        .ConfirmPatchAsync(game.FeaturedMod)
-                        .ContinueWith(t =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                Logger.LogError(t.Exception.ToString());
-                                NotificationService.Notify("Exception", t.Exception.ToString());
-                                Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
-                                return;
-                            }
-                            var lobby = ServerManager.GetLobbyClient();
-                            if (game.PasswordProtected) lobby.JoinGame(game.Uid, password);
-                            else lobby.JoinGame(game.Uid);
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                dialogg.Closed -= Dialog_Closed;
-                                dialogg.Hide();
-                            });
-                        });
-                    });
-            });
+            //    // TODO reverse MapsService injection from game
+            //    await MapsService
+            //        .EnsureMapExistAsync(game.Mapname)
+            //        .ContinueWith(async t =>
+            //        {
+            //            if (t.IsFaulted)
+            //            {
+            //                Logger.LogError(t.Exception.ToString());
+            //                NotificationService.Notify("Exception", t.Exception.ToString());
+            //                Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
+            //                return;
+            //            }
+            //            await ServerManager
+            //            .GetPatchClient()
+            //            .ConfirmPatchAsync(game.FeaturedMod)
+            //            .ContinueWith(t =>
+            //            {
+            //                if (t.IsFaulted)
+            //                {
+            //                    Logger.LogError(t.Exception.ToString());
+            //                    NotificationService.Notify("Exception", t.Exception.ToString());
+            //                    Application.Current.Dispatcher.BeginInvoke(dialogg.Hide, System.Windows.Threading.DispatcherPriority.Background);
+            //                    return;
+            //                }
+            //                var lobby = ServerManager.GetLobbyClient();
+            //                if (game.PasswordProtected) lobby.JoinGame(game.Uid, password);
+            //                else lobby.JoinGame(game.Uid);
+            //                Application.Current.Dispatcher.Invoke(() =>
+            //                {
+            //                    dialogg.Closed -= Dialog_Closed;
+            //                    dialogg.Hide();
+            //                });
+            //            });
+            //        });
+            //});
 
 
             //try
@@ -827,10 +637,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //}
         }
 
-        private void Dialog_Closed([System.Diagnostics.CodeAnalysis.NotNull] Wpf.Ui.Controls.Dialog sender, RoutedEventArgs e)
-        {
-            CancellationTokenSource.Cancel();
-        }
+        //private void Dialog_Closed([System.Diagnostics.CodeAnalysis.NotNull] Wpf.Ui.Controls.Dialog sender, RoutedEventArgs e)
+        //{
+        //    CancellationTokenSource.Cancel();
+        //}
         #endregion
 
         #region Filters

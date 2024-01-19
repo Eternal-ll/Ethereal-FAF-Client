@@ -1,11 +1,11 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
 using System;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Wpf.Ui.Common.Interfaces;
+using Wpf.Ui.Controls;
+using Image = System.Windows.Controls.Image;
 
 namespace Ethereal.FAF.UI.Client.Views
 {

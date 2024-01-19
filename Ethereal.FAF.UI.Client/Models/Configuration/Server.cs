@@ -26,7 +26,7 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
         Connecting,
         Connected,
     }
-    public partial class Server : ViewModels.Base.ViewModel
+    public partial class Server
     {
         [JsonPropertyName("ShortName")]
         public string ShortName { get; set; }
@@ -40,11 +40,6 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
         public Uri Logo { get; set; }
         [JsonPropertyName("Site")]
         public Uri Site { get; set; }
-
-        [JsonPropertyName("IsVisible")]
-        public bool IsVisible { get; set; }
-        [JsonPropertyName("AutoJoin")]
-        public bool AutoJoin { get; set; }
 
         [JsonPropertyName("Lobby")]
         public ServerAddress Lobby { get; set; }
@@ -60,6 +55,8 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
 
         [JsonPropertyName("API")]
         public Uri Api { get; set; }
+        [JsonPropertyName("UserApi")]
+        public Uri UserApi { get; set; }
 
         [JsonPropertyName("Content")]
         public Uri Content { get; set; }
@@ -71,25 +68,6 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
 
         [JsonPropertyName("Cloudfare")]
         public Cloudfare Cloudfare { get; set; }
-
-
-
-
-        #region 
-
-        private ServerState _ServerState;
-        public ServerState ServerState { get => _ServerState; set => Set(ref _ServerState, value); }
-
-        #endregion
-
-        public int _PlayersCount;
-        [JsonIgnore]
-        public int PlayersCount { get => _PlayersCount; private set => Set(ref _PlayersCount, value); }
-        public void SetPlayersCount(int count) => PlayersCount = count;
-        private int _GamesCount;
-        [JsonIgnore]
-        public int GamesCount { get => _GamesCount; private set => Set(ref _GamesCount, value); }
-        public void SetGamesCount(int count) => GamesCount = count;
     }
 
     public partial class Cloudfare
@@ -109,9 +87,14 @@ namespace Ethereal.FAF.UI.Client.Models.Configuration
 
     public class ServerAddress
     {
+        [JsonPropertyName("IsWss")]
+        public bool IsWss { get; set; }
+
+        [JsonPropertyName("Url")]
+        public Uri Url { get; set; }
+
         [JsonPropertyName("Host")]
         public string Host { get; set; }
-
         [JsonPropertyName("Port")]
         public int Port { get; set; }
     }

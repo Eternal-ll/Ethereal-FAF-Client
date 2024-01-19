@@ -6,9 +6,8 @@ using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using Wpf.Ui.Common.Interfaces;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
+using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
 {
@@ -18,8 +17,8 @@ namespace Ethereal.FAF.UI.Client.Views
     public partial class SelectVaultLocationView : INavigableView<object>
     {
         private readonly LoaderViewModel LoaderViewModel;
-        private readonly SnackbarService SnackbarService;
-        public SelectVaultLocationView(LoaderViewModel loaderViewModel, SnackbarService snackbarService)
+        private readonly ISnackbarService SnackbarService;
+        public SelectVaultLocationView(LoaderViewModel loaderViewModel, ISnackbarService snackbarService)
         {
             InitializeComponent();
             LoaderViewModel = loaderViewModel;
@@ -40,19 +39,19 @@ namespace Ethereal.FAF.UI.Client.Views
             };
             if (opnDlg.ShowDialog() is false)
             {
-                SnackbarService.Show("Warning", "Dude, i gave you instructions and still you did something wrong =/", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
-                return;
+                //SnackbarService.Show("Warning", "Dude, i gave you instructions and still you did something wrong =/", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
+                //return;
             }
             var location = Path.GetDirectoryName(opnDlg.FileName);
             if (File.Exists(Path.Combine(location, "maps")) || File.Exists(Path.Combine(location, "mods")))
             {
-                SnackbarService.Timeout = 10000;
-                SnackbarService.Show("Success", $"Wow, i see there something! It`s time to clear this place \"{location}\" =).", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
+                //SnackbarService.Timeout = 10000;
+                //SnackbarService.Show("Success", $"Wow, i see there something! It`s time to clear this place \"{location}\" =).", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             }
             else
             {
-                SnackbarService.Timeout = 5000;
-                SnackbarService.Show("Success", $"Pretty loose! It`s time to fill this place \"{location}\" with some huge maps and mods!", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
+                //SnackbarService.Timeout = 5000;
+                //SnackbarService.Show("Success", $"Pretty loose! It`s time to fill this place \"{location}\" with some huge maps and mods!", Wpf.Ui.Common.SymbolRegular.CheckboxChecked20, Wpf.Ui.Common.ControlAppearance.Success);
             }
             UserSettings.Update(ConfigurationConstants.ForgedAllianceVaultLocation, location);
             Thread.Sleep(500);

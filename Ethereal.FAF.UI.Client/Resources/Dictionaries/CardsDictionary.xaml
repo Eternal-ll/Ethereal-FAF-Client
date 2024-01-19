@@ -52,7 +52,7 @@
     <Style TargetType="Separator" BasedOn="{StaticResource {x:Type Separator}}">
         <Setter Property="Margin" Value="0 0 -7 0"/>
     </Style>
-    <Style x:Key="InlineHyperlink" TargetType="ui:Hyperlink" BasedOn="{StaticResource {x:Type ui:Hyperlink}}">
+    <Style x:Key="InlineHyperlink" TargetType="ui:HyperlinkButton" BasedOn="{StaticResource {x:Type ui:HyperlinkButton}}">
         <Setter Property="Margin" Value="0 -2"/>
         <Setter Property="Padding" Value="4 2"/>
         <Setter Property="FontSize" Value="12"/>

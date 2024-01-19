@@ -6,8 +6,7 @@ using Ethereal.FAF.UI.Client.Views;
 using Microsoft.Extensions.Configuration;
 using System.Threading;
 using System.Threading.Tasks;
-using Wpf.Ui.Mvvm.Contracts;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -33,7 +32,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             UidGenerator = uidGenerator;
             Configuration = configuration;
 
-            TokenProvider.TokenReceived += TokenProvider_TokenReceived;
+            //TokenProvider.TokenReceived += TokenProvider_TokenReceived;
             lobbyClient.StateChanged += LobbyClient_StateChanged;
             lobbyClient.SessionReceived += LobbyClient_SessionReceived;
             lobbyClient.AuthentificationFailed += LobbyClient_AuthentificationFailed;
@@ -41,14 +40,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void TokenProvider_TokenReceived(object sender, TokenBearer e)
         {
-            LobbyClient.Authorization = $"Bearer {e.AccessToken}";
-            LobbyClient.ConnectAsync();
+            //LobbyClient.Authorization = $"Bearer {e.AccessToken}";
+            //LobbyClient.ConnectAsync();
         }
 
         private void LobbyClient_AuthentificationFailed(object sender, global::FAF.Domain.LobbyServer.AuthentificationFailedData e)
         {
             LobbyClient.Disconnect();
-            LobbyClient.ConnectAsync();
+            //LobbyClient.ConnectAsync();
         }
 
         private CancellationTokenSource CancellationTokenSource;
@@ -60,11 +59,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void RunAuthorizationTask(string session)
         {
-            if (!LobbyClient.IsConnected)
-            {
-                LobbyClient.ConnectAsync();
-                return;
-            }
             CancellationTokenSource = new();
             Task.Run(async () =>
             {
@@ -76,8 +70,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private void LobbyClient_StateChanged(object sender, LobbyState e)
         {
-            App.Current.Dispatcher.BeginInvoke(() =>
-            SnackbarService.Show("Lobby", $"Lobby connection state changed to [{e}]", Wpf.Ui.Common.SymbolRegular.NetworkCheck20), System.Windows.Threading.DispatcherPriority.Background);
+            //App.Current.Dispatcher.BeginInvoke(() =>
+            //SnackbarService.Show("Lobby", $"Lobby connection state changed to [{e}]", Wpf.Ui.Common.SymbolRegular.NetworkCheck20), System.Windows.Threading.DispatcherPriority.Background);
             switch (e)
             {
                 case LobbyState.None:
@@ -97,8 +91,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 case LobbyState.Disconnected:
                     CancellationTokenSource?.Cancel();
                     App.Current.Dispatcher.BeginInvoke(() => NavigationWindow.Navigate(typeof(LoaderView)), System.Windows.Threading.DispatcherPriority.Background);
-					LobbyClient.Disconnect();
-					LobbyClient.ConnectAsync();
+					//LobbyClient.Disconnect();
+                    //LobbyClient.Connect();
 					break;
             }
         }

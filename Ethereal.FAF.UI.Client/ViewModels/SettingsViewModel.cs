@@ -1,8 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
-using Ethereal.FAF.UI.Client.Infrastructure.Queries.GetCoturnServers;
 using Ethereal.FAF.UI.Client.Models;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Win32;
 using System;
@@ -10,19 +8,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Security.Policy;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
-using Windows.Media.Core;
+using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Mvvm.Contracts;
-using System.Threading;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -100,7 +95,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly IThemeService ThemeService;
         private readonly INavigationWindow NavigationWindow;
-        private readonly IMediator _mediator;
 
         public BackgroundViewModel BackgroundViewModel { get; }
         private readonly BackgroundWorker _backgroundWorker;
@@ -109,8 +103,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 			INavigationWindow navigationWindow,
 			BackgroundViewModel backgroundViewModel,
 			IConfiguration configuration,
-			IceManager iceManager,
-			IMediator mediator)
+			IceManager iceManager)
 		{
 			ThemeService = themeService;
 			NavigationWindow = navigationWindow;
@@ -133,17 +126,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 			_PathToJavaRuntime = configuration.GetValue<string>("Paths:JavaRuntime");
 
 
-			_BackgroundType = configuration.GetValue<BackgroundType>("UI:BackgroundType");
+			_BackgroundType = configuration.GetValue<WindowBackdropType>("UI:BackgroundType");
 			_AccentColor = (Color)ColorConverter.ConvertFromString(configuration.GetValue<string>("UI:AccentColor"));
-			_ThemeType = configuration.GetValue<ThemeType>("UI:ThemeType");
+			_ThemeType = configuration.GetValue<ApplicationTheme>("UI:ThemeType");
 
-			Task.Run(async () =>
-			{
-				IceHelper = iceManager.GetIceHelpMessage();
-                CoturnServers = await _mediator.Send(new GetCoturnServersQuery());
-			});
+			//Task.Run(async () =>
+			//{
+			//	IceHelper = iceManager.GetIceHelpMessage();
+   //             CoturnServers = await _mediator.Send(new GetCoturnServersQuery());
+			//});
 
-			SetSystemAccentColorCommand = new LambdaCommand(arg => AccentColor = Accent.GetColorizationColor());
+			SetSystemAccentColorCommand = new LambdaCommand(arg => throw new NotImplementedException());
 			SelectDirectoryCommand = new LambdaCommand(arg =>
 			{
 				var target = arg.ToString();
@@ -206,7 +199,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 					}
 				}
 			});
-			_mediator = mediator;
             _backgroundWorker = new()
             {
 				WorkerSupportsCancellation = true
@@ -271,9 +263,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             .Cast<Brush>();
 
         #region ThemeType
-        public static ThemeType[] ThemeTypeSource { get; } = Enum.GetValues<ThemeType>(); //new ThemeType[] { ThemeType.Light, ThemeType.Dark }; 
-        private ThemeType _ThemeType;
-        public ThemeType ThemeType
+        public static ApplicationTheme[] ThemeTypeSource { get; } = Enum.GetValues<ApplicationTheme>(); //new ThemeType[] { ThemeType.Light, ThemeType.Dark }; 
+        private ApplicationTheme _ThemeType;
+        public ApplicationTheme ThemeType
         {
             get => _ThemeType;
             set
@@ -288,9 +280,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         #endregion
 
         #region BackgroundType
-        public static BackgroundType[] BackgroundTypeSource { get; } = Enum.GetValues<BackgroundType>();
-        private BackgroundType _BackgroundType;
-        public BackgroundType BackgroundType
+        public static WindowBackdropType[] BackgroundTypeSource { get; } = Enum.GetValues<WindowBackdropType>();
+        private WindowBackdropType _BackgroundType;
+        public WindowBackdropType BackgroundType
         {
             get => _BackgroundType;
             set
@@ -298,7 +290,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (Set(ref _BackgroundType, value))
                 {
                     UserSettings.Update("UI:BackgroundType", value.ToString());
-                    if (NavigationWindow is UiWindow window)
+                    if (NavigationWindow is FluentWindow window)
                     {
                         window.WindowBackdropType = value;
                     }

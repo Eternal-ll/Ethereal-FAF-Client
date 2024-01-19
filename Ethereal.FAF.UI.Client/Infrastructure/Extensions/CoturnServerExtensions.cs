@@ -4,7 +4,7 @@ using FAF.Domain.LobbyServer;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 {
-	public static class CoturnServerExtensions
+    public static class CoturnServerExtensions
 	{
 		public static IceCoturnServer MapToDomain(this ApiUniversalData<CoturnServerAttributes> x)
 			=> new IceCoturnServer()

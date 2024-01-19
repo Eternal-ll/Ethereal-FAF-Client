@@ -1,4 +1,4 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.MapsView"
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.MapsView"
            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
            xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -70,7 +70,7 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type apiUniversal:ApiUniversalSummary}">
                 <TextBlock>
-                    <ui:Rating Value="{Binding AverageRounded, Mode=OneWay,StringFormat='{}{0:0}'}">
+                    <!-- TODO <ui:Rating Value="{Binding AverageRounded, Mode=OneWay,StringFormat='{}{0:0}'}">
                         <ui:Rating.ToolTip>
                             <ToolTip>
                                 <TextBlock>
@@ -86,15 +86,15 @@
                                             </MultiBinding.Bindings>
                                         </MultiBinding>
                                     </TextBlock.Text>
-                                        <!--<Run Text="{Binding Score, Mode=OneWay,StringFormat='Score: {0}'}"/>
+                                        --><!--<Run Text="{Binding Score, Mode=OneWay,StringFormat='Score: {0}'}"/>
                                     <LineBreak/>
                                     <Run Text="{Binding ReviewsCount, Mode=OneWay, StringFormat='Reviews: {0}'}"/>
                                     <LineBreak/>
-                                    <Run/>-->
+                                    <Run/>--><!--
                                 </TextBlock>
                             </ToolTip>
                         </ui:Rating.ToolTip>
-                    </ui:Rating>
+                    </ui:Rating>-->
                     <LineBreak/>
                     <Run Text="&#xf4ae;" FontFamily="{StaticResource FontAwesomeLight}"/>
                     <Run Text="{Binding ReviewsCount, Mode=OneWay}"/>
@@ -274,7 +274,7 @@
                  VirtualizingPanel.IsVirtualizing="True"
                   ItemTemplateSelector="{StaticResource MapTemplateSelector}">
             <ListView.Resources>
-                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
+                <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
                     <Setter Property="Height" Value="62"/>
                     <Setter Property="Padding" Value="0"/>
                     <Setter Property="Background">
@@ -287,4 +287,4 @@
         </ListView>
 
     </Grid>
-</ui:UiPage>
+</local:PageBase>

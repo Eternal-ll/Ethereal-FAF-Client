@@ -2,6 +2,11 @@
 
 namespace FAF.Domain.LobbyServer
 {
+    public enum PlayerState
+    {
+        online,
+        offline,
+    }
 	public class PlayerInfoMessage : INPC
     {
         [JsonPropertyName("id")]
@@ -9,6 +14,11 @@ namespace FAF.Domain.LobbyServer
 
         [JsonPropertyName("login")]
         public string Login { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonPropertyName("state")]
+        public PlayerState State { get; set; }
+        public bool IsOffline => State == PlayerState.offline;
 
         [JsonPropertyName("avatar")]
         public PlayerAvatar Avatar { get; set; }

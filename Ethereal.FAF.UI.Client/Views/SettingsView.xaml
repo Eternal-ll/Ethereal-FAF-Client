@@ -1,14 +1,13 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.SettingsView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-           xmlns:models="clr-namespace:Ethereal.FAF.UI.Client.Models"
-           xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
-           d:DataContext="{d:DesignInstance {x:Type local:SettingsView}}"
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.SettingsView"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:models="clr-namespace:Ethereal.FAF.UI.Client.Models"
+                xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                d:DataContext="{d:DesignInstance {x:Type local:SettingsView}}"
              mc:Ignorable="d"
-           Scrollable="True"
              d:DesignHeight="450" d:DesignWidth="800">
     <VirtualizingStackPanel Loaded="VirtualizingStackPanel_Loaded"
         IsVirtualizing="True"
@@ -57,7 +56,7 @@
                         <Run Text="Backdrop"/>
                         <LineBreak/>
                         <Run Text="Switch backdrop effect" Style="{StaticResource DescriptionHeaderRun}"/>
-                        <ui:Hyperlink NavigateUri="https://learn.microsoft.com/en-us/windows/apps/design/style/mica" Content="Mica material"
+                        <ui:HyperlinkButton NavigateUri="https://learn.microsoft.com/en-us/windows/apps/design/style/mica" Content="Mica material"
                                       Style="{StaticResource InlineHyperlink}"/>
                     </TextBlock>
                     <ComboBox Grid.Column="2" Width="100" ItemsSource="{Binding ViewModel.BackgroundTypeSource}" SelectedItem="{Binding ViewModel.BackgroundType}"/>
@@ -246,7 +245,7 @@
                         <Run Text="FAF ICE Adapter"/>
                         <LineBreak/>
                         <Run Text="A P2P connection proxy for Supreme Commander: Forged Alliance. Or An ice (RFC 5245) based network bridge between FAF client and ForgedAlliance.exe" Style="{StaticResource DescriptionHeaderRun}"/>
-                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/java-ice-adapter" Content="Github repository"
+                        <ui:HyperlinkButton NavigateUri="https://github.com/FAForever/java-ice-adapter" Content="Github repository"
                                       Style="{StaticResource InlineHyperlink}"/>
                     </TextBlock>
                 </StackPanel>
@@ -445,7 +444,7 @@
                         <LineBreak/>
                         <Run Text="Procedurally generate Supreme Commander Maps from a seed to enable new gameplay on maps never before seen."
                              Style="{StaticResource DescriptionHeaderRun}"/>
-                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/Neroxis-Map-Generator" Content="Github repository"
+                        <ui:HyperlinkButton NavigateUri="https://github.com/FAForever/Neroxis-Map-Generator" Content="Github repository"
                                       Style="{StaticResource InlineHyperlink}"/>
                     </TextBlock>
                 </StackPanel>
@@ -511,7 +510,7 @@
                         <LineBreak/>
                         <Run Text="This executable collects RSA encrypted user information. It is used in the FA Forever client to prevent smurfing."
                              Style="{StaticResource DescriptionHeaderRun}"/>
-                        <ui:Hyperlink NavigateUri="https://github.com/FAForever/uid" Content="Github repository"
+                        <ui:HyperlinkButton NavigateUri="https://github.com/FAForever/uid" Content="Github repository"
                                       Style="{StaticResource InlineHyperlink}"/>
                     </TextBlock>
                 </StackPanel>
@@ -533,4 +532,4 @@
             </Grid>
         </ui:CardExpander>
     </VirtualizingStackPanel>
-</ui:UiPage>
+</local:PageBase>

@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Models.IRC;
 using Meziantou.Framework.WPF.Collections;
@@ -13,27 +14,27 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class ChatViewModel : Base.ViewModel
     {
-        private readonly PlayersViewModel Players;
+        private readonly IFafPlayersService _fafPlayersService;
 
         private readonly IConfiguration Configuration;
 
         private readonly NotificationService NotificationService;
         private readonly SnackbarService SnackbarService;
-        private readonly DialogService DialogService;
+        private readonly ContentDialogService DialogService;
 
         private readonly ConcurrentObservableCollection<string> UserChannels = new();
         private readonly HashSet<string> SelfLogins = new();
 
         private readonly IrcClient IrcClient;
 
-        public ChatViewModel(PlayersViewModel players, NotificationService notificationService, DialogService dialogService, IConfiguration configuration, SnackbarService snackbarService,
-            IServiceProvider serviceProvider)
+        public ChatViewModel(NotificationService notificationService, IContentDialogService contentDialogService, IConfiguration configuration, ISnackbarService snackbarService,
+            IServiceProvider serviceProvider, IFafPlayersService fafPlayersService)
         {
             JoinChannelCommand = new LambdaCommand(OnJoinChannelCommand, CanJoinChannelCommand);
             LeaveChannelCommand = new LambdaCommand(OnLeaveChannelCommand);
@@ -73,11 +74,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ircClient.ChannelTopicUpdated += IrcClient_ChannelTopicUpdated;
             ircClient.ChannelTopicChangedBy += IrcClient_ChannelTopicChangedBy;
             ircClient.NotificationMessageReceived += IrcClient_NotificationMessageReceived;
-            Players = players;
             NotificationService = notificationService;
-            DialogService = dialogService;
+            DialogService = (ContentDialogService)contentDialogService;
             Configuration = configuration;
-            SnackbarService = snackbarService;
+            SnackbarService = (SnackbarService)snackbarService;
+            _fafPlayersService = fafPlayersService;
         }
 
         private void AddServerMessage(string text) => History.Add(new IrcUserMessage(text, new("irc.faforever.com")));
@@ -232,7 +233,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
                 if (channel.IsSelected)
                 {
-                    if (Players.TryGetPlayer(e.user, out var player))
+                    if (_fafPlayersService.TryGetPlayer(e.user, out var player))
                     {
                         player.IrcUsername = null;
                     }
@@ -259,7 +260,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             var channel = (GroupChannel)GetChannel(e.channel);
             IrcUser user = new(e.user);
-            if (Players.TryGetPlayer(e.user, out var player))
+            if (_fafPlayersService.TryGetPlayer(e.user, out var player))
             {
                 user.SetPlayer(player);
             }
@@ -278,10 +279,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var channel = (GroupChannel)GetChannel(e.channel);
             channel.Users.Clear();
 
-            var users = e.users.Select(u =>
-            Players.TryGetPlayer(u.Trim('@').Trim('`'), out var player) ?
-            new IrcUser(u, player) :
-            new IrcUser(u));
+            var users = e.users.Select(u => _fafPlayersService.TryGetPlayer(u.Trim('@').Trim('`'), out var player) ?
+            new IrcUser(u, player) : new IrcUser(u));
 
 
             channel.Users.AddRange(users);
@@ -309,7 +308,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 else
                 {
                     user = new IrcUser(e.from);
-                    if (Players.TryGetPlayer(e.from.Trim('@').Trim('`'), out var player)) user.SetPlayer(player);
+                    if (_fafPlayersService.TryGetPlayer(e.from.Trim('@').Trim('`'), out var player)) user.SetPlayer(player);
                 }
             }
             var message = new IrcUserMessage(e.message, user);
@@ -327,7 +326,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 if (cachedChannel.Name == channel) return cachedChannel;
             }
             IrcChannel newChannel = channel.StartsWith('#') ? new GroupChannel(channel) :
-                Players.TryGetPlayer(channel, out var player) ? new DialogueChannel(channel, player) :
+                _fafPlayersService.TryGetPlayer(channel, out var player) ? new DialogueChannel(channel, player) :
                 new DialogueChannel(channel);
             Channels.Add(newChannel);
             SelectedChannel = newChannel;
@@ -461,12 +460,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             var textbox = new Wpf.Ui.Controls.TextBox();
             textbox.PlaceholderText = "New IRC username";
             textbox.Margin = new System.Windows.Thickness(0, 10, 0, 0);
-            var dialog = DialogService.GetDialogControl();
-            dialog.Content = textbox;
-            dialog.ButtonLeftName = "Rename";
-            dialog.ButtonRightName = "Cancel";
-            await dialog.ShowAndWaitAsync("Rename IRC name", null);
-            dialog.Hide();
+            //var dialog = DialogService.GetContentPresenter();
+            //dialog.Content = textbox;
+            //dialog.ButtonLeftName = "Rename";
+            //dialog.ButtonRightName = "Cancel";
+            //await dialog.ShowAndWaitAsync("Rename IRC name", null);
+            //dialog.Hide();
             GC.Collect();
             if (string.IsNullOrWhiteSpace(textbox.Text)) return;
             IrcClient.Rename(textbox.Text);

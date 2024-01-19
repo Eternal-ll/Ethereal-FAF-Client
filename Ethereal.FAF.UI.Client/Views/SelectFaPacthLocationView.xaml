@@ -1,10 +1,10 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.SelectFaPatchLocationView"
-           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-           xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-           mc:Ignorable="d" 
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.SelectFaPatchLocationView"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid HorizontalAlignment="Center" ShowGridLines="False">
         <Grid.RowDefinitions>
@@ -19,4 +19,4 @@
                    TextWrapping="Wrap" Opacity=".8"
                    VerticalAlignment="Bottom" FontSize="14" TextAlignment="Center"/>
     </Grid>
-</ui:UiPage>
+</local:PageBase>

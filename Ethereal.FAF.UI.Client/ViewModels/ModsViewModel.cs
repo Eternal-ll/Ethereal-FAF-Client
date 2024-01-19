@@ -1,13 +1,11 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -15,19 +13,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Services;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public class ModsViewModel : Base.ViewModel
     {
         private readonly ILogger<MapsViewModel> Logger;
-        private readonly SnackbarService SnackbarService;
+        private readonly ISnackbarService SnackbarService;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly IFafApiClient FafApiClient;
         private readonly IFileCacheService _fileCacheService;
 
-		public ModsViewModel(ILogger<MapsViewModel> logger, SnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient, IFileCacheService fileCacheService)
+		public ModsViewModel(ILogger<MapsViewModel> logger, ISnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient, IFileCacheService fileCacheService)
 		{
 			ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
 			Mods = new();
@@ -297,8 +295,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (response.Error is not null)
             {
                 CancellationTokenSource = null;
-                SnackbarService.Timeout = 10000;
-                SnackbarService.Show("Warning", response.Error?.Content, Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
+                //SnackbarService.Timeout = 10000;
+                //SnackbarService.Show("Warning", response.Error?.Content, Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Caution);
                 return;
             }
             response.Content.ParseIncluded();

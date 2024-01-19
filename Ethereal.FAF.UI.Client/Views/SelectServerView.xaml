@@ -1,0 +1,111 @@
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.SelectServerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             d:DataContext="{d:DesignInstance {x:Type local:SelectServerView}}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Page.Resources>
+        <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                        <Border
+                        x:Name="Border"
+                        Margin="0 4 0 0"
+                        Padding="0"
+                        Background="{DynamicResource ListViewItemBackgroundPointerOver}"
+                        BorderThickness="1"
+                        CornerRadius="{TemplateBinding Border.CornerRadius}">
+                            <Grid>
+                                <ContentPresenter Margin="{TemplateBinding Padding}" />
+                                <Rectangle
+                                x:Name="ActiveRectangle"
+                                Width="3"
+                                Height="18"
+                                Margin="0"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Fill="{DynamicResource ListViewItemPillFillBrush}"
+                                RadiusX="2"
+                                RadiusY="2"
+                                Visibility="Collapsed" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsEnabled" Value="True" />
+                                    <Condition Property="IsMouseOver" Value="True" />
+                                </MultiTrigger.Conditions>
+                            </MultiTrigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ActiveRectangle" Property="Visibility" Value="Visible" />   
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="SelectServerView">
+            <StackPanel >
+                <ListView x:Name="Servers" IsTabStop="False"
+                            ItemsSource="{Binding Servers, NotifyOnSourceUpdated=True}"
+                            SelectedValue="{Binding SelectedServer}"
+                          DisplayMemberPath="Name"/>
+                <Button Grid.Row="1" HorizontalAlignment="Stretch" Content="Select" Margin="0 4 0 0"
+                        Command="{Binding SelectServerCommand}"
+                        CommandParameter="{Binding ElementName=Servers, Path=SelectedValue}"/>
+                <!--<ui:Card Grid.Row="2" VerticalAlignment="Stretch" Margin="10" VerticalContentAlignment="Stretch">
+        <ScrollViewer Margin="10">
+            <Grid ShowGridLines="False">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Lobby"/>
+                <UniformGrid Grid.Row="1" Margin="0 4 0 0">
+                    <TextBlock>
+                        <Run Text="Host" Style="{StaticResource DescriptionHeaderRun}"/>
+                        <LineBreak/>
+                        <Run Text="ws.faforever.com" Style="{StaticResource DescriptionHeaderRun}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Port" Style="{StaticResource DescriptionHeaderRun}"/>
+                        <LineBreak/>
+                        <Run Text="6669" Style="{StaticResource DescriptionHeaderRun}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </UniformGrid>
+            </Grid>
+        </ScrollViewer>
+    </ui:Card>-->
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="WidenSelectServerViewLayout">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition MinWidth="400"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <ContentControl Grid.Column="1"
+                                IsTabStop="False"
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource SelectServerView}"/>
+            </Grid>
+        </DataTemplate>
+        <Style x:Key="SelectServerContentControlStyle" TargetType="ContentControl">
+            <Setter Property="ContentTemplate" Value="{StaticResource WidenSelectServerViewLayout}"/>
+        </Style>
+    </Page.Resources>
+    <ContentControl Content="{Binding ViewModel}" Margin="20" IsTabStop="False"
+                    Style="{StaticResource SelectServerContentControlStyle}"/>
+</local:PageBase>

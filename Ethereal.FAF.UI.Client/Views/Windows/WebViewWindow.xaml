@@ -1,0 +1,47 @@
+﻿<ui:FluentWindow x:Class="Ethereal.FAF.UI.Client.Views.Windows.WebViewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        Title="WebViewWindow"
+             Height="600"
+             MinHeight="600"
+             MaxHeight="600"
+             Width="350"
+             MinWidth="350"
+             MaxWidth="350"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+    ExtendsContentIntoTitleBar="True"
+    WindowBackdropType="Mica"
+    WindowCornerPreference="Round">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <wv2:WebView2 x:Name="WebView" Grid.Row="1" ZoomFactor="0.7" NavigationStarting="WebView_NavigationStarting"/>
+        <!--<ui:TitleBar
+            x:Name="TitleBar"
+            VerticalAlignment="Stretch"
+            Grid.Row="0" Height="0"
+            ForceShutdown="False"
+            MinimizeToTray="False"
+            ShowHelp="False"
+            ShowClose="False"
+            ShowMaximize="False"
+            ShowMinimize="False"
+            UseSnapLayout="True">
+        </ui:TitleBar>-->
+        <Button Grid.Row="2" Content="Close" HorizontalAlignment="Stretch"
+                Click="Button_Click"/>
+        <!--<TextBlock IsHitTestVisible="False">
+            <Run Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=ActualWidth, Mode=OneWay}"/>
+            <Run Text="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}, Path=ActualHeight, Mode=OneWay}"/>
+        </TextBlock>-->
+    </Grid>
+</ui:FluentWindow>

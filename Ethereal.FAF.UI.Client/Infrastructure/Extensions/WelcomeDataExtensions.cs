@@ -42,7 +42,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 			Clan = x.Clan,
 			Country = x.Country,
 			NumberOfGames = x.NumberOfGames,
-			Ratings = x.Ratings
+			Ratings = x.Ratings,
+			State = x.State,
 		};
 	}
 	public static class WelcomeDataExtensions

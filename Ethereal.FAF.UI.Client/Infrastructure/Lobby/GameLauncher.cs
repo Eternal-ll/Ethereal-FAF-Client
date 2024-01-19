@@ -157,7 +157,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         {
             var self = serverManager.Self;
             var iceManager = serverManager.GetIceManager();
-            var server = serverManager.Server;
 
             LastGameLaunchData = e;
             LastGameUid = e.GameUid;

@@ -1,4 +1,4 @@
-﻿<ui:UiPage x:Class="Ethereal.FAF.UI.Client.Views.PlayersView"
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.PlayersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,8 +10,9 @@
            xmlns:services="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Services"
            d:DataContext="{d:DesignInstance {x:Type local:PlayersView}}"
              mc:Ignorable="d" 
+                ScrollViewer.CanContentScroll="False"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid ShowGridLines="False">
+    <Grid>
         <Grid.Resources>
             <!--<ResourceDictionary x:Key="Test">
                 <Style TargetType="ContentControl">
@@ -42,7 +43,7 @@
                 </Style.Triggers>
             </Style>
             <Style x:Key="RatingContentControl" TargetType="ContentControl">
-                <Setter Property="ContentTemplate" Value="{StaticResource Rating}"/>
+                <!--<Setter Property="ContentTemplate" Value="{StaticResource Rating}"/>-->
                 <Setter Property="Margin" Value="4 0 0 0"/>
                 <Style.Triggers>
                     <Trigger Property="Content" Value="{x:Null}">
@@ -88,7 +89,7 @@
                         </Image.Style>
                     </Image>
                     <Image Source="{Binding FlagUri}" ToolTip="{Binding Country}" Width="16" Height="16" Margin="4 0"/>
-                    <TextBlock Text="{Binding LoginWithClan}" Width="120"/>
+                    <TextBlock Text="{Binding LoginWithClan}" MinWidth="120"/>
                     <Button Content="Invite"
                             Command="{DynamicResource InvitePlayerCommand}"
                             CommandParameter="{Binding Id}"
@@ -117,22 +118,42 @@
             </DataTemplate>
 
             <DataTemplate x:Key="Country">
-                <StackPanel Margin="0 -2 0 -4" ToolTip="{Binding Name}">
-                    <TextBlock x:Name="Teswt" Visibility="Collapsed" Text="{Binding Name, StringFormat='/Resources/Images/Flags/{0}.png'}"/>
-                    <Image Source="{Binding ElementName=Teswt, Path=Text}"
+                <StackPanel Margin="0 0 0 4" ToolTip="{Binding Name}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding Name, Converter={StaticResource PathToResourceFlagConverter}}"
                            Width="16" Height="16" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding Items.Count}" HorizontalAlignment="Center" Opacity=".7"/>
+                        <TextBlock Text="{Binding Name, Mode=OneWay}"
+                                   Style="{StaticResource DescriptionHeaderTextBlock}"
+                                   Margin="4 0 0 4"/>
+                    </StackPanel>
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Style="{StaticResource DescriptionHeaderTextBlock}">
+                        <Run
+                            FontSize="10"
+                            Text="{Binding ItemCount, Mode=OneWay, StringFormat='{}{0} players'}"
+                            Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate x:Key="RatingRange">
-                <StackPanel Margin="0 -2 0 -4">
+                <StackPanel Margin="0 0 0 4">
                     <StackPanel.ToolTip>
                         <ToolTip>
                             <TextBlock Text="{Binding Name, StringFormat='Above {0}'}"/>
                         </ToolTip>
                     </StackPanel.ToolTip>
-                    <TextBlock Text="{Binding Name,Mode=OneWay, StringFormat='≥{0}'}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding Items.Count}" Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center" Opacity=".7"/>
+                    <TextBlock Text="{Binding Name,Mode=OneWay, StringFormat='≥{0} R'}" HorizontalAlignment="Center"/>
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Style="{StaticResource DescriptionHeaderTextBlock}">
+                        <Run
+                            FontSize="10"
+                            Text="{Binding ItemCount, Mode=OneWay, StringFormat='{}{0} players'}"
+                            Style="{StaticResource DescriptionHeaderRun}"/>
+                    </TextBlock>
                 </StackPanel>
             </DataTemplate>
             <DataTemplate DataType="{x:Type services:ServerManager}">
@@ -144,106 +165,196 @@
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="240"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <WrapPanel Grid.ColumnSpan="3">
-            <ui:AutoSuggestBox Width="230" Padding="10 6" PlaceholderText="Search player" Text="{Binding ViewModel.FilterText, UpdateSourceTrigger=PropertyChanged}"/>
-            <ComboBox Margin="10 0 0 0" MinWidth="100" Padding="10 6"
-                      ItemsSource="{Binding ViewModel.PlayersSortSource}"
-                      SelectedItem="{Binding ViewModel.SelectedPlayersSort}"
-                      DisplayMemberPath="Name" SelectedIndex="0"/>
-            <ComboBox Margin="10 0 0 0" Width="124" Padding="10 6"
-                      ItemsSource="{Binding ViewModel.ListSortDirectionSource}"
-                      SelectedItem="{Binding ViewModel.ListSortDirection}"
-                      Visibility="{Binding ViewModel.ListSortDirectionVisibility}"/>
-            <ComboBox Margin="10 0 0 0" MinWidth="100" Padding="10 6"
+        <StackPanel>
+            <WrapPanel Grid.ColumnSpan="3">
+                <ui:AutoSuggestBox Width="230" Padding="10 6" PlaceholderText="Search player"
+                               Text="{Binding ViewModel.FilterText, Mode=OneWay}"
+                               TextChanged="AutoSuggestBox_TextChanged"/>
+                <Button Margin="10 0 0 0" Width="100" Content="Back"
+                    Command="{DynamicResource BackCommand}"
+                    Style="{StaticResource InvisibleButtonCommand}"/>
+            </WrapPanel>
+            <StackPanel Orientation="Horizontal" Margin="0 10 0 0">
+                <TextBlock Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                <Run Text="&#xe099;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                <Run Text="Sort by:"/>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <ComboBox MinWidth="100" Margin="4 0 0 0" Padding="10 6"
+          ItemsSource="{Binding ViewModel.PlayersSortSource}"
+          SelectedItem="{Binding ViewModel.SelectedPlayersSort}"
+          DisplayMemberPath="Name" SelectedIndex="0"/>
+                </InlineUIContainer>
+                <InlineUIContainer BaselineAlignment="Center">
+                    <ComboBox Margin="4 0 0 0" Width="130" Padding="10 6"
+          ItemsSource="{Binding ViewModel.ListSortDirectionSource}"
+          SelectedItem="{Binding ViewModel.ListSortDirection}"
+          Visibility="{Binding ViewModel.ListSortDirectionVisibility}"/>
+                </InlineUIContainer>
+                </TextBlock>
+                <TextBlock Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="30 0 0 0">
+                <Run Text="&#xe593;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                <Run Text="Group by:"/>
+                <InlineUIContainer BaselineAlignment="Center"><ComboBox Margin="4 0 0 0" MinWidth="100" Padding="10 6"
                       ItemsSource="{Binding ViewModel.PlayersGroupSource}"
                       SelectedIndex="{Binding ViewModel.GroupIndex}"
                       SelectedItem="{Binding ViewModel.GroupBy}"
                       DisplayMemberPath="Name"/>
-            <Button Margin="10 0 0 0" Width="100" Content="Back"
-                    Command="{DynamicResource BackCommand}"
-                    Style="{StaticResource InvisibleButtonCommand}"/>
-
-            <ui:Badge VerticalAlignment="Center" Margin="10 0 0 0">
-                <ui:Badge.Background>
-                    <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
-                </ui:Badge.Background>
-                <TextBlock Text="{Binding ViewModel.PlayersView.SourceCollection.Count, StringFormat='Total: {0} players'}"/>
-            </ui:Badge>
-            <ui:Badge VerticalAlignment="Center" Margin="10 0 0 0">
-                <ui:Badge.Background>
-                    <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
-                </ui:Badge.Background>
-                <TextBlock Text="{Binding ViewModel.PlayersView.Count, StringFormat='On view: {0} players'}"/>
-            </ui:Badge>
-        </WrapPanel>
-        <ListBox x:Name="GroupsSource" Grid.Row="1" Grid.ColumnSpan="3" Margin="0 10 10 0" 
+                    
+                </InlineUIContainer>
+                </TextBlock>
+            </StackPanel>
+            <TextBlock Margin="0 10"
+                   Text="{Binding ViewModel.PlayersView.Count, StringFormat='{}{0} players found'}"
+                   Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+            </TextBlock>
+            <!--<ListBox x:Name="GroupsSource" Grid.Row="1" Grid.ColumnSpan="3" Margin="0 10 10 0"
                  ItemsSource="{Binding ViewModel.Groups}"
                  SelectedItem="{Binding ViewModel.SelectedGroup}"
                  SelectionChanged="ListBox_SelectionChanged"
                  VirtualizingPanel.IsVirtualizing="True">
-            <ListBox.Style>
-                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                <ListBox.Style>
+                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ViewModel.Groups}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="1">
+                                <Setter Property="ItemTemplate" Value="{StaticResource Country}"/>
+                                <Setter Property="Padding" Value="2 2 2 0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="2">
+                                <Setter Property="ItemTemplate" Value="{StaticResource RatingRange}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Style>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>-->
+            <ListBox ItemsSource="{Binding ViewModel.Groups}"
+                 SelectedItem="{Binding ViewModel.SelectedGroup}"
+                     Margin="-4 0">
+                <ListBox.Style>
+                    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ViewModel.Groups}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="1">
+                                <Setter Property="ItemTemplate" Value="{StaticResource Country}"/>
+                                <Setter Property="Padding" Value="2 2 2 0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="2">
+                                <Setter Property="ItemTemplate" Value="{StaticResource RatingRange}"/>
+                                <Setter Property="Padding" Value="2 2 2 0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="3">
+                                <Setter Property="Padding" Value="2 2 2 0"/>
+                                <Setter Property="ItemTemplate">
+                                    <Setter.Value>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0 0 0 4">
+                                                <StackPanel.ToolTip>
+                                                    <ToolTip>
+                                                        <TextBlock Text="{Binding Name}"/>
+                                                    </ToolTip>
+                                                </StackPanel.ToolTip>
+                                                <TextBlock Text="{Binding Name,Mode=OneWay}" HorizontalAlignment="Left"/>
+                                                <TextBlock
+                                                    FontWeight="SemiBold"
+                                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                    Style="{StaticResource DescriptionHeaderTextBlock}">
+                                                    <Run FontSize="10"
+                                                         Text="{Binding ItemCount, Mode=OneWay, StringFormat='{}{0} players'}"
+                                                         Style="{StaticResource DescriptionHeaderRun}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Style>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ui:VirtualizingWrapPanel
+                        IsItemsHost="True"
+                        Orientation="Vertical"
+                        SpacingMode="Uniform"
+                        StretchItems="True">
+                        </ui:VirtualizingWrapPanel>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListBoxItem}"
+                       BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="10 4 10 0"/>
+                        <Setter Property="OverridesDefaultStyle" Value="True"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                    <ui:Card
+                                    x:Name="Border"
+                                    Margin="4"
+                                    Padding="{TemplateBinding Padding}"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalAlignment="Stretch">
+                                        <ContentPresenter />
+                                    </ui:Card>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource ListBoxItemSelectedBackgroundThemeBrush}" />
+                                            <Setter Property="Foreground" Value="{DynamicResource ListBoxItemSelectedForegroundThemeBrush}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+        </StackPanel>
+        <ui:Card Grid.Row="2" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <ui:Card.Style>
+                <Style TargetType="ui:Card" BasedOn="{StaticResource {x:Type ui:Card}}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ViewModel.Groups}" Value="{x:Null}">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="1">
-                            <Setter Property="ItemTemplate" Value="{StaticResource Country}"/>
-                            <Setter Property="Padding" Value="2 2 2 0"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding ViewModel.GroupIndex}" Value="2">
-                            <Setter Property="ItemTemplate" Value="{StaticResource RatingRange}"/>
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </ListBox.Style>
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-        </ListBox>
-        <ListView x:Name="OriginalSource" Grid.Row="2" Grid.ColumnSpan="3" Margin="0 4 -4 10"
-                  ItemsSource="{Binding ViewModel.PlayersView}"
-                 SelectedItem="{Binding ViewModel.SelectedPlayer}"
-                 SelectionChanged="OriginalSource_SelectionChanged"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
-                 VirtualizingPanel.IsVirtualizingWhenGrouping="True">
-            <ListView.Resources>
-                <Style TargetType="ListViewItem" BasedOn="{StaticResource UiListViewItem}">
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <SolidColorBrush Color="{DynamicResource ControlFillColorDefault}" />
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ListView.Resources>
-        </ListView>
-        <!--<ListBox x:Name="GroupedSource" Grid.Row="2" Grid.Column="1" Margin="0 10 10 10"
-                 SelectionChanged="GroupedSource_SelectionChanged"
-                 ItemsSource="{Binding ViewModel.SelectedGroup.Items}"
-                 SelectedItem="{Binding ViewModel.SelectedPlayer}"
-                 VirtualizingPanel.IsVirtualizing="True"
-                 VirtualizingPanel.VirtualizationMode="Recycling"
-                 VirtualizingPanel.IsVirtualizingWhenGrouping="True">
-            <ListBox.Style>
-                <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+            </ui:Card.Style>
+            <ListView x:Name="OriginalSource"  Grid.ColumnSpan="3"
+         SelectionChanged="OriginalSource_SelectionChanged"
+         VirtualizingPanel.IsVirtualizing="True"
+         VirtualizingPanel.VirtualizationMode="Recycling"
+         VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                      ItemsSource="{Binding ViewModel.PlayersView}"
+                      SelectedItem="{Binding ViewModel.SelectedPlayer}"/>
+        </ui:Card>
+        <ui:Card Grid.Row="2" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                 Padding="20 20 20 0">
+            <ui:Card.Style>
+                <Style TargetType="ui:Card" BasedOn="{StaticResource {x:Type ui:Card}}">
                     <Style.Triggers>
-                        <Trigger Property="ItemsSource" Value="{x:Null}">
+                        <DataTrigger Binding="{Binding ViewModel.SelectedGroup}" Value="{x:Null}">
                             <Setter Property="Visibility" Value="Collapsed"/>
-                        </Trigger>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </ListBox.Style>
-        </ListBox>-->
+            </ui:Card.Style>
+            <ListView
+                ItemsSource="{Binding ViewModel.SelectedGroup.Items}"
+                SelectedItem="{Binding ViewModel.SelectedPlayer}">
+            </ListView>
+        </ui:Card>
     </Grid>
-</ui:UiPage>
+</local:PageBase>

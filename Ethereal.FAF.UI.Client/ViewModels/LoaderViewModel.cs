@@ -1,17 +1,16 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
-using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Views;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-	public class LoaderViewModel : Base.ViewModel
+    public class LoaderViewModel : Base.ViewModel
     {
         private readonly INavigationWindow NavigationWindow;
         private readonly MapGenerator MapGenerator;
@@ -44,6 +43,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public async Task<bool> RunChecks()
         {
+            return true;
             var game = Configuration.GetForgedAllianceLocation();
             if (!ForgedAllianceHelper.DirectoryHasAnyGameFile(game))
             {

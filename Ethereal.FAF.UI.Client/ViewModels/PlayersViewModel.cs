@@ -1,25 +1,20 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
-using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Views;
-using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui.Mvvm.Contracts;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -78,56 +73,41 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     }
     public class PlayersViewModel : Base.ViewModel
     {
-        public event EventHandler<Game> NewGameReceived;
-        public event EventHandler<Game> GameUpdated;
-        //public event EventHandler<Game> GameRemoved;
-
-        public event EventHandler<Game> GameLaunched;
-        public event EventHandler<Game> GameEnd;
-        public event EventHandler<Game> GameClosed;
-
-        public event EventHandler<string[]> PlayersLeftFromGame;
-        public event EventHandler<KeyValuePair<Game, string[]>> PlayersJoinedToGame;
-
-        public event EventHandler<KeyValuePair<Game, Player[]>> PlayersJoinedGame;
-        public event EventHandler<KeyValuePair<Game, Player[]>> PlayersLeftGame;
-        public event EventHandler<KeyValuePair<Game, Player[]>> PlayersFinishedGame;
-
         private readonly IServiceProvider ServiceProvider;
-        private readonly IConfiguration Configuration;
+        private readonly IFafPlayersService _fafPlayersService;
+        private readonly IFafPlayersEventsService _fafPlayersEventsService;
 
-        public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, ServerManager serverManager)
+        public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, IFafPlayersService fafPlayersService, IFafPlayersEventsService fafPlayersEventsService)
         {
-            Players = new();
+            Players = new(Application.Current.Dispatcher);
+            Players.AddRange(fafPlayersService.GetPlayers());
             OpenPrivateCommand = new LambdaCommand(OnOpenPrivateCommand);
-            var server = serverManager;
-            var lobby = server.GetLobbyClient();
-            var ircClient = server.GetIrcClient();
-            lobby.StateChanged += (s, state) =>
-            {
-                if (state is not LobbyState.Disconnected) return;
-                lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
-                lobby.PlayerReceived -= server.PlayerReceived;
-                lobby.PlayersReceived -= server.PlayersReceived;
-                ircClient.UserDisconnected -= server.IrcUserDisconnected;
-            };
-            ircClient.UserDisconnected += (s, data) =>
-            {
-                if (!long.TryParse(data.id, out var id)) return;
-                var player = Players.FirstOrDefault(p => p.Id == id);
-                Players.Remove(player);
-            };
-            lobby.WelcomeDataReceived += (s, self) => Self = self.me;
-            lobby.PlayerReceived += Lobby_PlayerReceived;
-            lobby.PlayersReceived += Lobby_PlayersReceived;
+            //var lobby = server.GetLobbyClient();
+            //var ircClient = server.GetIrcClient();
+            //lobby.StateChanged += (s, state) =>
+            //{
+            //    if (state is not LobbyState.Disconnected) return;
+            //    lobby.WelcomeDataReceived -= server.WelcomeDataReceived;
+            //    lobby.PlayerReceived -= server.PlayerReceived;
+            //    lobby.PlayersReceived -= server.PlayersReceived;
+            //    ircClient.UserDisconnected -= server.IrcUserDisconnected;
+            //};
+            //ircClient.UserDisconnected += (s, data) =>
+            //{
+            //    if (!long.TryParse(data.id, out var id)) return;
+            //    var player = Players.FirstOrDefault(p => p.Id == id);
+            //    Players.Remove(player);
+            //};
+            //lobby.WelcomeDataReceived += (s, self) => Self = self.me;
+            //lobby.PlayerReceived += Lobby_PlayerReceived;
+            //lobby.PlayersReceived += Lobby_PlayersReceived;
             ServiceProvider = serviceProvider;
-            Configuration = configuration;
 
             PlayersGroupSource = new PlayersGroup[]
             {
                 new PlayersGroup()
                 {
-                    Name = "Group by"
+                    Name = "None"
                 },
                 new PlayersGroup()
                 {
@@ -138,10 +118,35 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     Name = "Group by ratings ranges",
                     PropertyGroupDescription = new PropertyGroupDescription(nameof(Player.Global), new RatingsRangeConverter(configuration))
+                },
+                new PlayersGroup()
+                {
+                    Name = "Group by clan",
+                    PropertyGroupDescription = new PropertyGroupDescription(nameof(Player.Clan))
                 }
             };
             GroupBy = PlayersGroupSource[0];
+            _fafPlayersService = fafPlayersService;
+            _fafPlayersEventsService = fafPlayersEventsService;
+
+            _fafPlayersEventsService.PlayersAdded += _fafPlayersService_PlayersAdded;
+            _fafPlayersEventsService.PlayersRemoved += _fafPlayersService_PlayersRemoved;
         }
+
+        public override void OnUnloaded()
+        {
+            Players.Clear();
+            base.OnUnloaded();
+        }
+
+        private void _fafPlayersService_PlayersRemoved(object sender, Player[] e)
+        {
+            foreach (var player in e)
+            {
+                Players.Remove(player);
+            }
+        }
+        private void _fafPlayersService_PlayersAdded(object sender, Player[] e) => Players.AddRange(e);
 
         public Player Self { get; set; }
 
@@ -160,7 +165,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-
         #region FilterText
         private string _FilterText;
         public string FilterText
@@ -168,7 +172,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             get => _FilterText;
             set
             {
-                if (Set(ref _FilterText, value))
+                if (Set(ref _FilterText, value) &&
+                    (string.IsNullOrEmpty(value) || value?.Length > 3))
                 {
                     PlayersView.Refresh();
                 }
@@ -198,12 +203,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 }
             }
         }
-
         #endregion
 
         public PlayersSort[] PlayersSortSource { get; set; } = new PlayersSort[]
         {
-            new PlayersSort("Sort by", null, ListSortDirection.Descending),
+            new PlayersSort("None", null, ListSortDirection.Descending),
             new PlayersSort("Sort by Id", nameof(Player.Id), ListSortDirection.Descending),
             new PlayersSort("Sort by Login", nameof(Player.Login), ListSortDirection.Descending),
             new PlayersSort("Sort by Clan", nameof(Player.Clan), ListSortDirection.Descending),
@@ -299,9 +303,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         public PlayersGroup[] PlayersGroupSource { get; set; }
 
-        public System.Collections.Concurrent.ConcurrentDictionary<int, PlayerInfoMessage> PlayersDic { get; } = new();
-        public PlayerInfoMessage[] PlayersArray => PlayersDic.Select(x => x.Value).ToArray();
-
         #region Players
         public CollectionViewSource PlayersSource { get; private set; }
         public ICollectionView PlayersView => PlayersSource?.View;
@@ -340,75 +341,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         #endregion
 
-        public Player GetPlayer(long id) => Players.FirstOrDefault(p => p.Id == id);
-        public Player GetPlayer(string login) => Players
-            .FirstOrDefault(p => p.Login.Equals(login, StringComparison.OrdinalIgnoreCase));
-        public bool TryGetPlayer(long id, out Player player)
-        {
-            player = GetPlayer(id);
-            return player is not null;
-        }
-        public bool TryGetPlayer(string login, out Player player)
-        {
-            player = GetPlayer(login);
-            return player is not null;
-        }
-
-        private void Lobby_PlayerReceived(object sender, Player e)
-        {
-            if (Self?.Id == e.Id)
-            {
-                Self = e;
-            }
-            
-            PrepareRatings(e);
-
-            var players = Players;
-            var found = false;
-            for (int i = 0; i < players.Count; i++)
-            {
-                var old = players[i];
-                if (old.Id == e.Id)
-                {
-                    found = true;
-                    players[i] = e;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                players.Add(e);
-            }
-        }
-
-        private void PrepareRatings(params Player[] players)
-        {
-            foreach (var player in players)
-            {
-                if (player.Ratings.Global is not null) player.Ratings.Global.name = "Global";
-                if (player.Ratings.Ladder1V1 is not null) player.Ratings.Ladder1V1.name = "1 vs 1";
-                if (player.Ratings.Tmm2V2 is not null) player.Ratings.Tmm2V2.name = "2 vs 2";
-                if (player.Ratings.Tmm4V4FullShare is not null) player.Ratings.Tmm4V4FullShare.name = "4 vs 4";
-            }
-        }
-
-        private void Lobby_PlayersReceived(object sender, Player[] e)
-        {
-            if (Players is not null)
-            {
-                foreach (var player in e)
-                {
-                    Lobby_PlayerReceived(sender, player);
-                }
-                return;
-            }
-
-            PrepareRatings(e);
-            var obs = new ConcurrentObservableCollection<Player>();
-            obs.AddRange(e);
-            Players = obs;
-        }
-
         public ICommand OpenPrivateCommand { get; }
         private void OnOpenPrivateCommand(object arg)
         {
@@ -420,4 +352,3 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
     }
 }
-    
