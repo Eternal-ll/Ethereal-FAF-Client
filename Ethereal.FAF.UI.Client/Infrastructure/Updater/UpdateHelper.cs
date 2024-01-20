@@ -4,7 +4,6 @@ using Ethereal.FAF.UI.Client.Models.Progress;
 using Ethereal.FAF.UI.Client.Models.Update;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -25,9 +24,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Updater
         private readonly System.Timers.Timer _checkUpdateTimer;
 
         public const string UpdateFolderName = ".EtherealFafClientUpdate";
-        public static DirectoryInfo UpdateFolder = new(UpdateFolderName);
+        public static DirectoryInfo UpdateFolder = new(Path.Combine(AppHelper.ExecutableDirectory.FullName, UpdateFolderName    ));
 
-        public static FileInfo ExecutableFile = new(Path.Combine(UpdateFolderName, Process.GetCurrentProcess().ProcessName));
+        public static FileInfo ExecutableFile
+            = new(Path.Combine(UpdateFolder.FullName, AppHelper.GetExecutableName()));
 
 
         private const string _manifestFileName = "update-manifest.json";
@@ -166,7 +166,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Updater
                     var binaryFile = extractDir
                         .EnumerateFiles("*.exe", SearchOption.AllDirectories)
                         .First();
-
                     binaryFile.MoveTo(ExecutableFile.FullName, true);
                 }
                 // Otherwise just copy

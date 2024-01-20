@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
 {
@@ -38,9 +37,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
             var compressed = ulong.Parse(matches[1].Value);
             return new ArchiveInfo(size, compressed);
         }
-        public static async Task<ArchiveInfo> GetRarAchiveInfo(string archivePath)
+        public static Task<ArchiveInfo> GetRarAchiveInfo(string archivePath)
         {
-            IArchive rar = SharpCompress.Archives.Rar.RarArchive.Open(archivePath, new()
+            using IArchive rar = SharpCompress.Archives.Rar.RarArchive.Open(archivePath, new()
             {
                 LeaveStreamOpen = false,
                 LookForHeader = true,
@@ -48,7 +47,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
             // Calculate the total extraction size.
             var totalSize = rar.Entries.Where(e => !e.IsDirectory).Sum(e => e.Size);
             var compressedSize = rar.Entries.Where(e => !e.IsDirectory).Sum(e => e.CompressedSize);
-            return new((ulong)totalSize, (ulong)compressedSize);
+            return Task.FromResult(new ArchiveInfo((ulong)totalSize, (ulong)compressedSize));
         }
         /// <summary>
         /// Extract an archive to the output directory.
@@ -106,35 +105,36 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
                         Overwrite = true,
                         ExtractFullPath = true,
                     };
-                    using var stream = File.OpenRead(archivePath);
-                    using var archive = ReaderFactory.Open(stream);
-
-                    // Start the progress reporting timer
-                    //progressMonitor?.Start();
-
-                    archive.EntryExtractionProgress += (s, arg) =>
+                    using (var stream = File.OpenRead(archivePath))
                     {
-                        progress?.Report(new(
-                            progress: arg.ReaderProgress?.PercentageReadExact * 0.01 ?? 1,
-                            message: $"Extracting \"{arg.Item.Key}\"",
-                            isIndeterminate: arg.ReaderProgress == null));
-                    };
+                        using var archive = ReaderFactory.Open(stream);
+                        // Start the progress reporting timer
+                        //progressMonitor?.Start();
 
-                    while (archive.MoveToNextEntry())
-                    {
-                        var entry = archive.Entry;
-                        if (!entry.IsDirectory)
+                        archive.EntryExtractionProgress += (s, arg) =>
                         {
-                            count += (ulong)entry.CompressedSize;
+                            progress?.Report(new(
+                                progress: arg.ReaderProgress?.PercentageReadExact * 0.01 ?? 1,
+                                message: $"Extracting \"{arg.Item.Key}\"",
+                                isIndeterminate: arg.ReaderProgress == null));
+                        };
+
+                        while (archive.MoveToNextEntry())
+                        {
+                            var entry = archive.Entry;
+                            if (!entry.IsDirectory)
+                            {
+                                count += (ulong)entry.CompressedSize;
+                            }
+                            archive.WriteEntryToDirectory(outputDirectory, extractOptions);
                         }
-                        archive.WriteEntryToDirectory(outputDirectory, extractOptions);
                     }
                 },TaskCreationOptions.LongRunning)
                 .ConfigureAwait(false);
 
             progress?.Report(new ProgressReport(progress: 1, message: "Done extracting"));
             //progressMonitor?.Stop();
-            _logger.LogInformation("Finished extracting archive {path}", archivePath);
+            _logger?.LogInformation("Finished extracting archive {path}", archivePath);
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using CommandLine;
+using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Updater;
 using Ethereal.FAF.UI.Client.Models;
+using Polly.Contrib.WaitAndRetry;
 using Serilog;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -34,7 +36,7 @@ namespace Ethereal.FAF.UI.Client
                 WaitForPidExit(waitExitPid, TimeSpan.FromSeconds(30));
             }
 
-            //HandleUpdateReplacement();
+            HandleUpdateReplacement();
             HandleUpdateCleanup();
 
             TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
@@ -79,7 +81,55 @@ namespace Ethereal.FAF.UI.Client
                 throw;
             }
         }
+        private static void HandleUpdateReplacement()
+        {
+            var currentDir = AppHelper.ExecutableDirectory;
 
+            // Check if we're in the named update folder or the legacy update folder for 1.2.0 -> 2.0.0
+            if (currentDir.Name is not UpdateHelper.UpdateFolderName)
+                return;
+
+            if (currentDir.Parent is not { } parentDir)
+                return;
+
+            // Copy our current file to the parent directory, overwriting the old app file
+            var currentExe = new FileInfo(AppHelper.ExecutableFileName);
+            var targetExe = Path.Combine(parentDir.FullName, AppHelper.GetExecutableName());
+
+            var isCopied = false;
+
+            foreach (
+                var delay in Backoff.DecorrelatedJitterBackoffV2(
+                    TimeSpan.FromMilliseconds(300),
+                    retryCount: 6,
+                    fastFirst: true
+                )
+            )
+            {
+                try
+                {
+                    currentExe.CopyTo(targetExe, true);
+                    isCopied = true;
+                    break;
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(delay);
+                }
+            }
+
+            if (!isCopied)
+            {
+                Logger.Error("Failed to copy current executable to parent directory");
+                Environment.Exit(1);
+            }
+
+            // Start the new app while passing our own PID to wait for exit
+            Process.Start(targetExe, $"--wait-for-exit-pid {Environment.ProcessId}");
+
+            // Shutdown the current app
+            Environment.Exit(0);
+        }
         private static void HandleUpdateCleanup()
         {
             // Delete update folder if it exists in current directory
