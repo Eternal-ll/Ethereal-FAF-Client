@@ -7,7 +7,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
     xmlns:models="clr-namespace:Ethereal.FAF.UI.Client.Models"
-    Title="Ethereal Multiverse Client" WindowStyle="None"
+    Title="Ethereal FAF Client" WindowStyle="None"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="None"
     WindowCornerPreference="Round"
