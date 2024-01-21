@@ -6,6 +6,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
 {
     internal static class AppHelper
     {
+        public static DirectoryInfo FilesDirectory { get; }
         public static DirectoryInfo ExecutableDirectory { get; }
         public static string ExecutableFileName => Path.Combine(ExecutableDirectory.FullName, GetExecutableName());
         /// <summary>
@@ -25,6 +26,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
         {
             using var process = Process.GetCurrentProcess();
             ExecutableDirectory = new(Path.GetDirectoryName(process.MainModule.FileName));
+            FilesDirectory = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files"));
+            if (!FilesDirectory.Exists) FilesDirectory.Create();
         }
     }
 }
