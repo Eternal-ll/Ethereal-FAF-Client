@@ -14,7 +14,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     /// <summary>
     /// System UID generator using lobby session code
     /// </summary>
-    public sealed class UidGenerator : IUidGenerator
+    public sealed class UidGenerator : IUIDService
     {
         private static FileInfo FileInfo = new(Path.Combine(AppHelper.FilesDirectory.FullName, "faf-uid.exe"));
 

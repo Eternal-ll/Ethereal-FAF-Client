@@ -51,14 +51,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly IFafAuthService _fafAuthService;
         private readonly ClientManager _clientManager;
-        private readonly UidGenerator _uidGenerator;
+        private readonly IUIDService _uidGenerator;
         private readonly List<byte> _cache = new();
 
         private ITransportClient _transportClient;
 
         public bool Connected => _transportClient?.IsConnected == true;
 
-        public FafLobbyService(IFafAuthService fafAuthService, ClientManager clientManager, IServiceProvider serviceProvider, ILogger<FafLobbyService> logger, UidGenerator uidGenerator)
+        public FafLobbyService(IFafAuthService fafAuthService, ClientManager clientManager, IServiceProvider serviceProvider, ILogger<FafLobbyService> logger, IUIDService uidGenerator)
         {
             _fafAuthService = fafAuthService;
             _clientManager = clientManager;

@@ -13,7 +13,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public sealed class ServerViewModel : Base.ViewModel
     {
         private readonly TokenProvider TokenProvider;
-        private readonly UidGenerator UidGenerator;
         private readonly LobbyClient LobbyClient;
         private readonly IrcClient IrcClient;
 
@@ -22,14 +21,13 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly IConfiguration Configuration;
         private readonly INavigationWindow NavigationWindow;
 
-        public ServerViewModel(TokenProvider tokenProvider, LobbyClient lobbyClient, IrcClient ircClient, INavigationWindow navigationWindow, SnackbarService snackbarService, UidGenerator uidGenerator, IConfiguration configuration)
+        public ServerViewModel(TokenProvider tokenProvider, LobbyClient lobbyClient, IrcClient ircClient, INavigationWindow navigationWindow, SnackbarService snackbarService, IConfiguration configuration)
         {
             TokenProvider = tokenProvider;
             LobbyClient = lobbyClient;
             IrcClient = ircClient;
             NavigationWindow = navigationWindow;
             SnackbarService = snackbarService;
-            UidGenerator = uidGenerator;
             Configuration = configuration;
 
             //TokenProvider.TokenReceived += TokenProvider_TokenReceived;
@@ -62,7 +60,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             CancellationTokenSource = new();
             Task.Run(async () =>
             {
-                var uid = await UidGenerator.GenerateAsync(session);
+                var uid = "";
                 var token = await TokenProvider.GetAccessTokenAsync(CancellationTokenSource.Token);
                 LobbyClient.Authenticate(token, uid, session);
             }, CancellationTokenSource.Token);

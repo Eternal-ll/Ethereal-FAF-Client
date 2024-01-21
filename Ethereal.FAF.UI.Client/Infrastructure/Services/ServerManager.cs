@@ -46,7 +46,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly PatchClient PatchClient;
         private readonly GameLauncher GameLauncher;
         private readonly IceManager IceManager;
-        private readonly UidGenerator UidGenerator;
         private readonly ClientManager _clientManager;
         private readonly IServiceProvider _serviceProvider;
 
@@ -57,12 +56,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Server Server { get; private set; }
         public Player Self { get; private set; }
 
-        public ServerManager(PatchClient patchClient, IceManager iceManager, GameLauncher gameLauncher, UidGenerator uidGenerator, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
+        public ServerManager(PatchClient patchClient, IceManager iceManager, GameLauncher gameLauncher, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
         {
             PatchClient = patchClient;
             IceManager = iceManager;
             GameLauncher = gameLauncher;
-            UidGenerator = uidGenerator;
             Logger = logger;
             IrcClient = ircClient;
             LobbyClient = lobbyClient;

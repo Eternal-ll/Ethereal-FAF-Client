@@ -6,7 +6,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     /// <summary>
     /// System UID generator
     /// </summary>
-    public interface IUidGenerator
+    public interface IUIDService
     {
         /// <summary>
         /// Generate system UID

@@ -89,7 +89,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafGamesService, FafGamesService>()
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
-                .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>());
+                .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
+                
+                .AddSingleton<IUIDService, UidGenerator>();
 
             services.AddTransient<WebSocketTransportClient>(sp =>
             {

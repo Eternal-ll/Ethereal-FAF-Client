@@ -95,7 +95,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<ServerManager>();
 
-            services.AddSingleton<UidGenerator>();
             services.AddScoped<PatchClient>();
             services.AddScoped<IceManager>();
             services.AddScoped<LobbyClient>();

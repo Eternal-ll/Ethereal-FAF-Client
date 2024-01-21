@@ -116,7 +116,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         /// Process authentification in lobby
         /// </summary>
         /// <param name="accessToken">OAuth api key <see cref="OAuth.TokenBearer.AccessToken"/></param>
-        /// <param name="uid">Generated system UID using session code <see cref="UidGenerator.GenerateUID(string, IProgress{string})"/></param>
+        /// <param name="uid">Generated system UID using session code </param>
         /// <param name="session">Generated session code from lobby server using <see cref="AskSession(string, string)"/></param>
         public void Authenticate(string accessToken, string uid, string session)
         {
