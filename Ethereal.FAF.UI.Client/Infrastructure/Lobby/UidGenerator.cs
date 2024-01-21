@@ -1,8 +1,12 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Microsoft.Extensions.Configuration;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Helper;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.Logging;
+using Polly.Contrib.WaitAndRetry;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
@@ -10,45 +14,71 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
     /// <summary>
     /// System UID generator using lobby session code
     /// </summary>
-    public sealed class UidGenerator
+    public sealed class UidGenerator : IUidGenerator
     {
-        private readonly ILogger Logger;
-        private readonly IConfiguration Configuration;
-        public UidGenerator(ILogger<UidGenerator> logger, IConfiguration configuration)
+        private static FileInfo FileInfo = new(Path.Combine(AppHelper.FilesDirectory.FullName, "faf-uid.exe"));
+
+        private readonly ILogger<UidGenerator> _logger;
+        private readonly ISettingsManager _settingsManager;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public UidGenerator(ILogger<UidGenerator> logger, ISettingsManager settingsManager, IHttpClientFactory httpClientFactory)
         {
-            Logger = logger;
-            Configuration = configuration;
+            _logger = logger;
+            _settingsManager = settingsManager;
+            _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<string> GenerateAsync(string session)
+        public async Task<string> GenerateAsync(string session, CancellationToken cancellationToken = default)
         {
-            var executable = Configuration.GetUidGeneratorExecutable();
-            if (!System.IO.File.Exists(executable))
-            {
-                throw new System.IO.FileNotFoundException("Can`t find executable of UID generator", executable);
-            }
-            Logger.LogTrace("Generating UID for session [{session}]", session);
+            await EnsureFafUidExist(cancellationToken);
+            _logger.LogTrace("Generating UID for session [{session}]", session);
             Process process = new()
             {
                 StartInfo = new()
                 {
-                    FileName = executable,
+                    FileName = FileInfo.FullName,
                     Arguments = session,
                     RedirectStandardOutput = true,
                     CreateNoWindow = true,
                 }
             };
-            Logger.LogTrace("Launching UID generator on [{fafuid}]", process.StartInfo.FileName);
+            _logger.LogTrace("Launching UID generator on [{fafuid}]", process.StartInfo.FileName);
             process.Start();
-            Logger.LogTrace("Reading output...");
+            _logger.LogTrace("Reading output...");
             string result = await process.StandardOutput.ReadLineAsync();
-            Logger.LogTrace("Done reading ouput");
-            Logger.LogTrace("Generated UID: [**********]");
-            Logger.LogTrace("Closing UID generator...");
+            _logger.LogTrace("Done reading ouput");
+            _logger.LogTrace("Generated UID: [**********]");
+            _logger.LogTrace("Closing UID generator...");
             process.Close();
             process.Dispose();
-            Logger.LogTrace("UID closed");
+            _logger.LogTrace("UID closed");
             return result;
+        }
+        private async Task EnsureFafUidExist(CancellationToken cancellationToken)
+        {
+            var file = FileInfo;
+            if (file.Exists) return;
+
+            using var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromMinutes(5);
+            HttpResponseMessage? response = null;
+            foreach (var delay in Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(50), retryCount: 4))
+            {
+                response = await client.GetAsync(_settingsManager.ClientConfiguration.Files.FafUidUrl, cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                {
+                    response = null;
+                    await Task.Delay(500);
+                    continue;
+                }
+            }
+            if (response == null)
+            {
+                throw new ApplicationException("Unable to fetch faf-uid");
+            }
+            using var fs = FileInfo.OpenWrite();
+            await response.Content.CopyToAsync(fs, cancellationToken);
         }
     }
 }
