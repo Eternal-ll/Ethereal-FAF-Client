@@ -13,5 +13,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         }
 
         public Settings Settings => _settings;
+
+        public RemoteClientConfiguration ClientConfiguration { get; }
     }
 }
