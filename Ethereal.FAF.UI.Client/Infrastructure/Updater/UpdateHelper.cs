@@ -90,8 +90,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Updater
                     .Cast<UpdateChannel>()
                     .Where(c => c == _settingsManager.Settings.PreferredUpdateChannel))
                 {
-                    if (updateManifest.Updates.TryGetValue(channel, out var update) &&
-                        await FillUpdateInfo(update))
+                    if (updateManifest.Updates.TryGetValue(channel, out var update)
+                        && update.TryGetVersion(out var version)
+                        && (update.Type == UpdateType.Mandatory || version > VersionHelper.GetCurrentVersion())
+                        && await FillUpdateInfo(update))
                     {
                         OnUpdateStatusChanged(new()
                         {
