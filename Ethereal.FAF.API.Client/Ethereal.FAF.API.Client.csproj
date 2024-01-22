@@ -14,7 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DesktopNotifications.Windows\DesktopNotifications.Windows.csproj" />
     <ProjectReference Include="..\FAF.Domain.LobbyServer\FAF.Domain.LobbyServer.csproj" />
   </ItemGroup>
 
