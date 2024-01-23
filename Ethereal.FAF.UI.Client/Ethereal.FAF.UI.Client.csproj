@@ -23,7 +23,6 @@
   
   <ItemGroup>
     <None Remove="Resources\Close.html" />
-    <None Remove="Resources\Images\Examples\SidebarExample.png" />
     <None Remove="Resources\Images\Flags\*.png" />
     <None Remove="Resources\logo.ico" />
     <None Remove="Resources\Result.html" />
