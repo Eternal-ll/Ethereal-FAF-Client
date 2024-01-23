@@ -145,9 +145,6 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         }
         #endregion
 
-        [JsonPropertyName("games")]
-        public new Game[] Games { get; set; }
-
         [JsonIgnore]
         private string _SmallMapPreview = null;
         public string SmallMapPreview
