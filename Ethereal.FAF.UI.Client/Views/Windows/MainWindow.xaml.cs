@@ -85,7 +85,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
+            Activate();
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
