@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.API.Client.Models.Clans;
+using Ethereal.FAF.UI.Client.Infrastructure.Background;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
@@ -11,7 +12,6 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Updater;
-using Ethereal.FAF.UI.Client.Models;
 using Ethereal.FAF.UI.Client.Models.Configurations;
 using Ethereal.FAF.UI.Client.Models.Settings;
 using Ethereal.FAF.UI.Client.ViewModels;
@@ -71,7 +71,7 @@ namespace Ethereal.FAF.UI.Client
             {
                 var settings = new Settings()
                 {
-                    FileName = "appsettings.user.json"
+                    FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.user.json")
                 };
                 settings.Load();
                 settings.EnableAutosave();
@@ -79,6 +79,16 @@ namespace Ethereal.FAF.UI.Client
             });
             // App Host
             services.AddHostedService<ApplicationHostService>();
+
+
+            services
+                // background image cache worker
+                .AddHostedService<ImageCachingBackgroundService>()
+                // background image cache queue
+                .AddSingleton<BackgroundImageCachingQueue>()
+                // background image cache publisher
+                .AddSingleton<IBackgroundImageCacheService>(sp => sp.GetService<BackgroundImageCachingQueue>());
+            
             services.AddAppServices();
             services.AddFafServices();
             services.AddViewsWithViewModels();
@@ -110,7 +120,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.Configure<IceAdapterConfiguration>(configuration.GetSection("IceAdapter"));
             services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
-            services.AddScoped<IFileCacheService, FileCacheService>();
 
             services.AddScoped<PatchWatcher>();
             services.AddScoped<GameLauncher>();

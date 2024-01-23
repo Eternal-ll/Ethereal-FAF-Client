@@ -65,11 +65,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             HttpResponseMessage? response = null;
             foreach (var delay in Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(50), retryCount: 4))
             {
-                response = await client.GetAsync(_settingsManager.ClientConfiguration.Files.FafUidUrl, cancellationToken);
+                response = await client.GetAsync(_settingsManager.ClientConfiguration.FafUidUrl, cancellationToken);
                 if (!response.IsSuccessStatusCode)
                 {
                     response = null;
-                    await Task.Delay(500);
                     continue;
                 }
             }

@@ -130,7 +130,7 @@ namespace FAF.UI.EtherealClient.Views.Windows
         /// <param name="e"></param>
         private void TitleBar_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (!IsTitleBarDoubleClickAllowed) e.Handled = true;
+
         }
         public void SetServiceProvider(IServiceProvider serviceProvider)
         {

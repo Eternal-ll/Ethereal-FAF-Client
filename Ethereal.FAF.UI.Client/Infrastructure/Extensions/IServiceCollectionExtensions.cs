@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Api;
+using Ethereal.FAF.UI.Client.Infrastructure.Converters;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
@@ -11,12 +12,13 @@ using Ethereal.FAF.UI.Client.ViewModels.Dialogs;
 using Ethereal.FAF.UI.Client.Views;
 using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.UI.EtherealClient.Views.Windows;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Octokit;
-using Octokit.Internal;
 using Refit;
 using System;
+using System.Configuration.Internal;
 using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
@@ -70,13 +72,20 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             
             .AddSingleton<ISettingsManager, SettingsManager>()
             .AddSingleton<IDownloadService, DownloadService>()
-            
+
+            .AddSingleton<IImageCacheService, FileImageCacheService>()
+
             .AddExternalServices();
 
         public static IServiceCollection AddExternalServices(this IServiceCollection services)
         {
             services.AddSingleton<IGithubService, GithubService>();
             services.AddSingleton<IGitHubClient>(sp => new GitHubClient(new ProductHeaderValue("ethereal-faf-client", VersionHelper.GetCurrentVersionInText())));
+
+
+            services
+                .AddHttpClient("ClientConfig")
+                .ConfigureHttpClient((sp, x) => x.BaseAddress = sp.GetService<IConfiguration>().GetValue<Uri>("Client:ConfigurationUrl"));
             return services;
         }
 
@@ -92,6 +101,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
                 
                 .AddSingleton<IUIDService, UidGenerator>();
+
+            services
+                .AddSingleton<GameMapPreviewCacheService>();
 
             services.AddTransient<WebSocketTransportClient>(sp =>
             {
@@ -193,6 +205,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             .AddSingleton<UpdateViewModel>()
             .AddTransient<UpdateClientView>()
             
-            .AddSingleton<MainWindowViewModel>();
+            .AddSingleton<MainWindowViewModel>()
+            
+            .AddTransient<PrepareClientView>()
+            .AddTransient<PrepareClientViewModel>();
     }
 }

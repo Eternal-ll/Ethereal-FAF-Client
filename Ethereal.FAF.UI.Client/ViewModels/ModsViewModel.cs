@@ -1,7 +1,6 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.API.Client.Models.MapsVault;
 using Ethereal.FAF.UI.Client.Infrastructure.Commands;
-using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,9 +22,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ISnackbarService SnackbarService;
         private readonly IHttpClientFactory HttpClientFactory;
         private readonly IFafApiClient FafApiClient;
-        private readonly IFileCacheService _fileCacheService;
 
-		public ModsViewModel(ILogger<MapsViewModel> logger, ISnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient, IFileCacheService fileCacheService)
+		public ModsViewModel(ILogger<MapsViewModel> logger, ISnackbarService snackbarService, IHttpClientFactory httpClientFactory, IFafApiClient fafApiClient)
 		{
 			ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
 			Mods = new();
@@ -38,7 +36,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 			SnackbarService = snackbarService;
 			HttpClientFactory = httpClientFactory;
 			FafApiClient = fafApiClient;
-			_fileCacheService = fileCacheService;
 		}
 		private readonly ConcurrentObservableCollection<Mod> Mods;
         private readonly CollectionViewSource ModsViewSource;

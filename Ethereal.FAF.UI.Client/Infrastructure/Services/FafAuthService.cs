@@ -57,6 +57,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 RefreshToken = token.RefreshToken,
                 AuthProvider = server.OAuth.BaseAddress.Host,
             });
+            _settingsManager.Settings.Save();
         }
 
         public async Task<TokenBearer> FetchTokenByCode(string code, string redirectUrl, CancellationToken cancellationToken = default)

@@ -9,6 +9,7 @@ using Humanizer;
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
+using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby
 {
@@ -123,7 +124,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         }
     }
 
-    public sealed class Game : GameInfoMessage
+    public sealed class Game : GameInfoMessage, IDisposable
     {
         #region Mapname
         private string _Mapname;
@@ -144,6 +145,9 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
             }
         }
         #endregion
+
+        private BitmapImage _MapSmallBitmapImage;
+        public BitmapImage MapSmallBitmapImage { get => _MapSmallBitmapImage; set => Set(ref _MapSmallBitmapImage, value); }
 
         [JsonIgnore]
         private string _SmallMapPreview = null;
@@ -270,7 +274,6 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
             return player is not null;
         }
 
-
         private FA.Vault.MapScenario _MapScenario;
         public FA.Vault.MapScenario MapScenario
         {
@@ -308,5 +311,14 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
 
         public bool UnSupported => FeaturedMod is not (FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop or FeaturedMod.coop);
         public bool IsDevChannel => FeaturedMod is FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop;
+
+
+        public void Dispose()
+        {
+            if (MapSmallBitmapImage != null)
+            {
+                MapSmallBitmapImage.UriSource = null;
+            }
+        }
     }
 }

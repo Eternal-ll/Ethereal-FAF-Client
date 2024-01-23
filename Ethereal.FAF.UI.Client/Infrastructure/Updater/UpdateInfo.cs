@@ -10,6 +10,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Updater
         public string Version { get; set; } = null!;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public UpdateChannel Channel { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public UpdateType Type { get; set; }
         public DateTimeOffset ReleaseDate { get; set; }
         public bool TryGetVersion(out Version version) => System.Version.TryParse(Version, out version);

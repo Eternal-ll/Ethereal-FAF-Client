@@ -3,47 +3,84 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
 {
-	public class CacheImageConverter : IValueConverter
+    public class CacheImageConverter : IValueConverter
 	{
-        private IFileCacheService _fileCacheService;
-		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		private IBackgroundImageCacheService _backgroundImageCacheService;
+		private BitmapSource Empty;
+        public CacheImageConverter()
+        {
+            var uri = new Uri("C:\\ProgramData\\FAForever\\cache\\empty.png");
+
+            BitmapImage image = new();
+            image.BeginInit();
+            image.DecodePixelWidth = 60;
+            image.DecodePixelHeight = 60;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = uri;
+            image.EndInit();
+            Empty = image;
+
+        }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-            _fileCacheService ??= App.Hosting.Services.GetService<IFileCacheService>();
-			return new AsyncTask(() =>
+			if (value == null) return new AsyncTaskTwo()
 			{
-				if (value is not string url) return value;
-				if (!Uri.IsWellFormedUriString(url, UriKind.Absolute)) return value;
-				return _fileCacheService.Cache(url, default).Result;
-			});
-		}
+				AsyncValue = Empty
+			};
+			_backgroundImageCacheService ??= App.Hosting.Services.GetService<IBackgroundImageCacheService>();
+			var task = new AsyncTaskTwo();
+			_backgroundImageCacheService.Load(value.ToString(), x =>
+			{
+                BitmapImage image = new();
+                image.BeginInit();
+                image.DecodePixelWidth = 60;
+                image.DecodePixelHeight = 60;
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = new Uri(x);
+                image.EndInit();
+                //image.BeginInit();
+                //image.DecodePixelWidth = 128;
+                //image.DecodePixelHeight = 128;
+                //image.CacheOption = BitmapCacheOption.OnLoad;
+                //image.UriSource = new Uri(x);
+                //image.EndInit();
+                //image.Freeze();
+                //if (image.CanFreeze)
+                //{
+                //    image.Freeze();
+                //}
+                task.AsyncValue = image;
+            });
+			return task;
+        }
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			throw new NotImplementedException();
 		}
+    }
+    public class AsyncTaskTwo : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
 
-		public class AsyncTask : INotifyPropertyChanged
-		{
-			public AsyncTask(Func<object> valueFunc)
-			{
-				LoadValue(valueFunc);
-			}
+        private object _AsyncValue;
+        public object AsyncValue
+        {
+            get => _AsyncValue;
+            set
+            {
+                if (!Equals(_AsyncValue, value))
+                {
+                    _AsyncValue = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AsyncValue)));
+                }
+            }
 
-			private async Task LoadValue(Func<object> valueFunc)
-			{
-				AsyncValue = await Task<object>.Run(valueFunc);
-				if (PropertyChanged != null)
-					PropertyChanged(this, new PropertyChangedEventArgs(nameof(AsyncValue)));
-			}
-
-			public event PropertyChangedEventHandler PropertyChanged;
-
-			public object AsyncValue { get; set; }
-		}
-	}
+        }
+    }
 }

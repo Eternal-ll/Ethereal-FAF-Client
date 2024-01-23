@@ -1,0 +1,195 @@
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.PrepareClientView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
+      d:DataContext="{d:DesignInstance {x:Type local:PrepareClientView}}"
+                mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="PrepareClientView">
+    <FrameworkElement.Resources>
+        <DataTemplate x:Key="Loader">
+            <ui:ProgressRing IsIndeterminate="True"/>
+        </DataTemplate>
+        <DataTemplate x:Key="LoadFilesView">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Required files:" HorizontalAlignment="Center"/>
+                <ItemsControl Grid.Row="2" ItemsSource="{Binding Downloads}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:DownloadItemViewModel}">
+                            <ui:Card Padding="0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Name}" Margin="10 14"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding ProgressText}" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource DescriptionHeaderTextBlock}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=TestTextBlock, Path=Text}">
+                                                        
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <ProgressBar Grid.ColumnSpan="2" VerticalAlignment="Bottom" Value="{Binding Progress}"
+                                                 Maximum="1">
+                                        <ProgressBar.Style>
+                                            <Style TargetType="ProgressBar" BasedOn="{StaticResource {x:Type ProgressBar}}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Finished}" Value="True">
+                                                        <Setter Property="Foreground" Value="Green"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Failed}" Value="True">
+                                                        <Setter Property="Foreground" Value="Red"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ProgressBar.Style>
+                                    </ProgressBar>
+                                </Grid>
+                            </ui:Card>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </Grid>
+        </DataTemplate>
+        <Style x:Key="TextBlockFontAwesomeLight" TargetType="TextBlock">
+        </Style>
+        <DataTemplate x:Key="SetupPathsView" DataType="{x:Type vm:PrepareClientViewModel}">
+            <StackPanel VerticalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="SC Forged Alliance location"/>
+                    <TextBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch"
+                             Text="{Binding ForgedAllianceLocation}"
+                             ToolTip="{Binding ForgedAllianceLocation}"
+                             IsReadOnly="True"/>
+                    <Button Grid.Row="2" Grid.Column="2" Command="{Binding SelectForgedAllianceLocationCommand}"
+                            VerticalAlignment="Stretch">
+                        <Button.Content>
+                            <TextBlock Text="&#xf07c;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+
+                <Grid Margin="0 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Vault location"/>
+                    <TextBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch"
+                             Text="{Binding ForgedAllianceVaultLocation}"
+                             ToolTip="{Binding ForgedAllianceVaultLocation}"
+                             IsReadOnly="True"/>
+                    <Button Grid.Row="2" Grid.Column="2" Command="{Binding SelectForgedAllianceVaultLocationCommand}"
+                            VerticalAlignment="Stretch">
+                        <Button.Content>
+                            <TextBlock Text="&#xf07c;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+
+                <Grid Margin="0 0 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="6"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="FAForever location"/>
+                    <TextBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch"
+                             Text="{Binding FAForeverLocation}"
+                             ToolTip="{Binding FAForeverLocation}"
+                             IsReadOnly="True"/>
+                    <Button Grid.Row="2" Grid.Column="2" Command="{Binding SelectFAForeverLocationCommand}"
+                            VerticalAlignment="Stretch">
+                        <Button.Content>
+                            <TextBlock Text="&#xf07c;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+                <UniformGrid Margin="-10 30 -10 0">
+                    <Button Margin="10 0" HorizontalAlignment="Stretch" Content="Continue"
+                            Command="{Binding SaveStepOneAndContinueCommand}"/>
+                </UniformGrid>
+            </StackPanel>
+        </DataTemplate>
+        <Style x:Key="LoaderContentControl" TargetType="ContentControl">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Loading}" Value="True">
+                    <Setter Property="ContentTemplate" Value="{DynamicResource Loader}"/>
+                </DataTrigger>
+                <DataTrigger  Binding="{Binding CurrentStep}" Value="1">
+                    <Setter Property="ContentTemplate" Value="{DynamicResource SetupPathsView}"/>
+                </DataTrigger>
+                <DataTrigger  Binding="{Binding CurrentStep}" Value="2">
+                    <Setter Property="ContentTemplate" Value="{DynamicResource LoadFilesView}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="Layout">
+            <Grid ShowGridLines="False">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height=".3*"/>
+                    <RowDefinition MaxHeight="40"/>
+                    <RowDefinition/>
+                    <RowDefinition MaxHeight="40"/>
+                    <RowDefinition Height=".3*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="1" Text="Welcome to Ethereal FAF Client" FontSize="24"
+                           HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                <ContentControl Grid.Column="1"
+                                Grid.Row="2"
+                                Content="{Binding}"
+                                Style="{DynamicResource LoaderContentControl}"
+                                IsTabStop="False"/>
+                <ProgressBar Grid.Column="1" Grid.Row="4"
+                             VerticalAlignment="Top"
+                             Value="{Binding CurrentStep}"
+                             Maximum="{Binding StepsCount}"/>
+            </Grid>
+        </DataTemplate>
+    </FrameworkElement.Resources>
+    <ContentControl Content="{Binding Path=ViewModel}"
+                    ContentTemplate="{DynamicResource Layout}"
+                    IsTabStop="False"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+</local:PageBase>

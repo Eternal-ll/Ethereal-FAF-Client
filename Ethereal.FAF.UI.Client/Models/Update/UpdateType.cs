@@ -1,8 +1,8 @@
-﻿using System;
+﻿using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Models.Update
 {
-    [Flags]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UpdateType
     {
         /// <summary>

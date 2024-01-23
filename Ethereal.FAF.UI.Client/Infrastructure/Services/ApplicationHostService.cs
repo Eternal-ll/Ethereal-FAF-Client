@@ -75,6 +75,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 //_serviceProvider.GetRequiredService<ChatViewModel>();
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
 
+                _serviceProvider.GetRequiredService<GameMapPreviewCacheService>();
+
                 //var notifyIcon = _serviceProvider.GetService<INotifyIconService>();
 
                 //if (!notifyIcon!.IsRegistered)
@@ -85,6 +87,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 
                 _navigationWindow.ShowWindow();
                 _navigationWindow.Navigate(typeof(SelectServerView));
+                //_navigationWindow.Navigate(typeof(PrepareClientView));
             }
 
             await Task.CompletedTask;

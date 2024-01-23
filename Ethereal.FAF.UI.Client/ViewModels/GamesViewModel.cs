@@ -135,12 +135,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void FafGamesService_GamesRemoved(object sender, Game e)
         {
             Games.Remove(e);
-                if (SelectedGameMode == "Custom"
+            if (SelectedGameMode == "Custom"
                 && e.State == GameState.Closed)
-                {
-                    //Application.Current.Dispatcher.BeginInvoke(() => GamesView.Refresh());
-                }
+            {
+                //Application.Current.Dispatcher.BeginInvoke(() => GamesView.Refresh());
             }
+        }
 
         private void FafGamesService_GamesAdded(object sender, Game e)
         {

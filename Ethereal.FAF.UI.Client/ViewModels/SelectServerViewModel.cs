@@ -64,6 +64,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (arg is Server server) 
             {
                 _clientManager.SetServer(server);
+                _settingsManager.Settings.Save();
                 _navigationWindow.Navigate(typeof(AuthView));
             }
         }

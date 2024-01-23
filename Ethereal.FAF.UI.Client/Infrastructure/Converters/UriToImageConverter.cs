@@ -15,7 +15,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
             image.BeginInit();
             image.DecodePixelWidth = 128;
             image.DecodePixelHeight = 128;
-            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.CacheOption = BitmapCacheOption.OnDemand;
             image.UriSource = new Uri(value as string);
             image.EndInit();
             image.DownloadCompleted += Image_DownloadCompleted;

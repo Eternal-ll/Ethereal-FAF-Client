@@ -35,7 +35,7 @@ namespace Ethereal.FAF.UI.Client.Views
                 CheckFileExists = true,
                 CheckPathExists = true,
                 InitialDirectory = LastLocation ?? "C:\\",
-                Filter = "SCFA|SupremeCommander.exe|Executable (*.exe)|*.exe"
+                Filter = "SupremeCommander.exe|SupremeCommander.exe (SupremeCommander.exe)"
             };
             if (dialog.ShowDialog() is false)
             {
