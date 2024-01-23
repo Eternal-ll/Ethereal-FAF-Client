@@ -11,9 +11,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
     internal class FafGamesService : IFafGamesService, IFafGamesEventsService
     {
-        public event EventHandler<Game[]> GamesAdded;
-        public event EventHandler<Game[]> GamesUpdated;
-        public event EventHandler<Game[]> GamesRemoved;
+        public event EventHandler<Game> GameAdded;
+        public event EventHandler<(Game Cached, Game Incoming)> GameUpdated;
+        public event EventHandler<Game> GameRemoved;
         public event EventHandler<(Game, GameState newest, GameState latest)> GameStateChanged;
 
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
@@ -62,8 +62,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 game.UpdateTeams();
                 FillPlayers(game);
                 _games.TryAdd(game.Uid, game);
+                GameAdded?.Invoke(this, game);
             }
-            GamesAdded?.Invoke(this, e);
         }
 
         private void _fafLobbyEventsService_GameReceived(object sender, Game e) => ProceedGame(e);
@@ -72,7 +72,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             if (!e)
             {
-                GamesRemoved.Invoke(this, _games.Values.ToArray());
+                foreach (var game in _games.Values)
+                {
+                    GameRemoved?.Invoke(this, game);
+                }
                 _games.Clear();
                 _gamesInitialized = false;
             }
@@ -154,7 +157,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     {
                         _logger.LogInformation("Game [{gameId}] [{state}] new launched game", e.Uid, e.State);
                     }
-                    GamesAdded?.Invoke(this, new[] { e });
+                    GameAdded?.Invoke(this, e);
                 }
                 //Logger.LogInformation(e.Title);
                 //OnNewGameReceived(newGame);
@@ -184,7 +187,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                             e.Uid, e.State);
                         GameStateChanged?.Invoke(this, (cached, e.State, cached.State));
                     }
-                    GamesRemoved?.Invoke(this, new[] { cached });
+                    GameRemoved?.Invoke(this, cached);
                 }
                 
             }
@@ -197,7 +200,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     {
                         if (games.TryRemove(cached.Uid, out _))
                         {
-                            GamesRemoved?.Invoke(this, new[] { cached });
+                            GameRemoved?.Invoke(this, cached);
                         }
                         return;
                     }
@@ -249,7 +252,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             }
             cached.State = e.State;
-            GamesUpdated?.Invoke(this, new[] { e });
+            GameUpdated?.Invoke(this, (cached, e));
         }
         private void UpdateTeams(Game oldGame, Game newGame)
         {

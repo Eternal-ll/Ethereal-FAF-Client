@@ -81,8 +81,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (banned is not null)
                 MapsBlacklist.AddRange(banned);
 
-            fafGamesEventsService.GamesAdded += FafGamesService_GamesAdded;
-            fafGamesEventsService.GamesRemoved += FafGamesService_GamesRemoved;
+            fafGamesEventsService.GameAdded += FafGamesService_GamesAdded;
+            fafGamesEventsService.GameRemoved += FafGamesService_GamesRemoved;
             fafGamesEventsService.GameStateChanged += FafGamesEventsService_GameStateChanged;
 
             Games = new();
@@ -132,22 +132,19 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             }
         }
 
-        private void FafGamesService_GamesRemoved(object sender, Game[] e)
+        private void FafGamesService_GamesRemoved(object sender, Game e)
         {
-            foreach (var game in e)
-            {
-                Games.Remove(game);
+            Games.Remove(e);
                 if (SelectedGameMode == "Custom"
-                    && game.State == GameState.Closed)
+                && e.State == GameState.Closed)
                 {
                     //Application.Current.Dispatcher.BeginInvoke(() => GamesView.Refresh());
                 }
             }
-        }
 
-        private void FafGamesService_GamesAdded(object sender, Game[] e)
+        private void FafGamesService_GamesAdded(object sender, Game e)
         {
-            Games.AddRange(e);
+            Games.Add(e);
         }
 
         public Visibility SearchButtonVisibility =>
