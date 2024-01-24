@@ -6,6 +6,7 @@
            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
            xmlns:services="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Services"
                 xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                d:DataContext="{d:DesignInstance {x:Type local:NavigationView}}"
            xmlns:v="clr-namespace:Ethereal.FAF.UI.Client.Views"
            mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -29,141 +30,7 @@
         OpenPaneLength="200"
         IsBackButtonVisible="Collapsed"
         IsPaneToggleVisible="True"
-        FrameMargin="0">
-        <ui:NavigationView.MenuItems>
-            <!--<ui:NavigationItem IsActive="True">
-                <ui:NavigationItem.Resources>
-                    <Style TargetType="Rectangle">
-                        <Setter Property="Opacity" Value="1"/>
-                    </Style>
-                </ui:NavigationItem.Resources>
-                <TextBlock Text="Test"/>
-            </ui:NavigationItem>-->
-            <!--<ui:NavigationHeader Text="Main"/>-->
-            <ui:NavigationViewItem
-                Content="Profile"
-                    TargetPageType="{x:Type v:ProfileView}">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Person24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                    NavigationCacheMode="Disabled"
-                    Content="Play"
-                    TargetPageType="{x:Type v:GamesView}"
-                    ToolTip="Select mode to play">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="XboxController24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-                <!--<ui:NavigationViewItem.MenuItems>
-                    <ui:NavigationViewItem
-                        NavigationCacheMode="Disabled"
-                        Content="Play"
-                        TargetPageType="{x:Type v:GamesView}"
-                        ToolTip="Search lobbies to play">
-                    </ui:NavigationViewItem>
-                </ui:NavigationViewItem.MenuItems>-->
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                    Content="Chat"
-                    TargetPageType="{x:Type v:ChatView}"
-                    ToolTip="IRC chat">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Chat24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                    Content="Players"
-                    TargetPageType="{x:Type v:PlayersView}"
-                    ToolTip="IRC chat">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="PeopleList24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                    Content="Links"
-                    NavigationCacheMode="Disabled"
-                    TargetPageType="{x:Type v:LinksView}"
-                    ToolTip="Useful links">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Link24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <!--<ui:NavigationItem
-                    Content="Maps"
-                    Icon="Map24"
-                    ToolTip="Maps vault"/>
-                <ui:NavigationItem
-                    Content="Mods"
-                    Icon="Vault24"
-                    ToolTip="Mods vault"/>-->
-            <!--<ui:NavigationHeader Text="API"/>-->
-            <!--<ui:NavigationItem
-                    Content="Vault"
-                    Icon="Vault24"
-                    TargetPageType="{x:Type v:VaultView}"
-                    ToolTip="Maps and mods vault"/>-->
-            <!--<ui:NavigationItem IsEnabled="False" Opacity=".7"
-                    Content="Replays"
-                    Icon="Video24"
-                    ToolTip="Replays"/>-->
-            <ui:NavigationViewItem
-                    Content="Data"
-                    TargetPageType="{x:Type v:DataView}"
-                    ToolTip="API">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Database24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem IsEnabled="False" Opacity=".7"
-                    Content="Clan"
-                    ToolTip="Clan">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="PeopleTeam24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                TargetPageType="{x:Type v:ReportsView}"
-                Content="Reports"
-                ToolTip="My reports">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="MailAlert24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem
-                    Content="Downloads"
-                    NavigationCacheMode="Disabled"
-                    TargetPageType="{x:Type v:DownloadsView}"
-                    ToolTip="Downloads">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="ArchiveArrowBack24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-        </ui:NavigationView.MenuItems>
-        <ui:NavigationView.FooterMenuItems>
-            <ui:NavigationViewItem
-                    Content="Changelog"
-                    TargetPageType="{x:Type v:ChangelogView}"
-                    ToolTip="API">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="History24" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <!--  A navigation element that does not point to the page can be used as a button.  -->
-            <!--<ui:NavigationItem Click="NavigationButtonTheme_OnClick" Content="Theme" Icon="DarkTheme24" />-->
-            <ui:NavigationViewItem
-                    Content="Settings"
-                    TargetPageType="{x:Type v:SettingsView}"
-                    NavigationCacheMode="Disabled">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="Settings28" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-            <ui:NavigationViewItem Content="Exit">
-                <ui:NavigationViewItem.Icon>
-                    <ui:SymbolIcon Symbol="ArrowExit20" FontSize="18" Filled="True"/>
-                </ui:NavigationViewItem.Icon>
-            </ui:NavigationViewItem>
-        </ui:NavigationView.FooterMenuItems>
-    </ui:NavigationView>
+        FrameMargin="0"
+        MenuItemsSource="{Binding ViewModel.MenuItems}"
+        FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems}"/>
 </local:PageBase>

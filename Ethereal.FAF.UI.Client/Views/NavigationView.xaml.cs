@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -73,5 +74,6 @@ namespace Ethereal.FAF.UI.Client.Views
         }
 
         public NavigationViewModel ViewModel { get; }
+        public override ViewModel GetViewModel() => ViewModel;
     }
 }
