@@ -17,7 +17,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
             MenuItems = new()
             {
-                new NavigationViewItem("Play", SymbolRegular.XboxController24, null)
+                new NavigationViewItem("Play", SymbolRegular.XboxController24, typeof(PlayTabPage))
                 {
                     MenuItems = new NavigationViewItem[]
                     {

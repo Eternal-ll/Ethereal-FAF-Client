@@ -146,8 +146,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         public static IServiceCollection AddViewsWithViewModels(this IServiceCollection services) => services
             .AddTransient<LobbyConnectionView>()
             .AddTransient<LobbyConnectionViewModel>()
-            
-            
+
+
             .AddTransient<SelectServerView>()
             .AddTransient<SelectServerViewModel>()
 
@@ -201,12 +201,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 
             .AddTransient<AuthView>()
             .AddTransient<AuthViewModel>()
-            
+
             .AddSingleton<UpdateViewModel>()
             .AddTransient<UpdateClientView>()
-            
+
             .AddSingleton<MainWindowViewModel>()
-            
+
+            .AddTransient<PlayTabPage>()
+            .AddTransient<PlayTabViewModel>()
+
             .AddTransient<PrepareClientView>()
             .AddTransient<PrepareClientViewModel>();
     }
