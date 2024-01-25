@@ -1,6 +1,5 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Api;
-using Ethereal.FAF.UI.Client.Infrastructure.Converters;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
@@ -18,7 +17,6 @@ using Microsoft.Extensions.Logging;
 using Octokit;
 using Refit;
 using System;
-using System.Configuration.Internal;
 using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
@@ -99,11 +97,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
                 .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
-                
+                .AddSingleton<IGameLauncher, FafGameLauncher>()
                 .AddSingleton<IUIDService, UidGenerator>();
 
-            services
-                .AddSingleton<GameMapPreviewCacheService>();
+            //services
+                //.AddSingleton<GameMapPreviewCacheService>();
 
             services.AddTransient<WebSocketTransportClient>(sp =>
             {
@@ -206,6 +204,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             .AddTransient<UpdateClientView>()
 
             .AddSingleton<MainWindowViewModel>()
+
+            .AddSingleton<CustomGamesViewModel>()
+            .AddSingleton<LobbyGamesViewModel>()
 
             .AddTransient<PlayTabPage>()
             .AddTransient<PlayTabViewModel>()

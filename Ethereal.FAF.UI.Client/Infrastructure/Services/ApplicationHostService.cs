@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
+using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.Views;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.Configuration;
@@ -72,10 +73,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 _serviceProvider.GetRequiredService<IFafPlayersService>();
                 _serviceProvider.GetRequiredService<IFafGamesService>();
+                _serviceProvider.GetRequiredService<LobbyGamesViewModel>();
                 //_serviceProvider.GetRequiredService<ChatViewModel>();
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
 
-                _serviceProvider.GetRequiredService<GameMapPreviewCacheService>();
+                //_serviceProvider.GetRequiredService<GameMapPreviewCacheService>();
 
                 //var notifyIcon = _serviceProvider.GetService<INotifyIconService>();
 
@@ -87,6 +89,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 
                 _navigationWindow.ShowWindow();
                 _navigationWindow.Navigate(typeof(SelectServerView));
+                //_navigationWindow.Navigate(typeof(NavigationView));
                 //_navigationWindow.Navigate(typeof(PrepareClientView));
             }
 

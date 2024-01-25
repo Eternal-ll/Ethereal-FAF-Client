@@ -1,6 +1,5 @@
 ﻿using Ethereal.FAF.API.Client.Models;
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.Domain.LobbyServer;

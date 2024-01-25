@@ -13,8 +13,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
             if (!Uri.IsWellFormedUriString(value as string, UriKind.Absolute)) return value;
             BitmapImage image = new();
             image.BeginInit();
-            image.DecodePixelWidth = 128;
-            image.DecodePixelHeight = 128;
+            image.DecodePixelWidth = 60;
+            image.DecodePixelHeight = 60;
             image.CacheOption = BitmapCacheOption.OnDemand;
             image.UriSource = new Uri(value as string);
             image.EndInit();

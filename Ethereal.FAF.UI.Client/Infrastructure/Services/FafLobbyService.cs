@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -149,9 +150,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 var command = JsonSerializer.Deserialize<ServerMessage>(e, JsonSerializerDefaults.FafLobbyCommandsJsonSerializerOptions);
 
-                var ignore = new[] { ServerCommand.game_info };
-                if (ignore.Contains(command.Command))
+                var ignore = new[] { ServerCommand.game_info, ServerCommand.player_info, ServerCommand.matchmaker_info };
+                if (!ignore.Contains(command.Command))
                 {
+                    //var raw = Encoding.UTF8.GetString(e);
                     //if (command is GameInfoMessage game)
                     //{
                     //    //_logger.LogInformation("[{id}]-[{state}] raw {raw}", game.Uid, game.State, JsonSerializer.Serialize(game));
@@ -163,7 +165,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     //        _logger.LogInformation("[{id}]-[{state}] raw {raw}", ga.Uid, ga.State, JsonSerializer.Serialize(ga));
                     //    }
                     //}
-                    //_logger.LogInformation("Incoming [{data}]", Encoding.UTF8.GetString(e).Replace("\n", null));
+                    _logger.LogInformation("Incoming [{data}]", Encoding.UTF8.GetString(e).Replace("\n", null));
                 }
                 else
                 {
@@ -229,5 +231,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             .SafeFireAndForget();
 
         #endregion
+
+        public Task JoinGameAsync(long uid, int port = 0)
+        {
+            SendCommandToLobby(new JoinGameCommand(uid, port));
+            return Task.CompletedTask;
+        }
+
+        public Task GameEndedAsync()
+        {
+            SendCommandToLobby(new OutgoingsArgsCommand("GameState", "Ended"));
+            return Task.CompletedTask;
+        }
     }
 }

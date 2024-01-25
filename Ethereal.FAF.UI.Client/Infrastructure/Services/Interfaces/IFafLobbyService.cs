@@ -17,5 +17,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public Task DisconnectAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Join game
+        /// </summary>
+        /// <param name="uid">Lobby UID</param>
+        /// <returns></returns>
+        public Task JoinGameAsync(long uid, int port = 0);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Task GameEndedAsync();
     }
 }

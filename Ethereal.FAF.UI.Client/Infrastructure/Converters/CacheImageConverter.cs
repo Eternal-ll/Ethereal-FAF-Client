@@ -20,7 +20,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
             image.BeginInit();
             image.DecodePixelWidth = 60;
             image.DecodePixelHeight = 60;
-            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.CacheOption = BitmapCacheOption.OnDemand;
             image.UriSource = uri;
             image.EndInit();
             Empty = image;
@@ -28,21 +28,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
         }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			if (value == null) return new AsyncTaskTwo()
-			{
-				AsyncValue = Empty
-			};
+            if (value == null) return new AsyncTaskTwo()
+            {
+                AsyncValue = "C:\\ProgramData\\FAForever\\cache\\empty.png"
+            };
 			_backgroundImageCacheService ??= App.Hosting.Services.GetService<IBackgroundImageCacheService>();
 			var task = new AsyncTaskTwo();
 			_backgroundImageCacheService.Load(value.ToString(), x =>
 			{
-                BitmapImage image = new();
-                image.BeginInit();
-                image.DecodePixelWidth = 60;
-                image.DecodePixelHeight = 60;
-                image.CacheOption = BitmapCacheOption.OnLoad;
-                image.UriSource = new Uri(x);
-                image.EndInit();
+                //BitmapImage image = new();
+                //image.BeginInit();
+                //image.DecodePixelWidth = 60;
+                //image.DecodePixelHeight = 60;
+                //image.CacheOption = BitmapCacheOption.OnLoad;
+                //image.UriSource = new Uri(x);
+                //image.EndInit();
                 //image.BeginInit();
                 //image.DecodePixelWidth = 128;
                 //image.DecodePixelHeight = 128;
@@ -54,7 +54,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
                 //{
                 //    image.Freeze();
                 //}
-                task.AsyncValue = image;
+                task.AsyncValue = x;
             });
 			return task;
         }
@@ -68,6 +68,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public bool Loading => _AsyncValue == null;
+
         private object _AsyncValue;
         public object AsyncValue
         {
@@ -78,6 +80,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
                 {
                     _AsyncValue = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AsyncValue)));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Loading)));
                 }
             }
 

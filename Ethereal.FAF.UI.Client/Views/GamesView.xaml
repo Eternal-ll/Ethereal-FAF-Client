@@ -441,9 +441,8 @@
                         </ToolTip>
                     </Border.ToolTip>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
-                               ToolTip="{Binding Mapname}" Width="50" Height="50" VerticalAlignment="Top"
-                               IsVisibleChanged="Image_IsVisibleChanged"/>
+                        <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource CacheImageConverter}}"
+                               ToolTip="{Binding Mapname}" Width="50" Height="50" VerticalAlignment="Top"/>
                         <Button Style="{StaticResource MapGeneratorButton}" Margin="-46 0 0 0" CommandParameter="{Binding}" FontSize="12"/>
                         <ItemsControl ItemsSource="{Binding GameTeams}" Margin="10 4">
                             <ItemsControl.ItemsPanel>
@@ -486,8 +485,7 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
-                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"
-                               IsVisibleChanged="Image_IsVisibleChanged"/>
+                               ToolTip="{Binding Mapname}" Width="128" Height="128" VerticalAlignment="Top"/>
                         <Ui:Badge VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                   Padding="4 2" FontSize="12" Appearance="Secondary">
                             <TextBlock>
@@ -627,6 +625,27 @@
                 </Setter>
             </Style>
 
+            <DataTemplate x:Key="Loader">
+                <ProgressBar IsIndeterminate="True"/>
+            </DataTemplate>
+            <DataTemplate x:Key="ImageDataTemplate">
+                <Image Source="{Binding AsyncValue, Converter={StaticResource UriToImageConverter}}" Width="60" Height="60"/>
+            </DataTemplate>
+            <Style x:Key="ContentControlImageLoader" TargetType="ContentControl">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Loading}" Value="True">
+                        <Setter Property="ContentTemplate" Value="{StaticResource Loader}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Loading}" Value="False">
+                        <Setter Property="ContentTemplate" Value="{StaticResource ImageDataTemplate}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <DataTemplate x:Key="Test" DataType="{x:Type converters:AsyncTaskTwo}">
+                <ContentControl Style="{StaticResource ContentControlImageLoader}" Content="{Binding}"/>
+
+            </DataTemplate>
+
             <DataTemplate x:Key="AlternativeCard" DataType="{x:Type lobby:Game}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="-3" ContextMenu="{StaticResource GameContextMenu}">
@@ -643,8 +662,13 @@
                         <!--<Image Source="{Binding AsyncValue}"
                                DataContext="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource CacheImageConverter}}"
                                Width="60" Height="60"/>-->
-                        <Image Source="{Binding MapSmallBitmapImage}" Width="60" Height="60"/>
+                        <!--<Image Source="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}" Width="60" Height="60"/>-->
                         <!--<ContentControl Content="{Binding MapSmallBitmapImage}" Width="60" Height="60"/>-->
+
+                        <ContentControl Content="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}"
+                                        Width="60" Height="60"
+                                        ContentTemplate="{StaticResource Test}"/>
+
 
                         <Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
                                 Style="{StaticResource MapGeneratorButton}" TextElement.FontSize="10" CommandParameter="{Binding}"/>
@@ -669,23 +693,11 @@
                         <!--<ContentControl Content="{Binding ServerManager}"/>-->
                         <!--<TextBlock Text="{Binding Host, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>-->
                     </StackPanel>
-                    <StackPanel Height="200">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}, Path=IsSelected}"
-                                                 Value="True">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-                    </StackPanel>
                 </StackPanel>
             </DataTemplate>
         </Grid.Resources>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -694,354 +706,73 @@
             <ColumnDefinition Width="Auto" MinWidth="300"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <WrapPanel Margin="0 0 30 10" Grid.ColumnSpan="3">
-            <ComboBox Width="100" SelectedItem="{Binding ViewModel.SelectedGameMode}" ItemsSource="{Binding ViewModel.GameModes}" Padding="10 5.5"
-                      ToolTip="Game mode"/>
-            <Button Width="100" Margin="10 0 0 0" 
-                    Visibility="{Binding ViewModel.LiveButtonVisibility}" Command="{Binding ViewModel.ChangeLiveButton}">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Content" Value="Show live"/>
+        <Grid Grid.Row="0" Grid.ColumnSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton x:Name="ToggleFiltersButton" Grid.Column="2">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding ViewModel.IsLive}" Value="True">
-                                <!--<Setter Property="Background" Value="#ff6e6e"/>-->
-                                <!--<Setter Property="Foreground" Value="White"/>-->
-                                <Setter Property="Content" Value="Show open"/>
-                            </DataTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="False"/>
+                                    <Condition Property="IsChecked" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <MultiTrigger.Setters>
+                                    <Setter Property="Opacity" Value=".6"/>
+                                </MultiTrigger.Setters>
+                            </MultiTrigger>
                         </Style.Triggers>
                     </Style>
-                </Button.Style>
-            </Button>
-            <ToggleButton Name="PopupToggeButton" Width="100" Content="Filter" Margin="10 0 0 0"/>
-            <Popup IsOpen="{Binding IsChecked, ElementName=PopupToggeButton}" StaysOpen="False" AllowsTransparency="True"
-                       PlacementTarget="{Binding ElementName=PopupToggeButton}"
-                       Placement="Bottom">
-                <Border Style="{StaticResource Card}" Padding="10"
-                            BorderThickness="1">
-                    <Border.Background>
-                        <SolidColorBrush Color="{DynamicResource SystemFillColorSolidNeutralBackground}" />
-                    </Border.Background>
-                    <Border.BorderBrush>
-                        <SolidColorBrush Color="{DynamicResource SolidBackgroundFillColorBase}" />
-                    </Border.BorderBrush>
-                    <Border.Effect>
-                        <DropShadowEffect
-                                BlurRadius="30"
-                                Direction="0"
-                                Opacity="0.4"
-                                ShadowDepth="0"
-                                Color="#202020" />
-                    </Border.Effect>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <CheckBox Content="Enable maps blacklist" IsChecked="{Binding ViewModel.EnableMapsBlacklist}"/>
-                            <CheckBox Content="Show only lobbies with friends" IsChecked="{Binding ViewModel.OnlyLobbiesWithFriends}"/>
-                            <CheckBox Content="Show only generated maps" IsChecked="{Binding ViewModel.OnlyGeneratedMaps}"/>
-                            <CheckBox Content="Hide foes lobbies" IsChecked="{Binding ViewModel.HideFoesLobbies}"/>
-                            <CheckBox Content="Hide private lobbies" IsChecked="{Binding ViewModel.HidePrivateLobbies}"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="10 0 0 0" Width="200" Visibility="{Binding ViewModel.MapsBlacklistVisibility}">
-                            <Grid Margin="0 0 0 8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Ui:TextBox x:Name="MapToBanInput" PlaceholderText="Map to ban" FontSize="12"/>
-                                <Button Command="{Binding ViewModel.AddMapToBlacklistCommand}"
-                                        CommandParameter="{Binding ElementName=MapToBanInput, Path=Text, UpdateSourceTrigger=PropertyChanged}"
-                                        Content="Add" HorizontalAlignment="Stretch" Margin="4 0 0 0" FontSize="12"
-                                        Grid.Column="1" VerticalAlignment="Stretch"/>
-                            </Grid>
-                            <Ui:TextBox Text="{Binding ViewModel.MapsBlacklistFilter,UpdateSourceTrigger=PropertyChanged}"
-                                        PlaceholderText="Search" FontSize="12"/>
-                            <ListBox ItemsSource="{Binding ViewModel.MapsBlacklistView}" Background="Transparent" BorderThickness="0"
-                                         MaxHeight="300" Margin="0 4 0 0">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0 -2">
-                                            <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
-                                            <Button HorizontalAlignment="Right" Command="{DynamicResource RemoveMapFromBlacklistCommand}"
-                                                        CommandParameter="{Binding}" Content="Remove" FontSize="12" Padding="2 0 2 1"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </StackPanel>
-                    </Grid>
-                </Border>
-            </Popup>
-
-            <Button Content="Host" Width="100" Margin="10 0 0 0" Visibility="{Binding ViewModel.HostGameButtonVisibility}" Command="{Binding ViewModel.HostGameCommand}"/>
-            <!--<CheckBox IsChecked="{Binding ViewModel.Compact}" Content="Compact"/>-->
-            <Ui:Button Margin="10 0 0 0" MinWidth="100" VerticalAlignment="Stretch">
-                <Ui:Button.Style>
-                    <Style TargetType="Ui:Button" BasedOn="{StaticResource {x:Type Ui:Button}}">
-                        <Setter Property="Visibility" Value="{Binding ViewModel.SearchButtonVisibility}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="0">
-                                <Setter Property="Command" Value="{Binding ViewModel.MatchmakingViewModel.JoinQueueCommand}"/>
-                            </DataTrigger>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding ViewModel.MatchmakingViewModel.PartyViewModel.IsOwner}" Value="False"/>
-                                    <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="0"/>
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </MultiDataTrigger>
-                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1">
-                                <Setter Property="Command" Value="{Binding ViewModel.MatchmakingViewModel.JoinQueueCommand}"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="6">
-                                <Setter Property="Command" Value="{Binding ViewModel.MatchmakingViewModel.JoinQueueCommand}"/>
-                                <Setter Property="ToolTip" Value="Cancel background downloads processes"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="2">
-
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding ViewModel.SelectedRatingType}" Value="0">
-                                <Setter Property="Command" Value="{Binding ViewModel.CancelQueuesCommand}"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Ui:Button.Style>
-                <StackPanel Orientation="Horizontal">
-                    <Ui:ProgressRing Height="12" Width="12"  Margin="0 0 10 0"
-                                     IsIndeterminate="{Binding ViewModel.MatchmakingViewModel.IsProgressRingIndeterminate}"
-                                     Visibility="{Binding ViewModel.MatchmakingViewModel.ProgressRingVisibility}"/>
-                    <TextBlock>
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="{Binding ViewModel.MatchmakingViewModel.ProgressText}"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1">
-                                        <Setter Property="Text">
-                                            <Setter.Value>
-                                                <MultiBinding StringFormat="Leave? Matching in {0:mm}:{0:ss} Players: {1}">
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PopTimeSpan"/>
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PlayersCountInQueue"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                    <!--<MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1"/>
-                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.IsOwner}" Value="True"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Text">
-                                            <Setter.Value>
-                                                <MultiBinding StringFormat="Leave? Matching in {0:mm}:{0:ss} Players: {1}">
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PopTimeSpan"/>
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PlayersCountInQueue"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiDataTrigger>-->
-                                    <!--<MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="False"/>
-                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Text">
-                                            <Setter.Value>
-                                                <MultiBinding StringFormat="Matching in {0:mm}:{0:ss} Players: {1}">
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PopTimeSpan"/>
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PlayersCountInQueue"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiDataTrigger>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True"/>
-                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Text">
-                                            <Setter.Value>
-                                                <MultiBinding StringFormat="Leave? Matching in {0:mm}:{0:ss} Players: {1}">
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PopTimeSpan"/>
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PlayersCountInQueue"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </MultiDataTrigger>-->
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Button}}, Path=IsMouseOver}" Value="True"/>
-                                            <Condition Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="6"/>
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="Text" Value="{Binding ViewModel.MatchmakingViewModel.ProgressText,StringFormat='Cancel? {0}'}"/>
-                                    </MultiDataTrigger>
-                                    <DataTrigger Binding="{Binding ViewModel.SelectedRatingType}" Value="0">
-                                        <Setter Property="Text">
-                                            <Setter.Value>
-                                                <MultiBinding StringFormat="Leave all queues? Matching in {0:mm}:{0:ss} Players: {1}">
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PopTimeSpan"/>
-                                                    <Binding Path="ViewModel.MatchmakingViewModel.CurrentQueue.PlayersCountInQueue"/>
-                                                </MultiBinding>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
-            </Ui:Button>
-
-
-            <ToggleButton x:Name="SelectFactions" Height="32" Margin="10 0 0 0" Padding="2" Visibility="{Binding ViewModel.SearchButtonVisibility}">
-                <ItemsControl ItemsSource="{Binding ViewModel.MatchmakingViewModel.PartyViewModel.Factions}"
-                              Style="{StaticResource FactionItemsControl}"/>
+                </ToggleButton.Style>
+                <TextBlock>
+                    <Run Text="&#xe0ad; " FontFamily="{StaticResource FontAwesomeLight}"/>
+                    <Run Text="Filters"/>
+                </TextBlock>
             </ToggleButton>
-            <Popup IsOpen="{Binding IsChecked, ElementName=SelectFactions}" StaysOpen="False" AllowsTransparency="True"
-                       PlacementTarget="{Binding ElementName=SelectFactions}"
-                       Placement="Center">
-                <Border Style="{StaticResource BorderPopup}" Padding="4" DataContext="{Binding ViewModel.MatchmakingViewModel.PartyViewModel}">
-                    <ItemsControl ItemsSource="{Binding Factions}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition/>
-                                        <ColumnDefinition/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                </Grid>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Key}" Value="2">
-                                        <Setter Property="Grid.Column" Value="1"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Key}" Value="3">
-                                        <Setter Property="Grid.Row" Value="1"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding Key}" Value="4">
-                                        <Setter Property="Grid.Row" Value="1"/>
-                                        <Setter Property="Grid.Column" Value="1"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Style="{StaticResource CardBorder}" Width="NaN" Height="NaN" Padding="10">
-                                    <Border.InputBindings>
-                                        <MouseBinding MouseAction="LeftClick"
-                                                      CommandParameter="{Binding Key}"
-                                                      Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},Path=DataContext.UpdateFactionCommand}"/>
-                                    </Border.InputBindings>
-                                    <Path Style="{StaticResource FactionPath}"/>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Border>
-            </Popup>
+        </Grid>
+        <ui:Card
+                Margin="0 10 0 0"
+                Grid.Row="1"
+                Grid.ColumnSpan="3"
+                Visibility="{Binding ElementName=ToggleFiltersButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ui:VirtualizingWrapPanel
+                                    IsItemsHost="True"
+                                    ItemSize="200,40"
+                                    Orientation="Vertical"
+                                    SpacingMode="Uniform"
+                                    StretchItems="True" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ComboBox ItemsSource="{Binding ViewModel.GameStates}"
+                      SelectedValue="{Binding ViewModel.SelectedGameState}"
+                      Margin="10 0 0 0" Padding="10 5 10 6"/>
+                <ComboBox ItemsSource="{Binding ViewModel.FeaturedMods}"
+                      SelectedValue="{Binding ViewModel.SelectedFeaturedMod}"
+                      Margin="10 0 0 0" Padding="10 5 10 6"/>
+            </ItemsControl>
+        </ui:Card>
+        <!--<WrapPanel Margin="0 0 30 10" Grid.ColumnSpan="3">
 
-            <ContentControl Content="{Binding ViewModel.MatchmakingViewModel.CurrentQueue}" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
-                <ContentControl.Style>
-                    <Style TargetType="ContentControl">
-                        <Setter Property="Visibility" Value="{Binding ViewModel.PartyVisibility}"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ViewModel.MatchmakingViewModel.State}" Value="1">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ContentControl.Style>
-                <ContentControl.ContentTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" Margin="10 0 0 0">
-                            <Ui:Badge>
-                                <TextBlock Text="{Binding PopTimeSpan, StringFormat='Matching in: {0:mm\\:ss}'}" VerticalAlignment="Center"/>
-                            </Ui:Badge>
-                            <Ui:Badge>
-                                <TextBlock Text="{Binding PlayersCountInQueue, StringFormat='In queue: {0}'}" VerticalAlignment="Center"/>
-                            </Ui:Badge>
-                        </StackPanel>
-                    </DataTemplate>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-
-            <Border Margin="10 0 0 0" Style="{StaticResource Card}" Visibility="{Binding ViewModel.PartyVisibility}">
-                <ItemsControl VerticalContentAlignment="Stretch" VerticalAlignment="Stretch"
-                              ItemsSource="{Binding ViewModel.MatchmakingViewModel.PartyViewModel.MembersObservable}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource Card}" Padding="4 2">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Player.Login}"/>
-                                    <Ui:SymbolIcon Symbol="Star12" Filled="True" Foreground="Orange" ToolTip="Party owner"
-                                                   IsEnabled="{Binding IsOwner}">
-                                        <Ui:SymbolIcon.Style>
-                                            <Style TargetType="Ui:SymbolIcon" BasedOn="{StaticResource {x:Type Ui:SymbolIcon}}">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsEnabled" Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Ui:SymbolIcon.Style>
-                                    </Ui:SymbolIcon>
-                                    <ItemsControl Style="{StaticResource FactionItemsControl}" ItemsSource="{Binding Factions}" Height="20" Margin="2 0 0 0"/>
-                                    <Button CommandParameter="{Binding Player.Id}"
-                                            Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}},
-                                                Path=DataContext.ViewModel.MatchmakingViewModel.PartyViewModel.KickPlayerCommand}"
-                                            Margin="4 0 0 0" Padding="2 0"
-                                            ToolTip="Kick player from party">
-                                        <Button.Style>
-                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=IsMouseOver}"
-                                                                 Value="False">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                        <Ui:SymbolIcon Symbol="PlugDisconnected24"/>
-                                    </Button>
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Border>
-            <Button FontSize="12" Margin="10 0 0 0" Command="{Binding ViewModel.MatchmakingViewModel.PartyViewModel.ShowInviteBoxCommand}"
-                    Visibility="{Binding ViewModel.MatchmakingViewModel.InviteButtonVisibility}" VerticalAlignment="Stretch">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Invite player"/>
-                    <Ui:SymbolIcon Symbol="PersonAdd24" Foreground="LimeGreen" Filled="True" Margin="6 0 0 0"
-                                       ToolTip="Invite player to party"/>
-                </StackPanel>
-            </Button>
-
-        </WrapPanel>
-        <ListView Grid.Row="1" Grid.ColumnSpan="2" Margin="0 0 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False"
-                  SelectedValue="{Binding ViewModel.SelectedGame}">
+        </WrapPanel>-->
+        <ListView Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False">
             <ListView.ItemTemplateSelector>
                 <databinding:GameTemplateSelector
                     IdleGame="{StaticResource AlternativeCard}"
                     LiveGame="{StaticResource AlternativeCard}"
                     MatchmakingGame="{StaticResource LadderGameOne}"
-                    
                     LadderGameOne="{StaticResource LadderGameOne}"
                     LadderGameCompact="{StaticResource LadderGameCompact}"/>
             </ListView.ItemTemplateSelector>
@@ -1091,164 +822,5 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <ToggleButton x:Name="SidebarToggleButton" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-            <ToggleButton.ToolTip>
-                <ToolTip Placement="Left">
-                    <StackPanel>
-                        <TextBlock TextWrapping="Wrap">
-                            <Run Text="Sidebar expander" FontSize="14"/>
-                            <LineBreak/>
-                            <Run Text="Expand or collapse additional information about selected lobby"/>
-                            <LineBreak/>
-                        </TextBlock>
-                    </StackPanel>
-                </ToolTip>
-            </ToggleButton.ToolTip>
-            <ToggleButton.Style>
-                <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                    <Setter Property="TextElement.FontSize" Value="22"/>
-                    <Setter Property="Padding" Value="6 1 6 4"/>
-                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                    <Setter Property="Content" Value='‹'/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=SidebarToggleButton, Path=IsChecked}" Value="True">
-                            <Setter Property="Grid.ColumnSpan" Value="2"/>
-                            <Setter Property="Content" Value="›"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ToggleButton.Style>
-        </ToggleButton>
-        <ScrollViewer x:Name="SidebarScrollViewer" Grid.Column="2" Grid.Row="1">
-            <ScrollViewer.Style>
-                <Style TargetType="ScrollViewer" BasedOn="{StaticResource {x:Type ScrollViewer}}">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding ElementName=SidebarToggleButton, Path=IsChecked}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
-                        </DataTrigger>
-                        <Trigger Property="CanContentScroll" Value="False">
-                            <Setter Property="Padding" Value="0 0 -16 0"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ScrollViewer.Style>
-            <Border Style="{StaticResource CardBorder}" Width="360">
-                <ContentControl Content="{Binding ViewModel.SelectedGame}">
-                    <ContentControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type lobby:Game}">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <Border Style="{StaticResource CardBorder}" Margin="0 8 0 0" Padding="10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="120"/>
-                                            <ColumnDefinition Width="10"/>
-                                            <ColumnDefinition/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                            <RowDefinition/>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Grid.ColumnSpan="3" Text="{Binding Mapname}" TextWrapping="Wrap"
-                                                   Margin="0 0 0 10" FontSize="14">
-                                            <TextBlock.Style>
-                                                <Style TargetType="FrameworkElement">
-                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding MapScenario}" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="0" Padding="0" Width="120" VerticalAlignment="Top">
-                                            <Image Source="{Binding SmallMapPreview, Mode=OneWay, Converter={StaticResource UriToImageConverter}}"
-                                               ToolTip="{Binding Mapname}" Width="120" Height="120"/>
-                                        </Border>
-                                        <Button Grid.Row="2" Height="120" Width="120" Style="{StaticResource MapGeneratorButton}" CommandParameter="{Binding}">
-                                            
-                                        </Button>
-                                        <ContentControl Grid.Row="2" Grid.Column="2" Content="{Binding MapScenario}">
-                                            <ContentControl.ContentTemplate>
-                                                <DataTemplate>
-                                                    <StackPanel TextBlock.FontSize="14">
-                                                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" FontWeight="DemiBold"/>
-                                                        <TextBlock Text="{Binding Type, StringFormat='Type: {0}'}"/>
-                                                        <TextBlock Text="{Binding IsAdaptiveMap, StringFormat='Adaptive: {0}'}"/>
-                                                        <TextBlock Text="{Binding MapVersion, StringFormat='Version: {0}'}" TextWrapping="Wrap"/>
-                                                        <TextBlock TextWrapping="Wrap">
-                                                            <Run Text="{Binding Height, Mode=OneWay, StringFormat='Heigth: {0} px'}"/>
-                                                            <Run Text="{Binding HeigthInKm, Mode=OneWay, StringFormat='- {0} km'}"/>
-                                                        </TextBlock>
-                                                        <TextBlock TextWrapping="Wrap">
-                                                            <Run Text="{Binding Width, Mode=OneWay, StringFormat='Width:  {0} px'}"/>
-                                                            <Run Text="{Binding WidthInKm, Mode=OneWay, StringFormat='- {0} km'}"/>
-                                                        </TextBlock>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ContentControl.ContentTemplate>
-                                        </ContentControl>
-                                    </Grid>
-                                </Border>
-                                <StackPanel Grid.Row="1">
-                                    <Border Style="{StaticResource CardBorder}" Margin="0 8 0 0" Padding="10" TextElement.FontSize="14">
-                                        <StackPanel>
-                                            <Label Content="Rating"/>
-                                            <UniformGrid Rows="1">
-                                                <TextBlock Text="{Binding RatingType, StringFormat='Type: {0}'}"/>
-                                                <TextBlock Text="{Binding RatingMin, StringFormat='Min: {0}'}">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RatingMin}" Value="{x:Null}">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding RatingMax, StringFormat='Max: {0}'}">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding RatingMin}" Value="{x:Null}">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </UniformGrid>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                                <ItemsControl Grid.Row="3" ItemsSource="{Binding GameTeams}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Style="{StaticResource CardBorder}" TextElement.FontSize="14" Padding="10" Margin="0 10 0 0">
-                                                <StackPanel>
-                                                    <Label Content="{Binding HumanTitle}"/>
-                                                    <ItemsControl ItemsSource="{Binding GamePlayers}"/>
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Grid>
-                        </DataTemplate>
-                    </ContentControl.ContentTemplate>
-                </ContentControl>
-            </Border>
-        </ScrollViewer>
     </Grid>
 </local:PageBase>
