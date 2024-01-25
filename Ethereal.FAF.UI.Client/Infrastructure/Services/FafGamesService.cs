@@ -302,6 +302,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 player.IsConnected = false;
             }
         }
+
+        public Game GetGame(long id)
+        {
+            if (_games.TryGetValue(id, out var game)) return game;
+            return null;
+        }
         #endregion
     }
 }
