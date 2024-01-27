@@ -4,19 +4,34 @@ using Meziantou.Framework.WPF.Collections;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public sealed class LobbyGamesViewModel : Base.ViewModel
+    public class LobbyGamesViewModel : Base.ViewModel
     {
-        public ConcurrentObservableCollection<Game> Games { get; private set; }
-        public LobbyGamesViewModel(IFafGamesService fafGamesService, IFafGamesEventsService fafGamesEventsService)
+        private readonly IFafGamesEventsService _fafGamesEventsService;
+        public ConcurrentObservableCollection<Game> Games { get; private set; } = new();
+        public LobbyGamesViewModel(IFafGamesEventsService fafGamesEventsService)
         {
-            var games = fafGamesService.GetGames();
-            Games = new();
-            Games.AddRange(games);           
-
-            fafGamesEventsService.GameAdded += FafGamesEventsService_GameAdded;
-            fafGamesEventsService.GameRemoved += FafGamesEventsService_GameRemoved;
+            _fafGamesEventsService = fafGamesEventsService;
+            _fafGamesEventsService.GameAdded += FafGamesEventsService_GameAdded;
+            _fafGamesEventsService.GameRemoved += FafGamesEventsService_GameRemoved;
+            _fafGamesEventsService.GameUpdated += _fafGamesEventsService_GameUpdated;
         }
-        private void FafGamesEventsService_GameRemoved(object sender, Game e) => Games.Remove(e);
-        private void FafGamesEventsService_GameAdded(object sender, Game e) => Games.Add(e);
+
+        private void _fafGamesEventsService_GameUpdated(object sender, (Game Cached, Game Incoming) e)
+        {
+            var index = Games.IndexOf(e.Cached);
+            if (index > 0)
+            {
+                Games[index] = e.Cached;
+            }
+        }
+
+        private void FafGamesEventsService_GameRemoved(object sender, Game e)
+        {
+            Games.Remove(e);
+        }
+        private void FafGamesEventsService_GameAdded(object sender, Game e)
+        {
+            Games.Add(e);
+        }
     }
 }
