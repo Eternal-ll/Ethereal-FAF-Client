@@ -1,5 +1,7 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.ViewModels;
+using FAF.Domain.LobbyServer;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -38,8 +40,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _fafLobbyEventsService.PlayerReceived += _fafLobbyEventsService_PlayerReceived;
         }
 
-        private void _fafLobbyEventsService_PlayerReceived(object sender, Player e)
+        private void _fafLobbyEventsService_PlayerReceived(object sender, PlayerInfoMessage serverPlayer)
         {
+            var e = serverPlayer.MapToViewModel();
             PrepareRatings(e);
             if (_players.TryGetValue(e.Id, out var player))
             {
@@ -63,8 +66,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             PlayersAdded?.Invoke(this, new[] { e });
         }
 
-        private void _fafLobbyEventsService_PlayersReceived(object sender, Player[] e)
+        private void _fafLobbyEventsService_PlayersReceived(object sender, PlayerInfoMessage[] data)
         {
+            var e = data.Select(x => x.MapToViewModel()).ToArray();
             if (_playersInitialized)
             {
                 foreach (var player in e)

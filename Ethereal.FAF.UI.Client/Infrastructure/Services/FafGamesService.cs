@@ -1,6 +1,8 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
+using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.Logging;
 using System;
@@ -39,7 +41,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _fafLobbyEventsService.GamesReceived += _fafLobbyEventsService_GamesReceived;
         }
 
-        private void _fafLobbyEventsService_GamesReceived(object sender, Game[] e)
+        private void _fafLobbyEventsService_GamesReceived(object sender, GameInfoMessage[] e)
         {
                 foreach (var game in e)
                 {
@@ -47,7 +49,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             }
 
-        private void _fafLobbyEventsService_GameReceived(object sender, Game e) => ProceedGame(e);
+        private void _fafLobbyEventsService_GameReceived(object sender, GameInfoMessage e) => ProceedGame(e.MapToViewModel());
 
         private void _fafLobbyEventsService_Connected(object sender, bool e)
         {

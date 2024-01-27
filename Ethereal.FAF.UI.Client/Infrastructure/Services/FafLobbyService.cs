@@ -1,9 +1,7 @@
 ﻿using AsyncAwaitBestPractices;
-using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Configuration;
-using Ethereal.FAF.UI.Client.Models.Lobby;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
@@ -26,10 +24,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         #region IFafLobbyEventsService
         public event EventHandler<bool> OnConnection;
         public event EventHandler<string> IrcPasswordReceived;
-        public event EventHandler<Player> PlayerReceived;
-        public event EventHandler<Player[]> PlayersReceived;
-        public event EventHandler<Game> GameReceived;
-        public event EventHandler<Game[]> GamesReceived;
+        public event EventHandler<PlayerInfoMessage> PlayerReceived;
+        public event EventHandler<PlayerInfoMessage[]> PlayersReceived;
+        public event EventHandler<GameInfoMessage> GameReceived;
+        public event EventHandler<GameInfoMessage[]> GamesReceived;
         public event EventHandler<AuthentificationFailedData> AuthentificationFailed;
         public event EventHandler<SocialData> SocialDataReceived;
         public event EventHandler<Welcome> WelcomeDataReceived;
@@ -188,12 +186,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     //        break;
                     //    }
                     SocialData msg => () => SocialDataReceived?.Invoke(this, msg),
-                    PlayerInfoMessage msg => () => PlayerReceived?.Invoke(this, msg.MapToViewModel()),
-                    LobbyPlayers msg => () => PlayersReceived?
-                            .Invoke(this, msg.Players.Select(x => x.MapToViewModel()).ToArray()),
-                    GameInfoMessage msg => () => GameReceived?.Invoke(this, msg.MapToViewModel()),
-                    LobbyGames msg => () => GamesReceived?
-                            .Invoke(this, msg.Games.Select(x => x.MapToViewModel()).ToArray()),
+                    PlayerInfoMessage msg => () => PlayerReceived?.Invoke(this, msg),
+                    LobbyPlayers msg => () => PlayersReceived?.Invoke(this, msg.Players),
+                    GameInfoMessage msg => () => GameReceived?.Invoke(this, msg),
+                    LobbyGames msg => () => GamesReceived?.Invoke(this, msg.Games.ToArray()),
                     GameLaunchData msg => () => GameLaunchDataReceived?.Invoke(this, msg),
                     PartyInvite msg => () => PartyInvite?.Invoke(this, msg),
                     PartyUpdate msg => () => PartyUpdated?.Invoke(this, msg),
