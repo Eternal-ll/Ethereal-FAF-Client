@@ -41,28 +41,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void _fafLobbyEventsService_GamesReceived(object sender, Game[] e)
         {
-            if (_gamesInitialized)
-            {
                 foreach (var game in e)
                 {
                     _fafLobbyEventsService_GameReceived(sender, game);
                 }
-                return;
             }
-            _gamesInitialized = true;
-            _logger.LogInformation("Received [{gamesCount}] games", e.Length);
-            foreach (var game in e)
-            {
-                if (!game.IsMapgen)
-                {
-                    game.SmallMapPreview = $"{_clientManager.GetServer().Content}maps/previews/small/{game.Mapname}.png";
-                }
-                game.UpdateTeams();
-                FillPlayers(game);
-                _games.TryAdd(game.Uid, game);
-                GameAdded?.Invoke(this, game);
-            }
-        }
 
         private void _fafLobbyEventsService_GameReceived(object sender, Game e) => ProceedGame(e);
 
