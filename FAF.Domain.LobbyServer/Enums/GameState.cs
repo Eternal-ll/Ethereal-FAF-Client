@@ -1,17 +1,21 @@
 ﻿namespace FAF.Domain.LobbyServer.Enums
 {
+    /// <summary>
+    /// Game state
+    /// </summary>
     public enum GameState : byte
     {
-        None = 0,
-
+        /// <summary>
+        /// Game open, free to join
+        /// </summary>
         Open = 1,
+        /// <summary>
+        /// Game launched, only for live replay
+        /// </summary>
         Playing = 2,
-        Closed = 3,
-
-        Host = 4,
-
-        Playing5 = 9,
-
-        Launched = 5,
+        /// <summary>
+        /// Game is initializing or closing
+        /// </summary>
+        Closed = 3
     }
 }
