@@ -105,7 +105,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<ServerManager>();
 
-            services.AddScoped<PatchClient>();
             services.AddScoped<IceManager>();
             services.AddScoped<LobbyClient>();
 
@@ -121,7 +120,7 @@ namespace Ethereal.FAF.UI.Client
             services.Configure<IceAdapterConfiguration>(configuration.GetSection("IceAdapter"));
             services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
 
-            services.AddScoped<PatchWatcher>();
+            services.AddSingleton<PatchWatcher>();
             services.AddScoped<GameLauncher>();
             services.AddScoped<MapGenerator>();
             services.AddScoped<MapsService>();
