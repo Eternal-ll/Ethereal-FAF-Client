@@ -6,6 +6,7 @@ using SharpCompress.Readers;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -64,14 +65,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
             Directory.CreateDirectory(outputDirectory);
             progress?.Report(new ProgressReport(-1, isIndeterminate: true, message: "Extracting..."));
 
-            var count = 0ul;
+            var ext = Path.GetExtension(archivePath);
 
             // Get true size
-            var (total, _) = Path.GetExtension(archivePath) switch
+            var (total, _) = ext switch
             {
                 ".rar" => await GetRarAchiveInfo(archivePath).ConfigureAwait(false),
                 //".7z" => await TestArchive(archivePath).ConfigureAwait(false),
-                _ => throw new NotImplementedException("Unknown archive extension"),
+                _ => new ArchiveInfo(),
             };
 
             // If not available, use the size of the archive file
@@ -96,39 +97,38 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
             //        progress!.Report(new ProgressReport(count, total, message: "Extracting..."));
             //    };
             //}
-
             await Task.Factory
                 .StartNew(() =>
                 {
+                    if (ext == ".zip") 
+                    {
+                        ZipFile.ExtractToDirectory(archivePath, outputDirectory, true);
+                        return;
+                    }
                     var extractOptions = new ExtractionOptions
                     {
                         Overwrite = true,
                         ExtractFullPath = true,
                     };
-                    using (var stream = File.OpenRead(archivePath))
+                    using var stream = File.OpenRead(archivePath);
+                    using var archive = ReaderFactory.Open(stream);
+                    // Start the progress reporting timer
+                    //progressMonitor?.Start();
+
+                    archive.EntryExtractionProgress += (s, arg) =>
                     {
-                        using var archive = ReaderFactory.Open(stream);
-                        // Start the progress reporting timer
-                        //progressMonitor?.Start();
+                        progress?.Report(new(
+                            progress: arg.ReaderProgress?.PercentageReadExact * 0.01 ?? 1,
+                            message: $"Extracting \"{arg.Item.Key}\"",
+                            isIndeterminate: arg.ReaderProgress == null));
+                    };
 
-                        archive.EntryExtractionProgress += (s, arg) =>
-                        {
-                            progress?.Report(new(
-                                progress: arg.ReaderProgress?.PercentageReadExact * 0.01 ?? 1,
-                                message: $"Extracting \"{arg.Item.Key}\"",
-                                isIndeterminate: arg.ReaderProgress == null));
-                        };
-
-                        while (archive.MoveToNextEntry())
-                        {
-                            var entry = archive.Entry;
-                            if (!entry.IsDirectory)
-                            {
-                                count += (ulong)entry.CompressedSize;
-                            }
-                            archive.WriteEntryToDirectory(outputDirectory, extractOptions);
-                        }
+                    while (archive.MoveToNextEntry())
+                    {
+                        archive.WriteEntryToDirectory(outputDirectory, extractOptions);
                     }
+
+                    //archive.WriteAllToDirectory(outputDirectory, extractOptions);
                 },TaskCreationOptions.LongRunning)
                 .ConfigureAwait(false);
 
