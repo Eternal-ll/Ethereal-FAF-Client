@@ -1,13 +1,12 @@
-﻿using Ethereal.FAF.API.Client.Models;
-using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
-using Humanizer;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby
@@ -123,83 +122,81 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         }
     }
 
-    public sealed class Game : GameInfoMessage, IDisposable
+    public sealed partial class Game : ObservableObject
     {
-        #region Mapname
-        private string _Mapname;
-        [JsonPropertyName("mapname")]
-        new public string Mapname
+        private bool Set<T>(ref T field, T value, [CallerMemberName] string PropertyName = null)
         {
-            get => _Mapname;
-            set
-            {
-                if (Set(ref _Mapname, value))
-                {
-                    MapGeneratorState = MapGeneratorState.NotGenerated;
-                    SmallMapPreview = string.IsNullOrWhiteSpace(value) || IsMapgen ?
-                        null :
-                        $"https://content.faforever.com/maps/previews/small/{value}.png";
-                    OnPropertyChanged(nameof(IsMapgen));
-                }
-            }
+            if (Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(PropertyName);
+            return true;
         }
+
+        #region Original properties
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <example>public</example>
+        [ObservableProperty]
+        private GameVisibility _Visibility;
+        [ObservableProperty]
+        private bool _PasswordProtected;
+        /// <summary>
+        /// Game unique ID
+        /// </summary>
+        /// <example>19113763</example>
+        [ObservableProperty]
+        private long _Uid;
+        [ObservableProperty]
+        private string _Title;
+        [ObservableProperty]
+        private GameState _State;
+        [ObservableProperty]
+        private GameType _GameType;
+        [ObservableProperty]
+        private FeaturedMod _FeaturedMod;
+        [ObservableProperty]
+        private Dictionary<string, string> _SimMods;
+        [ObservableProperty]
+        private GameMap _Map;
+        [ObservableProperty]
+        private string _Host;
+        [ObservableProperty]
+        private int _NumPlayers;
+        [ObservableProperty]
+        private int _MaxPlayers;
+        [ObservableProperty]
+        private double? _LaunchedAt;
+        public RatingType RatingType { get; set; }
+        public double? RatingMin { get; set; }
+        public double? RatingMax { get; set; }
+        public bool EnforceRatingRange { get; set; }
+        [ObservableProperty]
+        private TeamIds[] _TeamsIds;
+        [ObservableProperty]
+        private Dictionary<int, string[]> _Teams;
         #endregion
 
+        [ObservableProperty]
         private BitmapImage _MapSmallBitmapImage;
-        public BitmapImage MapSmallBitmapImage { get => _MapSmallBitmapImage; set => Set(ref _MapSmallBitmapImage, value); }
-
-        [JsonIgnore]
-        private string _SmallMapPreview = null;
-        public string SmallMapPreview
-        {
-            get => _SmallMapPreview;
-            set => Set(ref _SmallMapPreview, value);
-        }
-        [JsonIgnore]
-        public string LargeMapPreview => $"https://content.faforever.com/maps/previews/large/{Mapname}.png";
-        [JsonIgnore]
-        public string HumanTitle => Title.Truncate(34);
-        [JsonIgnore]
-        public string HumanLaunchedAt => "";//LaunchedAt.HasValue ? DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value).Humanize() : null;
-        public TimeSpan LaunchedAtTimeSpan => LaunchedAt is null ? TimeSpan.Zero :
-            DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeSeconds((long)LaunchedAt.Value);
-
 
         #region Map generator
-        public bool IsMapgen => MapGenerator.IsGeneratedMap(Mapname);
-        
-        #region MapGeneratorException
+        public bool IsMapgen => false;
+        [ObservableProperty]
         private string _MapGeneratorException;
-        public string MapGeneratorException { get => _MapGeneratorException; set => Set(ref _MapGeneratorException, value); } 
-        #endregion
-
-        #region MapGeneratorState
+        [ObservableProperty]
         private MapGeneratorState _MapGeneratorState;
-        public MapGeneratorState MapGeneratorState
-        {
-            get => _MapGeneratorState;
-            set => Set(ref _MapGeneratorState, value);
-        }
-        #endregion
 
         #endregion
 
+        [ObservableProperty]
         private Player _HostPlayer;
-
-        public Player HostPlayer { get => _HostPlayer; set => Set(ref _HostPlayer, value); }
-
+        [ObservableProperty]
         private GameTeam[] _GameTeams;
-        public GameTeam[] GameTeams
-        {
-            get => _GameTeams;
-            set
-            {
-                if (Set(ref _GameTeams, value))
-                {
 
-                }
-            }
-        }
+        [Obsolete]
+        [ObservableProperty]
+        private string _SmallMapPreview;
 
         public string[] PlayersLogins => Teams.SelectMany(t => t.Value).ToArray();
         public long[] PlayersIds => TeamsIds.SelectMany(t => t.PlayerIds).ToArray();
@@ -265,59 +262,11 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         public GamePlayer GetPlayer(long uid) => Players.FirstOrDefault(p => p.Id == uid);
         public bool TryGetPlayer(long uid, out GamePlayer player)
         {
-            if (GameTeams is null)
-            {
-
-            }
             player = GetPlayer(uid);
             return player is not null;
         }
 
+        [ObservableProperty]
         private FA.Vault.MapScenario _MapScenario;
-        public FA.Vault.MapScenario MapScenario
-        {
-            get => _MapScenario;
-            set => Set(ref _MapScenario, value);
-        }
-
-
-        public bool IsRanked => ApiGameValidatyState is ApiGameValidatyState.VALID;
-        #region ApiGameValidatyState
-        private ApiGameValidatyState _ApiGameValidatyState = ApiGameValidatyState.UNKNOWN;
-        public ApiGameValidatyState ApiGameValidatyState
-        {
-            get => _ApiGameValidatyState;
-            set
-            {
-                if (Set(ref _ApiGameValidatyState, value))
-                {
-                    OnPropertyChanged(nameof(IsRanked));
-                }
-            }
-        }
-
-        #endregion
-
-        #region VictoryCondition
-        private string _VictoryCondition;
-        public string VictoryCondition { get => _VictoryCondition; set => Set(ref _VictoryCondition, value); }
-        #endregion
-
-        public bool IsPassedFilter { get; set; }
-        public DateTime Created { get; set; } = DateTime.Now;
-        public TimeSpan AfterCreationTimeSpan => DateTime.Now - Created;
-
-
-        public bool UnSupported => FeaturedMod is not (FeaturedMod.FAF or FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop or FeaturedMod.coop);
-        public bool IsDevChannel => FeaturedMod is FeaturedMod.FAFBeta or FeaturedMod.FAFDevelop;
-
-
-        public void Dispose()
-        {
-            if (MapSmallBitmapImage != null)
-            {
-                MapSmallBitmapImage.UriSource = null;
-            }
-        }
     }
 }

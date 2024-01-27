@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
-    public class QueueData : INPC
+    public class QueueData : Base.ServerMessage
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ServerCommand Command { get; set; }

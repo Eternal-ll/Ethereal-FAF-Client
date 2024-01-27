@@ -1,21 +1,27 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Services;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
-using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public sealed class Player : PlayerInfoMessage
+    public sealed class Player : ObservableObject
     {
+        #region OriginalProperties
+        public long Id { get; set; }
+        public string Login { get; set; }
+        public PlayerState State { get; set; }
+        public bool IsOffline => State == PlayerState.offline;
+        public PlayerAvatar Avatar { get; set; }
+        public string Country { get; set; }
+        public string Clan { get; set; }
+        public Ratings Ratings { get; set; }
+
+        #endregion
         private string _FlagUri;
         public string FlagUri => _FlagUri ??= "/Resources/Images/Flags/" + Country + ".png";
 
         public string LoginWithClan => $"{(Clan is null ? null : '[' + Clan + "] ")}{Login}";
-
-        [JsonPropertyName("players")]
-        public new Player[] Players { get; set; }
-
 
         public int Global => Ratings.Global is null ? 0 : Ratings.Global.DisplayedRating;
         public int Ladder1v1 => Ratings.Ladder1V1 is null ? 0 : Ratings.Ladder1V1.DisplayedRating;
@@ -52,7 +58,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region IsLobbyConnected
         private bool _IsLobbyConnected;
-        public bool IsLobbyConnected { get => _IsLobbyConnected; set => Set(ref _IsLobbyConnected, value); }
+        public bool IsLobbyConnected { get => _IsLobbyConnected; set => SetProperty(ref _IsLobbyConnected, value); }
         #endregion
 
         public bool IsIrcConnected => !string.IsNullOrWhiteSpace(IrcUsername);
@@ -63,7 +69,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             get => _IrcUsername;
             set
             {
-                if (Set(ref _IrcUsername, value))
+                if (SetProperty(ref _IrcUsername, value))
                 {
                     OnPropertyChanged(nameof(IsIrcConnected));
                 }
@@ -78,12 +84,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region Game
         private Game _Game;
-        new public Game Game
+        public Game Game
         {
             get => _Game;
             set
             {
-                if (Set(ref _Game, value))
+                if (SetProperty(ref _Game, value))
                 {
                     OnPropertyChanged(nameof(IsInGame));
                     OnPropertyChanged(nameof(IsPlaying));

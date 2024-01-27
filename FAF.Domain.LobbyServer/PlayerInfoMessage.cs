@@ -7,7 +7,7 @@ namespace FAF.Domain.LobbyServer
         online,
         offline,
     }
-	public class PlayerInfoMessage : INPC
+	public class PlayerInfoMessage : Base.ServerMessage
     {
         [JsonPropertyName("id")]
         public long Id { get; set; }
