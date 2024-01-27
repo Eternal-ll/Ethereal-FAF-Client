@@ -19,16 +19,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
         private readonly IFafPlayersService _fafPlayersService;
         private readonly ILogger<FafGamesService> _logger;
-        private readonly ClientManager _clientManager;
         private readonly ConcurrentDictionary<long, Game> _games;
 
         private bool _gamesInitialized;
 
-        public FafGamesService(IFafLobbyEventsService fafLobbyEventsService, ClientManager clientManager, IFafPlayersService fafPlayersService, ILogger<FafGamesService> logger)
+        public FafGamesService(IFafLobbyEventsService fafLobbyEventsService, IFafPlayersService fafPlayersService, ILogger<FafGamesService> logger)
         {
             _games = new();
             _fafLobbyEventsService = fafLobbyEventsService;
-            _clientManager = clientManager;
             _fafPlayersService = fafPlayersService;
             InitializeEvents();
             _logger = logger;
