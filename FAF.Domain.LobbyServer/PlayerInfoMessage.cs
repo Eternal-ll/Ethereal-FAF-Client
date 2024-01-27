@@ -41,8 +41,5 @@ namespace FAF.Domain.LobbyServer
         [JsonPropertyName("number_of_games")]
         public long NumberOfGames { get; set; }
 
-        [JsonPropertyName("players")]
-        public PlayerInfoMessage[] Players { get; set; }
-
     }
 }
