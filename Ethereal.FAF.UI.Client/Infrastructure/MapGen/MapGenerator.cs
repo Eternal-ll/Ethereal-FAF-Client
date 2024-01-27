@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
 {
+    public record struct NeroxisMapInfo(string Raw, string Version, string Seed);
     public sealed class MapGenerator
     {
         public event EventHandler<string> MapGenerated;
@@ -130,6 +131,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
         }
 
         public static bool IsGeneratedMap(string map) => Pattern.IsMatch(map);
+        public static NeroxisMapInfo Parse(string data)
+        {
+            if (!IsGeneratedMap(data)) return new();
+            var result = Pattern.Match(data);
+            if (result.Groups.Count == 3)
+            {
+                return new(data, result.Groups[1].Value, result.Groups[2].Value);
+            }
+            return new();
+        }
 
         public async Task<List<string>> GetStylesAsync(string version)
         {
