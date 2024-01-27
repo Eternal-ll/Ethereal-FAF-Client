@@ -68,15 +68,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void _fafLobbyEventsService_PlayersReceived(object sender, PlayerInfoMessage[] data)
         {
-            var e = data.Select(x => x.MapToViewModel()).ToArray();
             if (_playersInitialized)
             {
-                foreach (var player in e)
+                foreach (var player in data)
                 {
                     _fafLobbyEventsService_PlayerReceived(sender, player);
                 }
                 return;
             }
+            var e = data.Select(x => x.MapToViewModel()).ToArray();
             foreach (var player in e)
             {
                 _players.TryAdd(player.Id, player);
