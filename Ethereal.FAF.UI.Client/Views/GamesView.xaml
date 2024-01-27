@@ -320,7 +320,7 @@
             <DataTemplate DataType="{x:Type vm:Player}">
                 <StackPanel Orientation="Horizontal">
                     <Image Style="{StaticResource AvatarImage}"/>
-                    <Image Source="{Binding FlagUri}" Margin="4 0 0 0" ToolTip="{Binding Country}" Width="16" Height="16"/>
+                    <Image Source="{Binding FlagUri}" Margin="4 2 0 0" ToolTip="{Binding Country}" Width="16" Height="16"/>
                     <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0" ToolTip="{Binding LoginWithClan}"/>
                 </StackPanel>
             </DataTemplate>
@@ -545,86 +545,6 @@
                 </Border>
             </DataTemplate>
 
-            <Style x:Key="FactionPath" TargetType="Path">
-                <Setter Property="Stretch" Value="Uniform"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Key}" Value="1">
-                        <Setter Property="Fill" Value="#2396f1"/>
-                        <Setter Property="Data" Value="M4.958 19.086c-1.029-1.029-2.057-2.057-3.086-3.086 1.029-1.029 2.057-2.057 3.086-3.086 1.029 1.029 2.057 2.057 3.086 3.086-1.029 1.029-2.057 2.057-3.086 3.086z
-                              M8.661 22.788c-1.029-1.029-2.057-2.057-3.086-3.086 1.029-1.029 2.057-2.057 3.086-3.086 1.029 1.029 2.057 2.057 3.086 3.086-1.028 1.029-2.057 2.057-3.086 3.086z
-                              M12.364 26.491c-1.029-1.029-2.057-2.057-3.086-3.086 1.029-1.029 2.057-2.057 3.086-3.086 1.029 1.029 2.057 2.057 3.086 3.086-1.029 1.029-2.057 2.057-3.086 3.086z                                                 M16.066 22.788c-1.029-1.029-2.057-2.057-3.086-3.086 1.029-1.029 2.057-2.057 3.086-3.086 1.029 1.029 2.057 2.057 3.086 3.086-1.029 1.029-2.057 2.057-3.086 3.086z
-                              M19.769 19.086c-1.029-1.029-2.057-2.057-3.086-3.086 1.029-1.029 2.057-2.057 3.086-3.086 1.029 1.029 2.057 2.057 3.086 3.086-1.029 1.029-2.057 2.057-3.086 3.086z
-                              M12.364 19.086c-2.256-2.256-4.512-4.512-6.768-6.768 2.256-2.27 4.512-4.539 6.768-6.809 2.263 2.263 4.525 4.526 6.788 6.788-2.263 2.263-4.526 4.526-6.788 6.788z"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Key}" Value="3">
-                        <Setter Property="Fill" Value="#4eaf4f"/>
-                        <Setter Property="Data" Value="M12.364 19.487c-0.546 0-0.989 1.46-0.989 3.258s0.443 3.258 0.989 3.258 0.989-1.46 0.989-3.258-0.443-3.258-0.989-3.258z
-                                        M12.364 15.298c-1.798 0-3.258-2.608-3.258-5.818 0-1.916 0.52-3.618 1.322-4.678-3.244 1.359-5.628 6.123-5.627 11.781 0.077-0.003 0.154-0.005 0.232-0.005 2.805 0 5.151 1.991 5.682 4.639 0.237-1.819 0.887-3.126 1.649-3.126s1.412 1.307 1.649 3.126c0.531-2.647 2.877-4.639 5.682-4.639 0.078 0 0.155 0.002 0.232 0.005 0-5.658-2.384-10.422-5.627-11.781 0.802 1.060 1.322 2.762 1.322 4.678-0 3.21-1.46 5.818-3.258 5.818z"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Key}" Value="2">
-                        <Setter Property="Fill" Value="#f34532"/>
-                        <Setter Property="Data" Value="M12.364 14.855c-0.84 1.455-1.68 2.909-2.519 4.364 1.68 0 3.359 0 5.039 0-0.84-1.455-1.68-2.909-2.519-4.364z
-                                        M16.727 19.679c2.169 1.256 4.339 2.511 6.508 3.767-1.086-1.881-2.172-3.762-3.258-5.643-0.252 0.145-0.504 0.291-0.756 0.436-0.349-0.605-0.698-1.209-1.047-1.814 0.582-1.008 1.165-2.016 1.747-3.024-1.164 0-2.329 0.001-3.493 0.001-0.349-0.605-0.698-1.209-1.047-1.814 0.252-0.145 0.504-0.291 0.756-0.436-1.086-1.881-2.172-3.762-3.258-5.643 0.003 2.507 0.005 5.013 0.008 7.52 1.28 2.217 2.56 4.434 3.84 6.651z
-                                        M8.524 20.586c-2.172 1.251-4.344 2.502-6.516 3.753 2.172 0 4.344 0 6.516 0 0-0.291 0-0.582 0-0.873 0.698 0 1.396 0 2.095 0 0.582 1.009 1.164 2.017 1.745 3.025 0.582-1.009 1.164-2.017 1.745-3.025 0.698 0 1.396 0 2.095 0 0 0.291 0 0.582 0 0.873 2.172 0 4.344 0 6.516 0-2.172-1.251-4.344-2.502-6.516-3.753-2.56 0-5.12 0-7.68 0z
-                                        M11.84 13.028c0.003-2.507 0.005-5.013 0.008-7.52-1.086 1.881-2.172 3.762-3.258 5.643 0.252 0.145 0.504 0.291 0.756 0.436-0.349 0.605-0.698 1.209-1.047 1.814-1.164-0-2.329-0.001-3.493-0.001 0.582 1.008 1.165 2.016 1.747 3.024-0.349 0.605-0.698 1.209-1.047 1.814-0.252-0.145-0.504-0.291-0.756-0.436-1.086 1.881-2.172 3.762-3.258 5.643 2.169-1.256 4.339-2.511 6.508-3.767 1.28-2.217 2.56-4.434 3.84-6.651z"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Key}" Value="4">
-                        <Setter Property="Fill" Value="#ffbf08"/>
-                        <Setter Property="Data" Value="M9.734 18.587c0.594-0.97 1.545-1.598 2.615-1.598s2.021 0.629 2.615 1.598c-0.468-1.944-1.464-3.285-2.615-3.285s-2.148 1.342-2.615 3.285z
-                                        M15.026 21.353c0-1.894-1.2-3.433-2.676-3.433s-2.676 1.539-2.676 3.433 1.2 3.433 2.676 3.433c1.477 0 2.676-1.539 2.676-3.433z
-                                        M14.502 24.628c0.808-0.789 1.338-2.024 1.338-3.392 0-0.468-0.061-0.919-0.173-1.341 0.024-0.38 0.131-1.171-0.185-2.324-0.317-1.156-1.053-1.982-1.504-2.444 0.682-0.171 1.281-0.719 1.687-1.42s0.88-1.812 1.039-3.7-0.377-4.303-0.631-5.178c0.647 0.753 1.526 2.28 2.095 3.724s1.177 3.667 1.414 5.236 0.291 2.56 0.099 3.607c-0.743-0.436-1.197-0.115-1.402 0.029s-0.641 0.626-0.849 1.199c-0.208 0.572-0.288 1.41-0.186 2.031s0.341 0.784 0.555 0.781 0.595-0.123 1.371-1.042c0.775-0.919 1.345-2.023 1.553-2.577s0.541-1.425 0.762-2.455c0.213 1.843-0.141 3.62-0.593 4.829s-1.146 2.485-2.583 4.073-2.945 2.558-4.503 2.909c0.221-0.295 0.441-0.787 0.547-1.222s0.154-0.943 0.151-1.321z
-                                        M10.197 24.628c-0.792-0.79-1.338-2.040-1.338-3.392 0-0.524 0.076-1.027 0.216-1.492-0.071-0.69-0.023-1.116 0.075-1.65 0.103-0.557 0.387-1.258 0.582-1.658-1.277-0.407-1.915-1.198-2.275-2.066s-0.458-2.279-0.41-3.491c0.048-1.212 0.252-2.051 0.532-2.851-0.762 0.896-1.573 2.288-1.935 3.142s-0.73 2.198-0.841 3.2-0.127 1.925 0.215 3.025c0.754-0.461 1.209-0.115 1.414 0.029s0.624 0.663 0.864 1.309c0.24 0.646 0.259 1.314 0.154 1.92s-0.366 0.753-0.553 0.751c-0.186-0.003-0.577-0.093-1.353-1.012s-1.372-2.045-1.585-2.577c-0.214-0.533-0.502-1.312-0.687-2.339-0.235 1.789-0.016 3.183 0.538 4.713s1.676 3.043 2.58 4.073c0.904 1.029 2.404 2.357 4.503 2.909-0.252-0.479-0.373-0.791-0.5-1.268s-0.162-0.899-0.198-1.274z"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Value}" Value="False">
-                        <Setter Property="Fill" Value="Gray"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <Style x:Key="FactionItemsControl" TargetType="ItemsControl">
-                <Setter Property="ItemsPanel">
-                    <Setter.Value>
-                        <ItemsPanelTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                            </Grid>
-                        </ItemsPanelTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="ItemContainerStyle">
-                    <Setter.Value>
-                        <Style>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding Key}" Value="2">
-                                    <Setter Property="Grid.Column" Value="1"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Key}" Value="3">
-                                    <Setter Property="Grid.Row" Value="1"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Key}" Value="4">
-                                    <Setter Property="Grid.Row" Value="1"/>
-                                    <Setter Property="Grid.Column" Value="1"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="ItemTemplate">
-                    <Setter.Value>
-                        <DataTemplate>
-                            <Path Style="{StaticResource FactionPath}" Margin=".5 .5"/>
-                        </DataTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-
             <DataTemplate x:Key="Loader">
                 <ProgressBar IsIndeterminate="True"/>
             </DataTemplate>
@@ -643,10 +563,116 @@
             </Style>
             <DataTemplate x:Key="Test" DataType="{x:Type converters:AsyncTaskTwo}">
                 <ContentControl Style="{StaticResource ContentControlImageLoader}" Content="{Binding}"/>
-
             </DataTemplate>
 
             <DataTemplate x:Key="AlternativeCard" DataType="{x:Type lobby:Game}">
+                <Grid ShowGridLines="False" Background="Transparent">
+                    <Grid.InputBindings>
+                        <MouseBinding
+                            MouseAction="LeftDoubleClick"
+                            Command="{DynamicResource JoinGameCommand}"
+                            CommandParameter="{Binding}"/>
+                    </Grid.InputBindings>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <ContentControl
+                        Content="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}"
+                        Width="60" Height="60"
+                        ContentTemplate="{StaticResource Test}"/>
+                    <TextBlock Grid.Column="2" ToolTip="{Binding Title}" VerticalAlignment="Center">
+                        <Run Text="{Binding Title, Converter={StaticResource TruncateStringConverter}, ConverterParameter=40}"/>
+                        <LineBreak/>
+                        <Run Text="{Binding Map.Name}" Style="{StaticResource DescriptionHeaderRun}"
+                             ToolTip="{Binding Map.RawName}">
+                            <Run.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Copy map name"
+                                              Command="{StaticResource CopyCommand}"
+                                              CommandParameter="{Binding Map.RawName}"/>
+                                </ContextMenu>
+                            </Run.ContextMenu>
+                        </Run>
+                    </TextBlock>
+                    <TextBlock Grid.Column="4" VerticalAlignment="Center">
+                        <!--<Run Text="Host" Style="{StaticResource DescriptionHeaderRun}"/>-->
+                        <!--<LineBreak/>-->
+                        <InlineUIContainer>
+                            <ContentControl Grid.Column="4" VerticalAlignment="Center">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Content" Value="{Binding HostPlayer}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HostPlayer}" Value="{x:Null}">
+                                                <Setter Property="Content" Value="{Binding Host}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </InlineUIContainer>
+                    </TextBlock>
+                    <TextBlock Grid.Column="6"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               ToolTip="Players">
+                        <!--<Run Text="Players"/>-->
+                        <!--<LineBreak/>-->
+                        <Run>
+                            <Run.Text>
+                                <MultiBinding StringFormat="{}{0}/{1}">
+                                    <Binding Path="NumPlayers"/>
+                                    <Binding Path="MaxPlayers"/>
+                                </MultiBinding>
+                            </Run.Text>
+                        </Run>
+                    </TextBlock>
+                    <TextBlock Grid.Column="8" Style="{StaticResource DescriptionHeaderTextBlock}"
+                               VerticalAlignment="Center">
+                        <Run Text="Featured mod"/>
+                        <LineBreak/>
+                        <Run Text="{Binding FeaturedMod}"/>
+                    </TextBlock>
+                    <ContentControl Grid.Column="10" Content="{Binding SimMods}"
+                                    VerticalAlignment="Center">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type lobby:Game}">
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock"
+                                               BasedOn="{StaticResource DescriptionHeaderTextBlock}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Count}" Value="0">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <TextBlock.ToolTip>
+                                        <ItemsControl ItemsSource="{Binding}" DisplayMemberPath="Value"/>
+                                    </TextBlock.ToolTip>
+                                    <Run Text="Mods" Style="{StaticResource DescriptionHeaderRun}"/>
+                                    <LineBreak/>
+                                    <Run Text="{Binding Count, Mode=OneWay}"/>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="AlternativeCard2" DataType="{x:Type lobby:Game}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="-3" ContextMenu="{StaticResource GameContextMenu}">
                         <StackPanel.InputBindings>
@@ -665,13 +691,13 @@
                         <!--<Image Source="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}" Width="60" Height="60"/>-->
                         <!--<ContentControl Content="{Binding MapSmallBitmapImage}" Width="60" Height="60"/>-->
 
-                        <ContentControl Content="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}"
+                        <!--<ContentControl Content="{Binding SmallMapPreview, Converter={StaticResource CacheImageConverter}}"
                                         Width="60" Height="60"
-                                        ContentTemplate="{StaticResource Test}"/>
+                                        ContentTemplate="{StaticResource Test}"/>-->
 
 
-                        <Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
-                                Style="{StaticResource MapGeneratorButton}" TextElement.FontSize="10" CommandParameter="{Binding}"/>
+                        <!--<Button Width="60" Height="60" Margin="-60 0 0 0" Padding="0"
+                                Style="{StaticResource MapGeneratorButton}" TextElement.FontSize="10" CommandParameter="{Binding}"/>-->
                         <!--<Border Style="{StaticResource CardBorder}" Width="NaN" MaxWidth="180" Padding="4"  VerticalAlignment="Top" Margin="10 0 0 0">
                             <TextBlock Text="{Binding Title, Mode=OneTime}" TextWrapping="Wrap"/>
                         </Border>-->
@@ -689,7 +715,11 @@
                             <Run Text="{Binding NumPlayers, Mode=OneWay}"/>
                             <Run Text="{Binding MaxPlayers, Mode=OneWay, StringFormat='/ {0}'}"/>
                         </TextBlock>
-                        <ContentControl Content="{Binding HostPlayer, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>
+                        <!--<ContentControl Content="{Binding HostPlayer, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"
+                                        Width="180"/>-->
+                        <TextBlock>
+                            <Run Text="{Binding State, StringFormat='State: {0}', Mode=OneWay}"/>
+                        </TextBlock>
                         <!--<ContentControl Content="{Binding ServerManager}"/>-->
                         <!--<TextBlock Text="{Binding Host, Mode=OneWay}" VerticalAlignment="Center" Margin="10 0"/>-->
                     </StackPanel>
@@ -714,8 +744,25 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ToggleButton x:Name="ToggleFiltersButton" Grid.Column="2">
+            <Border Grid.Column="2">
+                <StackPanel Orientation="Horizontal">
+                    <Button Command="{Binding ViewModel.ShowListViewCommand}" ToolTip="List view"
+                             Padding="6 5 6 6">
+                        <Button.Content>
+                            <TextBlock Text="&#xf0c9;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        </Button.Content>
+                    </Button>
+                    <Button Command="{Binding ViewModel.ShowGridViewCommand}" ToolTip="Grid view"
+                            Margin="4 0" Padding="6 5 6 6">
+                        <Button.Content>
+                            <TextBlock Text="&#xe195;" FontFamily="{StaticResource FontAwesomeLight}"/>
+                        </Button.Content>
+                    </Button>
+                </StackPanel>
+            </Border>
+            <ToggleButton x:Name="ToggleFiltersButton" Grid.Column="3">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
                         <Setter Property="Background" Value="Transparent"/>
@@ -766,8 +813,65 @@
         <!--<WrapPanel Margin="0 0 30 10" Grid.ColumnSpan="3">
 
         </WrapPanel>-->
+        <ui:DataGrid Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0"
+                  ItemsSource="{Binding ViewModel.GamesView}" AutoGenerateColumns="False"
+                     CanUserResizeRows="False"
+                     CanUserDeleteRows="False"
+                     CanUserAddRows="False"
+                     CanUserReorderColumns="False"
+                     CanUserResizeColumns="False"
+                     Visibility="{Binding ViewModel.GridViewEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ui:DataGrid.CellStyle>
+                <Style TargetType="DataGridCell" BasedOn="{StaticResource DefaultDataGridCellStyle}">
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                </Style>
+            </ui:DataGrid.CellStyle>
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Header="Map" Width="60"/>
+                <DataGridTextColumn Width="*" Binding="{Binding Title}" Header="Title"/>
+                <DataGridTemplateColumn Width="*" Header="Host" SortMemberPath="Host">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate DataType="{x:Type lobby:Game}">
+                            <ContentControl HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Margin="20 0 0 0">
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="Content" Value="{Binding HostPlayer}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HostPlayer}" Value="{x:Null}">
+                                                <Setter Property="Content" Value="{Binding Host}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Width="*" Header="Players" SortMemberPath="NumPlayers">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding StringFormat="{}{0}/{1}">
+                            <Binding Path="NumPlayers"/>
+                            <Binding Path="MaxPlayers"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="*" Header="Featured mod" Binding="{Binding FeaturedMod}"/>
+                <DataGridTextColumn Width="*" Header="Rating range" SortMemberPath="RatingMax">
+                    <DataGridTextColumn.Binding>
+                        <MultiBinding StringFormat="{}{0} - {1}">
+                            <Binding Path="RatingMin"/>
+                            <Binding Path="RatingMax"/>
+                        </MultiBinding>
+                    </DataGridTextColumn.Binding>
+                </DataGridTextColumn>
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
         <ListView Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False">
+                  Visibility="{Binding ViewModel.ListViewEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
+            ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False"
+                 VirtualizingPanel.IsVirtualizing="True">
             <ListView.ItemTemplateSelector>
                 <databinding:GameTemplateSelector
                     IdleGame="{StaticResource AlternativeCard}"
@@ -781,14 +885,14 @@
                     <Setter Property="OverridesDefaultStyle" Value="True"/>
                     <Setter Property="Template">
                         <Setter.Value>
-                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                            <ControlTemplate TargetType="{x:Type ListViewItem}">
                                 <ui:Card
                                     x:Name="Border"
                                     Margin="0"
-                                    Padding="10"
+                                    Padding="4"
                                     BorderThickness="1">
                                     <Grid>
-                                        <ContentPresenter Margin="{TemplateBinding Padding}" />
+                                        <ContentPresenter Margin="0" />
                                         <Rectangle
                                 x:Name="ActiveRectangle"
                                 Width="3"
@@ -809,7 +913,6 @@
                                             <Condition Property="IsMouseOver" Value="True" />
                                         </MultiTrigger.Conditions>
                                         <Setter TargetName="Border" Property="Background" Value="{DynamicResource ListViewItemBackgroundPointerOver}" />
-
                                     </MultiTrigger>
                                     <Trigger Property="IsSelected" Value="True">
                                         <Setter TargetName="ActiveRectangle" Property="Visibility" Value="Visible" />

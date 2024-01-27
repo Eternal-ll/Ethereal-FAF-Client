@@ -70,8 +70,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             set
             {
                 if (Set(ref _SelectedGameState, value)) RefreshViews();
+                }
             }
-        }
         #endregion
 
         public override void OnLoaded()
@@ -118,6 +118,23 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private async Task JoinGame(Game game)
         {
             await _gameLauncher.JoinGameAsync(game);
+        }
+
+        [ObservableProperty]
+        private bool _ListViewEnabled = true;
+        [RelayCommand]
+        private void ShowListView()
+        {
+            GridViewEnabled = false;
+            ListViewEnabled = true;
+        }
+        [ObservableProperty]
+        private bool _GridViewEnabled;
+        [RelayCommand]
+        private void ShowGridView()
+        {
+            ListViewEnabled = false;
+            GridViewEnabled = true;
         }
     }
 }
