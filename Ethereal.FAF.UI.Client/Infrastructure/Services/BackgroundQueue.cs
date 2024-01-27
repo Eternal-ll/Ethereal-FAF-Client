@@ -8,8 +8,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
     public abstract class BackgroundQueue : IBackgroundQueue
     {
-        private ConcurrentQueue<Func<CancellationToken, Task>> _workItems = new();
-        private SemaphoreSlim _signal = new(0);
+        private readonly ConcurrentQueue<Func<CancellationToken, Task>> _workItems = new();
+        private readonly SemaphoreSlim _signal = new(0);
         public void Enqueue(Func<CancellationToken, Task> workItem)
         {
             if (workItem == null)

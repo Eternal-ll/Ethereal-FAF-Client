@@ -89,6 +89,7 @@ namespace Ethereal.FAF.UI.Client
                 // background image cache publisher
                 .AddSingleton<IBackgroundImageCacheService>(sp => sp.GetService<BackgroundImageCachingQueue>());
             
+            services
             services.AddAppServices();
             services.AddFafServices();
             services.AddViewsWithViewModels();

@@ -51,19 +51,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IFafAuthService _fafAuthService;
         private readonly ClientManager _clientManager;
         private readonly IUIDService _uidGenerator;
+        private readonly IBackgroundQueue _queue;
         private readonly List<byte> _cache = new();
 
         private ITransportClient _transportClient;
 
         public bool Connected => _transportClient?.IsConnected == true;
 
-        public FafLobbyService(IFafAuthService fafAuthService, ClientManager clientManager, IServiceProvider serviceProvider, ILogger<FafLobbyService> logger, IUIDService uidGenerator)
+        public FafLobbyService(IFafAuthService fafAuthService, ClientManager clientManager, IServiceProvider serviceProvider, ILogger<FafLobbyService> logger, IUIDService uidGenerator, LobbyBackgroundQueue queue)
         {
             _fafAuthService = fafAuthService;
             _clientManager = clientManager;
             _serviceProvider = serviceProvider;
             _logger = logger;
             _uidGenerator = uidGenerator;
+            _queue = queue;
         }
 
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
@@ -99,7 +101,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             if (_cache.Count == 0 && e[^1] == '\n')
             {
-                ProcessMessage(e);
+                _queue.Enqueue(cancel =>
+                {
+                    ProcessMessage(e);
+                    return Task.CompletedTask;
+                });
                 return;
             }
             for (int i = 0; i < e.Length; i++)
@@ -108,7 +114,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 {
                     var data = _cache.ToArray();
                     _cache.Clear();
-                    ProcessMessage(data);
+                    _queue.Enqueue(cancel =>
+                    {
+                        ProcessMessage(e);
+                        return Task.CompletedTask;
+                    });
                     continue;
                 }
                 _cache.Add(e[i]);
