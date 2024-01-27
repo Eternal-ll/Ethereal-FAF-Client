@@ -1,10 +1,8 @@
-﻿using Ethereal.FAF.API.Client;
-using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
+﻿using Castle.DynamicProxy;
+using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
-using FAF.Domain.LobbyServer.Enums;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Ethereal.FAF.UI.Client.Models.Progress;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -14,83 +12,80 @@ using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 {
-    public class PatchClient
+    public class PatchClient : IPatchClient
     {
-        private readonly ILogger Logger;
-        private readonly ITokenProvider TokenProvider;
-        private readonly IConfiguration Configuration;
-        private readonly IFafApiClient FafApiClient;
-        private readonly IFafContentClient FafContentClient;
-        private readonly PatchWatcher PatchWatcher;
+        private readonly ILogger _logger;
+        private readonly IFafApiClient _fafApiClient;
+        private readonly IDownloadService _downloadService;
+        private readonly ISettingsManager _settingsManager;
+        private readonly PatchWatcher _patchWatcher;
 
         public PatchClient(
             ILogger<PatchClient> logger,
-            IConfiguration configuration,
             IFafApiClient fafApiClient,
-            IFafContentClient fafContentClient,
-            ITokenProvider tokenProvider,
-            PatchWatcher patchWatcher)
+            PatchWatcher patchWatcher,
+            IDownloadService downloadService,
+            ISettingsManager settingsManager)
         {
-            Logger = logger;
-            Configuration = configuration;
-            PatchWatcher = patchWatcher;
-            FafApiClient = fafApiClient;
-            FafContentClient = fafContentClient;
-            TokenProvider = tokenProvider;
+            _logger = logger;
+            _patchWatcher = patchWatcher;
+            _fafApiClient = fafApiClient;
+            _downloadService = downloadService;
+            _settingsManager = settingsManager;
         }
 
-        public bool CopyOriginalFilesToFAForeverPatch(string game = null)
+        public bool CopyOriginalFilesToFAForeverPatch(string targetDirectory)
         {
-            game = Configuration.GetForgedAllianceLocation();
-            var patch = Configuration.GetForgedAlliancePatchLocation();
-            var bin = Path.Combine(game, ForgedAllianceHelper.BinFolder);
-            var gamedata = Path.Combine(game, ForgedAllianceHelper.GamedataFolder);
-            if (Directory.Exists(bin)) Directory.CreateDirectory(bin);
-            if (Directory.Exists(gamedata)) Directory.CreateDirectory(gamedata);
+            var game = _settingsManager.Settings.ForgedAllianceLocation;
+            var patch = targetDirectory;
+            var bin = Path.Combine(targetDirectory, ForgedAllianceHelper.BinFolder);
+            if (!Directory.Exists(bin)) Directory.CreateDirectory(bin);
             foreach (var item in ForgedAllianceHelper.FilesToCopy)
             {
                 var file = Path.Combine(game, item);
                 var target = Path.Combine(patch, item);
                 if (File.Exists(target))
                 {
-                    //Logger.LogTrace("File already copied [{file}]", target);
                     continue;
                 }
                 if (!File.Exists(file))
                 {
-                    Logger.LogError("File not found [{file}]", file);
+                    _logger.LogError("File not found [{file}]", file);
                     return false;
-                    //throw new Exception($"File not found [{file}]");
                 }
                 File.Copy(file, Path.Combine(patch, target));
-                Logger.LogTrace("File copied [{file}] to [{target}]", file, target);
+                _logger.LogTrace("File copied [{file}] to [{target}]", file, target);
             }
             return true;
         }
 
-        private static FeaturedMod LatestFeaturedMod;
+        private static string LatestFeaturedMod;
         private static string LatestHost;
-        public async Task ConfirmPatchAsync(FeaturedMod mod, int version = 0, bool forceCheck = false,
-            CancellationToken cancellationToken = default, IProgress<string> progress = null)
+        public async Task EnsurePatchExist(string mod, string root, int version = 0, bool forceCheck = false,
+            IProgress<ProgressReport> progress = null,
+            CancellationToken cancellationToken = default)
         {
-            var path = $"featuredMods\\{(int)mod}\\files\\{(version == 0 ? "latest" : version)}";
-            Logger.LogTrace("Patch confirmation...");
-            Logger.LogTrace("Latest  featured mod: [{mod}]", LatestFeaturedMod);
-            Logger.LogTrace("Current featured mod: [{mod}]", mod);
-            Logger.LogTrace("Force patch confirmation: [{force}]", forceCheck);
-            Logger.LogTrace("Files changed: [{changed}]", PatchWatcher.IsFilesChanged);
-            if (!PatchWatcher.IsFilesChanged && !forceCheck && LatestFeaturedMod == mod)
+            progress?.Report(new(0, "PatchClient", "Fetching featured mod..."));
+            var featuredMods = await _fafApiClient.GetFeaturedMods($"technicalName=='{mod}'");
+            await featuredMods.EnsureSuccessStatusCodeAsync();
+            var featuredMod = featuredMods.Content.Data.FirstOrDefault() ?? throw new InvalidOperationException("Featured mod not found");
+            _logger.LogTrace("Patch confirmation...");
+            _logger.LogTrace("Latest  featured mod: [{mod}]", LatestFeaturedMod);
+            _logger.LogTrace("Current featured mod: [{mod}]", mod);
+            _logger.LogTrace("Force patch confirmation: [{force}]", forceCheck);
+            _logger.LogTrace("Files changed: [{changed}]", _patchWatcher.IsChanged());
+            if (!_patchWatcher.IsChanged() && !forceCheck && LatestFeaturedMod == mod)
             {
-                Logger.LogTrace("Confirmation skipped. All files up to date");
-                progress?.Report("Confirmation skipped. All files up to date");
+                _logger.LogTrace("Confirmation skipped. All files up to date");
+                //progress?.Report("Confirmation skipped. All files up to date");
                 return;
             }
-            CopyOriginalFilesToFAForeverPatch();
-            progress?.Report("Confirming patch from API");
-            var accessToken = await TokenProvider.GetAccessTokenAsync();
+            progress?.Report(new(0, "PatchClient", "Copying original game files..."));
+            CopyOriginalFilesToFAForeverPatch(root);
+            progress?.Report(new(0, "PatchClient", "Fetching patch files..."));
             var apiResponse = version == 0 ? 
-                await FafApiClient.GetLatestAsync((int)mod, accessToken, cancellationToken) :
-                await FafApiClient.GetAsync((int)mod, version, accessToken, cancellationToken);
+                await _fafApiClient.GetLatestAsync(featuredMod.Id, cancellationToken) :
+                await _fafApiClient.GetAsync(featuredMod.Id, version, cancellationToken);
             if (!apiResponse.IsSuccessStatusCode)
             {
                 throw apiResponse.Error;
@@ -98,49 +93,33 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             LatestFeaturedMod = mod;
             var files = apiResponse.Content.Data;
             var requiredFiles = files
-                .Where(f => !PatchWatcher.FilesMD5.TryGetValue(Path.Combine(f.Group.ToLower(), f.Name.ToLower()), out var cached) || cached != f.MD5)
+                .Where(f => !_patchWatcher.FilesMD5.TryGetValue(Path.Combine(f.Group.ToLower(), f.Name.ToLower()), out var cached) || cached != f.MD5)
                 .ToArray();
             if (requiredFiles.Length == 0)
             {
-                Logger.LogInformation("Confirmed from API. All files up to date");
-                progress?.Report("Confirmed from API. All files up to date");
-                PatchWatcher.IsFilesChanged = false;
+                _logger.LogInformation("Confirmed from API. All files up to date");
+                //progress?.Report("Confirmed from API. All files up to date");
+                _patchWatcher.SetState(false);
                 return;
             }
-            PatchWatcher.StopWatchers();
-            Logger.LogTrace("Downloading [{required}] out of [{total}] files", requiredFiles.Length, files.Length);
-            for (int i = 1; i <= requiredFiles.Length; i++)
+            _patchWatcher.StopWatchers();
+            _logger.LogTrace("Downloading [{required}] out of [{total}] files", requiredFiles.Length, files.Length);
+            foreach (var file in requiredFiles)
             {
-                var file = requiredFiles[i - 1];
                 var groupfile = Path.Combine(file.Group, file.Name);
-                var url = new Uri(file.CacheableUrl);
-                var fileDown = Path.Combine(Configuration.GetForgedAlliancePatchLocation(), groupfile);
-                
-                var md5 = !File.Exists(fileDown) ? null :  await PatchWatcher.CalculateMD5(Path.Combine(Configuration.GetForgedAlliancePatchLocation(), groupfile));
-                if (!File.Exists(fileDown) || md5 != file.MD5)
+                var targetFile = Path.Combine(root, groupfile);
+
+                var md5 = !File.Exists(targetFile) ? null : await PatchWatcher.CalculateMD5(targetFile);
+                if (!File.Exists(targetFile) || md5 != file.MD5)
                 {
-                    // /legacy-featured-mod-files/updates_faf_files/ForgedAlliance.3757.exe
-                    // eyJhbGciOiJSUzI1NiIsImtpZCI6InB1YmxpYzo5N2U2ZmQxMy0zNDcxLTQ4ZDgtYTA3OC1jYzVhMWIzNTZiMzYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOltdLCJjbGllbnRfaWQiOiJldGhlcmVhbC1mYWYtY2xpZW50IiwiZXhwIjoxNjg2MTYzNDQ3LCJleHQiOnsicm9sZXMiOlsiVVNFUiJdLCJ1c2VybmFtZSI6IkV0ZXJuYWwtIn0sImlhdCI6MTY4NjE1OTg0NywiaXNzIjoiaHR0cHM6Ly9oeWRyYS5mYWZvcmV2ZXIuY29tLyIsImp0aSI6ImM1YTU5Y2I0LTllZGUtNDZiMS1hZDRmLTRjZjJmYjM5YTQ0MiIsIm5iZiI6MTY4NjE1OTg0Nywic2NwIjpbIm9wZW5pZCIsIm9mZmxpbmUiLCJwdWJsaWNfcHJvZmlsZSIsImxvYmJ5IiwidXBsb2FkX21hcCIsInVwbG9hZF9tb2QiXSwic3ViIjoiMzAyMTc2In0.mNyT5RbRvTETTbrg_ssDG99EzUcvAn6W2rlV2LOes7E-b88CfrprRYq9t2u-yCFHecOIFbMm5dXLSJIt4l_om4vnBQcWeuecSHI0x84ABksf1KvXQJP2izG9OskVVF236Nxg4neZlByC_7ayzV1j6PIfwKyxEFECQSugGnGF_iyRmeO1RczLLmzn2E1Q-qvDgBbCpuisOpsDdyM1hsPGN7hb8el8V7lRbIulKgJ3FinHG06SXIu71o5XTwc4Vm3xRlLFRAo7r3gi8M1tM3YxpIQWM9Md-XAfCZfWJAOEDRRold8znI-dYG8WIQGW91ks3ubbEdSnt_-SUxr9ls4qRT7pfhdVzUfXrycdcM708tAvsf30j88kMr8254xLNe3A8IuFT-plbOtVbzfYNxDoIv3YYk0azmdIGuySylcUxiYNL5eKF2iHnCkxksfQhp-1HPH0niX3ZD8ryCp-krQYOEOEBOL6Ts7tCccLmQQ-WbOzNvkCp1YRtLrORqvaNm_YkS9IpGRIQQuOl9adfas0HfsiI2sKBFPLmq-qSLawc9B4clIuAdPed4xInbCz4YqnfIuD5HZgXZ21FW8LMJKQvd4WaRNxnJ0EtAvswY6QOXIln4zy04H8wRhacK7dTjoD9ex2SB-s0JsZnRctqGypY0xUNxPn-1btiE70-Cc9yAM
-                    // 1686162440-Ky4XsNgKgolC8hr5kpe4Y8V7R2%2Bf1RaDViwPOBavJwo%3D
-                    var fileResponse = await FafContentClient.GetFileStreamAsync(url.LocalPath[1..], accessToken, file.HmacToken, cancellationToken);
-                    if (!fileResponse.IsSuccessStatusCode)
-                    {
-                        Logger.LogError($"[{fileResponse.StatusCode}] Failed to download [{groupfile}] [{i}] of [{requiredFiles.Length}]");
-                        continue;
-                    }
-                    Logger.LogTrace($"Downloading [{groupfile}] [{i}] out of [{requiredFiles.Length}]");
-                    progress?.Report($"Downloading [{groupfile}] [{i}] out of [{requiredFiles.Length}]");
-                    using var fs = new FileStream(Path.Combine(Configuration.GetForgedAlliancePatchLocation(), groupfile), FileMode.Create);
-                    await fileResponse.Content.CopyToAsync(fs, cancellationToken);
-                    await fileResponse.Content.DisposeAsync();
-                    fileResponse.Content.Close();
+                    await _downloadService.DownloadToFileAsync(file.Url, targetFile, progress, "FafContent", cancellationToken);
+                    _patchWatcher.AddOrUpdate(groupfile, file.MD5);
                 }
-                PatchWatcher.AddOrUpdate(groupfile, file.MD5);
             }
-            Logger.LogInformation("Updated from API. All files up to date");
-            progress?.Report("Updated from API. All files up to date");
-            PatchWatcher.IsFilesChanged = false;
-            PatchWatcher.StartWatchers();
+            _logger.LogInformation("Updated from API. All files up to date");
+            //progress?.Report("Updated from API. All files up to date");
+            _patchWatcher.SetState(false);
+            _patchWatcher.StartWatchers();
         }
     }
 }

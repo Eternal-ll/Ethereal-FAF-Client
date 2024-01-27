@@ -1,10 +1,10 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -15,42 +15,50 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
     /// </summary>
     public class PatchWatcher
     {
-        private readonly IConfiguration Configuration;
-        private readonly ILogger Logger;
+        private readonly ISettingsManager _settingsManager;
+        private readonly ILogger _logger;
 
         public readonly Dictionary<string, string> FilesMD5 = new();
 
-        public bool IsFilesChanged = true;
+        private bool IsFilesChanged = true;
 
         private FileSystemWatcher[] PatchWatchers;
 
-        public PatchWatcher(IConfiguration configuration, ILogger<PatchWatcher> logger)
+        public PatchWatcher(ILogger<PatchWatcher> logger, ISettingsManager settingsManager)
         {
-            Configuration = configuration;
-            Logger = logger;
+            _logger = logger;
+            _settingsManager = settingsManager;
         }
+
+        public bool IsChanged()
+        {
+            var failed = false;
+            foreach (var roots in PatchWatchers?.Select(x => x.Path) ?? Array.Empty<string>())
+            {
+                var directory = new DirectoryInfo(roots);
+                if (!directory.Exists)
+                {
+                    foreach (var key in FilesMD5.Keys.Where(x => x.StartsWith(directory.Name)).ToArray()) 
+                    {
+                        FilesMD5.Remove(key);
+                    }
+                    failed = true;
+                }
+            }
+            if (failed) return false;
+            return IsFilesChanged;
+        }
+
+        public void SetState(bool filesChanged) => IsFilesChanged = filesChanged;
 
         public void InitializePatchWatchers()
         {
-            if (PatchWatchers is not null)
-            {
-                return;
-            }
-            var bin = Path.Combine(Configuration.GetForgedAlliancePatchLocation(), ForgedAllianceHelper.BinFolder);
-            var gamedata = Path.Combine(Configuration.GetForgedAlliancePatchLocation(), ForgedAllianceHelper.GamedataFolder);
+            if (PatchWatchers != null) return;
+            var root = _settingsManager.Settings.FAForeverLocation;
+            var bin = Path.Combine(root, ForgedAllianceHelper.BinFolder);
+            var gamedata = Path.Combine(root, ForgedAllianceHelper.GamedataFolder);
             if (!Directory.Exists(bin)) Directory.CreateDirectory(bin);
             if (!Directory.Exists(gamedata)) Directory.CreateDirectory(gamedata);
-
-            //if (PatchWatchers is not null)
-            //{
-            //    StopWatchers();
-            //    foreach (var watcher in PatchWatchers)
-            //    {
-            //        watcher.Dispose();
-            //    }
-            //    PatchWatchers = null;
-            //}
-
             PatchWatchers = new FileSystemWatcher[]
             {
                 new FileSystemWatcher()
@@ -68,7 +76,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             };
         }
         private bool Initializde = false;
-        public void InitializePatchWatching()
+        public async void InitializePatchWatching()
         {
             if (Initializde) return;
             Initializde = true;
@@ -93,7 +101,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
                 watcher.Changed -= OnFileChanged;
                 watcher.Deleted -= OnFileDeleted;
             }
-            Logger.LogTrace("File watchers stopped");
+            _logger.LogTrace("File watchers stopped");
         }
         public void StartWatchers()
         {
@@ -101,28 +109,37 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             {
                 InitializePatchWatchers();
             }
+            var root = _settingsManager.Settings.FAForeverLocation;
+            var bin = Path.Combine(root, ForgedAllianceHelper.BinFolder);
+            var gamedata = Path.Combine(root, ForgedAllianceHelper.GamedataFolder);
             foreach (var watcher in PatchWatchers)
             {
                 watcher.Changed += OnFileChanged;
                 watcher.Deleted += OnFileDeleted;
             }
-            Logger.LogTrace("File watchers started");
+            _logger.LogTrace("File watchers started");
         }
 
         private string LastFileInWork;
         private async void OnFileChanged(object sender, FileSystemEventArgs e)
         {
+            _logger.LogInformation("File changed: {File} {event}", e.FullPath, e.ChangeType.ToString());
             if (LastFileInWork == e.Name)
             {
                 LastFileInWork = null;
                 return;
             }
             LastFileInWork = e.Name;
-            Logger.LogTrace("File [{edited}] [{change}]", e.FullPath, e.ChangeType);
+            _logger.LogTrace("File [{edited}] [{change}]", e.FullPath, e.ChangeType);
             var data = e.FullPath.Split('\\', '/');
             var group = data[^2];
             var path = Path.Combine(group, e.Name);
             path = path.ToLower();
+            if (!File.Exists(e.FullPath))
+            {
+                FilesMD5.Remove(path);
+                IsFilesChanged = true;
+            }
             try
             {
                 var md5 = await CalculateMD5(e.FullPath);
@@ -130,7 +147,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.ToString());
+                _logger.LogError(ex.ToString());
             }
             finally
             {
@@ -141,17 +158,28 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
 
         private void OnFileDeleted(object sender, FileSystemEventArgs e)
         {
+            _logger.LogInformation("File deleted: {File} {event}", e.FullPath, e.ChangeType.ToString());
             var data = e.FullPath.Split('\\', '/');
             var group = data[^2];
             var path = Path.Combine(group, e.Name);
-            Logger.LogTrace("File [{deleted}] [{changed}]", path, e.ChangeType);
-            if (FilesMD5.Remove(path.ToLower()))
+            _logger.LogTrace("File [{deleted}] [{changed}]", path, e.ChangeType);
+            if (!Path.HasExtension(e.FullPath))
             {
-                Logger.LogTrace("File removed from MD5 dictionary [{removed}] as [{path}]", e.FullPath, path);
+                foreach (var key in FilesMD5.Keys.Where(x => x.StartsWith(e.Name)).ToArray())
+                {
+                    FilesMD5.Remove(key);
+                }
             }
             else
             {
-                Logger.LogWarning("File [{path}] not found in MD5 dictionary", path);
+                if (FilesMD5.Remove(path.ToLower()))
+                {
+                    _logger.LogTrace("File removed from MD5 dictionary [{removed}] as [{path}]", e.FullPath, path);
+                }
+                else
+                {
+                    _logger.LogWarning("File [{path}] not found in MD5 dictionary", path);
+                }
             }
             IsFilesChanged = true;
         }
@@ -163,13 +191,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             {
                 return;
             }
-            Logger.LogTrace("Processing files in [{file}]", patch.FullName);
+            _logger.LogTrace("Processing files in [{file}]", patch.FullName);
             foreach (var file in patch.EnumerateFiles())
             {
                 var key = Path.Combine(file.Directory.Name, file.Name);
                 if (!File.Exists(file.FullName))
                 {
-                    Logger.LogWarning("Calculating MD5 for removed file [{file}]", file.FullName);
+                    _logger.LogWarning("Calculating MD5 for removed file [{file}]", file.FullName);
                     continue;
                 }
                 var md5 = await CalculateMD5(file.FullName);
@@ -188,11 +216,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             var lower = file.ToLower();
             if (!FilesMD5.TryAdd(lower, md5))
             {
-                Logger.LogTrace("File [{key}] MD5 updated from [{old}] to [{new}]", file, FilesMD5[lower], md5);
+                _logger.LogTrace("File [{key}] MD5 updated from [{old}] to [{new}]", file, FilesMD5[lower], md5);
                 FilesMD5[lower] = md5;
                 return false;
             }
-            Logger.LogTrace("File [{key}] added with MD5 [{md5}]", file, md5);
+            _logger.LogTrace("File [{key}] added with MD5 [{md5}]", file, md5);
             return true;
         }
         public static async Task<string> CalculateMD5(string filename)

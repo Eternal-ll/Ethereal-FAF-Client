@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Api;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
+using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Configuration;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using Octokit;
 using Refit;
 using System;
+using System.IO;
 using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
@@ -97,8 +99,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
                 .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
+                
+
+                .AddSingleton<IMapsService, FafMapsService>()
                 .AddSingleton<IGameLauncher, FafGameLauncher>()
-                .AddSingleton<IUIDService, UidGenerator>();
+                .AddSingleton<IUIDService, UidGenerator>()
+                
+                .AddTransient<IPatchClient, PatchClient>();
 
             //services
                 //.AddSingleton<GameMapPreviewCacheService>();
@@ -130,10 +137,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddHttpMessageHandler<AuthHeaderHandler>();
             // FAF api service
             services.AddRefitClient<IFafApiClient>()
-                .ConfigureHttpClientBySelectedServer((sp, server, x) => x.BaseAddress = server.Api)
+                .ConfigureHttpClientBySelectedServer((sp, server, x) =>
+                x.BaseAddress = server.Api)
                 .AddHttpMessageHandler<AuthHeaderHandler>();
             // FAF content service
             services.AddRefitClient<IFafContentClient>()
+                .ConfigureHttpClientBySelectedServer((sp, server, x) => x.BaseAddress = server.Content)
+                .AddHttpMessageHandler<AuthHeaderHandler>()
+                .AddHttpMessageHandler<VerifyHeaderHandler>();
+
+            services
+                .AddHttpClient("FafContent")
                 .ConfigureHttpClientBySelectedServer((sp, server, x) => x.BaseAddress = server.Content)
                 .AddHttpMessageHandler<AuthHeaderHandler>()
                 .AddHttpMessageHandler<VerifyHeaderHandler>();
