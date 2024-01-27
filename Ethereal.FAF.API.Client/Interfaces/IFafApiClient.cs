@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.API.Client.Models;
 using Ethereal.FAF.API.Client.Models.Attributes;
 using Ethereal.FAF.API.Client.Models.Base;
+using Ethereal.FAF.API.Client.Models.FeaturedMod;
 using Refit;
 
 namespace Ethereal.FAF.API.Client
@@ -11,11 +12,14 @@ namespace Ethereal.FAF.API.Client
     }
     public interface IFafApiClient
     {
+        [Get("/data/featuredMod")]
+        Task<ApiResponse<FeaturedModsResponse>> GetFeaturedMods(
+            [AliasAs("filter")] string filter = null, CancellationToken cancellationToken = default);
         [Get("/featuredMods/{featuredMod}/files/latest")]
-        Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetLatestAsync(int featuredMod, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
+        Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetLatestAsync(long featuredMod, CancellationToken cancellationToken = default);
 
         [Get("/featuredMods/{featuredMod}/files/{version}")]
-        Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(int featuredMod, int version, [Authorize("Bearer")] string token, CancellationToken cancellationToken = default);
+        Task<ApiResponse<ApiUniversalResult<FeaturedModFile[]>>> GetAsync(long featuredMod, int version, CancellationToken cancellationToken = default);
 
         [Get("/data/coturnServer")]
         Task<FafApiResult<Entity<CoturnServerAttributes>[]>> GetCoturnServersAsync(CancellationToken cancellationToken = default);
