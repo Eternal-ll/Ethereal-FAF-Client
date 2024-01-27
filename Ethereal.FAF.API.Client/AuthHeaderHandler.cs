@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Headers;
-using System.Web;
 
 namespace Ethereal.FAF.API.Client
 {
@@ -17,19 +16,6 @@ namespace Ethereal.FAF.API.Client
             var token = await TokenProvider.GetAccessTokenAsync(cancellationToken);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
             return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-        }
-    }
-    public class VerifyHeaderHandler : DelegatingHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            if (request.RequestUri.Query.StartsWith("verify"))
-            {
-                var verify = request.RequestUri.Query.Split('=')[0];
-                request.Headers.Add("Verify", verify);
-                request.RequestUri = new Uri(request.RequestUri.AbsolutePath);
-            }
-            return base.SendAsync(request, cancellationToken);
         }
     }
 }
