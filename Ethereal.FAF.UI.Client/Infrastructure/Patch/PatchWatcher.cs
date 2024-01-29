@@ -147,7 +147,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
+                _logger.LogError(ex.Message);
             }
             finally
             {
