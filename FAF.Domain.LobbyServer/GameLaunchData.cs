@@ -4,6 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
+    public enum InitMode : int
+    {
+        Normal,
+        Auto
+    }
     public class GameLaunchData : Base.ServerMessage
     {
         // Custom game
@@ -27,6 +32,8 @@ namespace FAF.Domain.LobbyServer
         [JsonPropertyName("mod")]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public FeaturedMod FeaturedMod { get; set; }
+        [JsonPropertyName("init_mode")]
+        public InitMode InitMode { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -44,8 +51,7 @@ namespace FAF.Domain.LobbyServer
         /// 
         /// </summary>
         [JsonPropertyName("rating_type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RatingType RatingType { get; set; }
+        public string RatingType { get; set; }
 
 
         public int team { get; set; }

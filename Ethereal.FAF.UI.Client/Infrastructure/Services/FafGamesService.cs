@@ -43,11 +43,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void _fafLobbyEventsService_GamesReceived(object sender, GameInfoMessage[] e)
         {
-                foreach (var game in e)
-                {
-                    _fafLobbyEventsService_GameReceived(sender, game);
-                }
+            foreach (var game in e)
+            {
+                _fafLobbyEventsService_GameReceived(sender, game);
             }
+        }
 
         private void _fafLobbyEventsService_GameReceived(object sender, GameInfoMessage e) => ProceedGame(e.MapToViewModel());
 
@@ -89,6 +89,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void ProceedGame(Game e)
         {
+            e.SmallMapPreview = $"https://content.faforever.com/maps/previews/large/{e.Map.RawName}.png";
             var games = _games;
             if (!games.TryGetValue(e.Uid, out var cached))
             {
@@ -196,7 +197,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
             // lets update cached game
             cached.Title = e.Title;
-            cached.Mapname = e.Mapname;
+            //cached.Mapname = e.Mapname;
             cached.MaxPlayers = e.MaxPlayers;
             cached.NumPlayers = e.NumPlayers;
             cached.LaunchedAt = e.LaunchedAt;

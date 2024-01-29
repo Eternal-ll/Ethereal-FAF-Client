@@ -88,8 +88,11 @@ namespace Ethereal.FAF.UI.Client
                 .AddSingleton<BackgroundImageCachingQueue>()
                 // background image cache publisher
                 .AddSingleton<IBackgroundImageCacheService>(sp => sp.GetService<BackgroundImageCachingQueue>());
-            
+
             services
+                .AddHostedService<LobbyBackgroundQueueService>()
+                .AddSingleton<LobbyBackgroundQueue>();
+            
             services.AddAppServices();
             services.AddFafServices();
             services.AddViewsWithViewModels();
@@ -106,7 +109,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<ServerManager>();
 
-            services.AddScoped<IceManager>();
             services.AddScoped<LobbyClient>();
 
             services.AddScoped<IrcClient>(s => new IrcClient(
@@ -122,7 +124,6 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
 
             services.AddSingleton<PatchWatcher>();
-            services.AddScoped<GameLauncher>();
             services.AddScoped<MapGenerator>();
             services.AddScoped<MapsService>();
             //services.AddScoped<ServerViewModel>();
@@ -161,7 +162,6 @@ namespace Ethereal.FAF.UI.Client
             e.Handled = true;
             if (Hosting is null)
             {
-                File.WriteAllText($"APPLICATION_UNHANDLED_EXCEPTION.log", e.Exception.ToString());
                 return;
             }
             var logger = Hosting.Services.GetService<ILogger<App>>();
@@ -180,7 +180,7 @@ namespace Ethereal.FAF.UI.Client
             }
             catch
             {
-                throw e.Exception;
+                //throw e.Exception;
             }
         }
 

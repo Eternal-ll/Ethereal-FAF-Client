@@ -1,18 +1,16 @@
 ﻿using Ethereal.FAF.API.Client.Models.Attributes;
 using Ethereal.FAF.API.Client.Models.Base;
-using FAF.Domain.LobbyServer;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 {
     public static class CoturnServerExtensions
 	{
-		public static IceCoturnServer MapToDomain(this ApiUniversalData<CoturnServerAttributes> x)
-			=> new IceCoturnServer()
+		public static IceServer MapToDomain(this ApiUniversalData<CoturnServerAttributes> x)
+			=> new IceServer()
 		{
-			Active = x.Attributes.Active,
 			Credential = x.Attributes.Credential,
 			CredentialType = x.Attributes.CredentialType,
-			Region = x.Attributes.Region,
 			Urls = x.Attributes.Urls,
 			Username = x.Attributes.Username,
 		};

@@ -44,8 +44,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private readonly ILogger<ServerManager> Logger;
         private readonly PatchClient PatchClient;
-        private readonly GameLauncher GameLauncher;
-        private readonly IceManager IceManager;
         private readonly ClientManager _clientManager;
         private readonly IServiceProvider _serviceProvider;
 
@@ -56,18 +54,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Server Server { get; private set; }
         public Player Self { get; private set; }
 
-        public ServerManager(PatchClient patchClient, IceManager iceManager, GameLauncher gameLauncher, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
+        public ServerManager(PatchClient patchClient, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
         {
             PatchClient = patchClient;
-            IceManager = iceManager;
-            GameLauncher = gameLauncher;
             Logger = logger;
             IrcClient = ircClient;
             LobbyClient = lobbyClient;
 
             LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived1;
-            LobbyClient.GameLaunchDataReceived += LobbyClient_GameLaunchDataReceived;
-            LobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
             LobbyClient.IrcPasswordReceived += LobbyClient_IrcPasswordReceived;
             LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived;
             _clientManager = clientManager;
@@ -78,7 +72,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Server GetServer() => Server;
         public LobbyClient GetLobbyClient() => LobbyClient;
         public IrcClient GetIrcClient() => IrcClient;
-        public IceManager GetIceManager() => IceManager;
         public PatchClient GetPatchClient() => PatchClient;
         public IFafApiClient GetApiClient() => FafApiClient;
         public IFafContentClient GetContentClient() => FafContentClient;
@@ -118,16 +111,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private void LobbyClient_IrcPasswordReceived(object sender, string e)
         {
             IrcClient.SetPassword(e);
-        }
-
-        private void LobbyClient_MatchCancelled(object sender, global::FAF.Domain.LobbyServer.MatchCancelled e)
-        {
-            GameLauncher.LobbyClient_MatchCancelled(sender, e);
-        }
-
-        private void LobbyClient_GameLaunchDataReceived(object sender, global::FAF.Domain.LobbyServer.GameLaunchData e)
-        {
-            GameLauncher.LobbyClient_GameLaunchDataReceived(e, this);
         }
 
         public void Dispose()

@@ -73,7 +73,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                             if (queue.queue_pop_time_delta >= 0)
                             {
                                 queue.queue_pop_time_delta--;
-                                queue.OnPropertyChanged(nameof(queue.PopTimeSpan));
+                                //queue.OnPropertyChanged(nameof(queue.PopTimeSpan));
                             }
                         }
                     // update match confirmation expiration
@@ -321,16 +321,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var progress = new Progress<string>((d) =>
                 ProgressText = d.Length > 30 ? d.Truncate(30) : d);
                 var cancel = false;
-                await PatchClient.ConfirmPatchAsync(
-                    mod: FeaturedMod.FAF,
-                    version: 0,
-                    forceCheck: false,
-                    BackgroundCancellationTokenSource.Token,
-                    progress)
-                    .ContinueWith(t =>
-                    {
-                        if (t.IsFaulted || t.IsCanceled) cancel = true;
-                    });
+                //await PatchClient.ConfirmPatchAsync(
+                //    mod: FeaturedMod.FAF,
+                //    version: 0,
+                //    forceCheck: false,
+                //    BackgroundCancellationTokenSource.Token,
+                //    progress)
+                //    .ContinueWith(t =>
+                //    {
+                //        if (t.IsFaulted || t.IsCanceled) cancel = true;
+                //    });
                 if (cancel) return;
 
 

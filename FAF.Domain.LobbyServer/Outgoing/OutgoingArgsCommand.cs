@@ -2,9 +2,9 @@
 
 namespace FAF.Domain.LobbyServer.Outgoing
 {
-    public class OutgoingsArgsCommand : OutgoingCommand
+    public class OutgoingArgsCommand : OutgoingCommand
     {
-        public OutgoingsArgsCommand(string command, params object[] args) : base(command)
+        public OutgoingArgsCommand(string command, params object[] args) : base(command)
         {
             Args = args;
         }

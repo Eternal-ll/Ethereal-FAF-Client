@@ -147,9 +147,23 @@ namespace FAF.Domain.LobbyServer.Enums
         ConnectToPeer,
         DisconnectFromPeer,
         IceMsg,
-        GameFull,
         ClearSlot,
-        Chat
 
+        Connected,
+        Disconnected,
+        GameState,
+        GameOption,
+        GameMods,
+        PlayerOption,
+        Chat,
+        GameResult,
+        Stats,
+        ClearSlots,
+        AIOption,
+        JsonStats,
+        Rehost,
+        Desync,
+        GameFull,
+        ConnectedToHost
     }
 }

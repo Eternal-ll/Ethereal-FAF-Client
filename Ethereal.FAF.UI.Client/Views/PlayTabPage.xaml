@@ -30,7 +30,7 @@
             <ui:CardAction.Icon>
                 <ui:SymbolIcon
                             FontSize="30"
-                            Symbol="Play24"
+                            Symbol="Games24"
                             TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
             </ui:CardAction.Icon>
             <StackPanel>

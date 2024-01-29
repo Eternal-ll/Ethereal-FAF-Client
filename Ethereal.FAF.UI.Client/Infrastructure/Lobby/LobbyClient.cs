@@ -34,7 +34,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<Notification> NotificationReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
-        public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
 
         public event EventHandler<MatchmakingData> MatchMakingDataReceived;

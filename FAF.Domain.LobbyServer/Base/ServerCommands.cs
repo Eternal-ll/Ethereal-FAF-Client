@@ -170,7 +170,7 @@ namespace FAF.Domain.LobbyServer.Base
 
 
         // GAME GPGNET Commands
-        public static string UniversalGameCommand(string command, string args) => $"{{\"command\": \"{command}\", \"target\": \"game\", \"args\": {args}}}\n";
+        public static string UniversalGameCommand(string command, string args) => $"{{\"command\": \"{command}\", \"target\": \"game\", \"args\": {args}}}";
 
         // ICE
 

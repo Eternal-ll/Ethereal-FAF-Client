@@ -1,9 +1,17 @@
 ﻿using AsyncAwaitBestPractices;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
+using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Lobby;
+using Ethereal.FAF.UI.Client.Models.Progress;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Wpf.Ui;
@@ -17,8 +25,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
         private readonly IFafLobbyService _fafLobbyService;
         private readonly IFafGamesService _fafGamesService;
+        private readonly IMapsService _mapsService;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ISettingsManager _settingsManager;
+        private readonly IGameNetworkAdapter _gameNetworkAdapter;
+        private readonly ILogger _logger;
 
-        public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService)
+        private Process ForgedAlliance;
+
+        public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService, ILogger<FafGameLauncher> logger, IMapsService mapsService, IServiceProvider serviceProvider, ISettingsManager settingsManager, IGameNetworkAdapter gameNetworkAdapter)
         {
             _snackbarService = snackbarService;
             _fafLobbyEventsService = fafLobbyEventsService;
@@ -26,6 +41,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _fafLobbyEventsService.GameLaunchDataReceived += _fafLobbyEventsService_GameLaunchDataReceived;
             _fafLobbyService = fafLobbyService;
             _fafGamesService = fafGamesService;
+            _logger = logger;
+            _mapsService = mapsService;
+            _serviceProvider = serviceProvider;
+            _settingsManager = settingsManager;
+            _gameNetworkAdapter = gameNetworkAdapter;
         }
 
         private void ShowSnackbar(string message)
@@ -45,6 +65,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Unsupported game type. Only custom games supported");
                 return;
             }
+            if (game.FeaturedMod.ToString().ToLower() != "faf")
+            {
+                ShowSnackbar("Unsupported featured mod. Only faf supported");
+                return;
+            }
             if (game.SimMods.Any())
             {
                 ShowSnackbar("Games with SIM mods currently unsupported");
@@ -59,16 +84,103 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         }
 
         private void _fafLobbyEventsService_GameLaunchDataReceived(object sender, GameLaunchData e)
-            => HandleGameLaunchData(e)
-            .ContinueWith(HandleOnException, TaskContinuationOptions.OnlyOnFaulted)
-            .SafeFireAndForget();
+            => Task.Run(() => HandleGameLaunchData(e))
+            .ContinueWith(HandleOnException, TaskContinuationOptions.OnlyOnFaulted);
         private async Task HandleGameLaunchData(GameLaunchData data)
         {
-            throw new Exception();
+            var game = _fafGamesService.GetGame(data.GameUid);
+            if (game == null)
+            {
+                ShowSnackbar("Game not found");
+                return;
+            }
+            if (game.State != GameState.Open)
+            {
+                ShowSnackbar("Game state is incorrect");
+                return;
+            }
+            var progress = new Progress<ProgressReport>(x =>
+            {
+                return;
+                _logger.LogInformation(
+                    "Progress: {Progress:0.00}%, message: {message}",
+                    x.IsIndeterminate ? -1 : x.Progress,
+                    x.Message);
+            });
+            (var mapsService, var patchClient, var gameNetworkAdapter) = GetServices();
+            await mapsService.EnsureMapExist(game.Map.RawName, progress);
+            await patchClient.EnsurePatchExist(game.FeaturedMod.ToString(), _settingsManager.Settings.FAForeverLocation, progress: progress);
+            var gpgnetPort = await gameNetworkAdapter.Run(data.GameUid, data.InitMode.ToString().ToLower(), progress);
+
+            var initFile = $"init_{data.FeaturedMod.ToString().ToLower()}.lua";
+            if (!File.Exists(Path.Combine(_settingsManager.Settings.FAForeverLocation, "bin", initFile)))
+            {
+                initFile = "init.lua";
+            }
+
+            //if (country.Length > 0)
+            //{
+            //    args.Append($"/country {country} ");
+            //}
+            //if (clan?.Length > 0)
+            //{
+            //    args.Append($"/clan {clan} ");
+            //}
+            //args.Append($"/mean {mean} ");
+            //args.Append($"/deviation {deviation} ");
+            //args.Append($"/numgames {games} ");
+            //if (e.GameType is GameType.MatchMaker)
+            //{
+            //    // matchmaker
+            //    arguments.Append($"/{e.faction.ToString().ToLower()} ");
+            //    arguments.Append($"/players {e.expected_players} ");
+            //    arguments.Append($"/team {e.team} ");
+            //    arguments.Append($"/startspot {e.map_position} ");
+            //}
+            // append replay stream
+            //bool isSavingReplay = true;
+            //if (isSavingReplay)
+            //{
+            //    var replayPort = ReplayServerService.StartReplayServer();
+            //    arguments.Append($"/savereplay \"gpgnet://localhost:{replayPort}/{e.uid}/{me.login}.SCFAreplay\" ");
+            //}
+            //var logs = Configuration.GetValue<string>("Paths:GameSession").Replace("{uid}", e.uid.ToString());
+            //arguments.Append($"/log \"{logs}\" ");
+
+            ForgedAlliance = new()
+            {
+                StartInfo = new()
+                {
+                    FileName = Path.Combine(_settingsManager.Settings.FAForeverLocation, "bin", "ForgedAlliance.exe"),
+                    Arguments = $"/nobugreport /init {initFile} /gpgnet 127.0.0.1:{gpgnetPort}",
+                    UseShellExecute = true
+                }
+            };
+            //ForgedAlliance.Exited += (s, e) =>
+            //HandleOnException(null).RunSynchronously();
+            ForgedAlliance.Start();
+            
+            Task.Run(async () => await ForgedAlliance.WaitForExitAsync())
+                .ContinueWith(HandleOnException)
+                .SafeFireAndForget();
         }
-        private Task HandleOnException(Task task)
+        private async Task HandleOnException(Task task)
         {
-            return _fafLobbyService.GameEndedAsync();
+            if (task?.IsFaulted == true)
+            {
+                _logger.LogCritical(task.Exception?.InnerException?.ToString());
+            }
+            await _gameNetworkAdapter.Stop();
+            await _fafLobbyService.GameEndedAsync();
+            if (ForgedAlliance != null)
+            {
+                ForgedAlliance.Close();
+                ForgedAlliance.Dispose();
+            }
+        }
+        private (IMapsService, IPatchClient, IGameNetworkAdapter) GetServices()
+        {
+            return (_mapsService, _serviceProvider.GetService<IPatchClient>(), _gameNetworkAdapter);
         }
     }
 }

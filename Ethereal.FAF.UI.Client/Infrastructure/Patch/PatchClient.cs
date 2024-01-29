@@ -1,5 +1,6 @@
 ﻿using Castle.DynamicProxy;
 using Ethereal.FAF.API.Client;
+using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models.Progress;
@@ -74,6 +75,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Patch
             _logger.LogTrace("Current featured mod: [{mod}]", mod);
             _logger.LogTrace("Force patch confirmation: [{force}]", forceCheck);
             _logger.LogTrace("Files changed: [{changed}]", _patchWatcher.IsChanged());
+
+            File.WriteAllText(Path.Combine(_settingsManager.Settings.FAForeverLocation, "fa_path.lua"),
+@$"fa_path = ""{_settingsManager.Settings.ForgedAllianceLocation.Replace("\\", "/")}""
+custom_vault_path = ""{_settingsManager.Settings.ForgedAllianceVaultLocation.Replace("\\", "/")}""
+GameType = ""{mod.ToLower()}""
+GameVersion = ""3781""
+ClientVersion = ""{VersionHelper.GetCurrentVersionInText()}""");
+
             if (!_patchWatcher.IsChanged() && !forceCheck && LatestFeaturedMod == mod)
             {
                 _logger.LogTrace("Confirmation skipped. All files up to date");

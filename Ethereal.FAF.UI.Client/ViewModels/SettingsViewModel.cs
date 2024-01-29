@@ -102,8 +102,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 		public SettingsViewModel(IThemeService themeService,
 			INavigationWindow navigationWindow,
 			BackgroundViewModel backgroundViewModel,
-			IConfiguration configuration,
-			IceManager iceManager)
+			IConfiguration configuration)
 		{
 			ThemeService = themeService;
 			NavigationWindow = navigationWindow;

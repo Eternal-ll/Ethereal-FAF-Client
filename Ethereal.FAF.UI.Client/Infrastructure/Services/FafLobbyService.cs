@@ -33,8 +33,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<Notification> NotificationReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
-        public event EventHandler<IceServersData> IceServersDataReceived;
         public event EventHandler<IceUniversalData> IceUniversalDataReceived;
+        public event EventHandler<IceUniversalData2> IceUniversalDataReceived2;
         public event EventHandler<MatchmakingData> MatchMakingDataReceived;
         public event EventHandler<MatchCancelled> MatchCancelled;
         public event EventHandler<MatchConfirmation> MatchConfirmation;
@@ -116,7 +116,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     _cache.Clear();
                     _queue.Enqueue(cancel =>
                     {
-                        ProcessMessage(e);
+                        ProcessMessage(data);
                         return Task.CompletedTask;
                     });
                     continue;
@@ -146,10 +146,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             await _transportClient?.Disconnect(cancellationToken);
         }
 
-        private void SendCommandToLobby(OutgoingCommand command)
+        public void SendCommandToLobby(OutgoingCommand command)
         {
-            _logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command));
+            //_logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command));
             _transportClient.Send(JsonSerializer.SerializeToUtf8Bytes<object>(command));
+        }
+        public void SendCommandToLobby(string raw)
+        {
+            _logger.LogInformation("Outgoing command: [{command}]", raw);
+            _transportClient.Send(Encoding.UTF8.GetBytes(raw));
         }
 
         private void ProcessMessage(byte[] e)
@@ -158,7 +163,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 var command = JsonSerializer.Deserialize<ServerMessage>(e, JsonSerializerDefaults.FafLobbyCommandsJsonSerializerOptions);
 
-                var ignore = new[] { ServerCommand.game_info, ServerCommand.player_info, ServerCommand.matchmaker_info };
+                var ignore = new[] { ServerCommand.game_info, ServerCommand.player_info, ServerCommand.matchmaker_info, ServerCommand.ping };
                 if (!ignore.Contains(command.Command))
                 {
                     //var raw = Encoding.UTF8.GetString(e);
@@ -210,6 +215,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     MatchCancelled msg => () => MatchCancelled?.Invoke(this, msg),
                     SearchInfo msg => () => SearchInfoReceived?.Invoke(this, msg),
                     IceUniversalData msg => () => IceUniversalDataReceived?.Invoke(this, msg),
+                    IceUniversalData2 msg => () => IceUniversalDataReceived2?.Invoke(this, msg),
                     _ => () =>
                     {
                         _logger.LogWarning("Not handled command [{cmd}]", command.GetType());
@@ -246,7 +252,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public Task GameEndedAsync()
         {
-            SendCommandToLobby(new OutgoingsArgsCommand("GameState", "Ended"));
+            SendCommandToLobby(new OutgoingArgsCommand("GameState", "Ended"));
             return Task.CompletedTask;
         }
     }

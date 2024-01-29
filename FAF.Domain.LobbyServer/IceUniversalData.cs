@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer
 {
@@ -15,6 +16,11 @@ namespace FAF.Domain.LobbyServer
     {
         [JsonConverter(typeof(RawStringConverter))]
         public string args { get; set; }
+        public string target { get; set; }
+    }
+    public class IceUniversalData2 : Base.ServerMessage
+    {
+        public List<object> args { get; set; }
         public string target { get; set; }
     }
 }

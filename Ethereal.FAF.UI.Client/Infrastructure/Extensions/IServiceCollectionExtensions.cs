@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Api;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
+using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
@@ -99,7 +100,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
                 .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
-                
+
+                .AddSingleton<IJavaRuntime, LocalJavaRuntime>()
+                .AddSingleton<IGameNetworkAdapter, FafJavaIceAdapter>()
+                .AddSingleton<IFafJavaIceAdapterCallbacks, FafJavaIceAdapterCallbacks>()
 
                 .AddSingleton<IMapsService, FafMapsService>()
                 .AddSingleton<IGameLauncher, FafGameLauncher>()

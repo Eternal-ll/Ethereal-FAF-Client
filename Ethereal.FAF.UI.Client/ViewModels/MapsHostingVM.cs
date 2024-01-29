@@ -118,28 +118,28 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //Container.SplashText = "Confirming patch";
             //Container.Content = null;
             var progress = new Progress<string>();
-            await SelectedServer?.GetPatchClient().ConfirmPatchAsync(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
-            .ContinueWith(t =>
-            {
-                //Container.SplashProgressVisibility = Visibility.Collapsed;
-                //Container.SplashVisibility = Visibility.Collapsed;
-                if (t.IsFaulted)
-                {
-                    NotificationService.Notify("Error", t.Exception.ToString());
-                    return;
-                }
-                SelectedServer.GetLobbyClient().HostGame(
-                title: Game.Title,
-                mod: Game.FeaturedMod,
-                mapName: LocalMap.FolderName,
-                minRating: Game.MinimumRating,
-                maxRating: Game.MaximumRating,
-                visibility: Game.IsFriendsOnly ?
-                GameVisibility.Friends :
-                GameVisibility.Public,
-                isRatingResctEnforced: Game.EnforceRating,
-                password: Game.Password);
-            });
+            //await SelectedServer?.GetPatchClient().ConfirmPatchAsync(Game.FeaturedMod, 0, false, cancellationTokenSource.Token, progress)
+            //.ContinueWith(t =>
+            //{
+            //    //Container.SplashProgressVisibility = Visibility.Collapsed;
+            //    //Container.SplashVisibility = Visibility.Collapsed;
+            //    if (t.IsFaulted)
+            //    {
+            //        NotificationService.Notify("Error", t.Exception.ToString());
+            //        return;
+            //    }
+            //    SelectedServer.GetLobbyClient().HostGame(
+            //    title: Game.Title,
+            //    mod: Game.FeaturedMod,
+            //    mapName: LocalMap.FolderName,
+            //    minRating: Game.MinimumRating,
+            //    maxRating: Game.MaximumRating,
+            //    visibility: Game.IsFriendsOnly ?
+            //    GameVisibility.Friends :
+            //    GameVisibility.Public,
+            //    isRatingResctEnforced: Game.EnforceRating,
+            //    password: Game.Password);
+            //});
         });
         #endregion
 

@@ -25,7 +25,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 {
     public sealed class GamesViewModel : JsonSettingsViewModel
     {
-        private readonly GameLauncher GameLauncher;
 
         private readonly NotificationService NotificationService;
         private readonly INavigationService NavigationService;
@@ -46,7 +45,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
 
         public GamesViewModel(
-            GameLauncher gameLauncher,
             NotificationService notificationService,
             ILogger<GamesViewModel> logger,
             IConfiguration configuration,
@@ -94,8 +92,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
             GamesSource.Filter += GamesSource_Filter;
             SelectedGameMode = "Custom";
-
-            GameLauncher = gameLauncher;
             Configuration = configuration;
             Logger = logger;
             MatchmakingViewModel = matchmakingViewModel;
@@ -189,9 +185,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                     {
                         if (game.LaunchedAt.HasValue)
                         {
-                            game.OnPropertyChanged(nameof(game.LaunchedAtTimeSpan));
+                            //game.OnPropertyChanged(nameof(game.LaunchedAtTimeSpan));
                         }
-                        game.OnPropertyChanged(nameof(game.AfterCreationTimeSpan));
+                        //game.OnPropertyChanged(nameof(game.AfterCreationTimeSpan));
                     }
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
@@ -424,7 +420,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             var game = (Game)e.Item;
             e.Accepted = false;
-            game.IsPassedFilter = false;
             
             // tab filter
             if (game.GameType != SelectedGameType) return;
@@ -440,13 +435,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (OnlyLobbiesWithFriends) { }
             if (HideFoesLobbies) { }
             if (HidePrivateLobbies && game.PasswordProtected) return;
-            if (EnableMapsBlacklist && MapsBlacklist.Any(map => game.Mapname.Split('.')[0].Contains(map, StringComparison.OrdinalIgnoreCase)))
-                return;
+            //if (EnableMapsBlacklist && MapsBlacklist.Any(map => game.Mapname.Split('.')[0].Contains(map, StringComparison.OrdinalIgnoreCase)))
+            //    return;
 
             SetMapScenario(game);
 
             e.Accepted = true;
-            game.IsPassedFilter = true;
         }
 
         public ICommand ChangeLiveButton { get; }
@@ -455,8 +449,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         #region HostGame
         public ICommand HostGameCommand { get; }
-        private bool CanHostGameCommand(object arg) =>
-            GameLauncher.State is GameLauncherState.Idle && MatchmakingViewModel.State is MatchmakingState.Idle;
+        private bool CanHostGameCommand(object arg) => false;
         private void OnHostGameCommand(object arg)
         {
             //NavigationService.GetNavigationControl().SelectedPageIndex = 0;
@@ -481,7 +474,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 return;
             }
             Task.Run(async () => await MapsService
-                .EnsureMapExistAsync(game.Mapname)
+                .EnsureMapExistAsync("")
                 .ContinueWith(t =>
                 {
                     if (t.IsFaulted)
@@ -521,11 +514,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (game.LaunchedAt.HasValue)
             {
                 WatchGameCommand.Execute(arg);
-                return;
-            }
-            if (GameLauncher.State is not GameLauncherState.Idle)
-            {
-                NotificationService.Notify("Warning", $"Cant join game while launcher in state [{GameLauncher.State}]", SymbolRegular.Warning24);
                 return;
             }
             if (game.GameType is GameType.MatchMaker) return;

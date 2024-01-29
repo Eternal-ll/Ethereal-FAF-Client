@@ -27,12 +27,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IHostApplicationLifetime ApplicationLifetime;
         private readonly IConfiguration Configuration;
         private readonly IWindowService _windowService;
+        private readonly ISettingsManager _settingsManager;
 
         private INavigationWindow _navigationWindow;
 
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, ITaskBarService taskBarService,
-            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, IWindowService windowService)
+            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, IWindowService windowService, ISettingsManager settingsManager)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
@@ -42,6 +43,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             ApplicationLifetime = applicationLifetime;
             Configuration = configuration;
             _windowService = windowService;
+            _settingsManager = settingsManager;
         }
 
         /// <summary>
@@ -59,6 +61,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         /// <param name="cancellationToken">Indicates that the shutdown process should no longer be graceful.</param>
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            await _serviceProvider.GetService<IGameNetworkAdapter>().Stop();
             //_notifyIconService.Unregister();
             await Task.CompletedTask;
         }
@@ -86,7 +89,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 //    notifyIcon!.SetParentWindow(_navigationWindow as Window);
                 //    notifyIcon.Register();
                 //}
-                
+                await _settingsManager.LoadAsync();
                 _navigationWindow.ShowWindow();
                 _navigationWindow.Navigate(typeof(SelectServerView));
                 //_navigationWindow.Navigate(typeof(NavigationView));
