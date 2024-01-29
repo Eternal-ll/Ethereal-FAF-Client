@@ -14,7 +14,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,9 +67,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var pathToAdapter = await EnsureFafJavaAdapterExistAsync(progress, cancellationToken);
 
             _logger.LogInformation("Searching for free ports...");
-            var freePorts = GetFreePort(2);
-            var rpcPort = freePorts[0];
-            var gpgnetPort = freePorts[1];
+            var rpcPort = NetworkHelper.GetAvailablePort();
+            var gpgnetPort = NetworkHelper.GetAvailablePort();
             _logger.LogInformation("Rpc port: [{port}]", rpcPort);
             _logger.LogInformation("GPGNet port: [{port}]", gpgnetPort);
             FafIceAdapterProcess = new()
@@ -187,18 +185,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             _logger.LogInformation("Path to FAF Java Ice Adapter: [{path}]", downloadPath);
             return downloadPath;
-        }
-        private static int[] GetFreePort(int count)
-        {
-            var ports = new int[count];
-            for (int i = 0; i < count; i++)
-            {
-                TcpListener listener = new(IPAddress.Parse("127.0.0.1"), 0);
-                listener.Start();
-                ports[i] = ((IPEndPoint)listener.LocalEndpoint).Port;
-                listener.Stop();
-            }
-            return ports;
         }
 
         public async Task Stop()
