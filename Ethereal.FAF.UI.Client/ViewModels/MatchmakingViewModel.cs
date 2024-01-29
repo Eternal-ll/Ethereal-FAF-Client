@@ -31,7 +31,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly NotificationService NotificationService;
 
-        private LobbyClient LobbyClient;
         private PatchClient PatchClient;
 
         public PartyViewModel PartyViewModel { get; private set; }
@@ -41,47 +40,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             JoinQueueCommand = new LambdaCommand(OnJoinQueueCommand, CanJoinQueueCommand);
             NotificationService = notificationService;
             var serverManager = serviceProvider.GetRequiredService<ServerManager>();
-            Initialize(serverManager.GetLobbyClient(), serverManager.GetPatchClient(), partyViewModel);
-        }
-
-        public void Initialize(LobbyClient lobbyClient, PatchClient patchClient,  PartyViewModel partyViewModel)
-        {
-            LobbyClient = lobbyClient;
-            PartyViewModel = partyViewModel;
-            PatchClient = patchClient;
-
-            lobbyClient.StateChanged += LobbyClient_StateChanged;
-            lobbyClient.SearchInfoReceived += LobbyClient_SearchInfoReceived;
-            lobbyClient.MatchMakingDataReceived += LobbyClient_MatchMakingDataReceived;
-            lobbyClient.MatchConfirmation += LobbyClient_MatchConfirmation;
-            lobbyClient.MatchCancelled += LobbyClient_MatchCancelled;
-            lobbyClient.MatchFound += LobbyClient_MatchFound;
-        }
-
-        private void LobbyClient_StateChanged(object sender, LobbyState e)
-        {
-            if (e is not LobbyState.Authorized) return;
-            Task.Run(async () =>
-            {
-                while (LobbyClient.State is LobbyState.Authorized)
-                {
-                    // update queue pop time
-                    var queues = Queues;
-                    if (queues is not null)
-                        foreach (var queue in queues)
-                        {
-                            if (queue.queue_pop_time_delta >= 0)
-                            {
-                                queue.queue_pop_time_delta--;
-                                //queue.OnPropertyChanged(nameof(queue.PopTimeSpan));
-                            }
-                        }
-                    // update match confirmation expiration
-                    OnPropertyChanged(nameof(MatchConfirmation));
-
-                    await Task.Delay(1000);
-                }
-            });
         }
 
         private void LobbyClient_MatchFound(object sender, MatchFound e)
@@ -106,7 +64,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (e.IsReady) return;
             var result = await NotificationService.ShowDialog("Match confirmation", "Press \"Confirm\" button if you are ready to join the match", "Confirm", "Ignore");
             if (!result) return;
-            LobbyClient.ReadyToJoinMatch();
         }
 
         private void LobbyClient_SearchInfoReceived(object sender, SearchInfo e)
@@ -277,7 +234,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             foreach (var key in SearchStates.Keys)
             {
                 SearchStates[key] = false;
-                LobbyClient.UpdateQueue(key, QueueSearchState.Stop);
             }
             NotificationService.Notify("Matchmaking", "You left from all matchmaking queues");
         }
@@ -343,7 +299,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
 
             SearchStates[queue] = startSearch;
-            LobbyClient.UpdateQueue(queue, startSearch ? QueueSearchState.Start : QueueSearchState.Stop);
             if (!startSearch) return;
             if (UpdateTask is null)
             {

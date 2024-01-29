@@ -47,30 +47,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly ClientManager _clientManager;
         private readonly IServiceProvider _serviceProvider;
 
-        private readonly LobbyClient LobbyClient;
         private readonly IrcClient IrcClient;
         private IFafApiClient FafApiClient;
         private IFafContentClient FafContentClient;
         public Server Server { get; private set; }
         public Player Self { get; private set; }
 
-        public ServerManager(PatchClient patchClient, ILogger<ServerManager> logger, IrcClient ircClient, LobbyClient lobbyClient, ClientManager clientManager, IServiceProvider serviceProvider)
+        public ServerManager(PatchClient patchClient, ILogger<ServerManager> logger, IrcClient ircClient, ClientManager clientManager, IServiceProvider serviceProvider)
         {
             PatchClient = patchClient;
             Logger = logger;
             IrcClient = ircClient;
-            LobbyClient = lobbyClient;
-
-            LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived1;
-            LobbyClient.IrcPasswordReceived += LobbyClient_IrcPasswordReceived;
-            LobbyClient.WelcomeDataReceived += LobbyClient_WelcomeDataReceived;
             _clientManager = clientManager;
             _serviceProvider = serviceProvider;
         }
 
         public string GetApiDomain() => Server?.Api?.Host;
         public Server GetServer() => Server;
-        public LobbyClient GetLobbyClient() => LobbyClient;
         public IrcClient GetIrcClient() => IrcClient;
         public PatchClient GetPatchClient() => PatchClient;
         public IFafApiClient GetApiClient() => FafApiClient;

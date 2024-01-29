@@ -109,8 +109,6 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddScoped<ServerManager>();
 
-            services.AddScoped<LobbyClient>();
-
             services.AddScoped<IrcClient>(s => new IrcClient(
                     host: configuration.GetValue<string>("Server:Irc:Host"),
                     port: configuration.GetValue<int>("Server:Irc:Port"),

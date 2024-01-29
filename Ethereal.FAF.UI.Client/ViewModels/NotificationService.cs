@@ -32,7 +32,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         private readonly ISnackbarService SnackbarService;
         private readonly IContentDialogService DialogService;
-        private readonly LobbyClient LobbyClient;
         //private readonly INotificationManager OSNotificationManager;
 
         public NotificationService(ISnackbarService snackbarService)

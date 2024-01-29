@@ -64,7 +64,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
 
         private readonly ServerManager ServerManager;
-        private readonly LobbyClient LobbyClient;
         private readonly IFafPlayersService _fafPlayersService;
         private readonly NotificationService NotificationService;
         private readonly IServiceProvider ServiceProvider;
@@ -87,20 +86,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
             Members = new();
             ServerManager = serverManager;
-            var lobbyClient = serverManager.GetLobbyClient();
-            LobbyClient = lobbyClient;
-            lobbyClient.KickedFromParty += LobbyClient_KickedFromParty;
-            lobbyClient.PartyInvite += LobbyClient_PartyInvite;
-            lobbyClient.PartyUpdated += LobbyClient_PartyUpdated;
-            lobbyClient.StateChanged += LobbyClient_StateChanged;
             _fafPlayersService = fafPlayersService;
         }
 
         private void LobbyClient_StateChanged(object sender, LobbyState e)
         {
             if (e is not LobbyState.Authorized) return;
-            LobbyClient.RequestUpdateOnQueue();
-            LobbyClient.SetPartyFactions(SelectedFactions);
+            //LobbyClient.RequestUpdateOnQueue();
+            //LobbyClient.SetPartyFactions(SelectedFactions);
         }
 
         private long _OwnerId;
@@ -188,7 +181,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 var accepted = await NotificationService.ShowDialog("Party", $"Player {sender.Login} invites you to party", "Accept", "Ignore");
                 if (accepted)
                 {
-                    LobbyClient.AcceptPartyInviteFromPlayer(e.SenderId);
+                    //LobbyClient.AcceptPartyInviteFromPlayer(e.SenderId);
                 }
             }
         }
@@ -197,7 +190,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             //NotificationService.Notify("Notification", "You were kicked from party");
             Logger.LogTrace("[Party] Kicked from party of player [{id}]", OwnerId);
-            LobbyClient.SetPartyFactions(SelectedFactions);
+            //LobbyClient.SetPartyFactions(SelectedFactions);
         }
 
         #region BackCommand
@@ -233,7 +226,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         {
             if (obj is not long id) return;
             NotificationService.Notify("Invite", $"Player with id {id} invited.");
-            LobbyClient.InvitePlayerToParty(id);
+            //LobbyClient.InvitePlayerToParty(id);
         }
         #endregion
 
@@ -247,7 +240,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (SelectedFactions.Length == 1 && SelectedFactions[0] == faction) return;
             var item = Factions[faction];
             Factions[faction] = !item;
-            LobbyClient.SetPartyFactions(SelectedFactions);
+            //LobbyClient.SetPartyFactions(SelectedFactions);
         }
         #endregion
 
@@ -258,7 +251,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnKickPlayerCommand(object obj)
         {
             if (obj is not long id) return;
-            LobbyClient.KickPlayerFromParty(id);
+            //LobbyClient.KickPlayerFromParty(id);
         } 
         #endregion
     }
