@@ -50,20 +50,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 .GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                 .ConfigureAwait(false);
             contentLength = response.Content.Headers.ContentLength ?? 0;
-
-            var delays = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(50), retryCount: 3);
-
-            foreach (var delay in delays)
-            {
-                if (contentLength > 0)
-                    break;
-                logger.LogDebug("Retrying get-headers for content-length");
-                await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
-                response = await client
-                    .GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-                    .ConfigureAwait(false);
-                contentLength = response.Content.Headers.ContentLength ?? 0;
-            }
             var isIndeterminate = contentLength == 0;
             
             if (contentLength > 0)
