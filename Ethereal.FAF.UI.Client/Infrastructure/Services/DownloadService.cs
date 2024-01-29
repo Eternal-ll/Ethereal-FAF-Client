@@ -64,6 +64,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             }
 
+            response.EnsureSuccessStatusCode();
+
             await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
             var totalBytesRead = 0L;
             var buffer = new byte[BufferSize];
