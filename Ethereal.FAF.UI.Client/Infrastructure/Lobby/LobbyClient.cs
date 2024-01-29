@@ -34,7 +34,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<Notification> NotificationReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
-        public event EventHandler<IceUniversalData> IceUniversalDataReceived;
 
         public event EventHandler<MatchmakingData> MatchMakingDataReceived;
         public event EventHandler<MatchCancelled> MatchCancelled;
@@ -283,7 +282,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                     case MatchFound msg: MatchFound?.Invoke(this, msg); break;
                     case MatchCancelled msg: MatchCancelled?.Invoke(this, msg); break;
                     case SearchInfo msg: SearchInfoReceived?.Invoke(this, msg); break;
-                    case IceUniversalData msg: IceUniversalDataReceived?.Invoke(this, msg); break;
                     default:
                         {
                             Logger.LogWarning("Not handled command [{cmd}]", command.GetType());

@@ -33,7 +33,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public event EventHandler<Welcome> WelcomeDataReceived;
         public event EventHandler<Notification> NotificationReceived;
         public event EventHandler<GameLaunchData> GameLaunchDataReceived;
-        public event EventHandler<IceUniversalData> IceUniversalDataReceived;
         public event EventHandler<IceUniversalData2> IceUniversalDataReceived2;
         public event EventHandler<MatchmakingData> MatchMakingDataReceived;
         public event EventHandler<MatchCancelled> MatchCancelled;
@@ -214,7 +213,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     MatchFound msg => () => MatchFound?.Invoke(this, msg),
                     MatchCancelled msg => () => MatchCancelled?.Invoke(this, msg),
                     SearchInfo msg => () => SearchInfoReceived?.Invoke(this, msg),
-                    IceUniversalData msg => () => IceUniversalDataReceived?.Invoke(this, msg),
                     IceUniversalData2 msg => () => IceUniversalDataReceived2?.Invoke(this, msg),
                     _ => () =>
                     {
