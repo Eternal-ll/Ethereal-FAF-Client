@@ -9,6 +9,7 @@ using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Polly.Contrib.WaitAndRetry;
 using StreamJsonRpc;
 using System;
 using System.Diagnostics;
@@ -112,7 +113,31 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 .ToList();
 
             FafIceAdapterTcpClient = new();
+
+            var attempts = 50;
+            var delays = Backoff.DecorrelatedJitterBackoffV2(TimeSpan.FromMilliseconds(100), attempts, null, true);
+            var attempt = 1;
+            foreach (var delay in delays)
+            {
+                try
+                {
             await FafIceAdapterTcpClient.ConnectAsync("127.0.0.1", rpcPort);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogCritical(ex.Message);
+                }
+                    //.ContinueWith(x => _logger.LogWarning(x.Exception.InnerException.Message), TaskContinuationOptions.OnlyOnFaulted);
+                if (FafIceAdapterTcpClient.Connected)
+                {
+                    _logger.LogInformation(
+                        "Connected to RPC service after [{attempt}]",
+                        attempt);
+                    break;
+                }
+                await Task.Delay(delay, cancellationToken);
+                attempt++;
+            }
 
             var rpc = SetupJsonRpc(FafIceAdapterTcpClient.GetStream());
             rpc.AddLocalRpcTarget<IFafJavaIceAdapterCallbacks>(_fafJavaIceAdapterCallbacks, null);
