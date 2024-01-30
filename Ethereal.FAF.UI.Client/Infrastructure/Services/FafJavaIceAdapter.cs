@@ -125,13 +125,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
                 catch(Exception ex)
                 {
-                    _logger.LogCritical(ex.Message);
+                    _logger.LogWarning(ex.Message);
                 }
                     //.ContinueWith(x => _logger.LogWarning(x.Exception.InnerException.Message), TaskContinuationOptions.OnlyOnFaulted);
                 if (FafIceAdapterTcpClient.Connected)
                 {
                     _logger.LogInformation(
-                        "Connected to RPC service after [{attempt}]",
+                        "Connected to RPC service on [{attempt}] attempt",
                         attempt);
                     break;
                 }
@@ -140,7 +140,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
 
             var rpc = SetupJsonRpc(FafIceAdapterTcpClient.GetStream());
-            rpc.AddLocalRpcTarget<IFafJavaIceAdapterCallbacks>(_fafJavaIceAdapterCallbacks, null);
             rpc.StartListening();
             
             FafJavaIceAdapterClient = rpc.Attach<IFafJavaIceAdapterClient>();
@@ -150,16 +149,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             await FafJavaIceAdapterClient.SetLobbyInitModeAsync(mode);
             return gpgnetPort;
         }
-        private static JsonRpc SetupJsonRpc(Stream stream)
+        private JsonRpc SetupJsonRpc(Stream stream)
         {
             var jsonRpcMessageFormatter = new SystemTextJsonFormatter();
             var jsonRpcMessageHandler = new NewLineDelimitedMessageHandler(stream, stream, jsonRpcMessageFormatter);
             var rpc = new JsonRpc(jsonRpcMessageHandler);
+            rpc.AddLocalRpcTarget<IFafJavaIceAdapterCallbacks>(_fafJavaIceAdapterCallbacks, new()
+            {
+                DisposeOnDisconnect = true,
+            });
             return rpc;
         }
 
-        private void FafLobbyEventsService_IceUniversalDataReceived2(object sender, IceUniversalData2 e)
-            => Task.Run(() => SendDataAsync(e)).SafeFireAndForget();
+        private void FafLobbyEventsService_IceUniversalDataReceived2(object sender, IceUniversalData2 e) => Task
+            .Run(() => SendDataAsync(e))
+            .SafeFireAndForget(x => _logger.LogError(x.Message));
         private async Task SendDataAsync(IceUniversalData2 e)
         {
             if (FafJavaIceAdapterClient == null)
