@@ -182,8 +182,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 _logger.LogCritical(task.Exception?.InnerException?.ToString());
             }
-            await _gameNetworkAdapter.Stop();
             await _fafLobbyService.GameEndedAsync();
+            await _gameNetworkAdapter.Stop();
             if (ForgedAlliance != null)
             {
                 ForgedAlliance.Close();
