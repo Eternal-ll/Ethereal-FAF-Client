@@ -1,5 +1,4 @@
 ﻿using AsyncAwaitBestPractices;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Lobby;
@@ -10,9 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
@@ -29,11 +28,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ISettingsManager _settingsManager;
         private readonly IGameNetworkAdapter _gameNetworkAdapter;
+        private readonly IUserService _userService;
         private readonly ILogger _logger;
 
         private Process ForgedAlliance;
 
-        public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService, ILogger<FafGameLauncher> logger, IMapsService mapsService, IServiceProvider serviceProvider, ISettingsManager settingsManager, IGameNetworkAdapter gameNetworkAdapter)
+        public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService, ILogger<FafGameLauncher> logger, IMapsService mapsService, IServiceProvider serviceProvider, ISettingsManager settingsManager, IGameNetworkAdapter gameNetworkAdapter, IUserService userService)
         {
             _snackbarService = snackbarService;
             _fafLobbyEventsService = fafLobbyEventsService;
@@ -46,6 +46,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _serviceProvider = serviceProvider;
             _settingsManager = settingsManager;
             _gameNetworkAdapter = gameNetworkAdapter;
+            _userService = userService;
         }
 
         private void ShowSnackbar(string message)
@@ -118,17 +119,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 initFile = "init.lua";
             }
 
-            //if (country.Length > 0)
-            //{
-            //    args.Append($"/country {country} ");
-            //}
-            //if (clan?.Length > 0)
-            //{
-            //    args.Append($"/clan {clan} ");
-            //}
-            //args.Append($"/mean {mean} ");
-            //args.Append($"/deviation {deviation} ");
-            //args.Append($"/numgames {games} ");
+            var args = new StringBuilder();
+            args.Append($"/nobugreport /init {initFile} /gpgnet 127.0.0.1:{gpgnetPort} ");
+
+            var country = _userService.GetCountry();
+            var clan = _userService.GetClan();
+            var rating = _userService.GetRating(data.RatingType.ToString().ToLower());
+
+            if (!string.IsNullOrEmpty(country)) args.Append($"/country {country} ");
+            if (!string.IsNullOrEmpty(clan)) args.Append($"/clan {clan} ");
+
+            if (rating != null)
+            {
+                args.Append($"/mean {(int)rating.rating[0]} ");
+                args.Append($"/deviation {(int)rating.rating[1]} ");
+                args.Append($"/numgames {rating.number_of_games} ");
+            }
+
             //if (e.GameType is GameType.MatchMaker)
             //{
             //    // matchmaker
@@ -152,7 +159,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 StartInfo = new()
                 {
                     FileName = Path.Combine(_settingsManager.Settings.FAForeverLocation, "bin", "ForgedAlliance.exe"),
-                    Arguments = $"/nobugreport /init {initFile} /gpgnet 127.0.0.1:{gpgnetPort}",
+                    Arguments = args.ToString(),
                     UseShellExecute = true
                 }
             };

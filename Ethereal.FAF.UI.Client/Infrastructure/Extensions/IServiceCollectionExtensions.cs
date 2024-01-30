@@ -100,6 +100,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
                 .AddSingleton<IFafPlayersEventsService>(sp => (FafPlayersService)sp.GetService<IFafPlayersService>())
+                .AddSingleton<IUserService, FafUserService>()
 
                 .AddSingleton<IJavaRuntime, LocalJavaRuntime>()
                 .AddSingleton<IGameNetworkAdapter, FafJavaIceAdapter>()
