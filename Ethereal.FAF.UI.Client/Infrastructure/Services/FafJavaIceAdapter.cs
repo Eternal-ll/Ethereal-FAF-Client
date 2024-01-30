@@ -77,9 +77,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 StartInfo = new()
                 {
                     FileName = pathToJava,
-                    CreateNoWindow = false,
+                    CreateNoWindow = true,
                     RedirectStandardOutput = false,
-                    UseShellExecute = true,
+                    UseShellExecute = false,
                     Arguments = IceAdapterArguments.Generate(pathToAdapter)
                         .WithPlayerId(_fafAuthService.GetUserId())
                         .WithPlayerLogin(_fafAuthService.GetUserName())
