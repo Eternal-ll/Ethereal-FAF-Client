@@ -14,20 +14,25 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
     {
         private readonly IDownloadService _downloadService;
         private readonly ISettingsManager _settingsManager;
+        private readonly ClientManager _clientManager;
         private readonly ILogger _logger;
 
-        public FafMapsService(IDownloadService downloadService, ISettingsManager settingsManager, ILogger<FafMapsService> logger)
+        public FafMapsService(IDownloadService downloadService, ISettingsManager settingsManager, ILogger<FafMapsService> logger, ClientManager clientManager)
         {
             _downloadService = downloadService;
             _settingsManager = settingsManager;
             _logger = logger;
+            _clientManager = clientManager;
         }
 
         public async Task EnsureMapExist(string map, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
             if (IsExist(map)) return;
-            //https://content.faforever.com/maps/astro_crater_battles_4x4_rich_huge.v0004.zip
-            var uri = $"https://content.faforever.com/maps/{map}.zip";
+            var ub = new UriBuilder(_clientManager.GetServer().Content)
+            {
+                Path = $"/maps/{map}.zip"
+            };
+            var uri = ub.ToString() ;
 
             FileInfo mapArchive = new(Path.Combine(_settingsManager.Settings.ForgedAllianceMapsLocation, Path.GetFileName(uri)));
             if (!mapArchive.Directory.Exists) mapArchive.Directory.Create();
