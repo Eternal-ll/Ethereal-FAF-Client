@@ -4,33 +4,17 @@ using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Data;
-using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
 {
     public class CacheImageConverter : IValueConverter
 	{
 		private IBackgroundImageCacheService _backgroundImageCacheService;
-		private BitmapSource Empty;
-        public CacheImageConverter()
-        {
-            var uri = new Uri("C:\\ProgramData\\FAForever\\cache\\empty.png");
-
-            BitmapImage image = new();
-            image.BeginInit();
-            image.DecodePixelWidth = 60;
-            image.DecodePixelHeight = 60;
-            image.CacheOption = BitmapCacheOption.OnDemand;
-            image.UriSource = uri;
-            image.EndInit();
-            Empty = image;
-
-        }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
             if (value == null) return new AsyncTaskTwo()
             {
-                AsyncValue = "C:\\ProgramData\\FAForever\\cache\\empty.png"
+                AsyncValue = null
             };
 			_backgroundImageCacheService ??= App.Hosting.Services.GetService<IBackgroundImageCacheService>();
 			var task = new AsyncTaskTwo();
