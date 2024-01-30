@@ -167,13 +167,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     UseShellExecute = true
                 }
             };
-            //ForgedAlliance.Exited += (s, e) =>
-            //HandleOnException(null).RunSynchronously();
-            ForgedAlliance.Start();
-            
-            Task.Run(async () => await ForgedAlliance.WaitForExitAsync())
-                .ContinueWith(HandleOnException)
-                .SafeFireAndForget();
+            var started = ForgedAlliance.Start();
+            if (!started)
+            {
+                throw new InvalidOperationException("Failed to start ForgedAlliance.exe");
+            }
+            Task.Run(() => ForgedAlliance.WaitForExitAsync())
+                .ContinueWith(HandleOnException, TaskScheduler.Default)
+                .SafeFireAndForget(x => _logger.LogError(x.Message));
         }
         private async Task HandleOnException(Task task)
         {
