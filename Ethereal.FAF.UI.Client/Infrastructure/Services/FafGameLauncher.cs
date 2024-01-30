@@ -85,8 +85,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         }
 
         private void _fafLobbyEventsService_GameLaunchDataReceived(object sender, GameLaunchData e)
-            => Task.Run(() => HandleGameLaunchData(e))
-            .ContinueWith(HandleOnException, TaskContinuationOptions.OnlyOnFaulted);
+            => Task.Run(async () => await HandleGameLaunchData(e))
+            .ContinueWith(async x =>
+            {
+                if (x.IsFaulted) await HandleOnException(null);
+            }, TaskScheduler.Default)
+            .SafeFireAndForget(x => _logger.LogError(x.Message));
         private async Task HandleGameLaunchData(GameLaunchData data)
         {
             var game = _fafGamesService.GetGame(data.GameUid);
