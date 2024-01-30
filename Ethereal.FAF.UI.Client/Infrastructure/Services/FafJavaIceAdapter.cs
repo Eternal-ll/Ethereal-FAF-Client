@@ -121,7 +121,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 try
                 {
-            await FafIceAdapterTcpClient.ConnectAsync("127.0.0.1", rpcPort);
+                    await FafIceAdapterTcpClient.ConnectAsync("127.0.0.1", rpcPort);
                 }
                 catch(Exception ex)
                 {
@@ -153,7 +153,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             var jsonRpcMessageFormatter = new SystemTextJsonFormatter();
             var jsonRpcMessageHandler = new NewLineDelimitedMessageHandler(stream, stream, jsonRpcMessageFormatter);
-            var rpc = new JsonRpc(jsonRpcMessageHandler);
+            var rpc = new JsonRpc(jsonRpcMessageHandler)
+            {
+                CancelLocallyInvokedMethodsWhenConnectionIsClosed = true
+            };
             rpc.AddLocalRpcTarget<IFafJavaIceAdapterCallbacks>(_fafJavaIceAdapterCallbacks, new()
             {
                 DisposeOnDisconnect = true,
@@ -166,7 +169,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             .SafeFireAndForget(x => _logger.LogError(x.Message));
         private async Task SendDataAsync(IceUniversalData2 e)
         {
-            if (FafJavaIceAdapterClient == null)
+            if (FafIceAdapterTcpClient?.Connected == false)
             {
                 return;
             }
@@ -218,26 +221,27 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public async Task Stop()
         {
-            if (JsonRpc != null)
-            {
-                JsonRpc.Dispose();
-                JsonRpc = null;
-                FafJavaIceAdapterClient = null;
-            }
-            if (FafIceAdapterTcpClient != null)
-            {
-                //FafIceAdapterTcpClientStreamWriter.Close();
-                //await FafIceAdapterTcpClientStreamWriter.DisposeAsync();
-                //FafIceAdapterTcpClientStreamWriter = null;
-                FafIceAdapterTcpClient.Close();
-                FafIceAdapterTcpClient = null;
-            }
-            if (FafIceAdapterProcess != null)
-            {
-                FafIceAdapterProcess.Kill();
-                FafIceAdapterProcess.Dispose();
-                FafIceAdapterProcess = null;
-            }
+            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var graceShutdown = await Task
+                .Run(async () =>
+                {
+                    await FafJavaIceAdapterClient.QuitAsync();
+                    FafIceAdapterTcpClient.Close();
+                    await FafIceAdapterProcess.WaitForExitAsync();
+                }, cancellationTokenSource.Token)
+                .ContinueWith(x => x.IsCompletedSuccessfully, TaskScheduler.Default);
+
+            FafIceAdapterTcpClient?.Close();
+            FafIceAdapterTcpClient?.Dispose();
+            FafIceAdapterTcpClient = null;
+
+            FafJavaIceAdapterClient = null;
+            JsonRpc?.Dispose();
+            JsonRpc = null;
+
+            if (!graceShutdown) FafIceAdapterProcess?.Kill();
+            FafIceAdapterProcess?.Dispose();
+            FafIceAdapterProcess = null;
         }
     }
 }
