@@ -14,31 +14,50 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
     {
         private readonly IDownloadService _downloadService;
         private readonly ISettingsManager _settingsManager;
+        private readonly INeroxisMapGenerator _neroxisMapGenerator;
         private readonly ClientManager _clientManager;
         private readonly ILogger _logger;
 
-        public FafMapsService(IDownloadService downloadService, ISettingsManager settingsManager, ILogger<FafMapsService> logger, ClientManager clientManager)
+        public FafMapsService(IDownloadService downloadService, ISettingsManager settingsManager, ILogger<FafMapsService> logger, ClientManager clientManager, INeroxisMapGenerator neroxisMapGenerator)
         {
             _downloadService = downloadService;
             _settingsManager = settingsManager;
             _logger = logger;
             _clientManager = clientManager;
+            _neroxisMapGenerator = neroxisMapGenerator;
         }
 
         public async Task EnsureMapExist(string map, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
             if (IsExist(map)) return;
+
+            var folder = _settingsManager.Settings.ForgedAllianceMapsLocation;
+            if (_neroxisMapGenerator.IsNeroxisGeneratedMap(map))
+            {
+                await _neroxisMapGenerator.GenerateMapAsync(map, folder, progress, cancellationToken);
+            }
+            else
+            {
+                await DownloadCustomMapAsync(map, folder, progress, cancellationToken);
+            }
+        }
+        private async Task DownloadCustomMapAsync(
+            string map,
+            string folder,
+            IProgress<ProgressReport> progress = null,
+            CancellationToken cancellationToken = default)
+        {
             var ub = new UriBuilder(_clientManager.GetServer().Content)
             {
                 Path = $"/maps/{map}.zip"
             };
-            var uri = ub.ToString() ;
+            var uri = ub.ToString();
 
-            FileInfo mapArchive = new(Path.Combine(_settingsManager.Settings.ForgedAllianceMapsLocation, Path.GetFileName(uri)));
+            FileInfo mapArchive = new(Path.Combine(folder, Path.GetFileName(uri)));
             if (!mapArchive.Directory.Exists) mapArchive.Directory.Create();
 
             await _downloadService.DownloadToFileAsync(uri, mapArchive.FullName, null, "FafContent", cancellationToken);
-            await ArchiveHelper.Extract(mapArchive.FullName, _settingsManager.Settings.ForgedAllianceMapsLocation, progress);
+            await ArchiveHelper.Extract(mapArchive.FullName, folder, progress);
 
             mapArchive.Delete();
         }

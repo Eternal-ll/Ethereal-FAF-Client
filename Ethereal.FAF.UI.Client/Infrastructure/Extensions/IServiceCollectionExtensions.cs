@@ -3,6 +3,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Api;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
+using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
@@ -106,12 +107,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IGameNetworkAdapter, FafJavaIceAdapter>()
                 .AddSingleton<IFafJavaIceAdapterCallbacks, FafJavaIceAdapterCallbacks>()
 
+                .AddSingleton<INeroxisMapGenerator, MapGenerator>()
+
                 .AddSingleton<IMapsService, FafMapsService>()
                 .AddSingleton<IGameLauncher, FafGameLauncher>()
                 .AddSingleton<IUIDService, UidGenerator>()
                 
                 .AddTransient<IPatchClient, PatchClient>();
 
+            services.AddSingleton<LobbyNotificationsService>();
             //services
                 //.AddSingleton<GameMapPreviewCacheService>();
 

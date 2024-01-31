@@ -21,13 +21,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class MapsViewModel : Base.ViewModel
     {
         private readonly ILogger<MapsViewModel> Logger;
-        private readonly MapsService MapsService;
         private readonly ISnackbarService SnackbarService;
 
         private readonly IFafApiClient FafApiClient;
         private readonly IFafContentClient FafContentClient;
 
-        public MapsViewModel(ILogger<MapsViewModel> logger, MapsService mapsService, ISnackbarService snackbarService, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
+        public MapsViewModel(ILogger<MapsViewModel> logger, ISnackbarService snackbarService, IFafApiClient fafApiClient, IFafContentClient fafContentClient)
         {
             ChangeSortDirectionCommand = new LambdaCommand(OnChangeSortDirectionCommand, CanChangeSortDirectionCommand);
             DownloadMapCommand = new LambdaCommand(OnDownloadMapCommand);
@@ -327,16 +326,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 return;
             }
-            try
-            {
-                await MapsService.EnsureMapExistAsync(Path.GetFileNameWithoutExtension(map.LatestVersion.Filename));
-            }
-            catch (Exception ex)
-            {
-                //SnackbarService.Timeout = 10000;
-                //SnackbarService.Show("Exception", $"Failed to download map with exception:\n{ex}", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Secondary);
-                return;
-            }
+            //try
+            //{
+            //    await MapsService.EnsureMapExistAsync(Path.GetFileNameWithoutExtension(map.LatestVersion.Filename));
+            //}
+            //catch (Exception ex)
+            //{
+            //    //SnackbarService.Timeout = 10000;
+            //    //SnackbarService.Show("Exception", $"Failed to download map with exception:\n{ex}", Wpf.Ui.Common.SymbolRegular.Warning20, Wpf.Ui.Common.ControlAppearance.Secondary);
+            //    return;
+            //}
             //SnackbarService.Show("Notification", "Downloaded", Wpf.Ui.Common.SymbolRegular.Check20);
         }
         #endregion

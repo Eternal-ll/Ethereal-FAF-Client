@@ -76,11 +76,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Games with SIM mods currently unsupported");
                 return;
             }
-            if (game.IsMapgen)
-            {
-                ShowSnackbar("Generated maps currently unsupported");
-                return;
-            }
             await _fafLobbyService.JoinGameAsync(game.Uid);
         }
 

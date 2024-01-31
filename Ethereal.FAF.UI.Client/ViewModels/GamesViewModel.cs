@@ -32,7 +32,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly IFafPlayersService _fafPlayersService;
         private readonly IFafGamesService _fafGamesService;
         private readonly IFafGamesEventsService _fafGamesEventsService;
-        private readonly MapsService MapsService;
 
         private readonly ILogger Logger;
         private readonly IConfiguration Configuration;
@@ -49,7 +48,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             ILogger<GamesViewModel> logger,
             IConfiguration configuration,
             INavigationService navigationService,
-            MapsService mapsService,
             IServiceProvider serviceProvider,
             MatchmakingViewModel matchmakingViewModel,
             IFafPlayersService fafPlayersService,
