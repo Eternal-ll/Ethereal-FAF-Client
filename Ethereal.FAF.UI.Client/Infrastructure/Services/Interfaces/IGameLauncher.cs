@@ -5,6 +5,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
 {
     public interface IGameLauncher
     {
-        public Task JoinGameAsync(Game game);
+        public Task JoinGameAsync(Game game, string password = null);
     }
 }

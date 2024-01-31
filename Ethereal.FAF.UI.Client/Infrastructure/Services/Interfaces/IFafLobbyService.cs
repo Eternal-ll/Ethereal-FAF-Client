@@ -22,7 +22,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
         /// </summary>
         /// <param name="uid">Lobby UID</param>
         /// <returns></returns>
-        public Task JoinGameAsync(long uid, int port = 0);
+        public Task JoinGameAsync(long uid, string password = null, int port = 0);
         /// <summary>
         /// 
         /// </summary>

@@ -7,7 +7,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Data;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -16,15 +18,17 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly CollectionViewSource _gamesSource;
         private readonly LobbyGamesViewModel _lobbyGamesViewModel;
         private readonly IGameLauncher _gameLauncher;
+        private readonly IContentDialogService _contentDialogService;
 
         private string _AllFeaturedModsLabel = "All featured mods";
-        public CustomGamesViewModel(LobbyGamesViewModel lobbyGamesViewModel, IGameLauncher gameLauncher)
+        public CustomGamesViewModel(LobbyGamesViewModel lobbyGamesViewModel, IGameLauncher gameLauncher, IContentDialogService contentDialogService)
         {
             _lobbyGamesViewModel = lobbyGamesViewModel;
             _gamesSource = new();
 
             _SelectedFeaturedMod = _AllFeaturedModsLabel;
             _gameLauncher = gameLauncher;
+            _contentDialogService = contentDialogService;
         }
 
         public ICollectionView GamesView => _gamesSource.View;
@@ -117,7 +121,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         [RelayCommand]
         private async Task JoinGame(Game game)
         {
-            await _gameLauncher.JoinGameAsync(game);
+            string password = null;
+            if (game.PasswordProtected)
+            {
+                var textbox = new TextBox(); 
+                var result = await _contentDialogService.ShowSimpleDialogAsync(new()
+                {
+                    Title = "Enter secured password for lobby",
+                    Content = textbox,
+                    PrimaryButtonText = "Join",
+                    SecondaryButtonText = string.Empty,
+                    CloseButtonText = "Cancel",
+                });
+                if (result != Wpf.Ui.Controls.ContentDialogResult.Primary)
+                {
+                    return;
+                }
+                password = textbox.Text;
+            }
+            await _gameLauncher.JoinGameAsync(game, password);
         }
 
         [ObservableProperty]

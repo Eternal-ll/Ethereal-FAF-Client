@@ -54,7 +54,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _snackbarService.Show("GameLauncher", message);
         }
 
-        public async Task JoinGameAsync(Game game)
+        public async Task JoinGameAsync(Game game, string password = null)
         {
             if (game.State != GameState.Open)
             {
@@ -76,7 +76,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Games with SIM mods currently unsupported");
                 return;
             }
-            await _fafLobbyService.JoinGameAsync(game.Uid);
+            await _fafLobbyService.JoinGameAsync(game.Uid, password);
         }
 
         private void _fafLobbyEventsService_GameLaunchDataReceived(object sender, GameLaunchData e)

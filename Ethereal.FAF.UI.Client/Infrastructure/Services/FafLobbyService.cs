@@ -242,9 +242,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         #endregion
 
-        public Task JoinGameAsync(long uid, int port = 0)
+        public Task JoinGameAsync(long uid, string password = null, int port = 0)
         {
-            SendCommandToLobby(new JoinGameCommand(uid, port));
+            SendCommandToLobby(new JoinGameCommand(uid, password, port));
             return Task.CompletedTask;
         }
 
