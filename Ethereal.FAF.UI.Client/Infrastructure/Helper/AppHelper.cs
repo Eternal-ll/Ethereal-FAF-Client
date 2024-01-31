@@ -26,7 +26,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
         {
             using var process = Process.GetCurrentProcess();
             ExecutableDirectory = new(Path.GetDirectoryName(process.MainModule.FileName));
-            FilesDirectory = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "files"));
+            FilesDirectory = new(Path.Combine(ExecutableDirectory.FullName, "files"));
             if (!FilesDirectory.Exists) FilesDirectory.Create();
         }
     }
