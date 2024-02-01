@@ -86,7 +86,7 @@ namespace Ethereal.FAF.UI.Client
 
             services
                 // background image cache worker
-                //.AddHostedService<ImageCachingBackgroundService>()
+                .AddHostedService<ImageCachingBackgroundService>()
                 // background image cache queue
                 .AddSingleton<BackgroundImageCachingQueue>()
                 // background image cache publisher
