@@ -1,12 +1,11 @@
-﻿using Ethereal.FAF.UI.Client.ViewModels;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
 {
-	public class UriToImageConverter : IValueConverter
+    public class UriToImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -18,14 +17,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
             image.CacheOption = BitmapCacheOption.OnDemand;
             image.UriSource = new Uri(value as string);
             image.EndInit();
-            image.DownloadCompleted += Image_DownloadCompleted;
+            if (image.CanFreeze)
+            {
+                image.Freeze();
+            }
+            //image.DownloadCompleted += Image_DownloadCompleted;
             return image;
         }
 
         private void Image_DownloadCompleted(object sender, EventArgs e)
         {
             var image = (BitmapImage)sender;
-            image.DownloadCompleted -= Image_DownloadCompleted;
+            //image.DownloadCompleted -= Image_DownloadCompleted;
             image.Freeze();
         }   
 
