@@ -5,13 +5,11 @@ using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
-using FAF.Domain.LobbyServer.Enums;
 using FAF.Domain.LobbyServer.Outgoing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -51,8 +49,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly ClientManager _clientManager;
         private readonly IUIDService _uidGenerator;
         private readonly IBackgroundQueue _queue;
-        private readonly List<byte> _cache = new();
 
+        private static byte _delimeter = Encoding.UTF8.GetBytes("\n")[0];
+        
+        private MemoryStream _memoryStream;
         private ITransportClient _transportClient;
 
         public bool Connected => _transportClient?.IsConnected == true;
@@ -95,32 +95,27 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             throw new NotImplementedException("TCP lobby client not implemented");
         }
-
         private void _transportClient_DataReceived(object sender, byte[] e)
         {
-            if (_cache.Count == 0 && e[^1] == '\n')
+            if (e[^1] == _delimeter)
             {
-                _queue.Enqueue(cancel =>
+                if (_memoryStream != null)
                 {
-                    ProcessMessage(e);
-                    return Task.CompletedTask;
-                });
-                return;
-            }
-            for (int i = 0; i < e.Length; i++)
-            {
-                if (e[i] == '\n')
-                {
-                    var data = _cache.ToArray();
-                    _cache.Clear();
-                    _queue.Enqueue(cancel =>
-                    {
-                        ProcessMessage(data);
-                        return Task.CompletedTask;
-                    });
-                    continue;
+                    _memoryStream.Write(e, 0, e.Length);
+                    e = _memoryStream.ToArray();
+                    _memoryStream.Dispose();
+                    _memoryStream = null;
                 }
-                _cache.Add(e[i]);
+                else
+                {
+                    
+                _queue.Enqueue(cancel => ProcessMessageAsync(e));
+                }
+            }
+            else
+            {
+                _memoryStream ??= new();
+                _memoryStream.Write(e, 0, e.Length);
             }
         }
 
@@ -156,76 +151,50 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _transportClient.Send(Encoding.UTF8.GetBytes(raw));
         }
 
-        private void ProcessMessage(byte[] e)
+        private Task ProcessMessageAsync(byte[] e)
         {
             try
             {
                 var command = JsonSerializer.Deserialize<ServerMessage>(e, JsonSerializerDefaults.FafLobbyCommandsJsonSerializerOptions);
-
-                var ignore = new[] { ServerCommand.game_info, ServerCommand.player_info, ServerCommand.matchmaker_info, ServerCommand.ping };
-                if (!ignore.Contains(command.Command))
-                {
-                    //var raw = Encoding.UTF8.GetString(e);
-                    //if (command is GameInfoMessage game)
-                    //{
-                    //    //_logger.LogInformation("[{id}]-[{state}] raw {raw}", game.Uid, game.State, JsonSerializer.Serialize(game));
-                    //}
-                    //else if (command is LobbyGames games)
-                    //{
-                    //    foreach (var ga in games.Games)
-                    //    {
-                    //        _logger.LogInformation("[{id}]-[{state}] raw {raw}", ga.Uid, ga.State, JsonSerializer.Serialize(ga));
-                    //    }
-                    //}
-                    _logger.LogInformation("Incoming [{data}]", Encoding.UTF8.GetString(e).Replace("\n", null));
-                }
-                else
-                {
-                    //_logger.LogTrace("Incoming [{data}]", Encoding.UTF8.GetString(e).Replace("\n", null));
-                }
-
-                Action action = command switch
-                {
-                    PingMessage msg => () => SendCommandToLobby(new PongCommand()),
-                    SessionMessage msg => () => OnSession(msg.Session),
-                    //AuthentificationFailedData msg => AuthentificationFailed?.Invoke(this, msg),
-                    Notification msg => () => NotificationReceived?.Invoke(this, msg),
-                    IrcPassword msg => () => IrcPasswordReceived?.Invoke(this, msg.Password),
-                    //WelcomeData msg =>
-                    //    {
-                    //        //var welcome = msg.MapToViewModel();
-                    //        //WelcomeDataReceived?.Invoke(this, welcome);
-                    //        //PlayerReceived?.Invoke(this, welcome.me);
-                    //        //UpdateState(LobbyState.Authorized);
-                    //        break;
-                    //    }
-                    SocialData msg => () => SocialDataReceived?.Invoke(this, msg),
-                    PlayerInfoMessage msg => () => PlayerReceived?.Invoke(this, msg),
-                    LobbyPlayers msg => () => PlayersReceived?.Invoke(this, msg.Players),
-                    GameInfoMessage msg => () => GameReceived?.Invoke(this, msg),
-                    LobbyGames msg => () => GamesReceived?.Invoke(this, msg.Games.ToArray()),
-                    GameLaunchData msg => () => GameLaunchDataReceived?.Invoke(this, msg),
-                    PartyInvite msg => () => PartyInvite?.Invoke(this, msg),
-                    PartyUpdate msg => () => PartyUpdated?.Invoke(this, msg),
-                    PartyKick msg => () => KickedFromParty?.Invoke(this, null),
-                    MatchmakingData msg => () => MatchMakingDataReceived?.Invoke(this, msg),
-                    MatchConfirmation msg => () => MatchConfirmation?.Invoke(this, msg),
-                    MatchFound msg => () => MatchFound?.Invoke(this, msg),
-                    MatchCancelled msg => () => MatchCancelled?.Invoke(this, msg),
-                    SearchInfo msg => () => SearchInfoReceived?.Invoke(this, msg),
-                    IceUniversalData2 msg => () => IceUniversalDataReceived2?.Invoke(this, msg),
-                    _ => () =>
-                    {
-                        _logger.LogWarning("Not handled command [{cmd}]", command.GetType());
-                    }
-                };
-                action.Invoke();
+                Handle(command);
             }
             catch (Exception ex)
-            {   
-                //_logger.LogInformation("Incoming [{data}]", Encoding.UTF8.GetString(e).Replace("\n", null));
+            {
                 _logger.LogError(ex.ToString());
             }
+            return Task.CompletedTask;
+        }
+        private void Handle(ServerMessage data)
+        {
+            if (data is PingMessage) SendCommandToLobby(new PongCommand());
+            else if (data is SessionMessage session) OnSession(session.Session);
+            //AuthentificationFailedData msg => AuthentificationFailed?.Invoke(this, msg),
+            else if (data is Notification notification) NotificationReceived?.Invoke(this, notification);
+            else if (data is IrcPassword irc) IrcPasswordReceived?.Invoke(this, irc.Password);
+            //WelcomeData msg =>
+            //    {
+            //        //var welcome = msg.MapToViewModel();
+            //        //WelcomeDataReceived?.Invoke(this, welcome);
+            //        //PlayerReceived?.Invoke(this, welcome.me);
+            //        //UpdateState(LobbyState.Authorized);
+            //        break;
+            //    }
+            else if (data is SocialData SocialData) SocialDataReceived?.Invoke(this, SocialData);
+            else if (data is PlayerInfoMessage PlayerInfoMessage) PlayerReceived?.Invoke(this, PlayerInfoMessage);
+            else if (data is LobbyPlayers LobbyPlayers) PlayersReceived?.Invoke(this, LobbyPlayers.Players);
+            else if (data is GameInfoMessage GameInfoMessage) GameReceived?.Invoke(this, GameInfoMessage);
+            else if (data is LobbyGames LobbyGames) GamesReceived?.Invoke(this, LobbyGames.Games);
+            else if (data is GameLaunchData GameLaunchData) GameLaunchDataReceived?.Invoke(this, GameLaunchData);
+            else if (data is PartyInvite invite) PartyInvite?.Invoke(this, invite);
+            else if (data is PartyUpdate PartyUpdate) PartyUpdated?.Invoke(this, PartyUpdate);
+            else if (data is PartyKick PartyKick) KickedFromParty?.Invoke(this, EventArgs.Empty);
+            else if (data is MatchmakingData MatchmakingData) MatchMakingDataReceived?.Invoke(this, MatchmakingData);
+            else if (data is MatchConfirmation matchConfirmation) MatchConfirmation?.Invoke(this, matchConfirmation);
+            else if (data is MatchFound matchFound) MatchFound?.Invoke(this, matchFound);
+            else if (data is MatchCancelled matchCancelled) MatchCancelled?.Invoke(this, matchCancelled);
+            else if (data is SearchInfo SearchInfo) SearchInfoReceived?.Invoke(this, SearchInfo);
+            else if (data is IceUniversalData2 IceUniversalData2) IceUniversalDataReceived2?.Invoke(this, IceUniversalData2);
+            else _logger.LogWarning("Not handled command [{cmd}]", data.GetType());
         }
 
 
