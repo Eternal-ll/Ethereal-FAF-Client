@@ -1,4 +1,4 @@
-﻿using AsyncAwaitBestPractices;
+﻿using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Configuration;
@@ -54,6 +54,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         
         private MemoryStream _memoryStream;
         private ITransportClient _transportClient;
+        private long _session;
+        private SemaphoreSlim _sessionSemaphoreSlim = new(0);
 
         public bool Connected => _transportClient?.IsConnected == true;
 
@@ -69,23 +71,32 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            var server = _clientManager.GetServer();
-            if (server == null) throw new InvalidOperationException("Server not selected");
-            
-            var transportClient = GetTransportClient(server);
-            transportClient.OnState += _transportClient_ConnectionStateChange;
-            transportClient.OnData += _transportClient_DataReceived;
-
+            var server = _clientManager.GetServer() ?? throw new InvalidOperationException("Server not selected");
             if (_transportClient != null)
             {
                 _transportClient.OnState -= _transportClient_ConnectionStateChange;
                 _transportClient.OnData -= _transportClient_DataReceived;
                 _transportClient.Dispose();
             }
-
+            var transportClient = GetTransportClient(server);
+            transportClient.OnState += _transportClient_ConnectionStateChange;
+            transportClient.OnData += _transportClient_DataReceived;
             _transportClient = transportClient;
 
             await _transportClient.Connect(cancellationToken);
+
+            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var sessionReceived = await _sessionSemaphoreSlim
+                .WaitAsync(cancellationTokenSource.Token)
+                .ContinueWith(x => !x.IsFaulted, TaskScheduler.Default);
+            if (!sessionReceived)
+            {
+                throw new InvalidOperationException("Failed to fetch lobby session id");
+            }
+            var session = _session;
+            var uid = await _uidGenerator.GenerateAsync(session.ToString(), cancellationToken);
+            var token = await _fafAuthService.GetActualAccessToken(cancellationToken);
+            SendCommandToLobby(new AuthenticateCommand(token, uid, session));
         }
         private ITransportClient GetTransportClient(Server server)
         {
@@ -107,7 +118,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     _memoryStream = null;
                 }
                 _queue.Enqueue(cancel => ProcessMessageAsync(e));
-                }
+            }
             else
             {
                 _memoryStream ??= new();
@@ -121,11 +132,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             if (e == ConnectionState.Connected)
             {
                 OnConnection?.Invoke(this, true);
-                var command = new AskSessionCommand(_clientManager.GetServer().OAuth.ClientId, "2.2.0");
-                var json = JsonSerializer.SerializeToUtf8Bytes(command);
-                _transportClient.Send(json);
+                var command = new AskSessionCommand(_clientManager.GetServer().OAuth.ClientId, VersionHelper.GetCurrentVersionInText());
+                SendCommandToLobby(command);
             }
-            else if(e == ConnectionState.Disconnected)
+            else if (e == ConnectionState.Disconnected) 
             {
                 OnConnection?.Invoke(this, false);
             }
@@ -138,13 +148,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public void SendCommandToLobby(OutgoingCommand command)
         {
-            //_logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command));
-            _transportClient.Send(JsonSerializer.SerializeToUtf8Bytes<object>(command));
-        }
-        public void SendCommandToLobby(string raw)
-        {
-            _logger.LogInformation("Outgoing command: [{command}]", raw);
-            _transportClient.Send(Encoding.UTF8.GetBytes(raw));
+            _logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command));
+            _transportClient.SendData(JsonSerializer.SerializeToUtf8Bytes<object>(command));
         }
 
         private Task ProcessMessageAsync(byte[] e)
@@ -196,14 +201,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         #region Handlers
 
-        private void OnSession(long session) => Task
-            .Run(async () =>
-            {
-                var uid = await _uidGenerator.GenerateAsync(session.ToString());
-                var token = await _fafAuthService.GetActualAccessToken();
-                SendCommandToLobby(new AuthenticateCommand(token, uid, session));
-            })
-            .SafeFireAndForget();
+        private void OnSession(long session)
+        {
+            _session = session;
+            _sessionSemaphoreSlim.Release();
+        }
 
         #endregion
 
