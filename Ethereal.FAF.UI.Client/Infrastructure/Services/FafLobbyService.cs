@@ -106,12 +106,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     _memoryStream.Dispose();
                     _memoryStream = null;
                 }
-                else
-                {
-                    
                 _queue.Enqueue(cancel => ProcessMessageAsync(e));
                 }
-            }
             else
             {
                 _memoryStream ??= new();
