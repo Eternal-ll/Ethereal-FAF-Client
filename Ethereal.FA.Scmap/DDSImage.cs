@@ -1,4 +1,7 @@
-﻿namespace Ethereal.FA.Vault
+﻿using System;
+using System.IO;
+
+namespace Ethereal.FA.Vault
 {
     public static class DDSImage
     {

@@ -1,4 +1,7 @@
 ﻿using NLua;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Ethereal.FA.Mod
 {
@@ -97,7 +100,7 @@ namespace Ethereal.FA.Mod
         /// It might be nice if you add a comment after each UID to denote the name of the mod so mere
         /// mortals can maintain your list :)
         /// </summary>
-        public List<string> Requires { get; set; } = new();
+        public string[] Requires { get; set; } = Array.Empty<string>();
         /// <summary>
         /// Optional table which will map the required UID's to friendly names so the user of the mod can
         /// determine what they are missing.
@@ -109,18 +112,18 @@ namespace Ethereal.FA.Mod
         /// mod here (unless you'd like to be extra careful); the client determines mods with the same
         /// name to be the same mod and auto-updates them. Same format as `requires`.
         /// </summary>
-        public List<string> Conflicts { get; set; } = new();
+        public string[] Conflicts { get; set; } = Array.Empty<string>();
         /// <summary>
         /// Optional list of other mod UID's. If this mod happens to be active at the same time as any of
         /// the named other mods, it will be applied before them. Same format as `requires`.
         /// </summary>
-        public List<string> Before { get; set; } = new();
+        public string[] Before { get; set; } = Array.Empty<string>();
         /// <summary>
         /// Optional list of other mod UID's. If this mod happens to be active at the same time as any of
         /// the named other mods, it will be applied after them. If you do not supply an `after` list,
         /// the `requires` list will be used in its place (if present). Same format as `requires`.
         /// </summary>
-        public List<string> After { get; set; } = new();
+        public string[] After { get; set; } = Array.Empty<string>();
         /// <summary>
         /// 
         /// </summary>
@@ -146,11 +149,11 @@ namespace Ethereal.FA.Mod
                 mod.Version = parsedVersionNumber;
             if (lua[FaModInfoDefaults.Exclusive] is bool exclusive) mod.Exclusive = exclusive;
             if (lua[FaModInfoDefaults.UIOnly] is bool ui_only) mod.UIOnly = ui_only;
-            if (lua[FaModInfoDefaults.Requires] is LuaTable requires) mod.Requires = requires.ToList();
-            if (lua[FaModInfoDefaults.RequiresNames] is LuaTable requiresNames) mod.Requires = requiresNames.ToList();
-            if (lua[FaModInfoDefaults.Conflicts] is LuaTable conflicts) mod.Conflicts = conflicts.ToList();
-            if (lua[FaModInfoDefaults.Before] is LuaTable before) mod.Before = before.ToList();
-            if (lua[FaModInfoDefaults.After] is LuaTable after) mod.After = after.ToList();
+            if (lua[FaModInfoDefaults.Requires] is LuaTable requires) mod.Requires = requires.ToArray();
+            if (lua[FaModInfoDefaults.RequiresNames] is LuaTable requiresNames) mod.Requires = requiresNames.ToArray();
+            if (lua[FaModInfoDefaults.Conflicts] is LuaTable conflicts) mod.Conflicts = conflicts.ToArray();
+            if (lua[FaModInfoDefaults.Before] is LuaTable before) mod.Before = before.ToArray();
+            if (lua[FaModInfoDefaults.After] is LuaTable after) mod.After = after.ToArray();
             return mod;
         }
     }

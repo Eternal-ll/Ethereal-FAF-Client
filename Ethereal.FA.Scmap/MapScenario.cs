@@ -1,4 +1,6 @@
 ﻿using NLua;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Ethereal.FA.Vault
@@ -41,7 +43,7 @@ namespace Ethereal.FA.Vault
 
         public bool Starts { get; set; }
 
-        public List<string> Armies { get; set; }
+        public string[] Armies { get; set; }
         public string BattleType { get; set; }
 
         /// <summary>
@@ -100,7 +102,7 @@ namespace Ethereal.FA.Vault
                                     {
                                         armies.Add((string)army);
                                     }
-                                    scenario.Armies = armies;
+                                    scenario.Armies = armies.ToArray();
                                 }
                             }
                         }

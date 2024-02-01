@@ -1,4 +1,5 @@
 ﻿using NLua;
+using System.Collections.Generic;
 
 namespace Ethereal.FA.Mod
 {
@@ -12,6 +13,15 @@ namespace Ethereal.FA.Mod
                 data.Add(item.ToString());
             }
             return data;
+        }
+        public static string[] ToArray(this LuaTable table)
+        {
+            var data = new List<string>();
+            foreach (var item in table.Values)
+            {
+                data.Add(item.ToString());
+            }
+            return data.ToArray();
         }
     }
 }

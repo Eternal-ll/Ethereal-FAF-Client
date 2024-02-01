@@ -1,4 +1,6 @@
-﻿namespace Ethereal.FA.Vault
+﻿using System.IO;
+
+namespace Ethereal.FA.Vault
 {
     public class Scmap
     {
