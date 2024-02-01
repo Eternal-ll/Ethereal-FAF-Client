@@ -1,4 +1,5 @@
-﻿using Ethereal.FAF.UI.Client.Models.Update;
+﻿using Ethereal.FAF.UI.Client.Models.Configuration;
+using Ethereal.FAF.UI.Client.Models.Update;
 using Newtonsoft.Json;
 using Nucs.JsonSettings;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Ethereal.FAF.UI.Client.Models.Settings
         public virtual bool RememberSelectedFaServer { get; set; } = true;
         public virtual string SelectedFaServer { get; set; }
         public virtual List<FafAuthToken> AuthTokens { get; set; } = new();
+        [JsonIgnore]
+        public virtual List<Server> Servers { get; set; } = new();
 
 
         #region UI
