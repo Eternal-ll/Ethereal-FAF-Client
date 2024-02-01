@@ -135,11 +135,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 {
                     if (e.State == GameState.Open)
                     {
-                        _logger.LogInformation("Game [{gameId}] [{state}] new opened", e.Uid, e.State);
+                        _logger.LogDebug("Game [{gameId}] [{state}] new opened", e.Uid, e.State);
                     }
                     else if (e.State == GameState.Playing)
                     {
-                        _logger.LogInformation("Game [{gameId}] [{state}] new launched game", e.Uid, e.State);
+                        _logger.LogDebug("Game [{gameId}] [{state}] new launched game", e.Uid, e.State);
                     }
                     GameAdded?.Invoke(this, e);
                 }
@@ -161,13 +161,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     if (cached.State == GameState.Playing)
                     {
                         // game ended
-                        _logger.LogInformation("Game [{gameId}] [{state}] finished",
+                        _logger.LogDebug("Game [{gameId}] [{state}] finished",
                             e.Uid, e.State);
                     }
                     else if (cached.State == GameState.Open)
                     {
                         // lobby closed
-                        _logger.LogInformation("Game [{gameId}] [{state}] closed by host",
+                        _logger.LogDebug("Game [{gameId}] [{state}] closed by host",
                             e.Uid, e.State);
                         GameStateChanged?.Invoke(this, (cached, e.State, cached.State));
                     }
@@ -221,7 +221,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 if (cached.State is GameState.Open)
                 {
-                    _logger.LogInformation("Game [{gameId}] [{state}] launched", e.Uid, e.State);
+                    _logger.LogDebug("Game [{gameId}] [{state}] launched", e.Uid, e.State);
                     //Logger.LogTrace("Game [{title}] [{mod}] [{rating}] launched, updating list on index",
                     //    e.Title, e.FeaturedMod, e.RatingType);
                     e.GameTeams = cached.GameTeams;

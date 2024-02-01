@@ -48,7 +48,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 if (e.IsOffline)
                 {
-                    _logger.LogInformation("Player [{playerId}] disconnected", e.Id);
+                    _logger.LogDebug("Player [{playerId}] disconnected", e.Id);
                     if (_players.TryRemove(e.Id, out player))
                     {
                         PlayersRemoved?.Invoke(this, new[] { player });
@@ -58,10 +58,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             if (e.IsOffline)
             {
-                _logger.LogWarning("Player [{playerId}] disconnected and is missing in storage", e.Id);
+                _logger.LogDebug("Player [{playerId}] disconnected and is missing in storage", e.Id);
                 return;
             }
-            _logger.LogInformation("Player [{playerId}] connected", e.Id);
+            _logger.LogDebug("Player [{playerId}] connected", e.Id);
             _players.TryAdd(e.Id, e);
             PlayersAdded?.Invoke(this, new[] { e });
         }
