@@ -1,6 +1,7 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Configuration;
 using System;
+using System.Linq;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
@@ -11,6 +12,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public ClientManager(ISettingsManager settingsManager)
         {
             _settingsManager = settingsManager;
+            if (_settingsManager.Settings.RememberSelectedFaServer)
+            {
+                SelectedServer = _settingsManager.Settings.Servers.FirstOrDefault(x => x.Name == _settingsManager.Settings.SelectedFaServer);
+            }
         }
 
         public event EventHandler<Server> ServerChanged;
