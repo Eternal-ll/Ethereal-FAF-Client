@@ -77,7 +77,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             await _websocketClient.Stop(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Disconnect");
         }
 
-        public bool Send(byte[] data)
+        public bool SendData(byte[] data)
         {
             _websocketClient.Send(data.Append(Encoding.UTF8.GetBytes(_lineBreak)[0]).ToArray());
             return true;

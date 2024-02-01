@@ -16,6 +16,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public Task Connect(CancellationToken cancellationToken = default);
         public Task Disconnect(CancellationToken cancellationToken = default);
         public Task Reconnect(CancellationToken cancellationToken = default);
-        public bool Send(byte[] data);
+        public bool SendData(byte[] data);
     }
 }
