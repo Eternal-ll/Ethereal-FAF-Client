@@ -9,6 +9,7 @@ using Ethereal.FAF.UI.Client.Infrastructure.Patch;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Updater;
+using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.Models.Configurations;
 using Ethereal.FAF.UI.Client.Models.Settings;
 using Ethereal.FAF.UI.Client.ViewModels;
@@ -67,9 +68,13 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddSingleton<Settings>(sp =>
             {
-                var settings = new Settings()
+                var settings = new Settings
                 {
-                    FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.user.json")
+                    FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.user.json"),
+                    Servers =
+                    [
+                        configuration.GetSection("Server").Get<Server>()
+                    ]
                 };
                 settings.Load();
                 settings.EnableAutosave();
