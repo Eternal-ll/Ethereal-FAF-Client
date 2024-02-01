@@ -90,13 +90,58 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Infrastructure\Background\ApiGameValidator.cs" />
+    <Compile Remove="Infrastructure\Services\ServerManager.cs" />
+    <Compile Remove="ViewModels\ChatViewModel.cs" />
+    <Compile Remove="ViewModels\GamesViewModel.cs" />
+    <Compile Remove="ViewModels\GenerateMapsVM.cs" />
+    <Compile Remove="ViewModels\LocalMapsVM.cs" />
+    <Compile Remove="ViewModels\MapsHostingVM.cs" />
+    <Compile Remove="ViewModels\MatchmakingViewModel.cs" />
+    <Compile Remove="ViewModels\PartyViewModel.cs" />
+    <Compile Remove="Views\ChatView.xaml.cs" />
+    <Compile Remove="Views\Hosting\GenerateMapView.xaml.cs" />
+    <Compile Remove="Views\Hosting\SelectLocalMapView.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="External\Fonts.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Views\ChatView.xaml" />
+    <Page Remove="Views\Hosting\GenerateMapView.xaml" />
+    <Page Remove="Views\Hosting\SelectLocalMapView.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Infrastructure\Background\ApiGameValidator.cs" />
+    <None Include="Infrastructure\Services\ServerManager.cs" />
+    <None Include="ViewModels\ChatViewModel.cs" />
+    <None Include="ViewModels\LocalMapsVM.cs" />
+    <None Include="ViewModels\MapsHostingVM.cs" />
+    <None Include="ViewModels\MatchmakingViewModel.cs" />
+    <None Include="ViewModels\PartyViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ViewModels\GenerateMapsVM.cs" />
+    <None Include="Views\ChatView.xaml" />
+    <None Include="Views\ChatView.xaml.cs" />
+    <None Include="Views\Hosting\GenerateMapView.xaml" />
+    <None Include="Views\Hosting\GenerateMapView.xaml.cs" />
+    <None Include="Views\Hosting\SelectLocalMapView.xaml" />
+    <None Include="Views\Hosting\SelectLocalMapView.xaml.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Fonts">
       <HintPath>External\Fonts.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ViewModels\GamesViewModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

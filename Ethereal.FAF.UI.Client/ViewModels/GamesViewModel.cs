@@ -96,7 +96,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             NotificationService = notificationService;
             //DialogService = dialogService;
             NavigationService = navigationService;
-            MapsService = mapsService;
             _fafPlayersService = fafPlayersService;
             _fafGamesService = fafGamesService;
             _fafGamesEventsService = fafGamesEventsService;
@@ -471,28 +470,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 //NotificationService.Notify("Warning", $"Sim mods not supported", Wpf.Ui.Common.SymbolRegular.Warning24);
                 return;
             }
-            Task.Run(async () => await MapsService
-                .EnsureMapExistAsync("")
-                .ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        Logger.LogError(t.Exception.ToString());
-                        return;
-                    }
-                    //t.ContinueWith(t => ServerManager
-                    //.GetPatchClient()
-                    //.ConfirmPatchAsync(game.FeaturedMod)
-                    //.ContinueWith(t =>
-                    //{
-                    //    if (t.IsFaulted)
-                    //    {
-                    //        Logger.LogError(t.Exception.ToString());
-                    //        return;
-                    //    }
-                    //    t.ContinueWith(t => GameLauncher.WatchGame(game));
-                    //}));
-                }));
         }
         #endregion
 

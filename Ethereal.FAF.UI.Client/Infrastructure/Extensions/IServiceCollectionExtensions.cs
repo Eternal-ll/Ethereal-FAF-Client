@@ -165,60 +165,59 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         }
 
         public static IServiceCollection AddViewsWithViewModels(this IServiceCollection services) => services
-            .AddTransient<LobbyConnectionView>()
-            .AddTransient<LobbyConnectionViewModel>()
-
+            //.AddTransient<LobbyConnectionView>()
+            //.AddTransient<LobbyConnectionViewModel>()
 
             .AddTransient<SelectServerView>()
             .AddTransient<SelectServerViewModel>()
 
-            .AddTransient<SettingsView>()
-            .AddTransient<SettingsViewModel>()
+            //.AddTransient<SettingsView>()
+            //.AddTransient<SettingsViewModel>()
 
-            .AddTransient<LinksView>()
-            .AddTransient<LinksViewModel>()
+            //.AddTransient<LinksView>()
+            //.AddTransient<LinksViewModel>()
 
-            .AddTransient<PlayersView>()
-            .AddTransient<PlayersViewModel>()
+            .AddSingleton<PlayersView>()
+            .AddSingleton<PlayersViewModel>()
 
-            .AddScoped<ChangelogView>()
-            .AddScoped<ChangelogViewModel>()
+            //.AddScoped<ChangelogView>()
+            //.AddScoped<ChangelogViewModel>()
 
-            .AddScoped<ChatViewModel>()
-            .AddScoped<ChatView>()
+            //.AddScoped<ChatViewModel>()
+            //.AddScoped<ChatView>()
 
-            .AddScoped<MapsViewModel>()
-            .AddScoped<MapsView>()
+            //.AddScoped<MapsViewModel>()
+            //.AddScoped<MapsView>()
 
-            .AddScoped<ModsViewModel>()
-            .AddScoped<ModsView>()
+            //.AddScoped<ModsViewModel>()
+            //.AddScoped<ModsView>()
 
             .AddScoped<NavigationViewModel>()
             .AddScoped<NavigationView>()
 
-            .AddScoped<LoaderView>()
-            .AddScoped<LoaderViewModel>()
+            //.AddScoped<LoaderView>()
+            //.AddScoped<LoaderViewModel>()
 
-            .AddScoped<ProfileView>()
-            .AddTransient<ProfileViewModel>()
+            //.AddScoped<ProfileView>()
+            //.AddTransient<ProfileViewModel>()
 
-            .AddScoped<DataView>()
-            .AddScoped<DataViewModel>()
+            //.AddScoped<DataView>()
+            //.AddScoped<DataViewModel>()
 
-            .AddTransient<ClansView>()
-            .AddTransient<ClansViewModel>()
+            //.AddTransient<ClansView>()
+            //.AddTransient<ClansViewModel>()
 
-            .AddTransient<ReportsView>()
-            .AddTransient<ReportsViewModel>()
+            //.AddTransient<ReportsView>()
+            //.AddTransient<ReportsViewModel>()
 
-            .AddTransient<DownloadsView>()
-            .AddTransient<DownloadsViewModel>()
+            //.AddTransient<DownloadsView>()
+            //.AddTransient<DownloadsViewModel>()
 
-            .AddTransient<HostGameView>()
-            .AddTransient<HostGameViewModel>()
+            //.AddTransient<HostGameView>()
+            //.AddTransient<HostGameViewModel>()
 
-            .AddTransient<GamesView>()
-            .AddScoped<GamesViewModel>()
+            .AddSingleton<GamesView>()
+            //.AddScoped<GamesViewModel>()
 
             .AddTransient<AuthView>()
             .AddTransient<AuthViewModel>()

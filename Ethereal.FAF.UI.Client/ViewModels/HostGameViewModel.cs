@@ -63,9 +63,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     SelectionView = value switch
                     {
-                        "Local" => ServiceProvider.GetService<SelectLocalMapView>(),
-                        "API" => null,
-                        "Generator" => ServiceProvider.GetService<GenerateMapView>(),
+                        //"Local" => ServiceProvider.GetService<SelectLocalMapView>(),
+                        //"API" => null,
+                        //"Generator" => ServiceProvider.GetService<GenerateMapView>(),
                         _ => null
                     };
                     if (SelectionView is IGameHosting hosting)

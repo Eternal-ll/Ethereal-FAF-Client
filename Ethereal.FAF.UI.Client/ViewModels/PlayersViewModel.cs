@@ -344,11 +344,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ICommand OpenPrivateCommand { get; }
         private void OnOpenPrivateCommand(object arg)
         {
-            if (arg is not string user) return;
-            var navigation = ServiceProvider.GetService<INavigationService>();
-            var chat = ServiceProvider.GetService<ChatViewModel>();
-            chat.OpenPrivateCommand.Execute(user);
-            navigation.Navigate(typeof(ChatView));
+            //if (arg is not string user) return;
+            //var navigation = ServiceProvider.GetService<INavigationService>();
+            //var chat = ServiceProvider.GetService<ChatViewModel>();
+            //chat.OpenPrivateCommand.Execute(user);
+            //navigation.Navigate(typeof(ChatView));
         }
     }
 }

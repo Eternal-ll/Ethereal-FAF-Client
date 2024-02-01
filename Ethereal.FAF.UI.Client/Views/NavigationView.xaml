@@ -11,12 +11,12 @@
            mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Page.Resources>
-        <DataTemplate DataType="{x:Type services:ServerManager}">
+        <!--<DataTemplate DataType="{x:Type services:ServerManager}">
             <StackPanel Orientation="Horizontal">
                 <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
                 <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" Margin="4 0 0 0" FontSize="14"/>
             </StackPanel>
-        </DataTemplate>
+        </DataTemplate>-->
         <Style TargetType="ComboBox" BasedOn="{StaticResource {x:Type ComboBox}}">
             <Setter Property="Padding" Value="10 6"/>
             <Setter Property="MinWidth" Value="100"/>

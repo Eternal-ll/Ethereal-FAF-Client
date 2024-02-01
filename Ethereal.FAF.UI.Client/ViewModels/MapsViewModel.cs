@@ -38,7 +38,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             };
 
             Logger = logger;
-            MapsService = mapsService;
             SnackbarService = snackbarService;
             FafApiClient = fafApiClient;
             FafContentClient = fafContentClient;

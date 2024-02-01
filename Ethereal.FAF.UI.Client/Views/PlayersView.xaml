@@ -156,12 +156,12 @@
                     </TextBlock>
                 </StackPanel>
             </DataTemplate>
-            <DataTemplate DataType="{x:Type services:ServerManager}">
+            <!--<DataTemplate DataType="{x:Type services:ServerManager}">
                 <StackPanel Orientation="Horizontal">
                     <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
                     <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" Margin="4 0 0 0" FontSize="14"/>
                 </StackPanel>
-            </DataTemplate>
+            </DataTemplate>-->
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

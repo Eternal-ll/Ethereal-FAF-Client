@@ -2,10 +2,7 @@
 using Ethereal.FAF.API.Client.Models.Clans;
 using Ethereal.FAF.UI.Client.Infrastructure.Background;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.IRC;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Infrastructure.Mediator;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Patch;
@@ -28,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Windows;
+using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client
 {
@@ -83,7 +81,7 @@ namespace Ethereal.FAF.UI.Client
 
             services
                 // background image cache worker
-                .AddHostedService<ImageCachingBackgroundService>()
+                //.AddHostedService<ImageCachingBackgroundService>()
                 // background image cache queue
                 .AddSingleton<BackgroundImageCachingQueue>()
                 // background image cache publisher
@@ -107,7 +105,7 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddSingleton<ClientManager>();
 
-            services.AddScoped<ServerManager>();
+            //services.AddScoped<ServerManager>();
 
             services.AddScoped<IrcClient>(s => new IrcClient(
                     host: configuration.GetValue<string>("Server:Irc:Host"),
@@ -122,8 +120,6 @@ namespace Ethereal.FAF.UI.Client
             services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
 
             services.AddSingleton<PatchWatcher>();
-            services.AddScoped<MapGenerator>();
-            services.AddScoped<MapsService>();
             //services.AddScoped<ServerViewModel>();
 
             services.AddSingleton<TokenProvider>();
@@ -131,17 +127,17 @@ namespace Ethereal.FAF.UI.Client
 
             services.AddHttpClient();
 
-            services.AddTransient<MatchmakingViewModel>();
-            services.AddTransient<PartyViewModel>();
+            //services.AddTransient<MatchmakingViewModel>();
+            //services.AddTransient<PartyViewModel>();
 
             services.AddSingleton<BackgroundViewModel>();
 
-            services.AddTransient<GenerateMapView>();
-            services.AddTransient<SelectLocalMapView>();
+            //services.AddTransient<GenerateMapView>();
+            //services.AddTransient<SelectLocalMapView>();
             services.AddTransient<SelectCoopView>();
 
-            services.AddTransient<GenerateMapsVM>();
-            services.AddTransient<LocalMapsVM>();
+            //services.AddTransient<GenerateMapsVM>();
+            //services.AddTransient<LocalMapsVM>();
 
             services.AddScoped<SelectGameLocationView>();
             services.AddScoped<SelectFaPatchLocationView>();

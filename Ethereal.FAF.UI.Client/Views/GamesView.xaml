@@ -194,12 +194,12 @@
                 
             </Style>
 
-            <DataTemplate DataType="{x:Type services:ServerManager}">
+            <!--<DataTemplate DataType="{x:Type services:ServerManager}">
                 <StackPanel Orientation="Horizontal">
                     <Image Height="20" Width="20" Source="{Binding Server.Logo}"/>
                     <TextBlock Text="{Binding Server.ShortName}" VerticalAlignment="Center" Margin="4 0 0 0" FontSize="14"/>
                 </StackPanel>
-            </DataTemplate>
+            </DataTemplate>-->
 
             <Style x:Key="GamePlayerMenuItem" TargetType="MenuItem">
                 <Setter Property="Header" Value="{Binding}"/>
@@ -746,7 +746,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="2">
+            <!--<Border Grid.Column="2">
                 <StackPanel Orientation="Horizontal">
                     <Button Command="{Binding ViewModel.ShowListViewCommand}" ToolTip="List view"
                              Padding="6 5 6 6">
@@ -761,7 +761,7 @@
                         </Button.Content>
                     </Button>
                 </StackPanel>
-            </Border>
+            </Border>-->
             <ToggleButton x:Name="ToggleFiltersButton" Grid.Column="3">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
@@ -813,7 +813,7 @@
         <!--<WrapPanel Margin="0 0 30 10" Grid.ColumnSpan="3">
 
         </WrapPanel>-->
-        <ui:DataGrid Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0"
+        <!--<ui:DataGrid Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0"
                   ItemsSource="{Binding ViewModel.GamesView}" AutoGenerateColumns="False"
                      CanUserResizeRows="False"
                      CanUserDeleteRows="False"
@@ -867,11 +867,12 @@
                     </DataGridTextColumn.Binding>
                 </DataGridTextColumn>
             </ui:DataGrid.Columns>
-        </ui:DataGrid>
+        </ui:DataGrid>-->
         <ListView Grid.Row="2" Grid.ColumnSpan="2" Margin="0 10 0 0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                   Visibility="{Binding ViewModel.ListViewEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
             ItemsSource="{Binding ViewModel.GamesView}" IsTabStop="False"
-                 VirtualizingPanel.IsVirtualizing="True">
+                 VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling">
             <ListView.ItemTemplateSelector>
                 <databinding:GameTemplateSelector
                     IdleGame="{StaticResource AlternativeCard}"
