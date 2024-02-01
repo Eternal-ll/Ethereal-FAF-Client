@@ -222,10 +222,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private void OnAuthByPopupBrowser(object arg)
         {
             var window = _windowService.GetWindow<WebViewWindow>();
-            _httpAuthServer.CodeReceived += (s, e) =>
-            {
-                window.Close();
-            };
+            _httpAuthServer.CodeReceived += window.CodeReceived;
             var url = GetAuthUrl();
             window.WebView.Source = new(url);
             window.Show();

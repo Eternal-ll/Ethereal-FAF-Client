@@ -1,4 +1,5 @@
 ﻿using AsyncAwaitBestPractices;
+using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using System;
 using System.Windows;
 
@@ -32,6 +33,14 @@ namespace Ethereal.FAF.UI.Client.Views.Windows
             {
                 Close();
             }
+        }
+        public void CodeReceived(object sender, (string code, string state) e)
+        {
+            if (sender is HttpAuthServer httpAuthServer)
+            {
+                httpAuthServer.CodeReceived -= CodeReceived;
+            }
+            Close();
         }
         private void Dispose()
         {
