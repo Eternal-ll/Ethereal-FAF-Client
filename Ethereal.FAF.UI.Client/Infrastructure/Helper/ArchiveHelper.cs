@@ -97,8 +97,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
             //        progress!.Report(new ProgressReport(count, total, message: "Extracting..."));
             //    };
             //}
-            await Task.Factory
-                .StartNew(() =>
+            await Task.Run(() =>
                 {
                     if (ext == ".zip") 
                     {
@@ -129,8 +128,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
                     }
 
                     //archive.WriteAllToDirectory(outputDirectory, extractOptions);
-                },TaskCreationOptions.LongRunning)
-                .ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
             progress?.Report(new ProgressReport(progress: 1, message: "Done extracting"));
             //progressMonitor?.Stop();
