@@ -77,7 +77,8 @@
 
             <DataTemplate DataType="{x:Type lobby:GamePlayer}">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <Image DataContext="{Binding Player.Country}"
+                           Style="{StaticResource PlayerFlagBitmapImageStyle}"/>
                     <Image Height="16" Width="32" Margin="4 0 0 0">
                         <Image.Style>
                             <Style TargetType="Image">
@@ -141,7 +142,9 @@
                         <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Image Grid.Row="0" Grid.Column="0" Style="{StaticResource AvatarImage}" DataContext="{Binding Player}"/>
-                    <Image Grid.Row="2" Grid.Column="0" Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <Image Grid.Row="2" Grid.Column="0"
+                           DataContext="{Binding Player.Country}"
+                           Style="{StaticResource PlayerFlagBitmapImageStyle}"/>
                     <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding Player.LoginWithClan}" ToolTip="{Binding Player.LoginWithClan}"/>
                     <TextBlock Grid.Row="2" Grid.Column="4" FontSize="10">
                         <Run Text="{Binding Rating, StringFormat='R: {0}'}"/>
@@ -161,7 +164,9 @@
                         <RowDefinition Height="2"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Image Grid.Row="0" Grid.Column="0" Source="{Binding Player.FlagUri}" ToolTip="{Binding Player.Country}" Width="16" Height="16"/>
+                    <Image Grid.Row="0" Grid.Column="0"
+                           DataContext="{Binding Player.Country}"
+                           Style="{StaticResource PlayerFlagBitmapImageStyle}"/>
                     <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding Player.LoginWithClan}"/>
                     <TextBlock Grid.Row="2" Grid.Column="2" FontSize="10">
                         <Run Text="{Binding Rating, StringFormat='R: {0}'}"/>
@@ -320,7 +325,9 @@
             <DataTemplate DataType="{x:Type vm:Player}">
                 <StackPanel Orientation="Horizontal">
                     <Image Style="{StaticResource AvatarImage}"/>
-                    <Image Source="{Binding FlagUri}" Margin="4 2 0 0" ToolTip="{Binding Country}" Width="16" Height="16"/>
+                    <Image DataContext="{Binding Country}"
+                           Style="{StaticResource PlayerFlagBitmapImageStyle}"
+                           Margin="4 2 0 0"/>
                     <TextBlock Text="{Binding LoginWithClan}" Margin="4 0 0 0" ToolTip="{Binding LoginWithClan}"/>
                 </StackPanel>
             </DataTemplate>
@@ -549,20 +556,22 @@
                 <ProgressBar IsIndeterminate="True"/>
             </DataTemplate>
             <DataTemplate x:Key="ImageDataTemplate">
-                <Image Source="{Binding AsyncValue, Converter={StaticResource UriToImageConverter}}" Width="60" Height="60"/>
+                <Image Source="{Binding AsyncValue, Converter={StaticResource UriToImageConverter}}" 
+                      Width="60" Height="60"/>
             </DataTemplate>
             <Style x:Key="ContentControlImageLoader" TargetType="ContentControl">
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Loading}" Value="True">
-                        <Setter Property="ContentTemplate" Value="{StaticResource Loader}"/>
+                        <!--<Setter Property="ContentTemplate" Value="{StaticResource Loader}"/>-->
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Loading}" Value="False">
+                        <Setter Property="Content" Value="{Binding }"/>
                         <Setter Property="ContentTemplate" Value="{StaticResource ImageDataTemplate}"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
             <DataTemplate x:Key="Test" DataType="{x:Type converters:AsyncTaskTwo}">
-                <ContentControl Style="{StaticResource ContentControlImageLoader}" Content="{Binding}"/>
+                <ContentControl Style="{StaticResource ContentControlImageLoader}"/>
             </DataTemplate>
 
             <DataTemplate x:Key="AlternativeCard" DataType="{x:Type lobby:Game}">
