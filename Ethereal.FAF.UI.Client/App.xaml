@@ -42,6 +42,7 @@
                     </Style>
                 </ResourceDictionary>
                 <ResourceDictionary Source="pack://application:,,,/Fonts;component/FontsDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/PlayerDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/Dictionaries/FlagsDictionary.xaml"/>
                 <ResourceDictionary>

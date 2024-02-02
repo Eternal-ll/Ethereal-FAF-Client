@@ -1,4 +1,6 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.ViewModels.Base;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,6 +39,14 @@ namespace Ethereal.FAF.UI.Client.Views
         }
 
         public PlayersViewModel ViewModel { get; }
+        public override ViewModel GetViewModel() => ViewModel;
+
+        protected override void OnUnloadedEvent(RoutedEventArgs e)
+        {
+            base.OnUnloadedEvent(e);
+            ViewModel.Dispose();
+            Resources["OpenPrivateCommand"] = null;
+        }
 
         //private void GroupedSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
         //{

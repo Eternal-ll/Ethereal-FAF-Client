@@ -18,8 +18,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public Ratings Ratings { get; set; }
 
         #endregion
-        private string _FlagUri;
-        public string FlagUri => _FlagUri ??= "/Resources/Images/Flags/" + Country + ".png";
 
         public string LoginWithClan => $"{(Clan is null ? null : '[' + Clan + "] ")}{Login}";
 

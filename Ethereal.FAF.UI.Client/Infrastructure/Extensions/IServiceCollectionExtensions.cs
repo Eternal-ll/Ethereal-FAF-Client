@@ -177,8 +177,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             //.AddTransient<LinksView>()
             //.AddTransient<LinksViewModel>()
 
-            .AddSingleton<PlayersView>()
-            .AddSingleton<PlayersViewModel>()
+            .AddTransient<PlayersView>()
+            .AddTransient<PlayersViewModel>()
 
             //.AddScoped<ChangelogView>()
             //.AddScoped<ChangelogViewModel>()

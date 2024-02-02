@@ -53,7 +53,7 @@
             </Style>
             <DataTemplate DataType="{x:Type model:Player}">
                 <StackPanel Orientation="Horizontal" Margin="4">
-                    <StackPanel.ContextMenu>
+                    <!--<StackPanel.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{DynamicResource OpenPrivateCommand}"
                                       CommandParameter="{Binding IrcUsername}"
@@ -64,8 +64,8 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                         </ContextMenu>
-                    </StackPanel.ContextMenu>
-                    <StackPanel.ToolTip>
+                    </StackPanel.ContextMenu>-->
+                    <!--<StackPanel.ToolTip>
                         <ToolTip>
                             <TextBlock>
                                 <Run Text="{Binding DisplayRatingType, StringFormat='Diplayed rating type: {0}'}"/>
@@ -73,7 +73,7 @@
                                 <Run Text="{Binding UniversalRatingDisplay, Mode=OneWay, StringFormat='Rating: {0}'}"/>
                             </TextBlock>
                         </ToolTip>
-                    </StackPanel.ToolTip>
+                    </StackPanel.ToolTip>-->
                     <Image ToolTip="{Binding Avatar.Tooltip}" Height="16" Width="32">
                         <Image.Style>
                             <Style TargetType="Image">
@@ -88,7 +88,7 @@
                             </Style>
                         </Image.Style>
                     </Image>
-                    <Image Source="{Binding FlagUri}" ToolTip="{Binding Country}" Width="16" Height="16" Margin="4 0"/>
+                    <Image Source="{Binding Country, Converter={StaticResource PathToResourceFlagConverter}}" ToolTip="{Binding Country}" Width="16" Height="16" Margin="4 0"/>
                     <TextBlock Text="{Binding LoginWithClan}" MinWidth="120"/>
                     <Button Content="Invite"
                             Command="{DynamicResource InvitePlayerCommand}"
@@ -336,9 +336,16 @@
          SelectionChanged="OriginalSource_SelectionChanged"
          VirtualizingPanel.IsVirtualizing="True"
          VirtualizingPanel.VirtualizationMode="Recycling"
-         VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                      VirtualizingPanel.IsContainerVirtualizable="True"
                       ItemsSource="{Binding ViewModel.PlayersView}"
-                      SelectedItem="{Binding ViewModel.SelectedPlayer}"/>
+                      SelectedItem="{Binding ViewModel.SelectedPlayer}"
+                      DisplayMemberPath="LoginWithClan">
+                <!--<ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>-->
+            </ListView>
         </ui:Card>
         <ui:Card Grid.Row="2" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
                  Padding="20 20 20 0">

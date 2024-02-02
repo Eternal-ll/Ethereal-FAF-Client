@@ -1,11 +1,9 @@
 ﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
-using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer.Enums;
 using Meziantou.Framework.WPF.Collections;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -14,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -80,7 +77,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public PlayersViewModel(IServiceProvider serviceProvider, IConfiguration configuration, IFafPlayersService fafPlayersService, IFafPlayersEventsService fafPlayersEventsService)
         {
             Players = new(Application.Current.Dispatcher);
-            Players.AddRange(fafPlayersService.GetPlayers());
             OpenPrivateCommand = new LambdaCommand(OnOpenPrivateCommand);
             //var lobby = server.GetLobbyClient();
             //var ircClient = server.GetIrcClient();
@@ -128,13 +124,22 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             GroupBy = PlayersGroupSource[0];
             _fafPlayersService = fafPlayersService;
             _fafPlayersEventsService = fafPlayersEventsService;
+        }
+
+        public override void OnLoaded()
+        {
 
             _fafPlayersEventsService.PlayersAdded += _fafPlayersService_PlayersAdded;
             _fafPlayersEventsService.PlayersRemoved += _fafPlayersService_PlayersRemoved;
+            Players.AddRange(_fafPlayersService.GetPlayers());
+            base.OnLoaded();
         }
 
         public override void OnUnloaded()
         {
+
+            _fafPlayersEventsService.PlayersAdded -= _fafPlayersService_PlayersAdded;
+            _fafPlayersEventsService.PlayersRemoved -= _fafPlayersService_PlayersRemoved;
             Players.Clear();
             base.OnUnloaded();
         }
@@ -320,6 +325,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         }
         private void UpdatePlayersSource()
         {
+            if (_Players == null) return;
             PlayersSource = new()
             {
                 Source = Players.AsObservable
@@ -349,6 +355,26 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             //var chat = ServiceProvider.GetService<ChatViewModel>();
             //chat.OpenPrivateCommand.Execute(user);
             //navigation.Navigate(typeof(ChatView));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                PlayersSource.Filter -= PlayersSource_Filter;
+                PlayersSource = null;
+                Players.Clear();
+                Players = null;
+
+                _fafPlayersEventsService.PlayersAdded -= _fafPlayersService_PlayersAdded;
+                _fafPlayersEventsService.PlayersRemoved -= _fafPlayersService_PlayersRemoved;
+
+                PlayersGroupSource = null;
+                SelectedGroup = null;
+                SelectedPlayer = null;
+                SelectedPlayersSort = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }
