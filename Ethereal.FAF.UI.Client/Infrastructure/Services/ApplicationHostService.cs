@@ -33,7 +33,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public ApplicationHostService(IServiceProvider serviceProvider, INavigationService navigationService,
             IPageService pageService, ITaskBarService taskBarService,
-            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, IWindowService windowService, ISettingsManager settingsManager)
+            IHostApplicationLifetime applicationLifetime, IConfiguration configuration, IWindowService windowService, ISettingsManager settingsManager,
+            LobbyNotificationsService lobbyNotificationsService)
         {
             // If you want, you can do something with these services at the beginning of loading the application.
             _serviceProvider = serviceProvider;
