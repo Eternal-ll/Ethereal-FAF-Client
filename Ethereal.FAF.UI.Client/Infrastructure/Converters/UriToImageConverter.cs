@@ -9,12 +9,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!Uri.IsWellFormedUriString(value as string, UriKind.Absolute)) return value;
+            //if (!Uri.IsWellFormedUriString(value as string, UriKind.Absolute)) return value;
             BitmapImage image = new();
             image.BeginInit();
             image.DecodePixelWidth = 60;
             image.DecodePixelHeight = 60;
-            image.CacheOption = BitmapCacheOption.OnDemand;
+            image.CacheOption = BitmapCacheOption.OnLoad;
             image.UriSource = new Uri(value as string);
             image.EndInit();
             if (image.CanFreeze)
