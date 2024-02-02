@@ -5,11 +5,12 @@
                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                 xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
                 mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance {x:Type local:AuthView}}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Page.Resources>
-        <DataTemplate x:Key="AuthView">
+        <DataTemplate x:Key="AuthView" DataType="{x:Type vm:AuthViewModel}">
             <Grid>
                 <Grid.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
@@ -28,7 +29,7 @@
                             </TextBlock>
                         </ui:Card>
                         <Button Grid.Column="2" Content="Select" HorizontalAlignment="Right" Margin="0 0 10 0"
-                Command="{Binding GoToSelectServerViewCommand}"/>
+                Command="{Binding SelectServerCommand}"/>
                     </Grid>
                     <UniformGrid Rows="1">
                         <Button Padding="11 5 11 6" HorizontalAlignment="Stretch" Content="Login"
@@ -45,23 +46,18 @@
                                Margin="0 10 0 0" Appearance="Success"
                                Visibility="{Binding UpdateVM.IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}"
                                Command="{Binding OpenUpdateClientViewCommand}"/>
-
                 </StackPanel>
                 <StackPanel Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"
                 VerticalAlignment="Top" Margin="0 100 0 0">
                     <!--<ui:ProgressRing IsIndeterminate="True" Width="100" Height="100"/>-->
-                    <TextBlock HorizontalAlignment="Center" Margin="0 40 0 0" FontSize="14">
-            <Run Text="{Binding SplashText}"/>
-                    </TextBlock>
+                    <TextBlock HorizontalAlignment="Center" Margin="0 40 0 0" FontSize="14"
+                               Text="{Binding SplashText}"/>
                 </StackPanel>
                 <StackPanel Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"
                 VerticalAlignment="Bottom">
-                    <Button Content="Open browser" Command="{Binding AuthByBrowserCommand}"
-                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <Button Content="Open popup" Command="{Binding AuthByPopupBrowserCommand}"
-                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <Button Content="Copy link" Command="{Binding CopyAuthUrlCommand}"
-                Visibility="{Binding IsAuthenticating, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button Content="Open browser" Command="{Binding AuthByBrowserCommand}"/>
+                    <Button Content="Open popup" Command="{Binding AuthByPopupBrowserCommand}"/>
+                    <Button Content="Copy link" Command="{Binding CopyAuthUrlCommand}"/>
                     <Button Content="Cancel" Command="{Binding CancelAuthenticatingCommand}"/>
                 </StackPanel>
             </Grid>

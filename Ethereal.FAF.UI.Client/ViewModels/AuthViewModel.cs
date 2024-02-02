@@ -1,7 +1,6 @@
 ﻿using AsyncAwaitBestPractices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Ethereal.FAF.UI.Client.Infrastructure.Commands;
 using Ethereal.FAF.UI.Client.Infrastructure.OAuth;
 using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
@@ -12,12 +11,11 @@ using Ethereal.FAF.UI.Client.Views.Windows;
 using System;
 using System.Diagnostics;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using Wpf.Ui;
 using Wpf.Ui.Controls;
+using Wpf.Ui.Extensions;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -27,25 +25,12 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ISnackbarService _snackbarService;
         private readonly INavigationWindow _navigationWindow;
         private readonly IFafAuthService _fafAuthService;
-        private readonly IFafLobbyService _fafLobbyService;
         private readonly HttpAuthServer _httpAuthServer;
-
-        private readonly ClientManager _serverManager;
 
         private int redirectPort;
 
-        public AuthViewModel(IWindowService windowService, ISnackbarService snackbarService, ClientManager serverManager, INavigationWindow navigationWindow, IFafAuthService fafAuthService, IFafLobbyService lobbyService, UpdateViewModel updateViewModel)
+        public AuthViewModel(IWindowService windowService, ISnackbarService snackbarService, ClientManager serverManager, INavigationWindow navigationWindow, IFafAuthService fafAuthService, UpdateViewModel updateViewModel)
         {
-            LoginAsLastUserCommand = new LambdaCommand(async (arg) => await ConnectToLobby(),
-                (arg) =>
-                _fafAuthService.IsAuthorized());
-            LoginCommand = new LambdaCommand(OnLoginCommand);
-            CancelAuthenticatingCommand = new LambdaCommand(OnCancelAuthenticatingCommand, CanCancelAuthenticatingCommand);
-            GoToSelectServerViewCommand = new LambdaCommand(OnGoToSelectServerViewCommand);
-            AuthByPopupBrowserCommand = new LambdaCommand(OnAuthByPopupBrowser, CanAuthByPopupBrowser);
-            AuthByBrowserCommand = new LambdaCommand(OnAuthByBrowserCommand, CanAuthByBrowserCommand);
-            CopyAuthUrlCommand = new LambdaCommand(OnCopyAuthUrlCommand, CanCopyAuthUrlCommand);
-
             _httpAuthServer = new();
             _httpAuthServer.CodeReceived += _httpAuthServer_CodeReceived;
 
@@ -55,8 +40,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             _snackbarService = snackbarService;
             _navigationWindow = navigationWindow;
             _fafAuthService = fafAuthService;
-            _serverManager = serverManager;
-            _fafLobbyService = lobbyService;
             UpdateVM = updateViewModel;
         }
 
@@ -69,42 +52,22 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             SplashText = "Athorization code received. Fetching OAuth2 token...";
             _fafAuthService
                 .FetchTokenByCode(e.code, GetRedirectUrl())
-                .ContinueWith(async x =>
+                .ContinueWith(x =>
                 {
                     if (_fafAuthService.IsAuthorized())
                     {
                         AuthorizedUserName = _fafAuthService.GetUserName();
                     }
-                    OnPropertyChanged(nameof(IsAuthorized));
-
-                    SplashText = "OAuth2 token received!";
-                })
+                    IsAuthorized = true;
+                    _navigationWindow.Navigate(typeof(LobbyConnectionView));
+                }, TaskScheduler.Default)
                 .SafeFireAndForget();
-        }
-        private CancellationTokenSource CancellationTokenSource;
-        private async Task ConnectToLobby()
-        {
-            IsAuthenticating = true;
-            CancellationTokenSource = new();
-            SplashText = "Connecting to lobby...";
-            await _fafLobbyService
-                .ConnectAsync(CancellationTokenSource.Token)
-                .ContinueWith(x =>
-                {
-                    if (x.IsFaulted)
-                    {
-                        Application.Current.Dispatcher.Invoke(() => _snackbarService.Show("Lobby", "Unable to connect to lobby", ControlAppearance.Primary,  null, TimeSpan.FromSeconds(5)));
-                        IsAuthenticating = false;
-                        return;
-                    }
-                    Application.Current.Dispatcher.Invoke(() =>
-                    _navigationWindow.Navigate(typeof(Views.NavigationView)));
-                });
         }
 
         protected override void OnInitialLoaded()
         {
-            if (_fafAuthService.IsAuthorized())
+            IsAuthorized = _fafAuthService.IsAuthorized();
+            if (IsAuthorized)
             {
                 AuthorizedUserName = _fafAuthService.GetUserName();
             }
@@ -113,6 +76,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public override void OnUnloaded()
         {
             if (_httpAuthServer.IsListening) _httpAuthServer.StopListener();
+            _httpAuthServer.CodeReceived -= _httpAuthServer_CodeReceived;
         }
         private string GetRedirectUrl() => $"http://localhost:{redirectPort}";
 
@@ -131,94 +95,63 @@ namespace Ethereal.FAF.UI.Client.ViewModels
 
         [ObservableProperty]
         private bool _UpdateAvailable;
-
-        #region IsAuthorized
-        public bool IsAuthorized => _fafAuthService.IsAuthorized();
-        #endregion
-
-        #region AuthorizedUserName
+        [ObservableProperty]
+        public bool _IsAuthorized;
+        [ObservableProperty]
         private string _AuthorizedUserName;
-        public string AuthorizedUserName { get => _AuthorizedUserName; set => Set(ref _AuthorizedUserName, value); }
-        #endregion
-
-        #region IsAuthenticating
+        [ObservableProperty]
         private bool _IsAuthenticating;
-        public bool IsAuthenticating { get => _IsAuthenticating; set => Set(ref _IsAuthenticating, value); }
-        #endregion
-
-        #region SplashText
+        [ObservableProperty]
         private string _SplashText;
-        public string SplashText { get => _SplashText; set => Set(ref _SplashText, value); }
-        #endregion
 
         [RelayCommand]
-        private void OpenUpdateClientView()
+        private void OpenUpdateClientView() => _navigationWindow.Navigate(typeof(UpdateClientView));
+        [RelayCommand]
+        private void LoginAsLastUser() => _navigationWindow.Navigate(typeof(LobbyConnectionView));
+        [RelayCommand]
+        private void OnSelectServer(object arg)
         {
-            _navigationWindow.Navigate(typeof(UpdateClientView));
-        }
-
-        #region LoginAsLastUserCommand
-        public ICommand LoginAsLastUserCommand { get; set; }
-        #endregion
-
-        #region GoToSelectServerViewCommand
-        public ICommand GoToSelectServerViewCommand { get; set; }
-        private void OnGoToSelectServerViewCommand(object arg)
-        {
-            if (_httpAuthServer.IsListening)
-            {
-                _httpAuthServer.StopListener();
-            }
+            if (_httpAuthServer.IsListening) _httpAuthServer.StopListener();
             _navigationWindow.Navigate(typeof(SelectServerView));
         }
-        #endregion
-
-        #region LoginCommand
-        public ICommand LoginCommand { get; set; }
-        private void OnLoginCommand(object arg)
+        [RelayCommand]
+        private void OnLogin(object arg)
         {
             IsAuthenticating = true;
             SplashText = "Waiting for your authorization...";
             redirectPort = _httpAuthServer.StartListener(SelectedServer.OAuth.RedirectPorts);
-            //OnAuthByBrowserCommand(arg);
+            OnAuthByBrowser(null);
         }
-
-        #endregion
-
-        #region CancelAuthenticatingCommand
-        public ICommand CancelAuthenticatingCommand { get; set; }
-        public bool CanCancelAuthenticatingCommand(object arg) => IsAuthenticating;
-        public void OnCancelAuthenticatingCommand(object arg)
+        [RelayCommand]
+        public void OnCancelAuthenticating(object arg)
         {
+            if (!IsAuthenticating) return;
             IsAuthenticating = false;
-            CancellationTokenSource?.Cancel();
             _httpAuthServer.StopListener();
         }
-        #endregion
-
-        #region CopyAuthUrlCommand
-        public ICommand CopyAuthUrlCommand { get; }
-        public bool CanCopyAuthUrlCommand(object arg) => true;
-        public void OnCopyAuthUrlCommand(object arg)
+        [RelayCommand]
+        public void OnCopyAuthUrl(object arg)
         {
-            System.Windows.Clipboard.SetText(GetAuthUrl());
+            Clipboard.SetText(GetAuthUrl());
             _snackbarService.Show("Clipboard", "Link copied!", ControlAppearance.Primary, null, TimeSpan.FromSeconds(5));
         }
-        #endregion
-
-        #region AuthByBrowserCommand
-        public ICommand AuthByBrowserCommand { get; }
-        public bool CanAuthByBrowserCommand(object arg) => true;
-        public void OnAuthByBrowserCommand(object arg) => Process.Start(new ProcessStartInfo
+        [RelayCommand]
+        public void OnAuthByBrowser(object arg)
         {
-            FileName = GetAuthUrl(),
-            UseShellExecute = true,
-        });
-        #endregion
-
-        #region AuthByPopupBrowserCommand
-        public ICommand AuthByPopupBrowserCommand { get; }
-        private bool CanAuthByPopupBrowser(object arg) => OperatingSystem.IsWindows();
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = GetAuthUrl(),
+                    UseShellExecute = true,
+                });
+            }
+            catch
+            {
+                _snackbarService.Show("Auth", "Failed to open browser, copy url and open it manually.");
+            }
+        }
+        [RelayCommand]
         private void OnAuthByPopupBrowser(object arg)
         {
             var window = _windowService.GetWindow<WebViewWindow>();
@@ -227,6 +160,5 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             window.WebView.Source = new(url);
             window.Show();
         } 
-        #endregion
     }
 }
