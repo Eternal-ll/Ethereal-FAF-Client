@@ -43,7 +43,7 @@
                 </ResourceDictionary>
                 <ResourceDictionary Source="pack://application:,,,/Fonts;component/FontsDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
-
+                <ResourceDictionary Source="Resources/Dictionaries/FlagsDictionary.xaml"/>
                 <ResourceDictionary>
                     <Style x:Key="BorderPopup" TargetType="Border">
                         <Setter Property="Padding" Value="10"/>
