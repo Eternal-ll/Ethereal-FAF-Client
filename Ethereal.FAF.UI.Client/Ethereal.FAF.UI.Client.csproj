@@ -4,7 +4,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
@@ -16,6 +16,7 @@
     <StartupObject>Ethereal.FAF.UI.Client.Program</StartupObject>
     <Version>2.3.0</Version>
     <UseWindowsForms>false</UseWindowsForms>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -41,26 +42,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncAwaitBestPractices" Version="6.0.6" />
+    <PackageReference Include="AsyncAwaitBestPractices" Version="7.0.0" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="Downloader" Version="3.0.6" />
-    <PackageReference Include="GEmojiSharp" Version="2.0.0" />
+    <PackageReference Include="GEmojiSharp" Version="3.1.0" />
     <PackageReference Include="Hardware.Info" Version="100.0.1.1" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
-    <PackageReference Include="MdXaml" Version="1.23.0" />
+    <PackageReference Include="MdXaml" Version="1.25.0" />
     <PackageReference Include="Meziantou.Framework.WPF" Version="1.5.5" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2210.55" />
-    <PackageReference Include="NetCoreServer" Version="6.7.0" />
+    <PackageReference Include="NetCoreServer" Version="8.0.7" />
     <PackageReference Include="Nucs.JsonSettings" Version="2.0.2" />
     <PackageReference Include="Nucs.JsonSettings.Autosave" Version="2.0.2" />
-    <PackageReference Include="Octokit" Version="9.1.0" />
+    <PackageReference Include="Octokit" Version="9.1.1" />
     <PackageReference Include="Polly.Contrib.WaitAndRetry" Version="1.1.1" />
     <PackageReference Include="SharpCompress" Version="0.36.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.3.0" />
     <PackageReference Include="Websocket.Client" Version="5.0.0" />
     <PackageReference Include="WPF-UI" Version="3.0.0-preview.13" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
