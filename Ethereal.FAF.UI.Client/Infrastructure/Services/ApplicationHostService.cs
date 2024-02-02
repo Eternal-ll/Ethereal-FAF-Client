@@ -92,7 +92,23 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 //}
                 await _settingsManager.LoadAsync();
                 _navigationWindow.ShowWindow();
+
+                if (_settingsManager.Settings.SelectedFaServer == null)
+                {
                 _navigationWindow.Navigate(typeof(SelectServerView));
+                }
+                else
+                {
+                    var auth = _serviceProvider.GetService<IFafAuthService>();
+                    if (auth.IsAuthorized())
+                    {
+                        _navigationWindow.Navigate(typeof(LobbyConnectionView));
+                    }
+                    else
+                    {
+                        _navigationWindow.Navigate(typeof(AuthView));
+                    }
+                }
                 //_navigationWindow.Navigate(typeof(NavigationView));
                 //_navigationWindow.Navigate(typeof(PrepareClientView));
             }
