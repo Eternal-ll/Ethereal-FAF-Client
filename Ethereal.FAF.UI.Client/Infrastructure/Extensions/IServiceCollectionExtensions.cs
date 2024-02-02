@@ -165,8 +165,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         }
 
         public static IServiceCollection AddViewsWithViewModels(this IServiceCollection services) => services
-            //.AddTransient<LobbyConnectionView>()
-            //.AddTransient<LobbyConnectionViewModel>()
+            .AddTransient<LobbyConnectionView>()
+            .AddTransient<LobbyConnectionViewModel>()
 
             .AddTransient<SelectServerView>()
             .AddTransient<SelectServerViewModel>()
