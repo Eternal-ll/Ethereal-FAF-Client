@@ -55,7 +55,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private MemoryStream _memoryStream;
         private ITransportClient _transportClient;
         private long _session;
-        private SemaphoreSlim _sessionSemaphoreSlim = new(0);
+        private SemaphoreSlim _sessionSemaphoreSlim;
 
         public bool Connected => _transportClient?.IsConnected == true;
 
@@ -85,10 +85,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
             await _transportClient.Connect(cancellationToken);
 
+            _sessionSemaphoreSlim = new(0);
             var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             var sessionReceived = await _sessionSemaphoreSlim
                 .WaitAsync(cancellationTokenSource.Token)
                 .ContinueWith(x => !x.IsFaulted, TaskScheduler.Default);
+            _sessionSemaphoreSlim.Dispose();
+            _sessionSemaphoreSlim = null;
             if (!sessionReceived)
             {
                 throw new InvalidOperationException("Failed to fetch lobby session id");
