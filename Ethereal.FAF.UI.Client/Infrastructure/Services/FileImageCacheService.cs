@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Services
@@ -21,10 +22,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public async Task<string> EnsureCachedAsync(string url, CancellationToken cancellationToken)
         {
+            if (url == null) return null;
             //url: https://content.faforever.com/maps/previews/small/scmp_009.png
 
             // / maps/ previews/ small/ scmp_009.png
             var segments = new UriBuilder(url).Uri.Segments;
+
+            // ignore neroxis generated maps
+            if (MapGeneratorHelper.IsGeneratedMap(segments[^1]))
+            {
+                return null;
+            }
 
             // location maps/ previews/ small/ scmp_009.png
             segments[0] = GetPathToCacheLocation();
@@ -55,6 +63,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             }
             else
             {
+                return null;
                 return GetPathToEmptyImage();
             }
         }
