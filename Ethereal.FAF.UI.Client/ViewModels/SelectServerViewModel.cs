@@ -18,16 +18,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         private readonly ISettingsManager _settingsManager;
         private readonly ISnackbarService _snackbarService;
         private readonly INavigationWindow _navigationWindow;
-        private readonly IConfiguration _configuration;
         private readonly ClientManager _clientManager;
         private object _lockObject;
 
-        public SelectServerViewModel(ISnackbarService snackbarService, INavigationWindow navigationWindow, IConfiguration configuration, ClientManager clientManager, ISettingsManager settingsManager)
+        public SelectServerViewModel(ISnackbarService snackbarService, INavigationWindow navigationWindow, ClientManager clientManager, ISettingsManager settingsManager)
         {
             SelectServerCommand = new LambdaCommand(OnSelectServerCommand, CanSelectServerCommand);
             _snackbarService = snackbarService;
             _navigationWindow = navigationWindow;
-            _configuration = configuration;
             _clientManager = clientManager;
             _settingsManager = settingsManager;
         }
@@ -35,12 +33,11 @@ namespace Ethereal.FAF.UI.Client.ViewModels
         public ObservableCollection<Server> Servers { get; set; }
         protected override void OnInitialLoaded()
         {
-            Servers = new();
+            Servers = new(_settingsManager.Settings.Servers);
             OnPropertyChanged(nameof(Servers));
             _lockObject = new();
             BindingOperations.EnableCollectionSynchronization(Servers, _lockObject);
 
-            Servers.Add(_configuration.GetSection("Server").Get<Server>());
             if (_settingsManager.Settings.RememberSelectedFaServer)
             {
                 var server = Servers.FirstOrDefault(x => x.Name == _settingsManager.Settings.SelectedFaServer);
