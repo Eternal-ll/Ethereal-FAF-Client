@@ -114,12 +114,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
 
         public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, object message)
         {
+            var utf8 = JsonSerializer.Serialize(message, Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions);
             _logger.LogInformation(
                 "ICE message for connection '{local}/{remote}': {msg}",
                 localPlayerId,
                 remotePlayerId,
-                JsonSerializer.Serialize(message, Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions));
-            _fafLobbyService.SendCommandToLobby(new OutgoingArgsCommand("IceMsg", remotePlayerId, message));
+                utf8);
+            _fafLobbyService.SendCommandToLobby(new OutgoingArgsCommand("IceMsg", remotePlayerId, 
+                JsonSerializer.Deserialize<object>(utf8)));
             return Task.CompletedTask;
         }
     }
