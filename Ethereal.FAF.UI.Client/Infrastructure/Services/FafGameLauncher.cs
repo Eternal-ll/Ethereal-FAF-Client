@@ -76,6 +76,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Games with SIM mods currently unsupported");
                 return;
             }
+            var progress = new Progress<ProgressReport>(x =>
+            {
+                return;
+                _logger.LogInformation(
+                    "Progress: {Progress:0.00}%, message: {message}",
+                    x.IsIndeterminate ? -1 : x.Progress,
+                    x.Message);
+            });
+            (var mapsService, var patchClient, var gameNetworkAdapter) = GetServices();
+            await mapsService.EnsureMapExist(game.Map.RawName, progress);
+            await gameNetworkAdapter.PrepareAsync(progress);
+            await patchClient.EnsurePatchExist(game.FeaturedMod.ToString(), _settingsManager.Settings.FAForeverLocation, progress: progress);
             await _fafLobbyService.JoinGameAsync(game.Uid, password);
         }
 
@@ -107,9 +119,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     x.IsIndeterminate ? -1 : x.Progress,
                     x.Message);
             });
-            (var mapsService, var patchClient, var gameNetworkAdapter) = GetServices();
+            (var mapsService, _, var gameNetworkAdapter) = GetServices();
             await mapsService.EnsureMapExist(game.Map.RawName, progress);
-            await patchClient.EnsurePatchExist(game.FeaturedMod.ToString(), _settingsManager.Settings.FAForeverLocation, progress: progress);
             var gpgnetPort = await gameNetworkAdapter.Run(data.GameUid, data.InitMode.ToString().ToLower(), progress);
 
             var initFile = $"init_{data.FeaturedMod.ToString().ToLower()}.lua";
