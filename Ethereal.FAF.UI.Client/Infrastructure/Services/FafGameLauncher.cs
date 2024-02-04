@@ -20,6 +20,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 {
     internal class FafGameLauncher : IGameLauncher
     {
+        private readonly static TimeSpan LaunchDeadline = TimeSpan.FromMinutes(1);
+
         private readonly ISnackbarService _snackbarService;
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
         private readonly IFafLobbyService _fafLobbyService;
@@ -106,10 +108,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         }
 
         private void _fafLobbyEventsService_GameLaunchDataReceived(object sender, GameLaunchData e)
-            => Task.Run(async () => await HandleGameLaunchData(e))
+            => Task.Run(async () => await HandleGameLaunchData(e),
+                cancellationToken: new System.Threading.CancellationTokenSource(LaunchDeadline).Token)
             .ContinueWith(async x =>
             {
-                if (x.IsFaulted) await HandleOnException(null);
+                if (x.IsCanceled)
+                {
+                    _logger.LogWarning("Failed to launch game after [{time}] time, launch cancelled", LaunchDeadline);
+                }
+                else if (x.IsFaulted)
+                {
+                    _logger.LogError(x.Exception.ToString());
+                    await HandleOnException(null);
+                }
             }, TaskScheduler.Default)
             .SafeFireAndForget(x => _logger.LogError(x.Message));
         private async Task HandleGameLaunchData(GameLaunchData data)
