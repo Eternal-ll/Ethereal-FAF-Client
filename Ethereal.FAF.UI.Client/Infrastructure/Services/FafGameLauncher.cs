@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Wpf.Ui;
 using Wpf.Ui.Extensions;
@@ -21,6 +22,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
     internal class FafGameLauncher : IGameLauncher
     {
         private readonly static TimeSpan LaunchDeadline = TimeSpan.FromMinutes(1);
+
+        public event EventHandler<GameLauncherState> OnState;
+        public GameLauncherState State { get; private set; }
 
         private readonly ISnackbarService _snackbarService;
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
@@ -35,6 +39,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private Process ForgedAlliance;
         private long GameId;
+        private CancellationToken JoiningCancellationToken;
+        private IProgress<ProgressReport> JoiningProgress;
 
         public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService, ILogger<FafGameLauncher> logger, IMapsService mapsService, IServiceProvider serviceProvider, ISettingsManager settingsManager, IGameNetworkAdapter gameNetworkAdapter, IUserService userService)
         {
@@ -54,6 +60,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _gameNetworkAdapter = gameNetworkAdapter;
             _userService = userService;
         }
+        private void UpdateState(GameLauncherState state)
+        {
+            State = state;
+            OnState?.Invoke(this, state);
+        }
 
         private void FafLobbyEventsService_OnConnection(object sender, bool e)
         {
@@ -70,7 +81,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _snackbarService.Show("GameLauncher", message);
         }
 
-        public async Task JoinGameAsync(Game game, string password = null)
+        public async Task JoinGameAsync(
+            Game game,
+            string password = null,
+            IProgress<ProgressReport> progress = null,
+            CancellationToken cancellationToken = default)
         {
             if (game.State != GameState.Open)
             {
@@ -92,29 +107,26 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Games with SIM mods currently unsupported");
                 return;
             }
-            var progress = new Progress<ProgressReport>(x =>
-            {
-                return;
-                _logger.LogInformation(
-                    "Progress: {Progress:0.00}%, message: {message}",
-                    x.IsIndeterminate ? -1 : x.Progress,
-                    x.Message);
-            });
+            UpdateState(GameLauncherState.Joining);
             (var mapsService, var patchClient, var gameNetworkAdapter) = GetServices();
-            await mapsService.EnsureMapExist(game.Map.RawName, progress);
-            await gameNetworkAdapter.PrepareAsync(progress);
-            await patchClient.EnsurePatchExist(game.FeaturedMod.ToString(), _settingsManager.Settings.FAForeverLocation, progress: progress);
+            await mapsService.EnsureMapExist(game.Map.RawName, progress, cancellationToken);
+            await gameNetworkAdapter.PrepareAsync(progress, cancellationToken);
+            await patchClient.EnsurePatchExist(game.FeaturedMod.ToString(), _settingsManager.Settings.FAForeverLocation, 0, false, progress, cancellationToken);
             await _fafLobbyService.JoinGameAsync(game.Uid, password);
+            progress?.Report(new(-1, "Launcher", "Waiting lobby to response...", true));
+            JoiningCancellationToken = cancellationToken;
+            JoiningProgress = progress;
         }
 
         private void _fafLobbyEventsService_GameLaunchDataReceived(object sender, GameLaunchData e)
-            => Task.Run(async () => await HandleGameLaunchData(e),
-                cancellationToken: new System.Threading.CancellationTokenSource(LaunchDeadline).Token)
+            => Task.Run(async () => await HandleGameLaunchData(e, JoiningProgress, JoiningCancellationToken),
+                cancellationToken: new CancellationTokenSource(LaunchDeadline).Token)
             .ContinueWith(async x =>
             {
                 if (x.IsCanceled)
                 {
                     _logger.LogWarning("Failed to launch game after [{time}] time, launch cancelled", LaunchDeadline);
+                    await HandleOnException(null);
                 }
                 else if (x.IsFaulted)
                 {
@@ -123,7 +135,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             }, TaskScheduler.Default)
             .SafeFireAndForget(x => _logger.LogError(x.Message));
-        private async Task HandleGameLaunchData(GameLaunchData data)
+        private async Task HandleGameLaunchData(
+            GameLaunchData data,
+            IProgress<ProgressReport> progress = null,
+            CancellationToken cancellationToken = default)
         {
             var game = _fafGamesService.GetGame(data.GameUid);
             if (game == null)
@@ -136,17 +151,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Game state is incorrect");
                 return;
             }
-            var progress = new Progress<ProgressReport>(x =>
-            {
-                return;
-                _logger.LogInformation(
-                    "Progress: {Progress:0.00}%, message: {message}",
-                    x.IsIndeterminate ? -1 : x.Progress,
-                    x.Message);
-            });
             (var mapsService, _, var gameNetworkAdapter) = GetServices();
-            await mapsService.EnsureMapExist(game.Map.RawName, progress);
-            var gpgnetPort = await gameNetworkAdapter.Run(data.GameUid, data.InitMode.ToString().ToLower(), progress);
+            await mapsService.EnsureMapExist(game.Map.RawName, progress, cancellationToken);
+            var gpgnetPort = await gameNetworkAdapter.Run(data.GameUid, data.InitMode.ToString().ToLower(), progress, cancellationToken);
 
             var initFile = $"init_{data.FeaturedMod.ToString().ToLower()}.lua";
             if (!File.Exists(Path.Combine(_settingsManager.Settings.FAForeverLocation, "bin", initFile)))
@@ -198,12 +205,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                     UseShellExecute = true
                 }
             };
+            progress?.Report(new(-1, "Launcher", "Launching game...", true));
             var started = ForgedAlliance.Start();
             if (!started)
             {
                 throw new InvalidOperationException("Failed to start ForgedAlliance.exe");
             }
+            progress?.Report(new(-1, "Launcher", "Game launched!", true));
+            UpdateState(GameLauncherState.Running);
             GameId = data.GameUid;
+            JoiningProgress = null;
             Task.Run(() => ForgedAlliance.WaitForExitAsync())
                 .ContinueWith(HandleOnException, TaskScheduler.Default)
                 .SafeFireAndForget(x => _logger.LogError(x.Message));
@@ -222,6 +233,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ForgedAlliance.Close();
                 ForgedAlliance.Dispose();
             }
+            UpdateState(GameLauncherState.Idle);
         }
         private (IMapsService, IPatchClient, IGameNetworkAdapter) GetServices()
         {

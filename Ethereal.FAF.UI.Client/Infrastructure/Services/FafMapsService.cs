@@ -30,6 +30,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public async Task EnsureMapExist(string map, IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
         {
             if (IsExist(map)) return;
+            progress?.Report(new(-1, "Map service", "Map not found", true));
 
             var folder = _settingsManager.Settings.ForgedAllianceMapsLocation;
             if (_neroxisMapGenerator.IsNeroxisGeneratedMap(map))
@@ -56,7 +57,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             FileInfo mapArchive = new(Path.Combine(folder, Path.GetFileName(uri)));
             if (!mapArchive.Directory.Exists) mapArchive.Directory.Create();
 
-            await _downloadService.DownloadToFileAsync(uri, mapArchive.FullName, null, "FafContent", cancellationToken);
+            await _downloadService.DownloadToFileAsync(uri, mapArchive.FullName, progress, "FafContent", cancellationToken);
             await ArchiveHelper.Extract(mapArchive.FullName, folder, progress);
 
             mapArchive.Delete();

@@ -115,6 +115,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 
                 .AddTransient<IPatchClient, PatchClient>();
 
+            services.AddSingleton<GameManager>(sp =>
+            {
+                var manager = (GameManager)System.Windows.Application.Current.FindResource("GameManager");
+                if (!manager.Initialized)
+                    manager.Initialize(
+                        gameLauncher: sp.GetService<IGameLauncher>(),
+                        contentDialogService: sp.GetService<IContentDialogService>());
+                return manager;
+            });
+
             services.AddSingleton<LobbyNotificationsService>();
             //services
                 //.AddSingleton<GameMapPreviewCacheService>();

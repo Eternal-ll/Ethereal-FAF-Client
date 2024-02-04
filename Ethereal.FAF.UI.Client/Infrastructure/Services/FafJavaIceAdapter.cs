@@ -92,6 +92,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 }
             };
             _logger.LogInformation("Starting Java Ice Adapter with args: [{args}]", FafIceAdapterProcess.StartInfo.Arguments);
+            progress?.Report(new(-1, "Ice Adapter", "Running Java Ice Adapter...", true));
             var started = FafIceAdapterProcess.Start();
             if (!started)
             {
@@ -112,6 +113,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 })
                 .ToList();
 
+            progress?.Report(new(-1, "Ice Adapter", "Connecting to Java Ice Adapter...", true));
             FafIceAdapterTcpClient = new();
 
             var attempts = 50;
@@ -213,6 +215,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var downloadPath = Path.Combine(AppHelper.FilesDirectory.FullName, file);
             if (!File.Exists(downloadPath))
             {
+                _logger.LogInformation("Adapter not found, downloading...");
                 await _downloadService.DownloadToFileAsync(url, downloadPath, progress, null, cancellationToken);
             }
             _logger.LogInformation("Path to FAF Java Ice Adapter: [{path}]", downloadPath);

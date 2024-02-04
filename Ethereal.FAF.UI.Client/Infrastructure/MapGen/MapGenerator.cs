@@ -139,15 +139,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
             var mapgen = MapGeneratorFile(version);
             //progress?.Report($"Confirming map generator [{version}]");
             if (File.Exists(mapgen)) return;
-                var location = GetMapGeneratorVersionsLocation();
-                if (!Directory.Exists(location))
-                {
-                    Logger.LogInformation("Creating directory [{location}] for Map Generator [{version}]", location, version);
-                    Directory.Exists(location);
-                }
-                var baseAddress = "https://github.com/FAForever/Neroxis-Map-Generator/releases/download/";
-                var url = baseAddress + $"{version}/NeroxisGen_{version}.jar";
-                await _downloadService.DownloadToFileAsync(url, mapgen, progress);
+            var location = GetMapGeneratorVersionsLocation();
+            if (!Directory.Exists(location))
+            {
+                Logger.LogInformation("Creating directory [{location}] for Map Generator [{version}]", location, version);
+                Directory.Exists(location);
+            }
+            var baseAddress = "https://github.com/FAForever/Neroxis-Map-Generator/releases/download/";
+            var url = baseAddress + $"{version}/NeroxisGen_{version}.jar";
+            await _downloadService.DownloadToFileAsync(url, mapgen, progress);
         }
 
         public async Task<string[]> GenerateMapAsync(
@@ -311,7 +311,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.MapGen
                 while (!process.HasExited)
                 {
                     var output = await process.StandardOutput.ReadLineAsync();
-                    progress.Report(new(-1, "Generating map", output, true));
+                    progress.Report(new(-1, "Neroxis Map Generator", output, true));
                 }
             }
             await process.WaitForExitAsync(cancellationToken);

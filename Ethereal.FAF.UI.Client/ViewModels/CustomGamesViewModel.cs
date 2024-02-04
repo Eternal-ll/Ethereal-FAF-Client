@@ -1,16 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer.Enums;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
@@ -18,26 +13,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     {
         private readonly CollectionViewSource _gamesSource;
         private readonly LobbyGamesViewModel _lobbyGamesViewModel;
-        private readonly IGameLauncher _gameLauncher;
-        private readonly IContentDialogService _contentDialogService;
+        private readonly GameManager _gameManager;
 
         private string _AllFeaturedModsLabel = "All featured mods";
-        public CustomGamesViewModel(LobbyGamesViewModel lobbyGamesViewModel, IGameLauncher gameLauncher, IContentDialogService contentDialogService)
+        public CustomGamesViewModel(LobbyGamesViewModel lobbyGamesViewModel, GameManager gameManager)
         {
             _lobbyGamesViewModel = lobbyGamesViewModel;
             _gamesSource = new();
 
             _SelectedFeaturedMod = _AllFeaturedModsLabel;
-            _gameLauncher = gameLauncher;
-            _contentDialogService = contentDialogService;
-
-
-            var resource = Application.Current.TryFindResource("GameManager");
-            if (resource != null)
-            {
-                var GameManager = (GameManager)resource;
-                GameManager.JoinGameCommand = JoinGameCommand;
-            }
+            _gameManager = gameManager;
         }
 
         public ICollectionView GamesView => _gamesSource.View;
@@ -126,29 +111,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             if (!SelectedGameState.Equals(game.State.ToString(), StringComparison.OrdinalIgnoreCase)) return;
             
             e.Accepted = true;
-        }
-        [RelayCommand]
-        private async Task JoinGame(Game game)
-        {
-            string password = null;
-            if (game.PasswordProtected)
-            {
-                var textbox = new PasswordBox(); 
-                var result = await _contentDialogService.ShowSimpleDialogAsync(new()
-                {
-                    Title = "Enter password for lobby",
-                    Content = textbox,
-                    PrimaryButtonText = "Join",
-                    SecondaryButtonText = string.Empty,
-                    CloseButtonText = "Cancel",
-                });
-                if (result != Wpf.Ui.Controls.ContentDialogResult.Primary)
-                {
-                    return;
-                }
-                password = textbox.Password;
-            }
-            await _gameLauncher.JoinGameAsync(game, password);
         }
 
         [ObservableProperty]

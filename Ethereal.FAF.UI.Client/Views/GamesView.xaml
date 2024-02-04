@@ -36,6 +36,28 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+            <ui:Card Visibility="{Binding Path=JoiningGame,
+                Converter={StaticResource BooleanToVisibilityConverter}}"
+                     VerticalAlignment="Stretch"
+                     VerticalContentAlignment="Stretch"
+                     Padding="0"
+                     DataContext="{Binding Source={StaticResource GameManager}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding ProgressText}"
+                               VerticalAlignment="Center" Margin="10 0 0 0"/>
+                    <ProgressBar Grid.ColumnSpan="2"
+                                 IsIndeterminate="{Binding IsProgressIndeterminate}"
+                                 Value="{Binding ProgressValue}"
+                                 VerticalAlignment="Bottom"/>
+                    <Button Grid.Column="2" Content="Cancel"
+                            Command="{Binding CancelCommand}"/>
+                </Grid>
+            </ui:Card>
             <ToggleButton x:Name="ToggleFiltersButton" Grid.Column="3">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
