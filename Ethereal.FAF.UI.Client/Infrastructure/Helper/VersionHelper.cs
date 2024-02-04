@@ -3,6 +3,10 @@ using System.Reflection;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Helper
 {
+    internal class ClientVersion
+    {
+        public string Version { get; set; } = VersionHelper.GetCurrentVersionInText();
+    }
     internal static class VersionHelper
     {
         public static Version GetCurrentVersion()
