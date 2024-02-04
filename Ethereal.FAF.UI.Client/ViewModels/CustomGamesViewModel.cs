@@ -7,6 +7,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using Wpf.Ui;
@@ -29,6 +30,14 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             _SelectedFeaturedMod = _AllFeaturedModsLabel;
             _gameLauncher = gameLauncher;
             _contentDialogService = contentDialogService;
+
+
+            var resource = Application.Current.TryFindResource("GameManager");
+            if (resource != null)
+            {
+                var GameManager = (GameManager)resource;
+                GameManager.JoinGameCommand = JoinGameCommand;
+            }
         }
 
         public ICollectionView GamesView => _gamesSource.View;

@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:converter="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Converters"
-             xmlns:cmd="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Commands">
+             xmlns:cmd="clr-namespace:Ethereal.FAF.UI.Client.Infrastructure.Commands"
+             xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -20,6 +21,8 @@
 
                     <cmd:GenerateGameMapCommand x:Key="GenerateGameMapCommand"/>
                     <cmd:OpenImageCommand x:Key="OpenImageCommand"/>
+
+                    <vm:GameManager x:Key="GameManager"/>
 
                     <converter:TruncateStringConverter x:Key="TruncateStringConverter"/>
                     <converter:IsValueLessThanParameterConverter x:Key="IsValueLessThanParameterConverter"/>
