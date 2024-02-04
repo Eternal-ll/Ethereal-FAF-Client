@@ -100,56 +100,17 @@ namespace Ethereal.FAF.UI.Client
             services.AddFafServices();
             services.AddViewsWithViewModels();
 
-            services.AddMemoryCache();
-            // Background
-            //services.AddHostedService<TokenReloadService>();
-            //services.AddHostedService<ApiGameValidator>();
             services.AddTransient<WebViewWindow>();
             services.AddSingleton<NotificationService>();;
-            services.AddScoped<ContainerViewModel>();
 
             services.AddSingleton<ClientManager>();
 
-            //services.AddScoped<ServerManager>();
-
-            services.AddScoped<IrcClient>(s => new IrcClient(
-                    host: configuration.GetValue<string>("Server:Irc:Host"),
-                    port: configuration.GetValue<int>("Server:Irc:Port"),
-                    s.GetService<ILogger<IrcClient>>()));
-
-            services.AddScoped<IFafApi<ClanDto>, IFafClansService>(sp => sp.GetRequiredService<IFafClansService>());
-
-            //services.AddTransient<IRequestHandler<GetDataCommand<ClanDto>, PaginationDto<ClanDto>>, GetDataCommandHandler<ClanDto>>();
-
-            services.Configure<IceAdapterConfiguration>(configuration.GetSection("IceAdapter"));
-            services.AddScoped<IRelationParser<ClanDto>, ClanDtoRelationParser>();
-
             services.AddSingleton<PatchWatcher>();
-            //services.AddScoped<ServerViewModel>();
 
             services.AddSingleton<TokenProvider>();
             services.AddSingleton<ITokenProvider, TokenProvider>(s => s.GetRequiredService<TokenProvider>());
 
             services.AddHttpClient();
-
-            //services.AddTransient<MatchmakingViewModel>();
-            //services.AddTransient<PartyViewModel>();
-
-            services.AddSingleton<BackgroundViewModel>();
-
-            //services.AddTransient<GenerateMapView>();
-            //services.AddTransient<SelectLocalMapView>();
-            services.AddTransient<SelectCoopView>();
-
-            //services.AddTransient<GenerateMapsVM>();
-            //services.AddTransient<LocalMapsVM>();
-
-            services.AddScoped<SelectGameLocationView>();
-            services.AddScoped<SelectFaPatchLocationView>();
-            services.AddScoped<SelectVaultLocationView>();
-
-            services.AddTransient<ReportViewModel>();
-
 
             services.AddSingleton<IUpdateHelper, UpdateHelper>();
             services.AddHttpClient("UpdateClient");
