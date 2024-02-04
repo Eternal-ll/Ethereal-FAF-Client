@@ -201,6 +201,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             cached.MaxPlayers = e.MaxPlayers;
             cached.NumPlayers = e.NumPlayers;
             cached.LaunchedAt = e.LaunchedAt;
+            cached.Map = e.Map;
             //OnPropertyChanged(nameof(cached.LaunchedAtTimeSpan));
 
             if (e.State is GameState.Playing && cached.State is GameState.Playing)
