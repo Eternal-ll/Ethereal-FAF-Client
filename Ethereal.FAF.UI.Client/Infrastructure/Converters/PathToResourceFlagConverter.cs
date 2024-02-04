@@ -11,6 +11,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Converters
         private const string DefaultFlag = "earth";
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null) return null;
             var resource = Application.Current
                 .TryFindResource($"CountryFlagBitmapImage_{value.ToString().ToLower()}") ??
                 Application.Current.TryFindResource(DefaultFlag);
