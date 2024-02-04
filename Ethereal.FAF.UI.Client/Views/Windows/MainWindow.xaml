@@ -60,7 +60,7 @@
         <ui:SnackbarPresenter x:Name="SnackbarPresenter" Grid.Row="1" MaxWidth="600" />
         <ui:TitleBar
             x:Name="TitleBar"
-            Grid.Row="0" Height="30" Padding="10 0"
+            Grid.Row="0" Height="30" Margin="1 2 1 0" Padding="10 0"
             ForceShutdown="True"
             ShowClose="True"
             ShowMaximize="True"
