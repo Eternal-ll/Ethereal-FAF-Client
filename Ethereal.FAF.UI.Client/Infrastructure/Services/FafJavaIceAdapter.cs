@@ -225,11 +225,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var graceShutdown = await Task
                 .Run(async () =>
                 {
+                    if (FafJavaIceAdapterClient == null) return false;
                     await FafJavaIceAdapterClient.QuitAsync();
                     FafIceAdapterTcpClient.Close();
                     await FafIceAdapterProcess.WaitForExitAsync();
+                    return true;
                 }, cancellationTokenSource.Token)
-                .ContinueWith(x => x.IsCompletedSuccessfully, TaskScheduler.Default);
+                .ContinueWith(x => x.IsCompletedSuccessfully ? x.Result : false, TaskScheduler.Default);
 
             FafIceAdapterTcpClient?.Close();
             FafIceAdapterTcpClient?.Dispose();
