@@ -338,8 +338,7 @@
          VirtualizingPanel.VirtualizationMode="Recycling"
                       VirtualizingPanel.IsContainerVirtualizable="True"
                       ItemsSource="{Binding ViewModel.PlayersView}"
-                      SelectedItem="{Binding ViewModel.SelectedPlayer}"
-                      DisplayMemberPath="LoginWithClan">
+                      SelectedItem="{Binding ViewModel.SelectedPlayer}">
                 <!--<ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel/>
