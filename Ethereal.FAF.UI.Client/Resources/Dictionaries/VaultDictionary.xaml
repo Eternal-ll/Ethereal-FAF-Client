@@ -56,7 +56,7 @@
 
             <TextBlock Grid.Column="4" ToolTip="Max players on map" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <Run Text="&#xe533;" FontFamily="{StaticResource FontAwesomeLight}"/>
-                        <Run Text="{Binding Scenario.Armies.Count, Mode=OneWay}"/>
+                        <Run Text="{Binding Scenario.Armies.Length, Mode=OneWay}"/>
             </TextBlock>
             <TextBlock Grid.Column="6" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <Run Text="&#xf546;" FontFamily="{StaticResource FontAwesomeLight}"/>
@@ -101,7 +101,7 @@
                     <TextBlock Text="{Binding Scenario.Width,StringFormat='Map size: {0}px'}"/>
                 </ui:Badge>
                 <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
-                    <TextBlock Text="{Binding Scenario.Armies.Count, Mode=OneWay, StringFormat='Slots: {0}'}"/>
+                    <TextBlock Text="{Binding Scenario.Armies.Length, Mode=OneWay, StringFormat='Slots: {0}'}"/>
                 </ui:Badge>
                 <ui:Badge Appearance="Secondary" Margin="4 6 0 0">
                     <TextBlock Text="{Binding Scenario.MapVersion, StringFormat='Version: {0}'}"/>

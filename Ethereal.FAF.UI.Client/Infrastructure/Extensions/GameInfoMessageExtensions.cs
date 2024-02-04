@@ -2,6 +2,7 @@
 using Ethereal.FAF.UI.Client.Infrastructure.MapGen;
 using Ethereal.FAF.UI.Client.Models.Lobby;
 using FAF.Domain.LobbyServer;
+using System.Linq;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 {
@@ -15,7 +16,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 			MaxPlayers = x.MaxPlayers,
 			NumPlayers = x.NumPlayers,
 			PasswordProtected = x.PasswordProtected,
-			SimMods = x.SimMods,
+			SimMods = x.SimMods.Count == 0 ? null : new(x.SimMods.Select(x => new SimMod()
+            {
+                Id = x.Key,
+                Name = x.Value
+            }).ToArray()),
 			State = x.State,
 			TeamsIds = x.TeamsIds,
 			Teams = x.Teams,

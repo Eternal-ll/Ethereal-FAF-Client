@@ -45,9 +45,11 @@
                     </Style>
                 </ResourceDictionary>
                 <ResourceDictionary Source="pack://application:,,,/Fonts;component/FontsDictionary.xaml"/>
-                <ResourceDictionary Source="Resources/Dictionaries/PlayerDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/Dictionaries/VaultDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/CardsDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/Dictionaries/FlagsDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/PlayerDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Dictionaries/GameDictionary.xaml"/>
                 <ResourceDictionary>
                     <Style x:Key="BorderPopup" TargetType="Border">
                         <Setter Property="Padding" Value="10"/>
@@ -88,8 +90,6 @@
                         </DrawingImage.Drawing>
                     </DrawingImage>
                 </ResourceDictionary>
-
-                <ResourceDictionary Source="Resources/Dictionaries/CardsDictionary.xaml"/>
 
                 <ui:ControlsDictionary/>
                 <ui:ThemesDictionary Theme="Dark"/>

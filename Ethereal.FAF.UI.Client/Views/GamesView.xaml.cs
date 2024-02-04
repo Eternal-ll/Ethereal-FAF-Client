@@ -1,6 +1,6 @@
-﻿
-using Ethereal.FAF.UI.Client.ViewModels;
+﻿using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Base;
+using System.Windows;
 using Wpf.Ui.Controls;
 
 namespace Ethereal.FAF.UI.Client.Views
@@ -14,7 +14,6 @@ namespace Ethereal.FAF.UI.Client.Views
         {
             ViewModel = viewModel;
             InitializeComponent();
-            Resources.Add("JoinGameCommand", viewModel.JoinGameCommand);
             //Resources.Add("WatchGameCommand", viewModel.WatchGameCommand);
             //Resources.Add("RemoveMapFromBlacklistCommand", viewModel.RemoveMapFromBlacklistCommand);
             //Resources.Add("AddMapToBlacklistCommand", viewModel.AddMapToBlacklistCommand);

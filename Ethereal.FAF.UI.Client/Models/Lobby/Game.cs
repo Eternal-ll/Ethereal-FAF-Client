@@ -4,13 +4,30 @@ using Ethereal.FAF.UI.Client.ViewModels.Base;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 
 namespace Ethereal.FAF.UI.Client.Models.Lobby
 {
+    public class Mod
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+    public class SimMod : Mod
+    {
+
+    }
+    public class SimModReadOnlyCollection : ReadOnlyCollection<SimMod>
+    {
+        public SimModReadOnlyCollection(IList<SimMod> list) : base(list)
+        {
+        }
+    }
     public enum PreviewType : byte
     {
         Normal = 0,
@@ -156,7 +173,7 @@ namespace Ethereal.FAF.UI.Client.Models.Lobby
         [ObservableProperty]
         private FeaturedMod _FeaturedMod;
         [ObservableProperty]
-        private Dictionary<string, string> _SimMods;
+        private SimModReadOnlyCollection _SimMods;
         [ObservableProperty]
         private GameMap _Map;
         [ObservableProperty]
