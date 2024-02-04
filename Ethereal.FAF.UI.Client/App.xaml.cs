@@ -116,7 +116,7 @@ namespace Ethereal.FAF.UI.Client
             services.AddHttpClient("UpdateClient");
         }
 
-        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        private async void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             var msg = e.Exception.ToString();
             e.Handled = true;
@@ -128,15 +128,15 @@ namespace Ethereal.FAF.UI.Client
             logger.LogError(e.Exception.ToString());
             try
             {
-                //var dialog = Hosting.Services.GetService<IDialogService>().GetDialogControl();
-                //dialog.Hide();
-                //dialog.Title = "Exception occuried";
-                //dialog.ButtonLeftName = string.Empty;
-                //dialog.ButtonRightName = "Close";
-                //dialog.Content = null;
-                //dialog.Message = e.Exception.Message;
-                //dialog.Footer = null;
-                //dialog.Show();
+                var dialog = Hosting.Services.GetService<IContentDialogService>();
+                var result = await dialog.ShowSimpleDialogAsync(new()
+                {
+                    Title = "Unhandled exception",
+                    Content = $@"
+Something went wrong, contact me in Discord @eternal_l
+{e.Exception.Message}",
+                    CloseButtonText = "OK",
+                });
             }
             catch
             {
