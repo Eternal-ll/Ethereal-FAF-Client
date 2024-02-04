@@ -16,6 +16,7 @@ namespace Ethereal.FAF.UI.Client.Models.Settings
 
         public virtual UpdateChannel PreferredUpdateChannel { get; set; } = UpdateChannel.Stable;
 
+        public virtual bool ClientInitialized { get; set; }
 
 
         public virtual bool RememberSelectedFaServer { get; set; } = true;

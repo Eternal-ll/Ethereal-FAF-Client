@@ -93,9 +93,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 await _settingsManager.LoadAsync();
                 _navigationWindow.ShowWindow();
 
-                if (_settingsManager.Settings.SelectedFaServer == null)
+                if (!_settingsManager.Settings.ClientInitialized)
                 {
-                _navigationWindow.Navigate(typeof(SelectServerView));
+                    _navigationWindow.Navigate(typeof(PrepareClientView));
+                }
+                else if (_settingsManager.Settings.SelectedFaServer == null)
+                {
+                    _navigationWindow.Navigate(typeof(SelectServerView));
                 }
                 else
                 {

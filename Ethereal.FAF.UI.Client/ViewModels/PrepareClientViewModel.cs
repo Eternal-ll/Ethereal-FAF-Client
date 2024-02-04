@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
+using Ethereal.FAF.UI.Client.Infrastructure.Services;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.Infrastructure.Utils;
 using Ethereal.FAF.UI.Client.Models.Progress;
@@ -258,6 +259,8 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             {
                 if (x.IsCompletedSuccessfully)
                 {
+                    _settingsManager.Settings.ClientInitialized = true;
+                    _settingsManager.Settings.Save();
                     App.Current.Dispatcher.Invoke(() => _navigationWindow.Navigate(typeof(AuthView)));
                 }
             }).SafeFireAndForget();
