@@ -14,7 +14,7 @@
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <NoWarn>NU1605</NoWarn>
     <StartupObject>Ethereal.FAF.UI.Client.Program</StartupObject>
-    <Version>2.4.0</Version>
+    <Version>2.4.1</Version>
     <UseWindowsForms>false</UseWindowsForms>
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>

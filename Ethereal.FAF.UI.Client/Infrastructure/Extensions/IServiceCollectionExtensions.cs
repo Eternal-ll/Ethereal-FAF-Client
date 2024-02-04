@@ -12,7 +12,6 @@ using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels;
 using Ethereal.FAF.UI.Client.ViewModels.Dialogs;
 using Ethereal.FAF.UI.Client.Views;
-using Ethereal.FAF.UI.Client.Views.Hosting;
 using FAF.UI.EtherealClient.Views.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,6 @@ using Microsoft.Extensions.Logging;
 using Octokit;
 using Refit;
 using System;
-using System.IO;
 using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
@@ -136,6 +134,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                     url: server.Lobby.Url,
                     fafUserApi: sp.GetService<IFafUserApi>(),
                     logger: sp.GetService<ILogger<Websocket.Client.WebsocketClient>>());
+            });
+
+            services.AddTransient<WsTransportClient>(sp =>
+            {
+                var server = sp.GetService<ClientManager>().GetServer() ?? throw new InvalidOperationException("Server not selected");
+                return new(sp.GetService<IFafUserApi>());
             });
 
             services.AddTransient<AuthHeaderHandler>();

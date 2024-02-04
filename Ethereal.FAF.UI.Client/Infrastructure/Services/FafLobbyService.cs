@@ -5,10 +5,12 @@ using Ethereal.FAF.UI.Client.Models.Configuration;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Base;
+using FAF.Domain.LobbyServer.Enums;
 using FAF.Domain.LobbyServer.Outgoing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -143,7 +145,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _logger.LogInformation("Connection state: [{lobbyConnectionState}]", e);
             if (e == ConnectionState.Connected)
             {
-                OnConnection?.Invoke(this, true);
                 var command = new AskSessionCommand(_clientManager.GetServer().OAuth.ClientId, VersionHelper.GetCurrentVersionInText());
                 SendCommandToLobby(command);
             }
@@ -160,8 +161,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         public void SendCommandToLobby(OutgoingCommand command)
         {
-            _logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command));
-            _transportClient.SendData(JsonSerializer.SerializeToUtf8Bytes<object>(command));
+            _logger.LogInformation("Outgoing command: [{command}]", JsonSerializer.Serialize<object>(command, Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions));
+            _transportClient.SendData(JsonSerializer.SerializeToUtf8Bytes<object>(command,
+                Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions));
         }
 
         private Task ProcessMessageAsync(byte[] e)
@@ -169,6 +171,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             try
             {
                 var command = JsonSerializer.Deserialize<ServerMessage>(e, JsonSerializerDefaults.FafLobbyCommandsJsonSerializerOptions);
+                var log = new List<ServerCommand>()
+                {
+                    ServerCommand.IceMsg,
+                    ServerCommand.JoinGame,
+                    ServerCommand.HostGame
+                };
+                if (log.Contains(command.Command))
+                {
+                    _logger.LogInformation(Encoding.UTF8.GetString(e));
+                }
                 Handle(command);
             }
             catch (Exception ex)
