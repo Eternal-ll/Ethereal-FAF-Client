@@ -67,7 +67,6 @@
             ShowMinimize="True"
             Icon="/Resources/logo.ico"
             Title="Ethereal FAF Client"
-            PreviewMouseDoubleClick="TitleBar_PreviewMouseDoubleClick">
             <ui:TitleBar.Header>
                 <Grid
                     Margin="0,0,12,0"

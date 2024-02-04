@@ -81,6 +81,70 @@ namespace FAF.UI.EtherealClient.Views.Windows
 
             //Closing += MainWindow_Closing;
             Loaded += MainWindow_Loaded;
+
+            MaxHeight = SystemParameters.VirtualScreenHeight - 10;
+            MaxWidth = SystemParameters.VirtualScreenWidth - 10;
+
+            StateChanged += MainWindow_StateChanged;
+            SizeChanged += MainWindow_SizeChanged;
+        }
+
+        private double NormalHeight = 800;
+        private double NormalWidth = 1200;
+
+        private bool FullSized;
+        private bool WidthStateChanging;
+        private bool HeigthStateChanging;
+
+        private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!WidthStateChanging && !HeigthStateChanging)
+            {
+                if (e.HeightChanged)
+                {
+                    NormalHeight = e.NewSize.Height;
+                }
+                if (e.WidthChanged)
+                {
+                    NormalWidth = e.NewSize.Width;
+                }
+            }
+            else
+            {
+                if (WidthStateChanging && e.WidthChanged) WidthStateChanging = false;
+                if (HeigthStateChanging && e.HeightChanged) HeigthStateChanging = false;
+            }
+        }
+
+        private void MainWindow_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                WidthStateChanging = true;
+                HeigthStateChanging = true;
+                FullSized = !FullSized;
+                WindowState = WindowState.Normal;
+                if (Height == MaxHeight && Width == MaxWidth)
+                {
+                    Height = NormalHeight;
+                    Width = NormalWidth;
+                }
+                else
+                {
+                    Height = MaxHeight;
+                    Width = MaxWidth;
+                }
+                CenterWindowOnScreen();
+            }
+        }
+        private void CenterWindowOnScreen()
+        {
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
+            double windowWidth = this.Width;
+            double windowHeight = this.Height;
+            Left = (screenWidth / 2) - (windowWidth / 2);
+            Top = (screenHeight / 2) - (windowHeight / 2);
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -121,16 +185,6 @@ namespace FAF.UI.EtherealClient.Views.Windows
         {
             //if (sender is not MenuItem menuItem)
             //    return;
-        }
-
-        /// <summary>
-        /// Ignore maximize on title double click
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TitleBar_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-
         }
         public void SetServiceProvider(IServiceProvider serviceProvider)
         {
