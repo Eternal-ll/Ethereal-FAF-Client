@@ -47,11 +47,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             _websocketClient.DisconnectionHappened
                 .Subscribe(x =>
                 {
-                    if (_connected && !_isDisconnected)
-                    {
-                        Task.Run(async () => await Reconnect());
-                        _connected = false;
-                    }
+                    _connected = false;
                     UpdateState(ConnectionState.Disconnected);
                 });
         }
@@ -86,13 +82,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public void Dispose()
         {
             _websocketClient.Dispose();
-        }
-
-        public async Task Reconnect(CancellationToken cancellationToken = default)
-        {
-            var lobbyAccess = await _fafUserApi.GetLobbyAccess(cancellationToken);
-            _websocketClient.Url = lobbyAccess.AccessUrl;
-            await _websocketClient.Reconnect();
         }
     }
 }
