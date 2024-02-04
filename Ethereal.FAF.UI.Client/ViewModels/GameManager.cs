@@ -68,8 +68,16 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 IsProgressIndeterminate = x.IsIndeterminate;
                 ProgressText = $"{x.Title}: {x.Message}";
             });
-            await _gameLauncher.JoinGameAsync(game, password, progress,
-                JoiningCancellationTokenSource.Token);
+            await _gameLauncher
+                .JoinGameAsync(game, password, progress,
+                JoiningCancellationTokenSource.Token)
+                .ContinueWith(x =>
+                {
+                    if (x.IsFaulted)
+                    {
+                        JoiningGame = false;
+                    }
+                }, TaskScheduler.Current);
         }
 
         private CancellationTokenSource JoiningCancellationTokenSource;
