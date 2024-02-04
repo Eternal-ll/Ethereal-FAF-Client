@@ -133,10 +133,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             string password = null;
             if (game.PasswordProtected)
             {
-                var textbox = new TextBox(); 
+                var textbox = new PasswordBox(); 
                 var result = await _contentDialogService.ShowSimpleDialogAsync(new()
                 {
-                    Title = "Enter secured password for lobby",
+                    Title = "Enter password for lobby",
                     Content = textbox,
                     PrimaryButtonText = "Join",
                     SecondaryButtonText = string.Empty,
@@ -146,7 +146,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 {
                     return;
                 }
-                password = textbox.Text;
+                password = textbox.Password;
             }
             await _gameLauncher.JoinGameAsync(game, password);
         }
