@@ -49,10 +49,10 @@ namespace Ethereal.FAF.UI.Client
                     builder.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
                 })
             .ConfigureServices(ConfigureServices)
-            //.ConfigureHostConfiguration(c =>
-            //{
-            //    c.AddJsonFile("appsettings.user.json", true, true);
-            //})
+            .ConfigureHostConfiguration(c =>
+            {
+                c.AddJsonFile("appsettings.user.json", true, true);
+            })
             .ConfigureLogging((hostingContext, loggingBuilder) =>
             {
                 loggingBuilder.AddFile(hostingContext.Configuration.GetSection("Logging"));
