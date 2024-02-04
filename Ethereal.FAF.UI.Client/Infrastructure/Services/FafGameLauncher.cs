@@ -32,13 +32,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly ILogger _logger;
 
         private Process ForgedAlliance;
+        private long GameId;
 
         public FafGameLauncher(ISnackbarService snackbarService, IFafLobbyEventsService fafLobbyEventsService, IFafLobbyService fafLobbyService, IFafGamesService fafGamesService, ILogger<FafGameLauncher> logger, IMapsService mapsService, IServiceProvider serviceProvider, ISettingsManager settingsManager, IGameNetworkAdapter gameNetworkAdapter, IUserService userService)
         {
+
+            fafLobbyEventsService.GameLaunchDataReceived += _fafLobbyEventsService_GameLaunchDataReceived;
+            fafLobbyEventsService.OnConnection += FafLobbyEventsService_OnConnection;
+
+
             _snackbarService = snackbarService;
             _fafLobbyEventsService = fafLobbyEventsService;
-
-            _fafLobbyEventsService.GameLaunchDataReceived += _fafLobbyEventsService_GameLaunchDataReceived;
             _fafLobbyService = fafLobbyService;
             _fafGamesService = fafGamesService;
             _logger = logger;
@@ -47,6 +51,16 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             _settingsManager = settingsManager;
             _gameNetworkAdapter = gameNetworkAdapter;
             _userService = userService;
+        }
+
+        private void FafLobbyEventsService_OnConnection(object sender, bool e)
+        {
+            if (e && GameId != 0)
+            {
+                _fafLobbyService
+                    .RestoreGameSessionAsync(GameId)
+                    .SafeFireAndForget(x => _logger.LogError("Failed to restore game session [{ex}]", x.ToString()));
+            }
         }
 
         private void ShowSnackbar(string message)
@@ -178,12 +192,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             {
                 throw new InvalidOperationException("Failed to start ForgedAlliance.exe");
             }
+            GameId = data.GameUid;
             Task.Run(() => ForgedAlliance.WaitForExitAsync())
                 .ContinueWith(HandleOnException, TaskScheduler.Default)
                 .SafeFireAndForget(x => _logger.LogError(x.Message));
         }
         private async Task HandleOnException(Task task)
         {
+            GameId = 0;
             if (task?.IsFaulted == true)
             {
                 _logger.LogCritical(task.Exception?.InnerException?.ToString());

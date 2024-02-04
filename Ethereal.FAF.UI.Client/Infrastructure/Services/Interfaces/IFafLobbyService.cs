@@ -24,6 +24,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
         /// <returns></returns>
         public Task JoinGameAsync(long uid, string password = null, int port = 0);
         /// <summary>
+        /// Restore game session
+        /// </summary>
+        /// <param name="uid">Game id</param>
+        /// <returns></returns>
+        public Task RestoreGameSessionAsync(long uid);
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>

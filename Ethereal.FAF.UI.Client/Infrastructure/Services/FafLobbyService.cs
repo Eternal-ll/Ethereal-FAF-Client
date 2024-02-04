@@ -99,7 +99,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             var session = _session;
             var uid = await _uidGenerator.GenerateAsync(session.ToString(), cancellationToken);
             var token = await _fafAuthService.GetActualAccessToken(cancellationToken);
-            SendCommandToLobby(new AuthenticateCommand(token, uid, session));
+            var command = new AuthenticateCommand(token, uid, session);
+            _transportClient.SendData(JsonSerializer.SerializeToUtf8Bytes(command));
+            OnConnection?.Invoke(this, true);
         }
         private ITransportClient GetTransportClient(Server server)
         {
@@ -221,6 +223,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         public Task GameEndedAsync()
         {
             SendCommandToLobby(new OutgoingArgsCommand("GameState", "Ended"));
+            return Task.CompletedTask;
+        }
+
+        public Task RestoreGameSessionAsync(long uid)
+        {
+            SendCommandToLobby(new GameRestoreSession(uid));
             return Task.CompletedTask;
         }
     }
