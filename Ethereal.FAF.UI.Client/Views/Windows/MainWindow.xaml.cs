@@ -40,15 +40,15 @@ namespace FAF.UI.EtherealClient.Views.Windows
             IConfiguration configuration,
             IServiceProvider serviceProvider,
             IHost host,
-            ContainerViewModel viewModel,
             ISettingsManager settingsManager,
             MainWindowViewModel mainWindowViewModel)
         {
+            mainWindowViewModel.SetupNavigationWindow(this);
             DefaultMaxHeight = MaxHeight;
             DefaultMaxWidth = MaxWidth;
 
             // Context provided by the service provider.
-            DataContext = viewModel;
+            //DataContext = viewModel;
 
             Configuration = configuration;
             ServiceProvider = serviceProvider;

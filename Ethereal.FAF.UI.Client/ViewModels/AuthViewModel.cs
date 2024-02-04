@@ -59,7 +59,7 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                         AuthorizedUserName = _fafAuthService.GetUserName();
                     }
                     IsAuthorized = true;
-                    _navigationWindow.Navigate(typeof(LobbyConnectionView));
+                    Application.Current.Dispatcher.Invoke(() => _navigationWindow.Navigate(typeof(LobbyConnectionView)));
                 }, TaskScheduler.Default)
                 .SafeFireAndForget();
         }
