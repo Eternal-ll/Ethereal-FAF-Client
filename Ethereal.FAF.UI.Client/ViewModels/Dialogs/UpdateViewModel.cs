@@ -75,7 +75,9 @@ namespace Ethereal.FAF.UI.Client.ViewModels.Dialogs
                 IsUpdateAvailable = true;
                 UpdateInfo = info;
             };
-            updateHelper.StartCheckingForUpdates().SafeFireAndForget();
+            updateHelper
+                .StartCheckingForUpdates()
+                .SafeFireAndForget(x => _logger.LogError(x.Message));
         }
 
         public async Task Preload()
