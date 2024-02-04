@@ -86,7 +86,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                         .WithRpcPort(rpcPort)
                         .WithGPGNetPort(gpgnetPort)
                         .WithGameId(gameId, true)
-                        .WithForcedRelay(false)
+                        .WithForcedRelay(true)
                         //.Append("--debug-window")
                         .ToString(),
                 }
