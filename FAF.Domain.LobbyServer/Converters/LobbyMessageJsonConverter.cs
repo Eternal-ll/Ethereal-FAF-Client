@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 namespace FAF.Domain.LobbyServer.Converters
 {
-	public class LobbyMessageJsonConverter : JsonConverter<ServerMessage>
+    public class LobbyMessageJsonConverter : JsonConverter<ServerMessage>
 	{
 		private static Dictionary<ServerCommand, Func<JsonDocument, ServerMessage>> _commandConverters;
         public LobbyMessageJsonConverter()
@@ -30,7 +30,7 @@ namespace FAF.Domain.LobbyServer.Converters
 				{ ServerCommand.matchmaker_info, (json) => JsonSerializer.Deserialize<MatchmakingData>(json) }, 
 				//{ ServerCommand.mapvault_info, (json) => JsonSerializer.Deserialize<UnknownServerMessage>(json) }, 
 				{ ServerCommand.ping, (json) => JsonSerializer.Deserialize<PingMessage>(json) }, 
-				{ ServerCommand.pong, (json) => JsonSerializer.Deserialize<UnknownServerMessage>(json) }, 
+				{ ServerCommand.pong, (json) => JsonSerializer.Deserialize<PongMessage>(json) }, 
 				{ ServerCommand.game_launch, (json) => JsonSerializer.Deserialize<GameLaunchData>(json) }, 
 				{ ServerCommand.party_invite, (json) => JsonSerializer.Deserialize<PartyInvite>(json) }, 
 				{ ServerCommand.update_party, (json) => JsonSerializer.Deserialize<PartyUpdate>(json) }, 
@@ -41,7 +41,7 @@ namespace FAF.Domain.LobbyServer.Converters
 				//{ ServerCommand.match_ready, (json) => JsonSerializer.Deserialize<UnknomawnServerMessage>(json) }, 
 				{ ServerCommand.match_found, (json) => JsonSerializer.Deserialize<MatchFound>(json) }, 
 				{ ServerCommand.match_cancelled, (json) => JsonSerializer.Deserialize<MatchCancelled>(json) }, 
-				{ ServerCommand.search_info, (json) => JsonSerializer.Deserialize<SearchInfo>(json) }, 
+				{ ServerCommand.search_info, (json) => JsonSerializer.Deserialize<SearchInfo>(json) },
 				//{ ServerCommand.restore_game_session, (json) => JsonSerializer.Deserialize<UnknownServerMessage>(json) }, 
 				//{ ServerCommand.game_matchmaking, (json) => JsonSerializer.Deserialize<UnknownServerMessage>(json) }, 
 				//{ ServerCommand.game_host, (json) => JsonSerializer.Deserialize<UnknownServerMessage>(json) }, 

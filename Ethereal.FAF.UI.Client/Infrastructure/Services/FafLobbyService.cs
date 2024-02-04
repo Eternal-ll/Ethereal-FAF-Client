@@ -56,11 +56,18 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private ITransportClient _transportClient;
         private long _session;
         private SemaphoreSlim _sessionSemaphoreSlim;
+        private readonly Timer _timer;
 
         public bool Connected => _transportClient?.IsConnected == true;
 
         public FafLobbyService(IFafAuthService fafAuthService, ClientManager clientManager, IServiceProvider serviceProvider, ILogger<FafLobbyService> logger, IUIDService uidGenerator, LobbyBackgroundQueue queue)
         {
+            _timer = new(new(x =>
+            {
+                if (_transportClient == null) return;
+                if (!Connected) return;
+                SendCommandToLobby(new PingCommand());
+            }), null, 0, (int)TimeSpan.FromSeconds(30).TotalMilliseconds);
             _fafAuthService = fafAuthService;
             _clientManager = clientManager;
             _serviceProvider = serviceProvider;
@@ -200,6 +207,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             else if (data is MatchCancelled matchCancelled) MatchCancelled?.Invoke(this, matchCancelled);
             else if (data is SearchInfo SearchInfo) SearchInfoReceived?.Invoke(this, SearchInfo);
             else if (data is IceUniversalData2 IceUniversalData2) IceUniversalDataReceived2?.Invoke(this, IceUniversalData2);
+            else if(data is PongMessage _) { }
             else _logger.LogWarning("Not handled command [{cmd}]", data.GetType());
         }
 
