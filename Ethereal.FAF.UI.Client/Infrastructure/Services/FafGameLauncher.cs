@@ -87,7 +87,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 ShowSnackbar("Unsupported featured mod. Only faf supported");
                 return;
             }
-            if (game.SimMods.Any())
+            if (game.SimMods?.Any() == true)
             {
                 ShowSnackbar("Games with SIM mods currently unsupported");
                 return;
