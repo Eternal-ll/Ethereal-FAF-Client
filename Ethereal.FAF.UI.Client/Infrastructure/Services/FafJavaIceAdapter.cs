@@ -245,5 +245,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             FafIceAdapterProcess?.Dispose();
             FafIceAdapterProcess = null;
         }
+
+        public async Task PrepareAsync(IProgress<ProgressReport> progress = null, CancellationToken cancellationToken = default)
+        {
+            await _javaRuntime.EnsurJavaRuntimeExist(progress, cancellationToken);
+            await EnsureFafJavaAdapterExistAsync(progress, cancellationToken);
+        }
     }
 }

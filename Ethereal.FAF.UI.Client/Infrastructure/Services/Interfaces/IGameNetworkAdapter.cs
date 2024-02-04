@@ -11,6 +11,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces
     public interface IGameNetworkAdapter
     {
         /// <summary>
+        /// Prepare adapter before run
+        /// </summary>
+        /// <param name="progress"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task PrepareAsync(
+            IProgress<ProgressReport> progress = null,
+            CancellationToken cancellationToken = default);
+        /// <summary>
         /// Starts adapter and returns port for GPGnet
         /// </summary>
         /// <param name="gameId"></param>
