@@ -91,11 +91,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                         .ToString(),
                 }
             };
-            Process.Start(new ProcessStartInfo()
-            {
-                UseShellExecute = true,
-                FileName = $"https://ice-telemetry.faforever.com/app.html?gameId={gameId}&playerId={_fafAuthService.GetUserId()}"
-            });
+            //Process.Start(new ProcessStartInfo()
+            //{
+            //    UseShellExecute = true,
+            //    FileName = $"https://ice-telemetry.faforever.com/app.html?gameId={gameId}&playerId={_fafAuthService.GetUserId()}"
+            //});
             _logger.LogInformation("Starting Java Ice Adapter with args: [{args}]", FafIceAdapterProcess.StartInfo.Arguments);
             progress?.Report(new(-1, "Ice Adapter", "Running Java Ice Adapter...", true));
             var started = FafIceAdapterProcess.Start();
