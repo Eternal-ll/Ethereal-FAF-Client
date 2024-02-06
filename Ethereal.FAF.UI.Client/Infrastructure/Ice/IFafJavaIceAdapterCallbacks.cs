@@ -34,7 +34,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// <param name="message"></param>
         /// <returns></returns>
         [JsonRpcMethod("onIceMsg")]
-        public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, object message);
+        public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, string message);
         /// <summary>
         /// See <see href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState"/>
         /// </summary>
@@ -112,16 +112,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
             return Task.CompletedTask;
         }
 
-        public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, object message)
+        public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, string message)
         {
-            var utf8 = JsonSerializer.Serialize(message, Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions);
             _logger.LogInformation(
                 "ICE message for connection '{local}/{remote}': {msg}",
                 localPlayerId,
                 remotePlayerId,
-                utf8);
-            _fafLobbyService.SendCommandToLobby(new OutgoingArgsCommand("IceMsg", remotePlayerId, 
-                JsonSerializer.Deserialize<object>(utf8)));
+                message);
+            var command = new OutgoingArgsCommand("IceMsg", remotePlayerId, message);
+            _fafLobbyService.SendCommandToLobby(command);
             return Task.CompletedTask;
         }
     }

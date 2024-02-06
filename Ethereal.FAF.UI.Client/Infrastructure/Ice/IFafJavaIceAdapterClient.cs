@@ -59,7 +59,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// <param name="msg"></param>
         /// <returns></returns>
         [JsonRpcMethod("iceMsg")]
-        public Task IceMsgAsync(long remotePlayerId, object msg);
+        public Task IceMsgAsync(long remotePlayerId, string msg);
         /// <summary>
         /// Send an arbitrary message to the game.
         /// </summary>

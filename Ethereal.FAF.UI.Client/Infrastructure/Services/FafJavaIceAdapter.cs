@@ -201,7 +201,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
             else if (e.Command == ServerCommand.IceMsg)
             {
                 var remotePlayerId = long.Parse(e.args[0].ToString());
-                var msg = e.args[1];
+                var msg = e.args[1].ToString();
                 await FafJavaIceAdapterClient.IceMsgAsync(remotePlayerId, msg);
             }
             else if (e.Command == ServerCommand.DisconnectFromPeer)
