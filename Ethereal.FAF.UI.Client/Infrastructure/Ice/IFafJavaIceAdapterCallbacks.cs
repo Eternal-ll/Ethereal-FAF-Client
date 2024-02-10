@@ -1,10 +1,4 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Services;
-using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
-using FAF.Domain.LobbyServer.Outgoing;
-using Microsoft.Extensions.Logging;
-using StreamJsonRpc;
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using StreamJsonRpc;
 using System.Threading.Tasks;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
@@ -25,7 +19,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// <param name="chunks"></param>
         /// <returns></returns>
         [JsonRpcMethod("onGpgNetMessageReceived")]
-        public Task OnGpgNetMessageReceivedAsync(string header, List<object> chunks);
+        public Task OnGpgNetMessageReceivedAsync(string header, object[] chunks);
         /// <summary>
         /// The PeerRelays gathered a local ICE message for connecting to the remote player. This message must be forwarded to the remote peer and set using the iceMsg command.
         /// </summary>
@@ -53,75 +47,5 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Ice
         /// <returns></returns>
         [JsonRpcMethod("onConnected")]
         public Task OnConnectedAsync(long localPlayerId, long remotePlayerId, bool connected);
-    }
-    internal class FafJavaIceAdapterCallbacks : IFafJavaIceAdapterCallbacks
-    {
-        private readonly ILogger<FafJavaIceAdapterCallbacks> _logger;
-        private readonly FafLobbyService _fafLobbyService;
-
-        public FafJavaIceAdapterCallbacks(IFafLobbyService fafLobbyService,
-            ILogger<FafJavaIceAdapterCallbacks> logger)
-        {
-            _fafLobbyService = (FafLobbyService)fafLobbyService;
-            _logger = logger;
-        }
-
-        public Task OnConnectedAsync(long localPlayerId, long remotePlayerId, bool connected)
-        {
-            if (connected)
-            {
-                _logger.LogInformation(
-                    "Connection between '{local}' and '{remote}' has been established",
-                    localPlayerId,
-                    remotePlayerId);
-            }
-            else
-            {
-                _logger.LogInformation(
-                    "Connection between '{local}' and '{remote}' has been lost",
-                    localPlayerId,
-                    remotePlayerId);
-            }
-            return Task.CompletedTask;
-        }
-
-        public Task OnConnectionStateChangedAsync(string newState)
-        {
-            _logger.LogInformation(
-                "ICE adapter connection state changed to: {state}",
-                newState);
-            return Task.CompletedTask;
-        }
-
-        public Task OnGpgNetMessageReceivedAsync(string header, List<object> chunks)
-        {
-            _logger.LogInformation(
-                "Message from game: '{header}' '{chunks}'",
-                header,
-                JsonSerializer.Serialize(chunks, Services.JsonSerializerDefaults.CyrillicJsonSerializerOptions));
-            _fafLobbyService.SendCommandToLobby(new OutgoingArgsCommand(header, chunks.ToArray()));
-            return Task.CompletedTask;
-        }
-
-        public Task OnIceConnectionStateChangedAsync(long localPlayerId, long remotePlayerId, string state)
-        {
-            _logger.LogInformation(
-                "ICE connection state for peer '{remote}' changed to: {state}",
-                remotePlayerId,
-                state);
-            return Task.CompletedTask;
-        }
-
-        public Task OnIceMsgAsync(long localPlayerId, long remotePlayerId, string message)
-        {
-            _logger.LogInformation(
-                "ICE message for connection '{local}/{remote}': {msg}",
-                localPlayerId,
-                remotePlayerId,
-                message);
-            var command = new OutgoingArgsCommand("IceMsg", remotePlayerId, message);
-            _fafLobbyService.SendCommandToLobby(command);
-            return Task.CompletedTask;
-        }
     }
 }

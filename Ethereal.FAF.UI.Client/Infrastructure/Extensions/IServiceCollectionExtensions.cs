@@ -93,8 +93,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
         {
             services
                 .AddSingleton<IFafAuthService, FafAuthService>()
-                .AddSingleton<IFafLobbyService, FafLobbyService>()
-                .AddSingleton<IFafLobbyEventsService>(sp => (FafLobbyService)sp.GetService<IFafLobbyService>())
+                .AddSingleton<StreamJsonRpcFafLobbyService>()
+                .AddSingleton<FafLobbyService>()
+                .AddSingleton<IFafLobbyService>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
+                .AddSingleton<IFafLobbyEventsService>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
+                .AddSingleton<IFafLobbyActionClient>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
                 .AddSingleton<IFafGamesService, FafGamesService>()
                 .AddSingleton<IFafGamesEventsService>(sp => (FafGamesService)sp.GetService<IFafGamesService>())
                 .AddSingleton<IFafPlayersService, FafPlayersService>()
@@ -102,8 +105,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IUserService, FafUserService>()
 
                 .AddSingleton<IJavaRuntime, LocalJavaRuntime>()
-                .AddSingleton<IGameNetworkAdapter, FafJavaIceAdapter>()
-                .AddSingleton<IFafJavaIceAdapterCallbacks, FafJavaIceAdapterCallbacks>()
+                .AddSingleton<FafJavaIceAdapter>()
+                .AddSingleton<IGameNetworkAdapter>(sp => sp.GetService<FafJavaIceAdapter>())
+                .AddSingleton<IFafJavaIceAdapterClient>(sp => sp.GetService<FafJavaIceAdapter>())
+                .AddSingleton<IFafJavaIceAdapterCallbacks>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
 
                 .AddSingleton<INeroxisMapGenerator, MapGenerator>()
 
@@ -112,6 +117,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddSingleton<IUIDService, UidGenerator>()
                 
                 .AddTransient<IPatchClient, PatchClient>();
+
+            services
+                .AddSingleton<StreamJsonRpcFafLobbyService>()
+                .AddSingleton<IFafLobbyCallbacks>(sp => sp.GetService<StreamJsonRpcFafLobbyService>());
 
             services.AddSingleton<GameManager>(sp =>
             {
