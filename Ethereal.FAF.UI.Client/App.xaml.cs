@@ -71,10 +71,7 @@ namespace Ethereal.FAF.UI.Client
                 var settings = new Settings
                 {
                     FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.user.json"),
-                    Servers =
-                    [
-                        configuration.GetSection("Server").Get<Server>()
-                    ]
+                    Servers = new(configuration.GetSection("Servers").Get<Server[]>())
                 };
                 settings.Load();
                 settings.EnableAutosave();
