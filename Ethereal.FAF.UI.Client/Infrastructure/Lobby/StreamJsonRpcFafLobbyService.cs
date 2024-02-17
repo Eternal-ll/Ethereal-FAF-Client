@@ -111,7 +111,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
                 NewLine = NewLineDelimitedMessageHandler.NewLineStyle.Lf
             };
             var rpc = new JsonRpc(rpcMessageHandler);
-            rpc.Disconnected += Rpc_Disconnected;
             _fafLobbyClient = rpc.Attach<IFafLobbyClient>(new()
             {
                 ServerRequiresNamedArguments = true,
@@ -150,6 +149,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             OnConnection?.Invoke(this, true);
 
             _fafJavaIceAdapterClient ??= _serviceProvider.GetService<IFafJavaIceAdapterClient>();
+            rpc.Disconnected += Rpc_Disconnected;
         }
 
         private void Rpc_Disconnected(object sender, JsonRpcDisconnectedEventArgs e)
