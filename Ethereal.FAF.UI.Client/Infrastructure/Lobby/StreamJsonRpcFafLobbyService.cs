@@ -118,7 +118,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             rpc.AddLocalRpcTarget<IFafLobbyCallbacks>(this, new()
             {
                 ClientRequiresNamedArguments = true,
-                DisposeOnDisconnect = true,
             });
             rpc.TraceSource = new("LobbyClientJsonRpc", SourceLevels.Warning);
             rpc.TraceSource.Listeners.Add(new ConsoleTraceListener());
