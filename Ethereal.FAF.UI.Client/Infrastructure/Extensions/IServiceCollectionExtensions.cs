@@ -184,6 +184,65 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddHttpMessageHandler<AuthHeaderHandler>()
                 .AddHttpMessageHandler<VerifyHeaderHandler>();
 
+            services.AddByAttributes();
+
+            return services;
+        }
+
+        public static IServiceCollection AddByAttributes(this IServiceCollection services)
+        {
+            var exportedTypes = AppDomain
+                .CurrentDomain.GetAssemblies()
+                .Where(a => a.FullName?.StartsWith("Ethereal") == true)
+                .SelectMany(a => a.GetExportedTypes())
+                .ToArray();
+
+            var transientTypes = exportedTypes
+                .Select(t => new { t, attributes = t.GetCustomAttributes(typeof(TransientAttribute), false) })
+                .Where(t1 =>  t1.attributes is { Length: > 0 } && !t1.t.Name.Contains("Mock", StringComparison.OrdinalIgnoreCase))
+                .Select(t1 => new { Type = t1.t, Attribute = (TransientAttribute)t1.attributes[0] });
+
+            foreach (var typePair in transientTypes)
+            {
+                if (typePair.Attribute.InterfaceType is null)
+                {
+                    services.AddTransient(typePair.Type);
+                }
+                else
+                {
+                    services.AddTransient(typePair.Attribute.InterfaceType, typePair.Type);
+                }
+            }
+
+            var singletonTypes = exportedTypes
+                .Select(t => new { t, attributes = t.GetCustomAttributes(typeof(SingletonAttribute), false) })
+                .Where(
+                    t1 =>
+                        t1.attributes is { Length: > 0 }
+                        && !t1.t.Name.Contains("Mock", StringComparison.OrdinalIgnoreCase)
+                )
+                .Select(
+                    t1 => new { Type = t1.t, Attributes = t1.attributes.Cast<SingletonAttribute>().ToArray() }
+                );
+
+            foreach (var typePair in singletonTypes)
+            {
+                foreach (var attribute in typePair.Attributes)
+                {
+                    if (attribute.InterfaceType is null)
+                    {
+                        services.AddSingleton(typePair.Type);
+                    }
+                    else if (attribute.ImplType is not null)
+                    {
+                        services.AddSingleton(attribute.InterfaceType, attribute.ImplType);
+                    }
+                    else
+                    {
+                        services.AddSingleton(attribute.InterfaceType, typePair.Type);
+                    }
+                }
+            }
             return services;
         }
 
