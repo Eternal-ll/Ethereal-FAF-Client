@@ -92,7 +92,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 _players = new();
                 _playersInitialized = false;
             }
-            else
+            else if (_players != null)
             {
                 PlayersRemoved?.Invoke(this, _players.Values.ToArray());
                 _players.Clear();
