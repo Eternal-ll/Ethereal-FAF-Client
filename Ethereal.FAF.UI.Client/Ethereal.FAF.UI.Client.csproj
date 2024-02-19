@@ -17,6 +17,10 @@
     <Version>2.4.2</Version>
     <UseWindowsForms>false</UseWindowsForms>
     <ServerGarbageCollection>true</ServerGarbageCollection>
+    <RestoreAdditionalProjectSources>
+      https://api.nuget.org/v3/index.json;
+      $(MSBuildThisFileDirectory)/../packages/
+    </RestoreAdditionalProjectSources>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -46,6 +50,7 @@
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="Downloader" Version="3.0.6" />
+    <PackageReference Include="FAForever.Api.Client" Version="1.1.1" />
     <PackageReference Include="GEmojiSharp" Version="3.1.0" />
     <PackageReference Include="Hardware.Info" Version="100.0.1.1" />
     <PackageReference Include="Humanizer" Version="2.14.1" />
@@ -78,6 +83,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="runtimeconfig.template.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="links.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -98,8 +106,6 @@
     <Compile Remove="ViewModels\GenerateMapsVM.cs" />
     <Compile Remove="ViewModels\LocalMapsVM.cs" />
     <Compile Remove="ViewModels\MapsHostingVM.cs" />
-    <Compile Remove="ViewModels\MatchmakingViewModel.cs" />
-    <Compile Remove="ViewModels\PartyViewModel.cs" />
     <Compile Remove="Views\ChatView.xaml.cs" />
     <Compile Remove="Views\Hosting\GenerateMapView.xaml.cs" />
     <Compile Remove="Views\Hosting\SelectLocalMapView.xaml.cs" />
@@ -121,8 +127,6 @@
     <None Include="ViewModels\ChatViewModel.cs" />
     <None Include="ViewModels\LocalMapsVM.cs" />
     <None Include="ViewModels\MapsHostingVM.cs" />
-    <None Include="ViewModels\MatchmakingViewModel.cs" />
-    <None Include="ViewModels\PartyViewModel.cs" />
   </ItemGroup>
 
   <ItemGroup>

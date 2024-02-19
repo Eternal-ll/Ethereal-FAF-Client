@@ -1,4 +1,5 @@
 ﻿using Ethereal.FAF.UI.Client.ViewModels;
+using Ethereal.FAF.UI.Client.ViewModels.Base;
 using System.Windows.Controls;
 using Wpf.Ui.Controls;
 
@@ -16,15 +17,6 @@ namespace Ethereal.FAF.UI.Client.Views
         }
 
         public DataViewModel ViewModel { get; }
-        private void VirtualizingStackPanel_Loaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-            var root = (VirtualizingStackPanel)sender;
-
-
-            //var property = ScrollHost.GetType().GetProperty("ScrollInfo", BindingFlags.NonPublic | BindingFlags.Instance);
-            //property.SetValue(ScrollHost, new ScrollInfoAdapter((IScrollInfo)property.GetValue(ScrollHost)));
-
-            //root.ScrollOwner = ScrollHost;
-        }
+        public override ViewModel GetViewModel() => ViewModel;
     }
 }

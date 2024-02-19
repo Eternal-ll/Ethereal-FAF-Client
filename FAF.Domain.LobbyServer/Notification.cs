@@ -12,8 +12,7 @@ namespace FAF.Domain.LobbyServer
         /// Style
         /// </summary>
         [JsonPropertyName("style")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Enums.NotificationType Style { get; set; }
+        public string Style { get; set; }
         /// <summary>
         /// Message
         /// </summary>

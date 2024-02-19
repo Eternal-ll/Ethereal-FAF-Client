@@ -1,0 +1,283 @@
+﻿<local:PageBase x:Class="Ethereal.FAF.UI.Client.Views.MatchmakingView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Ethereal.FAF.UI.Client.Views"
+                xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                xmlns:vm="clr-namespace:Ethereal.FAF.UI.Client.ViewModels"
+      mc:Ignorable="d" 
+                d:DataContext="{d:DesignInstance {x:Type local:MatchmakingView}}"
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="MatchmakingView"
+                Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <Page.Resources>
+        <DataTemplate x:Key="IndeterminateProgressRing">
+            <ui:ProgressRing
+                Width="12"
+                Height="12"
+                IsIndeterminate="True"/>
+        </DataTemplate>
+        <DataTemplate x:Key="SelectFactionTemplate" DataType="{x:Type vm:CurrentPlayerFaction}">
+            <ui:CardAction
+                Margin="0"
+                Width="160"
+                BorderThickness="1"
+                IsChevronVisible="False"
+                VerticalAlignment="Stretch"
+                Command="{Binding UpdateSelectionCommand}"
+                CommandParameter="{Binding}">
+                <ui:CardAction.Style>
+                    <Style TargetType="ui:CardAction" BasedOn="{StaticResource {x:Type ui:CardAction}}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Selected}" Value="False">
+                                <Setter Property="Opacity" Value=".5"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ui:CardAction.Style>
+                <Grid ShowGridLines="False">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Path
+                        Grid.RowSpan="2"
+                        Width="30"
+                        Stretch="Uniform"
+                        Style="{StaticResource ForgedAllianceFactionPathStyle}"
+                        DataContext="{Binding Faction}"/>
+                    <ui:TextBlock
+                        Grid.Column="2"
+                        FontTypography="BodyStrong"
+                        Text="{Binding Faction}"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Text="Selected"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Visibility="{Binding Selected, Converter={StaticResource BooleanToHiddenConverter}}"/>
+                </Grid>
+            </ui:CardAction>
+        </DataTemplate>
+        <DataTemplate x:Key="PartyPlayerMemberTemplate" DataType="{x:Type vm:PartyPlayerMember}">
+            <ui:Card>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <ItemsControl
+                        ItemsSource="{Binding PartyFactions}"
+                        IsTabStop="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid
+                                IsItemsHost="True"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ui:Card Padding="4"
+                                     ToolTip="{Binding Faction}">
+                                    <Path
+                                        Height="14"
+                                        Stretch="Uniform"
+                                        Style="{StaticResource ForgedAllianceFactionPathStyle}"
+                                        DataContext="{Binding Faction}"/>
+                                </ui:Card>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ContentControl
+                        IsTabStop="False"
+                        Grid.Column="2">
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content" Value="{Binding Player}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Player}" Value="{x:Null}">
+                                        <Setter Property="Content" Value="{Binding PlayerId}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </Grid>
+            </ui:Card>
+        </DataTemplate>
+        <DataTemplate x:Key="QueueTemplate" DataType="{x:Type vm:QueueViewModel}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition Height="4"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock
+                    FontSize="16"
+                    Text="{Binding TechnicalName}"/>
+                <UniformGrid
+                    Grid.Row="2"
+                    Rows="2"
+                    TextBlock.Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                    <TextBlock
+                        FontSize="12"
+                        Margin="0 0 24 0"
+                        Text="{Binding PopTimeSpan, StringFormat='Matching in: {0:mm\\:ss}', Mode=OneWay}"/>
+                    <TextBlock
+                        FontSize="12"
+                        Text="{Binding NumPlayers, StringFormat='In queue: {0}'}"/>
+                    <TextBlock
+                        FontSize="12"
+                        Text="{Binding TeamSize, StringFormat='Team size: {0}'}"/>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Visibility="{Binding Searching, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ContentControl
+                            Content="{Binding Searching}"
+                            Margin="-18 0 0 0">
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Searching}" Value="True">
+                                            <Setter Property="ContentTemplate"
+                                                    Value="{StaticResource IndeterminateProgressRing}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                        <TextBlock
+                            FontSize="12"
+                            Text="Searching..."/>
+                    </StackPanel>
+                </UniformGrid>
+                <Grid
+                    Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Content="Join"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding UpdateStateCommand}"
+                        CommandParameter="{Binding}"/>
+                    <Button
+                        Grid.Column="2"
+                        Content="Map pool"
+                        HorizontalAlignment="Stretch"
+                        Command="{Binding ShowMapPoolCommand}"
+                        CommandParameter="{Binding TechnicalName}"/>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+    <VirtualizingStackPanel>
+        <StackPanel
+            Orientation="Horizontal"
+            Margin="0 0 0 10">
+            <TextBlock
+                FontSize="20"
+                Text="Queues"/>
+            <Button
+                VerticalAlignment="Center"
+                Content="Refresh"
+                Margin="10 0 0 0"
+                Command="{Binding ViewModel.RefreshQueuesCommand}"/>
+        </StackPanel>
+        <ListBox
+            Margin="0 0 0 36"
+            ItemsSource="{Binding ViewModel.QueuesView}"
+            ItemTemplate="{StaticResource QueueTemplate}">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ui:VirtualizingWrapPanel
+                        IsItemsHost="True"
+                        StretchItems="True"
+                        SpacingMode="None"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                    <Setter Property="IsTabStop" Value="False"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                <ui:Card>
+                                    <ContentPresenter/>
+                                </ui:Card>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+        </ListBox>
+        <StackPanel
+            Orientation="Horizontal"
+            Margin="0 0 0 10">
+            <TextBlock
+                FontSize="20"
+                Text="Factions"/>
+            <!--<Button
+                VerticalAlignment="Center"
+                Content="Select all"
+                Margin="10 0 0 0"/>-->
+        </StackPanel>
+        <ItemsControl
+            ItemsSource="{Binding ViewModel.PartyViewModel.PlayerFactions}"
+            ItemTemplate="{StaticResource SelectFactionTemplate}"
+            Margin="0 0 0 36"
+            IsTabStop="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ui:VirtualizingWrapPanel
+                        IsItemsHost="True"
+                        StretchItems="False"
+                        SpacingMode="None"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+        <StackPanel
+            Orientation="Horizontal"
+            Margin="0 0 0 10">
+            <TextBlock
+                FontSize="20"
+                Text="Party"/>
+            <Button
+                VerticalAlignment="Center"
+                Content="Invite"
+                Margin="10 0 0 0"
+                Command="{Binding ViewModel.PartyViewModel.InvitePlayerCommand}"/>
+            <Button
+                VerticalAlignment="Center"
+                Content="Leave"
+                Margin="10 0 0 0"
+                Command="{Binding ViewModel.PartyViewModel.LeavePartyCommand}"/>
+        </StackPanel>
+        <ItemsControl
+            ItemsSource="{Binding ViewModel.PartyViewModel.PartyMembersView}"
+            ItemTemplate="{StaticResource PartyPlayerMemberTemplate}"
+            Margin="0 0 0 36"
+            IsTabStop="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ui:VirtualizingWrapPanel
+                        StretchItems="False"
+                        SpacingMode="None"
+                        IsItemsHost="True"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </VirtualizingStackPanel>
+</local:PageBase>

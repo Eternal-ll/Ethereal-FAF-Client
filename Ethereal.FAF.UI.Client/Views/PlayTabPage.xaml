@@ -27,12 +27,6 @@
                     Command="{Binding Path=ViewModel.NavigatePageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:PlayTabPage}}, Mode=OneWay}"
                     CommandParameter="{x:Type local:GamesView}"
                     IsChevronVisible="True">
-            <ui:CardAction.Icon>
-                <ui:SymbolIcon
-                            FontSize="30"
-                            Symbol="Games24"
-                            TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-            </ui:CardAction.Icon>
             <StackPanel>
                 <ui:TextBlock
                             Margin="0"
@@ -44,6 +38,27 @@
                             Appearance="Secondary"
                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                             Text="Global games"
+                            TextWrapping="WrapWithOverflow" />
+            </StackPanel>
+        </ui:CardAction>
+        <ui:CardAction
+                    Margin="4"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Command="{Binding Path=ViewModel.NavigatePageCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:PlayTabPage}}, Mode=OneWay}"
+                    CommandParameter="{x:Type local:MatchmakingView}"
+                    IsChevronVisible="True">
+            <StackPanel>
+                <ui:TextBlock
+                            Margin="0"
+                            FontTypography="BodyStrong"
+                            Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                            Text="TMM"
+                            TextWrapping="WrapWithOverflow" />
+                <ui:TextBlock
+                            Appearance="Secondary"
+                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                            Text="Team matchmaking"
                             TextWrapping="WrapWithOverflow" />
             </StackPanel>
         </ui:CardAction>

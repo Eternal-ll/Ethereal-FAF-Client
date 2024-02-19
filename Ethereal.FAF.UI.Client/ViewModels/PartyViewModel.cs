@@ -1,258 +1,223 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Commands;
-using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Ethereal.FAF.UI.Client.Infrastructure.Attributes;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
-using Ethereal.FAF.UI.Client.Models;
-using Ethereal.FAF.UI.Client.Views;
 using FAF.Domain.LobbyServer;
 using FAF.Domain.LobbyServer.Enums;
-using Meziantou.Framework.WPF.Collections;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Windows.Input;
-using Wpf.Ui;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public sealed class PartyPlayer
+    public partial class PartyFaction : ObservableObject
     {
-        public PartyPlayer()
-        {
-
-        }
-        public PartyPlayer(Player player, Faction[] factions, bool isOwner)
-        {
-            Player = player;
-            IsOwner = isOwner;
-            foreach (var faction in factions)
-            {
-                Factions[faction] = true;
-            }
-        }
-
-        public Player Player { get; set; }
-        public Dictionary<Faction, bool> Factions { get; set; } = new()
-            {
-                { Faction.UEF, false },
-                { Faction.CYBRAN, false },
-                { Faction.AEON, false },
-                { Faction.SERAPHIM, false },
-            };
-        public Faction[] SelectedFactions => Factions.Where(t => t.Value).Select(t => t.Key).ToArray();
-        public bool IsOwner { get; set; }
+        [ObservableProperty]
+        private Faction _Faction;
+        [ObservableProperty]
+        private bool _Selected;
     }
-    /// <summary>
-    /// Matchmaking party view-model
-    /// </summary>
-    public sealed class PartyViewModel : Base.ViewModel
+    public partial class CurrentPlayerFaction : PartyFaction
     {
-        private object _Status;
-        public object Status
-        {
-            get => _Status;
-            set
-            {
-                if (Set(ref _Status, value))
-                {
-                    // event ?
-                    // notification ?
-                }
-            }
-        }
-
-        private readonly ServerManager ServerManager;
-        private readonly IFafPlayersService _fafPlayersService;
-        private readonly NotificationService NotificationService;
-        private readonly IServiceProvider ServiceProvider;
-        private readonly INavigationService INavigationService;
-        private readonly ILogger Logger;
-
-        public PartyViewModel(PlayersViewModel playersVM, ILogger<PartyViewModel> logger, IServiceProvider serviceProvider, NotificationService notificationService, INavigationService iNavigationService, ServerManager serverManager, IFafPlayersService fafPlayersService)
-        {
-            ServiceProvider = serviceProvider;
-            NotificationService = notificationService;
-            INavigationService = iNavigationService;
-            Logger = logger;
-
-            Factions = new()
-            {
-                { Faction.UEF, true },
-                { Faction.CYBRAN, true },
-                { Faction.AEON, true },
-                { Faction.SERAPHIM, true },
-            };
-            Members = new();
-            ServerManager = serverManager;
-            _fafPlayersService = fafPlayersService;
-        }
-
-        private void LobbyClient_StateChanged(object sender, LobbyState e)
-        {
-            if (e is not LobbyState.Authorized) return;
-            //LobbyClient.RequestUpdateOnQueue();
-            //LobbyClient.SetPartyFactions(SelectedFactions);
-        }
-
-        private long _OwnerId;
-        public long OwnerId
-        {
-            get => _OwnerId;
-            set
-            {
-                if (Set(ref _OwnerId, value))
-                {
-                    IsOwner = ServerManager.Self.Id == value;
-                }
-            }
-        }
+        [ObservableProperty]
+        private IRelayCommand _UpdateSelectionCommand;
+    }
+    public partial class PartyPlayerMember : ObservableObject
+    {
+        [ObservableProperty]
+        private long _PlayerId;
+        [ObservableProperty]
         private bool _IsOwner;
-        public bool IsOwner
+        [ObservableProperty]
+        private PartyFaction[] _PartyFactions;
+        [ObservableProperty]
+        private Player _Player;
+        [ObservableProperty]
+        private IRelayCommand _KickPlayerCommand;
+    }
+    [Singleton]
+    public partial class PartyViewModel : Base.ViewModel
+    {
+        private readonly IFafPartyService _fafPartyService;
+        private readonly IFafPlayersService _fafPlayersService;
+        private readonly IFafLobbyEventsService _fafLobbyEventsService;
+        private readonly ILogger _logger;
+        public PartyViewModel(
+            IFafPartyService fafPartyService,
+            IFafPlayersService fafPlayersService,
+            IFafLobbyEventsService fafLobbyEventsService,
+            ILogger<PartyViewModel> logger)
         {
-            get => _IsOwner;
-            set => Set(ref _IsOwner, value);
+            PlayerFactions = fafPartyService
+                .GetFactions()
+                .Select(x => new CurrentPlayerFaction()
+                {
+                    Faction = x,
+                    UpdateSelectionCommand = UpdatePartyFactionCommand
+                })
+                .ToArray();
+
+            PartyMembers = new();
+            _partyMembersViewSource = new()
+            {
+                Source = PartyMembers
+            };
+            _partyMembersViewSource.SortDescriptions
+                .Add(new(nameof(PartyPlayerMember.IsOwner), ListSortDirection.Descending));
+
+            fafPartyService.OnUpdate += FafPartyService_OnUpdate;
+            fafPartyService.OnKick += FafPartyService_OnKick;
+            fafPartyService.OnInvite += FafPartyService_OnInvite;
+            fafLobbyEventsService.OnConnection += FafLobbyEventsService_OnConnection;
+
+            _logger = logger;
+            _fafPartyService = fafPartyService;
+            _fafPlayersService = fafPlayersService;
+            _fafLobbyEventsService = fafLobbyEventsService;
         }
-        public bool CanInvitePlayer => Members.Count < 4;
-        public bool HasMembers => Members.Count > 1;
 
-        //#region Owner
-        //private Player _Owner;
-        //public Player Owner
-        //{
-        //    get => _Owner;
-        //    set => Set(ref _Owner, value);
-        //}
-        //#endregion
-
-        public ConcurrentObservableCollection<PartyPlayer> Members { get; }
-        public IReadOnlyObservableCollection<PartyPlayer> MembersObservable => Members.AsObservable;
-        public ObservableDictionary<Faction, bool> Factions { get; set; }
-        public Faction[] SelectedFactions => Factions.Where(t => t.Value).Select(t => t.Key).ToArray();
-
-        private void LobbyClient_PartyUpdated(object sender, PartyUpdate e)
+        private void FafLobbyEventsService_OnConnection(object sender, bool e)
         {
+            if (e)
+            {
+                UpdatePartyFaction(PlayerFactions[0]);
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var faction in PlayerFactions)
+                    {
+                        faction.Selected = false;
+                    }
+                    PartyMembers.Clear();
+                }, DispatcherPriority.Background);
+            }
+        }
+
+        private void FafPartyService_OnInvite(object sender, long e)
+        {
+
+        }
+
+        private void FafPartyService_OnKick(object sender, System.EventArgs e)
+        {
+            SetPartyFactions();
+        }
+
+        private void FafPartyService_OnUpdate(object sender, (long Owner, PartyMember[] Members) e)
+        {
+            var currentMembers = PartyMembers;
+            var incomingMembersIds = e.Members.Select(x => x.PlayerId).ToArray();
+
+            var leftMembers = currentMembers
+                .Where(x => !incomingMembersIds.Contains(x.PlayerId))
+                .ToArray();
+            _logger.LogDebug(
+                "Party: players left party [{0}]",
+                string.Join(',', leftMembers.Select(x => x.PlayerId)));
+            if (leftMembers.Length > 0)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var left in leftMembers)
+                    {
+                        currentMembers.Remove(left);
+                    }
+                }, DispatcherPriority.Background);
+            }
+            var currentMembersIds = currentMembers.Select(x => x.PlayerId).ToArray();
+
             foreach (var member in e.Members)
             {
-                if (_fafPlayersService.TryGetPlayer(member.PlayerId, out var player))
+                var playerMember = currentMembers
+                    .FirstOrDefault(x => x.PlayerId == member.PlayerId);
+                if (playerMember != null)
                 {
-                    var playerMember = Members.FirstOrDefault(m => m.Player.Id == member.PlayerId);
-                    var partyPlayer = new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId);
-                    if (playerMember is not null)
+                    foreach (var partyFaction in PlayerFactions)
                     {
-                        Members[Members.IndexOf(playerMember)] = partyPlayer;
-                        if (playerMember.SelectedFactions.Length == member.Factions.Length) continue;
-                        Logger.LogTrace("[Party] Player [{id}] updated factions from [{old}] to [{new}]",
-                            member.PlayerId, playerMember.SelectedFactions, member.Factions);
-                        NotificationService.Notify("Party", $"Player [{member.PlayerId}] updated factions to [{string.Join(',', partyPlayer.SelectedFactions)}]");
-                        continue;
+                        partyFaction.Selected = member.Factions.Contains(partyFaction.Faction);
                     }
-                    Members.Add(new PartyPlayer(player, member.Factions, member.PlayerId == e.OwnerId));
-                    Logger.LogTrace("[Party] Player [{id}] joined to party", member.PlayerId);
-                    // TODO Notify by server
-                    // TODO SELF ignore
-                    //if (PlayersVM.Self.Id == member.PlayerId) continue;
-                    NotificationService.Notify("Party", $"Player [{member.PlayerId}] joined to party with these factions [{string.Join(',', partyPlayer.SelectedFactions)}]");
                 }
             }
-            var left = Members.Where(m => !e.Members.Any(n => n.PlayerId == m.Player.Id));
-            foreach (var member in left)
-            {
-                Members.Remove(member);
-                Logger.LogTrace("[Party] Player [{id}] left from party", member.Player.Id);
-                NotificationService.Notify("Party", string.Format("Player [{0}] left from party", member.Player.Id));
-            }
 
-            if (OwnerId != e.OwnerId)
-            {
-                Logger.LogTrace("[Party] Owner [{old}] updated to [{}]", OwnerId, e.OwnerId);
-                OwnerId = e.OwnerId;
-            }
-
-            Logger.LogTrace("[Party] Updated");
-        }
-
-        private async void LobbyClient_PartyInvite(object s, PartyInvite e)
-        {
-            Logger.LogTrace("[Party] Party invite from player [{id}]", e.SenderId);
-            if (_fafPlayersService.TryGetPlayer(e.SenderId, out var sender))
-            {
-                var accepted = await NotificationService.ShowDialog("Party", $"Player {sender.Login} invites you to party", "Accept", "Ignore");
-                if (accepted)
+            var joined = incomingMembersIds
+                .Except(currentMembersIds)
+                .ToArray();
+            _logger.LogDebug(
+                "Party: players joined party [{0}]",
+                string.Join(',', joined));
+            var newPartyMembers = e.Members
+                .Where(x => joined.Contains(x.PlayerId))
+                .Select(x => new PartyPlayerMember()
                 {
-                    //LobbyClient.AcceptPartyInviteFromPlayer(e.SenderId);
-                }
+                    IsOwner = x.PlayerId == e.Owner,
+                    PlayerId = x.PlayerId,
+                    PartyFactions = PlayerFactions
+                     .Select(f => new PartyFaction()
+                     {
+                         Faction = f.Faction,
+                         Selected = x.Factions.Contains(f.Faction)
+                     })
+                     .ToArray(),
+                    KickPlayerCommand = KickPlayerCommand,
+                    Player = _fafPlayersService.TryGetPlayer(x.PlayerId, out var player) ? player : null
+                })
+                .ToArray();
+            if (newPartyMembers.Length > 0)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var member in newPartyMembers)
+                    {
+                        PartyMembers.Add(member);
+                    }
+                }, DispatcherPriority.Background);
             }
         }
-
-        private void LobbyClient_KickedFromParty(object sender, System.EventArgs e)
+        private Faction[] GetSelectedFactions() => PlayerFactions
+            .Where(x => x.Selected)
+            .Select(x => x.Faction)
+            .ToArray();
+        private void SetPartyFactions()
         {
-            //NotificationService.Notify("Notification", "You were kicked from party");
-            Logger.LogTrace("[Party] Kicked from party of player [{id}]", OwnerId);
-            //LobbyClient.SetPartyFactions(SelectedFactions);
+            var selectedFactions = GetSelectedFactions();
+            _fafPartyService.SetPartyFactions(selectedFactions);
         }
 
-        #region BackCommand
-        private ICommand _BackCommand;
-        public ICommand BackCommand => _BackCommand ??= new LambdaCommand(OnBackCommand);
-        private void OnBackCommand(object obj)
-        {
-            var playersView = ServiceProvider.GetService<PlayersView>();
-            playersView.DisableInvitePlayerCommand();
-            // TODO
-            //INavigationService.Navigate()
-        }
-        #endregion
+        [ObservableProperty]
+        private CurrentPlayerFaction[] _PlayerFactions;
+        [ObservableProperty]
+        private ObservableCollection<PartyPlayerMember> _PartyMembers;
+        private CollectionViewSource _partyMembersViewSource;
+        public ICollectionView PartyMembersView => _partyMembersViewSource.View;
 
-        #region ShowInviteBoxCommand
-        private ICommand _ShowInviteBoxCommand;
-        public ICommand ShowInviteBoxCommand => _ShowInviteBoxCommand ??= new LambdaCommand(OnShowInviteBoxCommand, CanShowInviteBoxCommand);
-        private bool CanShowInviteBoxCommand(object arg) => true;
-        private void OnShowInviteBoxCommand(object obj)
+        [RelayCommand]
+        private void KickPlayer(PartyPlayerMember member) => _fafPartyService.KickFromParty(member.PlayerId);
+        [RelayCommand]
+        private void UpdatePartyFaction(CurrentPlayerFaction partyFaction)
         {
-            var playersView = ServiceProvider.GetService<PlayersView>();
-            playersView.EnableInvitePlayerCommand(InvitePlayerCommand, BackCommand);
-            // TODO
-            //INavigationService.Navigate(2);
+            partyFaction.Selected = !partyFaction.Selected;
+            var selectedFactions = GetSelectedFactions();
+            _fafPartyService.SetPartyFactions(selectedFactions);
+            if (selectedFactions.Length == 0)
+                partyFaction.Selected = true;
         }
-        #endregion
-
-        #region InvitePlayerCommand
-        private ICommand _InvitePlayerCommand;
-        public ICommand InvitePlayerCommand => _InvitePlayerCommand ??= new LambdaCommand(OnInvitePlayerCommand, CanInvitePlayerCommand);
-        private bool CanInvitePlayerCommand(object arg) => true;
-        private void OnInvitePlayerCommand(object obj)
+        [RelayCommand]
+        private void LeaveParty()
         {
-            if (obj is not long id) return;
-            NotificationService.Notify("Invite", $"Player with id {id} invited.");
-            //LobbyClient.InvitePlayerToParty(id);
+            _fafPartyService.LeaveParty();
+            SetPartyFactions();
         }
-        #endregion
-
-        #region UpdateFactionCommand
-        private ICommand _UpdateFactionCommand;
-        public ICommand UpdateFactionCommand => _UpdateFactionCommand ??= new LambdaCommand(OnUpdateFactionCommand, CanUpdateFactionCommand);
-        private bool CanUpdateFactionCommand(object arg) => true;
-        private void OnUpdateFactionCommand(object obj)
+        [RelayCommand]
+        private async Task InvitePlayer()
         {
-            if (obj is not Faction faction) return;
-            if (SelectedFactions.Length == 1 && SelectedFactions[0] == faction) return;
-            var item = Factions[faction];
-            Factions[faction] = !item;
-            //LobbyClient.SetPartyFactions(SelectedFactions);
+
         }
-        #endregion
-
-        #region KickPlayerCommand
-        private ICommand _KickPlayerCommand;
-        public ICommand KickPlayerCommand => _KickPlayerCommand ??= new LambdaCommand(OnKickPlayerCommand, CanKickPlayerCommand);
-        private bool CanKickPlayerCommand(object arg) => true;
-        private void OnKickPlayerCommand(object obj)
-        {
-            if (obj is not long id) return;
-            //LobbyClient.KickPlayerFromParty(id);
-        } 
-        #endregion
     }
 }

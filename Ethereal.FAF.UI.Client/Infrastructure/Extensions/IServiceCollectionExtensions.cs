@@ -1,5 +1,6 @@
 ﻿using Ethereal.FAF.API.Client;
 using Ethereal.FAF.UI.Client.Infrastructure.Api;
+using Ethereal.FAF.UI.Client.Infrastructure.Attributes;
 using Ethereal.FAF.UI.Client.Infrastructure.Helper;
 using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Lobby;
@@ -19,6 +20,8 @@ using Microsoft.Extensions.Logging;
 using Octokit;
 using Refit;
 using System;
+using System.Linq;
+using System.Net.Http;
 using Wpf.Ui;
 
 namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
@@ -94,7 +97,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             services
                 .AddSingleton<IFafAuthService, FafAuthService>()
                 .AddSingleton<StreamJsonRpcFafLobbyService>()
-                .AddSingleton<FafLobbyService>()
                 .AddSingleton<IFafLobbyService>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
                 .AddSingleton<IFafLobbyEventsService>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
                 .AddSingleton<IFafLobbyActionClient>(sp => sp.GetService<StreamJsonRpcFafLobbyService>())
@@ -118,6 +120,13 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 
                 .AddTransient<IPatchClient, PatchClient>();
 
+            services.AddSingleton<FAForever.Api.Client.IFafApi>(sp =>
+            {
+                return FAForever.Api.Client.FafApiStatic.GetFafApi(
+                    httpClientFactory: sp.GetService<IHttpClientFactory>(),
+                    clientName: "faf-api");
+            });
+
             services
                 .AddSingleton<StreamJsonRpcFafLobbyService>()
                 .AddSingleton<IFafLobbyCallbacks>(sp => sp.GetService<StreamJsonRpcFafLobbyService>());
@@ -135,21 +144,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             services.AddSingleton<LobbyNotificationsService>();
             //services
                 //.AddSingleton<GameMapPreviewCacheService>();
-
-            services.AddTransient<WebSocketTransportClient>(sp =>
-            {
-                var server = sp.GetService<ClientManager>().GetServer() ?? throw new InvalidOperationException("Server not selected");
-                return new(
-                    url: server.Lobby.Url,
-                    fafUserApi: sp.GetService<IFafUserApi>(),
-                    logger: sp.GetService<ILogger<Websocket.Client.WebsocketClient>>());
-            });
-
-            services.AddTransient<WsTransportClient>(sp =>
-            {
-                var server = sp.GetService<ClientManager>().GetServer() ?? throw new InvalidOperationException("Server not selected");
-                return new(sp.GetService<IFafUserApi>());
-            });
 
             services.AddTransient<AuthHeaderHandler>();
             services.AddTransient<VerifyHeaderHandler>();
@@ -179,6 +173,12 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
                 .AddHttpMessageHandler<VerifyHeaderHandler>();
 
             services
+                .AddHttpClient("faf-api")
+                .ConfigureHttpClientBySelectedServer((sp, server, x) =>
+                x.BaseAddress = server.Api)
+                .AddHttpMessageHandler<AuthHeaderHandler>();
+
+            services
                 .AddHttpClient("FafContent")
                 .ConfigureHttpClientBySelectedServer((sp, server, x) => x.BaseAddress = server.Content)
                 .AddHttpMessageHandler<AuthHeaderHandler>()
@@ -191,10 +191,9 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
 
         public static IServiceCollection AddByAttributes(this IServiceCollection services)
         {
-            var exportedTypes = AppDomain
-                .CurrentDomain.GetAssemblies()
-                .Where(a => a.FullName?.StartsWith("Ethereal") == true)
-                .SelectMany(a => a.GetExportedTypes())
+            var exportedTypes = typeof(Program).Assembly
+                .GetTypes()
+                .Where(x => x.Namespace?.StartsWith("Ethereal") == true)
                 .ToArray();
 
             var transientTypes = exportedTypes
@@ -283,8 +282,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Extensions
             //.AddScoped<ProfileView>()
             //.AddTransient<ProfileViewModel>()
 
-            //.AddScoped<DataView>()
-            //.AddScoped<DataViewModel>()
+            .AddTransient<DataView>()
+            .AddTransient<DataViewModel>()
 
             //.AddTransient<ClansView>()
             //.AddTransient<ClansViewModel>()

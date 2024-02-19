@@ -3,12 +3,14 @@ using Ethereal.FAF.UI.Client.Infrastructure.Ice;
 using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
 using Ethereal.FAF.UI.Client.ViewModels;
 using FAF.Domain.LobbyServer;
+using FAF.Domain.LobbyServer.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Nerdbank.Streams;
 using StreamJsonRpc;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -125,20 +127,6 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
             _jsonRpc = rpc;
 
             _fafLobbyClient.AskSession("ethereal-faf-client", "2.4.3");
-            //await rpc.NotifyAsync("ask_session", argument: new
-            //{
-            //    user_agent = "ethereal-faf-client",
-            //    version = "2.4.3"
-            //});
-
-            //long? session = null;
-            //using (var _ = _fafLobbySessionCallback.GetSessionSemaphoreSlim(
-            //    x => session = x,
-            //    out var semaphore)) 
-            //{
-            //    await semaphore.WaitAsync();
-            //    _fafLobbySessionCallback.RemoveSessionSemaphoreSlim();
-            //}
             var session = await WaitForSessionAsync(cancellationToken);
             _logger.LogInformation("Received session: {0}", session);
             var uid = await _uidGenerator.GenerateAsync(session.ToString(), cancellationToken);
@@ -309,15 +297,15 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         private void LogMethod([CallerMemberName] string method = null,
             params object[] args)
         {
-            //_logger.LogInformation(
-            //    "Callback method: [{0}], args: [{1}]",
-            //    method,
-            //    JsonSerializer.Serialize(args));
+            _logger.LogDebug(
+                "Callback method: [{0}], args: [{1}]",
+                method,
+                JsonSerializer.Serialize(args));
         }
 
         public async Task OnGameInfoAsync(GameInfoMessage game)
         {
-            LogMethod(args: game);
+            //LogMethod(args: game);
             GameReceived?.Invoke(this, game);
         }
 
@@ -330,7 +318,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public async Task OnGameLaunchAsync(GameLaunchData model)
         {
             LogMethod(args: model);
-            //GameLaunchDataReceived?.Invoke(this, model);
+            GameLaunchDataReceived?.Invoke(this, model);
         }
 
 
@@ -401,16 +389,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         {
             LogMethod();
             _logger.LogError("Received protocol error. Client being disconnected.");
+            await OnNoticeAsync("error", "Received protocol error. Client being disconnected");
         }
 
         public async Task OnKickedFromPartyAsync()
         {
             LogMethod();
+            KickedFromParty?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task OnMatchCancelledAsync(long game_id, string queue_name)
         {
             LogMethod(args: new { game_id, queue_name });
+            MatchFound?.Invoke(this, new() { GameId = game_id, Queue = queue_name });
         }
 
         public async Task OnMatchFoundAsync(long game_id, string queue_name)
@@ -420,33 +411,38 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
 
         public async Task OnMatchInfoAsync(DateTime expires_at, int players_total, int players_ready, bool ready)
         {
+
         }
 
         public async Task OnMatchmakerInfoAsync(QueueData[] queues)
         {
-            LogMethod(args: queues);
+            //LogMethod(args: queues);
+            MatchMakingDataReceived?.Invoke(this, new() { Queues = queues});
         }
 
         public async Task OnNoticeAsync(string style, string text)
         {
             LogMethod(args: new { style, text });
+            NotificationReceived?.Invoke(this, new() { Style = style, Text = text });
         }
 
         public async Task OnPartyInviteAsync(long sender)
         {
             LogMethod(args: sender);
+            PartyInvite?.Invoke(this, new() { SenderId = sender });
         }
 
         public async Task OnPartyUpdateAsync(long owner, PartyMember[] members)
         {
             LogMethod(args: new { owner, members });
+            PartyUpdated?.Invoke(this, new() { OwnerId = owner, Members = members });
         }
 
         public async Task OnPingAsync()
         {
             await _jsonRpc.NotifyAsync("pong");
             //_fafLobbyClient.Pong();
-            LogMethod();
+            //LogMethod();
         }
 
         public async Task OnPlayerInfoAsync(PlayerInfoMessage player)
@@ -469,6 +465,11 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public async Task OnSearchInfoAsync(string queue_name, string state)
         {
             LogMethod(args: new { queue_name, state });
+            SearchInfoReceived?.Invoke(this, new()
+            {
+                Queue = queue_name,
+                State = Enum.Parse<QueueSearchState>(state, true)
+            });
         }
 
         public async Task OnSessionAsync(long session)
@@ -488,5 +489,17 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         {
             LogMethod(args: new { me, id, login });
         }
+
+        public void AcceptPartyInvite(long senderId) => _fafLobbyClient.AcceptPartyInvite(senderId);
+        public void InviteToParty(long recipientId) => _fafLobbyClient.InviteToParty(recipientId);
+        public void KickFromParty(long playerId) => _fafLobbyClient.KickPlayerFromParty(playerId);
+        public void LeaveParty() => _fafLobbyClient.LeaveParty();
+        public void SetPartyFactions(params Faction[] factions)
+            => _fafLobbyClient.SetPartyFactions(factions.Select(x => x.ToString()).ToArray());
+
+        public void AskQueues() => _fafLobbyClient.AskMatchmakerInfo();
+        public void MatchReady() => _fafLobbyClient.MatchReady();
+        public void UpdateQueueState(string queue, QueueSearchState state)
+            => _fafLobbyClient.UpdateMatchmakingQueueState(queue, state.ToString().ToLower());
     }
 }

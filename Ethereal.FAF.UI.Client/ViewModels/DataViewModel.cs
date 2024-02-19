@@ -1,18 +1,40 @@
-﻿using Ethereal.FAF.UI.Client.Infrastructure.Extensions;
-using Ethereal.FAF.UI.Client.Infrastructure.Services;
-using Microsoft.Extensions.Configuration;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Ethereal.FAF.UI.Client.Infrastructure.Services.Interfaces;
+using Ethereal.FAF.UI.Client.Models;
+using Ethereal.FAF.UI.Client.Views;
 
 namespace Ethereal.FAF.UI.Client.ViewModels
 {
-    public class DataViewModel : Base.ViewModel
+    public partial class DataViewModel : Base.ViewModel
     {
-        private readonly IConfiguration Configuration;
+        private readonly ISettingsManager _settingsManager;
 
-        public DataViewModel(IConfiguration configuration)
+        public DataViewModel(ISettingsManager settingsManager)
         {
-            Configuration = configuration;
+            _settingsManager = settingsManager;
         }
 
-        public string VaultLocation => Configuration.GetForgedAllianceVaultLocation();
+        public string VaultLocation => _settingsManager.Settings.ForgedAllianceVaultLocation;
+
+        [ObservableProperty]
+        private NavigationCard[] _NavigationCards;
+        protected override void OnInitialLoaded()
+        {
+            NavigationCards = new NavigationCard[]
+            {
+                new()
+                {
+                    Name = "Matchmaking.queues",
+                    Description = "matchmaking.queues.desription",
+                    PageType = typeof(MatchmakerQueuesView)
+                }
+            };
+            base.OnInitialLoaded();
+        }
+        public override void OnUnloaded()
+        {
+            NavigationCards = null;
+            base.OnUnloaded();
+        }
     }
 }

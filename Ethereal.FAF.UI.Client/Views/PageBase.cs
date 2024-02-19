@@ -16,7 +16,10 @@ namespace Ethereal.FAF.UI.Client.Views
         public virtual ViewModel GetViewModel() { return null; }
         protected virtual void OnLoadedEvent(RoutedEventArgs? e)
         {
-            var viewModel = GetViewModel();
+            if (DataContext is not ViewModel viewModel)
+            {
+                viewModel = GetViewModel();
+            }
             if (viewModel == null)
                 return;
 
@@ -28,7 +31,10 @@ namespace Ethereal.FAF.UI.Client.Views
         }
         protected virtual void OnUnloadedEvent(RoutedEventArgs? e)
         {
-            var viewModel = GetViewModel();
+            if (DataContext is not ViewModel viewModel)
+            {
+                viewModel = GetViewModel();
+            }
             if (viewModel == null)
                 return;
 

@@ -23,7 +23,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Attributes
 
         public SingletonAttribute(Type interfaceType, Type implType)
         {
-            InterfaceType = implType;
+            InterfaceType = interfaceType;
             ImplType = implType;
         }
     }

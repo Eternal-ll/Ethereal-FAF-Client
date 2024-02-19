@@ -16,14 +16,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         public Task OnWelcomeAsync(PlayerInfoMessage me, int id, string login);
         [JsonRpcMethod("social")]
         public Task OnSocialAsync(string[] autojoin, string[] channels, int[] friends, int[] foes, int power);
-        //[JsonRpcMethod("matchmaker_info")]
-        //public Task OnMatchmakerInfoAsync(QueueData[] queues);
+        [JsonRpcMethod("matchmaker_info")]
+        public Task OnMatchmakerInfoAsync(QueueData[] queues);
         [JsonRpcMethod("ping")]
         public Task OnPingAsync();
         [JsonRpcMethod("pong")]
         public Task OnPongAsync();
-        //[JsonRpcMethod("game_launch", UseSingleObjectParameterDeserialization = true)]
-        //public Task OnGameLaunchAsync(GameLaunchData model);
+        [JsonRpcMethod("game_launch", UseSingleObjectParameterDeserialization = true)]
+        public Task OnGameLaunchAsync(GameLaunchData model);
 
         [JsonRpcMethod("player_info", UseSingleObjectParameterDeserialization = true)]
         public Task OnPlayerInfoAsync(PlayerInfoMessage player);
@@ -49,7 +49,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         /// <param name="owner"></param>
         /// <param name="members"></param>
         /// <returns></returns>
-        [JsonRpcMethod("party_update")]
+        [JsonRpcMethod("update_party")]
         public Task OnPartyUpdateAsync(long owner, PartyMember[] members);
         [JsonRpcMethod("kicked_from_party")]
         public Task OnKickedFromPartyAsync();

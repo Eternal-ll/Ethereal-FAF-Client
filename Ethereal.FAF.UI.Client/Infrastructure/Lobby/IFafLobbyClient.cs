@@ -89,21 +89,21 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         /// <param name="recipient_id">Player id</param>
         /// <returns></returns>
         [JsonRpcMethod("invite_to_party")]
-        public void InviteToParty(int recipient_id);
+        public void InviteToParty(long recipient_id);
         /// <summary>
         /// Accept the party invite from the given player
         /// </summary>
         /// <param name="sender_id">Player id</param>
         /// <returns></returns>
         [JsonRpcMethod("accept_party_invite")]
-        public void AcceptPartyInvite(int sender_id);
+        public void AcceptPartyInvite(long sender_id);
         /// <summary>
         /// Kick a player from a party you own
         /// </summary>
         /// <param name="kicked_player_id">Player id</param>
         /// <returns></returns>
         [JsonRpcMethod("kick_player_from_party")]
-        public void KickPlayerFromParty(int kicked_player_id);
+        public void KickPlayerFromParty(long kicked_player_id);
         /// <summary>
         /// Leave the party you are currently in
         /// </summary>
@@ -133,23 +133,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Lobby
         /// <param name="state">Queue state</param>
         /// <returns></returns>
         [JsonRpcMethod("game_matchmaking")]
-        public void UpdateMatchmakingQueueState(string queue_name, string state, params string[] factions);
-        /// <summary>
-        /// Join matchmaking queue
-        /// </summary>
-        /// <param name="queue_name">Queue name</param>
-        /// <param name="factions">Selected factions</param>
-        /// <returns></returns>
-        public void StartMatchmakingQueue(string queue_name, params string[] factions)
-            => UpdateMatchmakingQueueState(queue_name, "start", factions);
-        /// <summary>
-        /// Leave matchmaking queue
-        /// </summary>
-        /// <param name="queue_name">Queue name</param>
-        /// <param name="factions">Selected factions</param>
-        /// <returns></returns>
-        public void StopMatchmakingQueue(string queue_name)
-            => UpdateMatchmakingQueueState(queue_name, "stop");
+        public void UpdateMatchmakingQueueState(string queue_name, string state);
         /// <summary>
         /// Ready for matchmaking match
         /// </summary>
