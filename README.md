@@ -4,7 +4,7 @@ Unofficial FAForever client by Eternal-ll, based on C# WPF .NET 8.0 for Windows 
 
 Forum thread: https://forum.faforever.com/topic/4724/ethereal-faf-client-2-0
 
-[Legacy client v1.0 source code](/Ethereal-FAF-Client-legacy)
+[Legacy client v1.0 source code](https://github.com/Eternal-ll/ethereal-faf-client-legacy)
 
 ## Development
 
