@@ -344,3 +344,4 @@ ASALocalRun/
 /LiveChartsSamples
 /Fonts
 /Ethereal.FAF.UI.Client/publish.bat
+!/packages/*.nupkg
