@@ -51,6 +51,7 @@ namespace Ethereal.FAF.UI.Client
             .ConfigureServices(ConfigureServices)
             .ConfigureHostConfiguration(c =>
             {
+                c.AddJsonFile("appsettings.Production.json", true, true);
                 c.AddJsonFile("appsettings.user.json", true, true);
             })
             .ConfigureLogging((hostingContext, loggingBuilder) =>
@@ -71,10 +72,7 @@ namespace Ethereal.FAF.UI.Client
                 var settings = new Settings
                 {
                     FileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.user.json"),
-                    Servers =
-                    [
-                        configuration.GetSection("Server").Get<Server>()
-                    ]
+                    Servers = new(configuration.GetSection("Servers").Get<Server[]>())
                 };
                 settings.Load();
                 settings.EnableAutosave();

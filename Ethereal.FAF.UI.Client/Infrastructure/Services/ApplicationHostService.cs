@@ -81,6 +81,8 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 //_serviceProvider.GetRequiredService<ChatViewModel>();
                 _navigationWindow = _serviceProvider.GetService<INavigationWindow>();
 
+                _serviceProvider.GetService<PartyViewModel>();
+                
                 //_serviceProvider.GetRequiredService<GameMapPreviewCacheService>();
 
                 //var notifyIcon = _serviceProvider.GetService<INotifyIconService>();
@@ -104,7 +106,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
                 else
                 {
                     var auth = _serviceProvider.GetService<IFafAuthService>();
-                    if (auth.IsAuthorized())
+                    if (auth.IsAuthorized() && false)
                     {
                         _navigationWindow.Navigate(typeof(LobbyConnectionView));
                     }

@@ -21,13 +21,10 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
         private readonly IFafPlayersService _fafPlayersService;
         private readonly ILogger<FafGamesService> _logger;
-        private readonly ConcurrentDictionary<long, Game> _games;
-
-        private bool _gamesInitialized;
+        private ConcurrentDictionary<long, Game> _games;
 
         public FafGamesService(IFafLobbyEventsService fafLobbyEventsService, IFafPlayersService fafPlayersService, ILogger<FafGamesService> logger)
         {
-            _games = new();
             _fafLobbyEventsService = fafLobbyEventsService;
             _fafPlayersService = fafPlayersService;
             InitializeEvents();
@@ -53,14 +50,19 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private void _fafLobbyEventsService_Connected(object sender, bool e)
         {
-            if (!e)
+            if (e)
             {
-                foreach (var game in _games.Values)
+                _games = new(1, 1000);
+            }
+            else if (_games != null)
+            {
+                var games = GetGames();
+                foreach (var game in games)
                 {
                     GameRemoved?.Invoke(this, game);
                 }
                 _games.Clear();
-                _gamesInitialized = false;
+                _games = null;
             }
         }
 

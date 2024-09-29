@@ -21,7 +21,7 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
 
         private readonly IFafLobbyEventsService _fafLobbyEventsService;
         private readonly ILogger<FafPlayersService> _logger;
-        private readonly ConcurrentDictionary<long, Player> _players;
+        private ConcurrentDictionary<long, Player> _players;
 
         private bool _playersInitialized;
 
@@ -89,12 +89,14 @@ namespace Ethereal.FAF.UI.Client.Infrastructure.Services
         {
             if (e)
             {
+                _players = new();
                 _playersInitialized = false;
             }
-            else
+            else if (_players != null)
             {
                 PlayersRemoved?.Invoke(this, _players.Values.ToArray());
                 _players.Clear();
+                _players = null;
             }
         }
 

@@ -20,6 +20,8 @@ namespace Ethereal.FAF.UI.Client
         [STAThread]
         public static void Main(string[] args)
         {
+            // force ipv4 for a while
+            AppContext.SetSwitch("System.Net.DisableIPv6", true);
             var parseResult = Parser
                 .Default
                 .ParseArguments<AppArgs>(args)

@@ -13,7 +13,6 @@ namespace Ethereal.FAF.UI.Client.ViewModels
     public class LobbyConnectionViewModel: Base.ViewModel
     {
         private readonly IFafLobbyService _fafLobbyService;
-        private readonly IFafAuthService _fafAuthService;
         private readonly ISnackbarService _snackbarService;
         private readonly INavigationWindow _navigationWindow;
         private readonly ILogger _logger;
@@ -22,16 +21,25 @@ namespace Ethereal.FAF.UI.Client.ViewModels
             IFafLobbyService fafLobbyService,
             ILogger<LobbyConnectionViewModel> logger,
             ISnackbarService snackbarService,
-            INavigationWindow navigationWindow,
-            IFafAuthService fafAuthService)
+            INavigationWindow navigationWindow)
         {
             _fafLobbyService = fafLobbyService;
             _logger = logger;
             _snackbarService = snackbarService;
             _navigationWindow = navigationWindow;
-            _fafAuthService = fafAuthService;
         }
-        public override async Task OnLoadedAsync() => await Task.Run(ConnectAsync);
+        public override async Task OnLoadedAsync() => await Task.Run(ConnectAsync)
+            .ContinueWith(x =>
+            {
+                if (x.IsFaulted)
+                {
+                    _logger.LogError(x.Exception.InnerException.ToString());
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _navigationWindow.Navigate(typeof(AuthView));
+                    });
+                }
+            });
         private async Task ConnectAsync()
         {
             if (_fafLobbyService.Connected)

@@ -58,6 +58,10 @@ namespace Ethereal.FAF.UI.Client.ViewModels
                 new NavigationViewItem("Players", SymbolRegular.PeopleList24, typeof(PlayersView))
                 {
                     NavigationCacheMode = NavigationCacheMode.Disabled
+                },
+                new NavigationViewItem("Data", SymbolRegular.DataArea24, typeof(DataView))
+                {
+
                 }
             };
             UpdateNavigationViewItem = new()
