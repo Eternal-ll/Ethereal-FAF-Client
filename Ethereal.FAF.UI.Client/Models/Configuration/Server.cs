@@ -6,26 +6,6 @@ using System.Text.Json.Serialization;
 
 namespace Ethereal.FAF.UI.Client.Models.Configuration
 {
-    public class ClientServers
-    {
-        IDisposable OptionsDisposable;
-        public ClientServers(IOptionsMonitor<ClientServers> optionsMonitor)
-        {
-            OptionsDisposable = optionsMonitor.OnChange((servers, data) =>
-            {
-
-            });
-        }
-        public ObservableCollection<Server> Servers { get; set; }
-    }
-    public enum ServerState : byte
-    {
-        Idle,
-        Authorizing,
-        Authorized,
-        Connecting,
-        Connected,
-    }
     public partial class Server
     {
         [JsonPropertyName("ShortName")]
