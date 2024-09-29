@@ -345,3 +345,4 @@ ASALocalRun/
 /Fonts
 /Ethereal.FAF.UI.Client/publish.bat
 !/packages/*.nupkg
+/Ethereal.FAF.UI.Client/appsettings.Production.json
