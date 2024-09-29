@@ -10,9 +10,6 @@
 *.userosscache
 *.sln.docstates
 
-Ethereal.FAF.UI.Client/appsettings.json
-beta/appsettings.json
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 .Документация/
@@ -338,12 +335,6 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 /Документация
-/ConsoleApp1
-/ConsoleApp2
-/ReplayParser
-/Ethereal.FAF.UI.Client/appsettings.json
-/beta/appsettings.json
-/beta/appsettings.Development.json
 /Documentation
 /WpfApp1
 /VisualStateTests
