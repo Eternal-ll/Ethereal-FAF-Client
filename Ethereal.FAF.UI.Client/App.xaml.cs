@@ -51,6 +51,7 @@ namespace Ethereal.FAF.UI.Client
             .ConfigureServices(ConfigureServices)
             .ConfigureHostConfiguration(c =>
             {
+                c.AddJsonFile("appsettings.Production.json", true, true);
                 c.AddJsonFile("appsettings.user.json", true, true);
             })
             .ConfigureLogging((hostingContext, loggingBuilder) =>
