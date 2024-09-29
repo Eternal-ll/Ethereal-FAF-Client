@@ -1,6 +1,8 @@
 # Ethereal FAF Client
 
-Unofficial FAForever client by Eternal-ll, based on C# WPF .NET 8.0 for Windows OS only
+Unofficial FAForever client by Eternal-ll, based on C# WPF .NET 8.0 for Windows OS only.
+
+Forum thread: https://forum.faforever.com/topic/4724/ethereal-faf-client-2-0
 
 [Legacy client v1.0 source code](/Ethereal-FAF-Client-legacy)
 
@@ -54,4 +56,3 @@ You must create JSON configuration file called "appsettings.Production.json". Co
     }
   }
 ```
-
