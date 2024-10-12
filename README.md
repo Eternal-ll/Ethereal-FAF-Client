@@ -15,9 +15,9 @@ Forum thread: https://forum.faforever.com/topic/4724/ethereal-faf-client-2-0
 
 ### Configuration
 
-You must create JSON configuration file called "appsettings.Production.json". Configuration must contain OAuth2 secrets to work properly.
+You must create JSON configuration file called "appsettings.Production.json". Configuration must contain servers with OAuth2 secrets to work properly.
 ```json
-  "Server": {
+  "Servers": [{
     "Name": "Server name",
     "Site": "https://example.com",
     "Lobby": {
@@ -30,7 +30,7 @@ You must create JSON configuration file called "appsettings.Production.json". Co
       "Host": "replay.com",
       "Port": "1000"
     },
-    "Relay": {
+    "Relay": {]
       "Host": "lobby.com",
       "Port": "2000"
     },
